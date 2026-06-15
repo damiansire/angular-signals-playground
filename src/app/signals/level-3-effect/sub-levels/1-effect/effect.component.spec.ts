@@ -14,7 +14,6 @@ describe('EffectComponent', () => {
 
     fixture = TestBed.createComponent(EffectComponent);
     component = fixture.componentInstance;
-    fixture.detectChanges();
   });
 
   it('should create', () => {

@@ -1,4 +1,11 @@
-import { isTag, spliteInTags } from './code-parser'; // Ajusta la ruta si es necesario
+import {
+  isTag,
+  spliteInTags,
+  HtmlHelper,
+  HtmlIdGeneratorService,
+  generateLinks,
+  generateNodes,
+} from './code-parser'; // Ajusta la ruta si es necesario
 
 describe('isTag', () => {
   // Definición de objetos para los casos de prueba
@@ -200,5 +207,151 @@ describe('spliteInTags', () => {
     ];
 
     expect(spliteInTags(htmlString)).toEqual(expectedResult);
+  });
+});
+
+describe('HtmlHelper', () => {
+  describe('getTagFromId', () => {
+    it('returns the tag name before the first dash', () => {
+      expect(HtmlHelper.getTagFromId('div-1')).toBe('div');
+      expect(HtmlHelper.getTagFromId('span-closed-2')).toBe('span');
+      expect(HtmlHelper.getTagFromId('space-3')).toBe('space');
+    });
+  });
+
+  describe('isSpaceElement', () => {
+    it('matches only space-<number> ids', () => {
+      expect(HtmlHelper.isSpaceElement('space-1')).toBeTrue();
+      expect(HtmlHelper.isSpaceElement('space-42')).toBeTrue();
+    });
+
+    it('rejects non-space ids', () => {
+      expect(HtmlHelper.isSpaceElement('div-1')).toBeFalse();
+      expect(HtmlHelper.isSpaceElement('space')).toBeFalse();
+      expect(HtmlHelper.isSpaceElement('space-')).toBeFalse();
+      expect(HtmlHelper.isSpaceElement('space-1-2')).toBeFalse();
+    });
+  });
+
+  describe('getElementType', () => {
+    it('detects an opening tag (lowercased element, not closing)', () => {
+      expect(HtmlHelper.getElementType('<DIV class="x">')).toEqual({
+        element: 'div',
+        isClosingTag: false,
+      });
+    });
+
+    it('detects a closing tag', () => {
+      expect(HtmlHelper.getElementType('</span>')).toEqual({
+        element: 'span',
+        isClosingTag: true,
+      });
+    });
+
+    it('classifies an empty string as a space element', () => {
+      expect(HtmlHelper.getElementType('   ')).toEqual({
+        element: 'space',
+        isClosingTag: false,
+      });
+    });
+
+    it('classifies plain content as text', () => {
+      expect(HtmlHelper.getElementType('Hello world')).toEqual({
+        element: 'text',
+        isClosingTag: false,
+      });
+    });
+  });
+});
+
+describe('HtmlIdGeneratorService', () => {
+  it('generates incremental ids per opening tag name', () => {
+    const gen = new HtmlIdGeneratorService();
+    expect(gen.generateId('<div>')).toBe('div-1');
+    expect(gen.generateId('<div>')).toBe('div-2');
+    expect(gen.generateId('<span>')).toBe('span-1');
+    expect(gen.generateId('<div>')).toBe('div-3');
+  });
+
+  it('uses a separate counter for closing tags', () => {
+    const gen = new HtmlIdGeneratorService();
+    expect(gen.generateId('<div>')).toBe('div-1');
+    expect(gen.generateId('</div>')).toBe('div-closed-1');
+    expect(gen.generateId('</div>')).toBe('div-closed-2');
+  });
+
+  it('produces stable ids for the same input sequence across instances', () => {
+    const a = new HtmlIdGeneratorService();
+    const b = new HtmlIdGeneratorService();
+    const seq = ['<ul>', '<li>', '</li>', '<li>', '</li>', '</ul>'];
+    expect(seq.map((t) => a.generateId(t))).toEqual(
+      seq.map((t) => b.generateId(t)),
+    );
+  });
+});
+
+describe('generateLinks', () => {
+  it('returns no links for a single root element', () => {
+    expect(generateLinks('<div></div>')).toEqual([]);
+  });
+
+  it('links a parent to its direct child', () => {
+    const links = generateLinks('<div><p></p></div>');
+    expect(links).toEqual([{ source: 'div-1', target: 'p-1' }]);
+  });
+
+  it('builds parent/child links following the tag stack on nesting', () => {
+    const html = '<div><p></p><span></span></div>';
+    const links = generateLinks(html);
+    expect(links).toEqual([
+      { source: 'div-1', target: 'p-1' },
+      { source: 'div-1', target: 'span-1' },
+    ]);
+  });
+
+  it('handles deeper nesting (grandchildren link to their parent)', () => {
+    const html = '<ul><li><a></a></li></ul>';
+    const links = generateLinks(html);
+    expect(links).toEqual([
+      { source: 'ul-1', target: 'li-1' },
+      { source: 'li-1', target: 'a-1' },
+    ]);
+  });
+});
+
+describe('generateNodes', () => {
+  it('creates one node per opening tag with its nesting level', () => {
+    const nodes = generateNodes('<div><p></p></div>');
+    expect(nodes.length).toBe(2);
+    const byId = new Map(nodes.map((n) => [n.id, n]));
+    expect(byId.get('div-1')?.level).toBe(1);
+    expect(byId.get('p-1')?.level).toBe(2);
+  });
+
+  it('ignores closing tags and text when counting nodes', () => {
+    const nodes = generateNodes('<div><p>Hello</p></div>');
+    expect(nodes.map((n) => n.id)).toEqual(['div-1', 'p-1']);
+  });
+
+  it('keeps a single sibling centered (x = 0)', () => {
+    const nodes = generateNodes('<div><p></p></div>');
+    const p = nodes.find((n) => n.id === 'p-1');
+    expect(p?.x).toBe(0);
+  });
+
+  it('spreads two siblings on the same level to opposite sides', () => {
+    const nodes = generateNodes('<div><p></p><span></span></div>');
+    const xs = nodes
+      .filter((n) => n.level === 2)
+      .map((n) => n.x)
+      .sort((a, b) => a - b);
+    expect(xs).toEqual([-100, 100]);
+  });
+
+  it('assigns y growing with the nesting depth', () => {
+    const nodes = generateNodes('<div><p></p></div>');
+    const div = nodes.find((n) => n.id === 'div-1')!;
+    const p = nodes.find((n) => n.id === 'p-1')!;
+    expect(p.y).toBeGreaterThan(div.y);
   });
 });

@@ -1,8 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { MenuSubLevelOptionComponent } from './menu-sub-level-option.component';
-import { ActivatedRoute } from '@angular/router';
-import { of } from 'rxjs';
+import { provideRouter } from '@angular/router';
 
 describe('MenuSubLevelOptionComponent', () => {
   let component: MenuSubLevelOptionComponent;
@@ -10,16 +9,8 @@ describe('MenuSubLevelOptionComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [MenuSubLevelOptionComponent, ActivatedRoute],
-      providers: [
-        {
-          provide: ActivatedRoute,
-          useValue: {
-            params: of({ id: 123 }), // Example parameters
-            // Add other properties/methods you might need
-          },
-        },
-      ],
+      imports: [MenuSubLevelOptionComponent],
+      providers: [provideRouter([])],
     }).compileComponents();
 
     fixture = TestBed.createComponent(MenuSubLevelOptionComponent);

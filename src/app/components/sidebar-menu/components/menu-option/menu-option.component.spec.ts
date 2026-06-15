@@ -1,8 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { MenuOptionComponent } from './menu-option.component';
-import { ActivatedRoute } from '@angular/router';
-import { of } from 'rxjs';
+import { provideRouter } from '@angular/router';
 
 describe('MenuOptionComponent', () => {
   let component: MenuOptionComponent;
@@ -10,16 +9,8 @@ describe('MenuOptionComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [MenuOptionComponent, ActivatedRoute],
-      providers: [
-        {
-          provide: ActivatedRoute,
-          useValue: {
-            params: of({ id: 123 }), // Example parameters
-            // Add other properties/methods you might need
-          },
-        },
-      ],
+      imports: [MenuOptionComponent],
+      providers: [provideRouter([])],
     }).compileComponents();
 
     fixture = TestBed.createComponent(MenuOptionComponent);
