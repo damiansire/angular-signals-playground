@@ -4,17 +4,17 @@ import {
   ViewChild,
   computed,
   signal,
+  ChangeDetectionStrategy
 } from '@angular/core';
-import { CodeComponent } from '../../../../components-atom/code/code.component';
 import { CodeLine } from '../../../../components-atom/component-atom.interface';
 import { ColumnAndCodeLayoutComponent } from '../../../../layouts/column-and-code-layout/column-and-code-layout.component';
 
 @Component({
-  selector: 'app-update-signal',
-  standalone: true,
-  templateUrl: './update-signal.component.html',
-  styleUrl: './update-signal.component.css',
-  imports: [CodeComponent, ColumnAndCodeLayoutComponent],
+    selector: 'app-update-signal',
+    templateUrl: './update-signal.component.html',
+    styleUrl: './update-signal.component.css',
+    changeDetection: ChangeDetectionStrategy.Eager,
+    imports: [ColumnAndCodeLayoutComponent]
 })
 export class UpdateSignalComponent {
   count = signal(0);

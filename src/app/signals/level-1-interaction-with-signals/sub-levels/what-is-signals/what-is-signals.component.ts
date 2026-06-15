@@ -1,31 +1,25 @@
-import { Component, computed, Signal } from '@angular/core';
+import { Component, computed, Signal, ChangeDetectionStrategy } from '@angular/core';
 import { TitleComponent } from '../../../../components-atom/title/title.component';
 import { WrapperAnimationComponent } from './wrapper-animation/wrapper-animation.component';
-import { DrawPreviewComponent } from '../../../../components/draw-preview/draw-preview.component';
 import { ContainerVariableBoxDrawComponent } from '../../../../components-draw/container-variable-box-draw/container-variable-box-draw.component';
 import { TextDescriptionComponent } from '../../../../components-atom/text-description/text-description.component';
-import { VariableBoxComponent } from '../../../../components-atom/variable-box/variable-box.component';
 import { VariableBoxDrawComponent } from '../../../../components-draw/variable-box-draw/variable-box-draw.component';
 import { CodeLine } from '../../../../components-atom/component-atom.interface';
-import { CodeComponent } from '../../../../components-atom/code/code.component';
 import { CodeLegazyComponent } from '../../../../components-atom/code-legazy/code-legazy.component';
 
 @Component({
-  selector: 'app-what-is-signals',
-  standalone: true,
-  imports: [
-    TitleComponent,
-    WrapperAnimationComponent,
-    DrawPreviewComponent,
-    ContainerVariableBoxDrawComponent,
-    TextDescriptionComponent,
-    VariableBoxComponent,
-    VariableBoxDrawComponent,
-    CodeComponent,
-    CodeLegazyComponent,
-  ],
-  templateUrl: './what-is-signals.component.html',
-  styleUrl: './what-is-signals.component.css',
+    selector: 'app-what-is-signals',
+    imports: [
+        TitleComponent,
+        WrapperAnimationComponent,
+        ContainerVariableBoxDrawComponent,
+        TextDescriptionComponent,
+        VariableBoxDrawComponent,
+        CodeLegazyComponent,
+    ],
+    templateUrl: './what-is-signals.component.html',
+    changeDetection: ChangeDetectionStrategy.Eager,
+    styleUrl: './what-is-signals.component.css'
 })
 export class WhatIsSignalsComponent {
   title = 'What are signals?';

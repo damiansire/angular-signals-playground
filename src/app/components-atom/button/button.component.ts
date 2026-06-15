@@ -1,15 +1,15 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
 
 @Component({
-  selector: 'app-button',
-  standalone: true,
-  imports: [],
-  templateUrl: './button.component.html',
-  styleUrl: './button.component.css',
+    selector: 'app-button',
+    imports: [],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    templateUrl: './button.component.html',
+    styleUrl: './button.component.css'
 })
 export class ButtonComponent {
-  @Output() onClick: any = new EventEmitter<void>();
-  @Input() text: string = 'Missing text';
+  onClick = output<string>();
+  text = input<string>('Missing text');
 
   callClick() {
     this.onClick.emit('emitido');

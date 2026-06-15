@@ -1,14 +1,14 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, ChangeDetectionStrategy } from '@angular/core';
 import { ClickInButton } from '../component.interface';
-import { CommonModule } from '@angular/common';
+
 import { EventComponent } from '../event/event.component';
 
 @Component({
-  selector: 'app-click-history',
-  standalone: true,
-  templateUrl: './click-history.component.html',
-  styleUrl: './click-history.component.css',
-  imports: [CommonModule, EventComponent],
+    selector: 'app-click-history',
+    templateUrl: './click-history.component.html',
+    styleUrl: './click-history.component.css',
+    changeDetection: ChangeDetectionStrategy.Eager,
+    imports: [EventComponent]
 })
 export class ClickHistoryComponent {
   @Input() clickHistory: ClickInButton[] = [];

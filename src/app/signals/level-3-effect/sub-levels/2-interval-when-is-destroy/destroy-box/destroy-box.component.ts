@@ -1,14 +1,12 @@
-import { Component, EventEmitter, Output, effect, signal } from '@angular/core';
+import { Component, EventEmitter, Output, effect, signal, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ButtonComponent } from '../../../../../components-atom/button/button.component';
-import { InputComponent } from '../../../../../components-atom/input/input.component';
 
 @Component({
-  selector: 'app-destroy-box',
-  standalone: true,
-  templateUrl: './destroy-box.component.html',
-  styleUrl: './destroy-box.component.css',
-  imports: [InputComponent, ButtonComponent, CommonModule],
+    selector: 'app-destroy-box',
+    templateUrl: './destroy-box.component.html',
+    styleUrl: './destroy-box.component.css',
+    changeDetection: ChangeDetectionStrategy.Eager,
+    imports: [CommonModule]
 })
 export class DestroyBoxComponent {
   @Output() autoRefreshEvent = new EventEmitter<boolean>();

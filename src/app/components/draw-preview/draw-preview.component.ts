@@ -1,11 +1,11 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, ChangeDetectionStrategy } from '@angular/core';
 
 @Component({
-  selector: 'app-draw-preview',
-  standalone: true,
-  imports: [],
-  templateUrl: './draw-preview.component.html',
-  styleUrl: './draw-preview.component.css',
+    selector: 'app-draw-preview',
+    imports: [],
+    templateUrl: './draw-preview.component.html',
+    changeDetection: ChangeDetectionStrategy.Eager,
+    styleUrl: './draw-preview.component.css'
 })
 export class DrawPreviewComponent {
   @Input() imgUrl: string = '';

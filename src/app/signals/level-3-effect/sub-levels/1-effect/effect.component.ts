@@ -1,5 +1,4 @@
 import { Component, computed, effect, signal } from '@angular/core';
-import { CodeComponent } from '../../../../components-atom/code/code.component';
 import { CodeLine } from '../../../../components-atom/component-atom.interface';
 import { VariableBoxComponent } from '../../../../components-atom/variable-box/variable-box.component';
 import { HistoryElement } from '../../../../components/component.interface';
@@ -8,17 +7,15 @@ import { EventHistoryComponent } from '../../../../components/event-history/even
 import { CodeLegazyComponent } from '../../../../components-atom/code-legazy/code-legazy.component';
 
 @Component({
-  selector: 'app-effect',
-  standalone: true,
-  templateUrl: './effect.component.html',
-  styleUrl: './effect.component.css',
-  imports: [
-    CodeComponent,
-    VariableBoxComponent,
-    EventHistoryComponent,
-    DependenciesStatusComponent,
-    CodeLegazyComponent,
-  ],
+    selector: 'app-effect',
+    templateUrl: './effect.component.html',
+    styleUrl: './effect.component.css',
+    imports: [
+        VariableBoxComponent,
+        EventHistoryComponent,
+        DependenciesStatusComponent,
+        CodeLegazyComponent,
+    ]
 })
 export class EffectComponent {
   count = signal(0);
@@ -37,8 +34,7 @@ export class EffectComponent {
           this.count() === 0 ? 'Initial render' : 'Increment Count';
         this.addConditionalCountRecomputation(trigger, '1', false);
         console.log(`The current count is: ${this.count()}`);
-      },
-      { allowSignalWrites: true }
+      }
     );
     effect(
       () => {
@@ -46,8 +42,7 @@ export class EffectComponent {
           this.count2() === 0 ? 'Initial render' : 'Increment Count';
         this.addConditionalCountRecomputation(trigger, '2', false);
         console.log(`The current count is: ${this.count2()}`);
-      },
-      { allowSignalWrites: true }
+      }
     );
   }
   lines = computed<CodeLine[]>(() => [

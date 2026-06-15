@@ -1,4 +1,4 @@
-import { Component, computed, signal } from '@angular/core';
+import { Component, computed, signal, ChangeDetectionStrategy } from '@angular/core';
 import {
   NodeTree,
   Link,
@@ -6,11 +6,11 @@ import {
 import { NodeTreeComponent } from '../../../../components-draw/node-tree/node-tree.component';
 
 @Component({
-  selector: 'app-old-change-detection',
-  standalone: true,
-  imports: [NodeTreeComponent],
-  templateUrl: './old-change-detection.component.html',
-  styleUrl: './old-change-detection.component.css',
+    selector: 'app-old-change-detection',
+    imports: [NodeTreeComponent],
+    templateUrl: './old-change-detection.component.html',
+    changeDetection: ChangeDetectionStrategy.Eager,
+    styleUrl: './old-change-detection.component.css'
 })
 export class OldChangeDetectionComponent {
   step = signal(0);

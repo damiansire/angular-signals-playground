@@ -1,13 +1,13 @@
-import { Component, Input, Signal, signal } from '@angular/core';
+import { Component, Input, Signal, signal, ChangeDetectionStrategy } from '@angular/core';
 import { HistoryElement } from '../component.interface';
-import { CommonModule } from '@angular/common';
+
 
 @Component({
-  selector: 'app-event-history',
-  standalone: true,
-  imports: [CommonModule],
-  templateUrl: './event-history.component.html',
-  styleUrl: './event-history.component.css',
+    selector: 'app-event-history',
+    imports: [],
+    templateUrl: './event-history.component.html',
+    changeDetection: ChangeDetectionStrategy.Eager,
+    styleUrl: './event-history.component.css'
 })
 export class EventHistoryComponent {
   @Input() title = 'text';

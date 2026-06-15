@@ -1,11 +1,11 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, Input, Output, ChangeDetectionStrategy } from '@angular/core';
 
 @Component({
-  selector: 'app-variable-box-draw',
-  standalone: true,
-  imports: [],
-  templateUrl: './variable-box-draw.component.html',
-  styleUrl: './variable-box-draw.component.css',
+    selector: 'app-variable-box-draw',
+    imports: [],
+    templateUrl: './variable-box-draw.component.html',
+    changeDetection: ChangeDetectionStrategy.Eager,
+    styleUrl: './variable-box-draw.component.css'
 })
 export class VariableBoxDrawComponent {
   @Input() variableName: string = '';

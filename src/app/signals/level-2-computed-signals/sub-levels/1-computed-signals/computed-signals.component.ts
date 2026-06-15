@@ -1,29 +1,25 @@
-import { CommonModule } from '@angular/common';
+
 import {
   Component,
   Signal,
   WritableSignal,
   computed,
   signal,
+  ChangeDetectionStrategy
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { CodeComponent } from '../../../../components-atom/code/code.component';
 import { CodeLine } from '../../../../components-atom/component-atom.interface';
-import { TitleComponent } from '../../../../components-atom/title/title.component';
 import { ColumnAndCodeLayoutComponent } from '../../../../layouts/column-and-code-layout/column-and-code-layout.component';
 
 @Component({
-  selector: 'app-computed-signals',
-  standalone: true,
-  templateUrl: './computed-signals.component.html',
-  styleUrl: './computed-signals.component.css',
-  imports: [
-    CommonModule,
+    selector: 'app-computed-signals',
+    templateUrl: './computed-signals.component.html',
+    styleUrl: './computed-signals.component.css',
+    changeDetection: ChangeDetectionStrategy.Eager,
+    imports: [
     FormsModule,
-    CodeComponent,
-    TitleComponent,
-    ColumnAndCodeLayoutComponent,
-  ],
+    ColumnAndCodeLayoutComponent
+]
 })
 export class ComputedSignalsComponent {
   firstName: WritableSignal<string> = signal('Damian');

@@ -1,4 +1,4 @@
-import { Component, computed, effect, input, signal } from '@angular/core';
+import { Component, computed, effect, input, signal, ChangeDetectionStrategy } from '@angular/core';
 import { NodeTreeComponent } from '../../components-draw/node-tree/node-tree.component';
 import {
   Link,
@@ -7,11 +7,11 @@ import {
 import { generateLinks, generateNodes } from '../../libs/code-parser';
 
 @Component({
-  selector: 'app-tree',
-  standalone: true,
-  imports: [NodeTreeComponent],
-  templateUrl: './tree.component.html',
-  styleUrl: './tree.component.css',
+    selector: 'app-tree',
+    imports: [NodeTreeComponent],
+    templateUrl: './tree.component.html',
+    changeDetection: ChangeDetectionStrategy.Eager,
+    styleUrl: './tree.component.css'
 })
 export class TreeComponent {
   htmlCode = input<string>('');
@@ -33,10 +33,7 @@ export class TreeComponent {
 
         const nodes = generateNodes(this.htmlCode());
         this.nodesData.set(nodes);
-
-        console.log(nodes);
-      },
-      { allowSignalWrites: true }
+      }
     );
   }
 }

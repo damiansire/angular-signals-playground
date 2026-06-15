@@ -1,27 +1,23 @@
-import { Component, signal } from '@angular/core';
-import { TitleComponent } from '../../../../components-atom/title/title.component';
+import { Component, signal, ChangeDetectionStrategy } from '@angular/core';
 import { CodeComponent } from '../../../../components-atom/code/code.component';
 import { TreeComponent } from '../../../../components/tree/tree.component';
 import { CountIncrementComponent } from './count-increment/count-increment.component';
-import { ButtonComponent } from '../../../../components-atom/button/button.component';
 import { CodeClick } from '../../../../components-atom/code/code.interface';
 import { TwoColumnLayoutComponent } from '../../../../layouts/two-column-layout/two-column-layout.component';
 import { SlidersControlButtonsComponent } from '../../../../components-draw/sliders-control-buttons/sliders-control-buttons.component';
 
 @Component({
-  selector: 'app-variable-refresh-and-tree',
-  standalone: true,
-  imports: [
-    TitleComponent,
-    CodeComponent,
-    TreeComponent,
-    CountIncrementComponent,
-    ButtonComponent,
-    TwoColumnLayoutComponent,
-    SlidersControlButtonsComponent,
-  ],
-  templateUrl: './variable-refresh-and-tree.component.html',
-  styleUrl: './variable-refresh-and-tree.component.css',
+    selector: 'app-variable-refresh-and-tree',
+    imports: [
+        CodeComponent,
+        TreeComponent,
+        CountIncrementComponent,
+        TwoColumnLayoutComponent,
+        SlidersControlButtonsComponent,
+    ],
+    templateUrl: './variable-refresh-and-tree.component.html',
+    changeDetection: ChangeDetectionStrategy.Eager,
+    styleUrl: './variable-refresh-and-tree.component.css'
 })
 export class VariableRefreshAndTreeComponent {
   htmlCode = `<section>

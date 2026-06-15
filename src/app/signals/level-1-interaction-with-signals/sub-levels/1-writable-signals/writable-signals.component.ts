@@ -4,17 +4,17 @@ import {
   ViewChild,
   computed,
   signal,
+  ChangeDetectionStrategy
 } from '@angular/core';
 import { CodeLine } from '../../../../components-atom/component-atom.interface';
-import { CodeComponent } from '../../../../components-atom/code/code.component';
 import { ColumnAndCodeLayoutComponent } from '../../../../layouts/column-and-code-layout/column-and-code-layout.component';
 
 @Component({
-  selector: 'app-writable-signals',
-  standalone: true,
-  templateUrl: './writable-signals.component.html',
-  styleUrl: './writable-signals.component.css',
-  imports: [CodeComponent, ColumnAndCodeLayoutComponent],
+    selector: 'app-writable-signals',
+    templateUrl: './writable-signals.component.html',
+    styleUrl: './writable-signals.component.css',
+    changeDetection: ChangeDetectionStrategy.Eager,
+    imports: [ColumnAndCodeLayoutComponent]
 })
 export class WritableSignalsComponent {
   count = signal(0);

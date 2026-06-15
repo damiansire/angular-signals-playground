@@ -1,4 +1,3 @@
-import { number } from 'echarts';
 import { Link, NodeTree } from '../components-draw/components-draw.inferface';
 
 interface TagType {

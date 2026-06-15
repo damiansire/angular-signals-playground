@@ -1,28 +1,26 @@
-import { Component, computed, effect, signal } from '@angular/core';
+import { Component, computed, effect, signal, ChangeDetectionStrategy } from '@angular/core';
 import { InputComponent } from '../../components-atom/input/input.component';
 import { ButtonComponent } from '../../components-atom/button/button.component';
 import { VariableBoxComponent } from '../../components-atom/variable-box/variable-box.component';
 import { CodeLine } from '../../components-atom/component-atom.interface';
-import { CodeComponent } from '../../components-atom/code/code.component';
 import { EventHistoryComponent } from '../../components/event-history/event-history.component';
 import { HistoryElement } from '../../components/component.interface';
 import { SelectionOptionComponent } from '../../components/selection-option/selection-option.component';
 import { CodeLegazyComponent } from '../../components-atom/code-legazy/code-legazy.component';
 
 @Component({
-  selector: 'app-signal-equality-functions',
-  standalone: true,
-  templateUrl: './signal-equality-functions.component.html',
-  styleUrl: './signal-equality-functions.component.css',
-  imports: [
-    InputComponent,
-    ButtonComponent,
-    VariableBoxComponent,
-    CodeComponent,
-    EventHistoryComponent,
-    SelectionOptionComponent,
-    CodeLegazyComponent,
-  ],
+    selector: 'app-signal-equality-functions',
+    templateUrl: './signal-equality-functions.component.html',
+    styleUrl: './signal-equality-functions.component.css',
+    changeDetection: ChangeDetectionStrategy.Eager,
+    imports: [
+        InputComponent,
+        ButtonComponent,
+        VariableBoxComponent,
+        EventHistoryComponent,
+        SelectionOptionComponent,
+        CodeLegazyComponent,
+    ]
 })
 export class SignalEqualityFunctionsComponent {
   currentLevel = signal(1);

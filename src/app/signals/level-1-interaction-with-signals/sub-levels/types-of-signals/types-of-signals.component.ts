@@ -1,25 +1,21 @@
-import { Component, computed, signal } from '@angular/core';
-import { ColumnAndCodeLayoutComponent } from '../../../../layouts/column-and-code-layout/column-and-code-layout.component';
+import { Component, computed, signal, ChangeDetectionStrategy } from '@angular/core';
 import { CodeLine } from '../../../../components-atom/component-atom.interface';
 import { TitleComponent } from '../../../../components-atom/title/title.component';
-import { CodeComponent } from '../../../../components-atom/code/code.component';
 import { TextDescriptionComponent } from '../../../../components-atom/text-description/text-description.component';
 import { VariableBoxDrawComponent } from '../../../../components-draw/variable-box-draw/variable-box-draw.component';
 import { CodeLegazyComponent } from '../../../../components-atom/code-legazy/code-legazy.component';
 
 @Component({
-  selector: 'app-types-of-signals',
-  standalone: true,
-  imports: [
-    ColumnAndCodeLayoutComponent,
-    TitleComponent,
-    CodeComponent,
-    TextDescriptionComponent,
-    VariableBoxDrawComponent,
-    CodeLegazyComponent,
-  ],
-  templateUrl: './types-of-signals.component.html',
-  styleUrl: './types-of-signals.component.css',
+    selector: 'app-types-of-signals',
+    imports: [
+        TitleComponent,
+        TextDescriptionComponent,
+        VariableBoxDrawComponent,
+        CodeLegazyComponent,
+    ],
+    templateUrl: './types-of-signals.component.html',
+    changeDetection: ChangeDetectionStrategy.Eager,
+    styleUrl: './types-of-signals.component.css'
 })
 export class TypesOfSignalsComponent {
   example = signal('');

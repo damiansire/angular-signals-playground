@@ -1,12 +1,12 @@
 import { CommonModule } from '@angular/common';
-import { Component, EventEmitter, Output, effect, signal } from '@angular/core';
+import { Component, EventEmitter, Output, effect, signal, ChangeDetectionStrategy } from '@angular/core';
 
 @Component({
-  selector: 'app-component-destroy',
-  standalone: true,
-  imports: [CommonModule],
-  templateUrl: './component-destroy.component.html',
-  styleUrl: './component-destroy.component.css',
+    selector: 'app-component-destroy',
+    imports: [CommonModule],
+    templateUrl: './component-destroy.component.html',
+    changeDetection: ChangeDetectionStrategy.Eager,
+    styleUrl: './component-destroy.component.css'
 })
 export class ComponentDestroyComponent {
   @Output() autoRefreshEvent = new EventEmitter<boolean>();

@@ -1,7 +1,6 @@
-import { Component, computed, signal } from '@angular/core';
+import { Component, computed, signal, ChangeDetectionStrategy } from '@angular/core';
 import { VariableBoxDrawComponent } from '../../../../components-draw/variable-box-draw/variable-box-draw.component';
 import { CodeLine } from '../../../../components-atom/component-atom.interface';
-import { CodeComponent } from '../../../../components-atom/code/code.component';
 import { TitleComponent } from '../../../../components-atom/title/title.component';
 import { CodeLegazyComponent } from '../../../../components-atom/code-legazy/code-legazy.component';
 
@@ -11,16 +10,15 @@ interface DataTypeExample {
 }
 
 @Component({
-  selector: 'app-variables',
-  standalone: true,
-  imports: [
-    VariableBoxDrawComponent,
-    CodeComponent,
-    TitleComponent,
-    CodeLegazyComponent,
-  ],
-  templateUrl: './variables.component.html',
-  styleUrl: './variables.component.css',
+    selector: 'app-variables',
+    imports: [
+        VariableBoxDrawComponent,
+        TitleComponent,
+        CodeLegazyComponent,
+    ],
+    templateUrl: './variables.component.html',
+    changeDetection: ChangeDetectionStrategy.Eager,
+    styleUrl: './variables.component.css'
 })
 export class VariablesComponent {
   dataTypes = ['Number'];

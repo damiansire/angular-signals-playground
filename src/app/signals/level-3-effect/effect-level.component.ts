@@ -1,11 +1,11 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 
 @Component({
-  selector: 'app-effect-level',
-  standalone: true,
-  imports: [],
-  templateUrl: './effect-level.component.html',
-  styleUrl: './effect-level.component.css'
+    selector: 'app-effect-level',
+    imports: [],
+    templateUrl: './effect-level.component.html',
+    changeDetection: ChangeDetectionStrategy.Eager,
+    styleUrl: './effect-level.component.css'
 })
 export class EffectLevelComponent {
 

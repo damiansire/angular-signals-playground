@@ -1,15 +1,15 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, ChangeDetectionStrategy } from '@angular/core';
 import { CustomRoute } from '../../../../app.routes';
 import { LevelState } from '../../../component.interface';
 import { RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
 
 @Component({
-  selector: 'app-menu-sub-level-option',
-  standalone: true,
-  imports: [RouterModule, CommonModule],
-  templateUrl: './menu-sub-level-option.component.html',
-  styleUrl: './menu-sub-level-option.component.css',
+    selector: 'app-menu-sub-level-option',
+    imports: [RouterModule, CommonModule],
+    templateUrl: './menu-sub-level-option.component.html',
+    changeDetection: ChangeDetectionStrategy.Eager,
+    styleUrl: './menu-sub-level-option.component.css'
 })
 export class MenuSubLevelOptionComponent {
   @Input() item: CustomRoute = {

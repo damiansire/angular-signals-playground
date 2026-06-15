@@ -1,24 +1,20 @@
-import { Component, computed, signal } from '@angular/core';
+import { Component, computed, signal, ChangeDetectionStrategy } from '@angular/core';
 import { CodeLine } from '../../../../components-atom/component-atom.interface';
 import { CodeComponent } from '../../../../components-atom/code/code.component';
-import { NodeTreeComponent } from '../../../../components-draw/node-tree/node-tree.component';
 import { CodeClick } from '../../../../components-atom/code/code.interface';
 import { TreeComponent } from '../../../../components/tree/tree.component';
-import { TitleComponent } from '../../../../components-atom/title/title.component';
 import { TwoColumnLayoutComponent } from '../../../../layouts/two-column-layout/two-column-layout.component';
 
 @Component({
-  selector: 'app-html-to-tree',
-  standalone: true,
-  imports: [
-    CodeComponent,
-    NodeTreeComponent,
-    TreeComponent,
-    TitleComponent,
-    TwoColumnLayoutComponent,
-  ],
-  templateUrl: './html-to-tree.component.html',
-  styleUrl: './html-to-tree.component.css',
+    selector: 'app-html-to-tree',
+    imports: [
+        CodeComponent,
+        TreeComponent,
+        TwoColumnLayoutComponent,
+    ],
+    templateUrl: './html-to-tree.component.html',
+    changeDetection: ChangeDetectionStrategy.Eager,
+    styleUrl: './html-to-tree.component.css'
 })
 export class HtmlToTreeComponent {
   htmlCode = ` <main> 

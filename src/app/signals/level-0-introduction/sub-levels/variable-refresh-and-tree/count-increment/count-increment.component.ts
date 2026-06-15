@@ -1,11 +1,11 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 
 @Component({
-  selector: 'app-count-increment',
-  standalone: true,
-  imports: [],
-  templateUrl: './count-increment.component.html',
-  styleUrl: './count-increment.component.css',
+    selector: 'app-count-increment',
+    imports: [],
+    templateUrl: './count-increment.component.html',
+    changeDetection: ChangeDetectionStrategy.Eager,
+    styleUrl: './count-increment.component.css'
 })
 export class CountIncrementComponent {
   count = 0;

@@ -1,15 +1,16 @@
 <div class="w-full">
   <div class="flex space-x-4">
-    <button
-      *ngFor="let level of levels"
-      (click)="selectLevel(level)"
-      class="px-4 py-2 rounded-md text-sm font-medium"
-      [class.bg-green-500]="selectedLevel === level"
-      [class.text-white]="selectedLevel === level"
-      [class.bg-gray-200]="selectedLevel !== level"
-      [class.text-gray-700]="selectedLevel !== level"
-    >
-      Level {{ level }}
-    </button>
+    @for (level of levels; track level) {
+      <button
+        (click)="selectLevel(level)"
+        class="px-4 py-2 rounded-md text-sm font-medium"
+        [class.bg-green-500]="selectedLevel === level"
+        [class.text-white]="selectedLevel === level"
+        [class.bg-gray-200]="selectedLevel !== level"
+        [class.text-gray-700]="selectedLevel !== level"
+        >
+        Level {{ level }}
+      </button>
+    }
   </div>
 </div>

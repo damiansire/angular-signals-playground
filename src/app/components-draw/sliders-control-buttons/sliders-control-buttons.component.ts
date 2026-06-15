@@ -1,11 +1,11 @@
-import { Component, EventEmitter, Output } from '@angular/core';
+import { Component, EventEmitter, Output, ChangeDetectionStrategy } from '@angular/core';
 
 @Component({
-  selector: 'app-sliders-control-buttons',
-  standalone: true,
-  imports: [],
-  templateUrl: './sliders-control-buttons.component.html',
-  styleUrl: './sliders-control-buttons.component.css',
+    selector: 'app-sliders-control-buttons',
+    imports: [],
+    templateUrl: './sliders-control-buttons.component.html',
+    changeDetection: ChangeDetectionStrategy.Eager,
+    styleUrl: './sliders-control-buttons.component.css'
 })
 export class SlidersControlButtonsComponent {
   sliderNumber = 0;

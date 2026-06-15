@@ -7,17 +7,18 @@ import {
   Output,
   Signal,
   signal,
+  ChangeDetectionStrategy
 } from '@angular/core';
 import { CodeLine } from '../component-atom.interface';
 import { spliteInTags } from '../../libs/code-parser';
 import { TailwindTextSize } from '../../interfaces/tailwind-css.interface';
 
 @Component({
-  selector: 'app-code-legazy',
-  standalone: true,
-  imports: [CommonModule],
-  templateUrl: './code-legazy.component.html',
-  styleUrl: './code-legazy.component.css',
+    selector: 'app-code-legazy',
+    imports: [CommonModule],
+    templateUrl: './code-legazy.component.html',
+    changeDetection: ChangeDetectionStrategy.Eager,
+    styleUrl: './code-legazy.component.css'
 })
 export class CodeLegazyComponent {
   @Input() textSize: TailwindTextSize = 'text-2xl';

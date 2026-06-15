@@ -1,11 +1,11 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, Input, Output, ChangeDetectionStrategy } from '@angular/core';
 
 @Component({
-  selector: 'app-input',
-  standalone: true,
-  imports: [],
-  templateUrl: './input.component.html',
-  styleUrl: './input.component.css',
+    selector: 'app-input',
+    imports: [],
+    templateUrl: './input.component.html',
+    changeDetection: ChangeDetectionStrategy.Eager,
+    styleUrl: './input.component.css'
 })
 export class InputComponent {
   @Input() text: string = '';

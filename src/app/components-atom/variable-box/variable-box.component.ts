@@ -1,11 +1,11 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, Input, Output, ChangeDetectionStrategy } from '@angular/core';
 
 @Component({
-  selector: 'app-variable-box',
-  standalone: true,
-  imports: [],
-  templateUrl: './variable-box.component.html',
-  styleUrl: './variable-box.component.css',
+    selector: 'app-variable-box',
+    imports: [],
+    templateUrl: './variable-box.component.html',
+    changeDetection: ChangeDetectionStrategy.Eager,
+    styleUrl: './variable-box.component.css'
 })
 export class VariableBoxComponent {
   @Input() variableName: string = '';

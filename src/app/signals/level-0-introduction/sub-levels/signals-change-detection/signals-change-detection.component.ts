@@ -1,11 +1,11 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 
 @Component({
-  selector: 'app-signals-change-detection',
-  standalone: true,
-  imports: [],
-  templateUrl: './signals-change-detection.component.html',
-  styleUrl: './signals-change-detection.component.css'
+    selector: 'app-signals-change-detection',
+    imports: [],
+    templateUrl: './signals-change-detection.component.html',
+    changeDetection: ChangeDetectionStrategy.Eager,
+    styleUrl: './signals-change-detection.component.css'
 })
 export class SignalsChangeDetectionComponent {
 

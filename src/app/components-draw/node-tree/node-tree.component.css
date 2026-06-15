@@ -1,3 +1,10 @@
+/* El contenedor de ECharts necesita un alto explícito: sin él no pinta el canvas. */
+.demo-chart {
+  display: block;
+  width: 100%;
+  height: 400px;
+}
+
 .graph {
   position: relative; /* For absolute positioning of connections */
 }

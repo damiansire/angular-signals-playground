@@ -1,22 +1,20 @@
-import { Component, computed, effect, signal } from '@angular/core';
+import { Component, computed, effect, signal, ChangeDetectionStrategy } from '@angular/core';
 import { DestroyBoxComponent } from './destroy-box/destroy-box.component';
-import { CodeComponent } from '../../../../components-atom/code/code.component';
 import { CodeLine } from '../../../../components-atom/component-atom.interface';
 import { HistoryElement } from '../../../../components/component.interface';
 import { EventHistoryComponent } from '../../../../components/event-history/event-history.component';
 import { CodeLegazyComponent } from '../../../../components-atom/code-legazy/code-legazy.component';
 
 @Component({
-  selector: 'app-destroy-effect',
-  standalone: true,
-  templateUrl: './destroy-effect.component.html',
-  styleUrl: './destroy-effect.component.css',
-  imports: [
-    DestroyBoxComponent,
-    CodeComponent,
-    EventHistoryComponent,
-    CodeLegazyComponent,
-  ],
+    selector: 'app-destroy-effect',
+    templateUrl: './destroy-effect.component.html',
+    styleUrl: './destroy-effect.component.css',
+    changeDetection: ChangeDetectionStrategy.Eager,
+    imports: [
+        DestroyBoxComponent,
+        EventHistoryComponent,
+        CodeLegazyComponent,
+    ]
 })
 export class DestroyEffectComponent {
   autoRefresh = signal(false);

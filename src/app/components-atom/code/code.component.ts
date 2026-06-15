@@ -9,6 +9,7 @@ import {
   Output,
   Signal,
   signal,
+  ChangeDetectionStrategy
 } from '@angular/core';
 import { CodeLine, CodeLineElement } from '../component-atom.interface';
 import {
@@ -21,11 +22,11 @@ import { TailwindTextSize } from '../../interfaces/tailwind-css.interface';
 import { CodeClick } from './code.interface';
 
 @Component({
-  selector: 'app-code',
-  standalone: true,
-  imports: [CommonModule],
-  templateUrl: './code.component.html',
-  styleUrl: './code.component.css',
+    selector: 'app-code',
+    imports: [CommonModule],
+    templateUrl: './code.component.html',
+    changeDetection: ChangeDetectionStrategy.Eager,
+    styleUrl: './code.component.css'
 })
 export class CodeComponent {
   //@deprecated
@@ -44,8 +45,7 @@ export class CodeComponent {
     effect(
       () => {
         this.codeLines.set(this.parseCode(this.htmlCode()));
-      },
-      { allowSignalWrites: true }
+      }
     );
   }
 

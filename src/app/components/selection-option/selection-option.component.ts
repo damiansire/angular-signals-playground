@@ -1,13 +1,13 @@
-import { CommonModule } from '@angular/common';
-import { Component, EventEmitter, Output } from '@angular/core';
+
+import { Component, EventEmitter, Output, ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 
 @Component({
-  selector: 'app-selection-option',
-  standalone: true,
-  imports: [CommonModule, FormsModule],
-  templateUrl: './selection-option.component.html',
-  styleUrl: './selection-option.component.css',
+    selector: 'app-selection-option',
+    imports: [FormsModule],
+    templateUrl: './selection-option.component.html',
+    changeDetection: ChangeDetectionStrategy.Eager,
+    styleUrl: './selection-option.component.css'
 })
 export class SelectionOptionComponent {
   @Output() selectedLevelChange = new EventEmitter<number>();

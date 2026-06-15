@@ -1,14 +1,14 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, ChangeDetectionStrategy } from '@angular/core';
 import { ClickInButton } from '../component.interface';
 import { CommonModule } from '@angular/common';
 import { SvgComponent } from '../../../icons/click.component';
 
 @Component({
-  selector: 'app-event',
-  standalone: true,
-  templateUrl: './event.component.html',
-  styleUrl: './event.component.css',
-  imports: [CommonModule, SvgComponent],
+    selector: 'app-event',
+    templateUrl: './event.component.html',
+    styleUrl: './event.component.css',
+    changeDetection: ChangeDetectionStrategy.Eager,
+    imports: [CommonModule, SvgComponent]
 })
 export class EventComponent {
   @Input() event: ClickInButton = {

@@ -1,11 +1,11 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 
 @Component({
-  selector: 'app-interval-manual-destruction',
-  standalone: true,
-  imports: [],
-  templateUrl: './interval-manual-destruction.component.html',
-  styleUrl: './interval-manual-destruction.component.css'
+    selector: 'app-interval-manual-destruction',
+    imports: [],
+    templateUrl: './interval-manual-destruction.component.html',
+    changeDetection: ChangeDetectionStrategy.Eager,
+    styleUrl: './interval-manual-destruction.component.css'
 })
 export class IntervalManualDestructionComponent {
 

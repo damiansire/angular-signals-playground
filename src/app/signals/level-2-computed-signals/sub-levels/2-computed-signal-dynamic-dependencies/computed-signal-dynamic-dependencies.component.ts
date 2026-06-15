@@ -1,7 +1,5 @@
-import { Component, Signal, computed, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { ButtonComponent } from '../../../../components-atom/button/button.component';
-import { CodeComponent } from '../../../../components-atom/code/code.component';
+import { Component, Signal, computed, signal, ChangeDetectionStrategy } from '@angular/core';
+
 import { CodeLine } from '../../../../components-atom/component-atom.interface';
 import { VariableBoxComponent } from '../../../../components-atom/variable-box/variable-box.component';
 import { HistoryElement } from '../../../../components/component.interface';
@@ -10,19 +8,16 @@ import { EventHistoryComponent } from '../../../../components/event-history/even
 import { CodeLegazyComponent } from '../../../../components-atom/code-legazy/code-legazy.component';
 
 @Component({
-  selector: 'app-computed-signal-dynamic-dependencies',
-  standalone: true,
-  templateUrl: './computed-signal-dynamic-dependencies.component.html',
-  styleUrl: './computed-signal-dynamic-dependencies.component.css',
-  imports: [
-    ButtonComponent,
-    CommonModule,
-    CodeComponent,
+    selector: 'app-computed-signal-dynamic-dependencies',
+    templateUrl: './computed-signal-dynamic-dependencies.component.html',
+    styleUrl: './computed-signal-dynamic-dependencies.component.css',
+    changeDetection: ChangeDetectionStrategy.Eager,
+    imports: [
     VariableBoxComponent,
     EventHistoryComponent,
     DependenciesStatusComponent,
-    CodeLegazyComponent,
-  ],
+    CodeLegazyComponent
+]
 })
 export class ComputedSignalDynamicDependenciesComponent {
   showCount = signal(false);

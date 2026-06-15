@@ -1,15 +1,15 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, ChangeDetectionStrategy } from '@angular/core';
 import { CustomRoute } from '../../../../app.routes';
 import { RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { LevelState } from '../../../component.interface';
 
 @Component({
-  selector: 'app-menu-option',
-  standalone: true,
-  imports: [RouterModule, CommonModule],
-  templateUrl: './menu-option.component.html',
-  styleUrl: './menu-option.component.css',
+    selector: 'app-menu-option',
+    imports: [RouterModule, CommonModule],
+    templateUrl: './menu-option.component.html',
+    changeDetection: ChangeDetectionStrategy.Eager,
+    styleUrl: './menu-option.component.css'
 })
 export class MenuOptionComponent {
   @Input({ required: true }) menuItem: CustomRoute = {
