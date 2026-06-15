@@ -22,3 +22,65 @@ body {
 .flex {
   display: flex;
 }
+
+/* ───────────────────────────────────────────────────────────────────────────
+   SUSTRATO COMPARTIDO — "el banco de laboratorio"
+   Lo que hace que las cuatro estéticas se sientan UN solo producto.
+   Color = CSS custom properties (Tailwind solo para layout/espaciado).
+   ─────────────────────────────────────────────────────────────────────────── */
+:root {
+  /* Tipografía por rol */
+  --font-display: 'Archivo', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+  --font-editorial: 'Fraunces', Georgia, serif;
+
+  /* Banco (modo oscuro = panel grafito cálido) */
+  --bench-graphite: #2b2823;
+  --bench-graphite-2: #322e28;
+
+  /* Acento semántico consistente en TODA la app */
+  --accent-source: #eb9b3c;  /* ámbar = fuente / signal / escritura */
+  --accent-derived: #62c4ad; /* jade  = derivado / computed       */
+  --accent-effect: #ff5a4a;  /* rojo  = effect disparado          */
+
+  /* Lenguaje de movimiento común: cada cambio MUESTRA la propagación */
+  --propagation-duration: 400ms;
+  --propagation-ease: cubic-bezier(0.4, 0.7, 0.3, 1);
+
+  /* Instrumento 01 · Signal Flow (patchbay) — signal() */
+  --sf-silk: #e9e3d3;          /* serigrafía crema */
+  --sf-cable-mustard: #d6a23b;
+  --sf-cable-rust: #bd4a3b;
+  --sf-led: #ff5a4a;
+
+  /* Instrumento 02 · Osciloscopio (CRT) — effect() */
+  --scope-phosphor: #46e07e;
+  --scope-bg: #07120a;
+  --scope-grid: #16361f;
+  --scope-ch2: #e0b84a;
+
+  /* Instrumento 03 · Celdas reactivas (planilla) — computed() */
+  --cell-paper: #f6f5f1;
+  --cell-source-bg: #fff8ec;
+  --cell-source-ink: #b5740f;
+  --cell-derived-bg: #eafaf3;
+  --cell-derived-ink: #0f7a59;
+  --cell-derived-border: #45b892;
+
+  /* Instrumento 04 · Manual técnico (editorial) — teoría / gotchas */
+  --manual-paper: #f4efe4;
+  --manual-ink: #1d1a14;
+  --manual-oxblood: #8a2c22;
+  --manual-prose: #3a342a;
+}
+
+body {
+  font-family: var(--font-display);
+  color: #1d1a14;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --propagation-duration: 1ms;
+  }
+}

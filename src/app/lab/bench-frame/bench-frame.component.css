@@ -1,0 +1,135 @@
+:host {
+  display: block;
+}
+
+.bench {
+  position: relative;
+  border-radius: 14px;
+  padding: clamp(1.25rem, 3vw, 2.25rem);
+  background:
+    radial-gradient(120% 80% at 50% -10%, #3a352d 0%, transparent 60%),
+    linear-gradient(160deg, var(--bench-graphite-2), var(--bench-graphite));
+  box-shadow: inset 0 1px 0 #4a443a, 0 24px 60px -30px #000;
+  color: var(--sf-silk);
+  font-family: var(--font-display);
+  overflow: hidden;
+}
+
+/* grilla hairline tenue: misma textura bajo todos los instrumentos */
+.bench::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.05;
+  background-image:
+    linear-gradient(var(--sf-silk) 1px, transparent 1px),
+    linear-gradient(90deg, var(--sf-silk) 1px, transparent 1px);
+  background-size: 28px 28px;
+}
+
+/* tornillos */
+.screw {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #6b6356, #2a2620);
+  box-shadow: inset 0 0 0 1px #1c1916, 0 1px 1px #000;
+}
+.screw::after {
+  content: '';
+  position: absolute;
+  inset: 3px;
+  border-top: 1px solid #1c1916;
+  transform: rotate(25deg);
+}
+.screw--tl { top: 12px; left: 12px; }
+.screw--tr { top: 12px; right: 12px; }
+.screw--bl { bottom: 12px; left: 12px; }
+.screw--br { bottom: 12px; right: 12px; }
+
+/* riel superior */
+.rail {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  position: relative;
+  padding: 0 1rem 0.75rem;
+  margin-bottom: 1.25rem;
+  border-bottom: 1px solid #4a443a;
+}
+.rail__id {
+  display: flex;
+  gap: 0.6rem;
+  align-items: baseline;
+}
+.rail__no {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.15em;
+  color: #9a9081;
+}
+.rail__name {
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  color: var(--sf-silk);
+}
+.rail__concept {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.rail__concept code {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  color: #cdc6b6;
+}
+.dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 10px 0 var(--accent);
+}
+
+/* el acento semántico del concepto tiñe el punto del riel */
+.bench[data-accent='source'] { --accent: var(--accent-source); }
+.bench[data-accent='derived'] { --accent: var(--accent-derived); }
+.bench[data-accent='effect'] { --accent: var(--accent-effect); }
+
+.surface {
+  position: relative;
+  z-index: 1;
+}
+
+/* leyenda compartida: el código de color es el mismo en toda la app */
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.2rem;
+  margin-top: 1.5rem;
+  padding: 0.75rem 1rem 0;
+  border-top: 1px solid #4a443a;
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  color: #9a9081;
+}
+.legend__item {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+.sw {
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  display: inline-block;
+}
+.sw--source { background: var(--accent-source); }
+.sw--derived { background: var(--accent-derived); }
+.sw--effect { background: var(--accent-effect); }

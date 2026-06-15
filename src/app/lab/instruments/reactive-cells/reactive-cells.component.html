@@ -1,0 +1,108 @@
+<app-bench-frame instrument="03" name="Cells" concept="computed()" accent="derived">
+  <!-- ficha de PAPEL apoyada sobre el banco grafito (intencional) -->
+  <div class="sheet">
+    <!-- ── barra de fórmula + badge de recálculo ── -->
+    <div class="formula-bar">
+      <span class="formula-bar__fx" aria-hidden="true">fx</span>
+      <code class="formula-bar__text">=B8/B5</code>
+      <span class="badge" aria-label="Las celdas derivadas se recalculan solas">
+        <span class="badge__pip" aria-hidden="true"></span>recalculado
+      </span>
+    </div>
+
+    <div class="grid" role="table" aria-label="Planilla de factura de exportación">
+      <!-- encabezados de columna -->
+      <div class="row row--head" role="row">
+        <span class="cell cell--corner" role="columnheader" aria-hidden="true"></span>
+        <span class="cell cell--colhead" role="columnheader">A</span>
+        <span class="cell cell--colhead" role="columnheader">B</span>
+        <span class="cell cell--colhead" role="columnheader">C</span>
+      </div>
+
+      <!-- ── CELDAS FUENTE (signal, ámbar) ── -->
+      <div class="row" role="row">
+        <span class="cell cell--rowhead" role="rowheader">1</span>
+        <span class="cell cell--label" role="cell">cantidad</span>
+        <span class="cell cell--src" role="cell">
+          <label class="sr-only" for="b1">cantidad de unidades</label>
+          <input id="b1" class="src-input" type="number" inputmode="numeric"
+            [value]="qty()" (input)="setQty($any($event.target).value)" min="0" />
+        </span>
+        <span class="cell cell--unit" role="cell">u</span>
+      </div>
+
+      <div class="row" role="row">
+        <span class="cell cell--rowhead" role="rowheader">2</span>
+        <span class="cell cell--label" role="cell">precio unitario</span>
+        <span class="cell cell--src" role="cell">
+          <label class="sr-only" for="b2">precio unitario en pesos</label>
+          <input id="b2" class="src-input" type="number" inputmode="numeric"
+            [value]="unitPriceArs()" (input)="setUnitPrice($any($event.target).value)" min="0" />
+        </span>
+        <span class="cell cell--unit" role="cell">$/u</span>
+      </div>
+
+      <div class="row" role="row">
+        <span class="cell cell--rowhead" role="rowheader">3</span>
+        <span class="cell cell--label" role="cell">descuento</span>
+        <span class="cell cell--src" role="cell">
+          <label class="sr-only" for="b3">descuento comercial en porcentaje</label>
+          <input id="b3" class="src-input" type="number" inputmode="numeric"
+            [value]="discountPct()" (input)="setDiscount($any($event.target).value)" min="0" max="100" />
+        </span>
+        <span class="cell cell--unit" role="cell">%</span>
+      </div>
+
+      <div class="row" role="row">
+        <span class="cell cell--rowhead" role="rowheader">4</span>
+        <span class="cell cell--label" role="cell">IVA</span>
+        <span class="cell cell--src" role="cell">
+          <label class="sr-only" for="b4">alícuota de IVA en porcentaje</label>
+          <input id="b4" class="src-input" type="number" inputmode="numeric"
+            [value]="ivaPct()" (input)="setIva($any($event.target).value)" min="0" max="100" />
+        </span>
+        <span class="cell cell--unit" role="cell">%</span>
+      </div>
+
+      <div class="row" role="row">
+        <span class="cell cell--rowhead" role="rowheader">5</span>
+        <span class="cell cell--label" role="cell">tipo de cambio</span>
+        <span class="cell cell--src" role="cell">
+          <label class="sr-only" for="b5">tipo de cambio USD sobre ARS</label>
+          <input id="b5" class="src-input" type="number" inputmode="numeric"
+            [value]="fxRate()" (input)="setFxRate($any($event.target).value)" min="1" />
+        </span>
+        <span class="cell cell--unit" role="cell">USD/ARS</span>
+      </div>
+
+      <!-- separador fuente → derivado -->
+      <div class="row row--rule" role="presentation"><span aria-hidden="true"></span></div>
+
+      <!-- ── CELDAS DERIVADAS (computed, jade) — destellan en cascada ── -->
+      @for (d of derived(); track d.ref) {
+        <div class="row" role="row">
+          <span class="cell cell--rowhead" role="rowheader">{{ 6 + d.depth }}</span>
+          <span class="cell cell--label" role="cell" [class.cell--label-total]="d.depth === 3">
+            {{ d.label }}
+          </span>
+          <!-- key=flash: cambia con el valor → re-render → reinicia el destello -->
+          @for (k of [d.flash]; track k) {
+            <span
+              class="cell cell--derived"
+              [class.cell--derived-total]="d.depth === 3"
+              [style.--depth]="d.depth"
+              role="cell"
+            >{{ d.display }}</span>
+          }
+          <code class="cell cell--formula" role="cell">{{ d.formula }}</code>
+        </div>
+      }
+    </div>
+
+    <!-- salida final, embebida como línea de código -->
+    <p class="readout">
+      <code>totalUsd = computed(() =&gt; withIva() / fxRate())</code>
+      <output class="readout__value">{{ totalLabel() }}</output>
+    </p>
+  </div>
+</app-bench-frame>

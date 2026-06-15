@@ -24,6 +24,11 @@ import { OldChangeDetectionComponent } from './signals/level-0-introduction/sub-
 import { SignalsChangeDetectionComponent } from './signals/level-0-introduction/sub-levels/signals-change-detection/signals-change-detection.component';
 import { VariableRefreshAndTreeComponent } from './signals/level-0-introduction/sub-levels/variable-refresh-and-tree/variable-refresh-and-tree.component';
 import { VariablesComponent } from './signals/level-1-interaction-with-signals/sub-levels/variables/variables.component';
+import { SignalFlowComponent } from './lab/instruments/signal-flow/signal-flow.component';
+import { OscilloscopeComponent } from './lab/instruments/oscilloscope/oscilloscope.component';
+import { ReactiveCellsComponent } from './lab/instruments/reactive-cells/reactive-cells.component';
+import { ManualComponent } from './lab/instruments/manual/manual.component';
+import { LabHubComponent } from './lab/lab-hub/lab-hub.component';
 
 const signalsRoutesTree: RouteItem[] = [
   {
@@ -114,6 +119,12 @@ function generateRoutes(routesTree: RouteItem[]) {
 const { allRoutes, baseRoutes } = generateRoutes(signalsRoutesTree);
 export const routes: Routes = [
   ...allRoutes,
+  // Lab multi-estética (instrumentos sobre el mismo banco)
+  { path: 'lab', component: LabHubComponent },
+  { path: 'lab/signal', component: SignalFlowComponent },
+  { path: 'lab/effect', component: OscilloscopeComponent },
+  { path: 'lab/computed', component: ReactiveCellsComponent },
+  { path: 'lab/manual', component: ManualComponent },
   { path: '', redirectTo: '/signals/level/0/sub-level/1', pathMatch: 'full' },
 ];
 export const menuItems = baseRoutes;

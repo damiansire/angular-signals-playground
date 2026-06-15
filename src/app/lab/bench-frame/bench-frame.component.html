@@ -1,0 +1,28 @@
+<div class="bench" [attr.data-accent]="accent()">
+  <!-- tornillos: motivo recurrente que une todos los instrumentos -->
+  <span class="screw screw--tl"></span>
+  <span class="screw screw--tr"></span>
+  <span class="screw screw--bl"></span>
+  <span class="screw screw--br"></span>
+
+  <header class="rail">
+    <div class="rail__id">
+      <span class="rail__no">INSTR·{{ instrument() }}</span>
+      <span class="rail__name">{{ name() }}</span>
+    </div>
+    <div class="rail__concept">
+      <code>{{ concept() }}</code>
+      <span class="dot" aria-hidden="true"></span>
+    </div>
+  </header>
+
+  <div class="surface">
+    <ng-content></ng-content>
+  </div>
+
+  <footer class="legend">
+    <span class="legend__item"><i class="sw sw--source"></i>source</span>
+    <span class="legend__item"><i class="sw sw--derived"></i>derived</span>
+    <span class="legend__item"><i class="sw sw--effect"></i>effect</span>
+  </footer>
+</div>

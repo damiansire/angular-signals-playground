@@ -1,0 +1,275 @@
+:host {
+  display: block;
+  max-width: 760px;
+  margin-inline: auto;
+}
+
+.scope {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr;
+  grid-template-areas:
+    'crt effects'
+    'throttle throttle';
+  gap: 0.9rem;
+  font-family: var(--font-display);
+}
+
+/* ───────────────────────── PANTALLA CRT (firma) ───────────────────────── */
+.crt {
+  grid-area: crt;
+  position: relative;
+  border-radius: 10px;
+  padding: 0.7rem;
+  background:
+    radial-gradient(120% 90% at 50% 30%, #0c1d12 0%, var(--scope-bg) 70%);
+  box-shadow:
+    inset 0 0 0 1px #0c2417,
+    inset 0 0 38px -6px #000,
+    0 6px 18px -10px #000;
+  overflow: hidden;
+}
+.crt__svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 320 / 180;
+}
+
+.graticule line {
+  stroke: var(--scope-grid);
+  stroke-width: 1;
+}
+
+/* CH2: umbral ámbar, punteado y discreto */
+.ch2 {
+  stroke: var(--scope-ch2);
+  stroke-width: 1.2;
+  stroke-dasharray: 5 4;
+  opacity: 0.7;
+  transition: all var(--propagation-duration) var(--propagation-ease);
+}
+
+/* CH1: la traza fósforo. SALTA de altura al cambiar tracePath() */
+.ch1 {
+  fill: none;
+  stroke: var(--scope-phosphor);
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  filter: drop-shadow(0 0 3px var(--scope-phosphor))
+    drop-shadow(0 0 7px rgba(70, 224, 126, 0.55));
+  transition: d var(--propagation-duration) var(--propagation-ease);
+}
+
+/* scanlines del tubo */
+.scanlines {
+  position: absolute;
+  inset: 0.7rem;
+  border-radius: 6px;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0) 0,
+    rgba(0, 0, 0, 0) 2px,
+    rgba(0, 0, 0, 0.22) 3px
+  );
+  mix-blend-mode: multiply;
+}
+
+/* latido rojo: parpadea UNA vez cada vez que el effect corre (data-run cambia) */
+.crt__beat {
+  position: absolute;
+  inset: 0.7rem;
+  border-radius: 6px;
+  pointer-events: none;
+  box-shadow: inset 0 0 0 2px var(--accent-effect);
+  opacity: 0;
+  animation: beat 520ms var(--propagation-ease);
+}
+@keyframes beat {
+  0% { opacity: 0.85; }
+  100% { opacity: 0; }
+}
+
+/* lecturas en mono, estilo osciloscopio */
+.readout {
+  position: absolute;
+  left: 0.95rem;
+  right: 0.95rem;
+  bottom: 0.85rem;
+  display: flex;
+  gap: 0.6rem;
+  align-items: center;
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.04em;
+}
+.readout__ch--1 { color: var(--scope-phosphor); }
+.readout__ch--2 { color: var(--scope-ch2); }
+.readout__band {
+  margin-left: auto;
+  padding: 0.05rem 0.4rem;
+  border-radius: 3px;
+  font-weight: 700;
+  color: var(--scope-bg);
+  background: var(--scope-phosphor);
+}
+.readout__band[data-band='OVER'] {
+  background: var(--accent-effect);
+  color: #fff;
+}
+
+/* ───────────────────────── PANEL DEL EFFECT ───────────────────────── */
+.effects {
+  grid-area: effects;
+  display: flex;
+  flex-direction: column;
+  border-radius: 10px;
+  padding: 0.7rem 0.8rem 0.8rem;
+  background: linear-gradient(180deg, #34302a, #2a2621);
+  box-shadow: inset 0 1px 0 #4a443a;
+}
+.effects__head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 0.5rem;
+}
+.effects__tag {
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  font-size: 0.68rem;
+  color: var(--accent-effect);
+}
+.effects__runs {
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  color: #a89e8d;
+}
+.effects__runs b {
+  color: #fff;
+  font-weight: 600;
+}
+/* el contador pulsa cuando incrementa, anclando "el effect corrió" */
+.effects__runs b {
+  display: inline-block;
+  animation: tick 360ms var(--propagation-ease);
+}
+@keyframes tick {
+  0% { transform: scale(1.5); color: var(--accent-effect); }
+  100% { transform: scale(1); }
+}
+
+.effects__line {
+  display: block;
+  margin-bottom: 0.6rem;
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  color: #cdc6b6;
+}
+.effects__line b {
+  color: var(--accent-effect);
+  font-weight: 600;
+}
+
+.logfeed {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  min-height: 6.4rem;
+}
+.logfeed__row {
+  display: grid;
+  grid-template-columns: auto auto 1fr;
+  grid-template-areas:
+    'run stamp val'
+    'sink sink sink';
+  gap: 0 0.45rem;
+  padding: 0.22rem 0.4rem;
+  border-radius: 4px;
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  background: #211e1a;
+  border-left: 2px solid #4a443a;
+  /* la fila nueva entra con un barrido, como una lectura recién impresa */
+  animation: print var(--propagation-duration) var(--propagation-ease);
+}
+.logfeed__row[data-sink='title'] { border-left-color: var(--accent-effect); }
+.logfeed__row[data-sink='storage'] { border-left-color: var(--scope-ch2); }
+.logfeed__row[data-sink='log'] { border-left-color: var(--scope-phosphor); }
+.logfeed__row--empty {
+  display: block;
+  color: #6f685c;
+  background: transparent;
+  border-left-color: transparent;
+  font-style: italic;
+  animation: none;
+}
+@keyframes print {
+  0% { opacity: 0; transform: translateY(-4px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+.logfeed__run { grid-area: run; color: #8f8678; }
+.logfeed__stamp { grid-area: stamp; color: #6f685c; }
+.logfeed__val { grid-area: val; color: #e8e1d2; text-align: right; }
+.logfeed__sink { grid-area: sink; color: #a89e8d; }
+
+.persist {
+  margin: 0.55rem 0 0;
+  font-family: var(--font-mono);
+  font-size: 0.58rem;
+  color: #8f8678;
+}
+.persist b { color: var(--scope-ch2); }
+
+/* ───────────────────────── THROTTLE (el signal) ───────────────────────── */
+.throttle {
+  grid-area: throttle;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  padding: 0.55rem 0.8rem 0.7rem;
+  border-radius: 10px;
+  background: linear-gradient(180deg, #34302a, #2a2621);
+  box-shadow: inset 0 1px 0 #4a443a;
+}
+.throttle__label {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.05em;
+  color: #b7ad9c;
+}
+.throttle__input {
+  width: 100%;
+  accent-color: var(--accent-effect);
+  cursor: pointer;
+}
+.throttle__input:focus-visible {
+  outline: 2px solid var(--accent-effect);
+  outline-offset: 4px;
+  border-radius: 3px;
+}
+
+/* ───────────────────────── responsive ───────────────────────── */
+@media (max-width: 640px) {
+  .scope {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      'crt'
+      'effects'
+      'throttle';
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ch1,
+  .ch2 { transition: none; }
+  .crt__beat,
+  .logfeed__row,
+  .effects__runs b { animation: none; }
+  .crt__beat { display: none; }
+}

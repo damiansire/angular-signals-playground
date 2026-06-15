@@ -1,0 +1,96 @@
+<app-bench-frame instrument="02" name="Oscilloscope" concept="effect()" accent="effect">
+  <div class="scope">
+    <!-- ── PANTALLA CRT: la traza ES la firma, salta en cada cambio ── -->
+    <div class="crt">
+      <svg
+        class="crt__svg"
+        viewBox="0 0 320 180"
+        preserveAspectRatio="none"
+        role="img"
+        aria-label="Traza del osciloscopio; salta de altura en cada lectura de velocidad"
+      >
+        <!-- graticula -->
+        <g class="graticule" aria-hidden="true">
+          @for (gx of cols; track gx) {
+            <line [attr.x1]="gx" y1="6" [attr.x2]="gx" y2="174" />
+          }
+          @for (gy of rows; track gy) {
+            <line x1="6" [attr.y1]="gy" x2="314" [attr.y2]="gy" />
+          }
+        </g>
+
+        <!-- CH2: umbral de régimen (ámbar) -->
+        <line
+          class="ch2"
+          x1="12"
+          [attr.y1]="thresholdY()"
+          x2="308"
+          [attr.y2]="thresholdY()"
+          aria-hidden="true"
+        />
+
+        <!-- CH1: la traza viva (verde fósforo) que SALTA con el signal -->
+        <path class="ch1" [attr.d]="tracePath()" aria-hidden="true" />
+      </svg>
+
+      <!-- scanlines + flash del effect, puramente decorativos -->
+      <span class="scanlines" aria-hidden="true"></span>
+      <span class="crt__beat" [attr.data-run]="runs()" aria-hidden="true"></span>
+
+      <!-- lecturas en mono, abajo, como un osciloscopio real -->
+      <div class="readout" aria-hidden="true">
+        <span class="readout__ch readout__ch--1">CH1 {{ speed() }} km/h</span>
+        <span class="readout__ch readout__ch--2">CH2 {{ threshold }} km/h</span>
+        <span class="readout__band" [attr.data-band]="band()">{{ band() }}</span>
+      </div>
+    </div>
+
+    <!-- ── PANEL DEL EFFECT: el side-effect imperativo, medido ── -->
+    <aside class="effects">
+      <div class="effects__head">
+        <span class="effects__tag">EFFECT</span>
+        <span class="effects__runs">
+          runs <b [attr.data-run]="runs()">{{ runs() }}</b>
+        </span>
+      </div>
+
+      <code class="effects__line">
+        effect(() =&gt; sync(<b>{{ speed() }}</b>))
+      </code>
+
+      <ol class="logfeed">
+        @for (row of log(); track row.run) {
+          <li class="logfeed__row" [attr.data-sink]="row.sink">
+            <span class="logfeed__run">#{{ row.run }}</span>
+            <span class="logfeed__stamp">{{ row.stamp }}</span>
+            <span class="logfeed__val">{{ row.speed }} km/h</span>
+            <span class="logfeed__sink">→ {{ sinkLabel(row.sink) }}</span>
+          </li>
+        } @empty {
+          <li class="logfeed__row logfeed__row--empty">waiting for input…</li>
+        }
+      </ol>
+
+      <p class="persist">
+        localStorage · last
+        <b>{{ restored ?? '—' }}</b>
+      </p>
+    </aside>
+
+    <!-- ── THROTTLE: el control real, ES el signal ── -->
+    <div class="throttle">
+      <label class="throttle__label" for="speed">throttle · set(speed)</label>
+      <input
+        id="speed"
+        class="throttle__input"
+        type="range"
+        [min]="min"
+        [max]="max"
+        step="1"
+        [value]="speed()"
+        (input)="setSpeed($any($event.target).value)"
+        aria-label="Velocidad del tren en kilómetros por hora"
+      />
+    </div>
+  </div>
+</app-bench-frame>

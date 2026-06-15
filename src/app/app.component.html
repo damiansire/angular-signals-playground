@@ -1,9 +1,10 @@
 <div class="body-container">
+  <a href="#main-content" class="skip-link">Saltar al contenido</a>
   <div class="flex">
     <div class="w-14 bg-gray-800 text-white h-screen">
       <app-sidebar-menu></app-sidebar-menu>
     </div>
-    <div class="flex-grow p-2">
+    <div id="main-content" class="flex-grow p-2">
       <router-outlet></router-outlet>
     </div>
   </div>

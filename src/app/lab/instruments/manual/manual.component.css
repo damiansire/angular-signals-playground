@@ -1,0 +1,305 @@
+:host {
+  display: block;
+  max-width: 760px;
+  margin-inline: auto;
+}
+
+/* ── la ficha de papel apoyada sobre el banco grafito (intencional) ── */
+.sheet {
+  position: relative;
+  padding: clamp(1.5rem, 4vw, 2.75rem);
+  border-radius: 4px;
+  color: var(--manual-prose);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0)) ,
+    var(--manual-paper);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.6) inset,
+    0 18px 40px -22px rgba(0, 0, 0, 0.7),
+    0 2px 6px -2px rgba(0, 0, 0, 0.4);
+}
+/* ── cabecera: kicker + progreso ── */
+.masthead {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  border-bottom: 1.5px solid rgba(29, 26, 20, 0.18);
+  padding-bottom: 0.6rem;
+}
+.kicker {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--manual-oxblood);
+}
+.progress {
+  display: flex;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.progress__dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  border: 1.5px solid var(--manual-oxblood);
+}
+.progress__dot.is-on {
+  background: var(--manual-oxblood);
+}
+
+/* ── título display (Fraunces, exclusivo del momento editorial) ── */
+.display {
+  font-family: var(--font-editorial);
+  font-optical-sizing: auto;
+  font-weight: 560;
+  font-size: clamp(2.1rem, 6.5vw, 3.4rem);
+  line-height: 0.98;
+  letter-spacing: -0.015em;
+  color: var(--manual-ink);
+  margin: 1.1rem 0 1.4rem;
+}
+
+/* ── lede con dropcap ── */
+.lede {
+  font-family: var(--font-editorial);
+  font-size: clamp(1.05rem, 2.4vw, 1.2rem);
+  line-height: 1.5;
+  color: var(--manual-ink);
+}
+.lede p { margin: 0; }
+.dropcap {
+  float: left;
+  font-family: var(--font-editorial);
+  font-weight: 600;
+  font-size: 3.1em;
+  line-height: 0.74;
+  padding: 0.04em 0.12em 0 0;
+  color: var(--manual-oxblood);
+}
+
+/* ── cuerpo: prosa a una columna con el código en el margen ── */
+.body {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) clamp(170px, 24vw, 220px);
+  gap: 1.6rem 2rem;
+  align-items: start;
+  margin-top: 1.6rem;
+  font-family: var(--font-editorial);
+  font-size: 1.02rem;
+  line-height: 1.62;
+}
+.body > p,
+.control,
+.graph {
+  grid-column: 1;
+}
+.body > p { margin: 0 0 0.85rem; }
+
+.inl {
+  font-family: var(--font-mono);
+  font-size: 0.86em;
+  color: var(--manual-ink);
+  background: rgba(29, 26, 20, 0.055);
+  padding: 0.06em 0.34em;
+  border-radius: 3px;
+}
+em { font-style: italic; }
+
+/* ── ELEMENTO FIRMA: el valor en vivo embebido en la oración ── */
+.live {
+  font-family: var(--font-mono);
+  font-weight: 600;
+  font-style: normal;
+  font-size: 0.94em;
+  padding: 0.02em 0.3em;
+  border-radius: 3px;
+  /* el cambio se "anota": un subrayado de tinta que late al recalcular */
+  background-position: 0 1.08em;
+  background-repeat: no-repeat;
+  background-size: 100% 2px;
+  transition:
+    color var(--propagation-duration) var(--propagation-ease),
+    background-size var(--propagation-duration) var(--propagation-ease);
+}
+.live--arm {
+  color: #2f7d6c;
+  background-image: linear-gradient(var(--accent-derived), var(--accent-derived));
+}
+.live--vertex {
+  color: #1f5a4d;
+  background-image: linear-gradient(var(--accent-derived), var(--accent-derived));
+  background-size: 100% 3px;
+  font-size: 1.04em;
+}
+.live--count {
+  color: var(--manual-oxblood);
+  background-image: linear-gradient(var(--manual-oxblood), var(--manual-oxblood));
+}
+
+/* ── control de la fuente ── */
+.control {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  margin: 0.4rem 0 1.4rem;
+  padding: 0.7rem 0.9rem;
+  border: 1.5px solid rgba(29, 26, 20, 0.16);
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.4);
+}
+.control__label {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--manual-oxblood);
+  white-space: nowrap;
+}
+.control__range {
+  flex: 1 1 auto;
+  accent-color: var(--accent-source);
+  cursor: pointer;
+}
+.control__range:focus-visible {
+  outline: 2px solid var(--manual-oxblood);
+  outline-offset: 4px;
+  border-radius: 3px;
+}
+.control__value {
+  font-family: var(--font-mono);
+  font-weight: 600;
+  font-size: 1.1rem;
+  color: var(--accent-source);
+  min-width: 1.6ch;
+  text-align: right;
+}
+
+/* ── diagrama del grafo ── */
+.graph {
+  margin: 0;
+}
+.graph svg {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+.graph figcaption {
+  margin-top: 0.5rem;
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.04em;
+  color: rgba(29, 26, 20, 0.6);
+}
+
+.edge {
+  fill: none;
+  stroke: var(--manual-ink);
+  stroke-width: 1.5;
+  /* la fuerza del trazo crece con el flujo: la propagación se "ilumina" */
+  opacity: calc(0.28 + var(--flow, 0) * 0.55);
+  transition: opacity var(--propagation-duration) var(--propagation-ease);
+}
+
+.node text {
+  font-family: var(--font-mono);
+  text-anchor: middle;
+  fill: var(--manual-ink);
+  font-size: 8px;
+  letter-spacing: 0.02em;
+}
+.node .node__val {
+  font-weight: 700;
+  font-size: 9px;
+}
+
+.node--source circle {
+  fill: rgba(235, 155, 60, 0.16);
+  stroke: var(--accent-source);
+  stroke-width: 2;
+}
+.node--source .node__val { fill: #9a5c14; }
+
+.node--arm rect {
+  fill: rgba(98, 196, 173, 0.14);
+  stroke: var(--accent-derived);
+  stroke-width: 1.75;
+}
+.node--vertex rect {
+  fill: rgba(98, 196, 173, 0.24);
+  stroke: var(--accent-derived);
+  stroke-width: 2.5;
+}
+.node--arm .node__val,
+.node--vertex .node__val { fill: #1f5a4d; }
+
+/* ── notas al margen ── */
+.margin {
+  grid-column: 2;
+  grid-row: 1 / span 4;
+  align-self: start;
+  position: sticky;
+  top: 1rem;
+  border-left: 2px solid var(--manual-oxblood);
+  padding-left: 1rem;
+}
+.margin__note {
+  font-family: var(--font-editorial);
+  font-size: 0.82rem;
+  font-style: italic;
+  line-height: 1.45;
+  color: var(--manual-prose);
+  margin: 0 0 0.9rem;
+}
+.margin__note code {
+  font-family: var(--font-mono);
+  font-style: normal;
+  font-size: 0.8em;
+}
+.margin__note--reads {
+  font-style: normal;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+  color: var(--manual-ink);
+}
+.margin__note--reads b {
+  color: var(--manual-oxblood);
+  font-size: 1.1em;
+}
+.margin__code {
+  margin: 0 0 0.9rem;
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  line-height: 1.7;
+  color: var(--manual-ink);
+  white-space: pre;
+  overflow-x: auto;
+}
+.margin__code .ln { display: block; }
+.margin__code .src { color: #9a5c14; font-weight: 700; }
+.margin__code .der { color: #1f5a4d; font-weight: 700; }
+
+/* ── responsive: el margen baja debajo de la prosa ── */
+@media (max-width: 640px) {
+  .body {
+    grid-template-columns: 1fr;
+  }
+  .margin {
+    grid-column: 1;
+    grid-row: auto;
+    position: static;
+    margin-top: 0.5rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .live,
+  .edge {
+    transition: none;
+  }
+}

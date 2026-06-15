@@ -1,0 +1,199 @@
+:host {
+  display: block;
+  max-width: 760px;
+  margin-inline: auto;
+}
+
+.patch {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  font-family: var(--font-display);
+}
+
+/* ── chapa del módulo ── */
+.module {
+  position: relative;
+  flex: 0 0 auto;
+  width: 210px;
+  padding: 1rem 1.1rem 1.2rem;
+  border-radius: 10px;
+  background: linear-gradient(180deg, #34302a, #2a2621);
+  box-shadow: inset 0 1px 0 #4a443a, inset 0 -10px 24px -16px #000;
+}
+.module__head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 0.9rem;
+}
+.module__tag {
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  font-size: 0.7rem;
+  color: var(--sf-silk);
+}
+.module__sig {
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  color: #a89e8d;
+}
+
+/* ── perilla: gira con el valor del signal ── */
+.knob {
+  display: grid;
+  place-items: center;
+  margin-bottom: 0.9rem;
+}
+.knob__dial {
+  position: relative;
+  width: 84px;
+  height: 84px;
+  border-radius: 50%;
+  background: conic-gradient(from 180deg, #211e1a, #3a352d, #211e1a);
+  box-shadow: inset 0 0 0 6px #1b1815, 0 6px 14px -8px #000, inset 0 2px 4px #4c463b;
+  display: grid;
+  place-items: center;
+  transform: rotate(var(--rot, 0deg));
+  transition: transform var(--propagation-duration) var(--propagation-ease);
+}
+.knob__pointer {
+  position: absolute;
+  top: 8px;
+  width: 3px;
+  height: 24px;
+  border-radius: 2px;
+  background: var(--accent-source);
+  box-shadow: 0 0 8px var(--accent-source);
+}
+
+.fader__label {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.05em;
+  color: #b7ad9c;
+  margin-bottom: 0.35rem;
+}
+.fader {
+  width: 100%;
+  accent-color: var(--accent-source);
+  cursor: pointer;
+}
+.fader:focus-visible {
+  outline: 2px solid var(--accent-source);
+  outline-offset: 4px;
+  border-radius: 3px;
+}
+
+.src-line {
+  display: block;
+  margin-top: 0.9rem;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: #cdc6b6;
+}
+.src-line b {
+  color: var(--accent-source);
+  font-weight: 600;
+}
+
+/* ── jacks IN/OUT ── */
+.jack {
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 40% 35%, #5a5348, #161310 60%);
+  box-shadow: inset 0 0 0 2px #0c0a08, 0 0 0 3px #3a352d;
+  z-index: 2;
+}
+.jack--out {
+  top: 50%;
+  right: -8px;
+  transform: translateY(-50%);
+}
+.jack--in {
+  top: 50%;
+  left: -8px;
+  transform: translateY(-50%);
+}
+
+/* ── cable (firma) ── */
+.cable {
+  flex: 1 1 auto;
+  height: 120px;
+  min-width: 90px;
+}
+.pulse {
+  filter: drop-shadow(0 0 6px #ffd98a);
+}
+
+/* ── medidor de salida ── */
+.meter {
+  position: relative;
+  flex: 0 0 auto;
+  width: 150px;
+  padding: 1.1rem 1rem;
+  border-radius: 10px;
+  background: linear-gradient(180deg, #34302a, #2a2621);
+  box-shadow: inset 0 1px 0 #4a443a;
+  display: grid;
+  justify-items: center;
+  gap: 0.75rem;
+}
+.led {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 40% 35%, #ffb3a8, var(--sf-led));
+  opacity: var(--glow, 0.5);
+  box-shadow: 0 0 calc(6px + var(--glow, 0.5) * 22px) var(--sf-led);
+  transition:
+    opacity var(--propagation-duration) var(--propagation-ease),
+    box-shadow var(--propagation-duration) var(--propagation-ease);
+}
+.meter__read {
+  display: grid;
+  justify-items: center;
+  gap: 0.15rem;
+}
+.meter__label {
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.2em;
+  color: #8f8678;
+}
+/* el OUT es el resultado: gana jerarquía sobre el code-line de la fuente */
+.meter__value {
+  font-family: var(--font-mono);
+  font-size: 1.35rem;
+  color: #ffc164;
+  font-weight: 600;
+  text-shadow: 0 0 12px rgba(235, 155, 60, 0.35);
+}
+
+/* ── responsive: el banco se apila, el cable queda corto y vertical ── */
+@media (max-width: 640px) {
+  .patch {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+  .module,
+  .meter {
+    width: 100%;
+    max-width: 280px;
+  }
+  .cable {
+    width: 80px;
+    height: 70px;
+  }
+  .jack--out { right: 50%; top: auto; bottom: -8px; transform: translateX(50%); }
+  .jack--in { left: 50%; top: -8px; transform: translateX(-50%); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pulse { display: none; }
+  .knob__dial,
+  .led { transition: none; }
+}

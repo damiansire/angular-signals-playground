@@ -1,11 +1,11 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
 import {
   NavigationEnd,
   NavigationStart,
   Router,
   RouterModule,
 } from '@angular/router';
-import { CommonModule } from '@angular/common';
+
 import { CustomRoute, menuItems } from '../../app.routes';
 import { MenuOptionComponent } from './components/menu-option/menu-option.component';
 import { MenuSubLevelOptionComponent } from './components/menu-sub-level-option/menu-sub-level-option.component';
@@ -103,17 +103,16 @@ class HandlerLevelStatus {
 }
 
 @Component({
-  selector: 'app-sidebar-menu',
-  standalone: true,
-  imports: [
-    CommonModule,
+    selector: 'app-sidebar-menu',
+    imports: [
     RouterModule,
     MenuOptionComponent,
     MenuSubLevelOptionComponent,
-    MenuSeparatorComponent,
-  ],
-  templateUrl: './sidebar-menu.component.html',
-  styleUrl: './sidebar-menu.component.css',
+    MenuSeparatorComponent
+],
+    templateUrl: './sidebar-menu.component.html',
+    changeDetection: ChangeDetectionStrategy.Eager,
+    styleUrl: './sidebar-menu.component.css'
 })
 export class SidebarMenuComponent {
   private router = inject(Router);
@@ -125,7 +124,10 @@ export class SidebarMenuComponent {
       if (event instanceof NavigationStart) {
         const currentUrl = this.router.url;
         const routePart = currentUrl.split('/');
-        this.levelHandler.leaveLevel(routePart[3], routePart[5]);
+        // Solo el árbol de niveles tiene estado; ignorar rutas externas (ej. /lab)
+        if (routePart[1] === 'signals') {
+          this.levelHandler.leaveLevel(routePart[3], routePart[5]);
+        }
       }
       if (event instanceof NavigationEnd) {
         let finalUrl = event.url;
@@ -133,7 +135,9 @@ export class SidebarMenuComponent {
           finalUrl = event.urlAfterRedirects;
         }
         const routePart = finalUrl.split('/');
-        this.levelHandler.setCurrentLevel(routePart[3], routePart[5]);
+        if (routePart[1] === 'signals') {
+          this.levelHandler.setCurrentLevel(routePart[3], routePart[5]);
+        }
       }
     });
   }

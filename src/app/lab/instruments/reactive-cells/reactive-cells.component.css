@@ -1,0 +1,253 @@
+:host {
+  display: block;
+  max-width: 620px;
+  margin-inline: auto;
+}
+
+/* ── ficha de PAPEL apoyada sobre el banco grafito (intencional) ── */
+.sheet {
+  background: var(--cell-paper);
+  color: #2c2a24;
+  border-radius: 8px;
+  padding: 0.9rem 1rem 1.1rem;
+  /* sombra de papel levantado sobre el panel oscuro */
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.6) inset,
+    0 14px 30px -16px rgba(0, 0, 0, 0.7),
+    0 2px 6px -2px rgba(0, 0, 0, 0.5);
+  font-family: var(--font-display);
+}
+
+/* ── barra de fórmula ── */
+.formula-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  padding-bottom: 0.7rem;
+  border-bottom: 1px solid #e3e0d7;
+  margin-bottom: 0.7rem;
+}
+.formula-bar__fx {
+  font-family: var(--font-editorial);
+  font-style: italic;
+  font-size: 0.95rem;
+  color: #8c8678;
+  width: 1.4rem;
+  text-align: center;
+  border-right: 1px solid #d9d5cb;
+}
+.formula-bar__text {
+  flex: 1 1 auto;
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  color: var(--cell-derived-ink);
+}
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.06em;
+  color: var(--cell-derived-ink);
+  background: var(--cell-derived-bg);
+  border: 1px solid var(--cell-derived-border);
+  border-radius: 999px;
+  padding: 0.18rem 0.55rem;
+}
+.badge__pip {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--accent-derived);
+  box-shadow: 0 0 0 0 var(--accent-derived);
+  animation: pip 2.4s var(--propagation-ease) infinite;
+}
+@keyframes pip {
+  0%, 70%, 100% { box-shadow: 0 0 0 0 rgba(98, 196, 173, 0.55); }
+  85% { box-shadow: 0 0 0 5px rgba(98, 196, 173, 0); }
+}
+
+/* ── grilla ── */
+.grid {
+  display: grid;
+  gap: 2px;
+}
+.row {
+  display: grid;
+  grid-template-columns: 1.8rem minmax(0, 1.55fr) minmax(5.2rem, 1.05fr) minmax(4.2rem, 0.95fr);
+  gap: 2px;
+}
+.row--head .cell,
+.row .cell--rowhead {
+  background: #ece9e1;
+  color: #8c8678;
+}
+
+.cell {
+  display: flex;
+  align-items: center;
+  padding: 0.34rem 0.55rem;
+  font-size: 0.78rem;
+  background: #fcfbf8;
+  border-radius: 3px;
+  min-height: 1.95rem;
+}
+.cell--corner { background: transparent; }
+.cell--colhead,
+.cell--rowhead {
+  justify-content: center;
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
+.cell--label { color: #4a463c; }
+.cell--label-total { font-weight: 700; color: #2c2a24; }
+.cell--unit {
+  justify-content: center;
+  font-family: var(--font-mono);
+  font-size: 0.64rem;
+  color: #9a9382;
+  background: transparent;
+}
+
+/* ── celda FUENTE (signal, ámbar) ── */
+.cell--src {
+  background: var(--cell-source-bg);
+  box-shadow: inset 0 0 0 1px #f0dcb8;
+  padding: 0;
+}
+.src-input {
+  width: 100%;
+  height: 100%;
+  min-height: 1.95rem;
+  border: 0;
+  background: transparent;
+  padding: 0 0.55rem;
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--cell-source-ink);
+  text-align: right;
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+.src-input::-webkit-outer-spin-button,
+.src-input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+.src-input:focus-visible {
+  outline: 2px solid var(--accent-source);
+  outline-offset: -2px;
+  border-radius: 3px;
+  background: #fff;
+}
+
+/* separador fuente → derivado */
+.row--rule {
+  grid-template-columns: 1fr;
+  margin: 0.18rem 0;
+}
+.row--rule span {
+  display: block;
+  height: 1px;
+  background: repeating-linear-gradient(90deg, #d7d3c8 0 6px, transparent 6px 11px);
+}
+
+/* ── celda DERIVADA (computed, jade) — FIRMA: destello en cascada ── */
+.cell--derived {
+  justify-content: flex-end;
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--cell-derived-ink);
+  background: var(--cell-derived-bg);
+  box-shadow: inset 0 0 0 1px var(--cell-derived-border);
+  /* delay escalonado por profundidad: la onda recorre la cadena */
+  animation: cascade var(--propagation-duration) var(--propagation-ease) both;
+  animation-delay: calc(var(--depth, 0) * (var(--propagation-duration) * 0.55));
+}
+.cell--derived-total {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #0b6448;
+  background: #dff5ec;
+  box-shadow: inset 0 0 0 1.5px var(--accent-derived);
+}
+.cell--formula {
+  justify-content: flex-start;
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  color: #8c9b8f;
+  background: transparent;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* el destello: fondo jade que se enciende y baja, valor que asoma */
+@keyframes cascade {
+  0% {
+    background: var(--accent-derived);
+    color: #06392a;
+    box-shadow: inset 0 0 0 1px var(--accent-derived), 0 0 0 2px rgba(98, 196, 173, 0.4);
+    transform: translateY(-1px);
+  }
+  100% {
+    background: var(--cell-derived-bg);
+    transform: translateY(0);
+  }
+}
+
+/* ── lectura final ── */
+.readout {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin: 0.85rem 0 0;
+  padding-top: 0.7rem;
+  border-top: 1px solid #e3e0d7;
+}
+.readout code {
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  color: #7c7668;
+}
+.readout__value {
+  font-family: var(--font-mono);
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--cell-derived-ink);
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ── responsive: oculto la columna de fórmula en pantallas chicas ── */
+@media (max-width: 520px) {
+  .row {
+    grid-template-columns: 1.6rem minmax(0, 1.5fr) minmax(4.6rem, 1fr);
+  }
+  .cell--unit,
+  .cell--formula {
+    display: none;
+  }
+  .formula-bar__text { font-size: 0.74rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cell--derived { animation: none; }
+  .badge__pip { animation: none; }
+}

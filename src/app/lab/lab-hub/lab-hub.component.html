@@ -1,0 +1,29 @@
+<div class="lab">
+  <span class="screw screw--tl"></span>
+  <span class="screw screw--tr"></span>
+  <span class="screw screw--bl"></span>
+  <span class="screw screw--br"></span>
+
+  <header class="lab__head">
+    <span class="lab__kicker">SIGNALS LAB · EL BANCO</span>
+    <h1 class="lab__title">Cuatro instrumentos, una mesa</h1>
+    <p class="lab__lede">
+      Cada concepto de Angular Signals se cuenta con el instrumento que mejor lo
+      encarna. Elegí uno.
+    </p>
+  </header>
+
+  <ul class="rack">
+    @for (i of instruments; track i.no) {
+      <li class="plate" [attr.data-accent]="i.accent">
+        <a class="plate__link" [routerLink]="i.link">
+          <span class="plate__no">INSTR·{{ i.no }}</span>
+          <span class="plate__name">{{ i.name }}</span>
+          <code class="plate__concept">{{ i.concept }}</code>
+          <span class="plate__blurb">{{ i.blurb }}</span>
+          <span class="plate__go" aria-hidden="true">→</span>
+        </a>
+      </li>
+    }
+  </ul>
+</div>

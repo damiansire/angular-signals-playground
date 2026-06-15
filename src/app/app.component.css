@@ -1,0 +1,22 @@
+/* Skip-link de accesibilidad: oculto hasta recibir foco por teclado.
+   Permite saltar el sidebar (~12 focusables) e ir directo al contenido. */
+.skip-link {
+  position: absolute;
+  left: 8px;
+  top: -48px;
+  z-index: 50;
+  padding: 0.5rem 0.9rem;
+  border-radius: 6px;
+  background: var(--accent-source, #eb9b3c);
+  color: #1d1a14;
+  font-family: var(--font-display, system-ui, sans-serif);
+  font-weight: 600;
+  font-size: 0.85rem;
+  text-decoration: none;
+  transition: top 150ms ease;
+}
+.skip-link:focus {
+  top: 8px;
+  outline: 2px solid #1d1a14;
+  outline-offset: 2px;
+}

@@ -1,0 +1,65 @@
+<app-bench-frame instrument="01" name="Patchbay" concept="signal()" accent="source">
+  <div class="patch">
+    <!-- ── MÓDULO FUENTE: la perilla ES el signal ── -->
+    <div class="module">
+      <div class="module__head">
+        <span class="module__tag">SOURCE</span>
+        <span class="module__sig">signal&lt;number&gt;</span>
+      </div>
+
+      <div class="knob" [style.--rot.deg]="rotation()">
+        <div class="knob__dial"><span class="knob__pointer"></span></div>
+      </div>
+
+      <label class="fader__label" for="cutoff">cutoff</label>
+      <input
+        id="cutoff"
+        class="fader"
+        type="range"
+        [min]="min"
+        [max]="max"
+        step="1"
+        [value]="cutoff()"
+        (input)="setCutoff($any($event.target).value)"
+        aria-label="Frecuencia de corte del filtro, en hercios"
+      />
+
+      <!-- el valor en vivo embebido en la línea de código -->
+      <code class="src-line">cutoff = signal(<b>{{ cutoff() }}</b>)</code>
+
+      <span class="jack jack--out" aria-hidden="true"></span>
+    </div>
+
+    <!-- ── CABLE (firma): transporta el valor con un pulso en cada cambio ── -->
+    <svg class="cable" viewBox="0 0 360 120" preserveAspectRatio="none" aria-hidden="true">
+      <defs>
+        <linearGradient id="cableStroke" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0" stop-color="var(--sf-cable-rust)" />
+          <stop offset="1" stop-color="var(--sf-cable-mustard)" />
+        </linearGradient>
+      </defs>
+      <!-- sombra del cable -->
+      <path d="M6,64 C120,12 240,116 354,64" fill="none" stroke="#16130f" stroke-width="10" stroke-linecap="round" opacity="0.5" />
+      <!-- cable -->
+      <path id="cablePath" d="M6,60 C120,8 240,112 354,60" fill="none" stroke="url(#cableStroke)" stroke-width="6" stroke-linecap="round" />
+      <!-- pulso: se recrea (y reinicia) cuando cambia la key -->
+      @for (k of pulses(); track k) {
+        <circle class="pulse" r="6" fill="#fff8e8">
+          <animateMotion dur="0.42s" fill="freeze" calcMode="spline" keyTimes="0;1" keySplines="0.4 0.7 0.3 1">
+            <mpath href="#cablePath" />
+          </animateMotion>
+        </circle>
+      }
+    </svg>
+
+    <!-- ── SALIDA: reacciona al valor que llegó por el cable ── -->
+    <div class="meter">
+      <span class="jack jack--in" aria-hidden="true"></span>
+      <div class="led" [style.--glow]="glow()"></div>
+      <div class="meter__read">
+        <span class="meter__label">OUT</span>
+        <output class="meter__value">{{ label() }}</output>
+      </div>
+    </div>
+  </div>
+</app-bench-frame>

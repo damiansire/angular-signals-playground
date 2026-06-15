@@ -1,0 +1,117 @@
+<app-bench-frame instrument="04" name="Manual" concept="the graph" accent="derived">
+  <article class="sheet" [style.--flow]="flow()">
+    <header class="masthead">
+      <p class="kicker">§ 04 · El grafo</p>
+      <ol class="progress" aria-label="Progreso de la lección: 1 de 3">
+        <li class="progress__dot is-on" aria-current="step"></li>
+        <li class="progress__dot"></li>
+        <li class="progress__dot"></li>
+      </ol>
+    </header>
+
+    <h1 class="display">El diamante de<br />dependencias</h1>
+
+    <div class="lede">
+      <p>
+        <span class="dropcap">U</span>na fuente alimenta dos derivados, y un tercero los
+        vuelve a juntar. El miedo razonable: que ese tercero se asome cuando un brazo ya
+        cambió y el otro no &mdash; un valor a medio cocer, un <em>glitch</em>. Movés la
+        fuente y el grafo te muestra que eso nunca pasa.
+      </p>
+    </div>
+
+    <div class="body">
+      <p>
+        Tomemos <code class="inl">n</code> como fuente. De ella cuelgan dos
+        <code class="inl">computed</code>: el cuadrado
+        <span class="live live--arm">{{ square() }}</span> y la mitad
+        <span class="live live--arm">{{ half() }}</span>. Un tercer computed,
+        <code class="inl">report</code>, los suma. La pregunta del gotcha no es cuánto
+        da, sino <em>cuántas veces</em> se calcula.
+      </p>
+
+      <p>
+        Con <code class="inl">n&nbsp;=&nbsp;{{ n() }}</code>, el informe vale
+        <span class="live live--vertex">{{ report() }}</span>, y lo hace en una sola
+        pasada consistente: Signals no evalúa <code class="inl">report</code> hasta que
+        ambos brazos quedaron al día. No hay estado intermedio observable. Por eso el
+        contador de evaluaciones avanzó a
+        <span class="live live--count">{{ evals() }}</span> &mdash; uno por cada cambio
+        de la fuente, jamás dos. Esa es la garantía <em>glitch-free</em>.
+      </p>
+
+      <div class="control">
+        <label class="control__label" for="manual-n">fuente · n</label>
+        <input
+          id="manual-n"
+          class="control__range"
+          type="range"
+          [min]="min"
+          [max]="max"
+          step="1"
+          [value]="n()"
+          (input)="setN($any($event.target).value)"
+          aria-label="Valor de la fuente n del diamante de dependencias"
+        />
+        <output class="control__value">{{ n() }}</output>
+      </div>
+
+      <!-- ── DIAGRAMA DEL GRAFO: la propagación se resalta con el flujo ── -->
+      <figure class="graph">
+        <svg viewBox="0 0 320 200" role="img"
+             aria-label="Grafo del diamante: n se ramifica en square y half, y ambos convergen en report.">
+          <defs>
+            <marker id="head" viewBox="0 0 8 8" refX="6" refY="4" markerWidth="6" markerHeight="6" orient="auto">
+              <path d="M0,0 L8,4 L0,8 Z" fill="var(--manual-ink)" opacity="0.55" />
+            </marker>
+          </defs>
+
+          <!-- aristas (se "encienden" con el flujo de la fuente) -->
+          <g class="edges">
+            <path class="edge" d="M70,100 C110,100 110,52 158,52" marker-end="url(#head)" />
+            <path class="edge" d="M70,100 C110,100 110,148 158,148" marker-end="url(#head)" />
+            <path class="edge" d="M214,52 C252,52 210,100 250,100" marker-end="url(#head)" />
+            <path class="edge" d="M214,148 C252,148 210,100 250,100" marker-end="url(#head)" />
+          </g>
+
+          <!-- nodo fuente (ámbar) -->
+          <g class="node node--source">
+            <circle cx="44" cy="100" r="26" />
+            <text x="44" y="96">n</text>
+            <text class="node__val" x="44" y="110">{{ n() }}</text>
+          </g>
+
+          <!-- brazos (jade) -->
+          <g class="node node--arm">
+            <rect x="158" y="32" width="56" height="40" rx="9" />
+            <text x="186" y="49">square</text>
+            <text class="node__val" x="186" y="64">{{ square() }}</text>
+          </g>
+          <g class="node node--arm">
+            <rect x="158" y="128" width="56" height="40" rx="9" />
+            <text x="186" y="145">half</text>
+            <text class="node__val" x="186" y="160">{{ half() }}</text>
+          </g>
+
+          <!-- vértice (jade, más marcado) -->
+          <g class="node node--vertex">
+            <rect x="250" y="78" width="58" height="44" rx="10" />
+            <text x="279" y="97">report</text>
+            <text class="node__val" x="279" y="113">{{ report() }}</text>
+          </g>
+        </svg>
+        <figcaption>n se ramifica en dos brazos y converge en report: un diamante.</figcaption>
+      </figure>
+    </div>
+
+    <!-- ── notas al margen: el código del modelo mental ── -->
+    <aside class="margin" aria-label="Definiciones del grafo">
+      <p class="margin__note">El vértice es <em>read-only</em>: a <code>report</code> nunca le asignás un valor, lo derivás.</p>
+      <pre class="margin__code"><code><span class="ln"><b class="src">n</b>      = signal({{ n() }});</span>
+<span class="ln"><b class="der">square</b> = computed(() =&gt; n() * n());</span>
+<span class="ln"><b class="der">half</b>   = computed(() =&gt; n() / 2);</span>
+<span class="ln"><b class="der">report</b> = computed(() =&gt; square() + half());</span></code></pre>
+      <p class="margin__note margin__note--reads">recálculos de <code>report</code>: <b>{{ evals() }}</b></p>
+    </aside>
+  </article>
+</app-bench-frame>
