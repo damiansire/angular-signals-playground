@@ -1,0 +1,14 @@
+<app-title title="Funciones de igualdad" />
+
+<div class="mx-auto max-w-2xl px-6 py-4 text-gray-700">
+  <p class="text-lg mb-4">
+    Un signal solo <strong>notifica</strong> a sus consumidores cuando su valor
+    "cambia". ¿Y cómo decide si cambió? Por defecto usa
+    <code class="font-mono">Object.is</code> (igualdad por referencia). Podés
+    cambiar esa regla pasando una función <code class="font-mono">equal</code>.
+  </p>
+  <ul class="list-disc list-inside space-y-1 text-gray-600">
+    <li><strong>1:</strong> igualdad por defecto — un objeto nuevo siempre notifica, aunque su contenido sea idéntico.</li>
+    <li><strong>2:</strong> una función <code class="font-mono">equal</code> custom — comparar por valor para evitar notificaciones de más.</li>
+  </ul>
+</div>

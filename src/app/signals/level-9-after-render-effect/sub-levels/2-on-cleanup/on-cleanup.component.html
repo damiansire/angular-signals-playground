@@ -1,0 +1,21 @@
+<app-column-and-code-layout
+  title="effect((onCleanup) => …)"
+  [codeLines]="lines"
+  concept="onCleanup() limpia un effect antes de que vuelva a correr o cuando el componente se destruye: así no quedan leaks."
+  action="Prendé y apagá el cronómetro varias veces."
+  observe="Al apagar, onCleanup hace clearInterval: el tick se detiene y se cuenta una limpieza."
+>
+  <section class="w-80 p-5 rounded-lg shadow-md bg-white text-center">
+    <p class="text-5xl font-bold tabular-nums text-violet-700 mb-1">{{ ticks() }}</p>
+    <p class="text-xs text-gray-400 mb-5">ticks · limpiezas: {{ cleanups() }}</p>
+
+    <button
+      type="button"
+      class="w-full text-white text-sm font-bold py-2.5 px-4 rounded"
+      [class]="running() ? 'bg-red-600 hover:bg-red-700' : 'bg-violet-600 hover:bg-violet-700'"
+      (click)="toggle()"
+    >
+      {{ running() ? "Apagar (dispara onCleanup)" : "Encender" }}
+    </button>
+  </section>
+</app-column-and-code-layout>

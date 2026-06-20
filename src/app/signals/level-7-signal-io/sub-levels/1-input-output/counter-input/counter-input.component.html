@@ -1,0 +1,11 @@
+<div class="inline-flex flex-col items-center gap-2 p-4 rounded-lg bg-gray-800 text-white">
+  <span class="text-xs uppercase tracking-wide text-gray-400">{{ label() }}</span>
+  <span class="text-3xl font-bold tabular-nums">{{ count() }}</span>
+  <button
+    type="button"
+    class="bg-amber-500 hover:bg-amber-600 text-gray-900 font-bold py-1.5 px-4 rounded"
+    (click)="increment()"
+  >
+    + {{ step() }}
+  </button>
+</div>

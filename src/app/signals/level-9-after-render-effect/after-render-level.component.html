@@ -1,0 +1,15 @@
+<app-title title="afterRenderEffect y onCleanup" />
+
+<div class="mx-auto max-w-2xl px-6 py-4 text-gray-700">
+  <p class="text-lg mb-4">
+    Dos piezas que cierran el tema de los effects:
+    <code class="font-mono">afterRenderEffect()</code> corre <strong>después</strong>
+    de que Angular renderizó (ideal para leer/medir el DOM), y
+    <code class="font-mono">onCleanup()</code> limpia un effect antes de que vuelva
+    a correr o cuando el componente se destruye.
+  </p>
+  <ul class="list-disc list-inside space-y-1 text-gray-600">
+    <li><strong>1:</strong> <code class="font-mono">afterRenderEffect()</code> — medir el ancho real de un texto ya pintado.</li>
+    <li><strong>2:</strong> <code class="font-mono">effect((onCleanup) =&gt; …)</code> — un intervalo que se limpia solo (sin leaks).</li>
+  </ul>
+</div>

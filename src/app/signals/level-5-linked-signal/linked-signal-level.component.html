@@ -1,0 +1,15 @@
+<app-title title="linkedSignal" />
+
+<div class="mx-auto max-w-2xl px-6 py-4 text-gray-700">
+  <p class="text-lg mb-4">
+    Un <code class="font-mono text-purple-700">linkedSignal()</code> es estado
+    <strong>editable</strong> (como un <code class="font-mono">signal</code>) que además
+    se <strong>recalcula</strong> cuando cambia la fuente de la que depende (como un
+    <code class="font-mono">computed</code>). Es el punto medio que faltaba.
+  </p>
+  <p class="mb-2">El caso típico: una selección que debe reiniciarse —o preservarse— cuando cambia la lista de opciones.</p>
+  <ul class="list-disc list-inside space-y-1 text-gray-600">
+    <li><strong>Sub-nivel 1:</strong> reinicio automático al cambiar la fuente.</li>
+    <li><strong>Sub-nivel 2:</strong> preservar la selección si sigue siendo válida (con <code class="font-mono">source</code> + <code class="font-mono">computation</code>).</li>
+  </ul>
+</div>

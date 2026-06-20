@@ -1,0 +1,50 @@
+<app-column-and-code-layout
+  title="viewChild() como signal"
+  [codeLines]="lines"
+  concept="viewChild() entrega un elemento de la vista como signal."
+  action="Escribí y usá Enfocar / Limpiar."
+  observe="El componente opera el input a través del signal de la query."
+>
+  <section class="w-80 p-5 rounded-lg shadow-md bg-white">
+    <p class="text-sm text-gray-500 mb-4">
+      <code class="font-mono">viewChild()</code> entrega el elemento como signal.
+      Escribí algo y usá los botones para operarlo desde el componente.
+    </p>
+
+    <label for="nameField" class="block text-xs font-semibold uppercase tracking-wide text-gray-400 mb-1">
+      Campo referenciado
+    </label>
+    <input
+      #nameField
+      id="nameField"
+      type="text"
+      class="w-full border border-gray-300 rounded px-3 py-2 mb-4 focus:outline-none focus:ring-2 focus:ring-teal-400"
+      placeholder="Escribí tu nombre…"
+      (input)="onInput($any($event.target).value)"
+    />
+
+    <p class="text-sm text-gray-600 mb-4">
+      Texto leído: <strong class="text-teal-700">{{ typed() || '—' }}</strong>
+      <br />
+      ¿Query resuelta?
+      <strong class="text-teal-700">{{ resolved() ? 'sí' : 'no' }}</strong>
+    </p>
+
+    <div class="flex gap-2">
+      <button
+        type="button"
+        class="flex-1 bg-teal-600 hover:bg-teal-700 text-white text-sm font-bold py-2 px-3 rounded"
+        (click)="focusField()"
+      >
+        Enfocar
+      </button>
+      <button
+        type="button"
+        class="flex-1 bg-gray-800 hover:bg-gray-900 text-white text-sm font-bold py-2 px-3 rounded"
+        (click)="clearField()"
+      >
+        Limpiar
+      </button>
+    </div>
+  </section>
+</app-column-and-code-layout>

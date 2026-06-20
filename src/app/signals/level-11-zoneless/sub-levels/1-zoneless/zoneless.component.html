@@ -1,0 +1,25 @@
+<app-column-and-code-layout
+  title="Change detection sin Zone.js"
+  [codeLines]="lines"
+  concept="Con signals + OnPush, Angular se entera de los cambios sin Zone.js: se activa con provideZonelessChangeDetection()."
+  action="Incrementá el contador."
+  observe="La vista se actualiza porque el signal avisa a Angular — no porque Zone.js parchee setInterval/eventos."
+>
+  <section class="w-80 p-5 rounded-lg shadow-md bg-white text-center">
+    <p class="text-5xl font-bold tabular-nums text-indigo-700">{{ count() }}</p>
+    <p class="text-sm text-gray-500 mb-5">doble (computed): {{ double() }}</p>
+
+    <button
+      type="button"
+      class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-6 rounded"
+      (click)="increment()"
+    >
+      Incrementar
+    </button>
+
+    <p class="text-xs text-gray-400 mt-5">
+      Esta app ya es OnPush + signals en todos sus componentes: está lista para
+      correr zoneless.
+    </p>
+  </section>
+</app-column-and-code-layout>

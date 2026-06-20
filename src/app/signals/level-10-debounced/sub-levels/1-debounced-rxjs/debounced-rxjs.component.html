@@ -1,0 +1,28 @@
+<app-column-and-code-layout
+  title="Debounce con RxJS"
+  [codeLines]="lines"
+  concept="toObservable lleva el signal a RxJS, debounceTime espera, y toSignal lo trae de vuelta."
+  action="Escribí rápido en el buscador."
+  observe="'Inmediato' cambia con cada tecla; 'Debounced' recién se actualiza 400ms después de que parás."
+>
+  <section class="w-80 p-5 rounded-lg shadow-md bg-white">
+    <label for="q1" class="block text-xs font-semibold uppercase tracking-wide text-gray-400 mb-1">
+      Buscar
+    </label>
+    <input
+      id="q1"
+      type="text"
+      class="w-full border border-gray-300 rounded px-3 py-2 mb-5 focus:outline-none focus:ring-2 focus:ring-rose-400"
+      [value]="query()"
+      (input)="setQuery($any($event.target).value)"
+      placeholder="Escribí algo…"
+    />
+
+    <p class="text-sm text-gray-600 mb-1">
+      Inmediato: <strong class="text-gray-800">{{ query() || "—" }}</strong>
+    </p>
+    <p class="text-sm text-gray-600">
+      Debounced (400ms): <strong class="text-rose-700">{{ debounced() || "—" }}</strong>
+    </p>
+  </section>
+</app-column-and-code-layout>

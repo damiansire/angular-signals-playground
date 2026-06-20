@@ -1,0 +1,33 @@
+<app-column-and-code-layout
+  title="input.required() y transform"
+  [codeLines]="lines"
+  concept="input.required() obliga a pasar el valor (error en build si falta); transform convierte el atributo (string) al tipo correcto."
+  action="Sumá al contador y alterná el resaltado."
+  observe="count llega como número (numberAttribute) y highlight como booleano (booleanAttribute)."
+>
+  <section class="w-80 p-5 rounded-lg shadow-md bg-white flex flex-col items-center gap-5">
+    <app-badge label="Mensajes" [count]="count()" [highlight]="highlight()" />
+
+    <div class="flex gap-2">
+      <button
+        type="button"
+        class="bg-amber-500 hover:bg-amber-600 text-gray-900 text-sm font-bold py-2 px-4 rounded"
+        (click)="more()"
+      >
+        + 1
+      </button>
+      <button
+        type="button"
+        class="bg-gray-800 hover:bg-gray-900 text-white text-sm font-bold py-2 px-4 rounded"
+        (click)="toggle()"
+      >
+        Resaltar
+      </button>
+    </div>
+
+    <p class="text-xs text-gray-400 text-center">
+      Si omitís <code class="font-mono">label</code>, el proyecto no compila:
+      eso es <code class="font-mono">input.required()</code>.
+    </p>
+  </section>
+</app-column-and-code-layout>

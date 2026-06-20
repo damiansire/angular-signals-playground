@@ -1,0 +1,59 @@
+<app-column-and-code-layout
+  title="linkedSignal: reinicio con la fuente"
+  [codeLines]="lines"
+  concept="linkedSignal() es estado editable que se reinicia cuando cambia su fuente."
+  action="Elegí una opción y después cambiá la lista."
+  observe="Tu selección se reinicia a la primera opción de la nueva lista."
+>
+  <section class="w-80 p-5 rounded-lg shadow-md bg-white">
+    <p class="text-sm text-gray-500 mb-4">
+      Elegí un método de envío y luego cambiá la lista: la selección se
+      <strong>reinicia</strong> a la primera opción.
+    </p>
+
+    <p class="text-xs font-semibold uppercase tracking-wide text-gray-400 mb-2">
+      Métodos disponibles
+    </p>
+    <div class="flex flex-wrap gap-2 mb-5">
+      @for (option of shippingOptions(); track option) {
+      <button
+        type="button"
+        class="px-3 py-1.5 rounded-full border text-sm font-medium transition-colors"
+        [class]="
+          option === selectedOption()
+            ? 'bg-purple-600 border-purple-600 text-white'
+            : 'bg-white border-gray-300 text-gray-700 hover:border-purple-400'
+        "
+        (click)="select(option)"
+      >
+        {{ option }}
+      </button>
+      }
+    </div>
+
+    <p class="text-lg mb-5">
+      Seleccionado:
+      <strong class="text-purple-700">{{ selectedOption() }}</strong>
+    </p>
+
+    <p class="text-xs font-semibold uppercase tracking-wide text-gray-400 mb-2">
+      Cambiar la fuente
+    </p>
+    <div class="flex gap-2">
+      <button
+        type="button"
+        class="flex-1 bg-gray-800 hover:bg-gray-900 text-white text-sm font-bold py-2 px-3 rounded"
+        (click)="useDomestic()"
+      >
+        Lista nacional
+      </button>
+      <button
+        type="button"
+        class="flex-1 bg-gray-800 hover:bg-gray-900 text-white text-sm font-bold py-2 px-3 rounded"
+        (click)="useInternational()"
+      >
+        Lista internacional
+      </button>
+    </div>
+  </section>
+</app-column-and-code-layout>

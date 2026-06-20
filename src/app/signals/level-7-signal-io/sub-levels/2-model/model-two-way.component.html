@@ -1,0 +1,29 @@
+<app-column-and-code-layout
+  title="model(): binding two-way con [(value)]"
+  [codeLines]="lines"
+  concept="model() habilita el binding two-way con [(value)]."
+  action="Tocá las estrellas o reseteá desde el padre."
+  observe="El valor se sincroniza hijo↔padre en ambos sentidos."
+>
+  <section class="w-80 p-5 rounded-lg shadow-md bg-white flex flex-col items-center gap-5">
+    <p class="text-sm text-gray-500 text-center">
+      Tocá las estrellas (cambia el hijo) o reseteá desde el padre: el valor está
+      <strong>sincronizado</strong> en ambos sentidos.
+    </p>
+
+    <app-rating [(value)]="rating" />
+
+    <p class="text-lg">
+      Valor en el padre:
+      <strong class="text-amber-600">{{ rating() }}</strong> / 5
+    </p>
+
+    <button
+      type="button"
+      class="bg-gray-800 hover:bg-gray-900 text-white text-sm font-bold py-2 px-4 rounded"
+      (click)="reset()"
+    >
+      Resetear desde el padre
+    </button>
+  </section>
+</app-column-and-code-layout>

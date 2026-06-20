@@ -1,0 +1,42 @@
+<app-column-and-code-layout
+  title="viewChildren() como signal"
+  [codeLines]="lines"
+  concept="viewChildren() entrega TODOS los elementos que matchean, como un signal que se actualiza solo."
+  action="Agregá y quitá nombres."
+  observe="El conteo de elementos queriados sigue a la lista sin que lo actualices a mano."
+>
+  <section class="w-80 p-5 rounded-lg shadow-md bg-white">
+    <div class="flex flex-wrap gap-2 mb-5 min-h-[3rem]">
+      @for (name of names(); track $index) {
+      <span
+        #chip
+        class="px-3 py-1 rounded-full bg-teal-100 text-teal-800 text-sm font-medium"
+      >
+        {{ name }}
+      </span>
+      }
+    </div>
+
+    <p class="text-lg mb-5">
+      Elementos queriados:
+      <strong class="text-teal-700 tabular-nums">{{ chipCount() }}</strong>
+    </p>
+
+    <div class="flex gap-2">
+      <button
+        type="button"
+        class="flex-1 bg-teal-600 hover:bg-teal-700 text-white text-sm font-bold py-2 px-3 rounded"
+        (click)="add()"
+      >
+        Agregar
+      </button>
+      <button
+        type="button"
+        class="flex-1 bg-gray-800 hover:bg-gray-900 text-white text-sm font-bold py-2 px-3 rounded"
+        (click)="removeLast()"
+      >
+        Quitar
+      </button>
+    </div>
+  </section>
+</app-column-and-code-layout>

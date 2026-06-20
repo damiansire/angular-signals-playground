@@ -1,0 +1,17 @@
+<app-title title="resource() — signals asincrónicos" />
+
+<div class="mx-auto max-w-2xl px-6 py-4 text-gray-700">
+  <p class="text-lg mb-4">
+    <code class="font-mono text-sky-700">resource()</code> conecta una petición
+    <strong>reactiva</strong> con una operación asincrónica y expone el resultado
+    vía signals: <code class="font-mono">value()</code>,
+    <code class="font-mono">status()</code>,
+    <code class="font-mono">error()</code> e
+    <code class="font-mono">isLoading()</code>. Cuando cambia la fuente, vuelve a
+    cargar (y cancela la carga anterior con <code class="font-mono">AbortSignal</code>).
+  </p>
+  <ul class="list-disc list-inside space-y-1 text-gray-600">
+    <li><strong>Sub-nivel 1:</strong> <code class="font-mono">resource()</code> con un loader basado en <code class="font-mono">Promise</code>.</li>
+    <li><strong>Sub-nivel 2:</strong> <code class="font-mono">rxResource()</code> con un <code class="font-mono">stream</code> de RxJS.</li>
+  </ul>
+</div>

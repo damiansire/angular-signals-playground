@@ -1,0 +1,37 @@
+<app-column-and-code-layout
+  title="contentChild() y contentChildren()"
+  [codeLines]="lines"
+  concept="Las queries de contenido buscan en lo que el PADRE proyecta dentro del hijo (ng-content), como signals."
+  action="Agregá y quitá tags."
+  observe="El hijo cuenta los elementos proyectados sin recibir nada por input: los descubre del contenido."
+>
+  <section class="w-80 p-5 rounded-lg shadow-md bg-white">
+    <app-tag-list>
+      @for (name of names(); track $index) {
+      <span
+        #tag
+        class="px-3 py-1 rounded-full bg-fuchsia-100 text-fuchsia-800 text-sm font-medium"
+      >
+        {{ name }}
+      </span>
+      }
+    </app-tag-list>
+
+    <div class="flex gap-2 mt-5">
+      <button
+        type="button"
+        class="flex-1 bg-fuchsia-600 hover:bg-fuchsia-700 text-white text-sm font-bold py-2 px-3 rounded"
+        (click)="add()"
+      >
+        Agregar
+      </button>
+      <button
+        type="button"
+        class="flex-1 bg-gray-800 hover:bg-gray-900 text-white text-sm font-bold py-2 px-3 rounded"
+        (click)="removeLast()"
+      >
+        Quitar
+      </button>
+    </div>
+  </section>
+</app-column-and-code-layout>

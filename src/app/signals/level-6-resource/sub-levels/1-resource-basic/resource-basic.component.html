@@ -1,0 +1,53 @@
+<app-column-and-code-layout
+  title="resource(): loader con Promise"
+  [codeLines]="lines"
+  concept="resource() conecta una petición reactiva con una carga async basada en Promise."
+  action="Elegí un usuario (el #4 no existe)."
+  observe="El estado pasa por loading → resolved, o error con el #4."
+>
+  <section class="w-80 p-5 rounded-lg shadow-md bg-white">
+    <p class="text-xs font-semibold uppercase tracking-wide text-gray-400 mb-2">
+      Elegí un usuario (el #4 no existe)
+    </p>
+    <div class="flex flex-wrap gap-2 mb-5">
+      @for (id of candidateIds; track id) {
+      <button
+        type="button"
+        class="w-10 h-10 rounded-full border text-sm font-bold transition-colors"
+        [class]="
+          id === userId()
+            ? 'bg-sky-600 border-sky-600 text-white'
+            : 'bg-white border-gray-300 text-gray-700 hover:border-sky-400'
+        "
+        (click)="setUser(id)"
+      >
+        {{ id }}
+      </button>
+      }
+    </div>
+
+    <div class="min-h-[6rem] rounded-md border border-gray-100 bg-gray-50 p-4 mb-4">
+      @if (userResource.isLoading()) {
+      <p class="text-sky-600 font-medium animate-pulse">⏳ Cargando…</p>
+      } @else if (userResource.error()) {
+      <p class="text-red-600 font-medium">⚠️ {{ userResource.error()?.message }}</p>
+      } @else if (userResource.hasValue()) {
+      <p class="text-lg font-bold text-gray-800">{{ userResource.value().name }}</p>
+      <p class="text-sm text-gray-500">{{ userResource.value().role }}</p>
+      }
+    </div>
+
+    <div class="flex items-center justify-between">
+      <span class="text-xs text-gray-400">
+        status: <strong class="text-gray-600">{{ userResource.status() }}</strong>
+      </span>
+      <button
+        type="button"
+        class="bg-gray-800 hover:bg-gray-900 text-white text-sm font-bold py-1.5 px-4 rounded"
+        (click)="reload()"
+      >
+        Recargar
+      </button>
+    </div>
+  </section>
+</app-column-and-code-layout>

@@ -1,0 +1,32 @@
+<app-column-and-code-layout
+  title="afterRenderEffect(): medir el DOM"
+  [codeLines]="lines"
+  concept="afterRenderEffect() corre después del render: es el lugar para leer o medir el DOM real."
+  action="Editá el texto del campo."
+  observe="El ancho en píxeles se mide del elemento ya pintado y se actualiza tras cada render."
+>
+  <section class="w-80 p-5 rounded-lg shadow-md bg-white">
+    <label for="txt" class="block text-xs font-semibold uppercase tracking-wide text-gray-400 mb-1">
+      Texto
+    </label>
+    <input
+      id="txt"
+      type="text"
+      class="w-full border border-gray-300 rounded px-3 py-2 mb-5 focus:outline-none focus:ring-2 focus:ring-cyan-400"
+      [value]="text()"
+      (input)="setText($any($event.target).value)"
+    />
+
+    <p class="text-xs text-gray-400 mb-1">Texto renderizado (medido):</p>
+    <span
+      #measured
+      class="inline-block text-xl font-bold text-cyan-700 border-b-2 border-cyan-200"
+      >{{ text() }}</span
+    >
+
+    <p class="mt-5 text-lg">
+      Ancho real:
+      <strong class="text-cyan-700 tabular-nums">{{ widthPx() }}px</strong>
+    </p>
+  </section>
+</app-column-and-code-layout>
