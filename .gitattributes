@@ -1,0 +1,13 @@
+# Normalizar todos los archivos de texto a LF en el repositorio.
+# Evita el "ruido" de fin de línea (CRLF/LF) entre Windows y Linux/macOS.
+* text=auto eol=lf
+
+# Binarios: nunca tocar.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.woff binary
+*.woff2 binary
+*.ttf binary
