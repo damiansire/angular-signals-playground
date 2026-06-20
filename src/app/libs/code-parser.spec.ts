@@ -348,6 +348,29 @@ describe('generateNodes', () => {
     expect(xs).toEqual([-100, 100]);
   });
 
+  it('spreads three siblings symmetrically around the center', () => {
+    const nodes = generateNodes('<ul><li></li><li></li><li></li></ul>');
+    const xs = nodes
+      .filter((n) => n.level === 2)
+      .map((n) => n.x)
+      .sort((a, b) => a - b);
+    // 3 hermanos: el del medio centrado, los otros a ±spacing
+    expect(xs).toEqual([-200, 0, 200]);
+  });
+
+  it('spreads five siblings symmetrically without overlapping at x = 0', () => {
+    const nodes = generateNodes(
+      '<ul><li></li><li></li><li></li><li></li><li></li></ul>',
+    );
+    const xs = nodes
+      .filter((n) => n.level === 2)
+      .map((n) => n.x)
+      .sort((a, b) => a - b);
+    expect(xs).toEqual([-400, -200, 0, 200, 400]);
+    // ninguna posición se repite (no se apilan en x = 0)
+    expect(new Set(xs).size).toBe(5);
+  });
+
   it('assigns y growing with the nesting depth', () => {
     const nodes = generateNodes('<div><p></p></div>');
     const div = nodes.find((n) => n.id === 'div-1')!;

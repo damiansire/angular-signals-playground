@@ -168,29 +168,18 @@ export function generateNodes(htmlCode: string): NodeTree[] {
   for (const node of nodes) {
     elementForLevel[node.level] = (elementForLevel[node.level] ?? 0) + 1;
   }
+
+  // Posicionamiento horizontal general: cada nivel se centra en x = 0 y sus
+  // hermanos se reparten de forma simétrica con un espaciado fijo. Funciona
+  // para cualquier cantidad de hermanos (1, 2, 3, 5, 6+), no solo 1/2/4.
+  const spacing = 200;
   const elementLevelIndex: number[] = [];
   for (const node of nodes) {
     elementLevelIndex[node.level] = (elementLevelIndex[node.level] ?? 0) + 1;
 
-    if (elementForLevel[node.level] === 1) {
-      /* un único elemento en el nivel: queda centrado (x = 0), sin offset */
-    } else if (elementForLevel[node.level] === 2) {
-      if (elementLevelIndex[node.level] === 1) {
-        node.x = -100;
-      } else {
-        node.x = 100;
-      }
-    } else if (elementForLevel[node.level] === 4) {
-      if (elementLevelIndex[node.level] === 1) {
-        node.x = -100 - 50;
-      } else if (elementLevelIndex[node.level] === 2) {
-        node.x = -100 + 50;
-      } else if (elementLevelIndex[node.level] === 3) {
-        node.x = 50;
-      } else if (elementLevelIndex[node.level] === 4) {
-        node.x = 100 + 50;
-      }
-    }
+    const indexInLevel = elementLevelIndex[node.level] - 1; // 0-based
+    const countInLevel = elementForLevel[node.level];
+    node.x = (indexInLevel - (countInLevel - 1) / 2) * spacing;
   }
 
   return nodes;
