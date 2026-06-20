@@ -5,7 +5,7 @@ export interface CodeLineElement {
   reservedWord?: boolean;
 }
 export interface CodeLine {
-  line?: CodeLineElement[] | any;
+  line?: CodeLineElement[] | string;
   elements?: CodeLineElement[];
   selected?: boolean;
   id?: string;

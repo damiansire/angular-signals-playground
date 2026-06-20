@@ -3,16 +3,18 @@ import { ComputedTrackerComponent } from '../../../../components/computed-tracke
 import { ClickInButton } from '../../../../components/component.interface';
 import { BasicFormComponent } from '../../../../components/basic-form/basic-form.component';
 import { ClickHistoryComponent } from '../../../../components/click-history/click-history.component';
+import { ConceptCardComponent } from '../../../../components-atom/concept-card/concept-card.component';
 
 @Component({
     selector: 'app-computed-signals-lazily-evaluated-memoized',
     templateUrl: './computed-signals-lazily-evaluated-memoized.component.html',
     styleUrl: './computed-signals-lazily-evaluated-memoized.component.css',
-    changeDetection: ChangeDetectionStrategy.Eager,
+    changeDetection: ChangeDetectionStrategy.OnPush,
     imports: [
         ComputedTrackerComponent,
         BasicFormComponent,
         ClickHistoryComponent,
+        ConceptCardComponent,
     ]
 })
 export class ComputedSignalsLazilyEvaluatedMemoizedComponent {

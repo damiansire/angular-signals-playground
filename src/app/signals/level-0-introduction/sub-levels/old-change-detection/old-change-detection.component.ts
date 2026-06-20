@@ -4,12 +4,13 @@ import {
   Link,
 } from '../../../../components-draw/components-draw.inferface';
 import { NodeTreeComponent } from '../../../../components-draw/node-tree/node-tree.component';
+import { ConceptCardComponent } from '../../../../components-atom/concept-card/concept-card.component';
 
 @Component({
     selector: 'app-old-change-detection',
-    imports: [NodeTreeComponent],
+    imports: [NodeTreeComponent, ConceptCardComponent],
     templateUrl: './old-change-detection.component.html',
-    changeDetection: ChangeDetectionStrategy.Eager,
+    changeDetection: ChangeDetectionStrategy.OnPush,
     styleUrl: './old-change-detection.component.css'
 })
 export class OldChangeDetectionComponent {
@@ -27,7 +28,7 @@ export class OldChangeDetectionComponent {
     }
   }
 
-  baseElement = <NodeTree[]>[
+  baseElement = [
     {
       name: 'main',
       x: 550,
@@ -70,7 +71,7 @@ export class OldChangeDetectionComponent {
       y: 500,
       color: this.step() > 2 ? '#90EE90' : '',
     },
-  ];
+  ] as NodeTree[];
 
   // Computed signal to derive node data based on 'step'
   data = computed<NodeTree[]>(() =>

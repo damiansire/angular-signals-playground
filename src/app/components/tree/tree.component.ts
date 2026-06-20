@@ -10,7 +10,7 @@ import { generateLinks, generateNodes } from '../../libs/code-parser';
     selector: 'app-tree',
     imports: [NodeTreeComponent],
     templateUrl: './tree.component.html',
-    changeDetection: ChangeDetectionStrategy.Eager,
+    changeDetection: ChangeDetectionStrategy.OnPush,
     styleUrl: './tree.component.css'
 })
 export class TreeComponent {

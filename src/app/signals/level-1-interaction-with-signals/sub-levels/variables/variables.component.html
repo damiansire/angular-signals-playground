@@ -1,12 +1,18 @@
+<app-concept-card
+  concept="Repaso pre-signals: en JS guardás un valor en una variable (var / const / let)."
+  action="Elegí un tipo y después un valor de ejemplo."
+  observe="El valor elegido aparece en las tres declaraciones (var/const/let difieren en alcance y reasignación)."
+/>
+
 <div class="mb-6">
-  <app-title title="Variables"></app-title>
+  <app-title title="Variables (repaso pre-signals)"></app-title>
 </div>
 <section class="flex flex-wrap justify-around mb-6">
   @for (type of dataTypes; track $index) {
 
   <app-variable-box-draw
     [variableName]="type"
-    (onClick)="selectType($event)"
+    (clicked)="selectType($event)"
   ></app-variable-box-draw>
 
   }
@@ -18,13 +24,13 @@
       <div class="mb-4">
         <app-variable-box-draw
           [variableName]="item"
-          (onClick)="selectExample($event)"
+          (clicked)="selectExample($event)"
         ></app-variable-box-draw>
       </div>
       }
     </div>
     <div class="content-center">
-      <app-code-legazy [lines]="lines"></app-code-legazy>
+      <app-code-legacy [lines]="lines"></app-code-legacy>
     </div>
   </div>
 </section>

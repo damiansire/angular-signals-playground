@@ -1,4 +1,4 @@
-import { Component, Input, Signal, signal, ChangeDetectionStrategy } from '@angular/core';
+import { Component, input, Signal, signal, ChangeDetectionStrategy } from '@angular/core';
 import { HistoryElement } from '../component.interface';
 
 
@@ -6,13 +6,13 @@ import { HistoryElement } from '../component.interface';
     selector: 'app-event-history',
     imports: [],
     templateUrl: './event-history.component.html',
-    changeDetection: ChangeDetectionStrategy.Eager,
+    changeDetection: ChangeDetectionStrategy.OnPush,
     styleUrl: './event-history.component.css'
 })
 export class EventHistoryComponent {
-  @Input() title = 'text';
-  @Input() stateName = 'Count';
-  @Input() history: Signal<HistoryElement[]> = signal([]);
+  readonly title = input('text');
+  readonly stateName = input('Count');
+  readonly history = input<Signal<HistoryElement[]>>(signal([]));
   beforeNumber(value: string | number): number {
     return Number(value) - 1;
   }

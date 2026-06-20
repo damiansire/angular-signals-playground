@@ -1,9 +1,14 @@
-<app-title title="Getter Function"></app-title>
+<app-concept-card
+  concept="Un signal se LEE llamándolo como función: count(). Funciona igual en el TypeScript y en el template."
+  observe="El paréntesis no es opcional: count es la función-getter, count() es el valor."
+/>
+
+<app-title title="Leer un signal: el getter ()"></app-title>
 <div class="flex justify-around mt-5">
   <section>
-    <app-code-legazy [lines]="htmlLines" />
+    <app-code-legacy [lines]="htmlLines" />
   </section>
   <section>
-    <app-code-legazy [lines]="lines" />
+    <app-code-legacy [lines]="lines" />
   </section>
 </div>

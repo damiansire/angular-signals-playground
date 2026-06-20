@@ -1,22 +1,24 @@
-import { Component, Signal, computed, signal, ChangeDetectionStrategy } from '@angular/core';
+import { Component, computed, signal, ChangeDetectionStrategy } from '@angular/core';
 
 import { CodeLine } from '../../../../components-atom/component-atom.interface';
 import { VariableBoxComponent } from '../../../../components-atom/variable-box/variable-box.component';
 import { HistoryElement } from '../../../../components/component.interface';
 import { DependenciesStatusComponent } from '../../../../components/dependencies-status/dependencies-status.component';
 import { EventHistoryComponent } from '../../../../components/event-history/event-history.component';
-import { CodeLegazyComponent } from '../../../../components-atom/code-legazy/code-legazy.component';
+import { CodeLegacyComponent } from '../../../../components-atom/code-legacy/code-legacy.component';
+import { ConceptCardComponent } from '../../../../components-atom/concept-card/concept-card.component';
 
 @Component({
     selector: 'app-computed-signal-dynamic-dependencies',
     templateUrl: './computed-signal-dynamic-dependencies.component.html',
     styleUrl: './computed-signal-dynamic-dependencies.component.css',
-    changeDetection: ChangeDetectionStrategy.Eager,
+    changeDetection: ChangeDetectionStrategy.OnPush,
     imports: [
     VariableBoxComponent,
     EventHistoryComponent,
     DependenciesStatusComponent,
-    CodeLegazyComponent
+    CodeLegacyComponent,
+    ConceptCardComponent
 ]
 })
 export class ComputedSignalDynamicDependenciesComponent {

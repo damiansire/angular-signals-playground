@@ -1,9 +1,10 @@
+<app-concept-card concept="El HTML que escribís se representa internamente como un árbol de nodos (el DOM)." action="Clickeá un tag del bloque de código." observe="Aparece o desaparece su nodo en el árbol de la izquierda." />
 <app-two-column-layout title="Example of HTML tree construction">
   <app-tree [nodesToShow]="nodesToShow()" [htmlCode]="htmlCode" left></app-tree>
   <app-code
     textSize="text-xl"
     (codeClick)="codeClickHandler($event)"
-    (onHtmlParsed)="onParsedCodeHandler($event)"
+    (htmlParsed)="onParsedCodeHandler()"
     [htmlCode]="htmlCode"
     right
   ></app-code>

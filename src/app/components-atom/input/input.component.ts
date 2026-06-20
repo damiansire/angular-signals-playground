@@ -1,19 +1,19 @@
-import { Component, EventEmitter, Input, Output, ChangeDetectionStrategy } from '@angular/core';
+import { Component, input, output, ChangeDetectionStrategy } from '@angular/core';
 
 @Component({
     selector: 'app-input',
     imports: [],
     templateUrl: './input.component.html',
-    changeDetection: ChangeDetectionStrategy.Eager,
+    changeDetection: ChangeDetectionStrategy.OnPush,
     styleUrl: './input.component.css'
 })
 export class InputComponent {
-  @Input() text: string = '';
-  @Input() placeholder: string = '';
-  @Output() onChangeEvent = new EventEmitter<string>();
+  readonly text = input('');
+  readonly placeholder = input('');
+  readonly valueChange = output<string>();
 
-  sendData(event: any) {
+  sendData(event: Event) {
     const inputValue = (event.target as HTMLInputElement).value;
-    this.onChangeEvent.emit(inputValue);
+    this.valueChange.emit(inputValue);
   }
 }

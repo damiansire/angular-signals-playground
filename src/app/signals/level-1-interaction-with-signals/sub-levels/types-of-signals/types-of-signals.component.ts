@@ -1,42 +1,86 @@
-import { Component, computed, signal, ChangeDetectionStrategy } from '@angular/core';
+import {
+  Component,
+  computed,
+  isSignal,
+  isWritableSignal,
+  signal,
+  ChangeDetectionStrategy,
+  Signal,
+} from '@angular/core';
 import { CodeLine } from '../../../../components-atom/component-atom.interface';
-import { TitleComponent } from '../../../../components-atom/title/title.component';
-import { TextDescriptionComponent } from '../../../../components-atom/text-description/text-description.component';
-import { VariableBoxDrawComponent } from '../../../../components-draw/variable-box-draw/variable-box-draw.component';
-import { CodeLegazyComponent } from '../../../../components-atom/code-legazy/code-legazy.component';
+import { ColumnAndCodeLayoutComponent } from '../../../../layouts/column-and-code-layout/column-and-code-layout.component';
+
+interface SignalKind {
+  id: string;
+  label: string;
+  writable: boolean;
+  description: string;
+  code: CodeLine[];
+}
 
 @Component({
-    selector: 'app-types-of-signals',
-    imports: [
-        TitleComponent,
-        TextDescriptionComponent,
-        VariableBoxDrawComponent,
-        CodeLegazyComponent,
-    ],
-    templateUrl: './types-of-signals.component.html',
-    changeDetection: ChangeDetectionStrategy.Eager,
-    styleUrl: './types-of-signals.component.css'
+  selector: 'app-types-of-signals',
+  imports: [ColumnAndCodeLayoutComponent],
+  templateUrl: './types-of-signals.component.html',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  styleUrl: './types-of-signals.component.css',
 })
 export class TypesOfSignalsComponent {
-  example = signal('');
-  lines = computed<CodeLine[]>(() => [
-    { line: '', active: false },
-    { line: `count = signal(${this.example()});      `, active: false },
-    { line: '', active: false },
-  ]);
-  dataTypes = [
-    { text: 'Number', example: '64' },
-    { text: 'String', example: '"Damian"' },
-    { text: 'Boolean', example: 'true' },
-    { text: 'Object', example: "{name : 'Damian'}" },
-    { text: 'Array', example: '[ 1, 2, 3]' },
+  readonly kinds: SignalKind[] = [
+    {
+      id: 'writable',
+      label: 'WritableSignal',
+      writable: true,
+      description: 'Se crea con signal(). Podés leerlo y escribirlo con set() / update().',
+      code: [
+        { line: 'count = signal(0);', active: true },
+        { line: 'count.set(5);', active: false },
+        { line: 'count.update((c) => c + 1);', active: false },
+      ],
+    },
+    {
+      id: 'readonly',
+      label: 'Signal (solo lectura)',
+      writable: false,
+      description: 'Un Signal<T> sin set/update. Se obtiene con asReadonly().',
+      code: [
+        { line: 'private _count = signal(0);', active: false },
+        { line: 'count = this._count.asReadonly();', active: true },
+      ],
+    },
+    {
+      id: 'computed',
+      label: 'Computed',
+      writable: false,
+      description: 'Derivado de otros signals con computed(). Siempre es de solo lectura.',
+      code: [{ line: 'double = computed(() => this.count() * 2);', active: true }],
+    },
   ];
 
-  selectType($event: any) {
-    const id = $event.name;
-    const exampleElement = this.dataTypes.find((x) => x.text === id);
-    if (exampleElement?.example) {
-      this.example.set(exampleElement.example);
-    }
+  // Instancias reales de cada tipo, para introspeccionarlas con los helpers.
+  private readonly writableSample = signal(0);
+  private readonly samples: Record<string, Signal<number>> = {
+    writable: this.writableSample,
+    readonly: this.writableSample.asReadonly(),
+    computed: computed(() => this.writableSample() * 2),
+  };
+
+  readonly selectedId = signal('writable');
+  readonly selected = computed(
+    () => this.kinds.find((k) => k.id === this.selectedId()) ?? this.kinds[0]
+  );
+  readonly lines = computed<CodeLine[]>(() => this.selected().code);
+
+  // isSignal() / isWritableSignal() sobre la instancia real seleccionada.
+  readonly introspection = computed(() => {
+    const sample = this.samples[this.selectedId()];
+    return {
+      isSignal: isSignal(sample),
+      isWritableSignal: isWritableSignal(sample),
+    };
+  });
+
+  select(id: string) {
+    this.selectedId.set(id);
   }
 }

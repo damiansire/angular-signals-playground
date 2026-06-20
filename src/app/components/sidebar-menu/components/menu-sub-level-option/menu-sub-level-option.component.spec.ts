@@ -15,6 +15,12 @@ describe('MenuSubLevelOptionComponent', () => {
 
     fixture = TestBed.createComponent(MenuSubLevelOptionComponent);
     component = fixture.componentInstance;
+    fixture.componentRef.setInput('item', {
+      path: '',
+      component: undefined,
+      id: '',
+      subLevels: [],
+    });
     fixture.detectChanges();
   });
 

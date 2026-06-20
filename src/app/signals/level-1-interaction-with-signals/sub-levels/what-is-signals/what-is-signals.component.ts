@@ -5,7 +5,8 @@ import { ContainerVariableBoxDrawComponent } from '../../../../components-draw/c
 import { TextDescriptionComponent } from '../../../../components-atom/text-description/text-description.component';
 import { VariableBoxDrawComponent } from '../../../../components-draw/variable-box-draw/variable-box-draw.component';
 import { CodeLine } from '../../../../components-atom/component-atom.interface';
-import { CodeLegazyComponent } from '../../../../components-atom/code-legazy/code-legazy.component';
+import { CodeLegacyComponent } from '../../../../components-atom/code-legacy/code-legacy.component';
+import { ConceptCardComponent } from '../../../../components-atom/concept-card/concept-card.component';
 
 @Component({
     selector: 'app-what-is-signals',
@@ -15,15 +16,16 @@ import { CodeLegazyComponent } from '../../../../components-atom/code-legazy/cod
         ContainerVariableBoxDrawComponent,
         TextDescriptionComponent,
         VariableBoxDrawComponent,
-        CodeLegazyComponent,
+        CodeLegacyComponent,
+        ConceptCardComponent,
     ],
     templateUrl: './what-is-signals.component.html',
-    changeDetection: ChangeDetectionStrategy.Eager,
+    changeDetection: ChangeDetectionStrategy.OnPush,
     styleUrl: './what-is-signals.component.css'
 })
 export class WhatIsSignalsComponent {
-  title = 'What are signals?';
-  showExample: boolean = false;
+  title = '¿Qué es un signal?';
+  showExample = false;
   clickCount = 0;
   dataTypes = [
     { text: 'Number', isContainer: false },
@@ -32,7 +34,7 @@ export class WhatIsSignalsComponent {
     { text: 'Object', isContainer: false },
     { text: 'Array', isContainer: false },
   ];
-  convertToContainer($event: any) {
+  convertToContainer($event: { name: string; value: string }) {
     const id = $event.name;
     const index = this.dataTypes.findIndex((type) => type.text === id);
     if (index !== -1) {

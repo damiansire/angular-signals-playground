@@ -1,11 +1,9 @@
 <li
   class="text-center cursor-pointer"
-  [routerLink]="[item.path]"
-  [ngClass]="{
-    'bg-green-600': levelState === 'win',
-    'bg-gray-700': levelState === 'pending',
-    'bg-orange-500': levelState === 'current'
-  }"
+  [routerLink]="[item().path]"
+  [class.bg-green-600]="levelState() === 'win'"
+  [class.bg-gray-700]="levelState() === 'pending'"
+  [class.bg-orange-500]="levelState() === 'current'"
 >
-  {{ item.id }}
+  {{ item().id }}
 </li>

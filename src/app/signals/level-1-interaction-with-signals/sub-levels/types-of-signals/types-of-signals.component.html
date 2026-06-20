@@ -1,20 +1,45 @@
-<app-title title="How do we make this wrapper?" />
+<app-column-and-code-layout
+  title="Tipos de signal"
+  [codeLines]="lines"
+  concept="No todos los signals son iguales: hay escribibles (WritableSignal) y de solo lectura (Signal y computed)."
+  action="Tocá cada tipo para ver cómo se crea."
+  observe="Solo el WritableSignal se puede escribir; los otros dos son de solo lectura."
+>
+  <section class="w-80 p-5 rounded-lg shadow-md bg-white">
+    <div class="flex flex-col gap-2 mb-5">
+      @for (kind of kinds; track kind.id) {
+      <button
+        type="button"
+        class="px-4 py-2 rounded-lg border text-left text-sm font-semibold transition-colors"
+        [class]="
+          kind.id === selectedId()
+            ? 'bg-blue-600 border-blue-600 text-white'
+            : 'bg-white border-gray-300 text-gray-700 hover:border-blue-400'
+        "
+        (click)="select(kind.id)"
+      >
+        {{ kind.label }}
+      </button>
+      }
+    </div>
 
-<div class="flex flex-col justify-around mt-3">
-  <app-text-description
-    text="You create writable signals by calling the signal function with the signal's initial value:"
-  ></app-text-description>
-  <section class="flex flex-wrap justify-around my-6">
-    @for (type of dataTypes; track $index) {
+    <div class="rounded-md border border-gray-100 bg-gray-50 p-4">
+      <span
+        class="inline-block text-xs font-bold px-2 py-0.5 rounded-full mb-2"
+        [class]="
+          selected().writable
+            ? 'bg-emerald-100 text-emerald-700'
+            : 'bg-amber-100 text-amber-700'
+        "
+      >
+        {{ selected().writable ? "escribible" : "solo lectura" }}
+      </span>
+      <p class="text-sm text-gray-700">{{ selected().description }}</p>
+    </div>
 
-    <app-variable-box-draw
-      [variableName]="type.text"
-      (onClick)="selectType($event)"
-    ></app-variable-box-draw>
-
-    }
+    <div class="mt-4 rounded-md border border-gray-100 bg-white p-3 text-xs font-mono text-gray-600">
+      <p>isSignal() → <strong class="text-blue-700">{{ introspection().isSignal }}</strong></p>
+      <p>isWritableSignal() → <strong class="text-blue-700">{{ introspection().isWritableSignal }}</strong></p>
+    </div>
   </section>
-  <section>
-    <app-code-legazy [lines]="lines" />
-  </section>
-</div>
+</app-column-and-code-layout>

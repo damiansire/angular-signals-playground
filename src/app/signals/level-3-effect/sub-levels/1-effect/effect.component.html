@@ -1,3 +1,9 @@
+<app-concept-card
+  concept="Un effect() corre la primera vez y cada vez que cambia un signal que LEE."
+  action="Tocá Count1 y Count2 para incrementarlos."
+  observe="Cada effect reacciona solo a su propio signal (mirá 'Effect Execution')."
+/>
+
 <div class="flex justify-around">
   <div class="flex flex-col gap-4">
     <app-variable-box
@@ -32,6 +38,6 @@
     ></app-event-history>
   </div>
   <div>
-    <app-code-legazy [lines]="lines" textSize="text-lg"></app-code-legazy>
+    <app-code-legacy [lines]="lines" textSize="text-lg"></app-code-legacy>
   </div>
 </div>

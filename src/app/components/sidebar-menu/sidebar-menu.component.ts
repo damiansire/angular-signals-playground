@@ -1,4 +1,12 @@
-import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  DestroyRef,
+  OnInit,
+  inject,
+} from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import {
   NavigationEnd,
   NavigationStart,
@@ -22,9 +30,7 @@ interface Level {
   subLevels: LevelHistory;
 }
 
-interface LevelHistory {
-  [key: string]: Level;
-}
+type LevelHistory = Record<string, Level>;
 
 class HandlerLevelStatus {
   levelHistory: LevelHistory = {};
@@ -111,35 +117,40 @@ class HandlerLevelStatus {
     MenuSeparatorComponent
 ],
     templateUrl: './sidebar-menu.component.html',
-    changeDetection: ChangeDetectionStrategy.Eager,
+    changeDetection: ChangeDetectionStrategy.OnPush,
     styleUrl: './sidebar-menu.component.css'
 })
-export class SidebarMenuComponent {
+export class SidebarMenuComponent implements OnInit {
   private router = inject(Router);
+  private cdr = inject(ChangeDetectorRef);
+  private destroyRef = inject(DestroyRef);
   menuItems: CustomRoute[] = menuItems;
-  levelHandler: any;
+  levelHandler = new HandlerLevelStatus(this.menuItems);
   ngOnInit() {
-    this.levelHandler = new HandlerLevelStatus(this.menuItems);
-    this.router.events.subscribe((event) => {
-      if (event instanceof NavigationStart) {
-        const currentUrl = this.router.url;
-        const routePart = currentUrl.split('/');
-        // Solo el árbol de niveles tiene estado; ignorar rutas externas (ej. /lab)
-        if (routePart[1] === 'signals') {
-          this.levelHandler.leaveLevel(routePart[3], routePart[5]);
+    this.router.events
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((event) => {
+        if (event instanceof NavigationStart) {
+          const currentUrl = this.router.url;
+          const routePart = currentUrl.split('/');
+          // Solo el árbol de niveles tiene estado; ignorar rutas externas (ej. /lab)
+          if (routePart[1] === 'signals') {
+            this.levelHandler.leaveLevel(routePart[3], routePart[5]);
+          }
         }
-      }
-      if (event instanceof NavigationEnd) {
-        let finalUrl = event.url;
-        if (event.urlAfterRedirects != event.url) {
-          finalUrl = event.urlAfterRedirects;
+        if (event instanceof NavigationEnd) {
+          let finalUrl = event.url;
+          if (event.urlAfterRedirects != event.url) {
+            finalUrl = event.urlAfterRedirects;
+          }
+          const routePart = finalUrl.split('/');
+          if (routePart[1] === 'signals') {
+            this.levelHandler.setCurrentLevel(routePart[3], routePart[5]);
+          }
         }
-        const routePart = finalUrl.split('/');
-        if (routePart[1] === 'signals') {
-          this.levelHandler.setCurrentLevel(routePart[3], routePart[5]);
-        }
-      }
-    });
+        // El estado vive en un objeto mutable (no signal); avisamos a OnPush.
+        this.cdr.markForCheck();
+      });
   }
   getMenuOptionStatus(level: string, subLevel: string | undefined) {
     return this.levelHandler.getLevelStatus(level, subLevel);

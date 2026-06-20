@@ -6,7 +6,7 @@ import { SidebarMenuComponent } from './components/sidebar-menu/sidebar-menu.com
     selector: 'app-root',
     templateUrl: './app.component.html',
     styleUrl: './app.component.css',
-    changeDetection: ChangeDetectionStrategy.Eager,
+    changeDetection: ChangeDetectionStrategy.OnPush,
     imports: [
     RouterOutlet,
     RouterModule,

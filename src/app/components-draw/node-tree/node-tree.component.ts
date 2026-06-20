@@ -2,7 +2,7 @@
 import {
   Component,
   computed,
-  Input,
+  input,
   Signal,
   signal,
   WritableSignal,
@@ -19,10 +19,10 @@ import { Link, NodeTree } from '../components-draw.inferface';
     styleUrl: './node-tree.component.css'
 })
 export class NodeTreeComponent {
-  @Input() nodes: WritableSignal<NodeTree[]> | Signal<NodeTree[]> = signal<
-    NodeTree[]
-  >([]);
-  @Input() links: WritableSignal<Link[]> = signal<Link[]>([]);
+  readonly nodes = input<WritableSignal<NodeTree[]> | Signal<NodeTree[]>>(
+    signal<NodeTree[]>([])
+  );
+  readonly links = input<WritableSignal<Link[]>>(signal<Link[]>([]));
   chartOption = computed<EChartsOption>(() => ({
     tooltip: {},
     animationDurationUpdate: 1500,
@@ -40,14 +40,14 @@ export class NodeTreeComponent {
         edgeLabel: {
           fontSize: 20,
         },
-        data: this.nodes(),
+        data: this.nodes()(),
         itemStyle: {
           color: (params) => {
             const node = params.data as NodeTree;
             return node.color || '#5784C1';
           },
         },
-        links: this.links(),
+        links: this.links()(),
         lineStyle: {
           opacity: 0.9,
           width: 2,

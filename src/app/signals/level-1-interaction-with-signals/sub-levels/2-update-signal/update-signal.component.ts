@@ -4,7 +4,7 @@ import {
   ViewChild,
   computed,
   signal,
-  ChangeDetectionStrategy
+  ChangeDetectionStrategy, OnInit
 } from '@angular/core';
 import { CodeLine } from '../../../../components-atom/component-atom.interface';
 import { ColumnAndCodeLayoutComponent } from '../../../../layouts/column-and-code-layout/column-and-code-layout.component';
@@ -13,10 +13,10 @@ import { ColumnAndCodeLayoutComponent } from '../../../../layouts/column-and-cod
     selector: 'app-update-signal',
     templateUrl: './update-signal.component.html',
     styleUrl: './update-signal.component.css',
-    changeDetection: ChangeDetectionStrategy.Eager,
+    changeDetection: ChangeDetectionStrategy.OnPush,
     imports: [ColumnAndCodeLayoutComponent]
 })
-export class UpdateSignalComponent {
+export class UpdateSignalComponent implements OnInit {
   count = signal(0);
   @ViewChild('signalSetInput') myInput!: ElementRef<HTMLInputElement>;
   ngOnInit() {

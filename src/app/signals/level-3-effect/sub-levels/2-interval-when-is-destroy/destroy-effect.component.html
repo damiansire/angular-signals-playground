@@ -1,3 +1,9 @@
+<app-concept-card
+  concept="Un effect() se destruye con el componente, pero un setInterval que arrancó adentro NO se limpia solo."
+  action="Activá Auto Refresh y después tocá Destroy."
+  observe="El reloj desaparece, pero 'Interval Evaluation' SIGUE creciendo: el intervalo quedó vivo (leak)."
+/>
+
 <div class="flex">
   <div>
     <button (click)="destroy()">Destroy</button>
@@ -16,6 +22,6 @@
   </div>
 
   <div class="flex-grow">
-    <app-code-legazy [lines]="lines" textSize="text-lg"></app-code-legazy>
+    <app-code-legacy [lines]="lines" textSize="text-lg"></app-code-legacy>
   </div>
 </div>

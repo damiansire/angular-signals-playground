@@ -1,10 +1,15 @@
-<app-title [title]="title"></app-title>
+<app-title [title]="title()"></app-title>
+
+@if (concept()) {
+<app-concept-card [concept]="concept()" [action]="action()" [observe]="observe()" />
+}
+
 <div class="flex justify-around mt-5">
   <section>
     <ng-content></ng-content>
   </section>
 
   <section>
-    <app-code-legazy [lines]="codeLines" />
+    <app-code-legacy [lines]="codeLines()" />
   </section>
 </div>

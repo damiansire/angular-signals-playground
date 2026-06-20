@@ -1,9 +1,9 @@
-import { Component, computed, signal, ChangeDetectionStrategy } from '@angular/core';
-import { CodeLine } from '../../../../components-atom/component-atom.interface';
+import { Component, signal, ChangeDetectionStrategy } from '@angular/core';
 import { CodeComponent } from '../../../../components-atom/code/code.component';
 import { CodeClick } from '../../../../components-atom/code/code.interface';
 import { TreeComponent } from '../../../../components/tree/tree.component';
 import { TwoColumnLayoutComponent } from '../../../../layouts/two-column-layout/two-column-layout.component';
+import { ConceptCardComponent } from '../../../../components-atom/concept-card/concept-card.component';
 
 @Component({
     selector: 'app-html-to-tree',
@@ -11,9 +11,10 @@ import { TwoColumnLayoutComponent } from '../../../../layouts/two-column-layout/
         CodeComponent,
         TreeComponent,
         TwoColumnLayoutComponent,
+        ConceptCardComponent,
     ],
     templateUrl: './html-to-tree.component.html',
-    changeDetection: ChangeDetectionStrategy.Eager,
+    changeDetection: ChangeDetectionStrategy.OnPush,
     styleUrl: './html-to-tree.component.css'
 })
 export class HtmlToTreeComponent {
@@ -53,5 +54,7 @@ export class HtmlToTreeComponent {
       currentNodes.filter((node) => node !== id)
     );
   }
-  onParsedCodeHandler(lines: CodeLine[]) {}
+  onParsedCodeHandler() {
+    // no-op: el árbol se actualiza vía codeClickHandler; este handler queda como punto de extensión
+  }
 }

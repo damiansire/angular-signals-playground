@@ -73,7 +73,7 @@ export class HtmlHelper {
 }
 
 export class HtmlIdGeneratorService {
-  private tagCounters: { [tagName: string]: number } = {};
+  private tagCounters: Record<string, number> = {};
 
   generateId(line: string): string {
     const elementInfo = HtmlHelper.getElementType(line); // Devuelve un objeto
@@ -107,7 +107,6 @@ export function generateLinks(htmlCode: string): Link[] {
     }
 
     const tagId = htmlIdGenerator.generateId(tag);
-    const tagName = HtmlHelper.getTagFromId(tagId);
     const isClosingTag = HtmlHelper.getElementType(tag).isClosingTag;
     const isSpaceElement = HtmlHelper.isSpaceElement(tagId);
 
@@ -136,9 +135,7 @@ export function generateNodes(htmlCode: string): NodeTree[] {
 
   const tags = spliteInTags(htmlCode);
 
-  let x = 550;
-  let y = 100;
-  const xOffset = 150;
+  const y = 100;
   const yOffset = 100;
   const elementForLevel: number[] = [];
 
@@ -172,11 +169,11 @@ export function generateNodes(htmlCode: string): NodeTree[] {
     elementForLevel[node.level] = (elementForLevel[node.level] ?? 0) + 1;
   }
   const elementLevelIndex: number[] = [];
-  let canvasWidth = 565;
   for (const node of nodes) {
     elementLevelIndex[node.level] = (elementLevelIndex[node.level] ?? 0) + 1;
 
     if (elementForLevel[node.level] === 1) {
+      /* un único elemento en el nivel: queda centrado (x = 0), sin offset */
     } else if (elementForLevel[node.level] === 2) {
       if (elementLevelIndex[node.level] === 1) {
         node.x = -100;

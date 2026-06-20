@@ -1,4 +1,4 @@
-import { Component, Input, ChangeDetectionStrategy } from '@angular/core';
+import { Component, input, ChangeDetectionStrategy } from '@angular/core';
 import { CustomRoute } from '../../../../app.routes';
 import { LevelState } from '../../../component.interface';
 import { RouterModule } from '@angular/router';
@@ -8,16 +8,11 @@ import { CommonModule } from '@angular/common';
     selector: 'app-menu-sub-level-option',
     imports: [RouterModule, CommonModule],
     templateUrl: './menu-sub-level-option.component.html',
-    changeDetection: ChangeDetectionStrategy.Eager,
+    changeDetection: ChangeDetectionStrategy.OnPush,
     styleUrl: './menu-sub-level-option.component.css'
 })
 export class MenuSubLevelOptionComponent {
-  @Input() item: CustomRoute = {
-    path: '',
-    component: undefined,
-    id: '',
-    subLevels: [],
-  };
+  readonly item = input.required<CustomRoute>();
 
-  @Input() levelState: LevelState = 'pending';
+  readonly levelState = input<LevelState>('pending');
 }

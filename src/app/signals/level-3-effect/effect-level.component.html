@@ -1,1 +1,14 @@
-<p>effect-level works!</p>
+<app-title title="Effects" />
+
+<div class="mx-auto max-w-2xl px-6 py-4 text-gray-700">
+  <p class="text-lg mb-4">
+    Un <code class="font-mono">effect()</code> ejecuta un <strong>efecto secundario</strong>
+    (log, DOM, timers…) la primera vez y cada vez que cambia algún signal que lee.
+    Se limpia solo cuando el componente se destruye.
+  </p>
+  <ul class="list-disc list-inside space-y-1 text-gray-600">
+    <li><strong>1:</strong> un effect reacciona solo a los signals que lee.</li>
+    <li><strong>2:</strong> qué pasa con un <code class="font-mono">setInterval</code> al destruir el componente.</li>
+    <li><strong>3:</strong> limpiar el efecto manualmente al destruirlo.</li>
+  </ul>
+</div>

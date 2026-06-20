@@ -1,12 +1,8 @@
-import { CommonModule } from '@angular/common';
 import {
   Component,
-  computed,
   effect,
-  EventEmitter,
   input,
-  Input,
-  Output,
+  output,
   Signal,
   signal,
   ChangeDetectionStrategy
@@ -23,24 +19,29 @@ import { CodeClick } from './code.interface';
 
 @Component({
     selector: 'app-code',
-    imports: [CommonModule],
+    imports: [],
     templateUrl: './code.component.html',
-    changeDetection: ChangeDetectionStrategy.Eager,
+    changeDetection: ChangeDetectionStrategy.OnPush,
     styleUrl: './code.component.css'
 })
 export class CodeComponent {
   //@deprecated
-  @Input() lines: Signal<CodeLine[]> = signal([]);
-  @Input() textSize: TailwindTextSize = 'text-2xl';
-  @Input() selectBy: 'Line' | 'Element' = 'Element';
+  readonly lines = input<Signal<CodeLine[]>>(signal([]));
+  readonly textSize = input<TailwindTextSize>('text-2xl');
+  readonly selectBy = input<'Line' | 'Element'>('Element');
   htmlCode = input<string>('');
-  //@deprecated use codeClick rather
-  @Output() click = new EventEmitter<string>();
-  @Output() codeClick = new EventEmitter<CodeClick>();
-  @Output() onHtmlParsed = new EventEmitter<CodeLine[]>();
+  readonly codeClick = output<CodeClick>();
+  readonly htmlParsed = output<CodeLine[]>();
 
   codeLines = signal<CodeLine[]>([]);
   characterIndentSize = 12;
+
+  lineClasses(item: CodeLine): string {
+    const state = item.selected
+      ? 'bg-green-700 text-white'
+      : 'bg-gray-800 text-gray-300 hover:bg-green-800 hover:text-white';
+    return `${this.textSize()} ${state}`;
+  }
   constructor() {
     effect(
       () => {
@@ -76,7 +77,7 @@ export class CodeComponent {
       parsedCode.push(newElement);
     }
 
-    this.onHtmlParsed.emit(parsedCode);
+    this.htmlParsed.emit(parsedCode);
     return parsedCode;
   }
 

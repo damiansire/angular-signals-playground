@@ -1,17 +1,17 @@
-import { Component, EventEmitter, Input, Output, ChangeDetectionStrategy } from '@angular/core';
+import { Component, input, output, ChangeDetectionStrategy } from '@angular/core';
 
 @Component({
     selector: 'app-variable-box',
     imports: [],
     templateUrl: './variable-box.component.html',
-    changeDetection: ChangeDetectionStrategy.Eager,
+    changeDetection: ChangeDetectionStrategy.OnPush,
     styleUrl: './variable-box.component.css'
 })
 export class VariableBoxComponent {
-  @Input() variableName: string = '';
-  @Input() variableValue: string = '';
+  readonly variableName = input('');
+  readonly variableValue = input('');
 
-  @Output() clickEvent = new EventEmitter<void>();
+  readonly clickEvent = output<void>();
 
   onClick() {
     this.clickEvent.emit();

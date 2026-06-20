@@ -1,15 +1,15 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input, ChangeDetectionStrategy } from '@angular/core';
+import { Component, input, ChangeDetectionStrategy } from '@angular/core';
 import { ClickInButton } from '../component.interface';
 
 @Component({
     selector: 'app-computed-tracker',
     imports: [CommonModule],
     templateUrl: './computed-tracker.component.html',
-    changeDetection: ChangeDetectionStrategy.Eager,
+    changeDetection: ChangeDetectionStrategy.OnPush,
     styleUrl: './computed-tracker.component.css'
 })
 export class ComputedTrackerComponent {
-  @Input() title: string = 'Calculated Signals';
-  @Input() computedTracker: ClickInButton[] = [];
+  readonly title = input('Calculated Signals');
+  readonly computedTracker = input<ClickInButton[]>([]);
 }

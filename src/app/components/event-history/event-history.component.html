@@ -1,11 +1,11 @@
-<h2 class="text-2xl font-semibold mb-4 text-center">{{ title }}</h2>
+<h2 class="text-2xl font-semibold mb-4 text-center">{{ title() }}</h2>
 
 <div class="space-y-4">
-  @for (item of history().reverse(); track $index) {
+  @for (item of history()().reverse(); track $index) {
   <div class="bg-gray-100 p-4 rounded-md shadow-sm flex justify-between">
     <div class="flex justify-between items-center">
       <div class="flex items-baseline">
-        <span class="text-gray-500 text-sm mr-2">{{ stateName }}</span>
+        <span class="text-gray-500 text-sm mr-2">{{ stateName() }}</span>
         <span class="text-lg font-medium">
           @if(item.isCountIncrement){
           {{ item.newState && beforeNumber(item.newState) }}

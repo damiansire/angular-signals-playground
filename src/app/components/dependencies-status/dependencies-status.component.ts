@@ -1,14 +1,14 @@
-import { Component, Input, Signal, signal, ChangeDetectionStrategy } from '@angular/core';
+import { Component, input, Signal, signal, ChangeDetectionStrategy } from '@angular/core';
 
 @Component({
     selector: 'app-dependencies-status',
     imports: [],
     templateUrl: './dependencies-status.component.html',
-    changeDetection: ChangeDetectionStrategy.Eager,
+    changeDetection: ChangeDetectionStrategy.OnPush,
     styleUrl: './dependencies-status.component.css'
 })
 export class DependenciesStatusComponent {
-  @Input() dependencies: Signal<string[]> = signal([]);
-  @Input() signalsInside: Signal<string[]> = signal([]);
-  @Input() computedName: string = '';
+  readonly dependencies = input<Signal<string[]>>(signal([]));
+  readonly signalsInside = input<Signal<string[]>>(signal([]));
+  readonly computedName = input('');
 }

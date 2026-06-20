@@ -1,4 +1,10 @@
-<app-column-and-code-layout title="Writable Signal" [codeLines]="lines">
+<app-column-and-code-layout
+  title="Writable Signal"
+  [codeLines]="lines"
+  concept="signal.set() reemplaza el valor de un writable signal por uno nuevo."
+  action="Escribí un número y tocá Set."
+  observe="El contador toma exactamente el valor que escribiste."
+>
   <section>
     <div class="counter-container">
       <div class="counter-display">Amount: {{ count() }}</div>

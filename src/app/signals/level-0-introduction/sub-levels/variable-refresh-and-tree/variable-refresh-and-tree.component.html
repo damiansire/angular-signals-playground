@@ -1,3 +1,4 @@
+<app-concept-card concept="Una variable y sus cambios se reflejan en la vista: del HTML al JavaScript a Angular." action="Movés el control para recorrer las tres etapas." observe="Cómo el mismo contador se expresa en cada tecnología." />
 <app-two-column-layout title="Variables and their updates on the screen">
   <app-sliders-control-buttons
     menuRight
@@ -12,7 +13,10 @@
     <app-tree [htmlCode]="htmlCode"></app-tree>
     } @case (2) {
     <div class="flex justify-center mt-8">
-      <img src="/assets/images/signals/simple_count_increment.png" />
+      <img
+        src="/assets/images/signals/simple_count_increment.png"
+        alt="Diagrama de un contador simple que se incrementa al hacer click"
+      />
     </div>
     } }
   </div>
@@ -27,6 +31,7 @@
     <img
       src="/assets/images/signals/simple_count_in_javascript.png"
       class="w-full object-contain"
+      alt="Código en JavaScript de un contador simple incrementándose"
     />
     } @case (2) {
     <div>

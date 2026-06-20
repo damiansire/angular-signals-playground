@@ -1,13 +1,13 @@
-import { Component, Input, ChangeDetectionStrategy } from '@angular/core';
+import { Component, input, ChangeDetectionStrategy } from '@angular/core';
 import { VariableBoxDrawComponent } from '../variable-box-draw/variable-box-draw.component';
 
 @Component({
     selector: 'app-container-variable-box-draw',
     imports: [VariableBoxDrawComponent],
     templateUrl: './container-variable-box-draw.component.html',
-    changeDetection: ChangeDetectionStrategy.Eager,
+    changeDetection: ChangeDetectionStrategy.OnPush,
     styleUrl: './container-variable-box-draw.component.css'
 })
 export class ContainerVariableBoxDrawComponent {
-  @Input() variableName: string = '';
+  readonly variableName = input('');
 }

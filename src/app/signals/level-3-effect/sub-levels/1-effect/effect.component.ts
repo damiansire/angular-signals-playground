@@ -1,20 +1,23 @@
-import { Component, computed, effect, signal } from '@angular/core';
+import { Component, computed, effect, signal, ChangeDetectionStrategy } from '@angular/core';
 import { CodeLine } from '../../../../components-atom/component-atom.interface';
 import { VariableBoxComponent } from '../../../../components-atom/variable-box/variable-box.component';
 import { HistoryElement } from '../../../../components/component.interface';
 import { DependenciesStatusComponent } from '../../../../components/dependencies-status/dependencies-status.component';
 import { EventHistoryComponent } from '../../../../components/event-history/event-history.component';
-import { CodeLegazyComponent } from '../../../../components-atom/code-legazy/code-legazy.component';
+import { CodeLegacyComponent } from '../../../../components-atom/code-legacy/code-legacy.component';
+import { ConceptCardComponent } from '../../../../components-atom/concept-card/concept-card.component';
 
 @Component({
     selector: 'app-effect',
     templateUrl: './effect.component.html',
     styleUrl: './effect.component.css',
+    changeDetection: ChangeDetectionStrategy.OnPush,
     imports: [
         VariableBoxComponent,
         EventHistoryComponent,
         DependenciesStatusComponent,
-        CodeLegazyComponent,
+        CodeLegacyComponent,
+        ConceptCardComponent,
     ]
 })
 export class EffectComponent {
@@ -30,17 +33,15 @@ export class EffectComponent {
   constructor() {
     effect(
       () => {
-        const trigger =
-          this.count() === 0 ? 'Initial render' : 'Increment Count';
-        this.addConditionalCountRecomputation(trigger, '1', false);
+        const trigger = this.count() === 0 ? 'effect(1) inicial' : 'effect(1) corrió';
+        this.addConditionalCountRecomputation(trigger, this.count(), false);
         console.log(`The current count is: ${this.count()}`);
       }
     );
     effect(
       () => {
-        const trigger =
-          this.count2() === 0 ? 'Initial render' : 'Increment Count';
-        this.addConditionalCountRecomputation(trigger, '2', false);
+        const trigger = this.count2() === 0 ? 'effect(2) inicial' : 'effect(2) corrió';
+        this.addConditionalCountRecomputation(trigger, this.count2(), false);
         console.log(`The current count is: ${this.count2()}`);
       }
     );

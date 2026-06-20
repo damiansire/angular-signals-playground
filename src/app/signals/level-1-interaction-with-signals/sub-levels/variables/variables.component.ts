@@ -1,8 +1,9 @@
-import { Component, computed, signal, ChangeDetectionStrategy } from '@angular/core';
+import { Component, computed, signal, ChangeDetectionStrategy, OnInit } from '@angular/core';
 import { VariableBoxDrawComponent } from '../../../../components-draw/variable-box-draw/variable-box-draw.component';
 import { CodeLine } from '../../../../components-atom/component-atom.interface';
 import { TitleComponent } from '../../../../components-atom/title/title.component';
-import { CodeLegazyComponent } from '../../../../components-atom/code-legazy/code-legazy.component';
+import { CodeLegacyComponent } from '../../../../components-atom/code-legacy/code-legacy.component';
+import { ConceptCardComponent } from '../../../../components-atom/concept-card/concept-card.component';
 
 interface DataTypeExample {
   name: string;
@@ -14,15 +15,16 @@ interface DataTypeExample {
     imports: [
         VariableBoxDrawComponent,
         TitleComponent,
-        CodeLegazyComponent,
+        CodeLegacyComponent,
+        ConceptCardComponent,
     ],
     templateUrl: './variables.component.html',
-    changeDetection: ChangeDetectionStrategy.Eager,
+    changeDetection: ChangeDetectionStrategy.OnPush,
     styleUrl: './variables.component.css'
 })
-export class VariablesComponent {
+export class VariablesComponent implements OnInit {
   dataTypes = ['Number'];
-  typesExamples: { [key: string]: DataTypeExample } = {
+  typesExamples: Record<string, DataTypeExample> = {
     Number: {
       name: 'Number',
       examples: ['1', '6', '56', '5.4', '10.1'],
@@ -59,11 +61,11 @@ export class VariablesComponent {
     this.dataTypes = Object.keys(this.typesExamples);
   }
 
-  selectExample(value: any) {
+  selectExample(value: { name: string; value: string }) {
     this.selectedExampleValue.set(value.name);
   }
 
-  selectType(value: any) {
+  selectType(value: { name: string; value: string }) {
     const variableName: string = value.name;
     const newSelectedType = this.typesExamples[variableName];
     this.selectedType.set(newSelectedType);

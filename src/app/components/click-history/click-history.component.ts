@@ -1,4 +1,4 @@
-import { Component, Input, ChangeDetectionStrategy } from '@angular/core';
+import { Component, input, ChangeDetectionStrategy } from '@angular/core';
 import { ClickInButton } from '../component.interface';
 
 import { EventComponent } from '../event/event.component';
@@ -7,9 +7,9 @@ import { EventComponent } from '../event/event.component';
     selector: 'app-click-history',
     templateUrl: './click-history.component.html',
     styleUrl: './click-history.component.css',
-    changeDetection: ChangeDetectionStrategy.Eager,
+    changeDetection: ChangeDetectionStrategy.OnPush,
     imports: [EventComponent]
 })
 export class ClickHistoryComponent {
-  @Input() clickHistory: ClickInButton[] = [];
+  readonly clickHistory = input<ClickInButton[]>([]);
 }

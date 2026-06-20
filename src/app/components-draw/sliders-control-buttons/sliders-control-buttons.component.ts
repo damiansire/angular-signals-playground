@@ -1,16 +1,16 @@
-import { Component, EventEmitter, Output, ChangeDetectionStrategy } from '@angular/core';
+import { Component, output, ChangeDetectionStrategy } from '@angular/core';
 
 @Component({
     selector: 'app-sliders-control-buttons',
     imports: [],
     templateUrl: './sliders-control-buttons.component.html',
-    changeDetection: ChangeDetectionStrategy.Eager,
+    changeDetection: ChangeDetectionStrategy.OnPush,
     styleUrl: './sliders-control-buttons.component.css'
 })
 export class SlidersControlButtonsComponent {
   sliderNumber = 0;
 
-  @Output() sliderChanged = new EventEmitter<number>();
+  readonly sliderChanged = output<number>();
 
   nextSlider() {
     this.sliderNumber++;

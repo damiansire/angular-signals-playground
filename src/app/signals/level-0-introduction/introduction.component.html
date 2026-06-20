@@ -1,1 +1,14 @@
-<p>introduction works!</p>
+<app-title title="Introducción: ¿por qué signals?" />
+
+<div class="mx-auto max-w-2xl px-6 py-4 text-gray-700">
+  <p class="text-lg mb-4">
+    Antes de usar signals conviene entender <strong>cómo Angular detecta cambios</strong>
+    y los actualiza en pantalla. Estos ejemplos van del DOM al modelo de reactividad.
+  </p>
+  <ul class="list-disc list-inside space-y-1 text-gray-600">
+    <li><strong>Sub-nivel 1:</strong> el HTML como árbol de nodos (DOM).</li>
+    <li><strong>Sub-nivel 2:</strong> cómo una variable se refleja en la vista (HTML → JS → Angular).</li>
+    <li><strong>Sub-nivel 3:</strong> la detección de cambios "clásica" (NgZone revisa todo el árbol).</li>
+    <li><strong>Sub-nivel 4:</strong> la detección con signals, mucho más quirúrgica.</li>
+  </ul>
+</div>

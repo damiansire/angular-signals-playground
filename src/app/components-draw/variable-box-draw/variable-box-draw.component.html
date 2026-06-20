@@ -1,3 +1,9 @@
-<div class="inner-box cursor-pointer" (click)="_onClick()">
-  <span>{{ variableName }}</span>
+<div
+  class="inner-box cursor-pointer"
+  tabindex="0"
+  role="button"
+  (click)="_onClick()"
+  (keyup.enter)="_onClick()"
+>
+  <span>{{ variableName() }}</span>
 </div>

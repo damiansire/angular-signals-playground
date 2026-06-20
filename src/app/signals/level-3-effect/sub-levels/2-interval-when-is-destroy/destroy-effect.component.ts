@@ -3,73 +3,41 @@ import { DestroyBoxComponent } from './destroy-box/destroy-box.component';
 import { CodeLine } from '../../../../components-atom/component-atom.interface';
 import { HistoryElement } from '../../../../components/component.interface';
 import { EventHistoryComponent } from '../../../../components/event-history/event-history.component';
-import { CodeLegazyComponent } from '../../../../components-atom/code-legazy/code-legazy.component';
+import { CodeLegacyComponent } from '../../../../components-atom/code-legacy/code-legacy.component';
+import { ConceptCardComponent } from '../../../../components-atom/concept-card/concept-card.component';
 
 @Component({
     selector: 'app-destroy-effect',
     templateUrl: './destroy-effect.component.html',
     styleUrl: './destroy-effect.component.css',
-    changeDetection: ChangeDetectionStrategy.Eager,
+    changeDetection: ChangeDetectionStrategy.OnPush,
     imports: [
         DestroyBoxComponent,
         EventHistoryComponent,
-        CodeLegazyComponent,
+        CodeLegacyComponent,
+        ConceptCardComponent,
     ]
 })
 export class DestroyEffectComponent {
   autoRefresh = signal(false);
   appEventHistory = signal<HistoryElement[]>([]);
   lines = computed<CodeLine[]>(() => [
-    {
-      line: 'constructor() {',
-      active: false,
-    },
-    {
-      line: '  effect(() => {',
-      active: false,
-    },
-    {
-      line: '    if (this.autoRefresh()) {',
-      active: this.autoRefresh(),
-    },
-    {
-      line: '      this.intervalSave = setInterval(() => {',
-      active: this.autoRefresh(),
-    },
-    {
-      line: '        this.currentTime = new Date();',
-      active: this.autoRefresh(),
-    },
-    {
-      line: '        console.log("Estoy aca");',
-      active: this.autoRefresh(),
-    },
-    {
-      line: '      }, 1000);',
-      active: this.autoRefresh(),
-    },
-    {
-      line: '    } else {',
-      active: !this.autoRefresh(),
-    },
-    {
-      line: '      clearInterval(this.intervalSave);',
-      active: !this.autoRefresh(),
-    },
-    {
-      line: '    }',
-      active: false,
-    },
-    {
-      line: '  });',
-      active: false,
-    },
-    {
-      line: '}',
-      active: false,
-    },
+    { line: 'effect(() => {', active: false },
+    { line: '  if (this.autoRefresh()) {', active: this.autoRefresh() },
+    { line: '    this.intervalSave = setInterval(() => {', active: this.autoRefresh() },
+    { line: '      this.addToHistory(new Date());', active: this.autoRefresh() },
+    { line: '    }, 1000);', active: this.autoRefresh() },
+    { line: '  } else {', active: !this.autoRefresh() },
+    { line: '    clearInterval(this.intervalSave);', active: !this.autoRefresh() },
+    { line: '  }', active: false },
+    { line: '});', active: false },
+    { line: '', active: false },
+    { line: 'destroy() {', active: false },
+    { line: '  this.showComponent = false;', active: false },
+    { line: '  // NO limpiamos el intervalo -> sigue corriendo (leak)', active: true },
+    { line: '}', active: false },
   ]);
-  intervalSave: any;
+  intervalSave: ReturnType<typeof setInterval> | undefined;
   showComponent = true;
 
   constructor() {
@@ -117,12 +85,5 @@ export class DestroyEffectComponent {
     const seconds = String(date.getSeconds()).padStart(2, '0');
 
     return `${hours}:${minutes}:${seconds}`;
-  }
-  newIntervalOutput(event: Date) {
-    this.addConditionalCountRecomputation(
-      'interval',
-      this.getFormattedTime(event),
-      false
-    );
   }
 }

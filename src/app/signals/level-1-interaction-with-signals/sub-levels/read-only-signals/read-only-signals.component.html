@@ -1,1 +1,39 @@
-<p>read-only-signals works!</p>
+<app-column-and-code-layout
+  title="Read-only signals: asReadonly()"
+  [codeLines]="lines"
+  concept="asReadonly() expone un signal que se lee pero no se escribe desde afuera."
+  action="Incrementá (interno) y reseteá."
+  observe="count() refleja los cambios; quien lo recibe no puede llamar .set()."
+>
+  <section class="w-80 p-5 rounded-lg shadow-md bg-white text-center">
+    <p class="text-sm text-gray-500 mb-4">
+      El componente expone un signal de <strong>solo lectura</strong>: se puede
+      leer (<code class="font-mono">count()</code>) pero quien lo recibe no puede
+      escribirlo. Solo el dueño, vía el signal privado, lo modifica.
+    </p>
+
+    <p class="text-5xl font-bold tabular-nums text-blue-700 mb-5">{{ count() }}</p>
+
+    <div class="flex gap-2 justify-center">
+      <button
+        type="button"
+        class="bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold py-2 px-4 rounded"
+        (click)="increment()"
+      >
+        Incrementar (interno)
+      </button>
+      <button
+        type="button"
+        class="bg-gray-800 hover:bg-gray-900 text-white text-sm font-bold py-2 px-4 rounded"
+        (click)="reset()"
+      >
+        Reset
+      </button>
+    </div>
+
+    <p class="text-xs text-gray-400 mt-4">
+      <code class="font-mono">count.set(…)</code> ni siquiera compila: el tipo
+      <code class="font-mono">Signal&lt;T&gt;</code> no tiene <code class="font-mono">set</code>.
+    </p>
+  </section>
+</app-column-and-code-layout>

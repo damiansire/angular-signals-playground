@@ -15,7 +15,7 @@ import { ColumnAndCodeLayoutComponent } from '../../../../layouts/column-and-cod
     selector: 'app-computed-signals',
     templateUrl: './computed-signals.component.html',
     styleUrl: './computed-signals.component.css',
-    changeDetection: ChangeDetectionStrategy.Eager,
+    changeDetection: ChangeDetectionStrategy.OnPush,
     imports: [
     FormsModule,
     ColumnAndCodeLayoutComponent
@@ -28,13 +28,13 @@ export class ComputedSignalsComponent {
     return `${this.firstName()} ${this.surname()}`;
   });
 
-  setFirstName(eventTarget: any) {
-    const value = eventTarget?.value || '';
+  setFirstName(eventTarget: EventTarget | null) {
+    const value = (eventTarget as HTMLInputElement | null)?.value || '';
     this.firstName.set(value);
   }
 
-  setLastName(eventTarget: any) {
-    const value = eventTarget?.value || '';
+  setLastName(eventTarget: EventTarget | null) {
+    const value = (eventTarget as HTMLInputElement | null)?.value || '';
     this.surname.set(value);
   }
 

@@ -1,3 +1,5 @@
+import { Type } from '@angular/core';
+
 export interface ClickInButton {
   date: Date;
   firstName: string;
@@ -13,7 +15,7 @@ export interface HistoryElement {
 
 export interface RouteItem {
   path: string;
-  component: any; // Asegúrate de importar tus componentes
+  component: Type<unknown>; // Asegúrate de importar tus componentes
   subLevels?: RouteItem[];
 }
 

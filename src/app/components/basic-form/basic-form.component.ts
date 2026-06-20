@@ -1,8 +1,7 @@
 import {
   Component,
   ElementRef,
-  EventEmitter,
-  Output,
+  output,
   Signal,
   ViewChild,
   WritableSignal,
@@ -21,7 +20,7 @@ interface ClickInButton {
     selector: 'app-basic-form',
     imports: [],
     templateUrl: './basic-form.component.html',
-    changeDetection: ChangeDetectionStrategy.Eager,
+    changeDetection: ChangeDetectionStrategy.OnPush,
     styleUrl: './basic-form.component.css'
 })
 export class BasicFormComponent {
@@ -32,12 +31,11 @@ export class BasicFormComponent {
   });
   @ViewChild('firstNameInput') firstNameInput!: ElementRef<HTMLInputElement>;
   @ViewChild('surnameInput') surnameInput!: ElementRef<HTMLInputElement>;
-  @Output() signalComputed = new EventEmitter<ClickInButton>();
-  @Output() buttonClicked = new EventEmitter<ClickInButton>();
+  readonly signalComputed = output<ClickInButton>();
+  readonly buttonClicked = output<ClickInButton>();
 
   constructor() {
     effect(() => {
-      const currentFullName = this.fullName();
       this.signalComputed.emit({
         date: new Date(),
         firstName: this.firstName(),

@@ -4,7 +4,7 @@ import { Component, ChangeDetectionStrategy } from '@angular/core';
     selector: 'app-count-increment',
     imports: [],
     templateUrl: './count-increment.component.html',
-    changeDetection: ChangeDetectionStrategy.Eager,
+    changeDetection: ChangeDetectionStrategy.OnPush,
     styleUrl: './count-increment.component.css'
 })
 export class CountIncrementComponent {

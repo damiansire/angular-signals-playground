@@ -1,8 +1,13 @@
+<app-concept-card
+  concept="Un signal es un envoltorio alrededor de un valor que avisa a sus consumidores cuando ese valor cambia."
+  action="Clickeá las cajitas para convertirlas en contenedores."
+  observe="Cualquier tipo de valor puede ir adentro de un signal."
+/>
+
 <app-title [title]="title"></app-title>
 <section class="mt-4 mb-5">
   <app-text-description
-    text="A signal is a wrapper around a value that notifies interested consumers when
-  that value changes."
+    text="Un signal es un envoltorio alrededor de un valor que notifica a sus consumidores cuando ese valor cambia."
   ></app-text-description>
 </section>
 <app-wrapper-animation></app-wrapper-animation>
@@ -16,7 +21,7 @@
     } @else{
     <app-variable-box-draw
       [variableName]="type.text"
-      (onClick)="convertToContainer($event)"
+      (clicked)="convertToContainer($event)"
     ></app-variable-box-draw>
     } }
   </section>
@@ -24,17 +29,19 @@
 @if(clickCount > 0){
 <div class="mt-4 mb-4">
   <app-text-description
-    text="Signals can contain any value, from primitives to complex data structures."
+    text="Un signal puede contener cualquier valor, desde primitivos hasta estructuras complejas."
   >
   </app-text-description>
 </div>
-} @if(clickCount > 4){
 <div class="flex justify-center">
   <div class="max-w-fit">
-    <app-code-legazy
+    <app-code-legacy
       [lines]="signalWrapperLines"
       textSize="text-lg"
-    ></app-code-legazy>
+    ></app-code-legacy>
+    <p class="text-xs text-gray-400 text-center mt-2">
+      SignalWrapper&lt;T&gt; es una metáfora para entender la idea; no es API real de Angular.
+    </p>
   </div>
 </div>
 }

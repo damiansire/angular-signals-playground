@@ -1,11 +1,9 @@
 <li
-  [routerLink]="getLink(menuItem.path)"
-  [ngClass]="{
-    'bg-green-600': levelState === 'win',
-    'bg-gray-700': levelState === 'pending',
-    'bg-orange-500': levelState === 'current'
-  }"
+  [routerLink]="getLink(menuItem().path)"
+  [class.bg-green-600]="levelState() === 'win'"
+  [class.bg-gray-700]="levelState() === 'pending'"
+  [class.bg-orange-500]="levelState() === 'current'"
   class="flex items-center justify-center w-10 h-10 rounded-full cursor-pointer mx-auto border-2 border-gray-100"
 >
-  <span class="text-white font-semibold">{{ menuItem.id }}</span>
+  <span class="text-white font-semibold">{{ menuItem().id }}</span>
 </li>

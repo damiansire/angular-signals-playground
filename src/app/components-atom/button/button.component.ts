@@ -8,10 +8,10 @@ import { ChangeDetectionStrategy, Component, input, output } from '@angular/core
     styleUrl: './button.component.css'
 })
 export class ButtonComponent {
-  onClick = output<string>();
+  clicked = output<string>();
   text = input<string>('Missing text');
 
   callClick() {
-    this.onClick.emit('emitido');
+    this.clicked.emit('emitido');
   }
 }

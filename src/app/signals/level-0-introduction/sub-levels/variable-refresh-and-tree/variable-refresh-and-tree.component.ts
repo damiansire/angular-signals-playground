@@ -5,6 +5,7 @@ import { CountIncrementComponent } from './count-increment/count-increment.compo
 import { CodeClick } from '../../../../components-atom/code/code.interface';
 import { TwoColumnLayoutComponent } from '../../../../layouts/two-column-layout/two-column-layout.component';
 import { SlidersControlButtonsComponent } from '../../../../components-draw/sliders-control-buttons/sliders-control-buttons.component';
+import { ConceptCardComponent } from '../../../../components-atom/concept-card/concept-card.component';
 
 @Component({
     selector: 'app-variable-refresh-and-tree',
@@ -14,9 +15,10 @@ import { SlidersControlButtonsComponent } from '../../../../components-draw/slid
         CountIncrementComponent,
         TwoColumnLayoutComponent,
         SlidersControlButtonsComponent,
+        ConceptCardComponent,
     ],
     templateUrl: './variable-refresh-and-tree.component.html',
-    changeDetection: ChangeDetectionStrategy.Eager,
+    changeDetection: ChangeDetectionStrategy.OnPush,
     styleUrl: './variable-refresh-and-tree.component.css'
 })
 export class VariableRefreshAndTreeComponent {
