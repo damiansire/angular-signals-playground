@@ -94,5 +94,4 @@ src/app/
 
 ## License
 
-No license file is currently included; all rights reserved by the author until one
-is added.
+Released under the [MIT License](./LICENSE).
