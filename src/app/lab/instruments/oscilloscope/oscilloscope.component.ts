@@ -31,8 +31,8 @@ import { BenchFrameComponent } from '../../bench-frame/bench-frame.component';
  *      - computed: traceY / tracePath /   → derivados que dibujan la traza y la
  *                  band                      banda de régimen. NO disparan efectos.
  *      - effect:   side-effect imperativo → en cada cambio: append al log de
- *                  telemetría, localStorage.setItem, document.title, y ++runs.
- *                  (allowSignalWrites: el log es un side-effect de logging válido.)
+ *                  telemetría en pantalla y ++runs. (El log on-screen es el
+ *                  side-effect de logging válido que demuestra el effect.)
  *
  * Wireframe ASCII:
  *   ┌─ INSTR·02 · OSCILLOSCOPE ─────────── effect() ──┐
@@ -50,7 +50,7 @@ import { BenchFrameComponent } from '../../bench-frame/bench-frame.component';
 interface LogEntry {
   readonly run: number;
   readonly speed: number;
-  readonly sink: 'log' | 'title' | 'storage';
+  readonly sink: 'log';
   readonly stamp: string;
 }
 
@@ -125,9 +125,6 @@ export class OscilloscopeComponent {
   /** Log de telemetría: producido DENTRO del effect (side-effect de logging). */
   log = signal<readonly LogEntry[]>([]);
 
-  /** Último valor recuperado de storage en el arranque, para mostrar persistencia. */
-  readonly restored = readStored();
-
   constructor() {
     // effect() idiomático: SOLO efectos imperativos. Corre una vez al inicio y
     // luego en CADA cambio de speed(). No deriva estado (eso vive en computed).
@@ -138,19 +135,9 @@ export class OscilloscopeComponent {
         // no auto-disparase por escribir su propio contador (evita loop infinito).
         const run = untracked(this.runs) + 1;
 
-        // 1) sincroniza la pestaña del navegador
-        document.title = `${v} km/h · scope`;
-        // 2) persiste la última lectura
-        try {
-          localStorage.setItem('scope.lastSpeed', String(v));
-        } catch {
-          /* storage no disponible: el log igual registra el intento */
-        }
-
-        // 3) registra la corrida en el log de pantalla (máx 6, más nueva arriba)
-        const sink: LogEntry['sink'] =
-          run === 1 ? 'storage' : v >= this.threshold ? 'title' : 'log';
-        const entry: LogEntry = { run, speed: v, sink, stamp: stamp() };
+        // registra la corrida en el log de pantalla (máx 6, más nueva arriba).
+        // Este log on-screen es el único side-effect: nada global (sin title ni storage).
+        const entry: LogEntry = { run, speed: v, sink: 'log', stamp: stamp() };
         this.runs.set(run);
         this.log.update((rows) => [entry, ...rows].slice(0, 6));
       }
@@ -162,15 +149,8 @@ export class OscilloscopeComponent {
   }
 
   /** Etiqueta legible del destino del side-effect para el log. */
-  sinkLabel(sink: LogEntry['sink']): string {
-    switch (sink) {
-      case 'title':
-        return 'document.title';
-      case 'storage':
-        return 'localStorage';
-      default:
-        return 'telemetry log';
-    }
+  sinkLabel(): string {
+    return 'telemetry log';
   }
 }
 
@@ -179,13 +159,4 @@ function stamp(): string {
   const d = new Date();
   const p = (n: number) => String(n).padStart(2, '0');
   return `${p(d.getHours())}:${p(d.getMinutes())}:${p(d.getSeconds())}`;
-}
-
-/** Lectura defensiva del último valor persistido (puede no existir). */
-function readStored(): string | null {
-  try {
-    return localStorage.getItem('scope.lastSpeed');
-  } catch {
-    return null;
-  }
 }

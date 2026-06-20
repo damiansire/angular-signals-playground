@@ -64,17 +64,12 @@
             <span class="logfeed__run">#{{ row.run }}</span>
             <span class="logfeed__stamp">{{ row.stamp }}</span>
             <span class="logfeed__val">{{ row.speed }} km/h</span>
-            <span class="logfeed__sink">→ {{ sinkLabel(row.sink) }}</span>
+            <span class="logfeed__sink">→ {{ sinkLabel() }}</span>
           </li>
         } @empty {
           <li class="logfeed__row logfeed__row--empty">waiting for input…</li>
         }
       </ol>
-
-      <p class="persist">
-        localStorage · last
-        <b>{{ restored ?? '—' }}</b>
-      </p>
     </aside>
 
     <!-- ── THROTTLE: el control real, ES el signal ── -->

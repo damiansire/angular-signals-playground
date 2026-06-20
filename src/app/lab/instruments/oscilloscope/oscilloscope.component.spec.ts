@@ -60,15 +60,7 @@ describe('OscilloscopeComponent (computed trace + imperative effect)', () => {
     expect(component.log().length).toBeLessThanOrEqual(6);
   });
 
-  it('persists the last reading to the document title via the effect', () => {
-    component.setSpeed('199');
-    fixture.detectChanges();
-    expect(document.title).toContain('199 km/h');
-  });
-
-  it('maps each sink to a human-readable label', () => {
-    expect(component.sinkLabel('title')).toBe('document.title');
-    expect(component.sinkLabel('storage')).toBe('localStorage');
-    expect(component.sinkLabel('log')).toBe('telemetry log');
+  it('etiqueta el destino del side-effect como log on-screen', () => {
+    expect(component.sinkLabel()).toBe('telemetry log');
   });
 });

@@ -75,6 +75,13 @@ export class ManualComponent {
    */
   evals = signal(0);
 
+  /**
+   * Conteo mostrado: el effect corre una vez en la inicialización (que no es un
+   * "cambio"), así que descontamos esa corrida. Al cargar muestra 0 y sube de a
+   * uno por cada cambio real de la fuente.
+   */
+  shownEvals = computed(() => Math.max(0, this.evals() - 1));
+
   /** Posición 0..1 de la fuente para resaltar la propagación en el diagrama. */
   flow = computed(() => (this.n() - this.min) / (this.max - this.min));
 

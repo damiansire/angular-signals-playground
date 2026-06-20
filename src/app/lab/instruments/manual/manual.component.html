@@ -36,7 +36,7 @@
         pasada consistente: Signals no evalúa <code class="inl">report</code> hasta que
         ambos brazos quedaron al día. No hay estado intermedio observable. Por eso el
         contador de evaluaciones avanzó a
-        <span class="live live--count">{{ evals() }}</span> &mdash; uno por cada cambio
+        <span class="live live--count">{{ shownEvals() }}</span> &mdash; uno por cada cambio
         de la fuente, jamás dos. Esa es la garantía <em>glitch-free</em>.
       </p>
 
@@ -111,7 +111,7 @@
 <span class="ln"><b class="der">square</b> = computed(() =&gt; n() * n());</span>
 <span class="ln"><b class="der">half</b>   = computed(() =&gt; n() / 2);</span>
 <span class="ln"><b class="der">report</b> = computed(() =&gt; square() + half());</span></code></pre>
-      <p class="margin__note margin__note--reads">recálculos de <code>report</code>: <b>{{ evals() }}</b></p>
+      <p class="margin__note margin__note--reads">recálculos de <code>report</code>: <b>{{ shownEvals() }}</b></p>
     </aside>
   </article>
 </app-bench-frame>
