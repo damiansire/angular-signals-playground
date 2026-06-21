@@ -1,13 +1,34 @@
 {
   "name": "angular-examples",
   "version": "0.0.0",
+  "description": "Introducción interactiva a Angular Signals: ejemplos hands-on de signals, computed, effect, linkedSignal y resource, construidos con Angular 22 y Tailwind CSS.",
+  "license": "MIT",
+  "keywords": [
+    "angular",
+    "signals",
+    "examples"
+  ],
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
-    "lint": "ng lint"
+    "lint": "ng lint",
+    "format": "prettier --write \"src/**/*.{ts,html,scss,json}\"",
+    "format:check": "prettier --check \"src/**/*.{ts,html,scss,json}\""
+  },
+  "prettier": {
+    "printWidth": 100,
+    "singleQuote": true,
+    "overrides": [
+      {
+        "files": "*.html",
+        "options": {
+          "parser": "angular"
+        }
+      }
+    ]
   },
   "private": true,
   "dependencies": {
@@ -39,6 +60,7 @@
     "karma-jasmine": "~5.1.0",
     "karma-jasmine-html-reporter": "~2.1.0",
     "postcss": "^8.4.39",
+    "prettier": "^3.8.4",
     "tailwindcss": "^3.4.4",
     "typescript": "~6.0.3",
     "typescript-eslint": "8.60.1"
