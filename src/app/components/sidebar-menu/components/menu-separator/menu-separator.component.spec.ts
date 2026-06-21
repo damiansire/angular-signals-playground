@@ -20,4 +20,12 @@ describe('MenuSeparatorComponent', () => {
   it('should create', () => {
     expect(component).toBeTruthy();
   });
+
+  it('renderiza un li con la barra separadora centrada', () => {
+    const li = fixture.nativeElement.querySelector('li') as HTMLElement;
+    expect(li).toBeTruthy();
+    expect(li.classList).toContain('justify-center');
+    const bar = li.querySelector('div') as HTMLElement;
+    expect(bar.classList).toContain('bg-sky-200');
+  });
 });

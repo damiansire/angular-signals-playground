@@ -20,4 +20,19 @@ describe('ContainerVariableBoxDrawComponent', () => {
   it('should create', () => {
     expect(component).toBeTruthy();
   });
+
+  it('proyecta variableName al app-variable-box-draw hijo', () => {
+    fixture.componentRef.setInput('variableName', 'counter');
+    fixture.detectChanges();
+
+    const inner = fixture.nativeElement.querySelector('app-variable-box-draw');
+    expect(inner).toBeTruthy();
+    expect((inner as HTMLElement).textContent?.trim()).toBe('counter');
+  });
+
+  it('envuelve al hijo en la outer-box', () => {
+    const outer = fixture.nativeElement.querySelector('.outer-box');
+    expect(outer).toBeTruthy();
+    expect(outer.querySelector('app-variable-box-draw')).toBeTruthy();
+  });
 });
