@@ -8,6 +8,11 @@ import { provideOptions } from './provide-options';
  * el token resuelve a `defaults`; `providerFn(partial)` arma un provider que
  * mezcla los defaults del ancestro con el override local.
  *
+ * NOTA (demo): en este repo este patron alimenta un unico consumidor (el boton),
+ * asi que es un EJERCICIO del patron Taiga, no infraestructura necesaria. Para un
+ * unico consumidor alcanza con un `InjectionToken` simple; se conserva aqui solo
+ * para mostrar como Taiga modela opciones en cascada por DI.
+ *
  * @example
  * export const [APP_BUTTON_OPTIONS, provideAppButtonOptions] =
  *   createOptions(APP_BUTTON_DEFAULT_OPTIONS);
