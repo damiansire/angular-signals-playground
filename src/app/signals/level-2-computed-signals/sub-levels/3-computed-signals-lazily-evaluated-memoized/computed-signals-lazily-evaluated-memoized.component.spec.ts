@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
 import { ComputedSignalsLazilyEvaluatedMemoizedComponent } from './computed-signals-lazily-evaluated-memoized.component';
 import { ClickInButton } from '../../../../components/component.interface';
 
@@ -9,6 +10,7 @@ describe('ComputedSignalsLazilyEvaluatedMemoizedComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [ComputedSignalsLazilyEvaluatedMemoizedComponent],
+      providers: [provideZonelessChangeDetection()],
     }).compileComponents();
 
     fixture = TestBed.createComponent(

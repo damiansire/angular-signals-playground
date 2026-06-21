@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, provideZonelessChangeDetection } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { TwoColumnLayoutComponent } from './two-column-layout.component';
@@ -23,6 +23,7 @@ describe('TwoColumnLayoutComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [TwoColumnLayoutComponent],
+      providers: [provideZonelessChangeDetection()],
     }).compileComponents();
 
     fixture = TestBed.createComponent(TwoColumnLayoutComponent);

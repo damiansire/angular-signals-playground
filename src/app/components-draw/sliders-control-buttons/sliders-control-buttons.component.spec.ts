@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
 
 import { SlidersControlButtonsComponent } from './sliders-control-buttons.component';
 
@@ -8,7 +9,8 @@ describe('SlidersControlButtonsComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [SlidersControlButtonsComponent]
+      imports: [SlidersControlButtonsComponent],
+      providers: [provideZonelessChangeDetection()]
     })
     .compileComponents();
 

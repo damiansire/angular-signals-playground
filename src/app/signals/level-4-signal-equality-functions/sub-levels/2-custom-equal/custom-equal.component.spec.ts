@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
 
 import { CustomEqualComponent } from './custom-equal.component';
 
@@ -9,6 +10,7 @@ describe('CustomEqualComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [CustomEqualComponent],
+      providers: [provideZonelessChangeDetection()],
     }).compileComponents();
 
     fixture = TestBed.createComponent(CustomEqualComponent);

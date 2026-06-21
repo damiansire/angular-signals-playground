@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
 
 import { OnCleanupComponent } from './on-cleanup.component';
 
@@ -9,6 +10,7 @@ describe('OnCleanupComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [OnCleanupComponent],
+      providers: [provideZonelessChangeDetection()],
     }).compileComponents();
 
     fixture = TestBed.createComponent(OnCleanupComponent);

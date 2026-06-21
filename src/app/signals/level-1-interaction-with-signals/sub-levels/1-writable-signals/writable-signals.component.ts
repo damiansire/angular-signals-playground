@@ -4,7 +4,7 @@ import {
   ViewChild,
   computed,
   signal,
-  ChangeDetectionStrategy, OnInit
+  ChangeDetectionStrategy
 } from '@angular/core';
 import { CodeLine } from '../../../../components-atom/component-atom.interface';
 import { ColumnAndCodeLayoutComponent } from '../../../../layouts/column-and-code-layout/column-and-code-layout.component';
@@ -16,15 +16,11 @@ import { ColumnAndCodeLayoutComponent } from '../../../../layouts/column-and-cod
     changeDetection: ChangeDetectionStrategy.OnPush,
     imports: [ColumnAndCodeLayoutComponent]
 })
-export class WritableSignalsComponent implements OnInit {
+export class WritableSignalsComponent {
   count = signal(0);
   @ViewChild('signalSetInput') myInput!: ElementRef<HTMLInputElement>;
-  ngOnInit() {
-    console.log('The count is: ' + this.count());
-  }
   update() {
     this.count.update((value) => value + 1);
-    console.log(this.count());
   }
 
   lines = computed<CodeLine[]>(() => [

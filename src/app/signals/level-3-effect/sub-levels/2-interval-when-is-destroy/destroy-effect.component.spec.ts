@@ -1,4 +1,5 @@
-import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
 
 import { DestroyEffectComponent } from './destroy-effect.component';
 
@@ -8,7 +9,8 @@ describe('DestroyEffectComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [DestroyEffectComponent]
+      imports: [DestroyEffectComponent],
+      providers: [provideZonelessChangeDetection()]
     })
     .compileComponents();
 
@@ -36,20 +38,25 @@ describe('DestroyEffectComponent', () => {
     expect(component.autoRefresh()).toBeTrue();
   });
 
-  it('destroy oculta el componente pero NO limpia el intervalo (leak intencional)', fakeAsync(() => {
-    component.setAutoRefresh(true);
-    fixture.detectChanges(); // programa el intervalo
-    tick(1000);
-    const afterFirst = component.appEventHistory().length;
-    expect(afterFirst).toBeGreaterThanOrEqual(1);
+  it('destroy oculta el componente pero NO limpia el intervalo (leak intencional)', () => {
+    jasmine.clock().install();
+    try {
+      component.setAutoRefresh(true);
+      fixture.detectChanges(); // corre el effect -> programa el intervalo
+      jasmine.clock().tick(1000);
+      const afterFirst = component.appEventHistory().length;
+      expect(afterFirst).toBeGreaterThanOrEqual(1);
 
-    component.destroy();
-    expect(component.showComponent).toBeFalse();
+      component.destroy();
+      expect(component.showComponent).toBeFalse();
 
-    // el intervalo sigue vivo: el historial sigue creciendo
-    tick(1000);
-    expect(component.appEventHistory().length).toBeGreaterThan(afterFirst);
-  }));
+      // el intervalo sigue vivo: el historial sigue creciendo
+      jasmine.clock().tick(1000);
+      expect(component.appEventHistory().length).toBeGreaterThan(afterFirst);
+    } finally {
+      jasmine.clock().uninstall();
+    }
+  });
 
   it('lines resalta el comentario del leak (no limpiamos el intervalo)', () => {
     const leakLine = component

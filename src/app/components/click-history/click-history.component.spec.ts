@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
 
 import { ClickHistoryComponent } from './click-history.component';
 import { ClickInButton } from '../component.interface';
@@ -9,7 +10,8 @@ describe('ClickHistoryComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [ClickHistoryComponent]
+      imports: [ClickHistoryComponent],
+      providers: [provideZonelessChangeDetection()]
     })
     .compileComponents();
 

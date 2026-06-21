@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
 
 import { ViewChildrenComponent } from './view-children.component';
 
@@ -9,6 +10,7 @@ describe('ViewChildrenComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [ViewChildrenComponent],
+      providers: [provideZonelessChangeDetection()],
     }).compileComponents();
 
     fixture = TestBed.createComponent(ViewChildrenComponent);

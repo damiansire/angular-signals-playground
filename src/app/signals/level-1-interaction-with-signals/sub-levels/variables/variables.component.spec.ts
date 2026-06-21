@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
 
 import { VariablesComponent } from './variables.component';
 
@@ -8,7 +9,8 @@ describe('VariablesComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [VariablesComponent]
+      imports: [VariablesComponent],
+      providers: [provideZonelessChangeDetection()]
     })
     .compileComponents();
 

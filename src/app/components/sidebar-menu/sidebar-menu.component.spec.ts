@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
 
 import { SidebarMenuComponent } from './sidebar-menu.component';
 import { provideRouter } from '@angular/router';
@@ -10,7 +11,7 @@ describe('SidebarMenuComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [SidebarMenuComponent],
-      providers: [provideRouter([])],
+      providers: [provideZonelessChangeDetection(), provideRouter([])],
     }).compileComponents();
 
     fixture = TestBed.createComponent(SidebarMenuComponent);

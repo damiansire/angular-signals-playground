@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
 
 import { EffectLevelComponent } from './effect-level.component';
 
@@ -8,7 +9,8 @@ describe('EffectLevelComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [EffectLevelComponent]
+      imports: [EffectLevelComponent],
+      providers: [provideZonelessChangeDetection()]
     })
     .compileComponents();
 

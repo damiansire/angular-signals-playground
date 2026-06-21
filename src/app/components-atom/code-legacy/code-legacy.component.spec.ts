@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { signal } from '@angular/core';
+import { signal, provideZonelessChangeDetection } from '@angular/core';
 
 import { CodeLegacyComponent } from './code-legacy.component';
 import { CodeLine } from '../component-atom.interface';
@@ -10,7 +10,8 @@ describe('CodeLegacyComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [CodeLegacyComponent]
+      imports: [CodeLegacyComponent],
+      providers: [provideZonelessChangeDetection()]
     })
     .compileComponents();
 

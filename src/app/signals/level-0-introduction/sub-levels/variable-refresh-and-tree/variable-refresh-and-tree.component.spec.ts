@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
 
 import { VariableRefreshAndTreeComponent } from './variable-refresh-and-tree.component';
 import { CodeClick } from '../../../../components-atom/code/code.interface';
@@ -9,7 +10,8 @@ describe('VariableRefreshAndTreeComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [VariableRefreshAndTreeComponent]
+      imports: [VariableRefreshAndTreeComponent],
+      providers: [provideZonelessChangeDetection()]
     })
     .compileComponents();
 

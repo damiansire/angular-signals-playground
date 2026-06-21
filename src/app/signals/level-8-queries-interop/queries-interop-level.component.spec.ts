@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
 
 import { QueriesInteropLevelComponent } from './queries-interop-level.component';
 
@@ -9,6 +10,7 @@ describe('QueriesInteropLevelComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [QueriesInteropLevelComponent],
+      providers: [provideZonelessChangeDetection()],
     }).compileComponents();
 
     fixture = TestBed.createComponent(QueriesInteropLevelComponent);

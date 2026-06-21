@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
 
 import { MenuSubLevelOptionComponent } from './menu-sub-level-option.component';
 import { provideRouter } from '@angular/router';
@@ -10,7 +11,7 @@ describe('MenuSubLevelOptionComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [MenuSubLevelOptionComponent],
-      providers: [provideRouter([])],
+      providers: [provideZonelessChangeDetection(), provideRouter([])],
     }).compileComponents();
 
     fixture = TestBed.createComponent(MenuSubLevelOptionComponent);
@@ -28,21 +29,33 @@ describe('MenuSubLevelOptionComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('muestra el id del item en el li', () => {
-    const li = fixture.nativeElement.querySelector('li') as HTMLElement;
-    expect(li.textContent?.trim()).toBe('2');
+  it('muestra el id del item en el span', () => {
+    const span = fixture.nativeElement.querySelector('span') as HTMLElement;
+    expect(span.textContent?.trim()).toBe('2');
   });
 
   it('aplica pending por defecto y refleja win/current segun levelState', () => {
-    const li = fixture.nativeElement.querySelector('li') as HTMLElement;
-    expect(li.classList).toContain('bg-gray-700');
+    const link = fixture.nativeElement.querySelector('a') as HTMLElement;
+    expect(link.classList).toContain('bg-gray-700');
 
     fixture.componentRef.setInput('levelState', 'win');
     fixture.detectChanges();
-    expect(li.classList).toContain('bg-green-600');
+    expect(link.classList).toContain('bg-green-600');
 
     fixture.componentRef.setInput('levelState', 'current');
     fixture.detectChanges();
-    expect(li.classList).toContain('bg-orange-500');
+    expect(link.classList).toContain('bg-orange-500');
+  });
+
+  it('expone un control accesible por teclado con nombre y aria-current', () => {
+    const link = fixture.nativeElement.querySelector('a') as HTMLAnchorElement;
+    expect(link).toBeTruthy();
+    expect(link.getAttribute('aria-label')).toBe('Sub-nivel 2');
+    expect(link.getAttribute('href')).toContain('signals/level/1/sub-level/2');
+    expect(link.getAttribute('aria-current')).toBeNull();
+
+    fixture.componentRef.setInput('levelState', 'current');
+    fixture.detectChanges();
+    expect(link.getAttribute('aria-current')).toBe('page');
   });
 });

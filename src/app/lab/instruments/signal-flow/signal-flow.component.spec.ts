@@ -1,4 +1,5 @@
 import { TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
 
 import { SignalFlowComponent } from './signal-flow.component';
 
@@ -6,7 +7,7 @@ describe('SignalFlowComponent (signal + computed derivations)', () => {
   let component: SignalFlowComponent;
 
   beforeEach(() => {
-    TestBed.configureTestingModule({ imports: [SignalFlowComponent] });
+    TestBed.configureTestingModule({ imports: [SignalFlowComponent], providers: [provideZonelessChangeDetection()] });
     component = TestBed.createComponent(SignalFlowComponent).componentInstance;
   });
 

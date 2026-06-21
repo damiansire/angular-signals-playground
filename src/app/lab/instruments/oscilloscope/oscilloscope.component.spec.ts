@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
 
 import { OscilloscopeComponent } from './oscilloscope.component';
 
@@ -7,7 +8,7 @@ describe('OscilloscopeComponent (computed trace + imperative effect)', () => {
   let fixture: ComponentFixture<OscilloscopeComponent>;
 
   beforeEach(() => {
-    TestBed.configureTestingModule({ imports: [OscilloscopeComponent] });
+    TestBed.configureTestingModule({ imports: [OscilloscopeComponent], providers: [provideZonelessChangeDetection()] });
     fixture = TestBed.createComponent(OscilloscopeComponent);
     component = fixture.componentInstance;
     fixture.detectChanges(); // primer render: corre el effect inicial

@@ -1,9 +1,13 @@
-<li
-  class="text-center cursor-pointer"
-  [routerLink]="[item().path]"
-  [class.bg-green-600]="levelState() === 'win'"
-  [class.bg-gray-700]="levelState() === 'pending'"
-  [class.bg-orange-500]="levelState() === 'current'"
->
-  {{ item().id }}
+<li class="text-center">
+  <a
+    [routerLink]="[item().path]"
+    [attr.aria-label]="'Sub-nivel ' + item().id"
+    [attr.aria-current]="levelState() === 'current' ? 'page' : null"
+    [class.bg-green-600]="levelState() === 'win'"
+    [class.bg-gray-700]="levelState() === 'pending'"
+    [class.bg-orange-500]="levelState() === 'current'"
+    class="flex items-center justify-center w-8 h-8 rounded-full cursor-pointer mx-auto border border-gray-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-300 focus-visible:ring-offset-2"
+  >
+    <span class="text-white text-sm font-medium">{{ item().id }}</span>
+  </a>
 </li>

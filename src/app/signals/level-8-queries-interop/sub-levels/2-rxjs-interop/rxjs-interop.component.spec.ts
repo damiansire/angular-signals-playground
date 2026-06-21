@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
 
 import { RxjsInteropComponent } from './rxjs-interop.component';
 
@@ -9,6 +10,7 @@ describe('RxjsInteropComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [RxjsInteropComponent],
+      providers: [provideZonelessChangeDetection()],
     }).compileComponents();
 
     fixture = TestBed.createComponent(RxjsInteropComponent);

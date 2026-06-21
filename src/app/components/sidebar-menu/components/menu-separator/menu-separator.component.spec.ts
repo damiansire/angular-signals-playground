@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
 
 import { MenuSeparatorComponent } from './menu-separator.component';
 
@@ -8,7 +9,8 @@ describe('MenuSeparatorComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [MenuSeparatorComponent]
+      imports: [MenuSeparatorComponent],
+      providers: [provideZonelessChangeDetection()]
     })
     .compileComponents();
 

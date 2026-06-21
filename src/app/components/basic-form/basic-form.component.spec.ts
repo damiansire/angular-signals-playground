@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
 
 import { BasicFormComponent } from './basic-form.component';
 
@@ -8,7 +9,8 @@ describe('BasicFormComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [BasicFormComponent]
+      imports: [BasicFormComponent],
+      providers: [provideZonelessChangeDetection()]
     })
     .compileComponents();
 

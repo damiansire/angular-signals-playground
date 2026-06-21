@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
 
 import { WritableSignalsComponent } from './writable-signals.component';
 
@@ -8,7 +9,8 @@ describe('WritableSignalsComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [WritableSignalsComponent]
+      imports: [WritableSignalsComponent],
+      providers: [provideZonelessChangeDetection()]
     })
     .compileComponents();
 

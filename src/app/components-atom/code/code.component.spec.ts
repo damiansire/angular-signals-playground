@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
 
 import { CodeComponent } from './code.component';
 import { CodeLine } from '../component-atom.interface';
@@ -10,7 +11,8 @@ describe('CodeComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [CodeComponent]
+      imports: [CodeComponent],
+      providers: [provideZonelessChangeDetection()]
     })
     .compileComponents();
 

@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
 
 import { TreeComponent } from './tree.component';
 
@@ -8,7 +9,8 @@ describe('TreeComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [TreeComponent]
+      imports: [TreeComponent],
+      providers: [provideZonelessChangeDetection()]
     })
     .compileComponents();
 

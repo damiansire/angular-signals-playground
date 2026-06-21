@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
 
 import { BasicLinkedSignalComponent } from './basic-linked-signal.component';
 
@@ -9,6 +10,7 @@ describe('BasicLinkedSignalComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [BasicLinkedSignalComponent],
+      providers: [provideZonelessChangeDetection()],
     }).compileComponents();
 
     fixture = TestBed.createComponent(BasicLinkedSignalComponent);

@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
 
 import { ZonelessLevelComponent } from './zoneless-level.component';
 
@@ -9,6 +10,7 @@ describe('ZonelessLevelComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [ZonelessLevelComponent],
+      providers: [provideZonelessChangeDetection()],
     }).compileComponents();
 
     fixture = TestBed.createComponent(ZonelessLevelComponent);

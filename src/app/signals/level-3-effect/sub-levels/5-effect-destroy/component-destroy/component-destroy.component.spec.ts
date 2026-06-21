@@ -1,4 +1,5 @@
-import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
 
 import { ComponentDestroyComponent } from './component-destroy.component';
 
@@ -8,7 +9,8 @@ describe('ComponentDestroyComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [ComponentDestroyComponent]
+      imports: [ComponentDestroyComponent],
+      providers: [provideZonelessChangeDetection()]
     })
     .compileComponents();
 
@@ -39,20 +41,25 @@ describe('ComponentDestroyComponent', () => {
     expect(component.autoRefresh()).toBeTrue();
   });
 
-  it('con autoRefresh activo el effect incrementa count y emite cada segundo', fakeAsync(() => {
-    const emissions: Date[] = [];
-    component.newIntervalOutput.subscribe((d) => emissions.push(d));
+  it('con autoRefresh activo el effect incrementa count y emite cada segundo', () => {
+    jasmine.clock().install();
+    try {
+      const emissions: Date[] = [];
+      component.newIntervalOutput.subscribe((d) => emissions.push(d));
 
-    component.autoRefresh.set(true);
-    fixture.detectChanges();
+      component.autoRefresh.set(true);
+      fixture.detectChanges(); // corre el effect -> programa el intervalo
 
-    tick(2000);
-    expect(component.count()).toBe(2);
-    expect(emissions.length).toBe(2);
+      jasmine.clock().tick(2000);
+      expect(component.count()).toBe(2);
+      expect(emissions.length).toBe(2);
 
-    component.autoRefresh.set(false);
-    fixture.detectChanges();
-    tick(2000);
-    expect(component.count()).toBe(2);
-  }));
+      component.autoRefresh.set(false);
+      fixture.detectChanges();
+      jasmine.clock().tick(2000);
+      expect(component.count()).toBe(2);
+    } finally {
+      jasmine.clock().uninstall();
+    }
+  });
 });

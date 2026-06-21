@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
 
 import { ResourceBasicComponent } from './resource-basic.component';
 
@@ -9,6 +10,7 @@ describe('ResourceBasicComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [ResourceBasicComponent],
+      providers: [provideZonelessChangeDetection()],
     }).compileComponents();
 
     fixture = TestBed.createComponent(ResourceBasicComponent);

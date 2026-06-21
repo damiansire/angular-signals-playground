@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
 
 import { CountIncrementComponent } from './count-increment.component';
 
@@ -8,7 +9,8 @@ describe('CountIncrementComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [CountIncrementComponent]
+      imports: [CountIncrementComponent],
+      providers: [provideZonelessChangeDetection()]
     })
     .compileComponents();
 

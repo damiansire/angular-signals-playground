@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
 
 import { HtmlToTreeComponent } from './html-to-tree.component';
 import { CodeClick } from '../../../../components-atom/code/code.interface';
@@ -9,7 +10,8 @@ describe('HtmlToTreeComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [HtmlToTreeComponent]
+      imports: [HtmlToTreeComponent],
+      providers: [provideZonelessChangeDetection()]
     })
     .compileComponents();
 

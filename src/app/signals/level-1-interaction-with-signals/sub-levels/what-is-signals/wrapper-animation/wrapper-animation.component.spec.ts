@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
 
 import { WrapperAnimationComponent } from './wrapper-animation.component';
 
@@ -8,7 +9,8 @@ describe('WrapperAnimationComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [WrapperAnimationComponent]
+      imports: [WrapperAnimationComponent],
+      providers: [provideZonelessChangeDetection()]
     })
     .compileComponents();
 

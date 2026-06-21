@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
 
 import { AfterRenderEffectComponent } from './after-render-effect.component';
 
@@ -9,6 +10,7 @@ describe('AfterRenderEffectComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [AfterRenderEffectComponent],
+      providers: [provideZonelessChangeDetection()],
     }).compileComponents();
 
     fixture = TestBed.createComponent(AfterRenderEffectComponent);

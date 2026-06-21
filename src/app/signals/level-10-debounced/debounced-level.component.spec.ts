@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
 
 import { DebouncedLevelComponent } from './debounced-level.component';
 
@@ -9,6 +10,7 @@ describe('DebouncedLevelComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [DebouncedLevelComponent],
+      providers: [provideZonelessChangeDetection()],
     }).compileComponents();
 
     fixture = TestBed.createComponent(DebouncedLevelComponent);

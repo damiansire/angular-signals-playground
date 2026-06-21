@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
 
 import { VariableBoxComponent } from './variable-box.component';
 
@@ -8,7 +9,8 @@ describe('VariableBoxComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [VariableBoxComponent]
+      imports: [VariableBoxComponent],
+      providers: [provideZonelessChangeDetection()]
     })
     .compileComponents();
 

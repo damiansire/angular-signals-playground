@@ -1,4 +1,5 @@
-import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
 
 import { EffectDestroyComponent } from './effect-destroy.component';
 
@@ -8,7 +9,8 @@ describe('EffectDestroyComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [EffectDestroyComponent]
+      imports: [EffectDestroyComponent],
+      providers: [provideZonelessChangeDetection()]
     })
     .compileComponents();
 
@@ -35,20 +37,25 @@ describe('EffectDestroyComponent', () => {
     expect(component.autoRefresh()).toBeTrue();
   });
 
-  it('destroy oculta el componente Y limpia el intervalo (sin leak)', fakeAsync(() => {
-    component.setAutoRefresh(true);
-    fixture.detectChanges(); // programa el intervalo
-    tick(1000);
-    const afterFirst = component.appEventHistory().length;
-    expect(afterFirst).toBeGreaterThanOrEqual(1);
+  it('destroy oculta el componente Y limpia el intervalo (sin leak)', () => {
+    jasmine.clock().install();
+    try {
+      component.setAutoRefresh(true);
+      fixture.detectChanges(); // corre el effect -> programa el intervalo
+      jasmine.clock().tick(1000);
+      const afterFirst = component.appEventHistory().length;
+      expect(afterFirst).toBeGreaterThanOrEqual(1);
 
-    component.destroy();
-    expect(component.showComponent).toBeFalse();
+      component.destroy();
+      expect(component.showComponent).toBeFalse();
 
-    // el cleanup detuvo el intervalo: el historial NO crece mas
-    tick(3000);
-    expect(component.appEventHistory().length).toBe(afterFirst);
-  }));
+      // el cleanup detuvo el intervalo: el historial NO crece mas
+      jasmine.clock().tick(3000);
+      expect(component.appEventHistory().length).toBe(afterFirst);
+    } finally {
+      jasmine.clock().uninstall();
+    }
+  });
 
   it('lines resalta el clearInterval del cleanup', () => {
     const cleanupLine = component

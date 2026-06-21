@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
 
 import { DrawPreviewComponent } from './draw-preview.component';
 
@@ -8,7 +9,8 @@ describe('DrawPreviewComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [DrawPreviewComponent]
+      imports: [DrawPreviewComponent],
+      providers: [provideZonelessChangeDetection()]
     })
     .compileComponents();
 

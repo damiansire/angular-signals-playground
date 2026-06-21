@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
 
 import { CounterInputComponent } from './counter-input.component';
 
@@ -9,6 +10,7 @@ describe('CounterInputComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [CounterInputComponent],
+      providers: [provideZonelessChangeDetection()],
     }).compileComponents();
 
     fixture = TestBed.createComponent(CounterInputComponent);

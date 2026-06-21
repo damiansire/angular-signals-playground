@@ -1,4 +1,5 @@
-import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
 
 import { DestroyBoxComponent } from './destroy-box.component';
 
@@ -8,7 +9,8 @@ describe('DestroyBoxComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [DestroyBoxComponent]
+      imports: [DestroyBoxComponent],
+      providers: [provideZonelessChangeDetection()]
     })
     .compileComponents();
 
@@ -52,20 +54,25 @@ describe('DestroyBoxComponent', () => {
     expect(component.autoRefresh()).toBeFalse();
   });
 
-  it('con autoRefresh activo el effect emite newIntervalOutput cada segundo', fakeAsync(() => {
-    const emissions: Date[] = [];
-    component.newIntervalOutput.subscribe((d) => emissions.push(d));
+  it('con autoRefresh activo el effect emite newIntervalOutput cada segundo', () => {
+    jasmine.clock().install();
+    try {
+      const emissions: Date[] = [];
+      component.newIntervalOutput.subscribe((d) => emissions.push(d));
 
-    component.autoRefresh.set(true);
-    fixture.detectChanges(); // corre el effect -> programa el intervalo
+      component.autoRefresh.set(true);
+      fixture.detectChanges(); // corre el effect -> programa el intervalo
 
-    tick(1000);
-    expect(emissions.length).toBe(1);
+      jasmine.clock().tick(1000);
+      expect(emissions.length).toBe(1);
 
-    // limpiar el intervalo para no dejar timers vivos
-    component.autoRefresh.set(false);
-    fixture.detectChanges();
-    tick(1000);
-    expect(emissions.length).toBe(1);
-  }));
+      // limpiar el intervalo para no dejar timers vivos
+      component.autoRefresh.set(false);
+      fixture.detectChanges();
+      jasmine.clock().tick(1000);
+      expect(emissions.length).toBe(1);
+    } finally {
+      jasmine.clock().uninstall();
+    }
+  });
 });

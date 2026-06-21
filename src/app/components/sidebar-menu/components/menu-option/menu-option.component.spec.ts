@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
 
 import { MenuOptionComponent } from './menu-option.component';
 import { provideRouter } from '@angular/router';
@@ -10,7 +11,7 @@ describe('MenuOptionComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [MenuOptionComponent],
-      providers: [provideRouter([])],
+      providers: [provideZonelessChangeDetection(), provideRouter([])],
     }).compileComponents();
 
     fixture = TestBed.createComponent(MenuOptionComponent);

@@ -1,4 +1,5 @@
 import { TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
 
 import { ReactiveCellsComponent } from './reactive-cells.component';
 
@@ -6,7 +7,7 @@ describe('ReactiveCellsComponent (computed cascade)', () => {
   let component: ReactiveCellsComponent;
 
   beforeEach(() => {
-    TestBed.configureTestingModule({ imports: [ReactiveCellsComponent] });
+    TestBed.configureTestingModule({ imports: [ReactiveCellsComponent], providers: [provideZonelessChangeDetection()] });
     component = TestBed.createComponent(ReactiveCellsComponent).componentInstance;
   });
 

@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { signal } from '@angular/core';
+import { signal, provideZonelessChangeDetection } from '@angular/core';
 
 import { EventHistoryComponent } from './event-history.component';
 import { HistoryElement } from '../component.interface';
@@ -10,7 +10,8 @@ describe('EventHistoryComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [EventHistoryComponent]
+      imports: [EventHistoryComponent],
+      providers: [provideZonelessChangeDetection()]
     })
     .compileComponents();
 

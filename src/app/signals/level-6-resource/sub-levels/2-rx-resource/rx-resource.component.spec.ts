@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
 
 import { RxResourceComponent } from './rx-resource.component';
 
@@ -9,6 +10,7 @@ describe('RxResourceComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [RxResourceComponent],
+      providers: [provideZonelessChangeDetection()],
     }).compileComponents();
 
     fixture = TestBed.createComponent(RxResourceComponent);

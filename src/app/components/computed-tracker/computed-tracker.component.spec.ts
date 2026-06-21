@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
 
 import { ComputedTrackerComponent } from './computed-tracker.component';
 import { ClickInButton } from '../component.interface';
@@ -9,7 +10,8 @@ describe('ComputedTrackerComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [ComputedTrackerComponent]
+      imports: [ComputedTrackerComponent],
+      providers: [provideZonelessChangeDetection()]
     })
     .compileComponents();
 

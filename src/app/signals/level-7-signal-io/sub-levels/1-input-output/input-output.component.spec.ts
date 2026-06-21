@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
 
 import { InputOutputComponent } from './input-output.component';
 
@@ -9,6 +10,7 @@ describe('InputOutputComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [InputOutputComponent],
+      providers: [provideZonelessChangeDetection()],
     }).compileComponents();
 
     fixture = TestBed.createComponent(InputOutputComponent);

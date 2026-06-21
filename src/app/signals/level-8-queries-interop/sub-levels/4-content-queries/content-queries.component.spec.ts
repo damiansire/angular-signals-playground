@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
 
 import { ContentQueriesComponent } from './content-queries.component';
 
@@ -9,6 +10,7 @@ describe('ContentQueriesComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [ContentQueriesComponent],
+      providers: [provideZonelessChangeDetection()],
     }).compileComponents();
 
     fixture = TestBed.createComponent(ContentQueriesComponent);

@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
 
 import { ManualComponent } from './manual.component';
 
@@ -7,7 +8,7 @@ describe('ManualComponent (diamond dependency, glitch-free)', () => {
   let fixture: ComponentFixture<ManualComponent>;
 
   beforeEach(() => {
-    TestBed.configureTestingModule({ imports: [ManualComponent] });
+    TestBed.configureTestingModule({ imports: [ManualComponent], providers: [provideZonelessChangeDetection()] });
     fixture = TestBed.createComponent(ManualComponent);
     component = fixture.componentInstance;
     fixture.detectChanges(); // primer render: corre el effect inicial

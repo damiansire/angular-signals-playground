@@ -35,6 +35,7 @@ export class EffectComponent {
       () => {
         const trigger = this.count() === 0 ? 'effect(1) inicial' : 'effect(1) corrió';
         this.addConditionalCountRecomputation(trigger, this.count(), false);
+        // eslint-disable-next-line no-console -- demo didactica: refleja el console.log mostrado en pantalla
         console.log(`The current count is: ${this.count()}`);
       }
     );
@@ -42,6 +43,7 @@ export class EffectComponent {
       () => {
         const trigger = this.count2() === 0 ? 'effect(2) inicial' : 'effect(2) corrió';
         this.addConditionalCountRecomputation(trigger, this.count2(), false);
+        // eslint-disable-next-line no-console -- demo didactica: refleja el console.log mostrado en pantalla
         console.log(`The current count is: ${this.count2()}`);
       }
     );

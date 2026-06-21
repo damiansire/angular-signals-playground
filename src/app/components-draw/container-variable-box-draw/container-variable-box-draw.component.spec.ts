@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
 
 import { ContainerVariableBoxDrawComponent } from './container-variable-box-draw.component';
 
@@ -8,7 +9,8 @@ describe('ContainerVariableBoxDrawComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [ContainerVariableBoxDrawComponent]
+      imports: [ContainerVariableBoxDrawComponent],
+      providers: [provideZonelessChangeDetection()]
     })
     .compileComponents();
 

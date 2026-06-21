@@ -1,4 +1,4 @@
-import { Component, signal } from '@angular/core';
+import { Component, signal, provideZonelessChangeDetection } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { ColumnAndCodeLayoutComponent } from './column-and-code-layout.component';
@@ -28,7 +28,8 @@ describe('ColumnAndCodeLayoutComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [ColumnAndCodeLayoutComponent]
+      imports: [ColumnAndCodeLayoutComponent],
+      providers: [provideZonelessChangeDetection()]
     })
     .compileComponents();
 

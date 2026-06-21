@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
 
 import { SignalEqualityLevelComponent } from './signal-equality-level.component';
 
@@ -9,6 +10,7 @@ describe('SignalEqualityLevelComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [SignalEqualityLevelComponent],
+      providers: [provideZonelessChangeDetection()],
     }).compileComponents();
 
     fixture = TestBed.createComponent(SignalEqualityLevelComponent);

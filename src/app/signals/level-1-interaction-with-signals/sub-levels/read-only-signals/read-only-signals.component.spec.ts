@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
 
 import { ReadOnlySignalsComponent } from './read-only-signals.component';
 
@@ -8,7 +9,8 @@ describe('ReadOnlySignalsComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [ReadOnlySignalsComponent]
+      imports: [ReadOnlySignalsComponent],
+      providers: [provideZonelessChangeDetection()]
     })
     .compileComponents();
 

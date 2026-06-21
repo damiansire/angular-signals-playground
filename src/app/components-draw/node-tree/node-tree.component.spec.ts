@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { signal } from '@angular/core';
+import { signal, provideZonelessChangeDetection } from '@angular/core';
 
 import { NodeTreeComponent } from './node-tree.component';
 import { Link, NodeTree } from '../components-draw.inferface';
@@ -10,7 +10,8 @@ describe('NodeTreeComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [NodeTreeComponent]
+      imports: [NodeTreeComponent],
+      providers: [provideZonelessChangeDetection()]
     })
     .compileComponents();
 

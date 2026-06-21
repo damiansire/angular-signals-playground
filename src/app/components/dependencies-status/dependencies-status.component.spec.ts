@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { signal } from '@angular/core';
+import { signal, provideZonelessChangeDetection } from '@angular/core';
 
 import { DependenciesStatusComponent } from './dependencies-status.component';
 
@@ -9,7 +9,8 @@ describe('DependenciesStatusComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [DependenciesStatusComponent]
+      imports: [DependenciesStatusComponent],
+      providers: [provideZonelessChangeDetection()]
     })
     .compileComponents();
 

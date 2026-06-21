@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
 
 import { ComputedSignalsComponent } from './computed-signals.component';
 
@@ -8,7 +9,8 @@ describe('ComputedSignalsComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [ComputedSignalsComponent]
+      imports: [ComputedSignalsComponent],
+      providers: [provideZonelessChangeDetection()]
     })
     .compileComponents();
 

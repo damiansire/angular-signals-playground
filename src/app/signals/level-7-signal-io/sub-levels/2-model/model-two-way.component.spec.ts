@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
 
 import { ModelTwoWayComponent } from './model-two-way.component';
 
@@ -9,6 +10,7 @@ describe('ModelTwoWayComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [ModelTwoWayComponent],
+      providers: [provideZonelessChangeDetection()],
     }).compileComponents();
 
     fixture = TestBed.createComponent(ModelTwoWayComponent);
