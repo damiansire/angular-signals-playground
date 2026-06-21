@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { signal, provideZonelessChangeDetection } from '@angular/core';
+import { provideZonelessChangeDetection } from '@angular/core';
 
 import { NodeTreeComponent } from './node-tree.component';
 import { Link, NodeTree } from '../components-draw.inferface';
@@ -41,8 +41,8 @@ describe('NodeTreeComponent', () => {
     ];
     const links: Link[] = [{ source: 'a', target: 'b' }];
 
-    fixture.componentRef.setInput('nodes', signal(nodes));
-    fixture.componentRef.setInput('links', signal(links));
+    fixture.componentRef.setInput('nodes', nodes);
+    fixture.componentRef.setInput('links', links);
     fixture.detectChanges();
 
     const series = (component.chartOption().series as unknown[])[0] as {

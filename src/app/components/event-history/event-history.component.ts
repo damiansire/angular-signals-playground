@@ -1,4 +1,4 @@
-import { Component, input, Signal, signal, ChangeDetectionStrategy } from '@angular/core';
+import { Component, input, ChangeDetectionStrategy } from '@angular/core';
 import { HistoryElement } from '../component.interface';
 
 @Component({
@@ -11,7 +11,7 @@ import { HistoryElement } from '../component.interface';
 export class EventHistoryComponent {
   readonly title = input('text');
   readonly stateName = input('Count');
-  readonly history = input<Signal<HistoryElement[]>>(signal([]));
+  readonly history = input<HistoryElement[]>([]);
   beforeNumber(value: string | number): number {
     return Number(value) - 1;
   }

@@ -18,14 +18,14 @@
     />
     <div class="mt-6">
       <app-dependencies-status
-        [dependencies]="dependencies"
+        [dependencies]="dependencies()"
         computedName="effect (1)"
       ></app-dependencies-status>
     </div>
 
     <div class="mt-6">
       <app-dependencies-status
-        [dependencies]="dependencies2"
+        [dependencies]="dependencies2()"
         computedName="effect (2)"
       ></app-dependencies-status>
     </div>
@@ -33,7 +33,7 @@
   <div class="flex-grow px-10">
     <app-event-history
       title="Effect Execution"
-      [history]="appEventHistory"
+      [history]="appEventHistory()"
       stateName="Count Number:"
     ></app-event-history>
   </div>

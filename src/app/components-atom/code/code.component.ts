@@ -1,12 +1,4 @@
-import {
-  Component,
-  effect,
-  input,
-  output,
-  Signal,
-  signal,
-  ChangeDetectionStrategy,
-} from '@angular/core';
+import { Component, effect, input, output, signal, ChangeDetectionStrategy } from '@angular/core';
 import { CodeLine, CodeLineElement } from '../component-atom.interface';
 import { isTag, spliteInTags, HtmlIdGeneratorService, HtmlHelper } from '../../libs/code-parser';
 import { TailwindTextSize } from '../../interfaces/tailwind-css.interface';
@@ -20,8 +12,6 @@ import { CodeClick } from './code.interface';
   styleUrl: './code.component.css',
 })
 export class CodeComponent {
-  //@deprecated
-  readonly lines = input<Signal<CodeLine[]>>(signal([]));
   readonly textSize = input<TailwindTextSize>('text-2xl');
   readonly selectBy = input<'Line' | 'Element'>('Element');
   htmlCode = input<string>('');

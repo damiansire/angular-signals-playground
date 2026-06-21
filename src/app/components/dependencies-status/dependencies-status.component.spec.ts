@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { signal, provideZonelessChangeDetection } from '@angular/core';
+import { provideZonelessChangeDetection } from '@angular/core';
 
 import { DependenciesStatusComponent } from './dependencies-status.component';
 
@@ -35,7 +35,7 @@ describe('DependenciesStatusComponent', () => {
   });
 
   it('muestra Signals Inside y sus chips cuando hay signals', () => {
-    fixture.componentRef.setInput('signalsInside', signal(['a', 'b']));
+    fixture.componentRef.setInput('signalsInside', ['a', 'b']);
     fixture.detectChanges();
     const text = (fixture.nativeElement as HTMLElement).textContent ?? '';
     expect(text).toContain('Signals Inside');
@@ -44,7 +44,7 @@ describe('DependenciesStatusComponent', () => {
   });
 
   it('renderiza un chip por cada dependency', () => {
-    fixture.componentRef.setInput('dependencies', signal(['x', 'y', 'z']));
+    fixture.componentRef.setInput('dependencies', ['x', 'y', 'z']);
     fixture.detectChanges();
     const chips = fixture.nativeElement.querySelectorAll('.bg-gray-700');
     expect(chips.length).toBe(3);

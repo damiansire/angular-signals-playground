@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { signal, provideZonelessChangeDetection } from '@angular/core';
+import { provideZonelessChangeDetection } from '@angular/core';
 
 import { EventHistoryComponent } from './event-history.component';
 import { HistoryElement } from '../component.interface';
@@ -41,7 +41,7 @@ describe('EventHistoryComponent', () => {
       { date: new Date(), trigger: 'update', newState: 2, isCountIncrement: false },
     ];
     fixture.componentRef.setInput('stateName', 'Counter');
-    fixture.componentRef.setInput('history', signal(history));
+    fixture.componentRef.setInput('history', history);
     fixture.detectChanges();
 
     const triggers = fixture.nativeElement.querySelectorAll('h3');

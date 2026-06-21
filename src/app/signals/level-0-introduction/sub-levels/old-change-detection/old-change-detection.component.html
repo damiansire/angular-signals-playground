@@ -4,7 +4,7 @@
   observe="El barrido pinta los nodos nivel por nivel (verde = revisado)."
 />
 <div>
-  <app-node-tree [nodes]="data" [links]="links" title="Old Change Detection"></app-node-tree>
+  <app-node-tree [nodes]="data()" [links]="links()"></app-node-tree>
 </div>
 
 <div class="flex justify-center space-x-4">

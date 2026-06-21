@@ -28,8 +28,8 @@
 
       <br />
       <app-dependencies-status
-        [dependencies]="dependencies"
-        [signalsInside]="signalsInside"
+        [dependencies]="dependencies()"
+        [signalsInside]="signalsInside()"
         computedName="conditionalCount"
       ></app-dependencies-status>
     </div>
@@ -37,11 +37,11 @@
   <div>
     <app-event-history
       title="conditionalCount Recomputations"
-      [history]="conditionalCountHistory"
+      [history]="conditionalCountHistory()"
     ></app-event-history>
     <app-event-history
       title="All Signals Recomputations"
-      [history]="appEventHistory"
+      [history]="appEventHistory()"
     ></app-event-history>
   </div>
   <div>
