@@ -6,56 +6,51 @@ import { EventHistoryComponent } from '../../../../components/event-history/even
 import { ConceptCardComponent } from '../../../../components-atom/concept-card/concept-card.component';
 
 @Component({
-    selector: 'app-effect-destroy',
-    templateUrl: './effect-destroy.component.html',
-    styleUrl: './effect-destroy.component.css',
-    changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [ComponentDestroyComponent, EventHistoryComponent, ConceptCardComponent]
+  selector: 'app-effect-destroy',
+  templateUrl: './effect-destroy.component.html',
+  styleUrl: './effect-destroy.component.css',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [ComponentDestroyComponent, EventHistoryComponent, ConceptCardComponent],
 })
 export class EffectDestroyComponent {
   autoRefresh = signal(false);
   appEventHistory = signal<HistoryElement[]>([]);
   count = signal(0);
   lines = computed<CodeLine[]>(() => [
-    { line: 'effect(() => {', active: false },
+    { line: 'effect((onCleanup) => {', active: false },
     { line: '  if (this.autoRefresh()) {', active: this.autoRefresh() },
     { line: '    this.intervalSave = setInterval(() => {', active: this.autoRefresh() },
     { line: '      this.count.update((x) => x + 1);', active: this.autoRefresh() },
     { line: '      this.addToHistory(this.count());', active: this.autoRefresh() },
     { line: '    }, 1000);', active: this.autoRefresh() },
-    { line: '  } else {', active: !this.autoRefresh() },
-    { line: '    clearInterval(this.intervalSave);', active: !this.autoRefresh() },
+    {
+      line: '    onCleanup(() => clearInterval(this.intervalSave)); // limpieza idiomatica',
+      active: this.autoRefresh(),
+    },
     { line: '  }', active: false },
     { line: '});', active: false },
-    { line: '', active: false },
-    { line: 'destroy() {', active: false },
-    { line: '  this.showComponent = false;', active: false },
-    { line: '  clearInterval(this.intervalSave); // limpieza -> se detiene', active: true },
-    { line: '}', active: false },
   ]);
   intervalSave: ReturnType<typeof setInterval> | undefined;
 
   constructor() {
-    effect(() => {
+    effect((onCleanup) => {
       if (this.autoRefresh()) {
         this.intervalSave = setInterval(() => {
           this.count.update((x) => x + 1);
           const event = new Date();
-          this.addConditionalCountRecomputation(
-            this.getFormattedTime(event),
-            this.count(),
-            true
-          );
+          this.addConditionalCountRecomputation(this.getFormattedTime(event), this.count(), true);
         }, 1000);
-      } else {
-        clearInterval(this.intervalSave);
+        // onCleanup corre al re-evaluar el effect (autoRefresh -> false) Y al
+        // destruirse el componente (navegacion). Asi el setInterval nunca queda
+        // huerfano: sin leak aunque se salga por ruta.
+        onCleanup(() => clearInterval(this.intervalSave));
       }
     });
   }
   showComponent = true;
   destroy() {
     this.showComponent = false;
-    clearInterval(this.intervalSave);
+    this.autoRefresh.set(false);
   }
   setAutoRefresh(event: boolean) {
     this.autoRefresh.set(event);
@@ -63,7 +58,7 @@ export class EffectDestroyComponent {
   addConditionalCountRecomputation(
     trigger: string,
     newState: number | string,
-    isCountIncrement: boolean
+    isCountIncrement: boolean,
   ) {
     this.appEventHistory.update((prevHistory) => {
       const newHistory = prevHistory.length ? [...prevHistory] : [];

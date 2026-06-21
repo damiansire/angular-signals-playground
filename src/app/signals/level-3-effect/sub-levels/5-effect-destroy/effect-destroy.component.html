@@ -1,16 +1,16 @@
 <app-concept-card
-  concept="Para evitar leaks, limpiamos el intervalo manualmente al destruir (clearInterval)."
+  concept="Para evitar leaks, registramos la limpieza con onCleanup dentro del propio effect: corre al apagar Auto Refresh y también al destruirse el componente (navegación)."
   action="Activá Auto Refresh y tocá Destroy."
-  observe="Ahora 'Effect Evaluation' deja de crecer: el cleanup detuvo el intervalo."
+  observe="Ahora 'Effect Evaluation' deja de crecer: el onCleanup detuvo el intervalo."
 />
 
 <div class="flex flex-col w-full">
   <button (click)="destroy()">Destroy</button>
   <div class="flex w-full">
-    @if(showComponent){
-    <div>
-      <app-component-destroy (autoRefreshEvent)="setAutoRefresh($event)" />
-    </div>
+    @if (showComponent) {
+      <div>
+        <app-component-destroy (autoRefreshEvent)="setAutoRefresh($event)" />
+      </div>
     }
     <div class="w-full">
       <app-event-history
