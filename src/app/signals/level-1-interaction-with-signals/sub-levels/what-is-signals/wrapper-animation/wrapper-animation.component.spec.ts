@@ -20,4 +20,10 @@ describe('WrapperAnimationComponent', () => {
   it('should create', () => {
     expect(component).toBeTruthy();
   });
+
+  it('es un componente presentacional sin contenido en el template (animacion via CSS)', () => {
+    const host = fixture.nativeElement as HTMLElement;
+    expect(host.children.length).toBe(0);
+    expect(host.textContent?.trim()).toBe('');
+  });
 });
