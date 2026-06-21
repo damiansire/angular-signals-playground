@@ -1,4 +1,12 @@
-import { Component, effect, input, output, signal, ChangeDetectionStrategy } from '@angular/core';
+import {
+  Component,
+  computed,
+  input,
+  linkedSignal,
+  output,
+  ChangeDetectionStrategy,
+} from '@angular/core';
+import { outputFromObservable, toObservable } from '@angular/core/rxjs-interop';
 import { CodeLine, CodeLineElement } from '../component-atom.interface';
 import { isTag, spliteInTags, HtmlIdGeneratorService, HtmlHelper } from '../../libs/code-parser';
 import { TailwindTextSize } from '../../interfaces/tailwind-css.interface';
@@ -16,9 +24,14 @@ export class CodeComponent {
   readonly selectBy = input<'Line' | 'Element'>('Element');
   htmlCode = input<string>('');
   readonly codeClick = output<CodeClick>();
-  readonly htmlParsed = output<CodeLine[]>();
 
-  codeLines = signal<CodeLine[]>([]);
+  // Resultado del parseo derivado del input (estado estrictamente derivado).
+  private readonly parsedLines = computed<CodeLine[]>(() => this.parseCode(this.htmlCode()));
+  // Las lineas visibles parten del parseo pero deben poder mutar con los clicks,
+  // por eso es un linkedSignal (no un effect que propaga estado).
+  codeLines = linkedSignal<CodeLine[]>(() => this.parsedLines());
+  // htmlParsed se deriva del parseo en vez de emitirse dentro de un effect.
+  readonly htmlParsed = outputFromObservable(toObservable(this.parsedLines));
   characterIndentSize = 12;
 
   lineClasses(item: CodeLine): string {
@@ -26,11 +39,6 @@ export class CodeComponent {
       ? 'bg-green-700 text-white'
       : 'bg-gray-800 text-gray-300 hover:bg-green-800 hover:text-white';
     return `${this.textSize()} ${state}`;
-  }
-  constructor() {
-    effect(() => {
-      this.codeLines.set(this.parseCode(this.htmlCode()));
-    });
   }
 
   parseCode(code: string): CodeLine[] {
@@ -60,7 +68,6 @@ export class CodeComponent {
       parsedCode.push(newElement);
     }
 
-    this.htmlParsed.emit(parsedCode);
     return parsedCode;
   }
 
