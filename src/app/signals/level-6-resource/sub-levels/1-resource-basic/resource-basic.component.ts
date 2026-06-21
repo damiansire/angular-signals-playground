@@ -1,10 +1,4 @@
-import {
-  Component,
-  ChangeDetectionStrategy,
-  computed,
-  resource,
-  signal,
-} from '@angular/core';
+import { Component, ChangeDetectionStrategy, computed, resource, signal } from '@angular/core';
 import { CodeLine } from '../../../../components-atom/component-atom.interface';
 import { ColumnAndCodeLayoutComponent } from '../../../../layouts/column-and-code-layout/column-and-code-layout.component';
 import { DemoUser, lookupUser } from '../../users.data';
@@ -51,6 +45,9 @@ export class ResourceBasicComponent {
     { line: '  loader: ({ params }) => fetchUser(params),', active: true },
     { line: '});', active: true },
     { line: '', active: false },
-    { line: '// status(): idle | loading | resolved | error', active: false },
+    {
+      line: '// status(): idle | loading | reloading | resolved | error | local',
+      active: false,
+    },
   ]);
 }
