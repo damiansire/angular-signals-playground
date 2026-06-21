@@ -375,4 +375,19 @@ describe('generateNodes', () => {
     const p = nodes.find((n) => n.id === 'p-1')!;
     expect(p.y).toBeGreaterThan(div.y);
   });
+
+  it('para HTML ramificado centra por NIVEL global, no agrupa por padre (limitacion documentada)', () => {
+    // <div><a/><b/></div><section><c/></section>
+    // Nivel 1: div, section. Nivel 2: a, b (hijos de div) y c (hijo de section).
+    // El layout reparte los 3 hijos del nivel 2 de forma global (sin agrupar bajo
+    // su padre), por eso 'c' no queda bajo 'section'. Este test fija ese tradeoff.
+    const nodes = generateNodes('<div><a></a><b></b></div><section><c></c></section>');
+    const level2 = nodes
+      .filter((n) => n.level === 2)
+      .sort((p, q) => p.x - q.x)
+      .map((n) => ({ id: n.id, x: n.x }));
+    // 3 nodos en el nivel 2, repartidos simetricamente alrededor de x = 0.
+    expect(level2.map((n) => n.x)).toEqual([-200, 0, 200]);
+    expect(level2.length).toBe(3);
+  });
 });

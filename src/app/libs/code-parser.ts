@@ -172,6 +172,13 @@ export function generateNodes(htmlCode: string): NodeTree[] {
   // Posicionamiento horizontal general: cada nivel se centra en x = 0 y sus
   // hermanos se reparten de forma simétrica con un espaciado fijo. Funciona
   // para cualquier cantidad de hermanos (1, 2, 3, 5, 6+), no solo 1/2/4.
+  //
+  // LIMITACIÓN (tradeoff conocido): el layout centra cada NIVEL globalmente,
+  // sin agrupar por padre. Para HTML ramificado (p.ej. <div><a/><b/></div>
+  // <section><c/></section>) un hijo puede no quedar justo debajo de su padre y
+  // las aristas se cruzan. Un Reingold–Tilford completo sería sobre-ingeniería
+  // para este demo; se documenta a propósito en vez de implicar que el caso
+  // general está cubierto.
   const spacing = 200;
   const elementLevelIndex: number[] = [];
   for (const node of nodes) {
