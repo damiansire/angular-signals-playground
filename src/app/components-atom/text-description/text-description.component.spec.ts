@@ -20,4 +20,17 @@ describe('TextDescriptionComponent', () => {
   it('should create', () => {
     expect(component).toBeTruthy();
   });
+
+  it('arranca con el parrafo vacio por defecto', () => {
+    const p = fixture.nativeElement.querySelector('p') as HTMLElement;
+    expect(p).toBeTruthy();
+    expect(p.textContent?.trim()).toBe('');
+  });
+
+  it('refleja el input text en el parrafo', () => {
+    fixture.componentRef.setInput('text', 'Una descripcion de prueba');
+    fixture.detectChanges();
+    const p = fixture.nativeElement.querySelector('p') as HTMLElement;
+    expect(p.textContent?.trim()).toBe('Una descripcion de prueba');
+  });
 });
