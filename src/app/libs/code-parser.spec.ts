@@ -61,8 +61,7 @@ describe('isTag', () => {
     },
     {
       tag: '<button class="btn btn-primary" disabled>',
-      description:
-        'Failed for button with multiple attributes and text content',
+      description: 'Failed for button with multiple attributes and text content',
     },
     {
       tag: '<button (click)="increment()">',
@@ -122,8 +121,7 @@ describe('spliteInTags', () => {
   });
 
   it('should handle tags with attributes', () => {
-    const htmlString =
-      '<div class="container"><p id="my-paragraph">Content</p></div>';
+    const htmlString = '<div class="container"><p id="my-paragraph">Content</p></div>';
     const expectedResult = [
       '<div class="container">',
       '<p id="my-paragraph">',
@@ -136,8 +134,7 @@ describe('spliteInTags', () => {
   });
 
   it('should handle nested tags', () => {
-    const htmlString =
-      '<div><p>Hello <b>world</b>!</p><span> hello word2 </span></div>';
+    const htmlString = '<div><p>Hello <b>world</b>!</p><span> hello word2 </span></div>';
     const expectedResult = [
       '<div>',
       '<p>',
@@ -179,11 +176,7 @@ describe('spliteInTags', () => {
 
   it('should handle CDATA sections', () => {
     const htmlString = '<div><![CDATA[This is CDATA content]]></div>';
-    const expectedResult = [
-      '<div>',
-      '<![CDATA[This is CDATA content]]>',
-      '</div>',
-    ];
+    const expectedResult = ['<div>', '<![CDATA[This is CDATA content]]>', '</div>'];
 
     expect(spliteInTags(htmlString)).toEqual(expectedResult);
   });
@@ -193,18 +186,12 @@ describe('spliteInTags', () => {
   });
 
   it('return the string for a string', () => {
-    expect(spliteInTags('This is just plain text')).toEqual([
-      'This is just plain text',
-    ]);
+    expect(spliteInTags('This is just plain text')).toEqual(['This is just plain text']);
   });
 
   it('should split angular tags', () => {
     const htmlString = '<button (click)="increment()"> Increment </button>';
-    const expectedResult = [
-      '<button (click)="increment()">',
-      ' Increment ',
-      '</button>',
-    ];
+    const expectedResult = ['<button (click)="increment()">', ' Increment ', '</button>'];
 
     expect(spliteInTags(htmlString)).toEqual(expectedResult);
   });
@@ -261,6 +248,21 @@ describe('HtmlHelper', () => {
         isClosingTag: false,
       });
     });
+
+    it('captura el nombre completo de un custom element con guiones', () => {
+      expect(HtmlHelper.getElementType('<app-badge>')).toEqual({
+        element: 'app-badge',
+        isClosingTag: false,
+      });
+      expect(HtmlHelper.getElementType('<my-custom-element class="x">')).toEqual({
+        element: 'my-custom-element',
+        isClosingTag: false,
+      });
+      expect(HtmlHelper.getElementType('</app-badge>')).toEqual({
+        element: 'app-badge',
+        isClosingTag: true,
+      });
+    });
   });
 });
 
@@ -284,9 +286,7 @@ describe('HtmlIdGeneratorService', () => {
     const a = new HtmlIdGeneratorService();
     const b = new HtmlIdGeneratorService();
     const seq = ['<ul>', '<li>', '</li>', '<li>', '</li>', '</ul>'];
-    expect(seq.map((t) => a.generateId(t))).toEqual(
-      seq.map((t) => b.generateId(t)),
-    );
+    expect(seq.map((t) => a.generateId(t))).toEqual(seq.map((t) => b.generateId(t)));
   });
 });
 
@@ -359,9 +359,7 @@ describe('generateNodes', () => {
   });
 
   it('spreads five siblings symmetrically without overlapping at x = 0', () => {
-    const nodes = generateNodes(
-      '<ul><li></li><li></li><li></li><li></li><li></li></ul>',
-    );
+    const nodes = generateNodes('<ul><li></li><li></li><li></li><li></li><li></li></ul>');
     const xs = nodes
       .filter((n) => n.level === 2)
       .map((n) => n.x)

@@ -58,8 +58,10 @@ export class HtmlHelper {
 
   static getElementType(content: string): TagType {
     content = content.trim();
-    const openingTagMatch = content.match(/<([a-z][a-z0-9]*)\b[^>]*>/i);
-    const closingTagMatch = content.match(/<\/([a-z][a-z0-9]*)\b[^>]*>/i);
+    // El grupo de captura admite guiones ([\w-]) igual que isTag, para nombrar
+    // bien los custom elements / componentes Angular (<app-badge>, <my-element>).
+    const openingTagMatch = content.match(/<([a-z][\w-]*)[^>]*>/i);
+    const closingTagMatch = content.match(/<\/([a-z][\w-]*)[^>]*>/i);
     if (openingTagMatch) {
       return { element: openingTagMatch[1].toLowerCase(), isClosingTag: false };
     } else if (closingTagMatch) {
@@ -88,9 +90,7 @@ export class HtmlIdGeneratorService {
       this.tagCounters[counterKey]++;
     }
 
-    return `${tagName}-${elementInfo.isClosingTag ? 'closed-' : ''}${
-      this.tagCounters[counterKey]
-    }`;
+    return `${tagName}-${elementInfo.isClosingTag ? 'closed-' : ''}${this.tagCounters[counterKey]}`;
   }
 }
 
