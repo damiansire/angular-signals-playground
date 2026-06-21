@@ -1,4 +1,3 @@
-
 import {
   ChangeDetectionStrategy,
   Component,
@@ -13,17 +12,15 @@ import { NgxEchartsDirective, provideEchartsCore } from 'ngx-echarts';
 import { Link, NodeTree } from '../components-draw.inferface';
 
 @Component({
-    selector: 'app-node-tree',
-    imports: [NgxEchartsDirective],
-    providers: [provideEchartsCore({ echarts: () => import('echarts') })],
-    templateUrl: './node-tree.component.html',
-    changeDetection: ChangeDetectionStrategy.OnPush,
-    styleUrl: './node-tree.component.css'
+  selector: 'app-node-tree',
+  imports: [NgxEchartsDirective],
+  providers: [provideEchartsCore({ echarts: () => import('echarts') })],
+  templateUrl: './node-tree.component.html',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  styleUrl: './node-tree.component.css',
 })
 export class NodeTreeComponent {
-  readonly nodes = input<WritableSignal<NodeTree[]> | Signal<NodeTree[]>>(
-    signal<NodeTree[]>([])
-  );
+  readonly nodes = input<WritableSignal<NodeTree[]> | Signal<NodeTree[]>>(signal<NodeTree[]>([]));
   readonly links = input<WritableSignal<Link[]>>(signal<Link[]>([]));
   chartOption = computed<EChartsOption>(() => ({
     tooltip: {},

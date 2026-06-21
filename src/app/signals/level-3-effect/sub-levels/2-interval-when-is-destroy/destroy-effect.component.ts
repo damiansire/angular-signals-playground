@@ -7,16 +7,11 @@ import { CodeLegacyComponent } from '../../../../components-atom/code-legacy/cod
 import { ConceptCardComponent } from '../../../../components-atom/concept-card/concept-card.component';
 
 @Component({
-    selector: 'app-destroy-effect',
-    templateUrl: './destroy-effect.component.html',
-    styleUrl: './destroy-effect.component.css',
-    changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [
-        DestroyBoxComponent,
-        EventHistoryComponent,
-        CodeLegacyComponent,
-        ConceptCardComponent,
-    ]
+  selector: 'app-destroy-effect',
+  templateUrl: './destroy-effect.component.html',
+  styleUrl: './destroy-effect.component.css',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [DestroyBoxComponent, EventHistoryComponent, CodeLegacyComponent, ConceptCardComponent],
 })
 export class DestroyEffectComponent {
   autoRefresh = signal(false);
@@ -45,11 +40,7 @@ export class DestroyEffectComponent {
       if (this.autoRefresh()) {
         this.intervalSave = setInterval(() => {
           const event = new Date();
-          this.addConditionalCountRecomputation(
-            'interval',
-            this.getFormattedTime(event),
-            false
-          );
+          this.addConditionalCountRecomputation('interval', this.getFormattedTime(event), false);
         }, 1000);
       } else {
         clearInterval(this.intervalSave);
@@ -66,7 +57,7 @@ export class DestroyEffectComponent {
   addConditionalCountRecomputation(
     trigger: string,
     newState: number | string,
-    isCountIncrement: boolean
+    isCountIncrement: boolean,
   ) {
     this.appEventHistory.update((prevHistory) => {
       const newHistory = prevHistory.length ? [...prevHistory] : [];

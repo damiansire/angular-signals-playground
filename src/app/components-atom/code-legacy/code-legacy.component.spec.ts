@@ -11,9 +11,8 @@ describe('CodeLegacyComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [CodeLegacyComponent],
-      providers: [provideZonelessChangeDetection()]
-    })
-    .compileComponents();
+      providers: [provideZonelessChangeDetection()],
+    }).compileComponents();
 
     fixture = TestBed.createComponent(CodeLegacyComponent);
     component = fixture.componentInstance;
@@ -25,10 +24,13 @@ describe('CodeLegacyComponent', () => {
   });
 
   it('renderiza una linea por cada CodeLine y muestra item.line', () => {
-    fixture.componentRef.setInput('lines', signal<CodeLine[]>([
-      { id: 'a', line: 'const x = 1;' },
-      { id: 'b', line: 'const y = 2;' },
-    ]));
+    fixture.componentRef.setInput(
+      'lines',
+      signal<CodeLine[]>([
+        { id: 'a', line: 'const x = 1;' },
+        { id: 'b', line: 'const y = 2;' },
+      ]),
+    );
     fixture.detectChanges();
 
     const rows = fixture.nativeElement.querySelectorAll('[role="button"]');

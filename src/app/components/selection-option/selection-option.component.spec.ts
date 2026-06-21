@@ -10,9 +10,8 @@ describe('SelectionOptionComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [SelectionOptionComponent],
-      providers: [provideZonelessChangeDetection()]
-    })
-    .compileComponents();
+      providers: [provideZonelessChangeDetection()],
+    }).compileComponents();
 
     fixture = TestBed.createComponent(SelectionOptionComponent);
     component = fixture.componentInstance;

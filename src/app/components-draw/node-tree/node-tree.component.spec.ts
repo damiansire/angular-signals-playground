@@ -11,9 +11,8 @@ describe('NodeTreeComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [NodeTreeComponent],
-      providers: [provideZonelessChangeDetection()]
-    })
-    .compileComponents();
+      providers: [provideZonelessChangeDetection()],
+    }).compileComponents();
 
     fixture = TestBed.createComponent(NodeTreeComponent);
     component = fixture.componentInstance;

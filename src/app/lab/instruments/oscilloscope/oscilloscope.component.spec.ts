@@ -8,7 +8,10 @@ describe('OscilloscopeComponent (computed trace + imperative effect)', () => {
   let fixture: ComponentFixture<OscilloscopeComponent>;
 
   beforeEach(() => {
-    TestBed.configureTestingModule({ imports: [OscilloscopeComponent], providers: [provideZonelessChangeDetection()] });
+    TestBed.configureTestingModule({
+      imports: [OscilloscopeComponent],
+      providers: [provideZonelessChangeDetection()],
+    });
     fixture = TestBed.createComponent(OscilloscopeComponent);
     component = fixture.componentInstance;
     fixture.detectChanges(); // primer render: corre el effect inicial

@@ -13,9 +13,7 @@ describe('ComputedSignalsLazilyEvaluatedMemoizedComponent', () => {
       providers: [provideZonelessChangeDetection()],
     }).compileComponents();
 
-    fixture = TestBed.createComponent(
-      ComputedSignalsLazilyEvaluatedMemoizedComponent
-    );
+    fixture = TestBed.createComponent(ComputedSignalsLazilyEvaluatedMemoizedComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

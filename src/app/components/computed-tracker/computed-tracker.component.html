@@ -6,14 +6,14 @@
   </h1>
   <div class="boxs-container">
     <div class="box-container">
-      @for(element of computedTracker().reverse(); track element){
-      <div class="box">
-        <div class="date-box">{{ element.date | date : "HH:mm:ss" }}</div>
-        <div class="data-box">
-          <div>Name: {{ element.firstName }}</div>
-          <div>Surname: {{ element.surname }}</div>
+      @for (element of computedTracker().reverse(); track element) {
+        <div class="box">
+          <div class="date-box">{{ element.date | date: 'HH:mm:ss' }}</div>
+          <div class="data-box">
+            <div>Name: {{ element.firstName }}</div>
+            <div>Surname: {{ element.surname }}</div>
+          </div>
         </div>
-      </div>
       }
     </div>
   </div>

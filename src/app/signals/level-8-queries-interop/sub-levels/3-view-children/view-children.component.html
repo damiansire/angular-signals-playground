@@ -8,12 +8,9 @@
   <section class="w-80 p-5 rounded-lg shadow-md bg-white">
     <div class="flex flex-wrap gap-2 mb-5 min-h-[3rem]">
       @for (name of names(); track $index) {
-      <span
-        #chip
-        class="px-3 py-1 rounded-full bg-teal-100 text-teal-800 text-sm font-medium"
-      >
-        {{ name }}
-      </span>
+        <span #chip class="px-3 py-1 rounded-full bg-teal-100 text-teal-800 text-sm font-medium">
+          {{ name }}
+        </span>
       }
     </div>
 

@@ -10,9 +10,8 @@ describe('WrapperAnimationComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [WrapperAnimationComponent],
-      providers: [provideZonelessChangeDetection()]
-    })
-    .compileComponents();
+      providers: [provideZonelessChangeDetection()],
+    }).compileComponents();
 
     fixture = TestBed.createComponent(WrapperAnimationComponent);
     component = fixture.componentInstance;

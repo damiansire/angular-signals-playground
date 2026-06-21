@@ -10,9 +10,8 @@ describe('TitleComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [TitleComponent],
-      providers: [provideZonelessChangeDetection()]
-    })
-    .compileComponents();
+      providers: [provideZonelessChangeDetection()],
+    }).compileComponents();
 
     fixture = TestBed.createComponent(TitleComponent);
     component = fixture.componentInstance;

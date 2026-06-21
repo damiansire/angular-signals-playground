@@ -19,11 +19,11 @@ interface Instrument {
 }
 
 @Component({
-    selector: 'app-lab-hub',
-    imports: [RouterLink],
-    templateUrl: './lab-hub.component.html',
-    styleUrl: './lab-hub.component.css',
-    changeDetection: ChangeDetectionStrategy.OnPush
+  selector: 'app-lab-hub',
+  imports: [RouterLink],
+  templateUrl: './lab-hub.component.html',
+  styleUrl: './lab-hub.component.css',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class LabHubComponent {
   readonly instruments: readonly Instrument[] = [

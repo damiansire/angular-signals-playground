@@ -9,19 +9,19 @@ import { CodeLegacyComponent } from '../../../../components-atom/code-legacy/cod
 import { ConceptCardComponent } from '../../../../components-atom/concept-card/concept-card.component';
 
 @Component({
-    selector: 'app-what-is-signals',
-    imports: [
-        TitleComponent,
-        WrapperAnimationComponent,
-        ContainerVariableBoxDrawComponent,
-        TextDescriptionComponent,
-        VariableBoxDrawComponent,
-        CodeLegacyComponent,
-        ConceptCardComponent,
-    ],
-    templateUrl: './what-is-signals.component.html',
-    changeDetection: ChangeDetectionStrategy.OnPush,
-    styleUrl: './what-is-signals.component.css'
+  selector: 'app-what-is-signals',
+  imports: [
+    TitleComponent,
+    WrapperAnimationComponent,
+    ContainerVariableBoxDrawComponent,
+    TextDescriptionComponent,
+    VariableBoxDrawComponent,
+    CodeLegacyComponent,
+    ConceptCardComponent,
+  ],
+  templateUrl: './what-is-signals.component.html',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  styleUrl: './what-is-signals.component.css',
 })
 export class WhatIsSignalsComponent {
   title = '¿Qué es un signal?';

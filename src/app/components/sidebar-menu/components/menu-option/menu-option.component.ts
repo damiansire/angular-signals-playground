@@ -5,11 +5,11 @@ import { CommonModule } from '@angular/common';
 import { LevelState } from '../../../component.interface';
 
 @Component({
-    selector: 'app-menu-option',
-    imports: [RouterModule, CommonModule],
-    templateUrl: './menu-option.component.html',
-    changeDetection: ChangeDetectionStrategy.OnPush,
-    styleUrl: './menu-option.component.css'
+  selector: 'app-menu-option',
+  imports: [RouterModule, CommonModule],
+  templateUrl: './menu-option.component.html',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  styleUrl: './menu-option.component.css',
 })
 export class MenuOptionComponent {
   readonly menuItem = input.required<CustomRoute>();

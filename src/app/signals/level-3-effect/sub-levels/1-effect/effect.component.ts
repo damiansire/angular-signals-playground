@@ -8,17 +8,17 @@ import { CodeLegacyComponent } from '../../../../components-atom/code-legacy/cod
 import { ConceptCardComponent } from '../../../../components-atom/concept-card/concept-card.component';
 
 @Component({
-    selector: 'app-effect',
-    templateUrl: './effect.component.html',
-    styleUrl: './effect.component.css',
-    changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [
-        VariableBoxComponent,
-        EventHistoryComponent,
-        DependenciesStatusComponent,
-        CodeLegacyComponent,
-        ConceptCardComponent,
-    ]
+  selector: 'app-effect',
+  templateUrl: './effect.component.html',
+  styleUrl: './effect.component.css',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    VariableBoxComponent,
+    EventHistoryComponent,
+    DependenciesStatusComponent,
+    CodeLegacyComponent,
+    ConceptCardComponent,
+  ],
 })
 export class EffectComponent {
   count = signal(0);
@@ -31,22 +31,18 @@ export class EffectComponent {
   });
   appEventHistory = signal<HistoryElement[]>([]);
   constructor() {
-    effect(
-      () => {
-        const trigger = this.count() === 0 ? 'effect(1) inicial' : 'effect(1) corrió';
-        this.addConditionalCountRecomputation(trigger, this.count(), false);
-        // eslint-disable-next-line no-console -- demo didactica: refleja el console.log mostrado en pantalla
-        console.log(`The current count is: ${this.count()}`);
-      }
-    );
-    effect(
-      () => {
-        const trigger = this.count2() === 0 ? 'effect(2) inicial' : 'effect(2) corrió';
-        this.addConditionalCountRecomputation(trigger, this.count2(), false);
-        // eslint-disable-next-line no-console -- demo didactica: refleja el console.log mostrado en pantalla
-        console.log(`The current count is: ${this.count2()}`);
-      }
-    );
+    effect(() => {
+      const trigger = this.count() === 0 ? 'effect(1) inicial' : 'effect(1) corrió';
+      this.addConditionalCountRecomputation(trigger, this.count(), false);
+      // eslint-disable-next-line no-console -- demo didactica: refleja el console.log mostrado en pantalla
+      console.log(`The current count is: ${this.count()}`);
+    });
+    effect(() => {
+      const trigger = this.count2() === 0 ? 'effect(2) inicial' : 'effect(2) corrió';
+      this.addConditionalCountRecomputation(trigger, this.count2(), false);
+      // eslint-disable-next-line no-console -- demo didactica: refleja el console.log mostrado en pantalla
+      console.log(`The current count is: ${this.count2()}`);
+    });
   }
   lines = computed<CodeLine[]>(() => [
     { line: 'count = signal(0);', active: false },
@@ -73,7 +69,7 @@ export class EffectComponent {
   addConditionalCountRecomputation(
     trigger: string,
     newState: number | string,
-    isCountIncrement: boolean
+    isCountIncrement: boolean,
   ) {
     this.appEventHistory.update((prevHistory) => {
       const newHistory = prevHistory.length ? [...prevHistory] : [];

@@ -15,11 +15,11 @@ import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 type Accent = 'source' | 'derived' | 'effect';
 
 @Component({
-    selector: 'app-bench-frame',
-    imports: [],
-    changeDetection: ChangeDetectionStrategy.OnPush,
-    templateUrl: './bench-frame.component.html',
-    styleUrl: './bench-frame.component.css'
+  selector: 'app-bench-frame',
+  imports: [],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  templateUrl: './bench-frame.component.html',
+  styleUrl: './bench-frame.component.css',
 })
 export class BenchFrameComponent {
   /** Número de instrumento en el riel (ej. "01"). */

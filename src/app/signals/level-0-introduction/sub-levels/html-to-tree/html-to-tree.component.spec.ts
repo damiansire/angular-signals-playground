@@ -11,9 +11,8 @@ describe('HtmlToTreeComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [HtmlToTreeComponent],
-      providers: [provideZonelessChangeDetection()]
-    })
-    .compileComponents();
+      providers: [provideZonelessChangeDetection()],
+    }).compileComponents();
 
     fixture = TestBed.createComponent(HtmlToTreeComponent);
     component = fixture.componentInstance;

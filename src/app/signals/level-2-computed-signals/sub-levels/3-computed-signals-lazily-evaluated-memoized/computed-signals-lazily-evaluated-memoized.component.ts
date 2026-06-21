@@ -6,16 +6,16 @@ import { ClickHistoryComponent } from '../../../../components/click-history/clic
 import { ConceptCardComponent } from '../../../../components-atom/concept-card/concept-card.component';
 
 @Component({
-    selector: 'app-computed-signals-lazily-evaluated-memoized',
-    templateUrl: './computed-signals-lazily-evaluated-memoized.component.html',
-    styleUrl: './computed-signals-lazily-evaluated-memoized.component.css',
-    changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [
-        ComputedTrackerComponent,
-        BasicFormComponent,
-        ClickHistoryComponent,
-        ConceptCardComponent,
-    ]
+  selector: 'app-computed-signals-lazily-evaluated-memoized',
+  templateUrl: './computed-signals-lazily-evaluated-memoized.component.html',
+  styleUrl: './computed-signals-lazily-evaluated-memoized.component.css',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    ComputedTrackerComponent,
+    BasicFormComponent,
+    ClickHistoryComponent,
+    ConceptCardComponent,
+  ],
 })
 export class ComputedSignalsLazilyEvaluatedMemoizedComponent {
   computedTracker: ClickInButton[] = [];

@@ -2,13 +2,15 @@
 
 <div class="mx-auto max-w-2xl px-6 py-4 text-gray-700">
   <p class="text-lg mb-4">
-    <code class="font-mono">computed()</code> crea estado <strong>derivado</strong>:
-    se calcula a partir de otros signals y se recalcula solo cuando alguno de los
-    que lee realmente cambia. Es perezoso (lazy) y memoizado.
+    <code class="font-mono">computed()</code> crea estado <strong>derivado</strong>: se calcula a
+    partir de otros signals y se recalcula solo cuando alguno de los que lee realmente cambia. Es
+    perezoso (lazy) y memoizado.
   </p>
   <ul class="list-disc list-inside space-y-1 text-gray-600">
     <li><strong>1:</strong> un derivado básico (nombre + apellido → nombre completo).</li>
     <li><strong>2:</strong> dependencias dinámicas (lee una dep solo bajo cierta condición).</li>
-    <li><strong>3:</strong> lazy + memoizado (no recalcula si nadie lo lee ni si las deps no cambian).</li>
+    <li>
+      <strong>3:</strong> lazy + memoizado (no recalcula si nadie lo lee ni si las deps no cambian).
+    </li>
   </ul>
 </div>

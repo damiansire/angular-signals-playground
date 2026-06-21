@@ -1,10 +1,4 @@
-import {
-  Component,
-  ChangeDetectionStrategy,
-  computed,
-  effect,
-  signal,
-} from '@angular/core';
+import { Component, ChangeDetectionStrategy, computed, effect, signal } from '@angular/core';
 import { CodeLine } from '../../../../components-atom/component-atom.interface';
 import { ColumnAndCodeLayoutComponent } from '../../../../layouts/column-and-code-layout/column-and-code-layout.component';
 
@@ -17,10 +11,7 @@ import { ColumnAndCodeLayoutComponent } from '../../../../layouts/column-and-cod
 })
 export class CustomEqualComponent {
   // equal custom: dos usuarios son "iguales" si tienen el mismo name.
-  readonly user = signal(
-    { name: 'Ada' },
-    { equal: (a, b) => a.name === b.name }
-  );
+  readonly user = signal({ name: 'Ada' }, { equal: (a, b) => a.name === b.name });
 
   private readonly runs = signal(0);
   readonly notifications = computed(() => Math.max(0, this.runs() - 1));

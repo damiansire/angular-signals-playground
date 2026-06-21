@@ -3,11 +3,17 @@
 <div class="mx-auto max-w-2xl px-6 py-4 text-gray-700">
   <p class="text-lg mb-4">
     Un caso clásico: querés reaccionar a lo que el usuario tipea, pero
-    <strong>solo cuando deja de escribir</strong> (para no disparar una búsqueda
-    por cada tecla). Eso es un valor <em>debounced</em>.
+    <strong>solo cuando deja de escribir</strong> (para no disparar una búsqueda por cada tecla).
+    Eso es un valor <em>debounced</em>.
   </p>
   <ul class="list-disc list-inside space-y-1 text-gray-600">
-    <li><strong>1:</strong> con RxJS — <code class="font-mono">toObservable + debounceTime + toSignal</code>.</li>
-    <li><strong>2:</strong> a mano — <code class="font-mono">effect + setTimeout + onCleanup</code> (sin RxJS).</li>
+    <li>
+      <strong>1:</strong> con RxJS —
+      <code class="font-mono">toObservable + debounceTime + toSignal</code>.
+    </li>
+    <li>
+      <strong>2:</strong> a mano —
+      <code class="font-mono">effect + setTimeout + onCleanup</code> (sin RxJS).
+    </li>
   </ul>
 </div>

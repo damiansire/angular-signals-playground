@@ -1,9 +1,4 @@
-import {
-  Component,
-  ChangeDetectionStrategy,
-  computed,
-  signal,
-} from '@angular/core';
+import { Component, ChangeDetectionStrategy, computed, signal } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { map, timer } from 'rxjs';
 import { CodeLine } from '../../../../components-atom/component-atom.interface';

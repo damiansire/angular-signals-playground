@@ -55,11 +55,11 @@ interface LogEntry {
 }
 
 @Component({
-    selector: 'app-oscilloscope',
-    changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [BenchFrameComponent],
-    templateUrl: './oscilloscope.component.html',
-    styleUrl: './oscilloscope.component.css'
+  selector: 'app-oscilloscope',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [BenchFrameComponent],
+  templateUrl: './oscilloscope.component.html',
+  styleUrl: './oscilloscope.component.css',
 })
 export class OscilloscopeComponent {
   /** Rango del sensor de velocidad (km/h). */
@@ -128,20 +128,18 @@ export class OscilloscopeComponent {
   constructor() {
     // effect() idiomático: SOLO efectos imperativos. Corre una vez al inicio y
     // luego en CADA cambio de speed(). No deriva estado (eso vive en computed).
-    effect(
-      () => {
-        const v = this.speed(); // dependencia: re-ejecuta en cada set()
-        // runs/log se LEEN con untracked: el effect solo debe depender de speed,
-        // no auto-disparase por escribir su propio contador (evita loop infinito).
-        const run = untracked(this.runs) + 1;
+    effect(() => {
+      const v = this.speed(); // dependencia: re-ejecuta en cada set()
+      // runs/log se LEEN con untracked: el effect solo debe depender de speed,
+      // no auto-disparase por escribir su propio contador (evita loop infinito).
+      const run = untracked(this.runs) + 1;
 
-        // registra la corrida en el log de pantalla (máx 6, más nueva arriba).
-        // Este log on-screen es el único side-effect: nada global (sin title ni storage).
-        const entry: LogEntry = { run, speed: v, sink: 'log', stamp: stamp() };
-        this.runs.set(run);
-        this.log.update((rows) => [entry, ...rows].slice(0, 6));
-      }
-    );
+      // registra la corrida en el log de pantalla (máx 6, más nueva arriba).
+      // Este log on-screen es el único side-effect: nada global (sin title ni storage).
+      const entry: LogEntry = { run, speed: v, sink: 'log', stamp: stamp() };
+      this.runs.set(run);
+      this.log.update((rows) => [entry, ...rows].slice(0, 6));
+    });
   }
 
   setSpeed(value: string) {

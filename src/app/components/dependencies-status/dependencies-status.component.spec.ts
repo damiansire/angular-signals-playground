@@ -10,9 +10,8 @@ describe('DependenciesStatusComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [DependenciesStatusComponent],
-      providers: [provideZonelessChangeDetection()]
-    })
-    .compileComponents();
+      providers: [provideZonelessChangeDetection()],
+    }).compileComponents();
 
     fixture = TestBed.createComponent(DependenciesStatusComponent);
     component = fixture.componentInstance;

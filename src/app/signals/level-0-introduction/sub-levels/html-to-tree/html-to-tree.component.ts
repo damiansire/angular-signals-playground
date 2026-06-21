@@ -6,16 +6,11 @@ import { TwoColumnLayoutComponent } from '../../../../layouts/two-column-layout/
 import { ConceptCardComponent } from '../../../../components-atom/concept-card/concept-card.component';
 
 @Component({
-    selector: 'app-html-to-tree',
-    imports: [
-        CodeComponent,
-        TreeComponent,
-        TwoColumnLayoutComponent,
-        ConceptCardComponent,
-    ],
-    templateUrl: './html-to-tree.component.html',
-    changeDetection: ChangeDetectionStrategy.OnPush,
-    styleUrl: './html-to-tree.component.css'
+  selector: 'app-html-to-tree',
+  imports: [CodeComponent, TreeComponent, TwoColumnLayoutComponent, ConceptCardComponent],
+  templateUrl: './html-to-tree.component.html',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  styleUrl: './html-to-tree.component.css',
 })
 export class HtmlToTreeComponent {
   htmlCode = ` <main> 
@@ -50,9 +45,7 @@ export class HtmlToTreeComponent {
     this.nodesToShow.update((currentNodes) => [...currentNodes, id]);
   }
   removeNode(id: string) {
-    this.nodesToShow.update((currentNodes) =>
-      currentNodes.filter((node) => node !== id)
-    );
+    this.nodesToShow.update((currentNodes) => currentNodes.filter((node) => node !== id));
   }
   onParsedCodeHandler() {
     // no-op: el árbol se actualiza vía codeClickHandler; este handler queda como punto de extensión

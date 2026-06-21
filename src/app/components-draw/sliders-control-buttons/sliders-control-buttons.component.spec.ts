@@ -10,9 +10,8 @@ describe('SlidersControlButtonsComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [SlidersControlButtonsComponent],
-      providers: [provideZonelessChangeDetection()]
-    })
-    .compileComponents();
+      providers: [provideZonelessChangeDetection()],
+    }).compileComponents();
 
     fixture = TestBed.createComponent(SlidersControlButtonsComponent);
     component = fixture.componentInstance;
@@ -47,13 +46,13 @@ describe('SlidersControlButtonsComponent', () => {
 
   const labels = () =>
     Array.from(fixture.nativeElement.querySelectorAll('button')).map((b) =>
-      (b as HTMLElement).textContent?.trim()
+      (b as HTMLElement).textContent?.trim(),
     );
 
   const clickByLabel = (label: string) => {
-    const btn = Array.from(
-      fixture.nativeElement.querySelectorAll('button')
-    ).find((b) => (b as HTMLElement).textContent?.trim() === label) as HTMLElement;
+    const btn = Array.from(fixture.nativeElement.querySelectorAll('button')).find(
+      (b) => (b as HTMLElement).textContent?.trim() === label,
+    ) as HTMLElement;
     btn.click();
     fixture.detectChanges();
   };

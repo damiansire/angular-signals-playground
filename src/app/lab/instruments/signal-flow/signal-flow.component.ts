@@ -23,11 +23,11 @@ import { BenchFrameComponent } from '../../bench-frame/bench-frame.component';
  * --------------------------------------------------------------------------
  */
 @Component({
-    selector: 'app-signal-flow',
-    imports: [BenchFrameComponent],
-    changeDetection: ChangeDetectionStrategy.OnPush,
-    templateUrl: './signal-flow.component.html',
-    styleUrl: './signal-flow.component.css'
+  selector: 'app-signal-flow',
+  imports: [BenchFrameComponent],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  templateUrl: './signal-flow.component.html',
+  styleUrl: './signal-flow.component.css',
 })
 export class SignalFlowComponent {
   readonly min = 20;

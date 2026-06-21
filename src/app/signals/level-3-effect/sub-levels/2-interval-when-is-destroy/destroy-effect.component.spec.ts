@@ -10,9 +10,8 @@ describe('DestroyEffectComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [DestroyEffectComponent],
-      providers: [provideZonelessChangeDetection()]
-    })
-    .compileComponents();
+      providers: [provideZonelessChangeDetection()],
+    }).compileComponents();
 
     fixture = TestBed.createComponent(DestroyEffectComponent);
     component = fixture.componentInstance;

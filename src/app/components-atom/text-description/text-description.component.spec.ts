@@ -10,9 +10,8 @@ describe('TextDescriptionComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [TextDescriptionComponent],
-      providers: [provideZonelessChangeDetection()]
-    })
-    .compileComponents();
+      providers: [provideZonelessChangeDetection()],
+    }).compileComponents();
 
     fixture = TestBed.createComponent(TextDescriptionComponent);
     component = fixture.componentInstance;

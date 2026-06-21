@@ -5,20 +5,14 @@ import { CodeLegacyComponent } from '../../../../components-atom/code-legacy/cod
 import { ConceptCardComponent } from '../../../../components-atom/concept-card/concept-card.component';
 
 @Component({
-    selector: 'app-create-new-signals',
-    imports: [
-        TitleComponent,
-        CodeLegacyComponent,
-        ConceptCardComponent,
-    ],
-    templateUrl: './create-new-signals.component.html',
-    changeDetection: ChangeDetectionStrategy.OnPush,
-    styleUrl: './create-new-signals.component.css'
+  selector: 'app-create-new-signals',
+  imports: [TitleComponent, CodeLegacyComponent, ConceptCardComponent],
+  templateUrl: './create-new-signals.component.html',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  styleUrl: './create-new-signals.component.css',
 })
 export class CreateNewSignalsComponent {
-  lines = computed<CodeLine[]>(() => [
-    { line: 'count = signal(0);', active: true },
-  ]);
+  lines = computed<CodeLine[]>(() => [{ line: 'count = signal(0);', active: true }]);
   htmlLines = computed<CodeLine[]>(() => [
     { line: '<div>', active: false },
     { line: '     <span>', active: false },

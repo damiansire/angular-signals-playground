@@ -55,22 +55,22 @@ import { BenchFrameComponent } from '../../bench-frame/bench-frame.component';
 
 /** Una celda derivada lista para renderizar en la grilla. */
 interface DerivedRow {
-  readonly ref: string;        // B6..B9
-  readonly label: string;      // nombre legible
-  readonly formula: string;    // =B1*B2 …
-  readonly depth: number;      // profundidad en la cascada (0 = primero)
-  readonly raw: number;        // valor numérico
-  readonly display: string;    // valor formateado
+  readonly ref: string; // B6..B9
+  readonly label: string; // nombre legible
+  readonly formula: string; // =B1*B2 …
+  readonly depth: number; // profundidad en la cascada (0 = primero)
+  readonly raw: number; // valor numérico
+  readonly display: string; // valor formateado
   /** Key de animación: cambia con el valor → reinicia el destello vía track. */
   readonly flash: string;
 }
 
 @Component({
-    selector: 'app-reactive-cells',
-    changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [BenchFrameComponent],
-    templateUrl: './reactive-cells.component.html',
-    styleUrl: './reactive-cells.component.css'
+  selector: 'app-reactive-cells',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [BenchFrameComponent],
+  templateUrl: './reactive-cells.component.html',
+  styleUrl: './reactive-cells.component.css',
 })
 export class ReactiveCellsComponent {
   // ── Celdas FUENTE: el único estado real (signal). Editar = .set(). ──
@@ -89,13 +89,9 @@ export class ReactiveCellsComponent {
   /** B6 = B1 * B2 */
   private subtotal = computed(() => this.qty() * this.unitPriceArs());
   /** B7 = B6 * (1 - B3/100) */
-  private netAfterDiscount = computed(
-    () => this.subtotal() * (1 - this.discountPct() / 100),
-  );
+  private netAfterDiscount = computed(() => this.subtotal() * (1 - this.discountPct() / 100));
   /** B8 = B7 * (1 + B4/100) */
-  private withIva = computed(
-    () => this.netAfterDiscount() * (1 + this.ivaPct() / 100),
-  );
+  private withIva = computed(() => this.netAfterDiscount() * (1 + this.ivaPct() / 100));
   /** B9 = B8 / B5 */
   private totalUsd = computed(() => this.withIva() / this.fxRate());
 

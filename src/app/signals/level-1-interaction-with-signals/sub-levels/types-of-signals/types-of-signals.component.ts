@@ -67,7 +67,7 @@ export class TypesOfSignalsComponent {
 
   readonly selectedId = signal('writable');
   readonly selected = computed(
-    () => this.kinds.find((k) => k.id === this.selectedId()) ?? this.kinds[0]
+    () => this.kinds.find((k) => k.id === this.selectedId()) ?? this.kinds[0],
   );
   readonly lines = computed<CodeLine[]>(() => this.selected().code);
 

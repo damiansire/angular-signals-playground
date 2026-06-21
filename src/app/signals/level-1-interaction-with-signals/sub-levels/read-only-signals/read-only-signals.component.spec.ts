@@ -10,9 +10,8 @@ describe('ReadOnlySignalsComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [ReadOnlySignalsComponent],
-      providers: [provideZonelessChangeDetection()]
-    })
-    .compileComponents();
+      providers: [provideZonelessChangeDetection()],
+    }).compileComponents();
 
     fixture = TestBed.createComponent(ReadOnlySignalsComponent);
     component = fixture.componentInstance;

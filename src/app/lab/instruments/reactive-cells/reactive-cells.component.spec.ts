@@ -7,7 +7,10 @@ describe('ReactiveCellsComponent (computed cascade)', () => {
   let component: ReactiveCellsComponent;
 
   beforeEach(() => {
-    TestBed.configureTestingModule({ imports: [ReactiveCellsComponent], providers: [provideZonelessChangeDetection()] });
+    TestBed.configureTestingModule({
+      imports: [ReactiveCellsComponent],
+      providers: [provideZonelessChangeDetection()],
+    });
     component = TestBed.createComponent(ReactiveCellsComponent).componentInstance;
   });
 

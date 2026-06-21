@@ -12,9 +12,8 @@ describe('CodeComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [CodeComponent],
-      providers: [provideZonelessChangeDetection()]
-    })
-    .compileComponents();
+      providers: [provideZonelessChangeDetection()],
+    }).compileComponents();
 
     fixture = TestBed.createComponent(CodeComponent);
     component = fixture.componentInstance;

@@ -7,7 +7,10 @@ describe('SignalFlowComponent (signal + computed derivations)', () => {
   let component: SignalFlowComponent;
 
   beforeEach(() => {
-    TestBed.configureTestingModule({ imports: [SignalFlowComponent], providers: [provideZonelessChangeDetection()] });
+    TestBed.configureTestingModule({
+      imports: [SignalFlowComponent],
+      providers: [provideZonelessChangeDetection()],
+    });
     component = TestBed.createComponent(SignalFlowComponent).componentInstance;
   });
 

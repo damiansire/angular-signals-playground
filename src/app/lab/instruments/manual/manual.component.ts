@@ -46,11 +46,11 @@ import { BenchFrameComponent } from '../../bench-frame/bench-frame.component';
  * --------------------------------------------------------------------------
  */
 @Component({
-    selector: 'app-manual',
-    imports: [BenchFrameComponent],
-    changeDetection: ChangeDetectionStrategy.OnPush,
-    templateUrl: './manual.component.html',
-    styleUrl: './manual.component.css'
+  selector: 'app-manual',
+  imports: [BenchFrameComponent],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  templateUrl: './manual.component.html',
+  styleUrl: './manual.component.css',
 })
 export class ManualComponent {
   readonly min = 1;
@@ -86,12 +86,10 @@ export class ManualComponent {
   flow = computed(() => (this.n() - this.min) / (this.max - this.min));
 
   constructor() {
-    effect(
-      () => {
-        this.report(); // única dependencia: cuenta re-evaluaciones del vértice
-        this.evals.update((n) => n + 1);
-      }
-    );
+    effect(() => {
+      this.report(); // única dependencia: cuenta re-evaluaciones del vértice
+      this.evals.update((n) => n + 1);
+    });
   }
 
   setN(value: string) {

@@ -13,8 +13,8 @@ import {
   template: `
     <div class="rounded-lg border border-gray-200 p-4">
       <p class="text-xs text-gray-500 mb-3">
-        Proyectados: <strong class="text-fuchsia-700">{{ count() }}</strong>
-        · primero: <strong class="text-fuchsia-700">{{ firstText() }}</strong>
+        Proyectados: <strong class="text-fuchsia-700">{{ count() }}</strong> · primero:
+        <strong class="text-fuchsia-700">{{ firstText() }}</strong>
       </p>
       <div class="flex flex-wrap gap-2">
         <ng-content />
@@ -29,7 +29,5 @@ export class TagListComponent {
 
   // contentChild(): el primero (o undefined).
   private readonly firstTag = contentChild<ElementRef<HTMLElement>>('tag');
-  readonly firstText = computed(
-    () => this.firstTag()?.nativeElement.textContent?.trim() ?? '—'
-  );
+  readonly firstText = computed(() => this.firstTag()?.nativeElement.textContent?.trim() ?? '—');
 }

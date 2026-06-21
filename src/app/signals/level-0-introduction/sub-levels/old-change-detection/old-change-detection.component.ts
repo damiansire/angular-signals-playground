@@ -1,17 +1,14 @@
 import { Component, computed, signal, ChangeDetectionStrategy } from '@angular/core';
-import {
-  NodeTree,
-  Link,
-} from '../../../../components-draw/components-draw.inferface';
+import { NodeTree, Link } from '../../../../components-draw/components-draw.inferface';
 import { NodeTreeComponent } from '../../../../components-draw/node-tree/node-tree.component';
 import { ConceptCardComponent } from '../../../../components-atom/concept-card/concept-card.component';
 
 @Component({
-    selector: 'app-old-change-detection',
-    imports: [NodeTreeComponent, ConceptCardComponent],
-    templateUrl: './old-change-detection.component.html',
-    changeDetection: ChangeDetectionStrategy.OnPush,
-    styleUrl: './old-change-detection.component.css'
+  selector: 'app-old-change-detection',
+  imports: [NodeTreeComponent, ConceptCardComponent],
+  templateUrl: './old-change-detection.component.html',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  styleUrl: './old-change-detection.component.css',
 })
 export class OldChangeDetectionComponent {
   step = signal(0);
@@ -78,7 +75,7 @@ export class OldChangeDetectionComponent {
     this.baseElement.map((node) => ({
       ...node,
       color: this.step() >= node.y / 100 ? '#90EE90' : '',
-    }))
+    })),
   );
 
   links = signal<Link[]>([

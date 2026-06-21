@@ -25,8 +25,15 @@
         <span class="cell cell--label" role="cell">cantidad</span>
         <span class="cell cell--src" role="cell">
           <label class="sr-only" for="b1">cantidad de unidades</label>
-          <input id="b1" class="src-input" type="number" inputmode="numeric"
-            [value]="qty()" (input)="setQty($any($event.target).value)" min="0" />
+          <input
+            id="b1"
+            class="src-input"
+            type="number"
+            inputmode="numeric"
+            [value]="qty()"
+            (input)="setQty($any($event.target).value)"
+            min="0"
+          />
         </span>
         <span class="cell cell--unit" role="cell">u</span>
       </div>
@@ -36,8 +43,15 @@
         <span class="cell cell--label" role="cell">precio unitario</span>
         <span class="cell cell--src" role="cell">
           <label class="sr-only" for="b2">precio unitario en pesos</label>
-          <input id="b2" class="src-input" type="number" inputmode="numeric"
-            [value]="unitPriceArs()" (input)="setUnitPrice($any($event.target).value)" min="0" />
+          <input
+            id="b2"
+            class="src-input"
+            type="number"
+            inputmode="numeric"
+            [value]="unitPriceArs()"
+            (input)="setUnitPrice($any($event.target).value)"
+            min="0"
+          />
         </span>
         <span class="cell cell--unit" role="cell">$/u</span>
       </div>
@@ -47,8 +61,16 @@
         <span class="cell cell--label" role="cell">descuento</span>
         <span class="cell cell--src" role="cell">
           <label class="sr-only" for="b3">descuento comercial en porcentaje</label>
-          <input id="b3" class="src-input" type="number" inputmode="numeric"
-            [value]="discountPct()" (input)="setDiscount($any($event.target).value)" min="0" max="100" />
+          <input
+            id="b3"
+            class="src-input"
+            type="number"
+            inputmode="numeric"
+            [value]="discountPct()"
+            (input)="setDiscount($any($event.target).value)"
+            min="0"
+            max="100"
+          />
         </span>
         <span class="cell cell--unit" role="cell">%</span>
       </div>
@@ -58,8 +80,16 @@
         <span class="cell cell--label" role="cell">IVA</span>
         <span class="cell cell--src" role="cell">
           <label class="sr-only" for="b4">alícuota de IVA en porcentaje</label>
-          <input id="b4" class="src-input" type="number" inputmode="numeric"
-            [value]="ivaPct()" (input)="setIva($any($event.target).value)" min="0" max="100" />
+          <input
+            id="b4"
+            class="src-input"
+            type="number"
+            inputmode="numeric"
+            [value]="ivaPct()"
+            (input)="setIva($any($event.target).value)"
+            min="0"
+            max="100"
+          />
         </span>
         <span class="cell cell--unit" role="cell">%</span>
       </div>
@@ -69,8 +99,15 @@
         <span class="cell cell--label" role="cell">tipo de cambio</span>
         <span class="cell cell--src" role="cell">
           <label class="sr-only" for="b5">tipo de cambio USD sobre ARS</label>
-          <input id="b5" class="src-input" type="number" inputmode="numeric"
-            [value]="fxRate()" (input)="setFxRate($any($event.target).value)" min="1" />
+          <input
+            id="b5"
+            class="src-input"
+            type="number"
+            inputmode="numeric"
+            [value]="fxRate()"
+            (input)="setFxRate($any($event.target).value)"
+            min="1"
+          />
         </span>
         <span class="cell cell--unit" role="cell">USD/ARS</span>
       </div>
@@ -92,7 +129,8 @@
               [class.cell--derived-total]="d.depth === 3"
               [style.--depth]="d.depth"
               role="cell"
-            >{{ d.display }}</span>
+              >{{ d.display }}</span
+            >
           }
           <code class="cell cell--formula" role="cell">{{ d.formula }}</code>
         </div>

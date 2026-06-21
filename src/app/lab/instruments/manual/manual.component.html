@@ -13,10 +13,10 @@
 
     <div class="lede">
       <p>
-        <span class="dropcap">U</span>na fuente alimenta dos derivados, y un tercero los
-        vuelve a juntar. El miedo razonable: que ese tercero se asome cuando un brazo ya
-        cambió y el otro no &mdash; un valor a medio cocer, un <em>glitch</em>. Movés la
-        fuente y el grafo te muestra que eso nunca pasa.
+        <span class="dropcap">U</span>na fuente alimenta dos derivados, y un tercero los vuelve a
+        juntar. El miedo razonable: que ese tercero se asome cuando un brazo ya cambió y el otro no
+        &mdash; un valor a medio cocer, un <em>glitch</em>. Movés la fuente y el grafo te muestra
+        que eso nunca pasa.
       </p>
     </div>
 
@@ -25,19 +25,19 @@
         Tomemos <code class="inl">n</code> como fuente. De ella cuelgan dos
         <code class="inl">computed</code>: el cuadrado
         <span class="live live--arm">{{ square() }}</span> y la mitad
-        <span class="live live--arm">{{ half() }}</span>. Un tercer computed,
-        <code class="inl">report</code>, los suma. La pregunta del gotcha no es cuánto
-        da, sino <em>cuántas veces</em> se calcula.
+        <span class="live live--arm">{{ half() }}</span
+        >. Un tercer computed, <code class="inl">report</code>, los suma. La pregunta del gotcha no
+        es cuánto da, sino <em>cuántas veces</em> se calcula.
       </p>
 
       <p>
-        Con <code class="inl">n&nbsp;=&nbsp;{{ n() }}</code>, el informe vale
-        <span class="live live--vertex">{{ report() }}</span>, y lo hace en una sola
-        pasada consistente: Signals no evalúa <code class="inl">report</code> hasta que
-        ambos brazos quedaron al día. No hay estado intermedio observable. Por eso el
-        contador de evaluaciones avanzó a
-        <span class="live live--count">{{ shownEvals() }}</span> &mdash; uno por cada cambio
-        de la fuente, jamás dos. Esa es la garantía <em>glitch-free</em>.
+        Con <code class="inl">n&nbsp;=&nbsp;{{ n() }}</code
+        >, el informe vale <span class="live live--vertex">{{ report() }}</span
+        >, y lo hace en una sola pasada consistente: Signals no evalúa
+        <code class="inl">report</code> hasta que ambos brazos quedaron al día. No hay estado
+        intermedio observable. Por eso el contador de evaluaciones avanzó a
+        <span class="live live--count">{{ shownEvals() }}</span> &mdash; uno por cada cambio de la
+        fuente, jamás dos. Esa es la garantía <em>glitch-free</em>.
       </p>
 
       <div class="control">
@@ -58,10 +58,21 @@
 
       <!-- ── DIAGRAMA DEL GRAFO: la propagación se resalta con el flujo ── -->
       <figure class="graph">
-        <svg viewBox="0 0 320 200" role="img"
-             aria-label="Grafo del diamante: n se ramifica en square y half, y ambos convergen en report.">
+        <svg
+          viewBox="0 0 320 200"
+          role="img"
+          aria-label="Grafo del diamante: n se ramifica en square y half, y ambos convergen en report."
+        >
           <defs>
-            <marker id="head" viewBox="0 0 8 8" refX="6" refY="4" markerWidth="6" markerHeight="6" orient="auto">
+            <marker
+              id="head"
+              viewBox="0 0 8 8"
+              refX="6"
+              refY="4"
+              markerWidth="6"
+              markerHeight="6"
+              orient="auto"
+            >
               <path d="M0,0 L8,4 L0,8 Z" fill="var(--manual-ink)" opacity="0.55" />
             </marker>
           </defs>
@@ -106,12 +117,19 @@
 
     <!-- ── notas al margen: el código del modelo mental ── -->
     <aside class="margin" aria-label="Definiciones del grafo">
-      <p class="margin__note">El vértice es <em>read-only</em>: a <code>report</code> nunca le asignás un valor, lo derivás.</p>
-      <pre class="margin__code"><code><span class="ln"><b class="src">n</b>      = signal({{ n() }});</span>
+      <p class="margin__note">
+        El vértice es <em>read-only</em>: a <code>report</code> nunca le asignás un valor, lo
+        derivás.
+      </p>
+      <pre
+        class="margin__code"
+      ><code><span class="ln"><b class="src">n</b>      = signal({{ n() }});</span>
 <span class="ln"><b class="der">square</b> = computed(() =&gt; n() * n());</span>
 <span class="ln"><b class="der">half</b>   = computed(() =&gt; n() / 2);</span>
 <span class="ln"><b class="der">report</b> = computed(() =&gt; square() + half());</span></code></pre>
-      <p class="margin__note margin__note--reads">recálculos de <code>report</code>: <b>{{ shownEvals() }}</b></p>
+      <p class="margin__note margin__note--reads">
+        recálculos de <code>report</code>: <b>{{ shownEvals() }}</b>
+      </p>
     </aside>
   </article>
 </app-bench-frame>

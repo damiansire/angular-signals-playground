@@ -8,7 +8,10 @@ describe('ManualComponent (diamond dependency, glitch-free)', () => {
   let fixture: ComponentFixture<ManualComponent>;
 
   beforeEach(() => {
-    TestBed.configureTestingModule({ imports: [ManualComponent], providers: [provideZonelessChangeDetection()] });
+    TestBed.configureTestingModule({
+      imports: [ManualComponent],
+      providers: [provideZonelessChangeDetection()],
+    });
     fixture = TestBed.createComponent(ManualComponent);
     component = fixture.componentInstance;
     fixture.detectChanges(); // primer render: corre el effect inicial

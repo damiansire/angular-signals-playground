@@ -10,9 +10,8 @@ describe('BasicFormComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [BasicFormComponent],
-      providers: [provideZonelessChangeDetection()]
-    })
-    .compileComponents();
+      providers: [provideZonelessChangeDetection()],
+    }).compileComponents();
 
     fixture = TestBed.createComponent(BasicFormComponent);
     component = fixture.componentInstance;

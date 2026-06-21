@@ -1,10 +1,6 @@
 import { computed, Directive, inject, input } from '@angular/core';
 
-import {
-  APP_BUTTON_OPTIONS,
-  type AppButtonAppearance,
-  type AppButtonSize,
-} from './button.options';
+import { APP_BUTTON_OPTIONS, type AppButtonAppearance, type AppButtonSize } from './button.options';
 
 const BASE_CLASSES =
   'inline-flex items-center justify-center text-center cursor-pointer ' +
@@ -40,12 +36,9 @@ const APPEARANCE_CLASSES: Record<AppButtonAppearance, string> = {
 })
 export class AppButton {
   public readonly size = input<AppButtonSize>(inject(APP_BUTTON_OPTIONS).size);
-  public readonly appearance = input<AppButtonAppearance>(
-    inject(APP_BUTTON_OPTIONS).appearance,
-  );
+  public readonly appearance = input<AppButtonAppearance>(inject(APP_BUTTON_OPTIONS).appearance);
 
   protected readonly classes = computed(
-    () =>
-      `${BASE_CLASSES} ${SIZE_CLASSES[this.size()]} ${APPEARANCE_CLASSES[this.appearance()]}`,
+    () => `${BASE_CLASSES} ${SIZE_CLASSES[this.size()]} ${APPEARANCE_CLASSES[this.appearance()]}`,
   );
 }

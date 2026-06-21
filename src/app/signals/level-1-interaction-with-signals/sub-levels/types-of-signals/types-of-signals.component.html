@@ -8,18 +8,18 @@
   <section class="w-80 p-5 rounded-lg shadow-md bg-white">
     <div class="flex flex-col gap-2 mb-5">
       @for (kind of kinds; track kind.id) {
-      <button
-        type="button"
-        class="px-4 py-2 rounded-lg border text-left text-sm font-semibold transition-colors"
-        [class]="
-          kind.id === selectedId()
-            ? 'bg-blue-600 border-blue-600 text-white'
-            : 'bg-white border-gray-300 text-gray-700 hover:border-blue-400'
-        "
-        (click)="select(kind.id)"
-      >
-        {{ kind.label }}
-      </button>
+        <button
+          type="button"
+          class="px-4 py-2 rounded-lg border text-left text-sm font-semibold transition-colors"
+          [class]="
+            kind.id === selectedId()
+              ? 'bg-blue-600 border-blue-600 text-white'
+              : 'bg-white border-gray-300 text-gray-700 hover:border-blue-400'
+          "
+          (click)="select(kind.id)"
+        >
+          {{ kind.label }}
+        </button>
       }
     </div>
 
@@ -27,19 +27,24 @@
       <span
         class="inline-block text-xs font-bold px-2 py-0.5 rounded-full mb-2"
         [class]="
-          selected().writable
-            ? 'bg-emerald-100 text-emerald-700'
-            : 'bg-amber-100 text-amber-700'
+          selected().writable ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'
         "
       >
-        {{ selected().writable ? "escribible" : "solo lectura" }}
+        {{ selected().writable ? 'escribible' : 'solo lectura' }}
       </span>
       <p class="text-sm text-gray-700">{{ selected().description }}</p>
     </div>
 
-    <div class="mt-4 rounded-md border border-gray-100 bg-white p-3 text-xs font-mono text-gray-600">
-      <p>isSignal() → <strong class="text-blue-700">{{ introspection().isSignal }}</strong></p>
-      <p>isWritableSignal() → <strong class="text-blue-700">{{ introspection().isWritableSignal }}</strong></p>
+    <div
+      class="mt-4 rounded-md border border-gray-100 bg-white p-3 text-xs font-mono text-gray-600"
+    >
+      <p>
+        isSignal() → <strong class="text-blue-700">{{ introspection().isSignal }}</strong>
+      </p>
+      <p>
+        isWritableSignal() →
+        <strong class="text-blue-700">{{ introspection().isWritableSignal }}</strong>
+      </p>
     </div>
   </section>
 </app-column-and-code-layout>

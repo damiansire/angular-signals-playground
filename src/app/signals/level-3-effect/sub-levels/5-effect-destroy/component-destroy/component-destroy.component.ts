@@ -2,11 +2,11 @@ import { CommonModule } from '@angular/common';
 import { Component, output, effect, signal, ChangeDetectionStrategy } from '@angular/core';
 
 @Component({
-    selector: 'app-component-destroy',
-    imports: [CommonModule],
-    templateUrl: './component-destroy.component.html',
-    changeDetection: ChangeDetectionStrategy.OnPush,
-    styleUrl: './component-destroy.component.css'
+  selector: 'app-component-destroy',
+  imports: [CommonModule],
+  templateUrl: './component-destroy.component.html',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  styleUrl: './component-destroy.component.css',
 })
 export class ComponentDestroyComponent {
   readonly autoRefreshEvent = output<boolean>();

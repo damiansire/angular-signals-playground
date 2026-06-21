@@ -7,12 +7,10 @@
 <div class="flex">
   <div>
     <button (click)="destroy()">Destroy</button>
-    @if(showComponent){
-    <div>
-      <app-destroy-box
-        (autoRefreshEvent)="setAutoRefresh($event)"
-      ></app-destroy-box>
-    </div>
+    @if (showComponent) {
+      <div>
+        <app-destroy-box (autoRefreshEvent)="setAutoRefresh($event)"></app-destroy-box>
+      </div>
     }
     <app-event-history
       title="Interval Evaluation"

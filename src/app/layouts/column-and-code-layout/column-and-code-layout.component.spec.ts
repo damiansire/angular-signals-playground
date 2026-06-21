@@ -7,11 +7,7 @@ import { CodeLine } from '../../components-atom/component-atom.interface';
 @Component({
   imports: [ColumnAndCodeLayoutComponent],
   template: `
-    <app-column-and-code-layout
-      [title]="title"
-      [concept]="concept"
-      [codeLines]="codeLines"
-    >
+    <app-column-and-code-layout [title]="title" [concept]="concept" [codeLines]="codeLines">
       <p class="proyectado">contenido proyectado</p>
     </app-column-and-code-layout>
   `,
@@ -29,9 +25,8 @@ describe('ColumnAndCodeLayoutComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [ColumnAndCodeLayoutComponent],
-      providers: [provideZonelessChangeDetection()]
-    })
-    .compileComponents();
+      providers: [provideZonelessChangeDetection()],
+    }).compileComponents();
 
     fixture = TestBed.createComponent(ColumnAndCodeLayoutComponent);
     component = fixture.componentInstance;

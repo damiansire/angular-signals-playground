@@ -8,18 +8,18 @@ import { SlidersControlButtonsComponent } from '../../../../components-draw/slid
 import { ConceptCardComponent } from '../../../../components-atom/concept-card/concept-card.component';
 
 @Component({
-    selector: 'app-variable-refresh-and-tree',
-    imports: [
-        CodeComponent,
-        TreeComponent,
-        CountIncrementComponent,
-        TwoColumnLayoutComponent,
-        SlidersControlButtonsComponent,
-        ConceptCardComponent,
-    ],
-    templateUrl: './variable-refresh-and-tree.component.html',
-    changeDetection: ChangeDetectionStrategy.OnPush,
-    styleUrl: './variable-refresh-and-tree.component.css'
+  selector: 'app-variable-refresh-and-tree',
+  imports: [
+    CodeComponent,
+    TreeComponent,
+    CountIncrementComponent,
+    TwoColumnLayoutComponent,
+    SlidersControlButtonsComponent,
+    ConceptCardComponent,
+  ],
+  templateUrl: './variable-refresh-and-tree.component.html',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  styleUrl: './variable-refresh-and-tree.component.css',
 })
 export class VariableRefreshAndTreeComponent {
   htmlCode = `<section>
@@ -61,9 +61,7 @@ export class VariableRefreshAndTreeComponent {
     this.nodesToShow.update((currentNodes) => [...currentNodes, id]);
   }
   removeNode(id: string) {
-    this.nodesToShow.update((currentNodes) =>
-      currentNodes.filter((node) => node !== id)
-    );
+    this.nodesToShow.update((currentNodes) => currentNodes.filter((node) => node !== id));
   }
   onSliderChanged(newValue: number) {
     this.sliderNumber = newValue;

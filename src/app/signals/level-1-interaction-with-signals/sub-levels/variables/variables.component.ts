@@ -11,16 +11,11 @@ interface DataTypeExample {
 }
 
 @Component({
-    selector: 'app-variables',
-    imports: [
-        VariableBoxDrawComponent,
-        TitleComponent,
-        CodeLegacyComponent,
-        ConceptCardComponent,
-    ],
-    templateUrl: './variables.component.html',
-    changeDetection: ChangeDetectionStrategy.OnPush,
-    styleUrl: './variables.component.css'
+  selector: 'app-variables',
+  imports: [VariableBoxDrawComponent, TitleComponent, CodeLegacyComponent, ConceptCardComponent],
+  templateUrl: './variables.component.html',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  styleUrl: './variables.component.css',
 })
 export class VariablesComponent implements OnInit {
   dataTypes = ['Number'];

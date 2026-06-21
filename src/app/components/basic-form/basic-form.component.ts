@@ -8,7 +8,7 @@ import {
   computed,
   effect,
   signal,
-  ChangeDetectionStrategy
+  ChangeDetectionStrategy,
 } from '@angular/core';
 interface ClickInButton {
   date: Date;
@@ -17,11 +17,11 @@ interface ClickInButton {
 }
 
 @Component({
-    selector: 'app-basic-form',
-    imports: [],
-    templateUrl: './basic-form.component.html',
-    changeDetection: ChangeDetectionStrategy.OnPush,
-    styleUrl: './basic-form.component.css'
+  selector: 'app-basic-form',
+  imports: [],
+  templateUrl: './basic-form.component.html',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  styleUrl: './basic-form.component.css',
 })
 export class BasicFormComponent {
   firstName: WritableSignal<string> = signal('Damian');

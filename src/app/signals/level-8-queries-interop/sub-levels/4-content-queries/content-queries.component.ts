@@ -1,9 +1,4 @@
-import {
-  Component,
-  ChangeDetectionStrategy,
-  computed,
-  signal,
-} from '@angular/core';
+import { Component, ChangeDetectionStrategy, computed, signal } from '@angular/core';
 import { CodeLine } from '../../../../components-atom/component-atom.interface';
 import { ColumnAndCodeLayoutComponent } from '../../../../layouts/column-and-code-layout/column-and-code-layout.component';
 import { TagListComponent } from './tag-list/tag-list.component';
@@ -20,10 +15,7 @@ export class ContentQueriesComponent {
   private readonly pool = ['Ada', 'Alan', 'Grace', 'Linus', 'Margaret'];
 
   add() {
-    this.names.update((list) => [
-      ...list,
-      this.pool[list.length % this.pool.length],
-    ]);
+    this.names.update((list) => [...list, this.pool[list.length % this.pool.length]]);
   }
 
   removeLast() {

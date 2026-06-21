@@ -10,9 +10,8 @@ describe('VariablesComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [VariablesComponent],
-      providers: [provideZonelessChangeDetection()]
-    })
-    .compileComponents();
+      providers: [provideZonelessChangeDetection()],
+    }).compileComponents();
 
     fixture = TestBed.createComponent(VariablesComponent);
     component = fixture.componentInstance;

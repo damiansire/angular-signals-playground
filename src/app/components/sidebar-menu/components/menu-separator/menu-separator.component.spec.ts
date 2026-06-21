@@ -10,9 +10,8 @@ describe('MenuSeparatorComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [MenuSeparatorComponent],
-      providers: [provideZonelessChangeDetection()]
-    })
-    .compileComponents();
+      providers: [provideZonelessChangeDetection()],
+    }).compileComponents();
 
     fixture = TestBed.createComponent(MenuSeparatorComponent);
     component = fixture.componentInstance;

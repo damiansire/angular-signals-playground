@@ -9,17 +9,17 @@ import { CodeLegacyComponent } from '../../../../components-atom/code-legacy/cod
 import { ConceptCardComponent } from '../../../../components-atom/concept-card/concept-card.component';
 
 @Component({
-    selector: 'app-computed-signal-dynamic-dependencies',
-    templateUrl: './computed-signal-dynamic-dependencies.component.html',
-    styleUrl: './computed-signal-dynamic-dependencies.component.css',
-    changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [
+  selector: 'app-computed-signal-dynamic-dependencies',
+  templateUrl: './computed-signal-dynamic-dependencies.component.html',
+  styleUrl: './computed-signal-dynamic-dependencies.component.css',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
     VariableBoxComponent,
     EventHistoryComponent,
     DependenciesStatusComponent,
     CodeLegacyComponent,
-    ConceptCardComponent
-]
+    ConceptCardComponent,
+  ],
 })
 export class ComputedSignalDynamicDependenciesComponent {
   showCount = signal(false);
@@ -54,27 +54,19 @@ export class ComputedSignalDynamicDependenciesComponent {
   upCount() {
     this.count.update((currentCount: number) => currentCount + 1);
     if (this.showCount()) {
-      this.addConditionalCountRecomputation(
-        'count',
-        this.conditionalCount(),
-        false
-      );
+      this.addConditionalCountRecomputation('count', this.conditionalCount(), false);
     }
     this.addCountRecomputation('count', this.count());
   }
   onShowCountChange() {
     this.showCount.set(!this.showCount());
-    this.addConditionalCountRecomputation(
-      'showCount',
-      this.conditionalCount(),
-      false
-    );
+    this.addConditionalCountRecomputation('showCount', this.conditionalCount(), false);
   }
 
   addConditionalCountRecomputation(
     trigger: string,
     newState: number | string,
-    isCountIncrement: boolean
+    isCountIncrement: boolean,
   ) {
     this.conditionalCountHistory.update((prevHistory) => {
       const newHistory = prevHistory.length ? [...prevHistory] : [];

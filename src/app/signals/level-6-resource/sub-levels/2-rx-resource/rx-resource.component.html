@@ -11,29 +11,29 @@
     </p>
     <div class="flex flex-wrap gap-2 mb-5">
       @for (id of candidateIds; track id) {
-      <button
-        type="button"
-        class="w-10 h-10 rounded-full border text-sm font-bold transition-colors"
-        [class]="
-          id === userId()
-            ? 'bg-indigo-600 border-indigo-600 text-white'
-            : 'bg-white border-gray-300 text-gray-700 hover:border-indigo-400'
-        "
-        (click)="setUser(id)"
-      >
-        {{ id }}
-      </button>
+        <button
+          type="button"
+          class="w-10 h-10 rounded-full border text-sm font-bold transition-colors"
+          [class]="
+            id === userId()
+              ? 'bg-indigo-600 border-indigo-600 text-white'
+              : 'bg-white border-gray-300 text-gray-700 hover:border-indigo-400'
+          "
+          (click)="setUser(id)"
+        >
+          {{ id }}
+        </button>
       }
     </div>
 
     <div class="min-h-[6rem] rounded-md border border-gray-100 bg-gray-50 p-4 mb-4">
       @if (userResource.isLoading()) {
-      <p class="text-indigo-600 font-medium animate-pulse">⏳ Cargando…</p>
+        <p class="text-indigo-600 font-medium animate-pulse">⏳ Cargando…</p>
       } @else if (userResource.error()) {
-      <p class="text-red-600 font-medium">⚠️ {{ userResource.error()?.message }}</p>
+        <p class="text-red-600 font-medium">⚠️ {{ userResource.error()?.message }}</p>
       } @else if (userResource.hasValue()) {
-      <p class="text-lg font-bold text-gray-800">{{ userResource.value().name }}</p>
-      <p class="text-sm text-gray-500">{{ userResource.value().role }}</p>
+        <p class="text-lg font-bold text-gray-800">{{ userResource.value().name }}</p>
+        <p class="text-sm text-gray-500">{{ userResource.value().role }}</p>
       }
     </div>
 

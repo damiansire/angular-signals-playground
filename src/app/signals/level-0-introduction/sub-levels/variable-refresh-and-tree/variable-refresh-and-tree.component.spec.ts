@@ -11,9 +11,8 @@ describe('VariableRefreshAndTreeComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [VariableRefreshAndTreeComponent],
-      providers: [provideZonelessChangeDetection()]
-    })
-    .compileComponents();
+      providers: [provideZonelessChangeDetection()],
+    }).compileComponents();
 
     fixture = TestBed.createComponent(VariableRefreshAndTreeComponent);
     component = fixture.componentInstance;
@@ -40,7 +39,11 @@ describe('VariableRefreshAndTreeComponent', () => {
     component.codeClickHandler({ target: 'Element', action: 'Select', id: 'span-1' } as CodeClick);
     expect(component.nodesToShow()).toContain('span-1');
 
-    component.codeClickHandler({ target: 'Element', action: 'Deselect', id: 'span-1' } as CodeClick);
+    component.codeClickHandler({
+      target: 'Element',
+      action: 'Deselect',
+      id: 'span-1',
+    } as CodeClick);
     expect(component.nodesToShow()).not.toContain('span-1');
   });
 

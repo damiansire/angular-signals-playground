@@ -1,11 +1,11 @@
 import { Component, output, ChangeDetectionStrategy } from '@angular/core';
 
 @Component({
-    selector: 'app-sliders-control-buttons',
-    imports: [],
-    templateUrl: './sliders-control-buttons.component.html',
-    changeDetection: ChangeDetectionStrategy.OnPush,
-    styleUrl: './sliders-control-buttons.component.css'
+  selector: 'app-sliders-control-buttons',
+  imports: [],
+  templateUrl: './sliders-control-buttons.component.html',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  styleUrl: './sliders-control-buttons.component.css',
 })
 export class SlidersControlButtonsComponent {
   sliderNumber = 0;

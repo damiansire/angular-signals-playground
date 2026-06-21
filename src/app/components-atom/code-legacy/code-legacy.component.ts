@@ -5,17 +5,17 @@ import {
   Input,
   Signal,
   signal,
-  ChangeDetectionStrategy
+  ChangeDetectionStrategy,
 } from '@angular/core';
 import { CodeLine } from '../component-atom.interface';
 import { TailwindTextSize } from '../../interfaces/tailwind-css.interface';
 
 @Component({
-    selector: 'app-code-legacy',
-    imports: [],
-    templateUrl: './code-legacy.component.html',
-    changeDetection: ChangeDetectionStrategy.OnPush,
-    styleUrl: './code-legacy.component.css'
+  selector: 'app-code-legacy',
+  imports: [],
+  templateUrl: './code-legacy.component.html',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  styleUrl: './code-legacy.component.css',
 })
 export class CodeLegacyComponent {
   readonly textSize = input<TailwindTextSize>('text-2xl');

@@ -5,11 +5,11 @@ import { CodeLegacyComponent } from '../../components-atom/code-legacy/code-lega
 import { ConceptCardComponent } from '../../components-atom/concept-card/concept-card.component';
 
 @Component({
-    selector: 'app-column-and-code-layout',
-    templateUrl: './column-and-code-layout.component.html',
-    styleUrl: './column-and-code-layout.component.css',
-    changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [TitleComponent, CodeLegacyComponent, ConceptCardComponent]
+  selector: 'app-column-and-code-layout',
+  templateUrl: './column-and-code-layout.component.html',
+  styleUrl: './column-and-code-layout.component.css',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [TitleComponent, CodeLegacyComponent, ConceptCardComponent],
 })
 export class ColumnAndCodeLayoutComponent {
   readonly title = input('No Title');

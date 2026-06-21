@@ -5,24 +5,19 @@ import {
   output,
   Signal,
   signal,
-  ChangeDetectionStrategy
+  ChangeDetectionStrategy,
 } from '@angular/core';
 import { CodeLine, CodeLineElement } from '../component-atom.interface';
-import {
-  isTag,
-  spliteInTags,
-  HtmlIdGeneratorService,
-  HtmlHelper,
-} from '../../libs/code-parser';
+import { isTag, spliteInTags, HtmlIdGeneratorService, HtmlHelper } from '../../libs/code-parser';
 import { TailwindTextSize } from '../../interfaces/tailwind-css.interface';
 import { CodeClick } from './code.interface';
 
 @Component({
-    selector: 'app-code',
-    imports: [],
-    templateUrl: './code.component.html',
-    changeDetection: ChangeDetectionStrategy.OnPush,
-    styleUrl: './code.component.css'
+  selector: 'app-code',
+  imports: [],
+  templateUrl: './code.component.html',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  styleUrl: './code.component.css',
 })
 export class CodeComponent {
   //@deprecated
@@ -43,11 +38,9 @@ export class CodeComponent {
     return `${this.textSize()} ${state}`;
   }
   constructor() {
-    effect(
-      () => {
-        this.codeLines.set(this.parseCode(this.htmlCode()));
-      }
-    );
+    effect(() => {
+      this.codeLines.set(this.parseCode(this.htmlCode()));
+    });
   }
 
   parseCode(code: string): CodeLine[] {
@@ -84,7 +77,7 @@ export class CodeComponent {
   onLineClick(clickedItem: CodeLine) {
     const isSelect = !clickedItem.selected;
     const updatedCodeLines = this.codeLines().map((item) =>
-      item.id === clickedItem.id ? { ...item, selected: isSelect } : item
+      item.id === clickedItem.id ? { ...item, selected: isSelect } : item,
     );
 
     this.codeLines.set(updatedCodeLines);
@@ -111,7 +104,7 @@ export class CodeComponent {
         const elementsInLine = item.elements.map((lineElement) =>
           lineElement.id === clickedItem.id
             ? { ...clickedItem, selected: !clickedItem.selected }
-            : lineElement
+            : lineElement,
         );
 
         return { ...item, elements: elementsInLine };

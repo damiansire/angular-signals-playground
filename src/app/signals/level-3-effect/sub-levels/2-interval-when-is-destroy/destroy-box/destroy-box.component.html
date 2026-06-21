@@ -2,16 +2,15 @@
   <h2 class="text-xl font-semibold mb-2">Clock with Time Refresh</h2>
 
   <div class="flex flex-col md:flex-row items-center justify-between mb-4">
-    @if(!autoRefresh()){
-    <p class="text-lg md:mr-4">
-      The time is obtained manually by clicking on "Refresh Time".
-    </p>
-    } @if(autoRefresh()){
-    <p class="text-lg md:mr-4">Automatic time refresh enabled.</p>
+    @if (!autoRefresh()) {
+      <p class="text-lg md:mr-4">The time is obtained manually by clicking on "Refresh Time".</p>
+    }
+    @if (autoRefresh()) {
+      <p class="text-lg md:mr-4">Automatic time refresh enabled.</p>
     }
   </div>
   <div class="mb-5">
-    <h2 class="text-3xl font-bold">{{ currentTime() | date : "medium" }}</h2>
+    <h2 class="text-3xl font-bold">{{ currentTime() | date: 'medium' }}</h2>
   </div>
   <div class="flex space-x-4">
     <button
@@ -25,7 +24,7 @@
       class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
       (click)="toggleAutoRefresh()"
     >
-      {{ autoRefresh() ? "Disable" : "Enable" }} Auto Refresh
+      {{ autoRefresh() ? 'Disable' : 'Enable' }} Auto Refresh
     </button>
   </div>
 </div>

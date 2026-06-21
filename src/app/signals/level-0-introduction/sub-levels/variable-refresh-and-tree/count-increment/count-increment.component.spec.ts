@@ -10,9 +10,8 @@ describe('CountIncrementComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [CountIncrementComponent],
-      providers: [provideZonelessChangeDetection()]
-    })
-    .compileComponents();
+      providers: [provideZonelessChangeDetection()],
+    }).compileComponents();
 
     fixture = TestBed.createComponent(CountIncrementComponent);
     component = fixture.componentInstance;

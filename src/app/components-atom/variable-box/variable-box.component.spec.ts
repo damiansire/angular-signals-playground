@@ -10,9 +10,8 @@ describe('VariableBoxComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [VariableBoxComponent],
-      providers: [provideZonelessChangeDetection()]
-    })
-    .compileComponents();
+      providers: [provideZonelessChangeDetection()],
+    }).compileComponents();
 
     fixture = TestBed.createComponent(VariableBoxComponent);
     component = fixture.componentInstance;

@@ -10,9 +10,8 @@ describe('ContainerVariableBoxDrawComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [ContainerVariableBoxDrawComponent],
-      providers: [provideZonelessChangeDetection()]
-    })
-    .compileComponents();
+      providers: [provideZonelessChangeDetection()],
+    }).compileComponents();
 
     fixture = TestBed.createComponent(ContainerVariableBoxDrawComponent);
     component = fixture.componentInstance;

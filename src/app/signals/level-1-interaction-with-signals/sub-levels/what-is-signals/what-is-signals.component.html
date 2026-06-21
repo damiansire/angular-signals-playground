@@ -14,34 +14,33 @@
 
 <div>
   <section class="flex flex-wrap justify-around mt-4">
-    @for (type of dataTypes; track $index) { @if(type.isContainer){
-    <app-container-variable-box-draw
-      [variableName]="type.text"
-    ></app-container-variable-box-draw>
-    } @else{
-    <app-variable-box-draw
-      [variableName]="type.text"
-      (clicked)="convertToContainer($event)"
-    ></app-variable-box-draw>
-    } }
+    @for (type of dataTypes; track $index) {
+      @if (type.isContainer) {
+        <app-container-variable-box-draw
+          [variableName]="type.text"
+        ></app-container-variable-box-draw>
+      } @else {
+        <app-variable-box-draw
+          [variableName]="type.text"
+          (clicked)="convertToContainer($event)"
+        ></app-variable-box-draw>
+      }
+    }
   </section>
 </div>
-@if(clickCount > 0){
-<div class="mt-4 mb-4">
-  <app-text-description
-    text="Un signal puede contener cualquier valor, desde primitivos hasta estructuras complejas."
-  >
-  </app-text-description>
-</div>
-<div class="flex justify-center">
-  <div class="max-w-fit">
-    <app-code-legacy
-      [lines]="signalWrapperLines"
-      textSize="text-lg"
-    ></app-code-legacy>
-    <p class="text-xs text-gray-400 text-center mt-2">
-      SignalWrapper&lt;T&gt; es una metáfora para entender la idea; no es API real de Angular.
-    </p>
+@if (clickCount > 0) {
+  <div class="mt-4 mb-4">
+    <app-text-description
+      text="Un signal puede contener cualquier valor, desde primitivos hasta estructuras complejas."
+    >
+    </app-text-description>
   </div>
-</div>
+  <div class="flex justify-center">
+    <div class="max-w-fit">
+      <app-code-legacy [lines]="signalWrapperLines" textSize="text-lg"></app-code-legacy>
+      <p class="text-xs text-gray-400 text-center mt-2">
+        SignalWrapper&lt;T&gt; es una metáfora para entender la idea; no es API real de Angular.
+      </p>
+    </div>
+  </div>
 }

@@ -1,15 +1,16 @@
-@if(sliderNumber > 0){
-<button
-  (click)="beforeSlider()"
-  class="bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold py-1 px-2 rounded"
->
-  Prev
-</button>
-} @if (sliderNumber < 2) {
-<button
-  (click)="nextSlider()"
-  class="bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold py-1 px-2 rounded"
->
-  Next
-</button>
+@if (sliderNumber > 0) {
+  <button
+    (click)="beforeSlider()"
+    class="bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold py-1 px-2 rounded"
+  >
+    Prev
+  </button>
+}
+@if (sliderNumber < 2) {
+  <button
+    (click)="nextSlider()"
+    class="bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold py-1 px-2 rounded"
+  >
+    Next
+  </button>
 }

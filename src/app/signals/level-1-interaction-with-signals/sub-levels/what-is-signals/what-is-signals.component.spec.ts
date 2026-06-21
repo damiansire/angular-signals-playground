@@ -10,9 +10,8 @@ describe('WhatIsSignalsComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [WhatIsSignalsComponent],
-      providers: [provideZonelessChangeDetection()]
-    })
-    .compileComponents();
+      providers: [provideZonelessChangeDetection()],
+    }).compileComponents();
 
     fixture = TestBed.createComponent(WhatIsSignalsComponent);
     component = fixture.componentInstance;
@@ -43,10 +42,12 @@ describe('WhatIsSignalsComponent', () => {
   });
 
   it('al clickear una cajita se la convierte en app-container-variable-box-draw', () => {
-    expect(fixture.nativeElement.querySelectorAll('app-container-variable-box-draw').length).toBe(0);
+    expect(fixture.nativeElement.querySelectorAll('app-container-variable-box-draw').length).toBe(
+      0,
+    );
 
     const firstBox = fixture.nativeElement.querySelector(
-      'app-variable-box-draw [role="button"]'
+      'app-variable-box-draw [role="button"]',
     ) as HTMLElement;
     firstBox.click();
     fixture.detectChanges();
@@ -59,7 +60,7 @@ describe('WhatIsSignalsComponent', () => {
     expect(fixture.nativeElement.querySelector('app-code-legacy')).toBeNull();
 
     const firstBox = fixture.nativeElement.querySelector(
-      'app-variable-box-draw [role="button"]'
+      'app-variable-box-draw [role="button"]',
     ) as HTMLElement;
     firstBox.click();
     fixture.detectChanges();

@@ -8,12 +8,12 @@
   <section class="w-80 p-5 rounded-lg shadow-md bg-white">
     <app-tag-list>
       @for (name of names(); track $index) {
-      <span
-        #tag
-        class="px-3 py-1 rounded-full bg-fuchsia-100 text-fuchsia-800 text-sm font-medium"
-      >
-        {{ name }}
-      </span>
+        <span
+          #tag
+          class="px-3 py-1 rounded-full bg-fuchsia-100 text-fuchsia-800 text-sm font-medium"
+        >
+          {{ name }}
+        </span>
       }
     </app-tag-list>
 

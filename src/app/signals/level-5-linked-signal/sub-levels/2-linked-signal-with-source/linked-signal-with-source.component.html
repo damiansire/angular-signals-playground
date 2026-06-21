@@ -16,18 +16,18 @@
     </p>
     <div class="flex flex-wrap gap-2 mb-5">
       @for (option of shippingOptions(); track option) {
-      <button
-        type="button"
-        class="px-3 py-1.5 rounded-full border text-sm font-medium transition-colors"
-        [class]="
-          option === selectedOption()
-            ? 'bg-emerald-600 border-emerald-600 text-white'
-            : 'bg-white border-gray-300 text-gray-700 hover:border-emerald-400'
-        "
-        (click)="select(option)"
-      >
-        {{ option }}
-      </button>
+        <button
+          type="button"
+          class="px-3 py-1.5 rounded-full border text-sm font-medium transition-colors"
+          [class]="
+            option === selectedOption()
+              ? 'bg-emerald-600 border-emerald-600 text-white'
+              : 'bg-white border-gray-300 text-gray-700 hover:border-emerald-400'
+          "
+          (click)="select(option)"
+        >
+          {{ option }}
+        </button>
       }
     </div>
 

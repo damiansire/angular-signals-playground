@@ -1,9 +1,4 @@
-import {
-  Component,
-  ChangeDetectionStrategy,
-  computed,
-  signal,
-} from '@angular/core';
+import { Component, ChangeDetectionStrategy, computed, signal } from '@angular/core';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { debounceTime } from 'rxjs';
 import { CodeLine } from '../../../../components-atom/component-atom.interface';
@@ -20,10 +15,9 @@ export class DebouncedRxjsComponent {
   readonly query = signal('');
 
   // El valor "debounced": se actualiza 400ms después de la última tecla.
-  readonly debounced = toSignal(
-    toObservable(this.query).pipe(debounceTime(400)),
-    { initialValue: '' }
-  );
+  readonly debounced = toSignal(toObservable(this.query).pipe(debounceTime(400)), {
+    initialValue: '',
+  });
 
   setQuery(value: string) {
     this.query.set(value);

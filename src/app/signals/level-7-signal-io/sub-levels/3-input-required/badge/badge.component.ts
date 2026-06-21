@@ -12,11 +12,7 @@ import {
   template: `
     <span
       class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-sm font-semibold"
-      [class]="
-        highlight()
-          ? 'bg-amber-500 text-white'
-          : 'bg-gray-200 text-gray-800'
-      "
+      [class]="highlight() ? 'bg-amber-500 text-white' : 'bg-gray-200 text-gray-800'"
     >
       {{ label() }}
       <span class="tabular-nums">{{ count() }}</span>

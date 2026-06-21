@@ -11,9 +11,8 @@ describe('ComputedTrackerComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [ComputedTrackerComponent],
-      providers: [provideZonelessChangeDetection()]
-    })
-    .compileComponents();
+      providers: [provideZonelessChangeDetection()],
+    }).compileComponents();
 
     fixture = TestBed.createComponent(ComputedTrackerComponent);
     component = fixture.componentInstance;

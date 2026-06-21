@@ -9,24 +9,22 @@
 </div>
 <section class="flex flex-wrap justify-around mb-6">
   @for (type of dataTypes; track $index) {
-
-  <app-variable-box-draw
-    [variableName]="type"
-    (clicked)="selectType($event)"
-  ></app-variable-box-draw>
-
+    <app-variable-box-draw
+      [variableName]="type"
+      (clicked)="selectType($event)"
+    ></app-variable-box-draw>
   }
 </section>
 <section class="flex flex-col justify-around">
   <div class="flex justify-around">
     <div class="flex flex-col justify-around">
       @for (item of selectedType().examples; track $index) {
-      <div class="mb-4">
-        <app-variable-box-draw
-          [variableName]="item"
-          (clicked)="selectExample($event)"
-        ></app-variable-box-draw>
-      </div>
+        <div class="mb-4">
+          <app-variable-box-draw
+            [variableName]="item"
+            (clicked)="selectExample($event)"
+          ></app-variable-box-draw>
+        </div>
       }
     </div>
     <div class="content-center">

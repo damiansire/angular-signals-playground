@@ -10,9 +10,8 @@ describe('CreateNewSignalsComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [CreateNewSignalsComponent],
-      providers: [provideZonelessChangeDetection()]
-    })
-    .compileComponents();
+      providers: [provideZonelessChangeDetection()],
+    }).compileComponents();
 
     fixture = TestBed.createComponent(CreateNewSignalsComponent);
     component = fixture.componentInstance;

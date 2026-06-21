@@ -6,7 +6,7 @@
   </h1>
   <div class="mt-5 flex flex-col gap-3 overflow-auto">
     @for (click of clickHistory().reverse(); track $index) {
-    <app-event [event]="click"></app-event>
+      <app-event [event]="click"></app-event>
     }
   </div>
 </div>

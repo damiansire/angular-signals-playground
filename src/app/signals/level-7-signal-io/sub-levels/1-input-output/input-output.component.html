@@ -6,11 +6,7 @@
   observe="El hijo recibe step por input y avisa al padre por output."
 >
   <section class="w-80 p-5 rounded-lg shadow-md bg-white flex flex-col items-center gap-5">
-    <app-counter-input
-      label="Clicks"
-      [step]="step()"
-      (countChange)="onCountChange($event)"
-    />
+    <app-counter-input label="Clicks" [step]="step()" (countChange)="onCountChange($event)" />
 
     <div class="text-center">
       <p class="text-sm text-gray-500">

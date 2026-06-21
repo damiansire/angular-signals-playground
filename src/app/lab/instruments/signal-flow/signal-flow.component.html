@@ -25,7 +25,10 @@
       />
 
       <!-- el valor en vivo embebido en la línea de código -->
-      <code class="src-line">cutoff = signal(<b>{{ cutoff() }}</b>)</code>
+      <code class="src-line"
+        >cutoff = signal(<b>{{ cutoff() }}</b
+        >)</code
+      >
 
       <span class="jack jack--out" aria-hidden="true"></span>
     </div>
@@ -39,13 +42,33 @@
         </linearGradient>
       </defs>
       <!-- sombra del cable -->
-      <path d="M6,64 C120,12 240,116 354,64" fill="none" stroke="#16130f" stroke-width="10" stroke-linecap="round" opacity="0.5" />
+      <path
+        d="M6,64 C120,12 240,116 354,64"
+        fill="none"
+        stroke="#16130f"
+        stroke-width="10"
+        stroke-linecap="round"
+        opacity="0.5"
+      />
       <!-- cable -->
-      <path id="cablePath" d="M6,60 C120,8 240,112 354,60" fill="none" stroke="url(#cableStroke)" stroke-width="6" stroke-linecap="round" />
+      <path
+        id="cablePath"
+        d="M6,60 C120,8 240,112 354,60"
+        fill="none"
+        stroke="url(#cableStroke)"
+        stroke-width="6"
+        stroke-linecap="round"
+      />
       <!-- pulso: se recrea (y reinicia) cuando cambia la key -->
       @for (k of pulses(); track k) {
         <circle class="pulse" r="6" fill="#fff8e8">
-          <animateMotion dur="0.42s" fill="freeze" calcMode="spline" keyTimes="0;1" keySplines="0.4 0.7 0.3 1">
+          <animateMotion
+            dur="0.42s"
+            fill="freeze"
+            calcMode="spline"
+            keyTimes="0;1"
+            keySplines="0.4 0.7 0.3 1"
+          >
             <mpath href="#cablePath" />
           </animateMotion>
         </circle>

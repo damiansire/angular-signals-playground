@@ -10,9 +10,8 @@ describe('ComputedSignalDynamicDependenciesComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [ComputedSignalDynamicDependenciesComponent],
-      providers: [provideZonelessChangeDetection()]
-    })
-    .compileComponents();
+      providers: [provideZonelessChangeDetection()],
+    }).compileComponents();
 
     fixture = TestBed.createComponent(ComputedSignalDynamicDependenciesComponent);
     component = fixture.componentInstance;

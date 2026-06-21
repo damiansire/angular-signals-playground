@@ -10,9 +10,8 @@ describe('OldChangeDetectionComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [OldChangeDetectionComponent],
-      providers: [provideZonelessChangeDetection()]
-    })
-    .compileComponents();
+      providers: [provideZonelessChangeDetection()],
+    }).compileComponents();
 
     fixture = TestBed.createComponent(OldChangeDetectionComponent);
     component = fixture.componentInstance;

@@ -10,9 +10,8 @@ describe('WritableSignalsComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [WritableSignalsComponent],
-      providers: [provideZonelessChangeDetection()]
-    })
-    .compileComponents();
+      providers: [provideZonelessChangeDetection()],
+    }).compileComponents();
 
     fixture = TestBed.createComponent(WritableSignalsComponent);
     component = fixture.componentInstance;

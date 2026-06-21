@@ -1,13 +1,12 @@
-
 import { Component, output, ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 
 @Component({
-    selector: 'app-selection-option',
-    imports: [FormsModule],
-    templateUrl: './selection-option.component.html',
-    changeDetection: ChangeDetectionStrategy.OnPush,
-    styleUrl: './selection-option.component.css'
+  selector: 'app-selection-option',
+  imports: [FormsModule],
+  templateUrl: './selection-option.component.html',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  styleUrl: './selection-option.component.css',
 })
 export class SelectionOptionComponent {
   readonly selectedLevelChange = output<number>();

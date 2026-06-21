@@ -4,11 +4,11 @@ import { CommonModule } from '@angular/common';
 import { SvgComponent } from '../../../icons/click.component';
 
 @Component({
-    selector: 'app-event',
-    templateUrl: './event.component.html',
-    styleUrl: './event.component.css',
-    changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [CommonModule, SvgComponent]
+  selector: 'app-event',
+  templateUrl: './event.component.html',
+  styleUrl: './event.component.css',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [CommonModule, SvgComponent],
 })
 export class EventComponent {
   readonly event = input<ClickInButton>({

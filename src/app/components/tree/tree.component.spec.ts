@@ -10,9 +10,8 @@ describe('TreeComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [TreeComponent],
-      providers: [provideZonelessChangeDetection()]
-    })
-    .compileComponents();
+      providers: [provideZonelessChangeDetection()],
+    }).compileComponents();
 
     fixture = TestBed.createComponent(TreeComponent);
     component = fixture.componentInstance;

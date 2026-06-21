@@ -10,9 +10,8 @@ describe('EffectLevelComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [EffectLevelComponent],
-      providers: [provideZonelessChangeDetection()]
-    })
-    .compileComponents();
+      providers: [provideZonelessChangeDetection()],
+    }).compileComponents();
 
     fixture = TestBed.createComponent(EffectLevelComponent);
     component = fixture.componentInstance;

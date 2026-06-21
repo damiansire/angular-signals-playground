@@ -3,9 +3,7 @@
     <app-click-icon></app-click-icon>
   </div>
   <div class="ml-2">
-    <div class="text-2xl uppercase leading-8">
-      {{ event().firstName }} {{ event().surname }}
-    </div>
-    <div>{{ event().date | date : "HH:mm:ss" }}</div>
+    <div class="text-2xl uppercase leading-8">{{ event().firstName }} {{ event().surname }}</div>
+    <div>{{ event().date | date: 'HH:mm:ss' }}</div>
   </div>
 </div>
