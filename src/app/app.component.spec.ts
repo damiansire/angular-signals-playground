@@ -15,4 +15,23 @@ describe('AppComponent', () => {
     const app = fixture.componentInstance;
     expect(app).toBeTruthy();
   });
+
+  it('expone el titulo de la aplicacion', () => {
+    const fixture = TestBed.createComponent(AppComponent);
+    expect(fixture.componentInstance.title).toBe('angular-examples');
+  });
+
+  it('renderiza el layout: sidebar, router-outlet y el skip-link de accesibilidad', () => {
+    const fixture = TestBed.createComponent(AppComponent);
+    fixture.detectChanges();
+    const el = fixture.nativeElement as HTMLElement;
+
+    expect(el.querySelector('app-sidebar-menu')).toBeTruthy();
+    expect(el.querySelector('router-outlet')).toBeTruthy();
+
+    const skip = el.querySelector('a.skip-link') as HTMLAnchorElement;
+    expect(skip).toBeTruthy();
+    expect(skip.getAttribute('href')).toBe('#main-content');
+    expect(el.querySelector('#main-content')).toBeTruthy();
+  });
 });

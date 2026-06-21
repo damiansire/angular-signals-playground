@@ -20,4 +20,17 @@ describe('InteractionWithSignalsComponent', () => {
   it('should create', () => {
     expect(component).toBeTruthy();
   });
+
+  it('muestra el titulo Interactuar con signals via app-title', () => {
+    const title = fixture.nativeElement.querySelector('app-title h1') as HTMLElement;
+    expect(title.textContent?.trim()).toBe('Interactuar con signals!');
+  });
+
+  it('menciona set()/update() y lista los siete sub-niveles', () => {
+    const text = (fixture.nativeElement as HTMLElement).textContent ?? '';
+    expect(text).toContain('set()');
+    expect(text).toContain('update()');
+    const items = fixture.nativeElement.querySelectorAll('ul li');
+    expect(items.length).toBe(7);
+  });
 });
