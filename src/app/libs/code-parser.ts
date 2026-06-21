@@ -21,30 +21,21 @@ export function isTag(str: string): boolean {
   return tagRegex.test(str);
 }
 
-export function spliteInTags(htmlString: string) {
-  // Expresión regular actualizada para etiquetas vacías y anidadas
-  const regex =
-    /\s*(<\/?\w+(?:\s+\w+(?:\s*=\s*(?:"[^"]*"|'[^']*'|[^'">\s]+))?)*\/?>|\s*<\/?\w+\s+\/>)\s*/g;
-  //              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^  ^^^^^^^^^^^
-  //                 |                                                              |          |
-  //    Patrón para etiquetas con atributos opcionales                          Patrón para etiquetas vacías
+// Nombre de atributo: admite atributos HTML normales ([\w-]) y la sintaxis de
+// binding de Angular sobre el mismo token, sin hardcodear casos:
+//   (click)  [prop]  [(ngModel)]  *ngIf  #ref  @defer  attr-normal
+const ATTR_NAME = String.raw`[@*#]?\(?\[?[\w.-]+\)?\]?\)?`;
+// Valor opcional: comillas dobles, simples o sin comillas (hasta espacio o '>').
+const ATTR_VALUE = String.raw`(?:\s*=\s*(?:"[^"]*"|'[^']*'|[^'">\s]+))?`;
+// Una etiqueta de apertura/cierre/auto-cerrada con cero o más atributos.
+const TAG = String.raw`<\/?[a-zA-Z][\w-]*(?:\s+${ATTR_NAME}${ATTR_VALUE})*\s*\/?>`;
 
-  const result = htmlString.split(regex).filter(Boolean);
-  const fixs = splitAndReplaceTag(result);
-  return fixs;
-}
-
-function splitAndReplaceTag(strings: string[]): string[] {
-  const targetElement = '<button (click)="increment()"> Increment';
-  for (let index = 0; index < strings.length; index++) {
-    if (strings[index] === targetElement) {
-      const part1 = '<button (click)="increment()">';
-      const part2 = ' Increment ';
-      strings.splice(index, 1, part1, part2); // Replace the element with two parts
-      break; // Stop after the first replacement
-    }
-  }
-  return strings;
+export function spliteInTags(htmlString: string): string[] {
+  // Separa la cadena en etiquetas y texto, consumiendo el espacio en blanco
+  // adyacente a cada etiqueta. El grupo de captura conserva las etiquetas en el
+  // resultado del split; el texto entre etiquetas queda como tokens propios.
+  const regex = new RegExp(String.raw`\s*(${TAG})\s*`, 'g');
+  return htmlString.split(regex).filter(Boolean);
 }
 
 export class HtmlHelper {

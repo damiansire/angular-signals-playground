@@ -191,9 +191,34 @@ describe('spliteInTags', () => {
 
   it('should split angular tags', () => {
     const htmlString = '<button (click)="increment()"> Increment </button>';
-    const expectedResult = ['<button (click)="increment()">', ' Increment ', '</button>'];
+    // El texto adyacente a las etiquetas se recorta de forma consistente, igual
+    // que en el resto de los casos (p.ej. ' hello word2 ' -> 'hello word2').
+    const expectedResult = ['<button (click)="increment()">', 'Increment', '</button>'];
 
     expect(spliteInTags(htmlString)).toEqual(expectedResult);
+  });
+
+  it('tokeniza un binding de propiedad de Angular distinto del hardcodeado', () => {
+    const htmlString = '<app-badge [count]="total">Tag</app-badge>';
+    const expectedResult = ['<app-badge [count]="total">', 'Tag', '</app-badge>'];
+
+    expect(spliteInTags(htmlString)).toEqual(expectedResult);
+  });
+
+  it('tokeniza two-way binding, referencia de template y atributo estructural', () => {
+    const htmlString = '<input [(ngModel)]="name" #ref *ngIf="show" />';
+
+    expect(spliteInTags(htmlString)).toEqual(['<input [(ngModel)]="name" #ref *ngIf="show" />']);
+  });
+
+  it('tokeniza varios bindings de Angular en una misma etiqueta', () => {
+    const htmlString = '<div [class.active]="on" (click)="go()">x</div>';
+
+    expect(spliteInTags(htmlString)).toEqual([
+      '<div [class.active]="on" (click)="go()">',
+      'x',
+      '</div>',
+    ]);
   });
 });
 
