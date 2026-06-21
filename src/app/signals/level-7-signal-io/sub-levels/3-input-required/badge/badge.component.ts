@@ -24,7 +24,8 @@ import {
   `,
 })
 export class BadgeComponent {
-  // Requerido: si el padre lo omite, falla en build (no en runtime).
+  // Requerido: el compilador exige pasarlo en el template (build, strictTemplates);
+  // además leerlo antes de que se setee lanza NG0950 en runtime.
   readonly label = input.required<string>();
 
   // transform: el atributo llega como string y se convierte a number / boolean.

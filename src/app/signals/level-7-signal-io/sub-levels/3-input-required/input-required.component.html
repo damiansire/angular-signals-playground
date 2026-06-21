@@ -1,7 +1,7 @@
 <app-column-and-code-layout
   title="input.required() y transform"
   [codeLines]="lines"
-  concept="input.required() obliga a pasar el valor (error en build si falta); transform convierte el atributo (string) al tipo correcto."
+  concept="input.required() obliga a pasar el valor (error en build con strictTemplates si falta, y NG0950 en runtime si se lee antes de setearse); transform convierte el atributo (string) al tipo correcto."
   action="Sumá al contador y alterná el resaltado."
   observe="count llega como número (numberAttribute) y highlight como booleano (booleanAttribute)."
 >
