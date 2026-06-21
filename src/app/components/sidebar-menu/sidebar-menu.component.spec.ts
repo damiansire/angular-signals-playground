@@ -41,7 +41,7 @@ describe('SidebarMenuComponent', () => {
   it('setCurrentLevel marca el nivel y subnivel como current y habilita solo su submenu', () => {
     const level = component.menuItems.find((m) => m.subLevels.length > 0)!;
     const otherLevel = component.menuItems.find(
-      (m) => m.id !== level.id && m.subLevels.length > 0
+      (m) => m.id !== level.id && m.subLevels.length > 0,
     )!;
     const subLevelId = level.subLevels[0].id;
 
@@ -59,5 +59,25 @@ describe('SidebarMenuComponent', () => {
     const subOptions = fixture.nativeElement.querySelectorAll('app-menu-sub-level-option');
     expect(subOptions.length).toBe(currentLevel.subLevels.length);
     expect(component.showSubMenu('1')).toBeTrue();
+  });
+
+  it('setLevelState lanza un error claro cuando el nivel no existe (sin TypeError previo)', () => {
+    expect(() =>
+      component.levelHandler.setLevelState('nivel-inexistente', undefined, 'current'),
+    ).toThrowError(/invalid level/);
+  });
+
+  it('setLevelState lanza cuando el subnivel no existe en un nivel valido', () => {
+    const validLevel = component.menuItems[0].id;
+    expect(() =>
+      component.levelHandler.setLevelState(validLevel, 'sub-inexistente', 'current'),
+    ).toThrowError(/invalid sub-level/);
+  });
+
+  it('setLevelState NO lanza para un nivel/subnivel validos', () => {
+    const level = component.menuItems.find((m) => m.subLevels.length > 0)!;
+    const subLevelId = level.subLevels[0].id;
+    expect(() => component.levelHandler.setLevelState(level.id, subLevelId, 'win')).not.toThrow();
+    expect(component.getMenuOptionStatus(level.id, subLevelId)).toBe('win');
   });
 });
