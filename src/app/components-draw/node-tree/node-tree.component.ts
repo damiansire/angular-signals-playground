@@ -1,5 +1,6 @@
 
 import {
+  ChangeDetectionStrategy,
   Component,
   computed,
   input,
@@ -16,6 +17,7 @@ import { Link, NodeTree } from '../components-draw.inferface';
     imports: [NgxEchartsDirective],
     providers: [provideEchartsCore({ echarts: () => import('echarts') })],
     templateUrl: './node-tree.component.html',
+    changeDetection: ChangeDetectionStrategy.OnPush,
     styleUrl: './node-tree.component.css'
 })
 export class NodeTreeComponent {

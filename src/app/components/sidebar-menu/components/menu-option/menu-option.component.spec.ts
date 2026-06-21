@@ -38,20 +38,32 @@ describe('MenuOptionComponent', () => {
   });
 
   it('aplica la clase de estado pending por defecto', () => {
-    const li = fixture.nativeElement.querySelector('li') as HTMLElement;
-    expect(li.classList).toContain('bg-gray-700');
-    expect(li.classList).not.toContain('bg-green-600');
+    const link = fixture.nativeElement.querySelector('a') as HTMLElement;
+    expect(link.classList).toContain('bg-gray-700');
+    expect(link.classList).not.toContain('bg-green-600');
   });
 
   it('refleja levelState win y current en las clases', () => {
     fixture.componentRef.setInput('levelState', 'win');
     fixture.detectChanges();
-    const li = fixture.nativeElement.querySelector('li') as HTMLElement;
-    expect(li.classList).toContain('bg-green-600');
+    const link = fixture.nativeElement.querySelector('a') as HTMLElement;
+    expect(link.classList).toContain('bg-green-600');
 
     fixture.componentRef.setInput('levelState', 'current');
     fixture.detectChanges();
-    expect(li.classList).toContain('bg-orange-500');
-    expect(li.classList).not.toContain('bg-green-600');
+    expect(link.classList).toContain('bg-orange-500');
+    expect(link.classList).not.toContain('bg-green-600');
+  });
+
+  it('expone un control accesible por teclado con nombre y aria-current', () => {
+    const link = fixture.nativeElement.querySelector('a') as HTMLAnchorElement;
+    expect(link).toBeTruthy();
+    expect(link.getAttribute('aria-label')).toBe('Nivel 7');
+    expect(link.getAttribute('href')).toContain('signals/level/1/sub-level/1');
+    expect(link.getAttribute('aria-current')).toBeNull();
+
+    fixture.componentRef.setInput('levelState', 'current');
+    fixture.detectChanges();
+    expect(link.getAttribute('aria-current')).toBe('page');
   });
 });

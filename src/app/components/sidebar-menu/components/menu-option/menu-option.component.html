@@ -1,9 +1,11 @@
-<li
+<a
   [routerLink]="getLink(menuItem().path)"
+  [attr.aria-label]="'Nivel ' + menuItem().id"
+  [attr.aria-current]="levelState() === 'current' ? 'page' : null"
   [class.bg-green-600]="levelState() === 'win'"
   [class.bg-gray-700]="levelState() === 'pending'"
   [class.bg-orange-500]="levelState() === 'current'"
-  class="flex items-center justify-center w-10 h-10 rounded-full cursor-pointer mx-auto border-2 border-gray-100"
+  class="flex items-center justify-center w-10 h-10 rounded-full cursor-pointer mx-auto border-2 border-gray-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-300 focus-visible:ring-offset-2"
 >
   <span class="text-white font-semibold">{{ menuItem().id }}</span>
-</li>
+</a>
