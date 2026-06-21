@@ -20,4 +20,10 @@ describe('CodeAndTabsComponent', () => {
   it('should create', () => {
     expect(component).toBeTruthy();
   });
+
+  it('renderiza el parrafo placeholder del componente', () => {
+    const p = fixture.nativeElement.querySelector('p') as HTMLElement;
+    expect(p).toBeTruthy();
+    expect(p.textContent?.trim()).toBe('code-and-tabs works!');
+  });
 });

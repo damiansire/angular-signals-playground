@@ -20,4 +20,16 @@ describe('DrawPreviewComponent', () => {
   it('should create', () => {
     expect(component).toBeTruthy();
   });
+
+  it('enlaza el input imgUrl al src del img', () => {
+    fixture.componentRef.setInput('imgUrl', 'https://example.com/foo.png');
+    fixture.detectChanges();
+    const img = fixture.nativeElement.querySelector('img') as HTMLImageElement;
+    expect(img.getAttribute('src')).toBe('https://example.com/foo.png');
+  });
+
+  it('el img tiene un texto alternativo descriptivo', () => {
+    const img = fixture.nativeElement.querySelector('img') as HTMLImageElement;
+    expect(img.getAttribute('alt')).toBe('Descripción de la imagen');
+  });
 });
