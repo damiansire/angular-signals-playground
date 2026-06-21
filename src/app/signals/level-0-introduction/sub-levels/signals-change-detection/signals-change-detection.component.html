@@ -1,4 +1,8 @@
-<app-concept-card concept="Con signals, Angular actualiza SOLO lo que depende del signal que cambió." action="Compará el diagrama NgZone contra signals." observe="Signals evita recorrer todo el árbol en cada cambio." />
+<app-concept-card
+  concept="Cuando cambia un signal, Angular re-chequea SOLO los componentes que lo consumen (no todo el árbol) y, dentro de cada uno, re-evalúa sus bindings."
+  action="Compará el diagrama NgZone contra signals."
+  observe="Con OnPush + zoneless, Angular poda los subárboles que no cambiaron en vez de recorrerlos enteros."
+/>
 <img
   src="/assets/images/signals/ng_zone_vs_signal.gif"
   alt="Comparación animada entre la detección de cambios con NgZone y con signals"

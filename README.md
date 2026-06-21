@@ -74,7 +74,7 @@ npm start
 
 ```
 src/app/
-├── signals/          # The learning levels (0–5) and their sub-levels
+├── signals/          # The learning levels (0–11) and their sub-levels
 ├── lab/              # Signals Lab: bench-frame, hub and instruments
 ├── components/       # Feature components (sidebar menu, histories, trees…)
 ├── components-atom/  # Atomic UI building blocks (button, code, input, title…)

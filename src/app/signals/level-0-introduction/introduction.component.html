@@ -7,8 +7,13 @@
   </p>
   <ul class="list-disc list-inside space-y-1 text-gray-600">
     <li><strong>Sub-nivel 1:</strong> el HTML como árbol de nodos (DOM).</li>
-    <li><strong>Sub-nivel 2:</strong> cómo una variable se refleja en la vista (HTML → JS → Angular).</li>
-    <li><strong>Sub-nivel 3:</strong> la detección de cambios "clásica" (NgZone revisa todo el árbol).</li>
+    <li>
+      <strong>Sub-nivel 2:</strong> cómo una variable se refleja en la vista (HTML → JS → Angular).
+    </li>
+    <li>
+      <strong>Sub-nivel 3:</strong> la detección de cambios "clásica" (Zone.js avisa que pasó algo
+      async; entonces Angular recorre el árbol).
+    </li>
     <li><strong>Sub-nivel 4:</strong> la detección con signals, mucho más quirúrgica.</li>
   </ul>
 </div>

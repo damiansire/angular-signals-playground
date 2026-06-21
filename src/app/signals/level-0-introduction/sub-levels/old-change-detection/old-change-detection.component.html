@@ -1,10 +1,10 @@
-<app-concept-card concept="Con NgZone, ante cualquier cambio Angular revisa TODO el árbol de componentes." action="Avanzá con las flechas." observe="El barrido pinta los nodos nivel por nivel (verde = revisado)." />
+<app-concept-card
+  concept="Zone.js avisa a Angular que pasó algo async; entonces Angular recorre el árbol (en estrategia default, entero)."
+  action="Avanzá con las flechas."
+  observe="El barrido pinta los nodos nivel por nivel (verde = revisado)."
+/>
 <div>
-  <app-node-tree
-    [nodes]="data"
-    [links]="links"
-    title="Old Change Detection"
-  ></app-node-tree>
+  <app-node-tree [nodes]="data" [links]="links" title="Old Change Detection"></app-node-tree>
 </div>
 
 <div class="flex justify-center space-x-4">
@@ -20,12 +20,7 @@
       viewBox="0 0 24 24"
       stroke="currentColor"
     >
-      <path
-        stroke-linecap="round"
-        stroke-linejoin="round"
-        stroke-width="2"
-        d="M15 19l-7-7 7-7"
-      />
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
     </svg>
   </button>
 
@@ -41,12 +36,7 @@
       viewBox="0 0 24 24"
       stroke="currentColor"
     >
-      <path
-        stroke-linecap="round"
-        stroke-linejoin="round"
-        stroke-width="2"
-        d="M9 5l7 7-7 7"
-      />
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
     </svg>
   </button>
 </div>
