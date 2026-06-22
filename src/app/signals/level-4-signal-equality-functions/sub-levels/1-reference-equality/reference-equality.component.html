@@ -1,6 +1,6 @@
 <app-column-and-code-layout
   title="Igualdad por defecto (Object.is)"
-  [codeLines]="lines"
+  [codeLines]="lines()"
   concept="Por defecto un signal usa Object.is: compara por referencia, no por contenido."
   action="Probá los tres botones y mirá el contador de notificaciones."
   observe="Un objeto NUEVO con el mismo contenido igual notifica; la misma referencia no."

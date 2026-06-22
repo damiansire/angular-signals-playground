@@ -1,6 +1,6 @@
 <app-column-and-code-layout
   title="Read-only signals: asReadonly()"
-  [codeLines]="lines"
+  [codeLines]="lines()"
   concept="asReadonly() expone un signal que se lee pero no se escribe desde afuera."
   action="Incrementá (interno) y reseteá."
   observe="count() refleja los cambios; quien lo recibe no puede llamar .set()."

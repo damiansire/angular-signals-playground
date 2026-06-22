@@ -1,4 +1,4 @@
-import { Component, input, signal, Signal, ChangeDetectionStrategy } from '@angular/core';
+import { Component, input, ChangeDetectionStrategy } from '@angular/core';
 import { TitleComponent } from '../../components-atom/title/title.component';
 import { CodeLine } from '../../components-atom/component-atom.interface';
 import { CodeLegacyComponent } from '../../components-atom/code-legacy/code-legacy.component';
@@ -13,7 +13,7 @@ import { ConceptCardComponent } from '../../components-atom/concept-card/concept
 })
 export class ColumnAndCodeLayoutComponent {
   readonly title = input('No Title');
-  readonly codeLines = input<Signal<CodeLine[]>>(signal<CodeLine[]>([]));
+  readonly codeLines = input<CodeLine[]>([]);
   // Tarjeta didáctica opcional: si se pasa `concept`, se muestra arriba.
   readonly concept = input('');
   readonly action = input('');

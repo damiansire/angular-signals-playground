@@ -1,12 +1,4 @@
-import {
-  Component,
-  input,
-  output,
-  Input,
-  Signal,
-  signal,
-  ChangeDetectionStrategy,
-} from '@angular/core';
+import { Component, input, output, ChangeDetectionStrategy } from '@angular/core';
 import { CodeLine } from '../component-atom.interface';
 import { TailwindTextSize } from '../../interfaces/tailwind-css.interface';
 
@@ -19,7 +11,7 @@ import { TailwindTextSize } from '../../interfaces/tailwind-css.interface';
 })
 export class CodeLegacyComponent {
   readonly textSize = input<TailwindTextSize>('text-2xl');
-  @Input() lines: Signal<CodeLine[]> = signal([]);
+  readonly lines = input<CodeLine[]>([]);
   readonly lineClick = output<string>();
 
   lineClasses(item: CodeLine): string {

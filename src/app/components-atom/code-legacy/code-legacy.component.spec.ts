@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { signal, provideZonelessChangeDetection } from '@angular/core';
+import { provideZonelessChangeDetection } from '@angular/core';
 
 import { CodeLegacyComponent } from './code-legacy.component';
 import { CodeLine } from '../component-atom.interface';
@@ -24,13 +24,10 @@ describe('CodeLegacyComponent', () => {
   });
 
   it('renderiza una linea por cada CodeLine y muestra item.line', () => {
-    fixture.componentRef.setInput(
-      'lines',
-      signal<CodeLine[]>([
-        { id: 'a', line: 'const x = 1;' },
-        { id: 'b', line: 'const y = 2;' },
-      ]),
-    );
+    fixture.componentRef.setInput('lines', [
+      { id: 'a', line: 'const x = 1;' },
+      { id: 'b', line: 'const y = 2;' },
+    ] satisfies CodeLine[]);
     fixture.detectChanges();
 
     const rows = fixture.nativeElement.querySelectorAll('[role="button"]');

@@ -1,4 +1,4 @@
-import { Component, signal, provideZonelessChangeDetection } from '@angular/core';
+import { Component, provideZonelessChangeDetection } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { ColumnAndCodeLayoutComponent } from './column-and-code-layout.component';
@@ -15,7 +15,7 @@ import { CodeLine } from '../../components-atom/component-atom.interface';
 class HostComponent {
   title = 'Mi Layout';
   concept = '';
-  codeLines = signal<CodeLine[]>([]);
+  codeLines: CodeLine[] = [];
 }
 
 describe('ColumnAndCodeLayoutComponent', () => {

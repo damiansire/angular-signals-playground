@@ -1,6 +1,6 @@
 <app-column-and-code-layout
   title="Change detection sin Zone.js"
-  [codeLines]="lines"
+  [codeLines]="lines()"
   concept="Con signals + OnPush, Angular se entera de los cambios sin Zone.js: se activa con provideZonelessChangeDetection()."
   action="Incrementá el contador."
   observe="La vista se actualiza porque el signal avisa a Angular — no porque Zone.js parchee setInterval/eventos."

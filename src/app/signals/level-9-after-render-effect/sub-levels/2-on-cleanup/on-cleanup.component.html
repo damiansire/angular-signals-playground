@@ -1,6 +1,6 @@
 <app-column-and-code-layout
   title="effect((onCleanup) => …)"
-  [codeLines]="lines"
+  [codeLines]="lines()"
   concept="onCleanup() limpia un effect antes de que vuelva a correr o cuando el componente se destruye: así no quedan leaks."
   action="Prendé y apagá el cronómetro varias veces."
   observe="Al apagar, onCleanup hace clearInterval: el tick se detiene y se cuenta una limpieza."
