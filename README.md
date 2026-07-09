@@ -61,6 +61,8 @@ npm start
 | `npm run watch` | Rebuild on change (development configuration) |
 | `npm test` | Unit tests (Karma + Jasmine) |
 | `npm run lint` | Lint with ESLint + `angular-eslint` |
+| `npm run format` | Format `src/` with Prettier |
+| `npm run format:check` | Check formatting without writing |
 
 ## Tech stack
 

@@ -1,0 +1,40 @@
+name: Links
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '**/*.md'
+      - '.github/workflows/links.yml'
+      - '.lycheeignore'
+  pull_request:
+    branches: [main]
+    paths:
+      - '**/*.md'
+      - '.github/workflows/links.yml'
+      - '.lycheeignore'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  link-check:
+    name: Check README links and badges
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Link Checker
+        uses: lycheeverse/lychee-action@v2
+        with:
+          # Fail the build if any README/Markdown link or badge is broken.
+          fail: true
+          args: >-
+            --no-progress
+            --verbose
+            './**/*.md'
+        env:
+          # Higher GitHub API rate limit for github.com links.
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
