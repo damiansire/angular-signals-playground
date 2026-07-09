@@ -1,7 +1,7 @@
 {
-  "name": "angular-examples",
+  "name": "angular-signals-playground",
   "version": "0.0.0",
-  "description": "Introducción interactiva a Angular Signals: ejemplos hands-on de signals, computed, effect, linkedSignal y resource, construidos con Angular 22 y Tailwind CSS.",
+  "description": "An interactive playground and introduction to learning Angular Signals (computed, effect, linkedSignal, resource) hands-on.",
   "license": "MIT",
   "keywords": [
     "angular",
