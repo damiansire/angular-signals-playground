@@ -2,13 +2,13 @@ name: Links
 
 on:
   push:
-    branches: [main]
+    branches: [master]
     paths:
       - '**/*.md'
       - '.github/workflows/links.yml'
       - '.lycheeignore'
   pull_request:
-    branches: [main]
+    branches: [master]
     paths:
       - '**/*.md'
       - '.github/workflows/links.yml'
