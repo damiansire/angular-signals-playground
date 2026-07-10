@@ -74,3 +74,30 @@ realmente tocás; no inventes scopes nuevos.
 | `npm run watch`   | Rebuild en cada cambio (configuración development)   |
 | `npm test`        | Tests unitarios (Karma + Jasmine)                   |
 | `npm run lint`    | Lint con ESLint + `angular-eslint`                  |
+
+## Estándar nivel mundial
+
+Piso transversal de `/fragua` (`fellow-standard.md` del corpus) + reglas del
+stack Angular (`~/.claude/tools/_audit-tools/refs/angular/`). Este repo ya
+cumple la mayoría por construcción (signals-first, OnPush, standalone, tests
+antes que UI, anti-over-engineering explícito arriba) — lo que sigue es lo que
+falta o hay que sostener:
+
+- **Nombres por dominio, no por mecanismo** (ítem a): un componente/signal se
+  nombra por lo que significa en el playground (`signalLevel`, `benchFrame`),
+  no por su tipo interno.
+- **Comentarios explican el PORQUÉ, nunca el QUÉ** (ítem b): si un comentario
+  parafrasea la línea de abajo, se borra o se renombra la variable en su lugar.
+- **README con prueba visible** (ítem k) — **PENDIENTE, no resuelto todavía**:
+  es un playground interactivo desplegado (GitHub Pages) y el README no tiene
+  ninguna captura/GIF; la descripción textual sola no alcanza para un artefacto
+  visual. Ver `_audits/DECISIONES.md` (screenshot falló por infraestructura de
+  sesión, no del repo — pendiente real).
+- **Fail-fast en los pocos boundaries async** (ítem i): si se agrega fetch de
+  datos o timers en `lab/`, van con timeout/cleanup explícito (`effect` con
+  `onCleanup`, no un `setTimeout` suelto).
+
+Gap de corpus: ninguno para este stack — `refs/angular/` tiene notas
+distiladas (`from-ngrx-platform`, `from-angular-components`,
+`signals-templates-cd`, `di-and-signals-internals`) que ya informan las
+convenciones de arriba.
