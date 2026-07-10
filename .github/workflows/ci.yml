@@ -1,0 +1,40 @@
+name: CI
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# Un run por rama; los push nuevos cancelan el anterior en curso.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  quality:
+    name: Lint, format y tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+
+      # Cada paso GATEA: si falla, el job falla (no es cosmético).
+      - name: Lint (ng lint)
+        run: npm run lint
+
+      - name: Format check (prettier)
+        run: npm run format:check
+
+      # ng test necesita un browser; ubuntu-latest trae Chrome preinstalado.
+      # ChromeHeadless corre sin display. --watch=false para no colgar el runner.
+      - name: Tests (ng test, ChromeHeadless)
+        run: npm test -- --watch=false --browsers=ChromeHeadless
