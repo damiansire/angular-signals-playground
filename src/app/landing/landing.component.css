@@ -1,0 +1,348 @@
+/* ───────────────────────────────────────────────────────────────────────────
+   LANDING · clima luminoso (híbrido).
+   La entrada se siente ncase/neal: campo crema→menta, monedas semánticas vivas.
+   El interior de la app sigue en el banco grafito; acá redefinimos la paleta
+   scoped al :host para no tocar el resto.
+   ─────────────────────────────────────────────────────────────────────────── */
+:host {
+  --paper-top: #f7f5ed;
+  --paper-bot: #e6f1ea;
+  --ink: #201d16;
+  --ink-soft: #6a6355;
+  --hair: #d7d1c2;
+
+  --source: #eb9b3c;
+  --source-deep: #c97d1e;
+  --derived: #2f9a80;
+  --effect: #ff5a4a;
+  --effect-deep: #d83628;
+
+  display: block;
+  height: 100vh;
+  overflow: auto;
+  background:
+    radial-gradient(130% 100% at 50% -10%, var(--paper-top) 0%, var(--paper-bot) 78%);
+  color: var(--ink);
+  font-family: var(--font-display);
+}
+
+/* Textura sutil de puntos: da "aire con vida" sin ruido. */
+.landing {
+  position: relative;
+  min-height: 100%;
+  display: grid;
+  place-items: center;
+  padding: clamp(1.25rem, 4vw, 3rem);
+  box-sizing: border-box;
+}
+
+.landing__inner {
+  position: relative;
+  z-index: 1;
+  width: min(1120px, 100%);
+  display: grid;
+  grid-template-columns: minmax(0, 0.92fr) minmax(0, 1.08fr);
+  align-items: center;
+  gap: clamp(1.5rem, 4vw, 3.5rem);
+}
+
+/* ── Columna editorial ─────────────────────────────────────────────────────── */
+.intro__kicker {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--source-deep);
+  margin: 0 0 1rem;
+}
+.intro__title {
+  font-family: var(--font-editorial);
+  font-weight: 600;
+  font-size: clamp(2.1rem, 5vw, 3.4rem);
+  line-height: 1.04;
+  letter-spacing: -0.01em;
+  margin: 0 0 1.1rem;
+  color: var(--ink);
+}
+.intro__title em {
+  font-style: italic;
+  color: var(--source-deep);
+}
+.intro__lede {
+  font-size: clamp(1rem, 1.4vw, 1.12rem);
+  line-height: 1.6;
+  max-width: 46ch;
+  color: var(--ink-soft);
+  margin: 0 0 1.75rem;
+}
+
+.intro__cta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-bottom: 2.25rem;
+}
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.8rem 1.35rem;
+  border-radius: 999px;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 0.98rem;
+  text-decoration: none;
+  cursor: pointer;
+  transition:
+    transform var(--propagation-duration) var(--propagation-ease),
+    box-shadow var(--propagation-duration) var(--propagation-ease);
+}
+.btn--primary {
+  background: var(--source);
+  color: #241a08;
+  box-shadow: 0 12px 26px -12px var(--source-deep);
+}
+.btn--primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 18px 34px -14px var(--source-deep);
+  background: #f2a748;
+}
+.btn--ghost {
+  background: transparent;
+  color: var(--ink);
+  box-shadow: inset 0 0 0 1.5px var(--hair);
+}
+.btn--ghost:hover {
+  box-shadow: inset 0 0 0 1.5px var(--source);
+}
+.btn:focus-visible {
+  outline: 2.5px solid var(--source-deep);
+  outline-offset: 3px;
+}
+
+/* Cinta del viaje: susurro de neal.fun, 0 → 11. */
+.trail {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  flex-wrap: wrap;
+}
+.trail__dot {
+  width: 22px;
+  height: 22px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: inset 0 0 0 1.5px var(--hair);
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  color: var(--ink-soft);
+}
+.trail__label {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  color: var(--ink-soft);
+  margin-left: 0.25rem;
+}
+
+/* ── Escenario del grafo ───────────────────────────────────────────────────── */
+.stage {
+  margin: 0;
+  display: grid;
+  justify-items: center;
+  gap: 0.5rem;
+}
+.graph {
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+.ambient__coin {
+  fill: var(--source);
+  opacity: 0.1;
+  animation: float 9s ease-in-out infinite;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+.ambient__coin.a2 { fill: var(--derived); animation-duration: 11s; animation-delay: -3s; }
+.ambient__coin.a3 { fill: var(--effect); animation-duration: 7.5s; animation-delay: -1.5s; }
+.ambient__coin.a4 { fill: var(--derived); animation-duration: 10s; animation-delay: -5s; }
+
+.cable {
+  stroke-width: 3;
+  stroke-linecap: round;
+  fill: none;
+  opacity: 0.55;
+}
+.cable--der { stroke: var(--derived); }
+.cable--eff { stroke: var(--effect); }
+
+.pulse {
+  fill: #fff;
+  opacity: 0;
+  filter: drop-shadow(0 0 6px var(--source));
+}
+.pulse--on { opacity: 1; }
+
+/* Monedas: orbes con sombra suave (drop-shadow CSS, no filtro SVG). */
+.coin {
+  filter: drop-shadow(0 10px 18px rgba(40, 32, 18, 0.22));
+}
+.coin text { text-anchor: middle; }
+.coin__ring {
+  fill: #fff;
+  opacity: 0.66;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+.coin__token {
+  font-family: var(--font-mono);
+  font-size: 15px;
+  font-weight: 600;
+  fill: var(--ink-soft);
+}
+.coin--src .coin__token { fill: var(--source-deep); }
+.coin--der .coin__token { fill: var(--derived); }
+.coin--eff .coin__token { fill: var(--effect-deep); }
+
+.coin__value {
+  font-family: var(--font-editorial);
+  font-size: 52px;
+  font-weight: 600;
+  fill: #2a2010;
+}
+.coin__value--eff { font-size: 40px; }
+.coin__runs {
+  font-family: var(--font-mono);
+  font-size: 18px;
+  font-weight: 600;
+  fill: #4a1712;
+}
+.coin__role {
+  font-family: var(--font-display);
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  fill: var(--ink-soft);
+}
+
+.coin--src.is-interactive { cursor: pointer; }
+.coin--src.is-interactive .coin__body {
+  transition: transform 160ms var(--propagation-ease);
+  transform-box: fill-box;
+  transform-origin: center;
+}
+.coin--src.is-interactive:hover .coin__body { transform: scale(1.05); }
+.coin--src.is-interactive:focus-visible { outline: none; }
+.coin--src.is-interactive:focus-visible .coin__ring {
+  fill: var(--source);
+  opacity: 0.4;
+}
+
+/* El efecto "se dispara": anillo rojo que late al llegar el pulso. */
+.coin--eff.is-firing .coin__ring {
+  animation: fire 420ms var(--propagation-ease);
+  fill: var(--effect);
+}
+.coin--eff.is-firing .coin__value--eff {
+  animation: zap 420ms var(--propagation-ease);
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+/* ── Controles accesibles ──────────────────────────────────────────────────── */
+.controls {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.4rem 0.5rem;
+  border-radius: 999px;
+  background: #fff;
+  box-shadow: 0 10px 24px -16px rgba(40, 32, 18, 0.5);
+}
+.controls__step {
+  width: 38px;
+  height: 38px;
+  border: none;
+  border-radius: 50%;
+  background: var(--paper-bot);
+  color: var(--ink);
+  font-size: 1.35rem;
+  line-height: 1;
+  cursor: pointer;
+  transition: background-color 160ms ease, transform 120ms ease;
+}
+.controls__step:hover { background: #d8eadf; }
+.controls__step:focus-visible {
+  outline: 2.5px solid var(--source-deep);
+  outline-offset: 2px;
+}
+.controls__read {
+  font-family: var(--font-mono);
+  font-size: 0.9rem;
+  color: var(--ink-soft);
+  min-width: 8ch;
+  text-align: center;
+}
+.controls__read code { color: var(--source-deep); }
+.controls__read strong { color: var(--ink); }
+.controls__reset {
+  border: none;
+  background: transparent;
+  color: var(--ink-soft);
+  font-family: var(--font-display);
+  font-size: 0.85rem;
+  padding: 0.4rem 0.7rem;
+  border-radius: 999px;
+  cursor: pointer;
+}
+.controls__reset:hover { color: var(--effect-deep); }
+.controls__reset:focus-visible {
+  outline: 2.5px solid var(--source-deep);
+  outline-offset: 2px;
+}
+
+/* ── Motion ────────────────────────────────────────────────────────────────── */
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+@keyframes fire {
+  0% { opacity: 0.66; transform: scale(1); }
+  35% { opacity: 0.95; transform: scale(1.14); }
+  100% { opacity: 0.66; transform: scale(1); }
+}
+@keyframes zap {
+  0% { transform: scale(1); }
+  40% { transform: scale(1.35); }
+  100% { transform: scale(1); }
+}
+
+/* ── Responsive ────────────────────────────────────────────────────────────── */
+@media (max-width: 860px) {
+  .landing__inner {
+    grid-template-columns: 1fr;
+    justify-items: center;
+    text-align: center;
+  }
+  .intro__lede { margin-inline: auto; }
+  .intro__cta,
+  .trail { justify-content: center; }
+  .stage { order: -1; }
+  .graph { max-width: 440px; }
+  .intro__title br { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ambient__coin,
+  .coin--eff.is-firing .coin__ring,
+  .coin--eff.is-firing .coin__value--eff {
+    animation: none;
+  }
+  .btn,
+  .coin--src.is-interactive .coin__body {
+    transition: none;
+  }
+}

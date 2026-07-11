@@ -53,6 +53,7 @@ import { OscilloscopeComponent } from './lab/instruments/oscilloscope/oscillosco
 import { ReactiveCellsComponent } from './lab/instruments/reactive-cells/reactive-cells.component';
 import { ManualComponent } from './lab/instruments/manual/manual.component';
 import { LabHubComponent } from './lab/lab-hub/lab-hub.component';
+import { LandingComponent } from './landing/landing.component';
 
 const signalsRoutesTree: RouteItem[] = [
   {
@@ -206,6 +207,6 @@ export const routes: Routes = [
   { path: 'lab/effect', component: OscilloscopeComponent },
   { path: 'lab/computed', component: ReactiveCellsComponent },
   { path: 'lab/manual', component: ManualComponent },
-  { path: '', redirectTo: '/signals/level/0/sub-level/1', pathMatch: 'full' },
+  { path: '', component: LandingComponent, pathMatch: 'full' },
 ];
 export const menuItems = baseRoutes;

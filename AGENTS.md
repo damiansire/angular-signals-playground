@@ -24,6 +24,7 @@ realmente tocás; no inventes scopes nuevos.
 
 | Directorio              | Qué contiene                                              | Scope        |
 | ----------------------- | -------------------------------------------------------- | ------------ |
+| `src/app/landing/`      | Landing de bienvenida (grafo reactivo vivo, ruta `/`)    | `landing`    |
 | `src/app/signals/`      | Los niveles de aprendizaje (0–11) y sus sub-niveles      | `signals`    |
 | `src/app/lab/`          | Signals Lab: bench-frame, hub e instrumentos             | `lab`        |
 | `src/app/components/`   | Componentes de feature (sidebar, histories, trees…)      | `components` |

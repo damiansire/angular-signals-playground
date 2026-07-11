@@ -1,0 +1,148 @@
+<main class="landing">
+  <div class="landing__inner">
+    <!-- ── Columna editorial ─────────────────────────────────────────────── -->
+    <section class="intro">
+      <p class="intro__kicker">Angular · reactividad</p>
+      <h1 class="intro__title">
+        Los signals son <em>círculos</em><br />
+        que se avisan entre sí.
+      </h1>
+      <p class="intro__lede">
+        Tocá la fuente y mirá cómo el valor derivado se recalcula solo y el efecto se dispara.
+        Después recorré los 12 niveles, de la detección de cambios a zoneless.
+      </p>
+
+      <div class="intro__cta">
+        <a class="btn btn--primary" routerLink="/signals/level/0/sub-level/1">
+          Comenzá el recorrido
+          <span class="btn__arrow" aria-hidden="true">→</span>
+        </a>
+        <a class="btn btn--ghost" routerLink="/lab">Explorar el Lab</a>
+      </div>
+
+      <div class="trail" aria-hidden="true">
+        @for (n of trail; track n) {
+          <span class="trail__dot">{{ n }}</span>
+        }
+        <span class="trail__label">12 niveles</span>
+      </div>
+
+      <p class="sr-only" aria-live="polite">
+        Fuente {{ count() }}, valor derivado {{ doubled() }}, el efecto ya corrió
+        {{ effectRuns() }} veces.
+      </p>
+    </section>
+
+    <!-- ── Grafo reactivo vivo ───────────────────────────────────────────── -->
+    <figure class="stage">
+      <svg class="graph" viewBox="0 0 720 460" role="img" aria-labelledby="graphTitle graphDesc">
+        <title id="graphTitle">Grafo reactivo de Angular Signals</title>
+        <desc id="graphDesc">
+          Una fuente signal alimenta un valor computed que a su vez dispara un effect. Al cambiar la
+          fuente, la propagación recorre el grafo.
+        </desc>
+
+        <defs>
+          <radialGradient id="coinSrc" cx="36%" cy="30%" r="75%">
+            <stop offset="0%" stop-color="#ffd48a" />
+            <stop offset="55%" stop-color="#eb9b3c" />
+            <stop offset="100%" stop-color="#c97d1e" />
+          </radialGradient>
+          <radialGradient id="coinDer" cx="36%" cy="30%" r="75%">
+            <stop offset="0%" stop-color="#b8efe0" />
+            <stop offset="55%" stop-color="#62c4ad" />
+            <stop offset="100%" stop-color="#2f9a80" />
+          </radialGradient>
+          <radialGradient id="coinEff" cx="36%" cy="30%" r="75%">
+            <stop offset="0%" stop-color="#ffb0a6" />
+            <stop offset="55%" stop-color="#ff5a4a" />
+            <stop offset="100%" stop-color="#d83628" />
+          </radialGradient>
+        </defs>
+
+        <!-- Monedas ambiente (decorativas) -->
+        <g class="ambient" aria-hidden="true">
+          <circle class="ambient__coin a1" cx="70" cy="96" r="16" />
+          <circle class="ambient__coin a2" cx="656" cy="120" r="11" />
+          <circle class="ambient__coin a3" cx="612" cy="60" r="7" />
+          <circle class="ambient__coin a4" cx="120" cy="410" r="9" />
+        </g>
+
+        <!-- Cables (dependencias) -->
+        <g class="cables" aria-hidden="true">
+          <line class="cable cable--der" x1="156" y1="258" x2="430" y2="148" />
+          <line class="cable cable--eff" x1="430" y1="148" x2="566" y2="336" />
+        </g>
+
+        <!-- Punto de pulso viajero -->
+        <circle
+          class="pulse"
+          [class.pulse--on]="pulseActive()"
+          [attr.cx]="pulsePos().x"
+          [attr.cy]="pulsePos().y"
+          r="8"
+          aria-hidden="true"
+        />
+
+        <!-- Nodo EFFECT -->
+        <g class="coin coin--eff" [class.is-firing]="effectFlash()" aria-hidden="true">
+          <circle class="coin__ring" cx="566" cy="336" r="68" />
+          <circle class="coin__body" cx="566" cy="336" r="60" fill="url(#coinEff)" />
+          <text class="coin__token" x="566" y="260">effect()</text>
+          <text class="coin__value coin__value--eff" x="566" y="330">⚡</text>
+          <text class="coin__runs" x="566" y="362">×{{ effectRuns() }}</text>
+          <text class="coin__role" x="566" y="422">efecto</text>
+        </g>
+
+        <!-- Nodo COMPUTED -->
+        <g class="coin coin--der" aria-hidden="true">
+          <circle class="coin__ring" cx="430" cy="148" r="68" />
+          <circle class="coin__body" cx="430" cy="148" r="60" fill="url(#coinDer)" />
+          <text class="coin__token" x="430" y="72">computed()</text>
+          <text class="coin__value" x="430" y="162">{{ doubled() }}</text>
+          <text class="coin__role" x="430" y="234">derivado</text>
+        </g>
+
+        <!-- Nodo SOURCE (interactivo) -->
+        <g
+          class="coin coin--src is-interactive"
+          role="button"
+          tabindex="0"
+          [attr.aria-label]="'Fuente igual a ' + count() + '. Activá para sumar uno.'"
+          (click)="bump(1)"
+          (keydown.enter)="bump(1)"
+          (keydown.space)="bump(1); $event.preventDefault()"
+        >
+          <circle class="coin__ring" cx="156" cy="258" r="68" />
+          <circle class="coin__body" cx="156" cy="258" r="60" fill="url(#coinSrc)" />
+          <text class="coin__token" x="156" y="182">signal()</text>
+          <text class="coin__value" x="156" y="272">{{ count() }}</text>
+          <text class="coin__role" x="156" y="344">fuente · tocá</text>
+        </g>
+      </svg>
+
+      <figcaption class="controls">
+        <button
+          type="button"
+          class="controls__step"
+          (click)="bump(-1)"
+          aria-label="Restar uno a la fuente"
+        >
+          −
+        </button>
+        <span class="controls__read">
+          <code>count</code> = <strong>{{ count() }}</strong>
+        </span>
+        <button
+          type="button"
+          class="controls__step"
+          (click)="bump(1)"
+          aria-label="Sumar uno a la fuente"
+        >
+          +
+        </button>
+        <button type="button" class="controls__reset" (click)="reset()">Reiniciar</button>
+      </figcaption>
+    </figure>
+  </div>
+</main>
