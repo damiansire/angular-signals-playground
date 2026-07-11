@@ -46,6 +46,10 @@
   text-transform: uppercase;
   color: var(--source);
 }
+.topbar__right {
+  display: inline-flex;
+  gap: 1rem;
+}
 
 /* ── Barra lateral del viaje ─────────────────────────────────────────────────── */
 .rail {

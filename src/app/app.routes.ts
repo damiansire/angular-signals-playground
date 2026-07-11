@@ -56,6 +56,7 @@ import { LabHubComponent } from './lab/lab-hub/lab-hub.component';
 import { LandingComponent } from './landing/landing.component';
 import { JourneyComponent } from './journey/journey.component';
 import { CartExampleComponent } from './practice/cart/cart-example.component';
+import { PocComponent } from './poc/poc.component';
 
 const signalsRoutesTree: RouteItem[] = [
   {
@@ -211,6 +212,7 @@ export const routes: Routes = [
   { path: 'lab/manual', component: ManualComponent },
   { path: 'recorrido', component: JourneyComponent },
   { path: 'practica/carrito', component: CartExampleComponent },
+  { path: 'poc', component: PocComponent },
   { path: '', component: LandingComponent, pathMatch: 'full' },
 ];
 export const menuItems = baseRoutes;
