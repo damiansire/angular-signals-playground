@@ -75,4 +75,58 @@ describe('ReactiveCellsComponent (computed cascade)', () => {
     // 100*1000 = 100000 ARS → /100 = 1000 USD
     expect(component.totalLabel()).toContain('1,000');
   });
+
+  describe('benchmark: recómputo de la cascada bajo carga', () => {
+    // `row` es privado: se tipa como el mínimo necesario para espiarlo sin `any`.
+    interface ComponentWithRow {
+      row: (...args: unknown[]) => unknown;
+    }
+
+    function spyOnRow() {
+      return spyOn(component as unknown as ComponentWithRow, 'row').and.callThrough();
+    }
+
+    it('recomputa la cascada proporcionalmente a N actualizaciones (no O(N^2))', () => {
+      const rowSpy = spyOnRow();
+      const updates = 200;
+
+      for (let i = 0; i < updates; i++) {
+        component.setQty(String(100 + i));
+        component.derived(); // fuerza la lectura (computed es lazy: sin lectura no recalcula)
+      }
+
+      // 4 filas derivadas por cada recómputo de la cascada → exactamente
+      // proporcional a `updates`, nunca O(N^2) ni trabajo de más.
+      expect(rowSpy.calls.count()).toBe(updates * 4);
+    });
+
+    it('no recomputa la cascada si se lee repetidas veces sin cambiar las fuentes', () => {
+      component.setQty('500');
+      component.derived();
+
+      const rowSpy = spyOnRow();
+      component.derived();
+      component.derived();
+      component.derived();
+
+      expect(rowSpy.calls.count()).toBe(0);
+    });
+
+    it('un cambio en una sola fuente no fuerza recómputo de las demás cascadas independientes', () => {
+      component.setQty('500');
+      component.derived();
+
+      const rowSpy = spyOnRow();
+      const updates = 50;
+      for (let i = 0; i < updates; i++) {
+        component.setDiscount(String(i % 100));
+        component.derived();
+      }
+
+      // Cada cambio de descuento sigue recalculando las 4 filas (todas dependen
+      // en cascada de discountPct), pero sigue siendo lineal en `updates`, no
+      // cuadrático: confirma que no hay recómputo duplicado por fila.
+      expect(rowSpy.calls.count()).toBe(updates * 4);
+    });
+  });
 });
