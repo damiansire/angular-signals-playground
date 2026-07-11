@@ -1,4 +1,13 @@
-import { ChangeDetectionStrategy, Component, computed, effect, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  DestroyRef,
+  ElementRef,
+  computed,
+  effect,
+  inject,
+  signal,
+} from '@angular/core';
 import { DecimalPipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import {
@@ -23,9 +32,31 @@ import {
 const STORAGE_KEY = 'signals-carrito';
 const FREE_SHIPPING = 12000;
 
+/** Cada fragmento de código se enlaza con la parte del widget que maneja. */
+export type LinkKey = 'signal' | 'subtotal' | 'envio' | 'effect';
+
 interface Saved {
   qty: Quantities;
   coupon: boolean;
+}
+
+interface Wire {
+  path: string;
+  color: string;
+}
+
+/** Color de la flecha según el rol del fragmento (mismo lenguaje semántico). */
+export function wireColorFor(key: LinkKey): string {
+  switch (key) {
+    case 'signal':
+      return '#c97d1e'; // ámbar: fuente
+    case 'subtotal':
+      return '#2f9a80'; // jade: derivado
+    case 'envio':
+      return '#2f9a80';
+    case 'effect':
+      return '#e23b2c'; // rojo: efecto
+  }
 }
 
 @Component({
@@ -64,6 +95,14 @@ export class CartExampleComponent {
     maximumFractionDigits: 0,
   });
 
+  // ── Mapa relacional código ↔ widget ─────────────────────────────────────────
+  private readonly host = inject(ElementRef<HTMLElement>).nativeElement as HTMLElement;
+  private readonly destroyRef = inject(DestroyRef);
+  /** Fragmento de código activo (hover/focus), o null. */
+  readonly linked = signal<LinkKey | null>(null);
+  /** Flecha curva que conecta el fragmento activo con su parte del widget. */
+  readonly wire = signal<Wire | null>(null);
+
   constructor() {
     const saved = readSaved();
     if (saved) {
@@ -72,6 +111,54 @@ export class CartExampleComponent {
     }
     // El carrito se guarda solo: el effect reacciona a qty y coupon.
     effect(() => writeSaved({ qty: this.qty(), coupon: this.coupon() }));
+
+    // Al scrollear o redimensionar, la flecha activa se recalcula.
+    if (typeof window !== 'undefined') {
+      const redraw = () => {
+        const key = this.linked();
+        if (key) this.drawWire(key);
+      };
+      this.host.addEventListener('scroll', redraw, { passive: true });
+      window.addEventListener('resize', redraw);
+      this.destroyRef.onDestroy(() => {
+        this.host.removeEventListener('scroll', redraw);
+        window.removeEventListener('resize', redraw);
+      });
+    }
+  }
+
+  /** Enciende el enlace de un fragmento y dibuja su flecha. */
+  linkTo(key: LinkKey): void {
+    this.linked.set(key);
+    this.drawWire(key);
+  }
+  unlink(): void {
+    this.linked.set(null);
+    this.wire.set(null);
+  }
+
+  private drawWire(key: LinkKey): void {
+    // La flecha solo tiene sentido con las dos columnas lado a lado.
+    const wideEnough =
+      typeof matchMedia !== 'undefined' && matchMedia('(min-width: 760px)').matches;
+    const codeEl = this.host.querySelector<HTMLElement>(`[data-code="${key}"]`);
+    const partEl = this.host.querySelector<HTMLElement>(`[data-part="${key}"]`);
+    if (!wideEnough || !codeEl || !partEl) {
+      this.wire.set(null);
+      return;
+    }
+    const c = codeEl.getBoundingClientRect();
+    const p = partEl.getBoundingClientRect();
+    // Sale del borde izquierdo del código y apunta al borde derecho del widget.
+    const cx = c.left;
+    const cy = c.top + c.height / 2;
+    const px = p.right + 6;
+    const py = p.top + p.height / 2;
+    const dx = Math.max(36, (cx - px) * 0.5);
+    this.wire.set({
+      path: `M ${cx} ${cy} C ${cx - dx} ${cy} ${px + dx} ${py} ${px} ${py}`,
+      color: wireColorFor(key),
+    });
   }
 
   lineOf(id: string): number {

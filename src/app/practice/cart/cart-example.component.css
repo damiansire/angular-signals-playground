@@ -275,6 +275,66 @@
   overflow-x: auto;
 }
 .how__code .c { color: #9a9081; }
+.how__hint {
+  font-size: 0.8rem;
+  color: var(--ink-soft);
+  margin: 0 0 0.6rem;
+}
+
+/* ── Mapa relacional: fragmento de código ↔ parte del widget ────────────────── */
+.wires {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 40;
+  opacity: 0;
+  transition: opacity 160ms ease;
+}
+.wires.is-on { opacity: 1; }
+.wire {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.25));
+}
+
+.frag {
+  cursor: pointer;
+  border-radius: 5px;
+  padding: 1px 4px;
+  margin: 0 -4px;
+  transition: background-color 150ms ease;
+}
+.frag:hover,
+.frag:focus-visible,
+.frag.is-active {
+  background: rgba(255, 255, 255, 0.12);
+  outline: none;
+}
+
+[data-part] {
+  outline: 2.5px solid transparent;
+  outline-offset: 4px;
+  border-radius: 10px;
+  transition: outline-color 160ms ease;
+}
+.cart__list.is-linked { outline-color: var(--source); }
+.summary__row.is-linked { outline-color: var(--derived); }
+.goal.is-linked { outline-color: var(--derived); }
+.saved.is-linked { outline-color: var(--effect); }
+
+.saved {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin: 0.25rem 0 0;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--ink-soft);
+}
 
 /* ── Responsive ─────────────────────────────────────────────────────────────── */
 @media (max-width: 720px) {
@@ -282,5 +342,10 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .goal__fill { transition: none; }
+  .goal__fill,
+  .wires,
+  .frag,
+  [data-part] {
+    transition: none;
+  }
 }

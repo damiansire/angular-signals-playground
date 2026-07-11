@@ -1,4 +1,24 @@
 <main class="practice">
+  <!-- Flecha que conecta el fragmento de código activo con su parte del widget. -->
+  <svg class="wires" [class.is-on]="wire()" [style.color]="wire()?.color" aria-hidden="true">
+    <defs>
+      <marker
+        id="cartArrow"
+        viewBox="0 0 10 10"
+        refX="8"
+        refY="5"
+        markerWidth="7"
+        markerHeight="7"
+        orient="auto"
+      >
+        <path d="M0,0 L10,5 L0,10 z" fill="currentColor" />
+      </marker>
+    </defs>
+    @if (wire(); as w) {
+      <path class="wire" [attr.d]="w.path" marker-end="url(#cartArrow)" />
+    }
+  </svg>
+
   <header class="practice__head">
     <a class="practice__back" routerLink="/recorrido">← Volver al recorrido</a>
     <p class="practice__kicker">Practicá · lo aprendido</p>
@@ -13,7 +33,7 @@
   <div class="practice__grid">
     <!-- ── El widget que se toca ─────────────────────────────────────────── -->
     <section class="cart" aria-label="Carrito">
-      <ul class="cart__list">
+      <ul class="cart__list" data-part="signal" [class.is-linked]="linked() === 'signal'">
         @for (p of catalog; track p.id) {
           <li class="line">
             <div class="line__info">
@@ -57,7 +77,7 @@
       </button>
 
       <dl class="summary" aria-live="polite">
-        <div class="summary__row">
+        <div class="summary__row" data-part="subtotal" [class.is-linked]="linked() === 'subtotal'">
           <dt>Subtotal ({{ count() }} u.)</dt>
           <dd>{{ money(subtotal()) }}</dd>
         </div>
@@ -73,12 +93,21 @@
         </div>
       </dl>
 
+      <p class="saved" data-part="effect" [class.is-linked]="linked() === 'effect'">
+        <span aria-hidden="true">💾</span> Se guarda solo
+      </p>
       <button type="button" class="cart__reset" (click)="reset()">Vaciar carrito</button>
     </section>
 
     <!-- ── Reto + el código detrás ───────────────────────────────────────── -->
     <aside class="aside">
-      <section class="goal" [class.goal--done]="freeShipping()" aria-live="polite">
+      <section
+        class="goal"
+        data-part="envio"
+        [class.goal--done]="freeShipping()"
+        [class.is-linked]="linked() === 'envio'"
+        aria-live="polite"
+      >
         <p class="goal__label">Reto</p>
         <p class="goal__text">
           @if (freeShipping()) {
@@ -106,21 +135,22 @@
 
       <section class="how">
         <p class="how__title">El código que lo mueve</p>
+        <p class="how__hint">Pasá el mouse por cada línea y seguí la flecha hasta lo que maneja.</p>
         <pre class="how__code"><code><span class="c">// una sola fuente:</span>
-qty = signal({{ '{' }} cafe: 1 {{ '}' }});
+<span class="frag" data-code="signal" tabindex="0" role="button" [class.is-active]="linked() === 'signal'" (mouseenter)="linkTo('signal')" (mouseleave)="unlink()" (focus)="linkTo('signal')" (blur)="unlink()" aria-label="qty es un signal: es la única fuente, controla las cantidades del carrito">qty = signal({{ '{' }} cafe: 1 {{ '}' }});</span>
 
 <span class="c">// todo lo demás se deriva:</span>
-subtotal = computed(() =>
+<span class="frag" data-code="subtotal" tabindex="0" role="button" [class.is-active]="linked() === 'subtotal'" (mouseenter)="linkTo('subtotal')" (mouseleave)="unlink()" (focus)="linkTo('subtotal')" (blur)="unlink()" aria-label="subtotal es un computed: deriva del carrito y alimenta la fila del subtotal">subtotal = computed(() =>
   catalogo.reduce((s, p) =>
-    s + p.precio * qty()[p.id], 0));
+    s + p.precio * qty()[p.id], 0));</span>
 
-envioGratis = computed(() =>
-  subtotal() >= 12000);
+<span class="frag" data-code="envio" tabindex="0" role="button" [class.is-active]="linked() === 'envio'" (mouseenter)="linkTo('envio')" (mouseleave)="unlink()" (focus)="linkTo('envio')" (blur)="unlink()" aria-label="envioGratis es un computed: deriva del subtotal y resuelve el reto">envioGratis = computed(() =>
+  subtotal() >= 12000);</span>
 
 <span class="c">// se guarda solo, sin ngOnDestroy:</span>
-effect(() =>
+<span class="frag" data-code="effect" tabindex="0" role="button" [class.is-active]="linked() === 'effect'" (mouseenter)="linkTo('effect')" (mouseleave)="unlink()" (focus)="linkTo('effect')" (blur)="unlink()" aria-label="effect: persiste el carrito solo, sin lifecycle hooks">effect(() =>
   localStorage.setItem(
-    'carrito', JSON.stringify(qty())));</code></pre>
+    'carrito', JSON.stringify(qty())));</span></code></pre>
       </section>
     </aside>
   </div>
