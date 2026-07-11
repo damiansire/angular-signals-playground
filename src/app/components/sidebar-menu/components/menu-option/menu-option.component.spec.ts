@@ -1,8 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
+import axe from 'axe-core';
 
 import { MenuOptionComponent } from './menu-option.component';
 import { provideRouter } from '@angular/router';
+
+/** Corre axe-core sobre el elemento y falla el test listando las violaciones (id + nodos). */
+async function expectNoA11yViolations(element: Element): Promise<void> {
+  const results = await axe.run(element);
+  const summary = results.violations
+    .map((v) => `- ${v.id} (${v.impact}): ${v.nodes.length} nodo(s) — ${v.help}`)
+    .join('\n');
+  expect(results.violations.length).withContext(summary).toBe(0);
+}
 
 describe('MenuOptionComponent', () => {
   let component: MenuOptionComponent;
@@ -66,5 +76,15 @@ describe('MenuOptionComponent', () => {
     fixture.componentRef.setInput('levelState', 'current');
     fixture.detectChanges();
     expect(link.getAttribute('aria-current')).toBe('page');
+  });
+
+  it('no tiene violaciones de accesibilidad detectables por axe-core', async () => {
+    await expectNoA11yViolations(fixture.nativeElement);
+  });
+
+  it('sigue sin violaciones de accesibilidad en el estado current (aria-current activo)', async () => {
+    fixture.componentRef.setInput('levelState', 'current');
+    fixture.detectChanges();
+    await expectNoA11yViolations(fixture.nativeElement);
   });
 });
