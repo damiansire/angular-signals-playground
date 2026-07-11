@@ -1,0 +1,286 @@
+/* Practicá · carrito reactivo. Mismo clima luminoso que landing/recorrido. */
+:host {
+  --paper-top: #f7f5ed;
+  --paper-bot: #e6f1ea;
+  --ink: #201d16;
+  --ink-soft: #6a6355;
+  --hair: #d7d1c2;
+  --source: #eb9b3c;
+  --source-deep: #c97d1e;
+  --derived: #2f9a80;
+  --card: #fffdf8;
+
+  display: block;
+  height: 100vh;
+  overflow: auto;
+  background: radial-gradient(130% 70% at 50% 0%, var(--paper-top) 0%, var(--paper-bot) 90%);
+  color: var(--ink);
+  font-family: var(--font-display);
+}
+
+.practice {
+  width: min(960px, 100%);
+  margin-inline: auto;
+  padding: clamp(1.5rem, 4vw, 3rem) clamp(1rem, 4vw, 2rem) 4rem;
+  box-sizing: border-box;
+}
+
+.practice__back {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  color: var(--ink-soft);
+  text-decoration: none;
+}
+.practice__back:hover { color: var(--source); }
+.practice__kicker {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--source);
+  margin: 1rem 0 0.3rem;
+}
+.practice__title {
+  font-family: var(--font-editorial);
+  font-weight: 600;
+  font-size: clamp(1.8rem, 4.5vw, 2.6rem);
+  margin: 0 0 0.6rem;
+}
+.practice__lede {
+  font-size: 1rem;
+  line-height: 1.55;
+  color: var(--ink-soft);
+  max-width: 60ch;
+  margin: 0 0 2rem;
+}
+.practice__lede code,
+.how__title code {
+  font-family: var(--font-mono);
+  font-size: 0.86em;
+  color: var(--source-deep);
+}
+
+.practice__grid {
+  display: grid;
+  grid-template-columns: 1.1fr 0.9fr;
+  gap: clamp(1rem, 3vw, 2rem);
+  align-items: start;
+}
+
+/* ── Carrito ────────────────────────────────────────────────────────────────── */
+.cart {
+  background: var(--card);
+  border-radius: 16px;
+  padding: 1.25rem;
+  box-shadow: 0 18px 40px -28px rgba(40, 32, 18, 0.5);
+}
+.cart__list {
+  list-style: none;
+  margin: 0 0 1rem;
+  padding: 0;
+}
+.line {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid var(--hair);
+}
+.line__name {
+  display: block;
+  font-weight: 600;
+}
+.line__price {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  color: var(--ink-soft);
+}
+.line__total {
+  font-family: var(--font-mono);
+  font-weight: 600;
+  min-width: 8ch;
+  text-align: right;
+}
+
+.stepper {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+.stepper__btn {
+  width: 30px;
+  height: 30px;
+  border: 1.5px solid var(--hair);
+  border-radius: 50%;
+  background: var(--paper-top);
+  color: var(--ink);
+  font-size: 1.1rem;
+  line-height: 1;
+  cursor: pointer;
+}
+.stepper__btn:hover:not(:disabled) { border-color: var(--source); }
+.stepper__btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.stepper__btn:focus-visible {
+  outline: 2.5px solid var(--source-deep);
+  outline-offset: 2px;
+}
+.stepper__qty {
+  min-width: 2ch;
+  text-align: center;
+  font-family: var(--font-mono);
+  font-weight: 600;
+}
+
+.coupon {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0.25rem 0 1rem;
+  padding: 0.5rem 0.9rem;
+  border: 1.5px dashed var(--hair);
+  border-radius: 999px;
+  background: transparent;
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  color: var(--ink-soft);
+  cursor: pointer;
+}
+.coupon--on {
+  border-style: solid;
+  border-color: var(--derived);
+  color: var(--derived);
+  background: #eafaf3;
+}
+.coupon__check {
+  width: 1.1em;
+  color: var(--derived);
+  font-weight: 700;
+}
+.coupon:focus-visible {
+  outline: 2.5px solid var(--source-deep);
+  outline-offset: 2px;
+}
+
+.summary {
+  margin: 0;
+  border-top: 2px solid var(--ink);
+  padding-top: 0.75rem;
+}
+.summary__row {
+  display: flex;
+  justify-content: space-between;
+  margin: 0.35rem 0;
+  font-size: 0.95rem;
+}
+.summary__row dt,
+.summary__row dd {
+  margin: 0;
+}
+.summary__row dd {
+  font-family: var(--font-mono);
+}
+.summary__row--save {
+  color: var(--derived);
+}
+.summary__row--total {
+  font-family: var(--font-editorial);
+  font-size: 1.35rem;
+  font-weight: 600;
+  margin-top: 0.6rem;
+}
+.summary__row--total dd {
+  font-family: var(--font-editorial);
+}
+
+.cart__reset {
+  margin-top: 1rem;
+  border: none;
+  background: transparent;
+  color: var(--ink-soft);
+  font-size: 0.82rem;
+  cursor: pointer;
+  padding: 0.3rem 0;
+}
+.cart__reset:hover { color: var(--source-deep); }
+
+/* ── Reto ───────────────────────────────────────────────────────────────────── */
+.aside {
+  display: grid;
+  gap: 1rem;
+}
+.goal {
+  background: var(--card);
+  border-radius: 16px;
+  padding: 1.1rem 1.25rem;
+  box-shadow: inset 0 0 0 2px var(--source);
+}
+.goal--done {
+  box-shadow: inset 0 0 0 2px var(--derived);
+  background: #eafaf3;
+}
+.goal__label {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--source-deep);
+  margin: 0 0 0.3rem;
+}
+.goal--done .goal__label { color: var(--derived); }
+.goal__text {
+  font-size: 0.95rem;
+  line-height: 1.5;
+  margin: 0 0 0.8rem;
+}
+.goal__bar {
+  height: 10px;
+  border-radius: 999px;
+  background: var(--paper-bot);
+  overflow: hidden;
+}
+.goal__fill {
+  display: block;
+  height: 100%;
+  background: var(--source);
+  transition: width var(--propagation-duration) var(--propagation-ease);
+}
+.goal--done .goal__fill { background: var(--derived); }
+.goal__status {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  color: var(--ink-soft);
+  margin: 0.5rem 0 0;
+  text-align: right;
+}
+
+/* ── Código detrás ──────────────────────────────────────────────────────────── */
+.how__title {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  margin: 0 0 0.5rem;
+}
+.how__code {
+  margin: 0;
+  padding: 1rem;
+  border-radius: 12px;
+  background: #26221b;
+  color: #efe9da;
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  line-height: 1.55;
+  overflow-x: auto;
+}
+.how__code .c { color: #9a9081; }
+
+/* ── Responsive ─────────────────────────────────────────────────────────────── */
+@media (max-width: 720px) {
+  .practice__grid { grid-template-columns: 1fr; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .goal__fill { transition: none; }
+}

@@ -165,9 +165,46 @@
   box-shadow: inset 0 0 0 1.5px var(--hair);
 }
 
+.apply {
+  margin-top: 2rem;
+  text-align: center;
+  padding: 1.5rem;
+  border-radius: 16px;
+  background: var(--paper-top);
+  box-shadow: inset 0 0 0 1.5px var(--hair);
+}
+.apply__kicker {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--source);
+  margin: 0 0 0.4rem;
+}
+.apply__text {
+  font-size: 1.02rem;
+  color: var(--ink);
+  margin: 0 0 1rem;
+}
+.apply__cta {
+  display: inline-block;
+  padding: 0.7rem 1.3rem;
+  border-radius: 999px;
+  background: var(--source);
+  color: #241a08;
+  font-weight: 600;
+  text-decoration: none;
+  box-shadow: 0 10px 22px -12px var(--source);
+}
+.apply__cta:hover { background: #f2a748; }
+.apply__cta:focus-visible {
+  outline: 2.5px solid var(--source);
+  outline-offset: 3px;
+}
+
 .journey__lab {
   text-align: center;
-  margin-top: 2.5rem;
+  margin-top: 1.5rem;
   font-size: 0.95rem;
   color: var(--ink-soft);
 }

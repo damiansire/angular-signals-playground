@@ -55,6 +55,7 @@ import { ManualComponent } from './lab/instruments/manual/manual.component';
 import { LabHubComponent } from './lab/lab-hub/lab-hub.component';
 import { LandingComponent } from './landing/landing.component';
 import { JourneyComponent } from './journey/journey.component';
+import { CartExampleComponent } from './practice/cart/cart-example.component';
 
 const signalsRoutesTree: RouteItem[] = [
   {
@@ -209,6 +210,7 @@ export const routes: Routes = [
   { path: 'lab/computed', component: ReactiveCellsComponent },
   { path: 'lab/manual', component: ManualComponent },
   { path: 'recorrido', component: JourneyComponent },
+  { path: 'practica/carrito', component: CartExampleComponent },
   { path: '', component: LandingComponent, pathMatch: 'full' },
 ];
 export const menuItems = baseRoutes;

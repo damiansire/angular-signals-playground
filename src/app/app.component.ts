@@ -32,5 +32,5 @@ export class AppComponent {
 /** Rutas sin chrome del banco (viaje/bienvenida). */
 function isFullBleed(url: string): boolean {
   const path = url.split('?')[0].split('#')[0];
-  return path === '/' || path === '/recorrido';
+  return path === '/' || path === '/recorrido' || path.startsWith('/practica');
 }

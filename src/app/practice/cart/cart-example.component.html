@@ -1,0 +1,127 @@
+<main class="practice">
+  <header class="practice__head">
+    <a class="practice__back" routerLink="/recorrido">← Volver al recorrido</a>
+    <p class="practice__kicker">Practicá · lo aprendido</p>
+    <h1 class="practice__title">Carrito reactivo</h1>
+    <p class="practice__lede">
+      Vos solo cambiás las cantidades. Los subtotales, el descuento y el total se derivan solos con
+      <code>computed</code>, y el carrito se guarda con un <code>effect</code>. Esto es
+      <code>signal → computed → effect</code> resolviendo algo real.
+    </p>
+  </header>
+
+  <div class="practice__grid">
+    <!-- ── El widget que se toca ─────────────────────────────────────────── -->
+    <section class="cart" aria-label="Carrito">
+      <ul class="cart__list">
+        @for (p of catalog; track p.id) {
+          <li class="line">
+            <div class="line__info">
+              <span class="line__name">{{ p.name }}</span>
+              <span class="line__price">{{ money(p.price) }} c/u</span>
+            </div>
+            <div class="stepper" role="group" [attr.aria-label]="'Cantidad de ' + p.name">
+              <button
+                type="button"
+                class="stepper__btn"
+                (click)="dec(p.id)"
+                [disabled]="qtyOf(p.id) === 0"
+                [attr.aria-label]="'Quitar uno de ' + p.name"
+              >
+                −
+              </button>
+              <span class="stepper__qty" aria-live="polite">{{ qtyOf(p.id) }}</span>
+              <button
+                type="button"
+                class="stepper__btn"
+                (click)="inc(p.id)"
+                [attr.aria-label]="'Agregar uno de ' + p.name"
+              >
+                +
+              </button>
+            </div>
+            <span class="line__total">{{ money(lineOf(p.id)) }}</span>
+          </li>
+        }
+      </ul>
+
+      <button
+        type="button"
+        class="coupon"
+        [class.coupon--on]="coupon()"
+        [attr.aria-pressed]="coupon()"
+        (click)="toggleCoupon()"
+      >
+        <span class="coupon__check" aria-hidden="true">{{ coupon() ? '✓' : '' }}</span>
+        Cupón CAFE10 (10% off)
+      </button>
+
+      <dl class="summary" aria-live="polite">
+        <div class="summary__row">
+          <dt>Subtotal ({{ count() }} u.)</dt>
+          <dd>{{ money(subtotal()) }}</dd>
+        </div>
+        @if (discount() > 0) {
+          <div class="summary__row summary__row--save">
+            <dt>Descuento</dt>
+            <dd>−{{ money(discount()) }}</dd>
+          </div>
+        }
+        <div class="summary__row summary__row--total">
+          <dt>Total</dt>
+          <dd>{{ money(total()) }}</dd>
+        </div>
+      </dl>
+
+      <button type="button" class="cart__reset" (click)="reset()">Vaciar carrito</button>
+    </section>
+
+    <!-- ── Reto + el código detrás ───────────────────────────────────────── -->
+    <aside class="aside">
+      <section class="goal" [class.goal--done]="freeShipping()" aria-live="polite">
+        <p class="goal__label">Reto</p>
+        <p class="goal__text">
+          @if (freeShipping()) {
+            Envío gratis conseguido. Mirá: nunca escribiste "envío gratis", se
+            <em>derivó</em> del subtotal.
+          } @else {
+            Llegá a {{ money(freeShippingGoal) }} de subtotal para el envío gratis. Te faltan
+            <strong>{{ money(missingForFree()) }}</strong
+            >.
+          }
+        </p>
+        <div
+          class="goal__bar"
+          role="progressbar"
+          aria-label="Progreso al envío gratis"
+          [attr.aria-valuenow]="subtotal()"
+          [attr.aria-valuemax]="freeShippingGoal"
+        >
+          <span class="goal__fill" [style.width.%]="progress() * 100"></span>
+        </div>
+        <p class="goal__status">
+          {{ freeShipping() ? '✓ Envío gratis' : (progress() * 100 | number: '1.0-0') + '%' }}
+        </p>
+      </section>
+
+      <section class="how">
+        <p class="how__title">El código que lo mueve</p>
+        <pre class="how__code"><code><span class="c">// una sola fuente:</span>
+qty = signal({{ '{' }} cafe: 1 {{ '}' }});
+
+<span class="c">// todo lo demás se deriva:</span>
+subtotal = computed(() =>
+  catalogo.reduce((s, p) =>
+    s + p.precio * qty()[p.id], 0));
+
+envioGratis = computed(() =>
+  subtotal() >= 12000);
+
+<span class="c">// se guarda solo, sin ngOnDestroy:</span>
+effect(() =>
+  localStorage.setItem(
+    'carrito', JSON.stringify(qty())));</code></pre>
+      </section>
+    </aside>
+  </div>
+</main>
