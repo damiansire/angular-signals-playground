@@ -11,7 +11,7 @@
       <strong>sigue disponible</strong> se mantiene; si no, cae a la primera.
     </p>
 
-    <p class="text-xs font-semibold uppercase tracking-wide text-gray-400 mb-2">
+    <p class="text-xs font-semibold uppercase tracking-wide text-gray-500 mb-2">
       Métodos disponibles
     </p>
     <div class="flex flex-wrap gap-2 mb-5">
@@ -21,7 +21,7 @@
           class="px-3 py-1.5 rounded-full border text-sm font-medium transition-colors"
           [class]="
             option === selectedOption()
-              ? 'bg-emerald-600 border-emerald-600 text-white'
+              ? 'bg-emerald-700 border-emerald-700 text-white'
               : 'bg-white border-gray-300 text-gray-700 hover:border-emerald-400'
           "
           (click)="select(option)"
@@ -36,7 +36,7 @@
       <strong class="text-emerald-700">{{ selectedOption() }}</strong>
     </p>
 
-    <p class="text-xs font-semibold uppercase tracking-wide text-gray-400 mb-2">
+    <p class="text-xs font-semibold uppercase tracking-wide text-gray-500 mb-2">
       Cambiar la fuente
     </p>
     <div class="flex gap-2">
