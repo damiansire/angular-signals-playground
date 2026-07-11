@@ -1,35 +1,45 @@
-<main class="journey">
-  <header class="journey__head">
-    <a class="journey__back" routerLink="/">← Inicio</a>
-    <p class="journey__kicker">El recorrido</p>
-    <h1 class="journey__title">De la detección de cambios a zoneless.</h1>
-    <p class="journey__lede">
-      Doce paradas, cada una un concepto que se toca. Bajá por el camino y entrá donde quieras.
-    </p>
+<div class="journey" [class.is-static]="reduceMotion">
+  <!-- Chrome fijo -->
+  <header class="topbar">
+    <a class="topbar__back" routerLink="/">← Inicio</a>
+    <span class="topbar__title">El recorrido</span>
+    <a class="topbar__practice" routerLink="/practica/carrito">Practicá →</a>
   </header>
 
-  <ol class="trail">
-    @for (stop of stops; track stop.id; let i = $index) {
-      <li class="stop" [class.stop--right]="i % 2 === 1" [attr.data-accent]="stop.accent">
-        <a class="stop__link" [routerLink]="levelLink(stop.id)">
-          <span class="stop__coin" aria-hidden="true">{{ stop.id }}</span>
-          <span class="stop__body">
-            <span class="stop__name">{{ stop.name }}</span>
-            <code class="stop__concept">{{ stop.concept }}</code>
-          </span>
-        </a>
-      </li>
-    }
-    <li class="trail__end" aria-hidden="true">
-      <span class="trail__flag">Fin del recorrido</span>
-    </li>
-  </ol>
+  <!-- Barra lateral del viaje (el hilo del deck) -->
+  <aside class="rail" aria-hidden="true">
+    <div class="rail__line">
+      <span class="rail__dot" [style.top.%]="progress() * 100"></span>
+    </div>
+    <ol class="rail__ticks">
+      @for (s of stops; track s.id; let i = $index) {
+        <li class="rail__tick" [class.is-active]="isActive(i)" [attr.data-accent]="s.accent">
+          {{ s.id }}
+        </li>
+      }
+    </ol>
+  </aside>
 
-  <section class="apply">
-    <p class="apply__kicker">¿Y ahora?</p>
-    <p class="apply__text">Poné a prueba lo aprendido armando algo real con signals.</p>
-    <a class="apply__cta" routerLink="/practica/carrito">Practicá: carrito reactivo →</a>
-  </section>
+  <!-- Pista de scroll: una pantalla por concepto -->
+  <div class="track" [style.height.px]="trackHeight()">
+    <div class="camera">
+      @for (s of stops; track s.id; let i = $index) {
+        <article
+          class="scene"
+          [attr.data-accent]="s.accent"
+          [style]="styleFor(i)"
+          [attr.inert]="inertFor(i)"
+        >
+          <span class="scene__no">{{ s.id }} / 11</span>
+          <div class="scene__orb">{{ s.id }}</div>
+          <h2 class="scene__name">{{ s.name }}</h2>
+          <code class="scene__concept">{{ s.concept }}</code>
+          <p class="scene__blurb">{{ s.blurb }}</p>
+          <a class="scene__enter" [routerLink]="levelLink(s.id)">Entrar al nivel →</a>
+        </article>
+      }
+    </div>
+  </div>
 
-  <p class="journey__lab">¿Querés experimentar libre? <a routerLink="/lab">Entrá al Lab →</a></p>
-</main>
+  <p class="scrollhint" aria-hidden="true">scrolleá para viajar ↓</p>
+</div>

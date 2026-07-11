@@ -26,10 +26,19 @@ describe('JourneyComponent', () => {
     expect(c.levelLink('11')).toBe('/signals/level/11/sub-level/1');
   });
 
-  it('renderiza una parada por nivel, cada una como enlace', () => {
+  it('renderiza una escena por nivel, cada una con su enlace de entrada', () => {
     const fixture = TestBed.createComponent(JourneyComponent);
     fixture.detectChanges();
-    const links = (fixture.nativeElement as HTMLElement).querySelectorAll('a.stop__link');
+    const links = (fixture.nativeElement as HTMLElement).querySelectorAll('a.scene__enter');
     expect(links.length).toBe(12);
+  });
+
+  it('styleFor devuelve opacidad y transform (la escena en foco es la más opaca)', () => {
+    const c = instance();
+    const first = c.styleFor(0);
+    expect(first.opacity).toBeDefined();
+    expect(first.transform).toContain('scale(');
+    // Al inicio (scroll 0) la parada 0 está en foco.
+    expect(c.isActive(0)).toBeTrue();
   });
 });
