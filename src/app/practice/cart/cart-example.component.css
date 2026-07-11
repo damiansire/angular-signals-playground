@@ -8,6 +8,7 @@
   --source: #eb9b3c;
   --source-deep: #c97d1e;
   --derived: #2f9a80;
+  --effect: #ff5a4a;
   --card: #fffdf8;
 
   display: block;
@@ -263,18 +264,52 @@
   color: var(--ink-soft);
   margin: 0 0 0.5rem;
 }
+.how__editor {
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 18px 40px -28px rgba(40, 32, 18, 0.55);
+}
+.how__chrome {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  background: #1c1913;
+}
+.how__dot {
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+}
+.how__dot--s { background: var(--source); }
+.how__dot--d { background: var(--derived); }
+.how__dot--e { background: var(--effect); }
+.how__file {
+  margin-left: 6px;
+  font-family: var(--font-mono);
+  font-style: normal;
+  font-size: 0.72rem;
+  color: #8a8172;
+}
 .how__code {
   margin: 0;
   padding: 1rem;
-  border-radius: 12px;
   background: #26221b;
-  color: #efe9da;
+  color: #d9d2c2;
   font-family: var(--font-mono);
   font-size: 0.78rem;
-  line-height: 1.55;
+  line-height: 1.6;
   overflow-x: auto;
 }
-.how__code .c { color: #9a9081; }
+/* Paleta de tokens: los keywords reactivos llevan su acento semántico. */
+.how__code .c { color: #8f8778; font-style: italic; }
+.how__code .t-sig { color: #f3ad4b; }
+.how__code .t-cmp { color: #6fd0b8; }
+.how__code .t-eff { color: #ff8a7c; }
+.how__code .t-fn { color: #8fb7ff; }
+.how__code .t-str { color: #bfe88f; }
+.how__code .t-num { color: #e2b6ff; }
+.how__code .t-prop { color: #9fe0d6; }
 .how__hint {
   font-size: 0.8rem;
   color: var(--ink-soft);

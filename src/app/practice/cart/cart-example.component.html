@@ -136,21 +136,29 @@
       <section class="how">
         <p class="how__title">El código que lo mueve</p>
         <p class="how__hint">Pasá el mouse por cada línea y seguí la flecha hasta lo que maneja.</p>
-        <pre class="how__code"><code><span class="c">// una sola fuente:</span>
-<span class="frag" data-code="signal" tabindex="0" role="button" [class.is-active]="linked() === 'signal'" (mouseenter)="linkTo('signal')" (mouseleave)="unlink()" (focus)="linkTo('signal')" (blur)="unlink()" aria-label="qty es un signal: es la única fuente, controla las cantidades del carrito">qty = signal({{ '{' }} cafe: 1 {{ '}' }});</span>
+        <div class="how__editor">
+          <div class="how__chrome" aria-hidden="true">
+            <span class="how__dot how__dot--s"></span>
+            <span class="how__dot how__dot--d"></span>
+            <span class="how__dot how__dot--e"></span>
+            <em class="how__file">cart.ts</em>
+          </div>
+          <pre class="how__code"><code><span class="c">// una sola fuente:</span>
+<span class="frag" data-code="signal" tabindex="0" role="button" [class.is-active]="linked() === 'signal'" (mouseenter)="linkTo('signal')" (mouseleave)="unlink()" (focus)="linkTo('signal')" (blur)="unlink()" aria-label="qty es un signal: es la única fuente, controla las cantidades del carrito">qty = <span class="t-sig">signal</span>({{ '{' }} <span class="t-prop">cafe</span>: <span class="t-num">1</span> {{ '}' }});</span>
 
 <span class="c">// todo lo demás se deriva:</span>
-<span class="frag" data-code="subtotal" tabindex="0" role="button" [class.is-active]="linked() === 'subtotal'" (mouseenter)="linkTo('subtotal')" (mouseleave)="unlink()" (focus)="linkTo('subtotal')" (blur)="unlink()" aria-label="subtotal es un computed: deriva del carrito y alimenta la fila del subtotal">subtotal = computed(() =>
-  catalogo.reduce((s, p) =>
-    s + p.precio * qty()[p.id], 0));</span>
+<span class="frag" data-code="subtotal" tabindex="0" role="button" [class.is-active]="linked() === 'subtotal'" (mouseenter)="linkTo('subtotal')" (mouseleave)="unlink()" (focus)="linkTo('subtotal')" (blur)="unlink()" aria-label="subtotal es un computed: deriva del carrito y alimenta la fila del subtotal">subtotal = <span class="t-cmp">computed</span>(() =>
+  catalogo.<span class="t-fn">reduce</span>((s, p) =>
+    s + p.<span class="t-prop">precio</span> * qty()[p.<span class="t-prop">id</span>], <span class="t-num">0</span>));</span>
 
-<span class="frag" data-code="envio" tabindex="0" role="button" [class.is-active]="linked() === 'envio'" (mouseenter)="linkTo('envio')" (mouseleave)="unlink()" (focus)="linkTo('envio')" (blur)="unlink()" aria-label="envioGratis es un computed: deriva del subtotal y resuelve el reto">envioGratis = computed(() =>
-  subtotal() >= 12000);</span>
+<span class="frag" data-code="envio" tabindex="0" role="button" [class.is-active]="linked() === 'envio'" (mouseenter)="linkTo('envio')" (mouseleave)="unlink()" (focus)="linkTo('envio')" (blur)="unlink()" aria-label="envioGratis es un computed: deriva del subtotal y resuelve el reto">envioGratis = <span class="t-cmp">computed</span>(() =>
+  subtotal() >= <span class="t-num">12000</span>);</span>
 
 <span class="c">// se guarda solo, sin ngOnDestroy:</span>
-<span class="frag" data-code="effect" tabindex="0" role="button" [class.is-active]="linked() === 'effect'" (mouseenter)="linkTo('effect')" (mouseleave)="unlink()" (focus)="linkTo('effect')" (blur)="unlink()" aria-label="effect: persiste el carrito solo, sin lifecycle hooks">effect(() =>
-  localStorage.setItem(
-    'carrito', JSON.stringify(qty())));</span></code></pre>
+<span class="frag" data-code="effect" tabindex="0" role="button" [class.is-active]="linked() === 'effect'" (mouseenter)="linkTo('effect')" (mouseleave)="unlink()" (focus)="linkTo('effect')" (blur)="unlink()" aria-label="effect: persiste el carrito solo, sin lifecycle hooks"><span class="t-eff">effect</span>(() =>
+  localStorage.<span class="t-fn">setItem</span>(
+    <span class="t-str">'carrito'</span>, JSON.<span class="t-fn">stringify</span>(qty())));</span></code></pre>
+        </div>
       </section>
     </aside>
   </div>
