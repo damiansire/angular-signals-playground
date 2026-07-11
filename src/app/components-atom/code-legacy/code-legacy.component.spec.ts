@@ -50,4 +50,33 @@ describe('CodeLegacyComponent', () => {
     expect(activeClasses).toContain('bg-green-700');
     expect(inactiveClasses).toContain('bg-gray-800');
   });
+
+  it('trata una línea con texto como interactiva', () => {
+    expect(component.isInteractive({ line: 'const x = 1;', active: false })).toBe(true);
+  });
+
+  it('trata una línea vacía, solo-espacios o sin `line` como NO interactiva', () => {
+    expect(component.isInteractive({ line: '', active: false })).toBe(false);
+    expect(component.isInteractive({ line: '   ', active: false })).toBe(false);
+    expect(component.isInteractive({ active: false })).toBe(false);
+  });
+
+  it('no expone role="button" ni tabindex en las líneas en blanco (sin nombre accesible)', () => {
+    fixture.componentRef.setInput('lines', [
+      { id: 'a', line: 'const x = 1;', active: true },
+      { id: 'b', line: '', active: false },
+    ] satisfies CodeLine[]);
+    fixture.detectChanges();
+
+    const rows: HTMLElement[] = Array.from(
+      fixture.nativeElement.querySelectorAll('[class*="font-mono"]'),
+    );
+    const [interactiveRow, blankRow] = rows;
+
+    expect(interactiveRow.getAttribute('role')).toBe('button');
+    expect(interactiveRow.getAttribute('tabindex')).toBe('0');
+
+    expect(blankRow.getAttribute('role')).toBeNull();
+    expect(blankRow.getAttribute('tabindex')).toBeNull();
+  });
 });

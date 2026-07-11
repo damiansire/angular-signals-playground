@@ -17,8 +17,19 @@ export class CodeLegacyComponent {
   lineClasses(item: CodeLine): string {
     const state = item.active
       ? 'bg-green-700 text-white'
-      : 'bg-gray-800 text-gray-300 hover:bg-green-800 hover:text-white';
+      : this.isInteractive(item)
+        ? 'bg-gray-800 text-gray-300 hover:bg-green-800 hover:text-white'
+        : 'bg-gray-800 text-gray-300';
     return `${this.textSize()} ${state}`;
+  }
+
+  /**
+   * Las líneas en blanco son separadores visuales, no código clickeable: no
+   * deben quedar como `role="button"` sin nombre accesible (violación de
+   * "ARIA commands must have an accessible name" detectada por axe-core).
+   */
+  isInteractive(item: CodeLine): boolean {
+    return typeof item.line === 'string' && item.line.trim().length > 0;
   }
 
   onLineClick(line: CodeLine) {
