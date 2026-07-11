@@ -16,14 +16,21 @@ export class AppComponent {
   private readonly router = inject(Router);
 
   /**
-   * La landing (`/`) es full-bleed: sin ella el sidebar del banco compite con la
-   * bienvenida. En los niveles y el Lab, el chrome vuelve.
+   * Las pantallas-viaje (landing `/` y el recorrido) son full-bleed: el sidebar
+   * del banco competiría con la bienvenida. En los niveles y el Lab, el chrome
+   * vuelve.
    */
-  protected readonly onLanding = toSignal(
+  protected readonly fullBleed = toSignal(
     this.router.events.pipe(
       filter((e): e is NavigationEnd => e instanceof NavigationEnd),
-      map((e) => (e.urlAfterRedirects || e.url) === '/'),
+      map((e) => isFullBleed(e.urlAfterRedirects || e.url)),
     ),
-    { initialValue: (this.router.url || '/') === '/' },
+    { initialValue: isFullBleed(this.router.url || '/') },
   );
+}
+
+/** Rutas sin chrome del banco (viaje/bienvenida). */
+function isFullBleed(url: string): boolean {
+  const path = url.split('?')[0].split('#')[0];
+  return path === '/' || path === '/recorrido';
 }
