@@ -11,9 +11,13 @@ describe('IntegradaVistaComponent', () => {
     }).compileComponents();
   });
 
-  it('cubre los 12 niveles (0 a 11) sin huecos ni repetidos', () => {
-    const c = TestBed.createComponent(IntegradaVistaComponent).componentInstance;
-    expect(c.stops.map((s) => s.id)).toEqual([
+  function instance() {
+    return TestBed.createComponent(IntegradaVistaComponent).componentInstance;
+  }
+
+  it('arma 12 átomos (0 a 11) con posición y un enlace entre cada par', () => {
+    const c = instance();
+    expect(c.atoms.map((a) => a.id)).toEqual([
       '0',
       '1',
       '2',
@@ -27,18 +31,25 @@ describe('IntegradaVistaComponent', () => {
       '10',
       '11',
     ]);
+    expect(c.atoms.every((a) => Number.isFinite(a.x) && Number.isFinite(a.y))).toBeTrue();
+    expect(c.bonds.length).toBe(11);
   });
 
-  it('cada parada enlaza al primer sub-nivel de su nivel', () => {
-    const c = TestBed.createComponent(IntegradaVistaComponent).componentInstance;
-    expect(c.levelLink('0')).toBe('/signals/level/0/sub-level/1');
-    expect(c.levelLink('11')).toBe('/signals/level/11/sub-level/1');
+  it('al inicio solo el primer átomo está a la vista y es el actual', () => {
+    const c = instance();
+    expect(c.revealed()).toBe(1);
+    expect(c.isShown(0)).toBeTrue();
+    expect(c.isShown(1)).toBeFalse();
+    expect(c.current().id).toBe('0');
   });
 
-  it('renderiza una estación por nivel, cada una como enlace', () => {
-    const fixture = TestBed.createComponent(IntegradaVistaComponent);
-    fixture.detectChanges();
-    const links = (fixture.nativeElement as HTMLElement).querySelectorAll('a.stop__link');
-    expect(links.length).toBe(12);
+  it('cada átomo enlaza al primer sub-nivel de su nivel', () => {
+    const c = instance();
+    expect(c.levelLink('2')).toBe('/signals/level/2/sub-level/1');
+  });
+
+  it('la órbita crece con la cantidad de átomos revelados', () => {
+    const c = instance();
+    expect(c.orbitR()).toBeGreaterThan(0);
   });
 });

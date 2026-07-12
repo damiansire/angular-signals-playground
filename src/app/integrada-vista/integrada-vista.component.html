@@ -1,29 +1,53 @@
-<main class="journey">
-  <header class="journey__head">
-    <a class="journey__back" routerLink="/">← Inicio</a>
-    <p class="journey__kicker">Vista integrada</p>
-    <h1 class="journey__title">De la detección de cambios a zoneless.</h1>
-    <p class="journey__lede">
-      Doce paradas, cada una un concepto que se toca. Bajá por el camino y entrá donde quieras.
-    </p>
+<div class="mol">
+  <header class="mol__top">
+    <a class="mol__back" routerLink="/">← Inicio</a>
+    <span class="mol__title">El sistema reactivo</span>
+    <a class="mol__back" routerLink="/recorrido">Otras vistas →</a>
   </header>
 
-  <ol class="trail">
-    @for (stop of stops; track stop.id; let i = $index) {
-      <li class="stop" [class.stop--right]="i % 2 === 1" [attr.data-accent]="stop.accent">
-        <a class="stop__link" [routerLink]="levelLink(stop.id)">
-          <span class="stop__coin" aria-hidden="true">{{ stop.id }}</span>
-          <span class="stop__body">
-            <span class="stop__name">{{ stop.name }}</span>
-            <code class="stop__concept">{{ stop.concept }}</code>
-          </span>
-        </a>
-      </li>
-    }
-    <li class="trail__end" aria-hidden="true">
-      <span class="trail__flag">Fin del recorrido</span>
-    </li>
-  </ol>
+  <div class="track" [style.height.px]="trackHeight()">
+    <div class="camera">
+      <svg class="scene" viewBox="0 0 800 600" aria-hidden="true">
+        <!-- Órbita punteada que crece con el cluster -->
+        <circle class="orbit" cx="400" cy="300" [attr.r]="orbitR()" />
 
-  <p class="journey__lab">¿Querés experimentar libre? <a routerLink="/lab">Entrá al Lab →</a></p>
-</main>
+        <!-- Enlaces entre átomos -->
+        @for (b of bonds; track b.at) {
+          <line
+            class="bond"
+            [class.shown]="isShown(b.at)"
+            [attr.x1]="b.x1"
+            [attr.y1]="b.y1"
+            [attr.x2]="b.x2"
+            [attr.y2]="b.y2"
+          />
+        }
+
+        <!-- Átomos (conceptos) -->
+        @for (a of atoms; track a.id; let i = $index) {
+          <g
+            class="atom"
+            [class.shown]="isShown(i)"
+            [class.current]="i === revealed() - 1"
+            [class.dotted]="a.dotted"
+            [attr.data-accent]="a.accent"
+          >
+            <circle class="atom__body" [attr.cx]="a.x" [attr.cy]="a.y" r="40" />
+            <text class="atom__label" [attr.x]="a.x" [attr.y]="a.y + 7">{{ a.id }}</text>
+          </g>
+        }
+      </svg>
+
+      <div class="caption" aria-live="polite">
+        <p class="caption__scene">Escena {{ revealed() }} / {{ atoms.length }}</p>
+        <h2 class="caption__name">{{ current().name }}</h2>
+        <code class="caption__concept" [attr.data-accent]="current().accent">{{
+          current().concept
+        }}</code>
+        <a class="caption__enter" [routerLink]="levelLink(current().id)">Entrar al nivel →</a>
+      </div>
+    </div>
+  </div>
+
+  <p class="scrollhint" aria-hidden="true">scrolleá: la molécula crece ↓</p>
+</div>
