@@ -95,7 +95,19 @@
   transform-origin: center;
 }
 .atom.current .halo {
-  opacity: 0.4;
+  opacity: 0.5;
+  animation: haloP 1.7s ease-in-out infinite;
+}
+@keyframes haloP {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.5;
+  }
+  50% {
+    transform: scale(1.3);
+    opacity: 0.12;
+  }
 }
 .aname {
   font-family: var(--sans);
@@ -373,11 +385,17 @@
   font-size: 1.12rem;
   margin: 0;
 }
-/* Sub-nivel de Lab: muestra el instrumento real y oculta el texto. */
+/* Sub-nivel de Lab: muestra el instrumento real y oculta el texto. Acotado en alto
+   con scroll interno para que instrumentos altos (Manual) no rebalsen el viewport. */
 .sublab {
   display: none;
   margin-top: 0.7rem;
+  max-height: 46vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+  border-radius: 10px;
 }
+.subbody--lab .st,
 .subbody--lab .scode,
 .subbody--lab .sc,
 .subbody--lab .sdemo {
@@ -611,7 +629,8 @@
   .bond.on,
   .tether,
   .sub-e.current .sub-dot,
-  .scrollcue__wheel {
+  .scrollcue__wheel,
+  .atom.current .halo {
     animation: none;
   }
 }
