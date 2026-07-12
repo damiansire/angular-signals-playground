@@ -1,0 +1,212 @@
+/* Vista integrada · el timeline original, con rebote al aparecer. Clima luminoso. */
+:host {
+  --paper-top: #f7f5ed;
+  --paper-bot: #e6f1ea;
+  --ink: #201d16;
+  --ink-soft: #6a6355;
+  --hair: #d7d1c2;
+  --source: #eb9b3c;
+  --derived: #2f9a80;
+  --effect: #ff5a4a;
+  --capstone: #b8791f;
+
+  display: block;
+  height: 100vh;
+  overflow: auto;
+  background: radial-gradient(130% 60% at 50% 0%, var(--paper-top) 0%, var(--paper-bot) 90%);
+  color: var(--ink);
+  font-family: var(--font-display);
+}
+
+.journey {
+  width: min(760px, 100%);
+  margin-inline: auto;
+  padding: clamp(1.5rem, 4vw, 3.5rem) clamp(1rem, 4vw, 2rem) 4rem;
+  box-sizing: border-box;
+}
+
+/* ── Cabecera ───────────────────────────────────────────────────────────────── */
+.journey__back {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  color: var(--ink-soft);
+  text-decoration: none;
+}
+.journey__back:hover { color: var(--source); }
+.journey__kicker {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--source);
+  margin: 1rem 0 0.4rem;
+}
+.journey__title {
+  font-family: var(--font-editorial);
+  font-weight: 600;
+  font-size: clamp(1.8rem, 4.5vw, 2.8rem);
+  line-height: 1.06;
+  margin: 0 0 0.7rem;
+}
+.journey__lede {
+  font-size: 1.02rem;
+  line-height: 1.55;
+  color: var(--ink-soft);
+  max-width: 44ch;
+  margin: 0 0 2.5rem;
+}
+
+/* ── El camino ──────────────────────────────────────────────────────────────── */
+.trail {
+  position: relative;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+/* Columna vertebral que baja por el centro. */
+.trail::before {
+  content: '';
+  position: absolute;
+  top: 8px;
+  bottom: 40px;
+  left: 50%;
+  width: 3px;
+  transform: translateX(-50%);
+  background: linear-gradient(var(--source), var(--derived) 50%, var(--effect));
+  opacity: 0.5;
+  border-radius: 3px;
+}
+
+.stop {
+  --accent: var(--source);
+  position: relative;
+  margin-bottom: clamp(1.5rem, 4vw, 2.5rem);
+  opacity: 0;
+  transform: translateY(28px) scale(0.55);
+}
+.stop.in {
+  animation: stop-pop 0.6s cubic-bezier(0.34, 1.5, 0.5, 1) forwards;
+}
+.stop[data-accent='source'] { --accent: var(--source); }
+.stop[data-accent='derived'] { --accent: var(--derived); }
+.stop[data-accent='effect'] { --accent: var(--effect); }
+.stop[data-accent='ink'] { --accent: var(--ink-soft); }
+.stop[data-accent='capstone'] { --accent: var(--capstone); }
+
+.stop__link {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 1rem;
+  text-decoration: none;
+  color: inherit;
+}
+.stop__coin {
+  grid-column: 2;
+  width: 58px;
+  height: 58px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--accent);
+  color: #fff;
+  font-family: var(--font-editorial);
+  font-size: 1.5rem;
+  font-weight: 600;
+  box-shadow: 0 8px 18px -8px rgba(40, 32, 18, 0.5);
+  transition: transform 180ms var(--propagation-ease);
+}
+.stop__body {
+  grid-column: 1;
+  text-align: right;
+}
+.stop--right .stop__body {
+  grid-column: 3;
+  text-align: left;
+}
+.stop__name {
+  display: block;
+  font-family: var(--font-editorial);
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: var(--ink);
+}
+.stop__concept {
+  display: inline-block;
+  margin-top: 0.2rem;
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  color: var(--accent);
+}
+
+.stop__link:hover .stop__coin,
+.stop__link:focus-visible .stop__coin {
+  transform: scale(1.12);
+}
+.stop__link:focus-visible {
+  outline: none;
+}
+.stop__link:focus-visible .stop__coin {
+  outline: 3px solid var(--accent);
+  outline-offset: 3px;
+}
+
+/* Bandera de meta. */
+.trail__end {
+  position: relative;
+  text-align: center;
+  padding-top: 0.5rem;
+}
+.trail__flag {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  background: var(--paper-top);
+  padding: 0.35rem 0.8rem;
+  border-radius: 999px;
+  box-shadow: inset 0 0 0 1.5px var(--hair);
+}
+
+.journey__lab {
+  text-align: center;
+  margin-top: 2.5rem;
+  font-size: 0.95rem;
+  color: var(--ink-soft);
+}
+.journey__lab a {
+  color: var(--source);
+  font-weight: 600;
+  text-decoration: none;
+}
+.journey__lab a:hover { text-decoration: underline; }
+
+/* ── Responsive: en angosto, el camino se alinea a la izquierda ─────────────── */
+@media (max-width: 640px) {
+  .trail::before { left: 29px; }
+  .stop__link {
+    grid-template-columns: auto 1fr;
+    gap: 0.9rem;
+  }
+  .stop__coin { grid-column: 1; }
+  .stop__body,
+  .stop--right .stop__body {
+    grid-column: 2;
+    text-align: left;
+  }
+}
+
+/* El rebote: entra achicado y desde abajo, se pasa un poco y asienta. */
+@keyframes stop-pop {
+  0% { opacity: 0; transform: translateY(28px) scale(0.55); }
+  70% { opacity: 1; transform: translateY(0) scale(1.12); }
+  100% { opacity: 1; transform: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .stop { opacity: 1; transform: none; }
+  .stop.in { animation: none; }
+  .stop__coin { transition: none; }
+}

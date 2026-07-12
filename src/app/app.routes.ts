@@ -57,6 +57,7 @@ import { LandingComponent } from './landing/landing.component';
 import { JourneyComponent } from './journey/journey.component';
 import { CartExampleComponent } from './practice/cart/cart-example.component';
 import { PocComponent } from './poc/poc.component';
+import { IntegradaVistaComponent } from './integrada-vista/integrada-vista.component';
 
 const signalsRoutesTree: RouteItem[] = [
   {
@@ -213,6 +214,7 @@ export const routes: Routes = [
   { path: 'recorrido', component: JourneyComponent },
   { path: 'practica/carrito', component: CartExampleComponent },
   { path: 'poc', component: PocComponent },
+  { path: 'integrada-vista', component: IntegradaVistaComponent },
   { path: '', component: LandingComponent, pathMatch: 'full' },
 ];
 export const menuItems = baseRoutes;

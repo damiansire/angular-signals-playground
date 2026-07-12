@@ -1,0 +1,29 @@
+<main class="journey">
+  <header class="journey__head">
+    <a class="journey__back" routerLink="/">← Inicio</a>
+    <p class="journey__kicker">Vista integrada</p>
+    <h1 class="journey__title">De la detección de cambios a zoneless.</h1>
+    <p class="journey__lede">
+      Doce paradas, cada una un concepto que se toca. Bajá por el camino y entrá donde quieras.
+    </p>
+  </header>
+
+  <ol class="trail">
+    @for (stop of stops; track stop.id; let i = $index) {
+      <li class="stop" [class.stop--right]="i % 2 === 1" [attr.data-accent]="stop.accent">
+        <a class="stop__link" [routerLink]="levelLink(stop.id)">
+          <span class="stop__coin" aria-hidden="true">{{ stop.id }}</span>
+          <span class="stop__body">
+            <span class="stop__name">{{ stop.name }}</span>
+            <code class="stop__concept">{{ stop.concept }}</code>
+          </span>
+        </a>
+      </li>
+    }
+    <li class="trail__end" aria-hidden="true">
+      <span class="trail__flag">Fin del recorrido</span>
+    </li>
+  </ol>
+
+  <p class="journey__lab">¿Querés experimentar libre? <a routerLink="/lab">Entrá al Lab →</a></p>
+</main>
