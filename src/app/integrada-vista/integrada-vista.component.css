@@ -10,50 +10,22 @@
   --mono: var(--font-mono, 'JetBrains Mono', ui-monospace, monospace);
 
   display: block;
-  min-height: 100vh;
-  padding: clamp(1rem, 3vw, 2rem);
-  background: radial-gradient(120% 80% at 50% 0%, #f7f5ed, #e6f1ea);
+  height: 100vh;
+  overflow: hidden;
   color: #201d16;
   font-family: var(--sans);
 }
 * {
   box-sizing: border-box;
 }
-.wrap {
-  max-width: 900px;
-  margin: 0 auto;
-}
-.eyebrow {
-  font-family: var(--mono);
-  font-size: 0.72rem;
-  letter-spacing: 0.22em;
-  text-transform: uppercase;
-  color: #c97d1e;
-  margin: 0 0 0.4rem;
-}
-h1 {
-  font-family: var(--serif);
-  font-weight: 600;
-  font-size: clamp(1.6rem, 4vw, 2.3rem);
-  margin: 0 0 0.4rem;
-}
-.sub {
-  color: #6a6355;
-  line-height: 1.5;
-  margin: 0 0 1.1rem;
-  max-width: 62ch;
-}
 
+/* La pantalla ES la página: el stage ocupa todo el viewport. */
 .stage {
   position: relative;
-  height: min(78vh, 680px);
-  border-radius: 22px;
+  height: 100vh;
   overflow-y: auto;
   overflow-x: hidden;
-  background: radial-gradient(90% 70% at 50% 40%, #fbf9f2, #eef4ee 82%);
-  box-shadow:
-    0 26px 54px -34px rgba(40, 32, 18, 0.55),
-    inset 0 0 0 1px #d7d1c2;
+  background: radial-gradient(90% 70% at 50% 35%, #fbf9f2, #e6f1ea 88%);
   scrollbar-width: thin;
 }
 .track {
@@ -63,7 +35,7 @@ h1 {
 .holder {
   position: sticky;
   top: 0;
-  height: min(78vh, 680px);
+  height: 100vh;
   overflow: hidden;
 }
 .mol {
@@ -445,7 +417,7 @@ h1 {
   position: absolute;
   left: 0;
   right: 0;
-  bottom: 16px;
+  bottom: 64px;
   text-align: center;
   pointer-events: none;
 }
@@ -535,33 +507,37 @@ h1 {
   font-weight: 700;
 }
 
+/* Controles integrados: pastilla flotante abajo del centro, dentro de la pantalla. */
 .controls {
+  position: absolute;
+  bottom: 14px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 6;
   display: flex;
   align-items: center;
-  gap: 0.8rem;
-  margin-top: 1rem;
-  justify-content: center;
-  flex-wrap: wrap;
+  gap: 0.7rem;
+  padding: 0.35rem 0.65rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.72);
+  box-shadow:
+    0 8px 22px -12px rgba(40, 32, 18, 0.5),
+    inset 0 0 0 1px #e3ddcf;
+  backdrop-filter: blur(5px);
 }
 .step {
-  width: 42px;
-  height: 42px;
+  width: 34px;
+  height: 34px;
   border-radius: 50%;
   border: 1.5px solid #d7d1c2;
   background: #fff;
   color: #201d16;
-  font-size: 1.05rem;
+  font-size: 0.95rem;
   cursor: pointer;
 }
 .scrubber {
-  width: min(340px, 62vw);
+  width: min(280px, 52vw);
   accent-color: #c97d1e;
-}
-.note {
-  text-align: center;
-  color: #6a6355;
-  font-size: 0.85rem;
-  margin-top: 0.7rem;
 }
 
 @media (prefers-reduced-motion: reduce) {
