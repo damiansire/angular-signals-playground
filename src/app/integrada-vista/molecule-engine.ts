@@ -628,7 +628,7 @@ export function initMolecule(root: HTMLElement, mountLab: MountLab, enc: string 
   const track = q<HTMLDivElement>('#track')!;
   const scrubber = q<HTMLInputElement>('#scrubber')!;
   const railDot = q<HTMLElement>('#railDot');
-  const hintEl = q<HTMLElement>('.hint');
+  const cueEl = q<HTMLElement>('.scrollcue');
   const railTicksOl = q<HTMLElement>('#railTicks')!;
   for (let t = 0; t < N; t++) {
     const li = document.createElement('li');
@@ -730,8 +730,8 @@ export function initMolecule(root: HTMLElement, mountLab: MountLab, enc: string 
         const px = lerp(parent.x, C[i].x, birth);
         const py = lerp(parent.y, C[i].y, birth);
         g.setAttribute('transform', `translate(${px.toFixed(1)},${py.toFixed(1)})`);
-        orb.style.transform = `scale(${(0.25 + 0.75 * birth).toFixed(3)})`;
-        g.style.opacity = (0.2 + 0.8 * birth).toFixed(2);
+        orb.style.transform = `scale(${(0.42 + 0.58 * birth).toFixed(3)})`;
+        g.style.opacity = (0.4 + 0.6 * birth).toFixed(2);
       } else {
         g.classList.remove('on', 'current');
         g.style.opacity = '0';
@@ -779,7 +779,7 @@ export function initMolecule(root: HTMLElement, mountLab: MountLab, enc: string 
     scrubber.value = String(Math.round((s / TOTAL) * 60));
     if (railDot) railDot.style.top = ((s / TOTAL) * 100).toFixed(1) + '%';
     for (let ti = 0; ti < railTicks.length; ti++) railTicks[ti].classList.toggle('on', ti === c);
-    if (hintEl) hintEl.style.opacity = s < 0.4 ? '1' : '0';
+    if (cueEl) cueEl.style.opacity = s < 0.45 ? '1' : '0';
   }
 
   // ---- Scroll / stepping ----

@@ -430,6 +430,58 @@
   margin: 0;
 }
 
+/* Indicador de "scrolleá" (mousecito con ruedita) que se desvanece al empezar. */
+.scrollcue {
+  position: absolute;
+  left: 50%;
+  bottom: 116px;
+  transform: translateX(-50%);
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.55rem;
+  pointer-events: none;
+  transition: opacity 0.5s ease;
+}
+.scrollcue__mouse {
+  width: 24px;
+  height: 38px;
+  border: 2px solid #b1a892;
+  border-radius: 13px;
+  display: flex;
+  justify-content: center;
+  padding-top: 6px;
+}
+.scrollcue__wheel {
+  width: 4px;
+  height: 8px;
+  border-radius: 2px;
+  background: var(--source);
+  animation: scrollcue-wheel 1.5s ease-in-out infinite;
+}
+@keyframes scrollcue-wheel {
+  0% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  55% {
+    transform: translateY(12px);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 0;
+  }
+}
+.scrollcue__label {
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #8a8272;
+}
+
 .topbar {
   position: absolute;
   top: 0;
@@ -544,7 +596,8 @@
 @media (prefers-reduced-motion: reduce) {
   .bond.on,
   .tether,
-  .sub-e.current .sub-dot {
+  .sub-e.current .sub-dot,
+  .scrollcue__wheel {
     animation: none;
   }
 }
