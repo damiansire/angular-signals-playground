@@ -22,36 +22,24 @@ const COL: Record<AccentKey, string> = {
   capstone: '#c98a2a',
 };
 
-/** Instrumentos reales del Lab embebibles. */
-export type LabKind = 'computed' | 'effect' | 'signal' | 'manual';
-
-interface Sub {
-  t: string;
-  code?: string;
-  c?: string;
-  demo?: 'set' | 'update';
-  value?: number;
-  /** Si está, este sub-nivel muestra el instrumento REAL del Lab en vez de texto. */
-  lab?: 'signal' | 'manual';
-}
+/** Monta el componente real de un sub-nivel (concepto ci, sub si) y devuelve su disposer. */
+export type MountSub = (host: HTMLElement, conceptIdx: number, subIdx: number) => () => void;
 
 interface RawConcept {
   name: string;
   code: string;
   accent: AccentKey;
   dotted: boolean;
-  p: string;
-  demo: string;
-  subs?: Sub[];
 }
 
 interface Concept extends RawConcept {
   x: number;
   y: number;
+  subN: number; // cantidad de sub-niveles reales
+  subs: unknown[]; // longitud = subN (para la órbita / conteo)
   card?: HTMLDivElement;
   subIdx: number;
-  entered: boolean;
-  stop: number;
+  subDispose?: () => void; // disposer del componente montado del sub actual
 }
 
 interface SubDot {
@@ -64,105 +52,20 @@ interface SubDot {
   dockT: number;
 }
 
-/** Los 12 conceptos. Introducción (4) y Signals (7) traen sub-niveles reales. */
+/** Los 12 conceptos (metadata del atomo). Los sub-niveles reales se embeben en cada dive. */
 const RAW: RawConcept[] = [
-  {
-    name: 'Introducción',
-    code: 'detección de cambios',
-    accent: 'ink',
-    dotted: false,
-    p: 'Cómo Angular decide qué volver a dibujar. El punto de partida.',
-    demo: '',
-    subs: [
-      {
-        t: 'HTML → árbol',
-        code: '<div><p>Hola</p></div>',
-        c: 'El HTML que escribís se representa internamente como un árbol de nodos (el DOM).',
-      },
-      {
-        t: 'Variables en pantalla',
-        code: "let nombre = 'Ada';",
-        c: 'Una variable y sus cambios se reflejan en la vista: del HTML al JavaScript a Angular.',
-      },
-      {
-        t: 'Detección vieja (Zone.js)',
-        code: '// click / timer / fetch → revisa TODO el árbol',
-        c: 'Zone.js avisa que pasó algo async; Angular recorre el árbol entero (estrategia default).',
-      },
-      {
-        t: 'Detección con signals',
-        code: 'count.set(5);',
-        c: 'Cuando cambia un signal, Angular re-chequea SOLO los componentes que lo consumen, no todo el árbol.',
-      },
-      {
-        t: 'La detección, en vivo',
-        c: 'El instrumento real del Lab: mirá cómo la detección de cambios recorre (o no) el árbol.',
-        lab: 'manual',
-      },
-    ],
-  },
-  {
-    name: 'Signals',
-    code: 'signal()',
-    accent: 'source',
-    dotted: false,
-    p: 'Un valor que avisa cuando cambia. La única fuente: todo lo demás sale de acá.',
-    demo: 'signal',
-    subs: [
-      {
-        t: 'Variables (repaso pre-signals)',
-        code: 'let count = 0;',
-        c: 'En JS guardás un valor en una variable: var / const / let.',
-      },
-      {
-        t: '¿Qué es un signal?',
-        code: 'count = signal(0);',
-        c: 'Un envoltorio alrededor de un valor que avisa a sus consumidores cuando ese valor cambia.',
-      },
-      {
-        t: 'Tipos de signal',
-        code: 'signal(0)   // writable\ncomputed()  // read-only',
-        c: 'Hay escribibles (WritableSignal) y de solo lectura (Signal y computed).',
-      },
-      {
-        t: 'Leer: el getter ()',
-        code: 'count()   // → 0',
-        c: 'Un signal se LEE llamándolo como función: count(). Igual en el TypeScript y en el template.',
-      },
-      {
-        t: 'Writable: set()',
-        code: 'count.set(5);',
-        c: 'signal.set() reemplaza el valor de un writable signal por uno nuevo.',
-        demo: 'set',
-      },
-      {
-        t: 'update()',
-        code: 'count.update(n => n + 1);',
-        c: 'signal.update() calcula el nuevo valor a partir del anterior.',
-        demo: 'update',
-      },
-      {
-        t: 'Read-only: asReadonly()',
-        code: 'ro = count.asReadonly();',
-        c: 'asReadonly() expone un signal que se lee pero no se escribe desde afuera.',
-      },
-      {
-        t: 'signal() en el instrumento',
-        c: 'El instrumento real del Lab: tocá la fuente y mirá el flujo de un signal en vivo.',
-        lab: 'signal',
-      },
-    ],
-  },
-  { name: 'Computed', code: 'computed()', accent: 'derived', dotted: true, p: 'Se deriva solo desde otros signals. No lo seteás: se recalcula cuando cambia su fuente.', demo: 'computed' },
-  { name: 'Effects', code: 'effect()', accent: 'effect', dotted: false, p: 'Corre una acción cada vez que cambia lo que lee. El lado de los efectos.', demo: 'effect' },
-  { name: 'Igualdad', code: 'equality', accent: 'source', dotted: false, p: 'Cuándo un signal NO avisa a sus consumidores.', demo: '' },
-  { name: 'Linked', code: 'linkedSignal()', accent: 'derived', dotted: true, p: 'Estado escribible que nace de una fuente y se resetea con ella.', demo: '' },
-  { name: 'Resource', code: 'resource()', accent: 'derived', dotted: true, p: 'Datos async como signals: value, status, error, isLoading.', demo: '' },
-  { name: 'Inputs & Outputs', code: 'input · model', accent: 'source', dotted: false, p: 'El API de un componente, en signals.', demo: '' },
-  { name: 'Queries', code: 'viewChild', accent: 'ink', dotted: true, p: 'Ver el DOM y convivir con RxJS, todo como signals.', demo: '' },
-  { name: 'After render', code: 'afterRenderEffect()', accent: 'effect', dotted: false, p: 'Medir y leer el DOM justo después de dibujar.', demo: '' },
-  { name: 'Debounce', code: 'debounce', accent: 'effect', dotted: true, p: 'Un valor que espera antes de propagarse.', demo: '' },
-  { name: 'Zoneless', code: 'zoneless', accent: 'capstone', dotted: false, p: 'Signals + OnPush dejan tirar Zone.js.', demo: '' },
+  { name: 'Introducción', code: 'detección de cambios', accent: 'ink', dotted: false },
+  { name: 'Signals', code: 'signal()', accent: 'source', dotted: false },
+  { name: 'Computed', code: 'computed()', accent: 'derived', dotted: true },
+  { name: 'Effects', code: 'effect()', accent: 'effect', dotted: false },
+  { name: 'Igualdad', code: 'equality', accent: 'source', dotted: false },
+  { name: 'Linked', code: 'linkedSignal()', accent: 'derived', dotted: true },
+  { name: 'Resource', code: 'resource()', accent: 'derived', dotted: true },
+  { name: 'Inputs & Outputs', code: 'input · model', accent: 'source', dotted: false },
+  { name: 'Queries', code: 'viewChild', accent: 'ink', dotted: true },
+  { name: 'After render', code: 'afterRenderEffect()', accent: 'effect', dotted: false },
+  { name: 'Debounce', code: 'debounce', accent: 'effect', dotted: true },
+  { name: 'Zoneless', code: 'zoneless', accent: 'capstone', dotted: false },
 ];
 
 const CX = 410;
@@ -207,11 +110,20 @@ function lerp(a: number, b: number, t: number): number {
   return a + (b - a) * t;
 }
 
-/** Monta un instrumento real del Lab dentro de `host` y devuelve su disposer. */
-export type MountLab = (host: HTMLElement, kind: LabKind) => () => void;
-
-export function initMolecule(root: HTMLElement, mountLab: MountLab, enc: string | null = null): () => void {
-  const C: Concept[] = RAW.map((r) => ({ ...r, x: 0, y: 0, subIdx: 0, entered: false, stop: 0 }));
+export function initMolecule(
+  root: HTMLElement,
+  mountSub: MountSub,
+  subCounts: number[],
+  enc: string | null = null,
+): () => void {
+  const C: Concept[] = RAW.map((r, i) => ({
+    ...r,
+    x: 0,
+    y: 0,
+    subN: subCounts[i] ?? 0,
+    subs: Array.from({ length: subCounts[i] ?? 0 }, () => ({})),
+    subIdx: 0,
+  }));
   const N = C.length;
 
   // Angular (ViewEncapsulation.Emulated) scopea el CSS del componente a un atributo
@@ -227,7 +139,6 @@ export function initMolecule(root: HTMLElement, mountLab: MountLab, enc: string 
 
   // rAF con teardown: guardamos los ids pendientes para cancelarlos al destruir.
   let destroyed = false;
-  const labDisposers: (() => void)[] = [];
   const rafIds = new Set<number>();
   const raf = (fn: FrameRequestCallback): void => {
     const id = requestAnimationFrame((ts) => {
@@ -238,7 +149,7 @@ export function initMolecule(root: HTMLElement, mountLab: MountLab, enc: string 
   };
 
   // Layout de scroll (ver scrollLayout): cada concepto arranca en off[i] y ocupa len[i].
-  const { off, len, total: TOTAL } = scrollLayout(C.map((c) => (c.subs ? c.subs.length : null)));
+  const { off, len, total: TOTAL } = scrollLayout(C.map((c) => c.subN || null));
 
   const pos = (i: number): { x: number; y: number } => {
     if (i === 0) return { x: CX, y: CY };
@@ -419,37 +330,15 @@ export function initMolecule(root: HTMLElement, mountLab: MountLab, enc: string 
   }
 
   function renderSubCard(cc: Concept): void {
-    const subs = cc.subs as Sub[];
-    const s = subs[cc.subIdx];
     const card = cc.card!;
-    card.querySelector('.st')!.textContent = s.t;
-    card.querySelector('.sc')!.textContent = s.c ?? '';
-    card.querySelector('.scode')!.textContent = s.code ?? '';
     card.querySelector('.subnum')!.textContent = String(cc.subIdx + 1);
-    // El sub-nivel de Lab muestra el instrumento real (oculta el texto) vía `.subbody--lab`.
-    card.querySelector('.subbody')!.classList.toggle('subbody--lab', !!s.lab);
+    // Montar el componente REAL del sub-nivel actual, desmontando el del sub anterior.
+    const host = card.querySelector<HTMLElement>('.subhost')!;
+    cc.subDispose?.();
+    host.textContent = '';
+    cc.subDispose = mountSub(host, C.indexOf(cc), cc.subIdx);
     fuse(cc);
     replay(card.querySelector('.subbody'), 'warp');
-    const sdemo = card.querySelector<HTMLElement>('.sdemo')!;
-    sdemo.innerHTML = '';
-    if (s.demo === 'set' || s.demo === 'update') {
-      if (s.value === undefined) s.value = 0;
-      const box = document.createElement('div');
-      box.className = 'demo';
-      const val = document.createElement('span');
-      val.className = 'val';
-      val.textContent = String(s.value);
-      const btn = document.createElement('button');
-      btn.textContent = s.demo === 'set' ? 'set(5)' : '+1';
-      btn.addEventListener('click', () => {
-        s.value = s.demo === 'set' ? 5 : (s.value ?? 0) + 1;
-        val.textContent = String(s.value);
-      });
-      box.appendChild(val);
-      box.appendChild(btn);
-      sdemo.appendChild(box);
-      stampTree(sdemo);
-    }
   }
 
   function subScrollTo(cc: Concept, k: number): void {
@@ -460,7 +349,7 @@ export function initMolecule(root: HTMLElement, mountLab: MountLab, enc: string 
   // Construye los electrones UNA vez por concepto; su posición la maneja orbitLoop.
   function paintOrbit(cc: Concept): void {
     const col = COL[cc.accent];
-    const nsub = (cc.subs as Sub[]).length;
+    const nsub = cc.subN;
     subRing.setAttribute('stroke', col);
     subEG.textContent = '';
     subDots = [];
@@ -571,60 +460,23 @@ export function initMolecule(root: HTMLElement, mountLab: MountLab, enc: string 
     raf(orbitLoop);
   }
 
-  // ---- Contenido de cada concepto ----
+  // ---- Contenido de cada concepto: cada sub-nivel embebe el componente REAL del nivel ----
   C.forEach((cc, i) => {
     const card = document.createElement('div');
-    const isLab = cc.demo === 'effect' || cc.demo === 'computed';
-    const hasSubs = !!cc.subs;
-    card.className =
-      'card' +
-      (cc.demo === 'signal' || isLab || hasSubs ? ' live' : '') +
-      (isLab ? ' card--wide' : '') +
-      (hasSubs ? ' card--sub' : '');
+    card.className = 'card live card--sub';
     card.style.setProperty('--glow', COL[cc.accent]);
-    let demoHtml = '';
-    if (cc.demo === 'signal') {
-      demoHtml = '<div class="demo"><span class="val" id="sigv">3</span><button id="sigb" aria-label="sumar">+</button></div>';
-    } else if (isLab) {
-      // Slot para embeber el instrumento REAL del Lab (se monta abajo).
-      const labName = cc.demo === 'computed' ? 'Celdas reactivas' : 'Osciloscopio';
-      demoHtml = `<p class="lab-tag">Lab · ${labName}</p><div class="lab-slot"></div>`;
-    }
-    if (hasSubs) {
-      card.innerHTML =
-        `<span class="subflash"></span><p class="card__k">Adentro · ${cc.name} · nivel ${i}</p>` +
-        `<p class="subtop">sub-nivel <b class="subnum">1</b> / ${(cc.subs as Sub[]).length}</p>` +
-        '<div class="subbody"><p class="st"></p><pre class="scode"></pre><p class="sc"></p><div class="sdemo"></div><div class="sublab"></div></div>';
-    } else {
-      card.innerHTML =
-        `<p class="card__k">Adentro · ${cc.name}</p><p class="card__t">${cc.name}</p>` +
-        `<p class="card__code">${cc.code}</p><p class="card__p">${cc.p}</p>${demoHtml}`;
-    }
+    card.innerHTML =
+      `<span class="subflash"></span><p class="card__k">Adentro · ${cc.name} · nivel ${i}</p>` +
+      `<p class="subtop">sub-nivel <b class="subnum">1</b> / ${cc.subN}</p>` +
+      '<div class="subbody"><div class="subhost"></div></div>';
     contentEl.appendChild(card);
     cc.card = card;
     stamp(card);
-    stampTree(card); // estampar ANTES de montar el Lab real (para no tocar sus internals)
-    if (isLab) {
-      const slot = card.querySelector<HTMLElement>('.lab-slot')!;
-      labDisposers.push(mountLab(slot, cc.demo === 'computed' ? 'computed' : 'effect'));
-    }
-    if (hasSubs) {
-      // El último sub-nivel de Introducción/Signals es el instrumento real del Lab.
-      const labSub = (cc.subs as Sub[]).find((sb) => sb.lab);
-      if (labSub) {
-        const slot = card.querySelector<HTMLElement>('.sublab')!;
-        labDisposers.push(mountLab(slot, labSub.lab!));
-      }
-      cc.subIdx = 0;
-      renderSubCard(cc);
-    }
+    stampTree(card); // estampar ANTES de montar el componente real (para no tocar sus internals)
+    cc.subIdx = 0;
+    renderSubCard(cc);
   });
   contentEl.appendChild(suborbit);
-
-  // Demo mínima del concepto Signals (contador): el resto del contenido real vive en cada nivel.
-  const sigv = q<HTMLElement>('#sigv');
-  const sigb = q<HTMLElement>('#sigb');
-  if (sigb && sigv) sigb.addEventListener('click', () => (sigv.textContent = String(+sigv.textContent! + 1)));
 
   // ---- Onda reactiva al nacer un átomo ----
   function ripat(i: number): void {
@@ -718,8 +570,8 @@ export function initMolecule(root: HTMLElement, mountLab: MountLab, enc: string 
     sceneG.style.opacity = (1 - 0.9 * diveDepth).toFixed(2);
 
     const dc = C[c];
-    if (dc.subs) {
-      const M = dc.subs.length;
+    if (dc.subN > 0) {
+      const M = dc.subN;
       const si = w < 2 ? 0 : Math.min(M - 1, 1 + Math.floor(w - 2));
       if (dc.subIdx !== si) {
         dc.subIdx = si;
@@ -727,7 +579,7 @@ export function initMolecule(root: HTMLElement, mountLab: MountLab, enc: string 
         if (orbitFor === c) updateOrbitFill(dc);
       }
     }
-    if (dc.subs && diveDepth > 0.35) {
+    if (dc.subN > 0 && diveDepth > 0.35) {
       if (orbitFor !== c) {
         paintOrbit(dc);
         orbitFor = c;
@@ -790,8 +642,8 @@ export function initMolecule(root: HTMLElement, mountLab: MountLab, enc: string 
       const card = cc.card!;
       card.style.opacity = amt.toFixed(2);
       card.style.transform = `scale(${(0.9 + 0.1 * amt).toFixed(3)})`;
-      const interactive = cc.demo === 'signal' || cc.demo === 'computed' || cc.demo === 'effect';
-      card.style.pointerEvents = amt > 0.6 && interactive ? 'auto' : 'none';
+      // Cada card embebe el componente real del sub-nivel: siempre interactivo cuando está visible.
+      card.style.pointerEvents = amt > 0.6 ? 'auto' : 'none';
     });
 
     if (w > 0.7 && lastBorn < c + 1) {
@@ -818,9 +670,10 @@ export function initMolecule(root: HTMLElement, mountLab: MountLab, enc: string 
   snaps.setAttribute('aria-hidden', 'true');
   stamp(snaps);
   for (let c = 0; c < N; c++) {
-    const positions: { s: number; stop: boolean }[] = C[c].subs
-      ? (C[c].subs as Sub[]).map((_, k) => ({ s: stopS(c, k), stop: true }))
-      : [{ s: off[c] + 1.85, stop: false }];
+    const positions: { s: number; stop: boolean }[] =
+      C[c].subN > 0
+        ? Array.from({ length: C[c].subN }, (_, k) => ({ s: stopS(c, k), stop: true }))
+        : [{ s: off[c] + 1.85, stop: false }];
     for (const p of positions) {
       const a = document.createElement('div');
       a.className = 'snap' + (p.stop ? ' snap--stop' : '');
@@ -880,6 +733,6 @@ export function initMolecule(root: HTMLElement, mountLab: MountLab, enc: string 
     window.removeEventListener('resize', onResize);
     window.removeEventListener('load', resetTop);
     scrubber.removeEventListener('input', onScrub);
-    labDisposers.forEach((d) => d());
+    C.forEach((cc) => cc.subDispose?.());
   };
 }

@@ -206,52 +206,23 @@
   color: var(--glow);
   margin: 0 0 0.4rem;
 }
-.card__t {
-  font-family: var(--serif);
-  font-size: 2.8rem;
-  margin: 0 0 0.4rem;
-  color: #e9e3d3;
-}
-.card__code {
-  font-family: var(--mono);
-  font-size: 1.15rem;
-  color: var(--glow);
-  margin: 0 0 1.1rem;
-}
-.card__p {
-  color: #cdc6b6;
-  line-height: 1.6;
-  font-size: 1.22rem;
-  max-width: 52ch;
-  margin: 0 auto 1.4rem;
-}
-.demo {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.7rem;
-  font-family: var(--mono);
-}
-.demo button {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  border: none;
-  background: var(--glow);
-  color: #241a08;
-  font-size: 1.2rem;
-  cursor: pointer;
-}
-.demo .val {
-  font-family: var(--serif);
-  font-size: 1.8rem;
-  color: #e9e3d3;
-  min-width: 2ch;
-}
-.card--wide {
-  width: min(960px, 96%);
-}
 .card--sub {
-  width: min(640px, 92%);
+  width: min(760px, 94%);
+}
+/* Contenedor del componente REAL del sub-nivel (montado imperativo). Fondo claro
+   propio: los componentes de /signals se diseñaron para el tema claro de la app.
+   Acotado en alto con scroll interno: los componentes-lista altos no se recortan
+   contra el borde de la card. El scroll interno encadena al stage al llegar al límite
+   (overscroll-behavior por defecto), así la rueda sigue avanzando el recorrido sin trabarse. */
+.subhost {
+  display: block;
+  text-align: left;
+  background: #f7f5ef;
+  color: #201d16;
+  border-radius: 12px;
+  padding: 1.1rem 1.2rem;
+  max-height: 62vh;
+  overflow: auto;
 }
 
 .suborbit {
@@ -376,80 +347,6 @@
   color: #f2ecdc;
   font-size: 1.12rem;
 }
-.st {
-  font-family: var(--serif);
-  font-size: clamp(2rem, 3.6vw, 2.6rem);
-  color: #f2ecdc;
-  margin: 0 0 0.9rem;
-  line-height: 1.1;
-}
-.scode {
-  font-family: var(--mono);
-  font-size: 0.98rem;
-  color: var(--glow);
-  background: #211e1a;
-  border: 1px solid #3a352d;
-  border-radius: 8px;
-  padding: 0.85rem 1.05rem;
-  margin: 0 0 0.9rem;
-  white-space: pre-wrap;
-  overflow-x: auto;
-  text-align: left;
-}
-.sc {
-  color: #cdc6b6;
-  line-height: 1.6;
-  font-size: 1.12rem;
-  margin: 0;
-}
-/* Sub-nivel de Lab: muestra el instrumento real y oculta el texto. Acotado en alto
-   con scroll interno para que instrumentos altos (Manual) no rebalsen el viewport. */
-.sublab {
-  display: none;
-  margin-top: 0.7rem;
-  max-height: 46vh;
-  overflow-y: auto;
-  overflow-x: hidden;
-  border-radius: 10px;
-}
-.subbody--lab .st,
-.subbody--lab .scode,
-.subbody--lab .sc,
-.subbody--lab .sdemo {
-  display: none;
-}
-.subbody--lab .sublab {
-  display: block;
-}
-.sdemo {
-  display: flex;
-  justify-content: center;
-  margin-top: 0.9rem;
-}
-.sdemo button {
-  width: auto;
-  height: auto;
-  padding: 0.45rem 1rem;
-  border-radius: 999px;
-  font-family: var(--mono);
-  font-weight: 700;
-}
-.lab-tag {
-  font-family: var(--mono);
-  font-size: 0.78rem;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: #46e07e;
-  opacity: 0.8;
-  margin: 0 0 0.6rem;
-}
-/* Slot donde se monta el instrumento REAL del Lab (celdas / osciloscopio). */
-.lab-slot {
-  display: block;
-  width: 100%;
-  margin: 0.4rem auto 0;
-}
-
 .caption {
   position: absolute;
   left: 0;

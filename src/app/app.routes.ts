@@ -59,7 +59,7 @@ import { CartExampleComponent } from './practice/cart/cart-example.component';
 import { PocComponent } from './poc/poc.component';
 import { IntegradaVistaComponent } from './integrada-vista/integrada-vista.component';
 
-const signalsRoutesTree: RouteItem[] = [
+export const signalsRoutesTree: RouteItem[] = [
   {
     path: '0',
     component: IntroductionComponent,

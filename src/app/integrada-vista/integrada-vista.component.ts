@@ -5,27 +5,25 @@ import {
   DestroyRef,
   ElementRef,
   EnvironmentInjector,
+  Type,
   afterNextRender,
   createComponent,
   inject,
 } from '@angular/core';
 import { RouterLink } from '@angular/router';
 
-import { ManualComponent } from '../lab/instruments/manual/manual.component';
-import { OscilloscopeComponent } from '../lab/instruments/oscilloscope/oscilloscope.component';
-import { ReactiveCellsComponent } from '../lab/instruments/reactive-cells/reactive-cells.component';
-import { SignalFlowComponent } from '../lab/instruments/signal-flow/signal-flow.component';
-import { initMolecule, type MountLab } from './molecule-engine';
+import { signalsRoutesTree } from '../app.routes';
+import { initMolecule, type MountSub } from './molecule-engine';
 
 /**
  * Vista integrada: el recorrido de los 12 conceptos como una MOLÉCULA reactiva.
- * Cada concepto nace como átomo del anterior; al scrollear, la cámara bucea a su
- * contenido y sus sub-niveles orbitan la card acoplándose por fuera.
+ * Cada concepto es un átomo; al scrollear, la cámara bucea a su contenido y sus
+ * sub-niveles orbitan la card. Cada sub-nivel EMBEBE el componente REAL de
+ * `/signals/level/X/sub-level/Z` (sacado de `signalsRoutesTree`), así toda la app
+ * de niveles vive dentro de esta única vista.
  *
- * La animación es imperativa (SVG/canvas/cámara/wheel-stepping) y vive en
- * `molecule-engine`; se arranca en `afterNextRender` (solo browser) y el cleanup
- * corta rAF, timers y listeners. El "adentro" de Computed y Effects embebe los
- * instrumentos REALES del Lab (`mountLab`).
+ * La animación es imperativa (SVG/cámara/scroll-snap) y vive en `molecule-engine`;
+ * se arranca en `afterNextRender` (solo browser) y el cleanup corta rAF y listeners.
  */
 @Component({
   selector: 'app-integrada-vista',
@@ -40,31 +38,38 @@ export class IntegradaVistaComponent {
   private readonly env = inject(EnvironmentInjector);
   private readonly appRef = inject(ApplicationRef);
 
+  /** Componentes reales de cada sub-nivel, por concepto (del árbol de rutas de /signals). */
+  private readonly subComponents: Type<unknown>[][] = signalsRoutesTree.map((lvl) =>
+    (lvl.subLevels ?? []).map((sl) => sl.component),
+  );
+
   constructor() {
     afterNextRender(() => {
-      // Nombre del atributo de encapsulación (p.ej. `_ngcontent-ng-c12345`) que Angular pone
-      // a los elementos del template; el motor lo estampa en lo que crea a mano para que el
-      // CSS scopeado del componente les aplique.
+      // Nombre del atributo de encapsulación que Angular pone a los elementos del template;
+      // el motor lo estampa en lo que crea a mano para que el CSS scopeado les aplique.
       const enc =
         this.host.querySelector('#stage')?.getAttributeNames().find((a) => a.startsWith('_ngcontent')) ??
         null;
-      const dispose = initMolecule(this.host, this.mountLab, enc);
+      const subCounts = this.subComponents.map((subs) => subs.length);
+      const dispose = initMolecule(this.host, this.mountSub, subCounts, enc);
       this.destroyRef.onDestroy(dispose);
     });
   }
 
-  /** Monta el instrumento real del Lab dentro del slot de la card y lo integra a la CD. */
-  private readonly mountLab: MountLab = (host, kind) => {
-    const opts = { environmentInjector: this.env, hostElement: host };
-    const ref =
-      kind === 'computed'
-        ? createComponent(ReactiveCellsComponent, opts)
-        : kind === 'effect'
-          ? createComponent(OscilloscopeComponent, opts)
-          : kind === 'signal'
-            ? createComponent(SignalFlowComponent, opts)
-            : createComponent(ManualComponent, opts);
+  /** Monta el componente REAL del sub-nivel (concepto ci, sub si) y lo integra a la CD. */
+  private readonly mountSub: MountSub = (host, ci, si) => {
+    const type = this.subComponents[ci]?.[si];
+    if (!type) return () => undefined;
+    // No pasamos `hostElement: host`: al destruir, `ref.destroy()` borraría ESE nodo, y `host`
+    // es la `.subhost` persistente de la card. Creamos el componente en su propio nodo y lo
+    // appendeamos adentro; así `destroy()` solo se lleva el nodo del componente, no la `.subhost`.
+    const ref = createComponent(type, { environmentInjector: this.env });
+    host.appendChild(ref.location.nativeElement);
     this.appRef.attachView(ref.hostView);
+    // La app es zoneless: montar desde el listener nativo de scroll no agenda ningún tick,
+    // así que la vista recién adjuntada nunca correría su primera CD y quedaría en blanco.
+    // Forzamos la detección inicial acá; las interacciones posteriores ya agendan su propio tick.
+    ref.changeDetectorRef.detectChanges();
     return () => {
       this.appRef.detachView(ref.hostView);
       ref.destroy();
