@@ -207,7 +207,7 @@
   margin: 0 0 0.5rem;
 }
 .card--sub {
-  width: min(1180px, 94%);
+  width: min(1440px, 92%);
 }
 /* Header (meta) integrado a la ventana: hilo divisor abajo y pegado al contenido,
    para que "ADENTRO · X · sub-nivel Y" y el componente lean como un solo panel. */
@@ -239,7 +239,7 @@
   overflow: auto;
 }
 .subhost > * {
-  zoom: 1.22;
+  zoom: 1.3;
 }
 
 .suborbit {
