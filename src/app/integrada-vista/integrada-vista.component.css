@@ -434,19 +434,6 @@
   font-family: var(--mono);
   font-weight: 700;
 }
-.enter-cta {
-  display: inline-block;
-  margin-top: 1.2rem;
-  padding: 0.72rem 1.5rem;
-  border-radius: 999px;
-  background: var(--glow);
-  color: #241a08;
-  font-family: var(--sans);
-  font-weight: 600;
-  font-size: 1.02rem;
-  text-decoration: none;
-  cursor: pointer;
-}
 .lab-tag {
   font-family: var(--mono);
   font-size: 0.78rem;
@@ -479,45 +466,44 @@
   margin: 0;
 }
 
-/* Indicador de "scrolleá" (mousecito con ruedita) que se desvanece al empezar. */
-.scrollcue {
+/* Overlay de bienvenida: tapa todo con "Scrolleá para empezar"; al scrollear se
+   desvanece y revela la molécula. Sin scroll no se lee como "algo cargando". */
+.intro {
   position: absolute;
-  left: 50%;
-  /* Justo debajo del átomo central: agrupa "scrolleá para empezar" con la molécula
-     como llamado a la acción, para que NO se lea como "algo está cargando". */
-  top: 59%;
-  transform: translateX(-50%);
-  z-index: 5;
+  inset: 0;
+  z-index: 20;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.55rem;
+  justify-content: center;
+  gap: 1.3rem;
   pointer-events: none;
-  transition: opacity 0.5s ease;
+  background: radial-gradient(90% 72% at 50% 46%, #fbf9f2, #e6f1ea 92%);
+  transition: opacity 0.6s ease;
 }
-.scrollcue__mouse {
-  width: 24px;
-  height: 38px;
-  border: 2px solid #b1a892;
-  border-radius: 13px;
+.intro__mouse {
+  width: 30px;
+  height: 48px;
+  border: 2.5px solid #b1a892;
+  border-radius: 16px;
   display: flex;
   justify-content: center;
-  padding-top: 6px;
+  padding-top: 8px;
 }
-.scrollcue__wheel {
-  width: 4px;
-  height: 8px;
-  border-radius: 2px;
+.intro__wheel {
+  width: 5px;
+  height: 10px;
+  border-radius: 3px;
   background: var(--source);
-  animation: scrollcue-wheel 1.5s ease-in-out infinite;
+  animation: intro-wheel 1.5s ease-in-out infinite;
 }
-@keyframes scrollcue-wheel {
+@keyframes intro-wheel {
   0% {
     transform: translateY(0);
     opacity: 1;
   }
   55% {
-    transform: translateY(12px);
+    transform: translateY(15px);
     opacity: 0;
   }
   100% {
@@ -525,12 +511,13 @@
     opacity: 0;
   }
 }
-.scrollcue__label {
+.intro__label {
   font-family: var(--mono);
-  font-size: 0.82rem;
-  letter-spacing: 0.14em;
+  font-size: 1.05rem;
+  letter-spacing: 0.22em;
   text-transform: uppercase;
   color: #8a8272;
+  margin: 0;
 }
 
 .topbar {
@@ -648,7 +635,7 @@
   .bond.on,
   .tether,
   .sub-e.current .sub-dot,
-  .scrollcue__wheel,
+  .intro__wheel,
   .atom.current .halo {
     animation: none;
   }

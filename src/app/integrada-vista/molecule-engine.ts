@@ -581,17 +581,15 @@ export function initMolecule(root: HTMLElement, mountLab: MountLab, enc: string 
       const labName = cc.demo === 'computed' ? 'Celdas reactivas' : 'Osciloscopio';
       demoHtml = `<p class="lab-tag">Lab · ${labName}</p><div class="lab-slot"></div>`;
     }
-    const cta = `<a class="enter-cta">Entrar al nivel ${i} →</a>`;
     if (hasSubs) {
       card.innerHTML =
         `<span class="subflash"></span><p class="card__k">Adentro · ${cc.name} · nivel ${i}</p>` +
         `<p class="subtop">sub-nivel <b class="subnum">1</b> / ${(cc.subs as Sub[]).length}</p>` +
-        '<div class="subbody"><p class="st"></p><pre class="scode"></pre><p class="sc"></p><div class="sdemo"></div><div class="sublab"></div></div>' +
-        cta;
+        '<div class="subbody"><p class="st"></p><pre class="scode"></pre><p class="sc"></p><div class="sdemo"></div><div class="sublab"></div></div>';
     } else {
       card.innerHTML =
         `<p class="card__k">Adentro · ${cc.name}</p><p class="card__t">${cc.name}</p>` +
-        `<p class="card__code">${cc.code}</p><p class="card__p">${cc.p}</p>${demoHtml}${cta}`;
+        `<p class="card__code">${cc.code}</p><p class="card__p">${cc.p}</p>${demoHtml}`;
     }
     contentEl.appendChild(card);
     cc.card = card;
@@ -645,7 +643,7 @@ export function initMolecule(root: HTMLElement, mountLab: MountLab, enc: string 
   const track = q<HTMLDivElement>('#track')!;
   const scrubber = q<HTMLInputElement>('#scrubber')!;
   const railDot = q<HTMLElement>('#railDot');
-  const cueEl = q<HTMLElement>('.scrollcue');
+  const introEl = q<HTMLElement>('.intro');
   const railTicksOl = q<HTMLElement>('#railTicks')!;
   for (let t = 0; t < N; t++) {
     const li = document.createElement('li');
@@ -796,7 +794,7 @@ export function initMolecule(root: HTMLElement, mountLab: MountLab, enc: string 
     scrubber.value = String(Math.round((s / TOTAL) * 60));
     if (railDot) railDot.style.top = ((s / TOTAL) * 100).toFixed(1) + '%';
     for (let ti = 0; ti < railTicks.length; ti++) railTicks[ti].classList.toggle('on', ti === c);
-    if (cueEl) cueEl.style.opacity = s < 0.45 ? '1' : '0';
+    if (introEl) introEl.style.opacity = s < 0.12 ? '1' : '0';
   }
 
   // ---- Scroll 100% NATIVO + snap ----
