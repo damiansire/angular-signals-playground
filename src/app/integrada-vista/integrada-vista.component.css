@@ -25,7 +25,7 @@
   height: 100vh;
   overflow-y: auto;
   overflow-x: hidden;
-  background: radial-gradient(90% 70% at 50% 35%, #fbf9f2, #e6f1ea 88%);
+  background: radial-gradient(90% 72% at 50% 46%, #fbf9f2, #e6f1ea 88%);
   scrollbar-width: thin;
 }
 .track {
