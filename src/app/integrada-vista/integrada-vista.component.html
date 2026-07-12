@@ -1,53 +1,56 @@
-<div class="mol">
-  <header class="mol__top">
-    <a class="mol__back" routerLink="/">← Inicio</a>
-    <span class="mol__title">El sistema reactivo</span>
-    <a class="mol__back" routerLink="/recorrido">Otras vistas →</a>
-  </header>
+<div class="wrap">
+  <p class="eyebrow">Vista integrada · el viaje</p>
+  <h1>De la molécula al contenido, sin cortar el scroll</h1>
+  <p class="sub">
+    Scrolleá dentro del recuadro. El concepto entra como átomo a la molécula; seguís scrolleando y
+    el scroll te mete ADENTRO (zoom) hasta su contenido; sus sub-niveles orbitan y se acoplan. Continuo.
+  </p>
 
-  <div class="track" [style.height.px]="trackHeight()">
-    <div class="camera">
-      <svg class="scene" viewBox="0 0 800 600" aria-hidden="true">
-        <!-- Órbita punteada que crece con el cluster -->
-        <circle class="orbit" cx="400" cy="300" [attr.r]="orbitR()" />
-
-        <!-- Enlaces entre átomos -->
-        @for (b of bonds; track b.at) {
-          <line
-            class="bond"
-            [class.shown]="isShown(b.at)"
-            [attr.x1]="b.x1"
-            [attr.y1]="b.y1"
-            [attr.x2]="b.x2"
-            [attr.y2]="b.y2"
-          />
-        }
-
-        <!-- Átomos (conceptos) -->
-        @for (a of atoms; track a.id; let i = $index) {
-          <g
-            class="atom"
-            [class.shown]="isShown(i)"
-            [class.current]="i === revealed() - 1"
-            [class.dotted]="a.dotted"
-            [attr.data-accent]="a.accent"
-          >
-            <circle class="atom__body" [attr.cx]="a.x" [attr.cy]="a.y" r="40" />
-            <text class="atom__label" [attr.x]="a.x" [attr.y]="a.y + 7">{{ a.id }}</text>
+  <div class="stage" id="stage">
+    <div class="track" id="track">
+      <div class="holder">
+        <svg class="mol" viewBox="0 0 820 600" aria-hidden="true">
+          <defs>
+            <filter id="glow" x="-80%" y="-80%" width="260%" height="260%">
+              <feGaussianBlur stdDeviation="3.5" result="b" />
+              <feMerge><feMergeNode in="b" /><feMergeNode in="SourceGraphic" /></feMerge>
+            </filter>
+          </defs>
+          <g id="stars"></g>
+          <g id="scene">
+            <g id="bonds"></g>
+            <g id="atoms"></g>
+            <g id="ripples"></g>
           </g>
-        }
-      </svg>
+        </svg>
+        <div class="content" id="content"></div>
 
-      <div class="caption" aria-live="polite">
-        <p class="caption__scene">Escena {{ revealed() }} / {{ atoms.length }}</p>
-        <h2 class="caption__name">{{ current().name }}</h2>
-        <code class="caption__concept" [attr.data-accent]="current().accent">{{
-          current().concept
-        }}</code>
-        <a class="caption__enter" [routerLink]="levelLink(current().id)">Entrar al nivel →</a>
+        <div class="topbar">
+          <a class="tb-back" routerLink="/">← Inicio</a>
+          <span class="tb-title">El recorrido</span>
+          <span class="tb-links">
+            <a routerLink="/recorrido">Recorrido</a> ·
+            <a routerLink="/poc">POC</a> ·
+            <a routerLink="/practica/carrito">Practicá</a>
+          </span>
+        </div>
+        <aside class="rail" aria-hidden="true">
+          <div class="rail-line"><span class="rail-dot" id="railDot"></span></div>
+          <ol class="rail-ticks" id="railTicks"></ol>
+        </aside>
+
+        <div class="caption"><p class="s" id="capS">Molécula · escena 1</p></div>
       </div>
     </div>
   </div>
 
-  <p class="scrollhint" aria-hidden="true">scrolleá: la molécula crece ↓</p>
+  <div class="controls">
+    <button class="step" id="prev" type="button" aria-label="anterior">◀</button>
+    <input class="scrubber" id="scrubber" type="range" min="0" max="60" value="0" aria-label="progreso" />
+    <button class="step" id="next" type="button" aria-label="siguiente">▶</button>
+  </div>
+  <p class="note">
+    El contenido real del nivel vive en cada "adentro": Celdas reactivas (computed) y Osciloscopio
+    (effect) son instrumentos del Lab.
+  </p>
 </div>
