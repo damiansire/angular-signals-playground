@@ -323,9 +323,16 @@ export function initMolecule(root: HTMLElement, mountLab: MountLab, enc: string 
     const tilts = [20 + i * 24, -55 + i * 15, 84];
     const durs = [2.4, 3.4, 4.3];
     const nO = cc.accent === 'source' ? 1 : i % 2 ? 3 : 2;
+    // Cada anillo TEJE el núcleo: media elipse detrás (backG) y media delante (frontG) → 3D real.
+    const arc = (sweep: number): string => `M ${-ORX} 0 A ${ORX} ${ORY} 0 0 ${sweep} ${ORX} 0`;
+    const backG = el('g', {});
+    const frontG = el('g', {});
     for (let o = 0; o < nO; o++) {
-      const og = el('g', { transform: `rotate(${tilts[o]})` });
-      og.appendChild(el('ellipse', { class: 'ring', cx: 0, cy: 0, rx: ORX, ry: ORY, stroke: accent }));
+      const backOg = el('g', { transform: `rotate(${tilts[o]})` });
+      backOg.appendChild(el('path', { class: 'ring', d: arc(0), stroke: accent }));
+      backG.appendChild(backOg);
+      const frontOg = el('g', { transform: `rotate(${tilts[o]})` });
+      frontOg.appendChild(el('path', { class: 'ring', d: arc(1), stroke: accent }));
       const e = el('circle', { class: 'electron', r: 4, fill: accent, style: 'color:' + accent });
       e.appendChild(
         el('animateMotion', {
@@ -335,9 +342,10 @@ export function initMolecule(root: HTMLElement, mountLab: MountLab, enc: string 
           begin: -o * 1.05 + 's',
         }),
       );
-      og.appendChild(e);
-      orb.appendChild(og);
+      frontOg.appendChild(e);
+      frontG.appendChild(frontOg);
     }
+    orb.appendChild(backG);
     orb.appendChild(
       el('circle', {
         class: 'nucleus',
@@ -349,6 +357,7 @@ export function initMolecule(root: HTMLElement, mountLab: MountLab, enc: string 
         style: 'color:' + accent,
       }),
     );
+    orb.appendChild(frontG);
     g.appendChild(orb);
     const ddx = cc.x - CX;
     const ddy = cc.y - CY;
