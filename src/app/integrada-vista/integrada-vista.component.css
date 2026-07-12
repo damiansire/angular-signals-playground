@@ -151,8 +151,8 @@
   opacity: 0;
   transform: scale(0.9);
   border: 1px solid #4a443a;
-  border-radius: 18px;
-  padding: 2rem 1.9rem;
+  border-radius: 20px;
+  padding: 2.3rem 2.2rem;
   background:
     linear-gradient(rgba(233, 227, 211, 0.045) 1px, transparent 1px),
     linear-gradient(90deg, rgba(233, 227, 211, 0.045) 1px, transparent 1px),
@@ -171,30 +171,30 @@
 }
 .card__k {
   font-family: var(--mono);
-  font-size: 0.72rem;
+  font-size: 0.85rem;
   letter-spacing: 0.16em;
   text-transform: uppercase;
   color: var(--glow);
-  margin: 0 0 0.3rem;
+  margin: 0 0 0.4rem;
 }
 .card__t {
   font-family: var(--serif);
-  font-size: 2.4rem;
-  margin: 0 0 0.3rem;
+  font-size: 2.8rem;
+  margin: 0 0 0.4rem;
   color: #e9e3d3;
 }
 .card__code {
   font-family: var(--mono);
-  font-size: 1rem;
+  font-size: 1.15rem;
   color: var(--glow);
-  margin: 0 0 1rem;
+  margin: 0 0 1.1rem;
 }
 .card__p {
   color: #cdc6b6;
-  line-height: 1.55;
-  font-size: 1.08rem;
-  max-width: 54ch;
-  margin: 0 auto 1.3rem;
+  line-height: 1.6;
+  font-size: 1.22rem;
+  max-width: 52ch;
+  margin: 0 auto 1.4rem;
 }
 .demo {
   display: inline-flex;
@@ -219,10 +219,10 @@
   min-width: 2ch;
 }
 .card--wide {
-  width: min(880px, 97%);
+  width: min(960px, 96%);
 }
 .card--sub {
-  width: min(540px, 90%);
+  width: min(640px, 92%);
 }
 
 .suborbit {
@@ -338,38 +338,39 @@
 
 .subtop {
   font-family: var(--mono);
-  font-size: 0.72rem;
+  font-size: 0.86rem;
   letter-spacing: 0.1em;
   color: var(--glow);
-  margin: 0 0 0.9rem;
+  margin: 0 0 1rem;
 }
 .subtop b {
   color: #f2ecdc;
-  font-size: 0.98rem;
+  font-size: 1.12rem;
 }
 .st {
   font-family: var(--serif);
-  font-size: clamp(1.7rem, 3.4vw, 2.1rem);
+  font-size: clamp(2rem, 3.6vw, 2.6rem);
   color: #f2ecdc;
-  margin: 0 0 0.7rem;
+  margin: 0 0 0.9rem;
   line-height: 1.1;
 }
 .scode {
   font-family: var(--mono);
-  font-size: 0.82rem;
+  font-size: 0.98rem;
   color: var(--glow);
   background: #211e1a;
   border: 1px solid #3a352d;
   border-radius: 8px;
-  padding: 0.7rem 0.9rem;
-  margin: 0 0 0.7rem;
+  padding: 0.85rem 1.05rem;
+  margin: 0 0 0.9rem;
   white-space: pre-wrap;
   overflow-x: auto;
   text-align: left;
 }
 .sc {
   color: #cdc6b6;
-  line-height: 1.55;
+  line-height: 1.6;
+  font-size: 1.12rem;
   margin: 0;
 }
 .sdemo {
@@ -387,25 +388,25 @@
 }
 .enter-cta {
   display: inline-block;
-  margin-top: 1.1rem;
-  padding: 0.6rem 1.3rem;
+  margin-top: 1.2rem;
+  padding: 0.72rem 1.5rem;
   border-radius: 999px;
   background: var(--glow);
   color: #241a08;
   font-family: var(--sans);
   font-weight: 600;
-  font-size: 0.92rem;
+  font-size: 1.02rem;
   text-decoration: none;
   cursor: pointer;
 }
 .lab-tag {
   font-family: var(--mono);
-  font-size: 0.66rem;
+  font-size: 0.78rem;
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: #46e07e;
   opacity: 0.8;
-  margin: 0 0 0.5rem;
+  margin: 0 0 0.6rem;
 }
 /* Slot donde se monta el instrumento REAL del Lab (celdas / osciloscopio). */
 .lab-slot {
@@ -424,7 +425,7 @@
 }
 .caption .s {
   font-family: var(--mono);
-  font-size: 0.7rem;
+  font-size: 0.84rem;
   letter-spacing: 0.16em;
   color: #6a6355;
   margin: 0;
@@ -476,7 +477,7 @@
 }
 .scrollcue__label {
   font-family: var(--mono);
-  font-size: 0.7rem;
+  font-size: 0.82rem;
   letter-spacing: 0.14em;
   text-transform: uppercase;
   color: #8a8272;
@@ -491,11 +492,11 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0.7rem 1.1rem;
+  padding: 1rem 1.4rem;
   font-family: var(--mono);
-  font-size: 0.68rem;
+  font-size: 0.85rem;
   color: #6a6355;
-  background: linear-gradient(180deg, #f7f5ed 35%, transparent);
+  background: linear-gradient(180deg, #f7f5ed 40%, transparent);
 }
 .tb-title {
   letter-spacing: 0.18em;
@@ -509,32 +510,32 @@
 
 .rail {
   position: absolute;
-  left: 12px;
+  left: 22px;
   top: 50%;
   transform: translateY(-50%);
   z-index: 6;
-  height: min(74%, 500px);
+  height: min(78%, 560px);
   display: flex;
-  gap: 8px;
+  gap: 13px;
   pointer-events: none;
 }
 .rail-line {
   position: relative;
-  width: 3px;
+  width: 4px;
   height: 100%;
-  border-radius: 3px;
+  border-radius: 4px;
   background: linear-gradient(var(--source), var(--derived) 50%, var(--effect));
-  opacity: 0.5;
+  opacity: 0.55;
 }
 .rail-dot {
   position: absolute;
   left: 50%;
-  width: 13px;
-  height: 13px;
+  width: 18px;
+  height: 18px;
   border-radius: 50%;
   background: #fff;
   transform: translate(-50%, -50%);
-  box-shadow: 0 0 0 3px var(--source);
+  box-shadow: 0 0 0 4px var(--source);
   transition: top 0.12s linear;
 }
 .rail-ticks {
@@ -547,9 +548,9 @@
 }
 .rail-ticks li {
   font-family: var(--mono);
-  font-size: 0.66rem;
+  font-size: 0.9rem;
   color: #6a6355;
-  opacity: 0.75;
+  opacity: 0.8;
   transition: all 0.2s;
   transform-origin: left center;
 }
