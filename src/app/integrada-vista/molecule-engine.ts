@@ -156,8 +156,8 @@ const ORX = 34;
 const ORY = 11;
 const NUC = 13;
 const SPIN = 55;
-const RX = 405;
-const RY = 196;
+const RX = 440;
+const RY = 208;
 const OMEGA = (2 * Math.PI) / SPIN;
 const VISITED = '#8791a8';
 const GLIDE = 640;
@@ -832,6 +832,7 @@ export function initMolecule(root: HTMLElement, mountLab: MountLab, enc: string 
       stepC = L.c;
       cc.entered = true;
       cc.stop = 0;
+      armed = false; // entrar es su propio stop: la inercia del flick no debe avanzar a sub 2
       glideTo(stopS(L.c, 0));
       return;
     }
