@@ -52,21 +52,23 @@ export class LandingComponent {
   private readonly split = this.len1 / (this.len1 + this.len2);
 
   // ── Capa visual del pulso ───────────────────────────────────────────────────
-  private readonly pulseT = signal(0); // 0..1 a lo largo de src→der→eff
-  readonly pulseActive = signal(false);
+  // Cada cambio de la fuente larga una "pelota" que viaja src→der→eff. Se admiten
+  // VARIAS a la vez (clicks rápidos = flujo continuo) en vez de reiniciar una sola.
   readonly effectFlash = signal(false);
   private readonly reduceMotion =
     typeof matchMedia !== 'undefined' && matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  /** Posición del punto de pulso interpolada sobre la polilínea del grafo. */
-  readonly pulsePos = computed<Pt>(() => {
-    const t = this.pulseT();
-    if (t <= this.split) {
-      return lerp(this.src, this.der, this.split === 0 ? 0 : t / this.split);
-    }
-    return lerp(this.der, this.eff, (t - this.split) / (1 - this.split));
-  });
+  private readonly pulseList = signal<{ id: number; start: number; t: number }[]>([]);
+  /** Posición (id + x/y) de cada pulso activo, interpolada sobre la polilínea del grafo. */
+  readonly pulsePoints = computed<{ id: number; x: number; y: number }[]>(() =>
+    this.pulseList().map((p) => {
+      const pt = this.posAt(p.t);
+      return { id: p.id, x: pt.x, y: pt.y };
+    }),
+  );
 
+  private pulseId = 0;
+  private running = false;
   private rafId = 0;
 
   constructor() {
@@ -78,39 +80,58 @@ export class LandingComponent {
     this.destroyRef.onDestroy(() => cancelAnimationFrame(this.rafId));
   }
 
-  /** Cambia la fuente y dispara la coreografía visual de propagación. */
+  /** Cambia la fuente y larga una pelota nueva por la propagación. */
   bump(delta: number): void {
     this.count.update((n) => clamp(n + delta, 0, 20));
-    this.animatePulse();
+    this.spawnPulse();
   }
 
   reset(): void {
     this.count.set(3);
-    this.animatePulse();
+    this.spawnPulse();
   }
 
-  private animatePulse(): void {
-    cancelAnimationFrame(this.rafId);
+  private posAt(t: number): Pt {
+    if (t <= this.split) {
+      return lerp(this.src, this.der, this.split === 0 ? 0 : t / this.split);
+    }
+    return lerp(this.der, this.eff, (t - this.split) / (1 - this.split));
+  }
+
+  private spawnPulse(): void {
     if (this.reduceMotion) {
-      this.pulseActive.set(false);
       this.fireEffectFlash();
       return;
     }
+    this.pulseList.update((list) => [...list, { id: this.pulseId++, start: 0, t: 0 }]);
+    if (!this.running) {
+      this.running = true;
+      this.rafId = requestAnimationFrame((now) => this.tick(now));
+    }
+  }
+
+  private tick(now: number): void {
     const duration = 720;
-    let start = 0;
-    this.pulseActive.set(true);
-    const step = (now: number) => {
-      if (!start) start = now;
-      const t = Math.min(1, (now - start) / duration);
-      this.pulseT.set(t);
-      if (t < 1) {
-        this.rafId = requestAnimationFrame(step);
-      } else {
-        this.pulseActive.set(false);
-        this.fireEffectFlash();
-      }
-    };
-    this.rafId = requestAnimationFrame(step);
+    let reachedEnd = false;
+    const next = this.pulseList()
+      .map((p) => {
+        const start = p.start || now;
+        return { id: p.id, start, t: Math.min(1, (now - start) / duration) };
+      })
+      .filter((p) => {
+        if (p.t >= 1) {
+          reachedEnd = true;
+          return false;
+        }
+        return true;
+      });
+    this.pulseList.set(next);
+    if (reachedEnd) this.fireEffectFlash();
+    if (next.length > 0) {
+      this.rafId = requestAnimationFrame((n) => this.tick(n));
+    } else {
+      this.running = false;
+    }
   }
 
   private fireEffectFlash(): void {
