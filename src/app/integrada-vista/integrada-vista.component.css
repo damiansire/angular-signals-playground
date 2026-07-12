@@ -466,7 +466,9 @@
 .scrollcue {
   position: absolute;
   left: 50%;
-  bottom: 116px;
+  /* Justo debajo del átomo central: agrupa "scrolleá para empezar" con la molécula
+     como llamado a la acción, para que NO se lea como "algo está cargando". */
+  top: 59%;
   transform: translateX(-50%);
   z-index: 5;
   display: flex;
