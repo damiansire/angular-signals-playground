@@ -11,8 +11,10 @@ import {
 } from '@angular/core';
 import { RouterLink } from '@angular/router';
 
+import { ManualComponent } from '../lab/instruments/manual/manual.component';
 import { OscilloscopeComponent } from '../lab/instruments/oscilloscope/oscilloscope.component';
 import { ReactiveCellsComponent } from '../lab/instruments/reactive-cells/reactive-cells.component';
+import { SignalFlowComponent } from '../lab/instruments/signal-flow/signal-flow.component';
 import { initMolecule, type MountLab } from './molecule-engine';
 
 /**
@@ -53,10 +55,15 @@ export class IntegradaVistaComponent {
 
   /** Monta el instrumento real del Lab dentro del slot de la card y lo integra a la CD. */
   private readonly mountLab: MountLab = (host, kind) => {
+    const opts = { environmentInjector: this.env, hostElement: host };
     const ref =
       kind === 'computed'
-        ? createComponent(ReactiveCellsComponent, { environmentInjector: this.env, hostElement: host })
-        : createComponent(OscilloscopeComponent, { environmentInjector: this.env, hostElement: host });
+        ? createComponent(ReactiveCellsComponent, opts)
+        : kind === 'effect'
+          ? createComponent(OscilloscopeComponent, opts)
+          : kind === 'signal'
+            ? createComponent(SignalFlowComponent, opts)
+            : createComponent(ManualComponent, opts);
     this.appRef.attachView(ref.hostView);
     return () => {
       this.appRef.detachView(ref.hostView);

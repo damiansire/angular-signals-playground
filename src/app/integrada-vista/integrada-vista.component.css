@@ -373,6 +373,19 @@
   font-size: 1.12rem;
   margin: 0;
 }
+/* Sub-nivel de Lab: muestra el instrumento real y oculta el texto. */
+.sublab {
+  display: none;
+  margin-top: 0.7rem;
+}
+.subbody--lab .scode,
+.subbody--lab .sc,
+.subbody--lab .sdemo {
+  display: none;
+}
+.subbody--lab .sublab {
+  display: block;
+}
 .sdemo {
   display: flex;
   justify-content: center;

@@ -22,12 +22,17 @@ const COL: Record<AccentKey, string> = {
   capstone: '#c98a2a',
 };
 
+/** Instrumentos reales del Lab embebibles. */
+export type LabKind = 'computed' | 'effect' | 'signal' | 'manual';
+
 interface Sub {
   t: string;
-  code: string;
-  c: string;
+  code?: string;
+  c?: string;
   demo?: 'set' | 'update';
   value?: number;
+  /** Si está, este sub-nivel muestra el instrumento REAL del Lab en vez de texto. */
+  lab?: 'signal' | 'manual';
 }
 
 interface RawConcept {
@@ -89,6 +94,11 @@ const RAW: RawConcept[] = [
         code: 'count.set(5);',
         c: 'Cuando cambia un signal, Angular re-chequea SOLO los componentes que lo consumen, no todo el árbol.',
       },
+      {
+        t: 'La detección, en vivo',
+        c: 'El instrumento real del Lab: mirá cómo la detección de cambios recorre (o no) el árbol.',
+        lab: 'manual',
+      },
     ],
   },
   {
@@ -135,6 +145,11 @@ const RAW: RawConcept[] = [
         t: 'Read-only: asReadonly()',
         code: 'ro = count.asReadonly();',
         c: 'asReadonly() expone un signal que se lee pero no se escribe desde afuera.',
+      },
+      {
+        t: 'signal() en el instrumento',
+        c: 'El instrumento real del Lab: tocá la fuente y mirá el flujo de un signal en vivo.',
+        lab: 'signal',
       },
     ],
   },
@@ -195,7 +210,7 @@ function lerp(a: number, b: number, t: number): number {
 }
 
 /** Monta un instrumento real del Lab dentro de `host` y devuelve su disposer. */
-export type MountLab = (host: HTMLElement, kind: 'computed' | 'effect') => () => void;
+export type MountLab = (host: HTMLElement, kind: LabKind) => () => void;
 
 export function initMolecule(root: HTMLElement, mountLab: MountLab, enc: string | null = null): () => void {
   const C: Concept[] = RAW.map((r) => ({ ...r, x: 0, y: 0, subIdx: 0, entered: false, stop: 0 }));
@@ -402,9 +417,11 @@ export function initMolecule(root: HTMLElement, mountLab: MountLab, enc: string 
     const s = subs[cc.subIdx];
     const card = cc.card!;
     card.querySelector('.st')!.textContent = s.t;
-    card.querySelector('.sc')!.textContent = s.c;
-    card.querySelector('.scode')!.textContent = s.code;
+    card.querySelector('.sc')!.textContent = s.c ?? '';
+    card.querySelector('.scode')!.textContent = s.code ?? '';
     card.querySelector('.subnum')!.textContent = String(cc.subIdx + 1);
+    // El sub-nivel de Lab muestra el instrumento real (oculta el texto) vía `.subbody--lab`.
+    card.querySelector('.subbody')!.classList.toggle('subbody--lab', !!s.lab);
     fuse(cc);
     replay(card.querySelector('.subbody'), 'warp');
     const sdemo = card.querySelector<HTMLElement>('.sdemo')!;
@@ -575,7 +592,7 @@ export function initMolecule(root: HTMLElement, mountLab: MountLab, enc: string 
       card.innerHTML =
         `<span class="subflash"></span><p class="card__k">Adentro · ${cc.name} · nivel ${i}</p>` +
         `<p class="subtop">sub-nivel <b class="subnum">1</b> / ${(cc.subs as Sub[]).length}</p>` +
-        '<div class="subbody"><p class="st"></p><pre class="scode"></pre><p class="sc"></p><div class="sdemo"></div></div>' +
+        '<div class="subbody"><p class="st"></p><pre class="scode"></pre><p class="sc"></p><div class="sdemo"></div><div class="sublab"></div></div>' +
         cta;
     } else {
       card.innerHTML =
@@ -591,6 +608,12 @@ export function initMolecule(root: HTMLElement, mountLab: MountLab, enc: string 
       labDisposers.push(mountLab(slot, cc.demo === 'computed' ? 'computed' : 'effect'));
     }
     if (hasSubs) {
+      // El último sub-nivel de Introducción/Signals es el instrumento real del Lab.
+      const labSub = (cc.subs as Sub[]).find((sb) => sb.lab);
+      if (labSub) {
+        const slot = card.querySelector<HTMLElement>('.sublab')!;
+        labDisposers.push(mountLab(slot, labSub.lab!));
+      }
       cc.subIdx = 0;
       renderSubCard(cc);
     }
