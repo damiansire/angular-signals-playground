@@ -138,7 +138,8 @@
   display: grid;
   place-items: center;
   pointer-events: none;
-  padding: 0.6rem;
+  /* padding inferior extra para que la card no quede tapada por la pastilla de controles + caption */
+  padding: 0.6rem 0.6rem 84px;
 }
 .card {
   grid-area: 1 / 1;
