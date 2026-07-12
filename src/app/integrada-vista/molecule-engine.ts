@@ -847,10 +847,19 @@ export function initMolecule(root: HTMLElement, mountLab: MountLab, enc: string 
   q<HTMLElement>('#prev')?.addEventListener('click', onPrev);
   q<HTMLElement>('#next')?.addEventListener('click', onNext);
 
+  // El navegador restaura el scroll del stage al recargar; queremos abrir SIEMPRE arriba
+  // (con el overlay de bienvenida). Reseteamos en el boot, en el próximo frame y al `load`
+  // (por si la restauración llega tarde).
+  const resetTop = (): void => {
+    stage.scrollTop = 0;
+    render(0);
+  };
   const bootTimer = window.setTimeout(() => {
     track.style.height = (TOTAL + 0.2) * unit() + 'px';
-    render(0);
+    resetTop();
+    raf(resetTop);
   }, 30);
+  window.addEventListener('load', resetTop);
 
   raf(orbitLoop);
 
@@ -860,6 +869,7 @@ export function initMolecule(root: HTMLElement, mountLab: MountLab, enc: string 
     rafIds.forEach((id) => cancelAnimationFrame(id));
     stage.removeEventListener('scroll', onScroll);
     window.removeEventListener('resize', onResize);
+    window.removeEventListener('load', resetTop);
     scrubber.removeEventListener('input', onScrub);
     labDisposers.forEach((d) => d());
   };
