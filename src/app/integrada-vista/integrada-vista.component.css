@@ -173,15 +173,15 @@
 .card {
   grid-area: 1 / 1;
   position: relative;
-  width: min(760px, 95%);
-  max-height: 95%;
+  width: min(1180px, 94%);
+  max-height: 96%;
   overflow-y: auto;
   text-align: center;
   opacity: 0;
   transform: scale(0.9);
   border: 1px solid #4a443a;
-  border-radius: 20px;
-  padding: 2.3rem 2.2rem;
+  border-radius: 22px;
+  padding: 2.4rem 2.6rem 2.6rem;
   background:
     linear-gradient(rgba(233, 227, 211, 0.045) 1px, transparent 1px),
     linear-gradient(90deg, rgba(233, 227, 211, 0.045) 1px, transparent 1px),
@@ -200,17 +200,31 @@
 }
 .card__k {
   font-family: var(--mono);
-  font-size: 0.85rem;
+  font-size: 1rem;
   letter-spacing: 0.16em;
   text-transform: uppercase;
   color: var(--glow);
-  margin: 0 0 0.4rem;
+  margin: 0 0 0.5rem;
 }
 .card--sub {
-  width: min(760px, 94%);
+  width: min(1180px, 94%);
+}
+/* Header (meta) integrado a la ventana: hilo divisor abajo y pegado al contenido,
+   para que "ADENTRO · X · sub-nivel Y" y el componente lean como un solo panel. */
+.card__k,
+.subtop {
+  max-width: 68ch;
+  margin-left: auto;
+  margin-right: auto;
+}
+.subbody {
+  border-top: 1px solid rgba(233, 227, 211, 0.14);
+  padding-top: 1.3rem;
 }
 /* Contenedor del componente REAL del sub-nivel (montado imperativo). Fondo claro
    propio: los componentes de /signals se diseñaron para el tema claro de la app.
+   El componente se escala (zoom) para que su tipografía fija (text-sm de Tailwind)
+   se lea a un tamaño acorde a la card grande, consistente en los 35 sub-niveles.
    Acotado en alto con scroll interno: los componentes-lista altos no se recortan
    contra el borde de la card. El scroll interno encadena al stage al llegar al límite
    (overscroll-behavior por defecto), así la rueda sigue avanzando el recorrido sin trabarse. */
@@ -219,10 +233,13 @@
   text-align: left;
   background: #f7f5ef;
   color: #201d16;
-  border-radius: 12px;
-  padding: 1.1rem 1.2rem;
-  max-height: 62vh;
+  border-radius: 14px;
+  padding: 1.4rem 1.6rem;
+  max-height: 66vh;
   overflow: auto;
+}
+.subhost > * {
+  zoom: 1.22;
 }
 
 .suborbit {
@@ -338,14 +355,14 @@
 
 .subtop {
   font-family: var(--mono);
-  font-size: 0.86rem;
+  font-size: 1rem;
   letter-spacing: 0.1em;
   color: var(--glow);
-  margin: 0 0 1rem;
+  margin: 0 0 1.3rem;
 }
 .subtop b {
   color: #f2ecdc;
-  font-size: 1.12rem;
+  font-size: 1.35rem;
 }
 .caption {
   position: absolute;
