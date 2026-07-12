@@ -40,7 +40,13 @@ export class IntegradaVistaComponent {
 
   constructor() {
     afterNextRender(() => {
-      const dispose = initMolecule(this.host, this.mountLab);
+      // Nombre del atributo de encapsulación (p.ej. `_ngcontent-ng-c12345`) que Angular pone
+      // a los elementos del template; el motor lo estampa en lo que crea a mano para que el
+      // CSS scopeado del componente les aplique.
+      const enc =
+        this.host.querySelector('#stage')?.getAttributeNames().find((a) => a.startsWith('_ngcontent')) ??
+        null;
+      const dispose = initMolecule(this.host, this.mountLab, enc);
       this.destroyRef.onDestroy(dispose);
     });
   }

@@ -197,9 +197,20 @@ function lerp(a: number, b: number, t: number): number {
 /** Monta un instrumento real del Lab dentro de `host` y devuelve su disposer. */
 export type MountLab = (host: HTMLElement, kind: 'computed' | 'effect') => () => void;
 
-export function initMolecule(root: HTMLElement, mountLab: MountLab): () => void {
+export function initMolecule(root: HTMLElement, mountLab: MountLab, enc: string | null = null): () => void {
   const C: Concept[] = RAW.map((r) => ({ ...r, x: 0, y: 0, subIdx: 0, entered: false, stop: 0 }));
   const N = C.length;
+
+  // Angular (ViewEncapsulation.Emulated) scopea el CSS del componente a un atributo
+  // `_ngcontent-*` que solo llevan los elementos del TEMPLATE. El motor crea la molécula,
+  // las cards y la órbita imperativamente, así que hay que estamparles ese atributo a mano
+  // para que el CSS del componente les aplique. `enc` es ese nombre de atributo.
+  const stamp = (e: Element): void => {
+    if (enc) e.setAttribute(enc, '');
+  };
+  const stampTree = (r: Element): void => {
+    if (enc) r.querySelectorAll('*').forEach(stamp);
+  };
 
   // rAF con teardown: guardamos los ids pendientes para cancelarlos al destruir.
   let destroyed = false;
@@ -254,6 +265,7 @@ export function initMolecule(root: HTMLElement, mountLab: MountLab): () => void 
   ): SVGElementTagNameMap[K] {
     const e = document.createElementNS(NS, tag);
     if (attrs) for (const k in attrs) e.setAttribute(k, String(attrs[k]));
+    stamp(e);
     return e;
   }
 
@@ -413,6 +425,7 @@ export function initMolecule(root: HTMLElement, mountLab: MountLab): () => void 
       box.appendChild(val);
       box.appendChild(btn);
       sdemo.appendChild(box);
+      stampTree(sdemo);
     }
   }
 
@@ -571,6 +584,8 @@ export function initMolecule(root: HTMLElement, mountLab: MountLab): () => void 
     }
     contentEl.appendChild(card);
     cc.card = card;
+    stamp(card);
+    stampTree(card); // estampar ANTES de montar el Lab real (para no tocar sus internals)
     if (isLab) {
       const slot = card.querySelector<HTMLElement>('.lab-slot')!;
       labDisposers.push(mountLab(slot, cc.demo === 'computed' ? 'computed' : 'effect'));
@@ -618,6 +633,7 @@ export function initMolecule(root: HTMLElement, mountLab: MountLab): () => void 
   for (let t = 0; t < N; t++) {
     const li = document.createElement('li');
     li.textContent = String(t);
+    stamp(li);
     railTicksOl.appendChild(li);
   }
   const railTicks = Array.from(root.querySelectorAll<HTMLElement>('#railTicks li'));
