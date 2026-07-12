@@ -175,8 +175,6 @@ const RX = 440;
 const RY = 208;
 const OMEGA = (2 * Math.PI) / SPIN;
 const VISITED = '#8791a8';
-const GLIDE = 640;
-const QUIET = 200;
 
 /**
  * Layout de scroll del recorrido: cada concepto ocupa [nace(1) + bucear(1)] = 2 unidades;
@@ -238,7 +236,6 @@ export function initMolecule(root: HTMLElement, mountLab: MountLab, enc: string 
     });
     rafIds.add(id);
   };
-  const now = (): number => performance.now();
 
   // Layout de scroll (ver scrollLayout): cada concepto arranca en off[i] y ocupa len[i].
   const { off, len, total: TOTAL } = scrollLayout(C.map((c) => (c.subs ? c.subs.length : null)));
@@ -448,10 +445,7 @@ export function initMolecule(root: HTMLElement, mountLab: MountLab, enc: string 
 
   function subScrollTo(cc: Concept, k: number): void {
     const ci = C.indexOf(cc);
-    stepC = ci;
-    cc.entered = true;
-    cc.stop = k;
-    glideTo(stopS(ci, k));
+    stage.scrollTo({ top: stopS(ci, k) * unit(), behavior: 'smooth' });
   }
 
   // Construye los electrones UNA vez por concepto; su posición la maneja orbitLoop.
@@ -805,131 +799,51 @@ export function initMolecule(root: HTMLElement, mountLab: MountLab, enc: string 
     if (cueEl) cueEl.style.opacity = s < 0.45 ? '1' : '0';
   }
 
-  // ---- Scroll / stepping ----
+  // ---- Scroll 100% NATIVO + snap ----
+  // El navegador maneja el scroll (suave y familiar). Anclas invisibles hacen que:
+  //  - en los sub-niveles NO se pueda saltear (scroll-snap-stop: always → uno por gesto);
+  //  - en cada concepto de la molécula se asiente sin trabar el scroll (snap suave).
   const unit = (): number => stage.clientHeight;
-  const locate = (sIn: number): { c: number; w: number } => {
-    const s = Math.max(0, Math.min(TOTAL - 0.0001, sIn));
-    let c = 0;
-    while (c < N - 1 && s >= off[c] + len[c]) c++;
-    return { c, w: s - off[c] };
-  };
   const stopS = (c: number, k: number): number => off[c] + (k === 0 ? 1.95 : 2 + (k - 1) + 0.5);
 
+  const snaps = document.createElement('div');
+  snaps.className = 'snaps';
+  snaps.setAttribute('aria-hidden', 'true');
+  stamp(snaps);
+  for (let c = 0; c < N; c++) {
+    const positions: { s: number; stop: boolean }[] = C[c].subs
+      ? (C[c].subs as Sub[]).map((_, k) => ({ s: stopS(c, k), stop: true }))
+      : [{ s: off[c] + 1.85, stop: false }];
+    for (const p of positions) {
+      const a = document.createElement('div');
+      a.className = 'snap' + (p.stop ? ' snap--stop' : '');
+      a.style.top = ((p.s / (TOTAL + 0.2)) * 100).toFixed(3) + '%';
+      stamp(a);
+      snaps.appendChild(a);
+    }
+  }
+  track.appendChild(snaps);
+
   let ticking = false;
-  let stepC = -1;
-  let locked = false;
-  let lockPos = 0;
-  let armed = true;
-  let quietTimer = 0;
-
-  function glideTo(sTarget: number): void {
-    locked = true;
-    const from = stage.scrollTop;
-    const to = sTarget * unit();
-    const t0 = now();
-    const step = (): void => {
-      if (destroyed) return;
-      const k = Math.min(1, (now() - t0) / GLIDE);
-      const e = k < 0.5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2;
-      lockPos = from + (to - from) * e;
-      stage.scrollTop = lockPos;
-      render(lockPos / unit());
-      if (k < 1) raf(step);
-      else {
-        lockPos = to;
-        stage.scrollTop = to;
-        render(sTarget);
-        locked = false;
-      }
-    };
-    raf(step);
-  }
-  const fromScroll = (): void => render(stage.scrollTop / unit());
-
-  // Scroll nativo libre en la molécula; al entrar a un nivel con sub-niveles pasa a modo "paso".
-  function onScrollFrame(): void {
-    const s = stage.scrollTop / unit();
-    const L = locate(s);
-    const cc = C[L.c];
-    if (cc.subs && L.w >= 1.5) {
-      stepC = L.c;
-      cc.entered = true;
-      cc.stop = 0;
-      armed = false; // entrar es su propio stop: la inercia del flick no debe avanzar a sub 2
-      glideTo(stopS(L.c, 0));
-      return;
-    }
-    render(s);
-  }
   const onScroll = (): void => {
-    if (locked || stepC >= 0) {
-      stage.scrollTop = lockPos;
-      return;
-    }
     if (ticking) return;
     ticking = true;
     raf(() => {
       ticking = false;
-      onScrollFrame();
+      render(stage.scrollTop / unit());
     });
   };
-
-  // Salir del modo paso (arriba → molécula, abajo → siguiente concepto).
-  function exitStep(dir: number): void {
-    const c = stepC;
-    stepC = -1;
-    C[c].entered = false;
-    lockPos = (dir > 0 ? off[c] + len[c] + 0.02 : off[c] + 1.3) * unit();
-    stage.scrollTop = lockPos;
-    fromScroll();
-  }
-
-  // Un flick del mousepad = UN sub-nivel: se re-arma sólo tras silencio real de wheel.
-  const onWheel = (ev: WheelEvent): void => {
-    if (stepC < 0) return;
-    ev.preventDefault();
-    window.clearTimeout(quietTimer);
-    quietTimer = window.setTimeout(() => (armed = true), QUIET);
-    if (locked || !armed) return;
-    armed = false;
-    const cc = C[stepC];
-    const M = (cc.subs as Sub[]).length;
-    const cur = cc.stop || 0;
-    if (ev.deltaY > 0) {
-      if (cur < M - 1) {
-        cc.stop = cur + 1;
-        glideTo(stopS(stepC, cur + 1));
-      } else exitStep(1);
-    } else if (ev.deltaY < 0) {
-      if (cur > 0) {
-        cc.stop = cur - 1;
-        glideTo(stopS(stepC, cur - 1));
-      } else exitStep(-1);
-    }
-  };
-
   const onResize = (): void => {
     track.style.height = (TOTAL + 0.2) * unit() + 'px';
   };
   const onScrub = (): void => {
-    stepC = -1;
-    locked = false;
     stage.scrollTop = (+scrubber.value / 60) * TOTAL * unit();
-    fromScroll();
+    render(stage.scrollTop / unit());
   };
-  const onPrev = (): void => {
-    stepC = -1;
-    locked = false;
-    stage.scrollTop -= unit() * 0.5;
-  };
-  const onNext = (): void => {
-    stepC = -1;
-    locked = false;
-    stage.scrollTop += unit() * 0.5;
-  };
+  const onPrev = (): void => stage.scrollBy({ top: -unit() * 0.55, behavior: 'smooth' });
+  const onNext = (): void => stage.scrollBy({ top: unit() * 0.55, behavior: 'smooth' });
 
   stage.addEventListener('scroll', onScroll, { passive: true });
-  stage.addEventListener('wheel', onWheel, { passive: false });
   window.addEventListener('resize', onResize);
   scrubber.addEventListener('input', onScrub);
   q<HTMLElement>('#prev')?.addEventListener('click', onPrev);
@@ -945,10 +859,8 @@ export function initMolecule(root: HTMLElement, mountLab: MountLab, enc: string 
   return () => {
     destroyed = true;
     window.clearTimeout(bootTimer);
-    window.clearTimeout(quietTimer);
     rafIds.forEach((id) => cancelAnimationFrame(id));
     stage.removeEventListener('scroll', onScroll);
-    stage.removeEventListener('wheel', onWheel);
     window.removeEventListener('resize', onResize);
     scrubber.removeEventListener('input', onScrub);
     labDisposers.forEach((d) => d());

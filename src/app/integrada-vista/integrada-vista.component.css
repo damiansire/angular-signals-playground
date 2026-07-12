@@ -27,10 +27,27 @@
   overflow-x: hidden;
   background: radial-gradient(90% 72% at 50% 46%, #fbf9f2, #e6f1ea 88%);
   scrollbar-width: thin;
+  /* Scroll nativo + snap: en la molécula asienta suave; los sub-niveles no se saltean. */
+  scroll-snap-type: y proximity;
 }
 .track {
   position: relative;
   width: 100%;
+}
+.snaps {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.snap {
+  position: absolute;
+  left: 0;
+  width: 1px;
+  height: 1px;
+  scroll-snap-align: start;
+}
+.snap--stop {
+  scroll-snap-stop: always;
 }
 .holder {
   position: sticky;
