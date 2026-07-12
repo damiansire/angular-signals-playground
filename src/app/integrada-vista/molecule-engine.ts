@@ -460,6 +460,21 @@ export function initMolecule(
     raf(orbitLoop);
   }
 
+  // Velo: al bucear, oscurece sutilmente el fondo alrededor del card (spotlight) para que el
+  // color del concepto resalte parejo (si no, el teal se funde con el fondo verdoso de la página).
+  const diveVeil = document.createElement('div');
+  diveVeil.className = 'dive-veil';
+  stamp(diveVeil);
+  contentEl.appendChild(diveVeil);
+
+  // Aura del concepto: al bucear, el átomo actual "crece" y se vuelve el fondo de color
+  // donde vive el ejemplo, así el card no aparece como un rectángulo suelto sino nacido del
+  // átomo. Su color y su escala/opacidad las maneja render() según el concepto y el diveDepth.
+  const diveAura = document.createElement('div');
+  diveAura.className = 'dive-aura';
+  stamp(diveAura);
+  contentEl.appendChild(diveAura);
+
   // ---- Contenido de cada concepto: cada sub-nivel embebe el componente REAL del nivel ----
   C.forEach((cc, i) => {
     const card = document.createElement('div');
@@ -568,6 +583,14 @@ export function initMolecule(
     }
     sceneG.setAttribute('transform', `translate(${(CX - K * fx).toFixed(1)},${(300 - K * fy).toFixed(1)}) scale(${K.toFixed(3)})`);
     sceneG.style.opacity = (1 - 0.9 * diveDepth).toFixed(2);
+
+    // El aura del concepto crece desde el átomo (chica) hasta el fondo del card (grande),
+    // tomando el color del concepto: el card queda "nacido" del átomo, no suelto. El velo
+    // oscurece el entorno para que el color resalte parejo en todos los conceptos.
+    diveAura.style.setProperty('--glow', COL[C[c].accent]);
+    diveAura.style.opacity = (0.72 * diveDepth).toFixed(3);
+    diveAura.style.transform = `scale(${(0.32 + 0.68 * diveDepth).toFixed(3)})`;
+    diveVeil.style.opacity = (0.6 * diveDepth).toFixed(3);
 
     const dc = C[c];
     if (dc.subN > 0) {

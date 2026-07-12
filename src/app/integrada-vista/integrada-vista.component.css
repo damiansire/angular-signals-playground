@@ -170,6 +170,33 @@
   /* padding inferior extra para que la card no quede tapada por la pastilla de controles + caption */
   padding: 0.6rem 0.6rem 84px;
 }
+/* Velo de buceo: spotlight que oscurece el entorno del card (centro casi limpio, bordes
+   oscuros) para que el color del concepto resalte parejo, incluido el teal sobre el fondo
+   verdoso. La opacidad la sube el motor con el diveDepth. */
+.dive-veil {
+  grid-area: 1 / 1;
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(68% 60% at 50% 50%, transparent 28%, rgba(28, 24, 16, 0.62) 100%);
+  opacity: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+/* Aura del concepto: disco de color que crece desde el átomo y se vuelve el fondo del
+   contenedor (escala/opacidad/color las maneja el motor por diveDepth). Da la sensación de
+   que el card nace del átomo, no que aparece suelto en el medio. */
+.dive-aura {
+  grid-area: 1 / 1;
+  width: min(1640px, 98%);
+  height: 96%;
+  border-radius: 46% / 42%;
+  background: radial-gradient(56% 56% at 50% 50%, var(--glow, #eb9b3c) 0%, transparent 72%);
+  opacity: 0;
+  z-index: 1;
+  pointer-events: none;
+  filter: blur(7px) saturate(1.15);
+  will-change: transform, opacity;
+}
 .card {
   grid-area: 1 / 1;
   position: relative;
@@ -179,21 +206,26 @@
   text-align: center;
   opacity: 0;
   transform: scale(0.9);
-  border: 1px solid #4a443a;
+  border: 1.5px solid color-mix(in srgb, var(--glow, #eb9b3c) 48%, #4a443a);
   border-radius: 22px;
   padding: 2.4rem 2.6rem 2.6rem;
+  /* El color del concepto entra al CUERPO del card (bloom desde arriba + tinte del grafito),
+     no solo al borde: el contenedor ES del color del átomo, no un cuadro negro con trim. */
   background:
+    radial-gradient(130% 78% at 50% 0%, color-mix(in srgb, var(--glow, #eb9b3c) 26%, transparent), transparent 58%),
     linear-gradient(rgba(233, 227, 211, 0.045) 1px, transparent 1px),
     linear-gradient(90deg, rgba(233, 227, 211, 0.045) 1px, transparent 1px),
-    linear-gradient(160deg, #34302a, #2a2621);
+    linear-gradient(160deg, color-mix(in srgb, var(--glow, #eb9b3c) 12%, #34302a), color-mix(in srgb, var(--glow, #eb9b3c) 6%, #2a2621));
   background-size:
+    auto,
     26px 26px,
     26px 26px,
     auto;
   box-shadow:
-    0 28px 64px -22px rgba(40, 32, 18, 0.75),
-    0 0 70px -22px var(--glow, #eb9b3c);
-  z-index: 1;
+    0 0 0 1px color-mix(in srgb, var(--glow, #eb9b3c) 30%, transparent),
+    0 28px 64px -22px rgba(40, 32, 18, 0.72),
+    0 0 110px -22px var(--glow, #eb9b3c);
+  z-index: 2;
 }
 .card.live {
   pointer-events: auto;
