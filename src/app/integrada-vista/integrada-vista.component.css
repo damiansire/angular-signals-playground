@@ -181,11 +181,14 @@
 /* Velo de buceo: spotlight que oscurece el entorno del card (centro casi limpio, bordes
    oscuros) para que el color del concepto resalte parejo, incluido el teal sobre el fondo
    verdoso. La opacidad la sube el motor con el diveDepth. */
+/* SIN grid-area a propósito: dentro de `.content` (que tiene padding) un grid-item absoluto
+   se posiciona contra el ÁREA DE GRILLA (adentro del padding), dejando una franja superior
+   sin velo. Sin grid-area, `inset:0` se resuelve contra la caja de `.content` = viewport
+   completo, así el velo cubre de borde a borde (incluida la franja de arriba). */
 .dive-veil {
-  grid-area: 1 / 1;
   position: absolute;
   inset: 0;
-  background: radial-gradient(68% 60% at 50% 50%, transparent 28%, rgba(28, 24, 16, 0.62) 100%);
+  background: radial-gradient(72% 64% at 50% 42%, transparent 30%, rgba(28, 24, 16, 0.6) 100%);
   opacity: 0;
   z-index: 0;
   pointer-events: none;
