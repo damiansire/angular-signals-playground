@@ -26,9 +26,17 @@
   overflow-y: auto;
   overflow-x: hidden;
   background: radial-gradient(90% 72% at 50% 46%, #fbf9f2, #e6f1ea 88%);
-  scrollbar-width: thin;
+  /* Scrollbar nativa oculta: es una escena inmersiva, no una lista. `scrollbar-width:thin`
+     solo lo respeta Firefox; en Chrome/Edge queda la barra ancha de sistema pegada al borde
+     de la ventana, que se lee como "apareció un scroll ajeno a la página". El scroll sigue
+     funcionando igual, solo se esconde la barra. */
+  scrollbar-width: none;
+  -ms-overflow-style: none;
   /* Scroll nativo + snap: en la molécula asienta suave; los sub-niveles no se saltean. */
   scroll-snap-type: y proximity;
+}
+.stage::-webkit-scrollbar {
+  display: none;
 }
 .track {
   position: relative;
