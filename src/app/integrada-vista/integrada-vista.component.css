@@ -371,6 +371,16 @@
     r 0.25s ease,
     fill 0.35s ease;
 }
+/* El electrón actual queda fijo arriba (sin el giro continuo del resto): al cambiar de
+   sub-nivel, que asiente suave en su lugar en vez de saltar de golpe. */
+.sub-e.current .sub-dot,
+.sub-e.current .sub-n {
+  transition:
+    cx 0.4s ease,
+    cy 0.4s ease,
+    r 0.25s ease,
+    fill 0.35s ease;
+}
 .sub-n {
   font-family: var(--mono);
   font-size: 13px;

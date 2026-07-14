@@ -451,6 +451,7 @@ export function initMolecule(
       let hh = 190;
       let topbarY = -1e9;
       let bottomY = 1e9;
+      let railX = -1e9;
       const m0 = suborbit.getScreenCTM();
       if (m0 && cc.card) {
         const m = m0.inverse();
@@ -466,17 +467,24 @@ export function initMolecule(
         ccy = (tl.y + br.y) / 2;
         hw = (br.x - tl.x) / 2;
         hh = (br.y - tl.y) / 2;
-        // Límites de chrome (topbar arriba, pastilla de controles abajo) para que la órbita
-        // no cruce ninguno: se clampea el rect redondeado contra ellos.
+        // Límites de chrome (topbar arriba, pastilla de controles abajo, riel de conceptos a
+        // la izquierda) para que la órbita no cruce ninguno: se clampea el rect contra ellos.
         p.x = 0;
         p.y = topbarEl ? topbarEl.getBoundingClientRect().bottom : 0;
         topbarY = p.matrixTransform(m).y;
         p.y = window.innerHeight - 92;
         bottomY = p.matrixTransform(m).y;
+        p.x = railEl ? railEl.getBoundingClientRect().right : 0;
+        p.y = 0;
+        railX = p.matrixTransform(m).x;
       }
       // Rect redondeado que envuelve la card por fuera (PAD de separación), clampeado al chrome.
+      // El riel MANDA siempre en el lado izquierdo: si el margen hacia el riel es menor al PAD
+      // completo, el rect se pega más a la card (o incluso roza su borde) en vez de invadir el
+      // riel. Pisar el riel es un bug de legibilidad real (números pegados); rozar la card es
+      // solo estético — entre las dos, gana la que no rompe la lectura.
       const PAD = 30;
-      const L = ccx - hw - PAD;
+      const L = Math.max(ccx - hw - PAD, railX + 22);
       const R = ccx + hw + PAD;
       const T = Math.max(ccy - hh - PAD, topbarY + 22);
       const B = Math.min(ccy + hh + PAD, bottomY - 12);
@@ -487,8 +495,13 @@ export function initMolecule(
       subRing.setAttribute('height', (B - T).toFixed(1));
       subRing.setAttribute('rx', rad.toFixed(1));
       const per = rrectPerimeter(R - L, B - T, rad);
-      for (const o of subDots) {
-        const pt = rrectPoint(L, T, R, B, rad, (o.frac + t / SPIN) * per);
+      const cur = cc.subIdx;
+      for (let k = 0; k < subDots.length; k++) {
+        const o = subDots[k];
+        // El sub-nivel actual queda fijo arriba del todo (centro del borde superior), sin el
+        // giro continuo: es "dónde estoy", no debería moverse solo. Los demás siguen
+        // recorriendo el perímetro (el resto del recorrido, en movimiento).
+        const pt = k === cur ? { x: (L + R) / 2, y: T } : rrectPoint(L, T, R, B, rad, (o.frac + t / SPIN) * per);
         o.lx = pt.x;
         o.ly = pt.y;
         o.dot.setAttribute('cx', o.lx.toFixed(1));
