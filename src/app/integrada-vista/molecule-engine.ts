@@ -46,10 +46,10 @@ interface SubDot {
   g: SVGGElement;
   dot: SVGCircleElement;
   num: SVGTextElement;
-  phi: number;
+  /** Fracción base [0,1) sobre el perímetro de la órbita (rect redondeado). */
+  frac: number;
   lx: number;
   ly: number;
-  dockT: number;
 }
 
 /** Los 12 conceptos (metadata del atomo). Los sub-niveles reales se embeben en cada dive. */
@@ -74,9 +74,6 @@ const ORX = 34;
 const ORY = 11;
 const NUC = 13;
 const SPIN = 55;
-const RX = 440;
-const RY = 208;
-const OMEGA = (2 * Math.PI) / SPIN;
 const VISITED = '#8791a8';
 
 /**
@@ -108,6 +105,46 @@ function smoothstep(t: number): number {
 
 function lerp(a: number, b: number, t: number): number {
   return a + (b - a) * t;
+}
+
+/** Perímetro de un rectángulo redondeado (para repartir electrones sobre él). */
+function rrectPerimeter(w: number, h: number, r: number): number {
+  return 2 * (w - 2 * r) + 2 * (h - 2 * r) + 2 * Math.PI * r;
+}
+
+/**
+ * Punto a distancia `d` sobre el perímetro de un rect redondeado (L,T,R,B, radio r),
+ * en sentido horario arrancando por el borde superior. Así los electrones ENVUELVEN la
+ * card (siguen su contorno por fuera) en vez de una elipse que la corta.
+ */
+function rrectPoint(
+  L: number,
+  T: number,
+  R: number,
+  B: number,
+  r: number,
+  d: number,
+): { x: number; y: number } {
+  const sTop = R - L - 2 * r;
+  const sSide = B - T - 2 * r;
+  const arc = (Math.PI * r) / 2;
+  let x = ((d % (2 * sTop + 2 * sSide + 4 * arc)) + 2 * sTop + 2 * sSide + 4 * arc) % (2 * sTop + 2 * sSide + 4 * arc);
+  if (x < sTop) return { x: L + r + x, y: T };
+  x -= sTop;
+  if (x < arc) { const a = -Math.PI / 2 + (x / arc) * (Math.PI / 2); return { x: R - r + r * Math.cos(a), y: T + r + r * Math.sin(a) }; }
+  x -= arc;
+  if (x < sSide) return { x: R, y: T + r + x };
+  x -= sSide;
+  if (x < arc) { const a = (x / arc) * (Math.PI / 2); return { x: R - r + r * Math.cos(a), y: B - r + r * Math.sin(a) }; }
+  x -= arc;
+  if (x < sTop) return { x: R - r - x, y: B };
+  x -= sTop;
+  if (x < arc) { const a = Math.PI / 2 + (x / arc) * (Math.PI / 2); return { x: L + r + r * Math.cos(a), y: B - r + r * Math.sin(a) }; }
+  x -= arc;
+  if (x < sSide) return { x: L, y: B - r - x };
+  x -= sSide;
+  const a = Math.PI + (x / arc) * (Math.PI / 2);
+  return { x: L + r + r * Math.cos(a), y: T + r + r * Math.sin(a) };
 }
 
 export function initMolecule(
@@ -291,15 +328,12 @@ export function initMolecule(
     atomEls.push(g);
   });
 
-  // Órbita de sub-niveles (electrones que orbitan la card; el actual se acopla por fuera).
+  // Órbita de sub-niveles: los electrones ENVUELVEN la card recorriendo un rect redondeado
+  // que la abraza por fuera (el actual se resalta en su lugar, sin volar hasta arriba).
   const suborbit = el('svg', { class: 'suborbit', viewBox: '0 0 900 600' });
-  const subRing = el('ellipse', { class: 'sub-ring', cx: 450, cy: 300, rx: RX, ry: RY });
-  const tether = el('path', { class: 'tether', d: '' });
-  const tetherNode = el('circle', { class: 'tether-node', r: 5 });
+  const subRing = el('rect', { class: 'sub-ring', rx: 40 });
   const subEG = el('g', {});
   suborbit.appendChild(subRing);
-  suborbit.appendChild(tether);
-  suborbit.appendChild(tetherNode);
   suborbit.appendChild(subEG);
 
   let orbitFor = -1;
@@ -365,19 +399,18 @@ export function initMolecule(
     subEG.textContent = '';
     subDots = [];
     for (let k = 0; k < nsub; k++) {
-      const phi = -Math.PI / 2 + k * ((2 * Math.PI) / nsub);
-      const x0 = 450 + RX * Math.cos(phi);
-      const y0 = 300 + RY * Math.sin(phi);
+      // Repartidos parejo sobre el perímetro; arrancan por arriba (fracción 0 = borde superior).
+      const frac = k / nsub;
       const g = el('g', { class: 'sub-e' });
-      const dot = el('circle', { class: 'sub-dot', cx: x0.toFixed(1), cy: y0.toFixed(1), r: 12 });
-      const num = el('text', { class: 'sub-n', x: x0.toFixed(1), y: (y0 + 4).toFixed(1) });
+      const dot = el('circle', { class: 'sub-dot', cx: 450, cy: 90, r: 12 });
+      const num = el('text', { class: 'sub-n', x: 450, y: 94 });
       num.textContent = String(k + 1);
       g.appendChild(dot);
       g.appendChild(num);
       const idx = k;
       g.addEventListener('click', () => subScrollTo(cc, idx));
       subEG.appendChild(g);
-      subDots.push({ g, dot, num, phi, lx: x0, ly: y0, dockT: 0 });
+      subDots.push({ g, dot, num, frac, lx: 450, ly: 90 });
     }
     updateOrbitFill(cc);
   }
@@ -390,7 +423,7 @@ export function initMolecule(
       const cur = cc.subIdx;
       const state = k === cur ? 'current' : k < cur ? 'visited' : 'pending';
       o.g.setAttribute('class', 'sub-e ' + state);
-      o.dot.setAttribute('r', String(state === 'current' ? 18 : state === 'visited' ? 13 : 12));
+      o.dot.setAttribute('r', String(state === 'current' ? 22 : state === 'visited' ? 13 : 12));
       if (state === 'current') {
         o.dot.setAttribute('fill', col);
         o.dot.setAttribute('filter', 'url(#glow)');
@@ -404,21 +437,20 @@ export function initMolecule(
     }
   }
 
-  // Loop VIVO: mueve los electrones sobre la elipse; el actual se acopla arriba de la card
-  // y un haz corto lo conecta con el borde superior (siempre por fuera de la caja).
+  // Loop VIVO: los electrones recorren un rect redondeado que ABRAZA la card por fuera.
+  // El actual se resalta en su lugar (no vuela hasta arriba, que se leía forzado).
   function orbitLoop(ts: number): void {
     if (destroyed) return;
     const vis = orbitFor >= 0 && subDots.length > 0 && (+suborbit.style.opacity || 0) > 0.05;
     if (vis) {
       const cc = C[orbitFor];
       const t = (ts || 0) / 1000;
-      const cur = cc.subIdx;
-      const op = +suborbit.style.opacity || 0;
       let ccx = 450;
       let ccy = 300;
       let hw = 380;
       let hh = 190;
       let topbarY = -1e9;
+      let bottomY = 1e9;
       const m0 = suborbit.getScreenCTM();
       if (m0 && cc.card) {
         const m = m0.inverse();
@@ -434,70 +466,36 @@ export function initMolecule(
         ccy = (tl.y + br.y) / 2;
         hw = (br.x - tl.x) / 2;
         hh = (br.y - tl.y) / 2;
-        if (topbarEl) {
-          p.x = 0;
-          p.y = topbarEl.getBoundingClientRect().bottom;
-          topbarY = p.matrixTransform(m).y;
-        }
+        // Límites de chrome (topbar arriba, pastilla de controles abajo) para que la órbita
+        // no cruce ninguno: se clampea el rect redondeado contra ellos.
+        p.x = 0;
+        p.y = topbarEl ? topbarEl.getBoundingClientRect().bottom : 0;
+        topbarY = p.matrixTransform(m).y;
+        p.y = window.innerHeight - 92;
+        bottomY = p.matrixTransform(m).y;
       }
-      const dockX = ccx;
-      // Un electrón "en órbita" (no acoplado) nunca puede caer ADENTRO del rectángulo real
-      // de la card: una elipse pura no despeja un rectángulo en todos sus ángulos (los
-      // vértices sí, los ~120° intermedios no). Si cae adentro del rect con margen, se
-      // empuja hacia afuera a lo largo del mismo rayo desde el centro. También se clampea
-      // contra el topbar fijo, que la elipse puede cruzar en la parte alta del ciclo.
-      const MARGIN = 34;
-      // El punto de acople (arriba de la card) también tiene que respetar el topbar: si la
-      // card es casi tan alta como el viewport, "arriba de la card - 48" cae detrás del
-      // topbar y el indicador del sub-nivel actual queda invisible. El mismo clamp que
-      // protege a los electrones en órbita libre tiene que aplicar acá también.
-      const dockY = Math.max(ccy - hh - 48, topbarY + MARGIN);
-      for (let k = 0; k < subDots.length; k++) {
-        const o = subDots[k];
-        const a = o.phi + OMEGA * t;
-        let ox = 450 + RX * Math.cos(a);
-        let oy = 300 + RY * Math.sin(a);
-        const dx = ox - ccx;
-        const dy = oy - ccy;
-        const bw = hw + MARGIN;
-        const bh = hh + MARGIN;
-        if (Math.abs(dx) < bw && Math.abs(dy) < bh) {
-          const scale = Math.max(bw / Math.max(1, Math.abs(dx)), bh / Math.max(1, Math.abs(dy)));
-          ox = ccx + dx * scale;
-          oy = ccy + dy * scale;
-        }
-        oy = Math.max(oy, topbarY + MARGIN);
-        const target = k === cur ? 1 : 0;
-        o.dockT += (target - o.dockT) * 0.12;
-        const e = o.dockT * o.dockT * (3 - 2 * o.dockT);
-        o.lx = ox + (dockX - ox) * e;
-        o.ly = oy + (dockY - oy) * e;
+      // Rect redondeado que envuelve la card por fuera (PAD de separación), clampeado al chrome.
+      const PAD = 30;
+      const L = ccx - hw - PAD;
+      const R = ccx + hw + PAD;
+      const T = Math.max(ccy - hh - PAD, topbarY + 22);
+      const B = Math.min(ccy + hh + PAD, bottomY - 12);
+      const rad = Math.min(40, (R - L) / 2, (B - T) / 2);
+      subRing.setAttribute('x', L.toFixed(1));
+      subRing.setAttribute('y', T.toFixed(1));
+      subRing.setAttribute('width', (R - L).toFixed(1));
+      subRing.setAttribute('height', (B - T).toFixed(1));
+      subRing.setAttribute('rx', rad.toFixed(1));
+      const per = rrectPerimeter(R - L, B - T, rad);
+      for (const o of subDots) {
+        const pt = rrectPoint(L, T, R, B, rad, (o.frac + t / SPIN) * per);
+        o.lx = pt.x;
+        o.ly = pt.y;
         o.dot.setAttribute('cx', o.lx.toFixed(1));
         o.dot.setAttribute('cy', o.ly.toFixed(1));
         o.num.setAttribute('x', o.lx.toFixed(1));
         o.num.setAttribute('y', (o.ly + 4).toFixed(1));
       }
-      const oc = subDots[cur];
-      if (oc && oc.dockT > 0.5) {
-        // Igual que dockY: el borde superior real de la card puede arrancar detrás del
-        // topbar (la card empieza unos px por encima de su línea), así que este extremo
-        // del haz también necesita el clamp, no solo el punto acoplado del otro lado.
-        const edgeY = Math.max(ccy - hh, topbarY + MARGIN);
-        tether.setAttribute('d', `M ${oc.lx.toFixed(1)} ${oc.ly.toFixed(1)} L ${dockX.toFixed(1)} ${edgeY.toFixed(1)}`);
-        tether.setAttribute('stroke', COL[cc.accent]);
-        tetherNode.setAttribute('cx', dockX.toFixed(1));
-        tetherNode.setAttribute('cy', edgeY.toFixed(1));
-        tetherNode.setAttribute('fill', COL[cc.accent]);
-        const cop = Math.min(1, (oc.dockT - 0.5) / 0.4) * op;
-        tether.style.opacity = (0.9 * cop).toFixed(2);
-        tetherNode.style.opacity = cop.toFixed(2);
-      } else {
-        tether.style.opacity = '0';
-        tetherNode.style.opacity = '0';
-      }
-    } else {
-      tether.style.opacity = '0';
-      tetherNode.style.opacity = '0';
     }
     raf(orbitLoop);
   }

@@ -212,7 +212,11 @@
   grid-area: 1 / 1;
   position: relative;
   width: min(1180px, 94%);
-  max-height: 96%;
+  /* Altura acotada dejando lugar para el chrome (topbar + controles) y la órbita que la
+     envuelve: una card más alta que el viewport no se puede orbitar (el rect caería adentro)
+     y además se cortaría abajo. Con este tope, el contenido largo scrollea DENTRO de la card
+     (un solo scroll) y la órbita siempre la abraza entera. */
+  max-height: calc(100vh - 280px);
   overflow-y: auto;
   text-align: center;
   opacity: 0;
@@ -353,28 +357,6 @@
   stroke-width: 1.5;
   stroke-dasharray: 2 10;
   opacity: 0.5;
-}
-.tether {
-  fill: none;
-  stroke-width: 2.6;
-  stroke-linecap: round;
-  stroke-dasharray: 2 9;
-  opacity: 0;
-  filter: url(#glow);
-  pointer-events: none;
-  animation: tflow 0.9s linear infinite;
-  transition: opacity 0.3s ease;
-}
-@keyframes tflow {
-  to {
-    stroke-dashoffset: -22;
-  }
-}
-.tether-node {
-  opacity: 0;
-  filter: url(#glow);
-  pointer-events: none;
-  transition: opacity 0.3s ease;
 }
 .sub-e {
   cursor: pointer;
@@ -645,7 +627,6 @@
 
 @media (prefers-reduced-motion: reduce) {
   .bond.on,
-  .tether,
   .sub-e.current .sub-dot,
   .intro__wheel,
   .atom.current .halo {
