@@ -214,68 +214,56 @@
   text-align: center;
   opacity: 0;
   transform: scale(0.9);
-  border: 1px solid color-mix(in srgb, var(--glow, #eb9b3c) 30%, transparent);
+  color: #201d16;
+  border: 1px solid color-mix(in srgb, var(--glow, #eb9b3c) 26%, #e6dfcf);
   border-radius: 22px;
-  padding: 2.4rem 2.6rem 2.6rem;
-  /* El color del concepto entra al CUERPO del card (bloom desde arriba + tinte del grafito),
-     no solo al borde: el contenedor ES del color del átomo, no un cuadro negro con trim. */
+  padding: 1.9rem 2.4rem 2.3rem;
+  /* Hoja de papel del MISMO clima que la página (no una cámara oscura sobre un fondo claro,
+     que siempre se lee como "ventana aparte"). El color del concepto entra como acento tenue
+     arriba + glow, no como fondo: la card es una sección más de la página, no un panel sobre ella. */
   background:
-    radial-gradient(130% 78% at 50% 0%, color-mix(in srgb, var(--glow, #eb9b3c) 26%, transparent), transparent 58%),
-    linear-gradient(rgba(233, 227, 211, 0.045) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(233, 227, 211, 0.045) 1px, transparent 1px),
-    linear-gradient(160deg, color-mix(in srgb, var(--glow, #eb9b3c) 12%, #34302a), color-mix(in srgb, var(--glow, #eb9b3c) 6%, #2a2621));
-  background-size:
-    auto,
-    26px 26px,
-    26px 26px,
-    auto;
-  /* Sin drop-shadow direccional (esa era la firma de "tarjeta flotando sobre la página",
-     lo típico de un modal): solo un glow ambiental del acento, se funde con el aura de
-     buceo en vez de "levantar" el card como una superficie aparte. */
-  box-shadow: 0 0 90px -30px var(--glow, #eb9b3c);
+    radial-gradient(120% 62% at 50% 0%, color-mix(in srgb, var(--glow, #eb9b3c) 16%, transparent), transparent 54%),
+    linear-gradient(180deg, #fcfbf5, #f5f2e8);
+  box-shadow: 0 0 80px -30px var(--glow, #eb9b3c);
   z-index: 2;
 }
 .card.live {
   pointer-events: auto;
 }
-.card__k {
-  font-family: var(--mono);
-  font-size: 1rem;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  color: var(--glow);
-  margin: 0 0 0.5rem;
-}
 .card--sub {
   width: min(1440px, 92%);
 }
-/* Header (meta) integrado a la ventana: hilo divisor abajo y pegado al contenido,
-   para que "ADENTRO · X · sub-nivel Y" y el componente lean como un solo panel. */
+/* Header (meta) integrado: un solo bloque compacto pegado al contenido, sin hilo divisor ni
+   aire de más, para que "ADENTRO · X" + "sub-nivel Y/N" + el ejemplo se lean como una sola
+   superficie continua, no como rótulos sueltos arriba de una caja. */
 .card__k,
 .subtop {
   max-width: 68ch;
   margin-left: auto;
   margin-right: auto;
 }
-.subbody {
-  border-top: 1px solid rgba(233, 227, 211, 0.14);
-  padding-top: 1.3rem;
+.card__k {
+  font-family: var(--mono);
+  font-size: 0.88rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  /* Acento del concepto oscurecido para que TODOS los tonos (incluido el ámbar, el más
+     flojo sobre crema) tengan contraste parejo como texto. */
+  color: color-mix(in srgb, var(--glow, #eb9b3c) 55%, #35301f);
+  margin: 0 0 0.15rem;
 }
-/* Contenedor del componente REAL del sub-nivel (montado imperativo). Fondo claro
-   propio: los componentes de /signals se diseñaron para el tema claro de la app.
-   El componente se escala (zoom) para que su tipografía fija (text-sm de Tailwind)
-   se lea a un tamaño acorde a la card grande, consistente en los 35 sub-niveles.
-   SIN scroll propio: antes tenía su propio overflow (además del de .card), y esas
-   dos barras anidadas eran justo lo que hacía leer esto como "una ventana aparte".
-   Ahora .card es el único contenedor que scrollea; el contenido alto simplemente
-   hace crecer la altura y el propio card se desplaza como una superficie continua. */
+.subbody {
+  padding-top: 0.3rem;
+}
+/* Contenedor del componente REAL del sub-nivel (montado imperativo). Ya NO es un panel
+   claro con esquinas propias adentro de la card (eso era una "ventana dentro de la ventana"):
+   ahora es transparente y hereda la hoja de papel de la card, así el ejemplo fluye sobre la
+   misma superficie. El componente se escala (zoom) para que su tipografía fija (text-sm de
+   Tailwind) se lea acorde a la card grande. SIN scroll propio: .card es el único que scrollea. */
 .subhost {
   display: block;
   text-align: left;
-  background: #f7f5ef;
   color: #201d16;
-  border-radius: 14px;
-  padding: 1.4rem 1.6rem;
 }
 .subhost > * {
   zoom: 1.3;
@@ -460,14 +448,14 @@
 
 .subtop {
   font-family: var(--mono);
-  font-size: 1rem;
+  font-size: 0.9rem;
   letter-spacing: 0.1em;
-  color: var(--glow);
-  margin: 0 0 1.3rem;
+  color: color-mix(in srgb, var(--glow, #eb9b3c) 50%, #4a4438);
+  margin: 0 0 0.7rem;
 }
 .subtop b {
-  color: #f2ecdc;
-  font-size: 1.35rem;
+  color: #201d16;
+  font-size: 1.15rem;
 }
 .caption {
   position: absolute;
