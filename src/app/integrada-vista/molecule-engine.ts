@@ -409,7 +409,9 @@ export function initMolecule(
       const op = +suborbit.style.opacity || 0;
       let ccx = 450;
       let ccy = 300;
+      let hw = 380;
       let hh = 190;
+      let topbarY = -1e9;
       const m0 = suborbit.getScreenCTM();
       if (m0 && cc.card) {
         const m = m0.inverse();
@@ -423,15 +425,41 @@ export function initMolecule(
         const br = p.matrixTransform(m);
         ccx = (tl.x + br.x) / 2;
         ccy = (tl.y + br.y) / 2;
+        hw = (br.x - tl.x) / 2;
         hh = (br.y - tl.y) / 2;
+        if (topbarEl) {
+          p.x = 0;
+          p.y = topbarEl.getBoundingClientRect().bottom;
+          topbarY = p.matrixTransform(m).y;
+        }
       }
       const dockX = ccx;
-      const dockY = ccy - hh - 48;
+      // Un electrón "en órbita" (no acoplado) nunca puede caer ADENTRO del rectángulo real
+      // de la card: una elipse pura no despeja un rectángulo en todos sus ángulos (los
+      // vértices sí, los ~120° intermedios no). Si cae adentro del rect con margen, se
+      // empuja hacia afuera a lo largo del mismo rayo desde el centro. También se clampea
+      // contra el topbar fijo, que la elipse puede cruzar en la parte alta del ciclo.
+      const MARGIN = 34;
+      // El punto de acople (arriba de la card) también tiene que respetar el topbar: si la
+      // card es casi tan alta como el viewport, "arriba de la card - 48" cae detrás del
+      // topbar y el indicador del sub-nivel actual queda invisible. El mismo clamp que
+      // protege a los electrones en órbita libre tiene que aplicar acá también.
+      const dockY = Math.max(ccy - hh - 48, topbarY + MARGIN);
       for (let k = 0; k < subDots.length; k++) {
         const o = subDots[k];
         const a = o.phi + OMEGA * t;
-        const ox = 450 + RX * Math.cos(a);
-        const oy = 300 + RY * Math.sin(a);
+        let ox = 450 + RX * Math.cos(a);
+        let oy = 300 + RY * Math.sin(a);
+        const dx = ox - ccx;
+        const dy = oy - ccy;
+        const bw = hw + MARGIN;
+        const bh = hh + MARGIN;
+        if (Math.abs(dx) < bw && Math.abs(dy) < bh) {
+          const scale = Math.max(bw / Math.max(1, Math.abs(dx)), bh / Math.max(1, Math.abs(dy)));
+          ox = ccx + dx * scale;
+          oy = ccy + dy * scale;
+        }
+        oy = Math.max(oy, topbarY + MARGIN);
         const target = k === cur ? 1 : 0;
         o.dockT += (target - o.dockT) * 0.12;
         const e = o.dockT * o.dockT * (3 - 2 * o.dockT);
@@ -444,7 +472,10 @@ export function initMolecule(
       }
       const oc = subDots[cur];
       if (oc && oc.dockT > 0.5) {
-        const edgeY = ccy - hh;
+        // Igual que dockY: el borde superior real de la card puede arrancar detrás del
+        // topbar (la card empieza unos px por encima de su línea), así que este extremo
+        // del haz también necesita el clamp, no solo el punto acoplado del otro lado.
+        const edgeY = Math.max(ccy - hh, topbarY + MARGIN);
         tether.setAttribute('d', `M ${oc.lx.toFixed(1)} ${oc.ly.toFixed(1)} L ${dockX.toFixed(1)} ${edgeY.toFixed(1)}`);
         tether.setAttribute('stroke', COL[cc.accent]);
         tetherNode.setAttribute('cx', dockX.toFixed(1));
@@ -588,7 +619,10 @@ export function initMolecule(
       diveDepth = Math.min(1, (w - 1.3) / 0.7);
     }
     sceneG.setAttribute('transform', `translate(${(CX - K * fx).toFixed(1)},${(300 - K * fy).toFixed(1)}) scale(${K.toFixed(3)})`);
-    sceneG.style.opacity = (1 - 0.9 * diveDepth).toFixed(2);
+    // La cámara ya centró y agrandó el átomo detrás de la card (K llega a FK=2.7): dejarlo
+    // brillar de fondo, en vez de apagarlo casi del todo, es lo que hace que la card se lea
+    // "parada sobre el átomo" en vez de "algo nuevo que tapó la escena".
+    sceneG.style.opacity = (1 - 0.62 * diveDepth).toFixed(2);
 
     // El aura del concepto crece desde el átomo (chica) hasta el fondo del card (grande),
     // tomando el color del concepto: el card queda "nacido" del átomo, no suelto. El velo

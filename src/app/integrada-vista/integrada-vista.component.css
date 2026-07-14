@@ -341,9 +341,15 @@
   border-color: transparent;
 }
 
+/* El anillo de sub-niveles debe rodear a la card, no quedar más chico que ella: quedó
+   topeado en 900px de un momento a otro cuando .card--sub creció a 1440px en pasadas
+   anteriores, así que los electrones numerados terminaban cayendo ADENTRO de la card
+   en vez de orbitarla por fuera. Ancho > que el cap de la card, alto acotado para que
+   la elipse no se estire tanto como para asomar por encima del topbar. */
 .suborbit {
   grid-area: 1 / 1;
-  width: min(900px, 99%);
+  width: min(1700px, 99%);
+  max-height: 82vh;
   height: auto;
   opacity: 0;
   transition: opacity 0.35s ease;
