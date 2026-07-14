@@ -206,7 +206,7 @@
   text-align: center;
   opacity: 0;
   transform: scale(0.9);
-  border: 1.5px solid color-mix(in srgb, var(--glow, #eb9b3c) 48%, #4a443a);
+  border: 1px solid color-mix(in srgb, var(--glow, #eb9b3c) 30%, transparent);
   border-radius: 22px;
   padding: 2.4rem 2.6rem 2.6rem;
   /* El color del concepto entra al CUERPO del card (bloom desde arriba + tinte del grafito),
@@ -221,10 +221,10 @@
     26px 26px,
     26px 26px,
     auto;
-  box-shadow:
-    0 0 0 1px color-mix(in srgb, var(--glow, #eb9b3c) 30%, transparent),
-    0 28px 64px -22px rgba(40, 32, 18, 0.72),
-    0 0 110px -22px var(--glow, #eb9b3c);
+  /* Sin drop-shadow direccional (esa era la firma de "tarjeta flotando sobre la página",
+     lo típico de un modal): solo un glow ambiental del acento, se funde con el aura de
+     buceo en vez de "levantar" el card como una superficie aparte. */
+  box-shadow: 0 0 90px -30px var(--glow, #eb9b3c);
   z-index: 2;
 }
 .card.live {
@@ -257,9 +257,10 @@
    propio: los componentes de /signals se diseñaron para el tema claro de la app.
    El componente se escala (zoom) para que su tipografía fija (text-sm de Tailwind)
    se lea a un tamaño acorde a la card grande, consistente en los 35 sub-niveles.
-   Acotado en alto con scroll interno: los componentes-lista altos no se recortan
-   contra el borde de la card. El scroll interno encadena al stage al llegar al límite
-   (overscroll-behavior por defecto), así la rueda sigue avanzando el recorrido sin trabarse. */
+   SIN scroll propio: antes tenía su propio overflow (además del de .card), y esas
+   dos barras anidadas eran justo lo que hacía leer esto como "una ventana aparte".
+   Ahora .card es el único contenedor que scrollea; el contenido alto simplemente
+   hace crecer la altura y el propio card se desplaza como una superficie continua. */
 .subhost {
   display: block;
   text-align: left;
@@ -267,8 +268,6 @@
   color: #201d16;
   border-radius: 14px;
   padding: 1.4rem 1.6rem;
-  max-height: 66vh;
-  overflow: auto;
 }
 .subhost > * {
   zoom: 1.3;

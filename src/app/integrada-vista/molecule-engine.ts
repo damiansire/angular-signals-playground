@@ -524,6 +524,8 @@ export function initMolecule(
   const scrubber = q<HTMLInputElement>('#scrubber')!;
   const railDot = q<HTMLElement>('#railDot');
   const introEl = q<HTMLElement>('.intro');
+  const topbarEl = q<HTMLElement>('.topbar');
+  const railEl = q<HTMLElement>('.rail');
   const railTicksOl = q<HTMLElement>('#railTicks')!;
   for (let t = 0; t < N; t++) {
     const li = document.createElement('li');
@@ -590,11 +592,17 @@ export function initMolecule(
 
     // El aura del concepto crece desde el átomo (chica) hasta el fondo del card (grande),
     // tomando el color del concepto: el card queda "nacido" del átomo, no suelto. El velo
-    // oscurece el entorno para que el color resalte parejo en todos los conceptos.
+    // es una atmósfera suave (no un scrim de modal): apenas entona el entorno para que el
+    // color resalte parejo en todos los conceptos, sin apagar la escena.
     diveAura.style.setProperty('--glow', COL[C[c].accent]);
     diveAura.style.opacity = (0.72 * diveDepth).toFixed(3);
     diveAura.style.transform = `scale(${(0.32 + 0.68 * diveDepth).toFixed(3)})`;
-    diveVeil.style.opacity = (0.6 * diveDepth).toFixed(3);
+    diveVeil.style.opacity = (0.32 * diveDepth).toFixed(3);
+    // El topbar y el riel acompañan la misma atmósfera al bucear (en vez de quedar fijos y
+    // brillantes mientras todo se apaga alrededor, que es la gramática visual de un modal
+    // sobre un app-shell). Siguen legibles/clickeables, solo bajan de intensidad.
+    if (topbarEl) topbarEl.style.opacity = (1 - 0.4 * diveDepth).toFixed(3);
+    if (railEl) railEl.style.opacity = (1 - 0.35 * diveDepth).toFixed(3);
 
     const dc = C[c];
     if (dc.subN > 0) {
@@ -668,7 +676,10 @@ export function initMolecule(
       amt = Math.max(0, Math.min(1, amt));
       const card = cc.card!;
       card.style.opacity = amt.toFixed(2);
-      card.style.transform = `scale(${(0.9 + 0.1 * amt).toFixed(3)})`;
+      // Escala casi plana: un pop 0.9→1 sincronizado con el fade es la curva típica de
+      // "se abrió un diálogo". La cámara ya hizo el zoom hacia el átomo (sceneG arriba);
+      // el card solo necesita asentar, no volver a "aparecer creciendo" por su cuenta.
+      card.style.transform = `scale(${(0.97 + 0.03 * amt).toFixed(3)})`;
       // Cada card embebe el componente real del sub-nivel: siempre interactivo cuando está visible.
       card.style.pointerEvents = amt > 0.6 ? 'auto' : 'none';
     });
