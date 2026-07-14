@@ -115,6 +115,10 @@ export function initMolecule(
   mountSub: MountSub,
   subCounts: number[],
   enc: string | null = null,
+  // Avisa dónde está el recorrido para reflejarlo en la URL: `conceptIdx` = nivel actual;
+  // `subIdx` = sub-nivel (0-based) cuando estás ADENTRO, o -1 en la vista molécula. Solo se
+  // llama cuando cambia el par (nivel, sub-nivel), no en cada frame.
+  onWhere: (conceptIdx: number, subIdx: number) => void,
 ): () => void {
   const C: Concept[] = RAW.map((r, i) => ({
     ...r,
@@ -535,6 +539,9 @@ export function initMolecule(
     window.setTimeout(() => r.remove(), 810);
   }
   let lastBorn = 0;
+  // Último (nivel, sub-nivel) reportado a la URL, para no reescribirla en cada frame.
+  let whereC = -2;
+  let whereSub = -2;
   function propagate(idx: number, rev: number): void {
     ripat(idx);
     for (let j = 0; j < rev; j++) {
@@ -728,6 +735,14 @@ export function initMolecule(
     if (railDot) railDot.style.top = ((s / TOTAL) * 100).toFixed(1) + '%';
     for (let ti = 0; ti < railTicks.length; ti++) railTicks[ti].classList.toggle('on', ti === c);
     if (introEl) introEl.style.opacity = s < 0.12 ? '1' : '0';
+
+    // Reflejar en la URL el nivel actual y, si estás adentro, el sub-nivel. -1 = vista molécula.
+    const subNow = w > 1.3 && dc.subN > 0 ? dc.subIdx : -1;
+    if (whereC !== c || whereSub !== subNow) {
+      whereC = c;
+      whereSub = subNow;
+      onWhere(c, subNow);
+    }
   }
 
   // ---- Scroll 100% NATIVO + snap ----

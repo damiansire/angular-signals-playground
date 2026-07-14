@@ -10,6 +10,7 @@ import {
   createComponent,
   inject,
 } from '@angular/core';
+import { Location } from '@angular/common';
 import { RouterLink } from '@angular/router';
 
 import { signalsRoutesTree } from '../app.routes';
@@ -37,6 +38,7 @@ export class IntegradaVistaComponent {
   private readonly destroyRef = inject(DestroyRef);
   private readonly env = inject(EnvironmentInjector);
   private readonly appRef = inject(ApplicationRef);
+  private readonly location = inject(Location);
 
   /** Componentes reales de cada sub-nivel, por concepto (del árbol de rutas de /signals). */
   private readonly subComponents: Type<unknown>[][] = signalsRoutesTree.map((lvl) =>
@@ -51,10 +53,21 @@ export class IntegradaVistaComponent {
         this.host.querySelector('#stage')?.getAttributeNames().find((a) => a.startsWith('_ngcontent')) ??
         null;
       const subCounts = this.subComponents.map((subs) => subs.length);
-      const dispose = initMolecule(this.host, this.mountSub, subCounts, enc);
+      const dispose = initMolecule(this.host, this.mountSub, subCounts, enc, this.onWhere);
       this.destroyRef.onDestroy(dispose);
     });
   }
+
+  /**
+   * Refleja el nivel/sub-nivel actual del recorrido en la URL sin navegar ni recargar.
+   * `replaceState` reescribe la barra (respetando el base href) sin pasar por el Router,
+   * así el componente no se desmonta ni se pierde el scroll. `subIdx` -1 = vista molécula.
+   */
+  private readonly onWhere = (conceptIdx: number, subIdx: number): void => {
+    const query =
+      subIdx >= 0 ? `nivel=${conceptIdx}&sub-nivel=${subIdx + 1}` : `nivel=${conceptIdx}`;
+    this.location.replaceState('/integrada-vista', query);
+  };
 
   /** Monta el componente REAL del sub-nivel (concepto ci, sub si) y lo integra a la CD. */
   private readonly mountSub: MountSub = (host, ci, si) => {
