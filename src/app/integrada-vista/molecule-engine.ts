@@ -119,6 +119,9 @@ export function initMolecule(
   // `subIdx` = sub-nivel (0-based) cuando estás ADENTRO, o -1 en la vista molécula. Solo se
   // llama cuando cambia el par (nivel, sub-nivel), no en cada frame.
   onWhere: (conceptIdx: number, subIdx: number) => void,
+  // Deep-link: si viene con `concept` (nivel) y `sub` (sub-nivel 1-based), el recorrido abre
+  // scrolleado directo a ese sub-nivel en vez de arriba con el overlay. Se clampea al rango real.
+  initial: { concept: number; sub: number } | null = null,
 ): () => void {
   const C: Concept[] = RAW.map((r, i) => ({
     ...r,
@@ -796,19 +799,29 @@ export function initMolecule(
   q<HTMLElement>('#prev')?.addEventListener('click', onPrev);
   q<HTMLElement>('#next')?.addEventListener('click', onNext);
 
-  // El navegador restaura el scroll del stage al recargar; queremos abrir SIEMPRE arriba
-  // (con el overlay de bienvenida). Reseteamos en el boot, en el próximo frame y al `load`
-  // (por si la restauración llega tarde).
-  const resetTop = (): void => {
-    stage.scrollTop = 0;
-    render(0);
+  // Posición de apertura: normalmente 0 (arriba, con el overlay). Con deep-link (?nivel&sub-nivel)
+  // arranca scrolleado directo a ese sub-nivel, clampeado al rango real de conceptos/sub-niveles.
+  const bootScroll = (): number => {
+    if (!initial) return 0;
+    const c = Math.max(0, Math.min(N - 1, Math.round(initial.concept)));
+    if (C[c].subN <= 0) return off[c];
+    const k = Math.max(0, Math.min(C[c].subN - 1, Math.round(initial.sub) - 1));
+    return stopS(c, k);
+  };
+  // El navegador restaura el scroll del stage al recargar; queremos abrir en la posición que
+  // decide bootScroll (arriba, o el deep-link). Lo forzamos en el boot, en el próximo frame y
+  // al `load` (por si la restauración del navegador llega tarde y la pisa).
+  const openAt = (): void => {
+    const s = bootScroll();
+    stage.scrollTop = s * unit();
+    render(s);
   };
   const bootTimer = window.setTimeout(() => {
     track.style.height = (TOTAL + 0.2) * unit() + 'px';
-    resetTop();
-    raf(resetTop);
+    openAt();
+    raf(openAt);
   }, 30);
-  window.addEventListener('load', resetTop);
+  window.addEventListener('load', openAt);
 
   raf(orbitLoop);
 
@@ -818,7 +831,7 @@ export function initMolecule(
     rafIds.forEach((id) => cancelAnimationFrame(id));
     stage.removeEventListener('scroll', onScroll);
     window.removeEventListener('resize', onResize);
-    window.removeEventListener('load', resetTop);
+    window.removeEventListener('load', openAt);
     scrubber.removeEventListener('input', onScrub);
     C.forEach((cc) => cc.subDispose?.());
   };

@@ -53,9 +53,18 @@ export class IntegradaVistaComponent {
         this.host.querySelector('#stage')?.getAttributeNames().find((a) => a.startsWith('_ngcontent')) ??
         null;
       const subCounts = this.subComponents.map((subs) => subs.length);
-      const dispose = initMolecule(this.host, this.mountSub, subCounts, enc, this.onWhere);
+      const dispose = initMolecule(this.host, this.mountSub, subCounts, enc, this.onWhere, this.initialFromUrl());
       this.destroyRef.onDestroy(dispose);
     });
+  }
+
+  /** Deep-link: lee ?nivel=X&sub-nivel=Z de la URL para abrir el recorrido en ese sub-nivel. */
+  private initialFromUrl(): { concept: number; sub: number } | null {
+    const params = new URLSearchParams(window.location.search);
+    const nivel = Number(params.get('nivel'));
+    const sub = Number(params.get('sub-nivel'));
+    if (!Number.isInteger(nivel) || nivel < 0 || !Number.isInteger(sub) || sub < 1) return null;
+    return { concept: nivel, sub };
   }
 
   /**
