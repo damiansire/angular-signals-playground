@@ -227,9 +227,9 @@
   padding: 1.9rem 2.4rem 2.3rem;
   /* Hoja de papel del MISMO clima que la página (no una cámara oscura sobre un fondo claro,
      que siempre se lee como "ventana aparte"). El color del concepto entra como acento tenue
-     arriba + glow, no como fondo: la card es una sección más de la página, no un panel sobre ella. */
+     abajo + glow, no como fondo: la card es una sección más de la página, no un panel sobre ella. */
   background:
-    radial-gradient(120% 62% at 50% 0%, color-mix(in srgb, var(--glow, #eb9b3c) 16%, transparent), transparent 54%),
+    radial-gradient(120% 62% at 50% 100%, color-mix(in srgb, var(--glow, #eb9b3c) 16%, transparent), transparent 54%),
     linear-gradient(180deg, #fcfbf5, #f5f2e8);
   box-shadow: 0 0 80px -30px var(--glow, #eb9b3c);
   z-index: 2;
