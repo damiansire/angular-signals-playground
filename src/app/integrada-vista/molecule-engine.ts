@@ -337,6 +337,10 @@ export function initMolecule(
     cc.subDispose?.();
     host.textContent = '';
     cc.subDispose = mountSub(host, C.indexOf(cc), cc.subIdx);
+    // Re-estampar: cada mount trae su propio árbol nuevo (Angular no le pone el atributo
+    // de encapsulación de integrada-vista), así que sin esto el CSS de armonización de
+    // .subhost (h1/botones) nunca matchea nada.
+    stampTree(host);
     fuse(cc);
     replay(card.querySelector('.subbody'), 'warp');
   }

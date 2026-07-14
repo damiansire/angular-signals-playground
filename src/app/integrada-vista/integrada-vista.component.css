@@ -274,6 +274,66 @@
   zoom: 1.3;
 }
 
+/* Armonización del contenido embebido: los 35 sub-niveles son componentes standalone
+   pensados para página completa (título propio gigante, botones de colores random de
+   Tailwind), así que sueltos dentro del card se leen como un iframe pegado. Estas reglas
+   homologan lo más "gritón" SIN tocar los 35 templates (stamp/stampTree ya deja que este
+   CSS les aplique). Alcance: el h1 (título redundante de TitleComponent) y los botones
+   con color Tailwind ESTÁTICO (bg-* fijo, no condicional: ahí el color es decorativo, no
+   estado, así que unificarlo es seguro). Toggles con color condicional y diagramas/canvas
+   quedan afuera: ahí el color puede ser semántico. */
+.subhost h1 {
+  font-family: var(--serif);
+  font-weight: 600;
+  font-size: 1.55rem;
+  letter-spacing: normal;
+  text-align: left;
+  color: #201d16;
+  margin: 0 0 1.1rem;
+  line-height: 1.25;
+}
+.subhost button[class*='bg-blue-'],
+.subhost button[class*='bg-green-'],
+.subhost button[class*='bg-amber-'],
+.subhost button[class*='bg-indigo-'],
+.subhost button[class*='bg-emerald-'],
+.subhost button[class*='bg-gray-'] {
+  font-family: var(--sans);
+  font-weight: 600;
+  border: none;
+  border-radius: 999px;
+  padding: 0.6rem 1.35rem;
+  transition: filter 0.15s ease;
+}
+.subhost button[class*='bg-blue-'],
+.subhost button[class*='bg-green-'],
+.subhost button[class*='bg-amber-'],
+.subhost button[class*='bg-indigo-'],
+.subhost button[class*='bg-emerald-'] {
+  background: var(--glow, #eb9b3c);
+  color: #201d16;
+}
+.subhost button[class*='bg-gray-'] {
+  background: #3a352d;
+  color: #f2ecdc;
+}
+.subhost button[class*='bg-blue-']:hover:not(:disabled),
+.subhost button[class*='bg-green-']:hover:not(:disabled),
+.subhost button[class*='bg-amber-']:hover:not(:disabled),
+.subhost button[class*='bg-indigo-']:hover:not(:disabled),
+.subhost button[class*='bg-emerald-']:hover:not(:disabled),
+.subhost button[class*='bg-gray-']:hover:not(:disabled) {
+  filter: brightness(1.08);
+}
+/* Foco de los inputs de texto en el acento del concepto en vez del cian/teal/rosa/naranja
+   al azar que trae cada sub-nivel (mismo color de foco, no la variedad Tailwind). */
+.subhost input[type='text']:focus,
+.subhost input[type='number']:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--glow, #eb9b3c);
+  border-color: transparent;
+}
+
 .suborbit {
   grid-area: 1 / 1;
   width: min(900px, 99%);
