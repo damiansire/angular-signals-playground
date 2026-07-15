@@ -227,8 +227,13 @@ export function initMolecule(
 
   const pos = (i: number): { x: number; y: number } => {
     if (i === 0) return { x: CX, y: CY };
-    const ang = (i - 1) * 0.68 - Math.PI / 2;
-    const r = 64 + (i - 1) * 21;
+    // Espiral de la cadena. El átomo tiene tamaño FIJO (núcleo + nube de electrones ~38 de radio)
+    // y la cámara auto-encuadra el espiral, así que lo que evita que las nubes se pisen es el
+    // radio del espiral RELATIVO a ese tamaño fijo: radio base alto (135) para despegar ya al
+    // átomo 1 del centro, y crecimiento por paso (26) calculado para que el primer gap (1→2, el
+    // más apretado) supere el diámetro de la nube. Los internos dejan de amontonarse.
+    const ang = (i - 1) * 0.76 - Math.PI / 2;
+    const r = 172 + (i - 1) * 24;
     return { x: CX + r * Math.cos(ang), y: CY + r * Math.sin(ang) };
   };
   C.forEach((cc, i) => {
@@ -245,7 +250,10 @@ export function initMolecule(
     }
     return m;
   };
-  const wideK = (c: number): number => Math.max(0.58, Math.min(1.2, 250 / (outerRadius(c) + 62)));
+  // Encuadre de la molécula: mapea el radio del espiral a un radio en pantalla objetivo. El
+  // espiral es más grande ahora (radio base 135), así que el piso sube a 0.6 para llenar más el
+  // alto del viewport en la vista completa (12 átomos) sin que los de arriba/abajo se corten.
+  const wideK = (c: number): number => Math.max(0.6, Math.min(1.2, 265 / (outerRadius(c) + 62)));
   const centroid = (c: number): { x: number; y: number } => {
     let sx = 0;
     let sy = 0;
@@ -305,26 +313,39 @@ export function initMolecule(
     });
     const orb = el('g', { class: 'orb' });
     orb.appendChild(el('circle', { class: 'halo', cx: 0, cy: 0, r: NUC + 34, stroke: accent }));
-    const tilts = [20 + i * 24, -55 + i * 15, 84];
-    const durs = [2.4, 3.4, 4.3];
-    const nO = cc.accent === 'source' ? 1 : i % 2 ? 3 : 2;
+    // Un electrón por sub-nivel: el átomo MUESTRA cuántos sub-niveles tiene el concepto
+    // (Introducción = 4 → 4 electrones). Al bucear, estos mismos electrones se apagan y su rol
+    // pasa a los sub-dots numerados que orbitan la card (ver .suborbit): se leen como los mismos
+    // electrones que salieron a orbitar afuera. Fallback a 1 para conceptos sin sub-niveles.
+    const nO = Math.max(1, cc.subN);
+    // Cada electrón va en su propio anillo, inclinado distinto, para que se lean como N
+    // partículas separadas (nube 3D) y no una fila. Tilts repartidos en abanico y duraciones
+    // escalonadas para que no laten sincronizados; generados (no tabla fija) para servir a
+    // cualquier N de sub-niveles sin romper.
+    const tiltOf = (o: number): number =>
+      nO === 1 ? 20 + i * 12 : -66 + (o * 132) / (nO - 1) + i * 7;
+    const durOf = (o: number): number => 2.6 + (o % 3) * 0.6;
     // Cada anillo TEJE el núcleo: media elipse detrás (backG) y media delante (frontG) → 3D real.
     const arc = (sweep: number): string => `M ${-ORX} 0 A ${ORX} ${ORY} 0 0 ${sweep} ${ORX} 0`;
     const backG = el('g', {});
     const frontG = el('g', {});
     for (let o = 0; o < nO; o++) {
-      const backOg = el('g', { transform: `rotate(${tilts[o]})` });
+      const tilt = tiltOf(o);
+      const dur = durOf(o);
+      const backOg = el('g', { transform: `rotate(${tilt})` });
       backOg.appendChild(el('path', { class: 'ring', d: arc(0), stroke: accent }));
       backG.appendChild(backOg);
-      const frontOg = el('g', { transform: `rotate(${tilts[o]})` });
+      const frontOg = el('g', { transform: `rotate(${tilt})` });
       frontOg.appendChild(el('path', { class: 'ring', d: arc(1), stroke: accent }));
       const e = el('circle', { class: 'electron', r: 4, fill: accent, style: 'color:' + accent });
       e.appendChild(
         el('animateMotion', {
-          dur: durs[o] + 's',
+          dur: dur + 's',
           repeatCount: 'indefinite',
           path: opath(),
-          begin: -o * 1.05 + 's',
+          // Fase repartida sobre el perímetro (o/nO) para que en cualquier instante los N
+          // electrones estén distribuidos alrededor del núcleo, no amontonados.
+          begin: ((-o * dur) / nO).toFixed(2) + 's',
         }),
       );
       frontOg.appendChild(e);
@@ -530,14 +551,31 @@ export function initMolecule(
       subRing.setAttribute('width', (R - L).toFixed(1));
       subRing.setAttribute('height', (B - T).toFixed(1));
       subRing.setAttribute('rx', rad.toFixed(1));
-      const per = rrectPerimeter(R - L, B - T, rad);
       const cur = cc.subIdx;
+      // En dissolve el anillo rect está oculto (.suborbit.dissolve .sub-ring): los electrones
+      // orbitan una ELIPSE inscrita en los mismos límites, que abraza el contenido de forma
+      // redonda. Así los 4 dots dejan de caer en las 4 esquinas (desparramados) y se leen como
+      // electrones girando. En el resto se mantiene el recorrido sobre el rect redondeado, cuyo
+      // anillo punteado sí se ve, para no descalzar dots y anillo.
+      const dissolve = DISSOLVE.has(orbitFor);
+      const per = rrectPerimeter(R - L, B - T, rad);
+      const ecx = (L + R) / 2;
+      const ecy = (T + B) / 2;
+      const erx = (R - L) / 2;
+      const ery = (B - T) / 2;
       for (let k = 0; k < subDots.length; k++) {
         const o = subDots[k];
-        // El sub-nivel actual queda fijo arriba del todo (centro del borde superior), sin el
-        // giro continuo: es "dónde estoy", no debería moverse solo. Los demás siguen
-        // recorriendo el perímetro (el resto del recorrido, en movimiento).
-        const pt = k === cur ? { x: (L + R) / 2, y: T } : rrectPoint(L, T, R, B, rad, (o.frac + t / SPIN) * per);
+        // El sub-nivel actual queda fijo arriba del todo (12 en punto), sin el giro continuo:
+        // es "dónde estoy", no debería moverse solo. Los demás recorren el contorno.
+        let pt: { x: number; y: number };
+        if (k === cur) {
+          pt = dissolve ? { x: ecx, y: ecy - ery } : { x: (L + R) / 2, y: T };
+        } else if (dissolve) {
+          const ang = (o.frac + t / SPIN) * 2 * Math.PI - Math.PI / 2;
+          pt = { x: ecx + erx * Math.cos(ang), y: ecy + ery * Math.sin(ang) };
+        } else {
+          pt = rrectPoint(L, T, R, B, rad, (o.frac + t / SPIN) * per);
+        }
         o.lx = pt.x;
         o.ly = pt.y;
         o.dot.setAttribute('cx', o.lx.toFixed(1));

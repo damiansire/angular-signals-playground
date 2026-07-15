@@ -104,6 +104,7 @@
 }
 .electron {
   filter: drop-shadow(0 0 4px currentColor);
+  transition: opacity 0.45s ease;
 }
 .nucleus {
   stroke: rgba(255, 255, 255, 0.5);
@@ -165,6 +166,11 @@
 }
 .atom.dived-dissolve .ring {
   opacity: 0.5;
+}
+/* Los electrones pasan a orbitar la card (.suborbit): se apagan del núcleo para no convivir
+   como dos cosas distintas con los sub-dots numerados. */
+.atom.dived-dissolve .electron {
+  opacity: 0;
 }
 
 .ripple {
@@ -449,7 +455,8 @@
   height: auto;
   opacity: 0;
   transition: opacity 0.35s ease;
-  z-index: 2;
+  /* Encima de la card (antes 2): los electrones flotan por delante, no detrás. */
+  z-index: 3;
   pointer-events: none;
   overflow: visible;
 }
