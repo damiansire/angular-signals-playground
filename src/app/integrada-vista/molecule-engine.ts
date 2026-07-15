@@ -68,6 +68,11 @@ const RAW: RawConcept[] = [
   { name: 'Zoneless', code: 'zoneless', accent: 'capstone', dotted: false },
 ];
 
+// Conceptos que usan el tratamiento "disolver el marco": la card deja de ser una ventana y su
+// contenido flota en el campo del átomo (escena viva sin velo, aura grande). Experimento acotado
+// (hoy nivel 0); agregar índices acá lo extiende a más conceptos.
+const DISSOLVE = new Set<number>([0]);
+
 const CX = 410;
 const CY = 290;
 const ORX = 34;
@@ -556,7 +561,7 @@ export function initMolecule(
   // ---- Contenido de cada concepto: cada sub-nivel embebe el componente REAL del nivel ----
   C.forEach((cc, i) => {
     const card = document.createElement('div');
-    card.className = 'card live card--sub';
+    card.className = 'card live card--sub' + (DISSOLVE.has(i) ? ' card--dissolve' : '');
     card.style.setProperty('--glow', COL[cc.accent]);
     card.innerHTML =
       `<span class="subflash"></span><p class="card__k">Adentro · ${cc.name} · nivel ${i}</p>` +
@@ -667,16 +672,20 @@ export function initMolecule(
     // La cámara ya centró y agrandó el átomo detrás de la card (K llega a FK=2.7): dejarlo
     // brillar de fondo, en vez de apagarlo casi del todo, es lo que hace que la card se lea
     // "parada sobre el átomo" en vez de "algo nuevo que tapó la escena".
-    sceneG.style.opacity = (1 - 0.62 * diveDepth).toFixed(2);
+    // Conceptos "disolver el marco": la card no es una ventana sino el interior del átomo, así
+    // que al bucear NO se atenúa la escena (sin velo, molécula viva) y el aura crece más para
+    // volverse la sala. En el resto, la atmósfera normal (escena tenue de fondo + velo suave).
+    const dissolve = DISSOLVE.has(c);
+    sceneG.style.opacity = (1 - (dissolve ? 0.1 : 0.62) * diveDepth).toFixed(2);
 
     // El aura del concepto crece desde el átomo (chica) hasta el fondo del card (grande),
     // tomando el color del concepto: el card queda "nacido" del átomo, no suelto. El velo
     // es una atmósfera suave (no un scrim de modal): apenas entona el entorno para que el
     // color resalte parejo en todos los conceptos, sin apagar la escena.
     diveAura.style.setProperty('--glow', COL[C[c].accent]);
-    diveAura.style.opacity = (0.72 * diveDepth).toFixed(3);
-    diveAura.style.transform = `scale(${(0.32 + 0.68 * diveDepth).toFixed(3)})`;
-    diveVeil.style.opacity = (0.32 * diveDepth).toFixed(3);
+    diveAura.style.opacity = ((dissolve ? 0.92 : 0.72) * diveDepth).toFixed(3);
+    diveAura.style.transform = `scale(${((dissolve ? 0.5 : 0.32) + (dissolve ? 1.15 : 0.68) * diveDepth).toFixed(3)})`;
+    diveVeil.style.opacity = ((dissolve ? 0 : 0.32) * diveDepth).toFixed(3);
     // El topbar y el riel acompañan la misma atmósfera al bucear (en vez de quedar fijos y
     // brillantes mientras todo se apaga alrededor, que es la gramática visual de un modal
     // sobre un app-shell). Siguen legibles/clickeables, solo bajan de intensidad.
@@ -699,6 +708,9 @@ export function initMolecule(
         orbitFor = c;
       }
       suborbit.classList.add('on');
+      // En conceptos dissolve se oculta el anillo punteado (deja solo los electrones): con la
+      // card sin marco, el rect punteado volvería a leerse como el borde de una ventana.
+      suborbit.classList.toggle('dissolve', dissolve);
       suborbit.style.opacity = Math.min(1, (diveDepth - 0.35) / 0.4).toFixed(2);
     } else if (orbitFor !== -1) {
       suborbit.classList.remove('on');

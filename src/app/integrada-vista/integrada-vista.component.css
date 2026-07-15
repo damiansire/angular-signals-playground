@@ -243,6 +243,15 @@
 .card--sub {
   width: min(1440px, 92%);
 }
+/* Experimento "disolver el marco" (nivel 0): la card deja de ser una ventana (sin borde, sin
+   sombra, sin hoja de papel) y el contenido flota en el campo del átomo. La legibilidad la
+   sostienen el texto oscuro sobre el clima claro + el aura del concepto detrás (que el motor
+   agranda) + los fondos propios del bloque de concepto y del código embebido. */
+.card--dissolve {
+  border-color: transparent;
+  background: transparent;
+  box-shadow: none;
+}
 /* Header (meta) integrado: un solo bloque compacto pegado al contenido, sin hilo divisor ni
    aire de más, para que "ADENTRO · X" + "sub-nivel Y/N" + el ejemplo se lean como una sola
    superficie continua, no como rótulos sueltos arriba de una caja. */
@@ -360,6 +369,11 @@
   stroke-width: 1.5;
   stroke-dasharray: 2 10;
   opacity: 0.5;
+}
+/* En modo "disolver el marco" el anillo se esconde (los electrones siguen orbitando): el rect
+   punteado alrededor de la card sin marco se leería como el borde de una ventana. */
+.suborbit.dissolve .sub-ring {
+  opacity: 0;
 }
 .sub-e {
   cursor: pointer;
