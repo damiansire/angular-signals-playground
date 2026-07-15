@@ -161,10 +161,10 @@
    del demo): halo estable (sin latido) + anillos más visibles, en vez de una mancha tenue. */
 .atom.dived-dissolve .halo {
   animation: none;
-  opacity: 0.42;
+  opacity: 0.26;
 }
 .atom.dived-dissolve .ring {
-  opacity: 0.72;
+  opacity: 0.5;
 }
 
 .ripple {
@@ -294,8 +294,8 @@
   display: grid;
   /* Instrucciones angostas a la izquierda; el DEMO se lleva el resto del ancho (1fr) y estira
      para que el árbol y el código respiren. */
-  grid-template-columns: minmax(0, 16rem) minmax(0, 1fr);
-  gap: 2.4rem;
+  grid-template-columns: minmax(0, 13rem) minmax(0, 1fr);
+  gap: 2rem;
   align-items: start;
   zoom: 1;
 }
@@ -317,7 +317,18 @@
 .card--dissolve .subhost app-code div {
   white-space: pre;
   font-size: 1.05rem;
-  line-height: 1.6;
+  line-height: 1.5;
+}
+/* Con todos los tags seleccionados, el fondo verde SÓLIDO (bg-green-700) tapaba el código y
+   gritaba. Lo hacemos translúcido: marca el nodo activo sin ahogar la lectura. Y compactamos el
+   interlineado (py-2 era demasiado) para que el bloque entre y respire. */
+.card--dissolve .subhost app-code .bg-green-700 {
+  background-color: rgba(29, 158, 117, 0.22);
+  border-radius: 4px;
+}
+.card--dissolve .subhost app-code .py-2 {
+  padding-top: 0.16rem;
+  padding-bottom: 0.16rem;
 }
 /* La caja de instrucciones deja de ser un panel blanco sólido que flota sobre la escena y pasa
    a GLASS translúcido: se posa sobre la molécula en vez de taparla, rematando el "disolver el
