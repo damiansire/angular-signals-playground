@@ -30,6 +30,7 @@ interface RawConcept {
   code: string;
   accent: AccentKey;
   dotted: boolean;
+  tagline?: string; // título de encuadre del nivel (topbar en vista molécula, antes de bucear)
 }
 
 interface Concept extends RawConcept {
@@ -55,7 +56,7 @@ interface SubDot {
 
 /** Los 12 conceptos (metadata del atomo). Los sub-niveles reales se embeben en cada dive. */
 const RAW: RawConcept[] = [
-  { name: 'Introducción', code: 'detección de cambios', accent: 'ink', dotted: false },
+  { name: 'Introducción', code: 'detección de cambios', accent: 'ink', dotted: false, tagline: 'Cómo la pantalla sabe qué cambió' },
   { name: 'Signals', code: 'signal()', accent: 'source', dotted: false },
   { name: 'Computed', code: 'computed()', accent: 'derived', dotted: true },
   { name: 'Effects', code: 'effect()', accent: 'effect', dotted: false },
@@ -709,7 +710,6 @@ export function initMolecule(
       topbarEl.classList.toggle('contextual', dissolve);
       topbarEl.style.opacity = dissolve ? '1' : (1 - 0.4 * diveDepth).toFixed(3);
     }
-    if (tbTitleEl) tbTitleEl.textContent = dissolve ? C[c].exampleTitle || C[c].name : 'El recorrido';
     if (railEl) railEl.style.opacity = (1 - 0.35 * diveDepth).toFixed(3);
     if (captionEl) captionEl.style.opacity = dissolve ? Math.max(0, 1 - diveDepth / 0.5).toFixed(2) : '1';
     // Título vertical del concepto (espina de identidad) pegado al riel: aparece al bucear en
@@ -733,6 +733,18 @@ export function initMolecule(
         renderSubCard(dc);
         if (orbitFor === c) updateOrbitFill(dc);
       }
+    }
+    // Título del topbar en dissolve: antes de bucear (vista molécula) enmarca el nivel con su
+    // tagline; adentro, el título del sub-ejemplo actual. Va DESPUÉS de renderSubCard para leer
+    // el exampleTitle recién montado (si no, va un sub-nivel atrasado). En el resto, "El recorrido".
+    if (tbTitleEl) {
+      // Adentro: título del sub-ejemplo; si el sub-nivel no tiene h1 propio, cae al tagline del
+      // nivel (no al nombre, que ya está en la espina vertical). Antes de bucear: el tagline.
+      tbTitleEl.textContent = dissolve
+        ? diveDepth > 0.5
+          ? dc.exampleTitle || dc.tagline || dc.name
+          : dc.tagline || dc.name
+        : 'El recorrido';
     }
     if (dc.subN > 0 && diveDepth > 0.35) {
       if (orbitFor !== c) {
