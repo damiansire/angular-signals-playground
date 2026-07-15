@@ -147,9 +147,15 @@
   stroke-width: 3.5px;
   stroke-linejoin: round;
   opacity: 0;
+  transition: opacity 0.4s ease;
 }
 .atom.current .aname {
   opacity: 1;
+}
+/* En dissolve, al bucear, el nombre del átomo se apaga: su rol de etiqueta lo toma el título
+   promovido dentro de la card (no se repite en la escena). Va DESPUÉS de .atom.current para ganar. */
+.atom.dived-dissolve .aname {
+  opacity: 0;
 }
 
 .ripple {
@@ -251,6 +257,30 @@
   border-color: transparent;
   background: transparent;
   box-shadow: none;
+}
+/* Info depurada (dissolve): el nombre del concepto PROMOVIDO a título del espacio, con el
+   sub-nivel como contador pegado debajo (su única casa en texto; la otra es la órbita). Reemplaza
+   al header meta redundante "Adentro · X · nivel N / sub-nivel Y/N". */
+.card--dissolve .space-title {
+  font-family: var(--serif);
+  font-weight: 600;
+  font-size: 2.1rem;
+  line-height: 1.05;
+  letter-spacing: -0.01em;
+  color: color-mix(in srgb, var(--glow, #eb9b3c) 44%, #2a2620);
+  margin: 0 0 0.15rem;
+}
+.card--dissolve .space-count {
+  font-family: var(--mono);
+  font-size: 0.9rem;
+  letter-spacing: 0.14em;
+  color: var(--ink-soft);
+  margin: 0 0 1.2rem;
+}
+.card--dissolve .space-count b {
+  color: color-mix(in srgb, var(--glow, #eb9b3c) 62%, #35301f);
+  font-weight: 700;
+  font-size: 1.05rem;
 }
 /* Header (meta) integrado: un solo bloque compacto pegado al contenido, sin hilo divisor ni
    aire de más, para que "ADENTRO · X" + "sub-nivel Y/N" + el ejemplo se lean como una sola

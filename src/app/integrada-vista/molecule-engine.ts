@@ -563,10 +563,17 @@ export function initMolecule(
     const card = document.createElement('div');
     card.className = 'card live card--sub' + (DISSOLVE.has(i) ? ' card--dissolve' : '');
     card.style.setProperty('--glow', COL[cc.accent]);
+    // En modo "disolver el marco" la info se depura: el nombre del concepto se PROMUEVE a título
+    // del espacio (el nivel ya lo dice el riel, "Adentro" es obvio) y el sub-nivel queda como un
+    // contador pegado a ese título (su otra casa son los electrones de la órbita). En el resto,
+    // el header meta clásico (Adentro · X · nivel N + sub-nivel Y/N).
+    const header = DISSOLVE.has(i)
+      ? `<h2 class="space-title">${cc.name}</h2>` +
+        `<p class="space-count"><b class="subnum">1</b> <span class="of">/ ${cc.subN}</span></p>`
+      : `<p class="card__k">Adentro · ${cc.name} · nivel ${i}</p>` +
+        `<p class="subtop">sub-nivel <b class="subnum">1</b> / ${cc.subN}</p>`;
     card.innerHTML =
-      `<span class="subflash"></span><p class="card__k">Adentro · ${cc.name} · nivel ${i}</p>` +
-      `<p class="subtop">sub-nivel <b class="subnum">1</b> / ${cc.subN}</p>` +
-      '<div class="subbody"><div class="subhost"></div></div>';
+      `<span class="subflash"></span>${header}<div class="subbody"><div class="subhost"></div></div>`;
     contentEl.appendChild(card);
     cc.card = card;
     stamp(card);
@@ -606,6 +613,7 @@ export function initMolecule(
   const railDot = q<HTMLElement>('#railDot');
   const introEl = q<HTMLElement>('.intro');
   const topbarEl = q<HTMLElement>('.topbar');
+  const captionEl = q<HTMLElement>('.caption');
   const railEl = q<HTMLElement>('.rail');
   const railTicksOl = q<HTMLElement>('#railTicks')!;
   for (let t = 0; t < N; t++) {
@@ -689,8 +697,12 @@ export function initMolecule(
     // El topbar y el riel acompañan la misma atmósfera al bucear (en vez de quedar fijos y
     // brillantes mientras todo se apaga alrededor, que es la gramática visual de un modal
     // sobre un app-shell). Siguen legibles/clickeables, solo bajan de intensidad.
-    if (topbarEl) topbarEl.style.opacity = (1 - 0.4 * diveDepth).toFixed(3);
+    // En dissolve el topbar (incl. "El recorrido") casi desaparece adentro: es chrome de sección
+    // que no aporta cuando ya estás inmerso. El caption inferior ("Adentro · X") se va del todo al
+    // bucear —es redundante con el título promovido— pero sigue en la vista molécula.
+    if (topbarEl) topbarEl.style.opacity = (1 - (dissolve ? 0.82 : 0.4) * diveDepth).toFixed(3);
     if (railEl) railEl.style.opacity = (1 - 0.35 * diveDepth).toFixed(3);
+    if (captionEl) captionEl.style.opacity = dissolve ? Math.max(0, 1 - diveDepth / 0.5).toFixed(2) : '1';
 
     const dc = C[c];
     if (dc.subN > 0) {
@@ -720,6 +732,9 @@ export function initMolecule(
 
     atomEls.forEach((g, i) => {
       const orb = g.querySelector<SVGGElement>('.orb')!;
+      // El nombre del átomo se desvanece al bucear en dissolve: su rol de etiqueta lo toma el
+      // título promovido dentro de la card, no debe repetirse en la escena. Solo el actual.
+      g.classList.toggle('dived-dissolve', i === c && dissolve && diveDepth > 0.4);
       if (i < c) {
         g.classList.add('on');
         g.classList.remove('current');
