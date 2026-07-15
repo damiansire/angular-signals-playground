@@ -327,6 +327,10 @@
   backdrop-filter: blur(7px);
   border-color: rgba(120, 110, 95, 0.28);
 }
+/* El título del sub-ejemplo (h1) se promovió al topbar: se oculta acá para no duplicarlo. */
+.card--dissolve .subhost h1 {
+  display: none;
+}
 /* Header (meta) integrado: un solo bloque compacto pegado al contenido, sin hilo divisor ni
    aire de más, para que "ADENTRO · X" + "sub-nivel Y/N" + el ejemplo se lean como una sola
    superficie continua, no como rótulos sueltos arriba de una caja. */
@@ -660,6 +664,20 @@
   letter-spacing: 0.18em;
   text-transform: uppercase;
   color: #c97d1e;
+}
+/* En dissolve el topbar es contextual: su centro muestra el título del sub-ejemplo actual con
+   presencia (serif, sin versalitas, alto contraste), no un rótulo de sección tenue. */
+.topbar.contextual .tb-title {
+  font-family: var(--serif);
+  font-size: 1.22rem;
+  font-weight: 600;
+  letter-spacing: 0.005em;
+  text-transform: none;
+  color: #241f18;
+  max-width: 62vw;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .topbar a {
   color: #6a6355;

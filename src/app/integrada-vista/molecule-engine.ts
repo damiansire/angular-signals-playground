@@ -40,6 +40,7 @@ interface Concept extends RawConcept {
   card?: HTMLDivElement;
   subIdx: number;
   subDispose?: () => void; // disposer del componente montado del sub actual
+  exampleTitle?: string; // título del sub-ejemplo actual (h1 del componente montado), para el topbar
 }
 
 interface SubDot {
@@ -410,6 +411,9 @@ export function initMolecule(
     // de encapsulación de integrada-vista), así que sin esto el CSS de armonización de
     // .subhost (h1/botones) nunca matchea nada.
     stampTree(host);
+    // El título del sub-ejemplo (h1 del componente) se promueve al topbar; lo guardamos acá,
+    // recién montado, y render() lo refleja. En dissolve el h1 se oculta (no se duplica).
+    cc.exampleTitle = host.querySelector('h1')?.textContent?.trim() ?? '';
     fuse(cc);
     replay(card.querySelector('.subbody'), 'warp');
   }
@@ -612,6 +616,7 @@ export function initMolecule(
   const railDot = q<HTMLElement>('#railDot');
   const introEl = q<HTMLElement>('.intro');
   const topbarEl = q<HTMLElement>('.topbar');
+  const tbTitleEl = q<HTMLElement>('.tb-title');
   const captionEl = q<HTMLElement>('.caption');
   const spaceSpineEl = q<HTMLElement>('#spaceSpine');
   const railEl = q<HTMLElement>('.rail');
@@ -697,10 +702,14 @@ export function initMolecule(
     // El topbar y el riel acompañan la misma atmósfera al bucear (en vez de quedar fijos y
     // brillantes mientras todo se apaga alrededor, que es la gramática visual de un modal
     // sobre un app-shell). Siguen legibles/clickeables, solo bajan de intensidad.
-    // En dissolve el topbar (incl. "El recorrido") casi desaparece adentro: es chrome de sección
-    // que no aporta cuando ya estás inmerso. El caption inferior ("Adentro · X") se va del todo al
-    // bucear —es redundante con el título promovido— pero sigue en la vista molécula.
-    if (topbarEl) topbarEl.style.opacity = (1 - (dissolve ? 0.82 : 0.4) * diveDepth).toFixed(3);
+    // En dissolve el topbar deja de ser chrome tenue: su centro muestra el TÍTULO del sub-ejemplo
+    // actual (promovido desde el h1 del demo) con protagonismo, así que se mantiene presente. En
+    // el resto conserva "El recorrido" y se atenúa al bucear. El caption inferior sí se va (abajo).
+    if (topbarEl) {
+      topbarEl.classList.toggle('contextual', dissolve);
+      topbarEl.style.opacity = dissolve ? '1' : (1 - 0.4 * diveDepth).toFixed(3);
+    }
+    if (tbTitleEl) tbTitleEl.textContent = dissolve ? C[c].exampleTitle || C[c].name : 'El recorrido';
     if (railEl) railEl.style.opacity = (1 - 0.35 * diveDepth).toFixed(3);
     if (captionEl) captionEl.style.opacity = dissolve ? Math.max(0, 1 - diveDepth / 0.5).toFixed(2) : '1';
     // Título vertical del concepto (espina de identidad) pegado al riel: aparece al bucear en
