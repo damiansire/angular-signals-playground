@@ -267,21 +267,8 @@
   background: transparent;
   box-shadow: none;
 }
-/* Info depurada (dissolve): el nombre del concepto vive como TÍTULO VERTICAL pegado al riel
-   (.space-spine, abajo); acá adentro queda solo el contador de sub-nivel, como metadato chico
-   arriba a la izquierda (su otra casa son los electrones de la órbita). */
-.card--dissolve .space-count {
-  font-family: var(--mono);
-  font-size: 0.9rem;
-  letter-spacing: 0.14em;
-  color: var(--ink-soft);
-  margin: 0 0 1.2rem;
-}
-.card--dissolve .space-count b {
-  color: color-mix(in srgb, var(--glow, #eb9b3c) 62%, #35301f);
-  font-weight: 700;
-  font-size: 1.05rem;
-}
+/* En dissolve el nombre del concepto vive como TÍTULO VERTICAL pegado al riel (.space-spine) y el
+   sub-nivel como contador en el topbar (.tb-count), a nivel del título. La card no lleva header. */
 /* D2 · dos zonas. La card se alinea a la izquierda y el título promovido la encabeza; el
    componente embebido se reparte en INSTRUCCIONES (app-concept-card, siempre el primer hijo en
    los 4 sub-niveles) a la izquierda y el DEMO (el resto: two-column, divs, img…) a la derecha.
@@ -294,10 +281,10 @@
   display: grid;
   /* Instrucciones angostas a la izquierda; el DEMO se lleva el resto del ancho (1fr) y estira
      para que el árbol y el código respiren. */
-  grid-template-columns: minmax(0, 13rem) minmax(0, 1fr);
-  gap: 2rem;
-  align-items: start;
-  zoom: 1;
+  grid-template-columns: minmax(0, 14rem) minmax(0, 1fr);
+  gap: 2.4rem;
+  align-items: center;
+  zoom: 1.2;
 }
 .card--dissolve .subhost > * > app-concept-card {
   grid-column: 1;
@@ -330,13 +317,25 @@
   padding-top: 0.16rem;
   padding-bottom: 0.16rem;
 }
-/* La caja de instrucciones deja de ser un panel blanco sólido que flota sobre la escena y pasa
-   a GLASS translúcido: se posa sobre la molécula en vez de taparla, rematando el "disolver el
-   marco". El fondo lo pinta el clima de la escena a través del blur. */
+/* La caja de instrucciones se DES-ENCAJONA: deja de ser un panel (borde + fondo) y pasa a texto
+   suelto sobre la escena, con sus tres partes (Concepto / Qué hacer / Qué observar) separadas y
+   aireadas. Remata el "disolver el marco" y libera la columna. */
 .card--dissolve .subhost app-concept-card > div {
-  background: rgba(252, 251, 245, 0.42);
-  backdrop-filter: blur(7px);
-  border-color: rgba(120, 110, 95, 0.28);
+  background: none;
+  border: none;
+  padding: 0;
+  backdrop-filter: none;
+  max-width: none;
+  margin: 0;
+}
+.card--dissolve .subhost app-concept-card p {
+  font-size: 0.92rem;
+  line-height: 1.5;
+  margin: 0 0 0.9rem;
+}
+/* El árbol (ECharts) gana alto para que el grafo se despliegue y respire en vez de amontonarse. */
+.card--dissolve .subhost .demo-chart {
+  height: 500px;
 }
 /* El título del sub-ejemplo (h1) se promovió al topbar: se oculta acá para no duplicarlo. */
 .card--dissolve .subhost h1 {
@@ -675,6 +674,20 @@
   letter-spacing: 0.18em;
   text-transform: uppercase;
   color: #c97d1e;
+}
+/* El centro del topbar agrupa el contador de sub-nivel (prefijo) + el título. */
+.tb-center {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.55rem;
+  min-width: 0;
+}
+.topbar.contextual .tb-count {
+  font-family: var(--mono);
+  font-size: 0.85rem;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  color: #8a8272;
 }
 /* En dissolve el topbar es contextual: su centro muestra el título del sub-ejemplo actual con
    presencia (serif, sin versalitas, alto contraste), no un rótulo de sección tenue. */

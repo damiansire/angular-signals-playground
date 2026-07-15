@@ -402,7 +402,8 @@ export function initMolecule(
 
   function renderSubCard(cc: Concept): void {
     const card = cc.card!;
-    card.querySelector('.subnum')!.textContent = String(cc.subIdx + 1);
+    const subnumEl = card.querySelector('.subnum'); // solo en el header clásico (no-dissolve)
+    if (subnumEl) subnumEl.textContent = String(cc.subIdx + 1);
     // Montar el componente REAL del sub-nivel actual, desmontando el del sub anterior.
     const host = card.querySelector<HTMLElement>('.subhost')!;
     cc.subDispose?.();
@@ -573,7 +574,7 @@ export function initMolecule(
     // contador pegado a ese título (su otra casa son los electrones de la órbita). En el resto,
     // el header meta clásico (Adentro · X · nivel N + sub-nivel Y/N).
     const header = DISSOLVE.has(i)
-      ? `<p class="space-count"><b class="subnum">1</b> <span class="of">/ ${cc.subN}</span></p>`
+      ? '' // en dissolve el nivel/sub-nivel viven en el riel, el topbar y la órbita; sin header en la card
       : `<p class="card__k">Adentro · ${cc.name} · nivel ${i}</p>` +
         `<p class="subtop">sub-nivel <b class="subnum">1</b> / ${cc.subN}</p>`;
     card.innerHTML =
@@ -618,6 +619,7 @@ export function initMolecule(
   const introEl = q<HTMLElement>('.intro');
   const topbarEl = q<HTMLElement>('.topbar');
   const tbTitleEl = q<HTMLElement>('.tb-title');
+  const tbCountEl = q<HTMLElement>('.tb-count');
   const captionEl = q<HTMLElement>('.caption');
   const spaceSpineEl = q<HTMLElement>('#spaceSpine');
   const railEl = q<HTMLElement>('.rail');
@@ -745,6 +747,12 @@ export function initMolecule(
           ? dc.exampleTitle || dc.tagline || dc.name
           : dc.tagline || dc.name
         : 'El recorrido';
+    }
+    // El contador de sub-nivel vive a nivel del título (en el topbar, como prefijo), no adentro
+    // de la card. Solo cuando estás en un sub-ejemplo (buceado en dissolve).
+    if (tbCountEl) {
+      tbCountEl.textContent =
+        dissolve && diveDepth > 0.5 && dc.subN > 0 ? `${dc.subIdx + 1} / ${dc.subN}` : '';
     }
     if (dc.subN > 0 && diveDepth > 0.35) {
       if (orbitFor !== c) {
