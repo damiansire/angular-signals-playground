@@ -282,6 +282,30 @@
   font-weight: 700;
   font-size: 1.05rem;
 }
+/* D2 · dos zonas. La card se alinea a la izquierda y el título promovido la encabeza; el
+   componente embebido se reparte en INSTRUCCIONES (app-concept-card, siempre el primer hijo en
+   los 4 sub-niveles) a la izquierda y el DEMO (el resto: two-column, divs, img…) a la derecha.
+   Baja la altura (antes concept + demo apilados) y usa el ancho. Robusto por estructura, sin
+   tocar los internals de los 35 componentes. */
+.card--dissolve {
+  text-align: left;
+}
+.card--dissolve .subhost > * {
+  display: grid;
+  /* Columnas que ABRAZAN el contenido (el demo tiene ancho intrínseco ~500px y no estira),
+     centradas como par: así no queda aire muerto a un costado. */
+  grid-template-columns: minmax(0, 22rem) minmax(0, 34rem);
+  justify-content: center;
+  gap: 2.4rem;
+  align-items: start;
+  zoom: 1.1;
+}
+.card--dissolve .subhost > * > app-concept-card {
+  grid-column: 1;
+}
+.card--dissolve .subhost > * > :not(app-concept-card) {
+  grid-column: 2;
+}
 /* Header (meta) integrado: un solo bloque compacto pegado al contenido, sin hilo divisor ni
    aire de más, para que "ADENTRO · X" + "sub-nivel Y/N" + el ejemplo se lean como una sola
    superficie continua, no como rótulos sueltos arriba de una caja. */
