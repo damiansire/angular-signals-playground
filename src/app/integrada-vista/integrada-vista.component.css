@@ -157,6 +157,15 @@
 .atom.dived-dissolve .aname {
   opacity: 0;
 }
+/* ...y el átomo gana presencia para ANCLAR el centro de la escena (ahí arranca vacío el árbol
+   del demo): halo estable (sin latido) + anillos más visibles, en vez de una mancha tenue. */
+.atom.dived-dissolve .halo {
+  animation: none;
+  opacity: 0.42;
+}
+.atom.dived-dissolve .ring {
+  opacity: 0.72;
+}
 
 .ripple {
   fill: none;
@@ -309,6 +318,14 @@
   white-space: pre;
   font-size: 1.05rem;
   line-height: 1.6;
+}
+/* La caja de instrucciones deja de ser un panel blanco sólido que flota sobre la escena y pasa
+   a GLASS translúcido: se posa sobre la molécula en vez de taparla, rematando el "disolver el
+   marco". El fondo lo pinta el clima de la escena a través del blur. */
+.card--dissolve .subhost app-concept-card > div {
+  background: rgba(252, 251, 245, 0.42);
+  backdrop-filter: blur(7px);
+  border-color: rgba(120, 110, 95, 0.28);
 }
 /* Header (meta) integrado: un solo bloque compacto pegado al contenido, sin hilo divisor ni
    aire de más, para que "ADENTRO · X" + "sub-nivel Y/N" + el ejemplo se lean como una sola
