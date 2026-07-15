@@ -789,15 +789,50 @@ export function initMolecule(
   const unit = (): number => stage.clientHeight;
   const stopS = (c: number, k: number): number => off[c] + subStopOffset(k);
 
-  // Salta a una parada (nivel/sub-nivel) fijando `scrollTop` directo. NO usamos
-  // `scrollTo({behavior:'smooth'})`: con `scroll-snap-type: mandatory` el navegador lo
-  // descarta y el contenedor no se mueve (la flecha no navegaría). Como el destino ES una
-  // parada exacta, el salto instantáneo queda firme sin que el snap lo reajuste, y llamamos
-  // `render()` en el acto para que la escena refleje la posición nueva (el `scroll` nativo lo
-  // haría vía rAF, pero así no dependemos de que la pestaña esté visible).
+  // Desliza el recorrido hasta una parada (nivel/sub-nivel) con una animación propia por rAF.
+  // NO usamos `scrollTo({behavior:'smooth'})`: con `scroll-snap-type: mandatory` el navegador
+  // lo descarta y el contenedor no se mueve (la flecha no navegaría). Movemos `scrollTop`
+  // nosotros con easing y renderizamos cada cuadro (así la cámara acompaña el desplazamiento);
+  // apagamos el snap durante la animación y lo restauramos al asentar en la parada exacta, que
+  // ya es un punto de snap, así no hay reajuste visible. Con `prefers-reduced-motion` o un
+  // salto nulo vamos directo, sin animar.
+  const easeInOut = (p: number): number =>
+    p < 0.5 ? 2 * p * p : 1 - Math.pow(-2 * p + 2, 2) / 2;
+  let scrollAnimId = 0;
+  const prefersReducedMotion = (): boolean =>
+    typeof window.matchMedia === 'function' &&
+    window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   function goToUnit(u: number): void {
-    stage.scrollTop = u * unit();
-    render(u);
+    cancelAnimationFrame(scrollAnimId);
+    const to = u * unit();
+    const from = stage.scrollTop;
+    const dist = to - from;
+    if (prefersReducedMotion() || Math.abs(dist) < 1) {
+      stage.scrollTop = to;
+      render(u);
+      return;
+    }
+    stage.style.scrollSnapType = 'none';
+    // Duración proporcional a la distancia, acotada: pasos cortos (sub-niveles contiguos) no se
+    // arrastran y saltos largos (cambio de concepto) no vuelan.
+    const dur = Math.min(620, 220 + Math.abs(dist) * 0.35);
+    let start = -1;
+    const tick = (ts: number): void => {
+      if (destroyed) return;
+      if (start < 0) start = ts;
+      const p = Math.min(1, (ts - start) / dur);
+      const top = from + dist * easeInOut(p);
+      stage.scrollTop = top;
+      render(top / unit());
+      if (p < 1) {
+        scrollAnimId = requestAnimationFrame(tick);
+      } else {
+        stage.scrollTop = to; // asentar exacto en la parada
+        render(u);
+        stage.style.scrollSnapType = '';
+      }
+    };
+    scrollAnimId = requestAnimationFrame(tick);
   }
 
   const snaps = document.createElement('div');
@@ -881,6 +916,7 @@ export function initMolecule(
   return () => {
     destroyed = true;
     window.clearTimeout(bootTimer);
+    cancelAnimationFrame(scrollAnimId);
     rafIds.forEach((id) => cancelAnimationFrame(id));
     stage.removeEventListener('scroll', onScroll);
     window.removeEventListener('resize', onResize);
