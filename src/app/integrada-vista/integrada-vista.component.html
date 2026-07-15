@@ -25,9 +25,13 @@
           <a routerLink="/practica/carrito">Practicá</a>
         </span>
       </div>
-      <aside class="rail" aria-hidden="true">
-        <div class="rail-line"><span class="rail-dot" id="railDot"></span></div>
-        <ol class="rail-ticks" id="railTicks"></ol>
+      <aside class="rail">
+        <button class="rail-step" id="railUp" type="button" aria-label="nivel anterior">▲</button>
+        <div class="rail-body" aria-hidden="true">
+          <div class="rail-line"><span class="rail-dot" id="railDot"></span></div>
+          <ol class="rail-ticks" id="railTicks"></ol>
+        </div>
+        <button class="rail-step" id="railDown" type="button" aria-label="nivel siguiente">▼</button>
       </aside>
 
       <div class="intro" id="intro" aria-hidden="true">
@@ -35,11 +39,6 @@
         <p class="intro__label">Scrolleá para empezar</p>
       </div>
       <div class="caption"><p class="s" id="capS">Molécula · escena 1</p></div>
-      <div class="controls">
-        <button class="step" id="prev" type="button" aria-label="anterior">◀</button>
-        <input class="scrubber" id="scrubber" type="range" min="0" max="60" value="0" aria-label="progreso" />
-        <button class="step" id="next" type="button" aria-label="siguiente">▶</button>
-      </div>
     </div>
   </div>
 </div>

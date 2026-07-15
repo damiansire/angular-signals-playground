@@ -1,4 +1,4 @@
-import { scrollLayout } from './molecule-engine';
+import { scrollLayout, snapStops } from './molecule-engine';
 
 describe('scrollLayout', () => {
   it('un concepto sin sub-niveles ocupa 2 unidades (nace + bucea)', () => {
@@ -17,5 +17,28 @@ describe('scrollLayout', () => {
     const { off, total } = scrollLayout([4, 7, null, null]);
     expect(off).toEqual([0, 5, 13, 15]);
     expect(total).toBe(17);
+  });
+});
+
+describe('snapStops', () => {
+  it('arranca en 0 (overlay inicial), antes del átomo del primer concepto', () => {
+    const stops = snapStops([2, null]);
+    expect(stops[0]).toBe(0);
+    expect(stops[1]).toBe(1.3); // átomo enfocado del concepto 0
+  });
+
+  it('un concepto con N sub-niveles aporta átomo + N paradas, una por sub-nivel', () => {
+    const stops = snapStops([2, null]);
+    // concepto 0 (off 0): átomo 1.3, sub 1 → 1.95, sub 2 → 2.5
+    expect(stops.slice(0, 4)).toEqual([0, 1.3, 1.95, 2.5]);
+    // concepto 1 (off 3, plano sin sub-niveles): solo su átomo, en 3 + 1.3
+    expect(stops.slice(4)).toEqual([4.3]);
+  });
+
+  it('cada parada es estrictamente mayor que la anterior (nunca retrocede ni se repite)', () => {
+    const stops = snapStops([4, 7, 2, null]);
+    for (let i = 1; i < stops.length; i++) {
+      expect(stops[i]).toBeGreaterThan(stops[i - 1]);
+    }
   });
 });

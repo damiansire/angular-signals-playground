@@ -32,8 +32,10 @@
      funcionando igual, solo se esconde la barra. */
   scrollbar-width: none;
   -ms-overflow-style: none;
-  /* Scroll nativo + snap: en la molécula asienta suave; los sub-niveles no se saltean. */
-  scroll-snap-type: y proximity;
+  /* Scroll nativo + snap: `mandatory` (no `proximity`) es lo que hace que
+     `scroll-snap-stop: always` (abajo) realmente frene en CADA sub-nivel; con
+     `proximity` un gesto largo de trackpad podía saltear varios de una. */
+  scroll-snap-type: y mandatory;
 }
 .stage::-webkit-scrollbar {
   display: none;
@@ -175,8 +177,8 @@
   display: grid;
   place-items: center;
   pointer-events: none;
-  /* padding inferior extra para que la card no quede tapada por la pastilla de controles + caption */
-  padding: 0.6rem 0.6rem 84px;
+  /* Sin pastilla de controles: solo se reserva abajo el alto del caption tenue. */
+  padding: 0.6rem 0.6rem 40px;
 }
 /* Velo de buceo: spotlight que oscurece el entorno del card (centro casi limpio, bordes
    oscuros) para que el color del concepto resalte parejo, incluido el teal sobre el fondo
@@ -212,11 +214,12 @@
   grid-area: 1 / 1;
   position: relative;
   width: min(1180px, 94%);
-  /* Altura acotada dejando lugar para el chrome (topbar + controles) y la órbita que la
+  /* Altura acotada dejando lugar para el chrome (topbar + caption) y la órbita que la
      envuelve: una card más alta que el viewport no se puede orbitar (el rect caería adentro)
-     y además se cortaría abajo. Con este tope, el contenido largo scrollea DENTRO de la card
-     (un solo scroll) y la órbita siempre la abraza entera. */
-  max-height: calc(100vh - 280px);
+     y además se cortaría abajo. Sin la pastilla de controles inferior se recupera ese alto,
+     así la card es más larga y muestra más contenido sin scroll interno; la órbita sigue
+     abrazándola entera (su clamp inferior se bajó a la par en el motor). */
+  max-height: calc(100vh - 200px);
   overflow-y: auto;
   text-align: center;
   opacity: 0;
@@ -456,7 +459,7 @@
   position: absolute;
   left: 0;
   right: 0;
-  bottom: 64px;
+  bottom: 16px;
   text-align: center;
   pointer-events: none;
 }
@@ -557,8 +560,44 @@
   z-index: 6;
   height: min(78%, 560px);
   display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 11px;
+}
+/* La línea + los ticks (decorativos, aria-hidden) van en fila; los pasos ▲/▼ los
+   flanquean arriba y abajo, sobre el mismo eje vertical que navegan. */
+.rail-body {
+  flex: 1;
+  min-height: 0;
+  display: flex;
   gap: 13px;
   pointer-events: none;
+}
+.rail-step {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: 1.5px solid #d7d1c2;
+  background: rgba(255, 255, 255, 0.82);
+  color: #6a6355;
+  font-size: 0.72rem;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(4px);
+  transition:
+    color 0.15s ease,
+    border-color 0.15s ease;
+}
+.rail-step:hover {
+  color: #201d16;
+  border-color: var(--source);
+}
+.rail-step:focus-visible {
+  outline: 2px solid var(--source);
+  outline-offset: 2px;
 }
 .rail-line {
   position: relative;
@@ -600,39 +639,6 @@
   color: #201d16;
   transform: scale(1.5);
   font-weight: 700;
-}
-
-/* Controles integrados: pastilla flotante abajo del centro, dentro de la pantalla. */
-.controls {
-  position: absolute;
-  bottom: 14px;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 6;
-  display: flex;
-  align-items: center;
-  gap: 0.7rem;
-  padding: 0.35rem 0.65rem;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.72);
-  box-shadow:
-    0 8px 22px -12px rgba(40, 32, 18, 0.5),
-    inset 0 0 0 1px #e3ddcf;
-  backdrop-filter: blur(5px);
-}
-.step {
-  width: 34px;
-  height: 34px;
-  border-radius: 50%;
-  border: 1.5px solid #d7d1c2;
-  background: #fff;
-  color: #201d16;
-  font-size: 0.95rem;
-  cursor: pointer;
-}
-.scrubber {
-  width: min(280px, 52vw);
-  accent-color: #c97d1e;
 }
 
 @media (prefers-reduced-motion: reduce) {

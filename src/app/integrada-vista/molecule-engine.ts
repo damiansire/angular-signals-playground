@@ -98,6 +98,29 @@ export function scrollLayout(subCounts: readonly (number | null)[]): {
   return { off, len, total };
 }
 
+/** Offset relativo (unidades de scroll) del sub-nivel `k` dentro de su concepto. */
+function subStopOffset(k: number): number {
+  return k === 0 ? 1.95 : 2 + (k - 1) + 0.5;
+}
+
+/**
+ * Puntos de scroll donde el recorrido debe frenar, uno por gesto: el inicio (overlay
+ * "Scrolleá para empezar"), el átomo enfocado de cada concepto (molécula → adentro) y
+ * cada uno de sus sub-niveles. `initMolecule` los usa para plantar los `.snap--stop`
+ * (scroll-snap-stop: always) que hacen que un scroll largo de trackpad no salte pasos.
+ * Función pura para poder testearla sin DOM.
+ */
+export function snapStops(subCounts: readonly (number | null)[]): number[] {
+  const { off } = scrollLayout(subCounts);
+  const stops: number[] = [0];
+  subCounts.forEach((n, i) => {
+    stops.push(off[i] + 1.3);
+    const nsub = n ?? 0;
+    for (let k = 0; k < nsub; k++) stops.push(off[i] + subStopOffset(k));
+  });
+  return stops;
+}
+
 function smoothstep(t: number): number {
   const x = Math.max(0, Math.min(1, t));
   return x * x * (3 - 2 * x);
@@ -388,7 +411,7 @@ export function initMolecule(
 
   function subScrollTo(cc: Concept, k: number): void {
     const ci = C.indexOf(cc);
-    stage.scrollTo({ top: stopS(ci, k) * unit(), behavior: 'smooth' });
+    goToUnit(stopS(ci, k));
   }
 
   // Construye los electrones UNA vez por concepto; su posición la maneja orbitLoop.
@@ -472,7 +495,9 @@ export function initMolecule(
         p.x = 0;
         p.y = topbarEl ? topbarEl.getBoundingClientRect().bottom : 0;
         topbarY = p.matrixTransform(m).y;
-        p.y = window.innerHeight - 92;
+        // Sin pastilla de controles abajo, el único chrome inferior es el caption tenue:
+        // la órbita puede bajar casi hasta el borde (antes reservaba 92px para la pastilla).
+        p.y = window.innerHeight - 40;
         bottomY = p.matrixTransform(m).y;
         p.x = railEl ? railEl.getBoundingClientRect().right : 0;
         p.y = 0;
@@ -573,7 +598,6 @@ export function initMolecule(
   const capS = q<HTMLElement>('#capS')!;
   const stage = q<HTMLDivElement>('#stage')!;
   const track = q<HTMLDivElement>('#track')!;
-  const scrubber = q<HTMLInputElement>('#scrubber')!;
   const railDot = q<HTMLElement>('#railDot');
   const introEl = q<HTMLElement>('.intro');
   const topbarEl = q<HTMLElement>('.topbar');
@@ -745,7 +769,6 @@ export function initMolecule(
     }
     if (s < 0.05) lastBorn = 0;
     capS.textContent = (w > 1.3 ? 'Adentro · ' : 'Molécula · ') + C[c].name;
-    scrubber.value = String(Math.round((s / TOTAL) * 60));
     if (railDot) railDot.style.top = ((s / TOTAL) * 100).toFixed(1) + '%';
     for (let ti = 0; ti < railTicks.length; ti++) railTicks[ti].classList.toggle('on', ti === c);
     if (introEl) introEl.style.opacity = s < 0.12 ? '1' : '0';
@@ -760,28 +783,33 @@ export function initMolecule(
   }
 
   // ---- Scroll 100% NATIVO + snap ----
-  // El navegador maneja el scroll (suave y familiar). Anclas invisibles hacen que:
-  //  - en los sub-niveles NO se pueda saltear (scroll-snap-stop: always → uno por gesto);
-  //  - en cada concepto de la molécula se asiente sin trabar el scroll (snap suave).
+  // El navegador maneja el scroll (suave y familiar). Anclas invisibles con
+  // scroll-snap-stop: always hacen que un gesto largo de trackpad frene en CADA
+  // parada (inicio, átomo de cada concepto, cada sub-nivel) en vez de saltear varias.
   const unit = (): number => stage.clientHeight;
-  const stopS = (c: number, k: number): number => off[c] + (k === 0 ? 1.95 : 2 + (k - 1) + 0.5);
+  const stopS = (c: number, k: number): number => off[c] + subStopOffset(k);
+
+  // Salta a una parada (nivel/sub-nivel) fijando `scrollTop` directo. NO usamos
+  // `scrollTo({behavior:'smooth'})`: con `scroll-snap-type: mandatory` el navegador lo
+  // descarta y el contenedor no se mueve (la flecha no navegaría). Como el destino ES una
+  // parada exacta, el salto instantáneo queda firme sin que el snap lo reajuste, y llamamos
+  // `render()` en el acto para que la escena refleje la posición nueva (el `scroll` nativo lo
+  // haría vía rAF, pero así no dependemos de que la pestaña esté visible).
+  function goToUnit(u: number): void {
+    stage.scrollTop = u * unit();
+    render(u);
+  }
 
   const snaps = document.createElement('div');
   snaps.className = 'snaps';
   snaps.setAttribute('aria-hidden', 'true');
   stamp(snaps);
-  for (let c = 0; c < N; c++) {
-    const positions: { s: number; stop: boolean }[] =
-      C[c].subN > 0
-        ? Array.from({ length: C[c].subN }, (_, k) => ({ s: stopS(c, k), stop: true }))
-        : [{ s: off[c] + 1.85, stop: false }];
-    for (const p of positions) {
-      const a = document.createElement('div');
-      a.className = 'snap' + (p.stop ? ' snap--stop' : '');
-      a.style.top = ((p.s / (TOTAL + 0.2)) * 100).toFixed(3) + '%';
-      stamp(a);
-      snaps.appendChild(a);
-    }
+  for (const s of snapStops(C.map((c) => c.subN || null))) {
+    const a = document.createElement('div');
+    a.className = 'snap snap--stop';
+    a.style.top = ((s / (TOTAL + 0.2)) * 100).toFixed(3) + '%';
+    stamp(a);
+    snaps.appendChild(a);
   }
   track.appendChild(snaps);
 
@@ -797,18 +825,32 @@ export function initMolecule(
   const onResize = (): void => {
     track.style.height = (TOTAL + 0.2) * unit() + 'px';
   };
-  const onScrub = (): void => {
-    stage.scrollTop = (+scrubber.value / 60) * TOTAL * unit();
-    render(stage.scrollTop / unit());
+  // Los pasos saltan a la parada ADYACENTE (nivel o sub-nivel), no un desplazamiento fijo:
+  // con scroll-snap mandatory un medio-paso queda por debajo del intervalo de snap y el
+  // navegador lo devuelve a la misma parada (la flecha no haría nada). Con la lista real de
+  // paradas ordenada, cada click avanza exactamente una — que es "avanzar de a un paso".
+  const stopUnits = snapStops(C.map((c) => c.subN || null))
+    .slice()
+    .sort((a, b) => a - b);
+  const stepTo = (dir: 1 | -1): void => {
+    const cur = stage.scrollTop / unit();
+    const eps = 0.05;
+    const target =
+      dir > 0
+        ? stopUnits.find((s) => s > cur + eps) ?? stopUnits[stopUnits.length - 1]
+        : [...stopUnits].reverse().find((s) => s < cur - eps) ?? stopUnits[0];
+    goToUnit(target);
   };
-  const onPrev = (): void => stage.scrollBy({ top: -unit() * 0.55, behavior: 'smooth' });
-  const onNext = (): void => stage.scrollBy({ top: unit() * 0.55, behavior: 'smooth' });
+  const onPrev = (): void => stepTo(-1);
+  const onNext = (): void => stepTo(1);
 
   stage.addEventListener('scroll', onScroll, { passive: true });
   window.addEventListener('resize', onResize);
-  scrubber.addEventListener('input', onScrub);
-  q<HTMLElement>('#prev')?.addEventListener('click', onPrev);
-  q<HTMLElement>('#next')?.addEventListener('click', onNext);
+  // Los pasos viven arriba y abajo del riel vertical (el eje que mueven): ▲ = anterior
+  // (scroll hacia 0), ▼ = siguiente (scroll hacia 11). Cada click avanza un paso del
+  // recorrido (nivel o sub-nivel) dejando que el snap asiente en la próxima parada.
+  q<HTMLElement>('#railUp')?.addEventListener('click', onPrev);
+  q<HTMLElement>('#railDown')?.addEventListener('click', onNext);
 
   // Posición de apertura: normalmente 0 (arriba, con el overlay). Con deep-link (?nivel&sub-nivel)
   // arranca scrolleado directo a ese sub-nivel, clampeado al rango real de conceptos/sub-niveles.
@@ -843,7 +885,6 @@ export function initMolecule(
     stage.removeEventListener('scroll', onScroll);
     window.removeEventListener('resize', onResize);
     window.removeEventListener('load', openAt);
-    scrubber.removeEventListener('input', onScrub);
     C.forEach((cc) => cc.subDispose?.());
   };
 }
