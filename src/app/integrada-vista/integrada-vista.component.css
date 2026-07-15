@@ -258,18 +258,9 @@
   background: transparent;
   box-shadow: none;
 }
-/* Info depurada (dissolve): el nombre del concepto PROMOVIDO a título del espacio, con el
-   sub-nivel como contador pegado debajo (su única casa en texto; la otra es la órbita). Reemplaza
-   al header meta redundante "Adentro · X · nivel N / sub-nivel Y/N". */
-.card--dissolve .space-title {
-  font-family: var(--serif);
-  font-weight: 600;
-  font-size: 2.1rem;
-  line-height: 1.05;
-  letter-spacing: -0.01em;
-  color: color-mix(in srgb, var(--glow, #eb9b3c) 44%, #2a2620);
-  margin: 0 0 0.15rem;
-}
+/* Info depurada (dissolve): el nombre del concepto vive como TÍTULO VERTICAL pegado al riel
+   (.space-spine, abajo); acá adentro queda solo el contador de sub-nivel, como metadato chico
+   arriba a la izquierda (su otra casa son los electrones de la órbita). */
 .card--dissolve .space-count {
   font-family: var(--mono);
   font-size: 0.9rem;
@@ -292,19 +283,32 @@
 }
 .card--dissolve .subhost > * {
   display: grid;
-  /* Columnas que ABRAZAN el contenido (el demo tiene ancho intrínseco ~500px y no estira),
-     centradas como par: así no queda aire muerto a un costado. */
-  grid-template-columns: minmax(0, 22rem) minmax(0, 34rem);
-  justify-content: center;
+  /* Instrucciones angostas a la izquierda; el DEMO se lleva el resto del ancho (1fr) y estira
+     para que el árbol y el código respiren. */
+  grid-template-columns: minmax(0, 16rem) minmax(0, 1fr);
   gap: 2.4rem;
   align-items: start;
-  zoom: 1.1;
+  zoom: 1;
 }
 .card--dissolve .subhost > * > app-concept-card {
   grid-column: 1;
 }
 .card--dissolve .subhost > * > :not(app-concept-card) {
   grid-column: 2;
+  width: 100%;
+}
+/* El bloque de código (app-code) trae fuente text-2xl y whitespace-pre-wrap: en su columna se
+   partía a mitad de statement (rompe el sentido de "así se arma el árbol"). Lo bajamos a un
+   tamaño que respira y lo preformateamos (sin wrap; scroll horizontal propio si hiciera falta),
+   así el HTML se lee como HTML. */
+.card--dissolve .subhost app-code {
+  display: block;
+  overflow-x: auto;
+}
+.card--dissolve .subhost app-code div {
+  white-space: pre;
+  font-size: 1.05rem;
+  line-height: 1.6;
 }
 /* Header (meta) integrado: un solo bloque compacto pegado al contenido, sin hilo divisor ni
    aire de más, para que "ADENTRO · X" + "sub-nivel Y/N" + el ejemplo se lean como una sola
@@ -537,6 +541,31 @@
   letter-spacing: 0.16em;
   color: #6a6355;
   margin: 0;
+}
+
+/* Título vertical del concepto (espina de identidad), pegado al riel: el nombre corre de abajo
+   hacia arriba junto a los números 0-11, ocupando el alto de la escena. Es LA casa del nombre
+   en modo dissolve (reemplaza al header meta y al label del átomo). El motor le pone el texto,
+   el color del concepto (--glow) y lo desvanece según el buceo. */
+.space-spine {
+  position: absolute;
+  left: 60px;
+  top: 50%;
+  transform: translateY(-50%) rotate(180deg);
+  writing-mode: vertical-rl;
+  z-index: 4;
+  pointer-events: none;
+  font-family: var(--serif);
+  font-weight: 600;
+  font-size: clamp(2.6rem, 6.4vh, 4.8rem);
+  line-height: 1;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+  max-height: 86vh;
+  overflow: hidden;
+  color: color-mix(in srgb, var(--glow, #6a6355) 40%, #1b1712);
+  opacity: 0;
+  transition: opacity 0.4s ease;
 }
 
 /* Overlay de bienvenida: tapa todo con "Scrolleá para empezar"; al scrollear se

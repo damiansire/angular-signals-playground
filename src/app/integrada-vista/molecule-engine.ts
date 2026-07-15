@@ -568,8 +568,7 @@ export function initMolecule(
     // contador pegado a ese título (su otra casa son los electrones de la órbita). En el resto,
     // el header meta clásico (Adentro · X · nivel N + sub-nivel Y/N).
     const header = DISSOLVE.has(i)
-      ? `<h2 class="space-title">${cc.name}</h2>` +
-        `<p class="space-count"><b class="subnum">1</b> <span class="of">/ ${cc.subN}</span></p>`
+      ? `<p class="space-count"><b class="subnum">1</b> <span class="of">/ ${cc.subN}</span></p>`
       : `<p class="card__k">Adentro · ${cc.name} · nivel ${i}</p>` +
         `<p class="subtop">sub-nivel <b class="subnum">1</b> / ${cc.subN}</p>`;
     card.innerHTML =
@@ -614,6 +613,7 @@ export function initMolecule(
   const introEl = q<HTMLElement>('.intro');
   const topbarEl = q<HTMLElement>('.topbar');
   const captionEl = q<HTMLElement>('.caption');
+  const spaceSpineEl = q<HTMLElement>('#spaceSpine');
   const railEl = q<HTMLElement>('.rail');
   const railTicksOl = q<HTMLElement>('#railTicks')!;
   for (let t = 0; t < N; t++) {
@@ -703,6 +703,17 @@ export function initMolecule(
     if (topbarEl) topbarEl.style.opacity = (1 - (dissolve ? 0.82 : 0.4) * diveDepth).toFixed(3);
     if (railEl) railEl.style.opacity = (1 - 0.35 * diveDepth).toFixed(3);
     if (captionEl) captionEl.style.opacity = dissolve ? Math.max(0, 1 - diveDepth / 0.5).toFixed(2) : '1';
+    // Título vertical del concepto (espina de identidad) pegado al riel: aparece al bucear en
+    // dissolve, con el color del concepto. Es la casa del nombre en la escena.
+    if (spaceSpineEl) {
+      if (dissolve) {
+        if (spaceSpineEl.textContent !== C[c].name) spaceSpineEl.textContent = C[c].name;
+        spaceSpineEl.style.setProperty('--glow', COL[C[c].accent]);
+        spaceSpineEl.style.opacity = Math.min(1, diveDepth / 0.55).toFixed(2);
+      } else {
+        spaceSpineEl.style.opacity = '0';
+      }
+    }
 
     const dc = C[c];
     if (dc.subN > 0) {
