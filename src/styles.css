@@ -97,3 +97,56 @@ body {
     --propagation-duration: 1ms;
   }
 }
+
+/* ============================================================================
+   Armonización material de los demos embebidos en /integrada-vista (dissolve).
+   Los sub-niveles del recorrido montan componentes standalone (editor de código,
+   contador, imágenes/GIF) que traen superficies dispares: sueltas en el campo del
+   átomo se leían como cajas ajenas. Estas reglas los homologan a UNA familia:
+   editor en carbón cálido, vidrio esmerilado entonado con el concepto, y las
+   imágenes/GIF montadas como pantallas con bisel. Viven en el stylesheet GLOBAL
+   (no en integrada-vista.component.css) porque ALCANZAN internals de componentes
+   DESCENDIENTES: es theming cross-component, no estilo scoped del host — así no
+   dependen del truco de stamping ni presionan el budget de estilo del componente.
+   El color del concepto llega por `--glow`, que el motor setea inline en `.card`
+   y hereda por el árbol. */
+
+/* Scroll único: la card scrollea, nada adentro. Una barra de sistema pegada a un
+   panel embebido se lee como "iframe ajeno" y rompe la inmersión. */
+.card::-webkit-scrollbar,
+.card--dissolve .subhost *::-webkit-scrollbar {
+  display: none;
+}
+.card,
+.card--dissolve .subhost * {
+  scrollbar-width: none;
+}
+
+/* Familia material: carbón cálido (editor) o vidrio entonado (card clara), redondeados
+   y flotando sobre una sombra teñida con el concepto (--frame), que los hace leer
+   "proyectados desde el átomo", no paneles de otra app. */
+.card--dissolve .subhost app-code > div,
+.card--dissolve .subhost img,
+.card--dissolve .subhost app-count-increment section {
+  --frame: 0 26px 64px -34px color-mix(in srgb, var(--glow, #9a9081) 68%, #000);
+  border-radius: 16px;
+}
+/* Editor: de gris frío (bg-gray-800 de Tailwind) a carbón cálido para hermanar con el crema. */
+.card--dissolve .subhost app-code > div {
+  background: linear-gradient(180deg, #26231d, #1b1915);
+  box-shadow: var(--frame);
+}
+/* GIF/imágenes: montadas como pantalla con bisel entonado (en vez de un rectángulo blanco). */
+.card--dissolve .subhost img {
+  max-height: 62vh;
+  width: auto;
+  border: 1px solid color-mix(in srgb, var(--glow, #9a9081) 34%, #ded5c2);
+  box-shadow: var(--frame);
+}
+/* Card del contador (bg-gray-100): del blanco plano a un vidrio cálido entonado. */
+.card--dissolve .subhost app-count-increment section {
+  background: color-mix(in srgb, var(--glow, #9a9081) 10%, rgba(252, 251, 245, 0.72));
+  backdrop-filter: blur(7px);
+  border: 1px solid color-mix(in srgb, var(--glow, #9a9081) 26%, #e6dfcf);
+  box-shadow: var(--frame);
+}

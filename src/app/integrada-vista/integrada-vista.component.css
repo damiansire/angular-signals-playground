@@ -158,14 +158,37 @@
 .atom.dived-dissolve .aname {
   opacity: 0;
 }
-/* ...y el átomo gana presencia para ANCLAR el centro de la escena (ahí arranca vacío el árbol
-   del demo): halo estable (sin latido) + anillos más visibles, en vez de una mancha tenue. */
+/* ...y el átomo gana presencia para ANCLAR el centro de la escena (ahí arranca el árbol del
+   demo). Con el árbol ya disuelto (transparente), esta molécula se ve a través del contenido:
+   así que en vez de quedar congelada, RESPIRA lento — un latido calmo y amplio que hace sentir
+   vivo el campo de fondo sin competir con la lectura. */
 .atom.dived-dissolve .halo {
-  animation: none;
+  animation: dissolveBreath 5.5s ease-in-out infinite;
   opacity: 0.26;
+}
+@keyframes dissolveBreath {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.16;
+  }
+  50% {
+    transform: scale(1.16);
+    opacity: 0.32;
+  }
 }
 .atom.dived-dissolve .ring {
   opacity: 0.5;
+  animation: dissolveRingBreath 5.5s ease-in-out infinite;
+}
+@keyframes dissolveRingBreath {
+  0%,
+  100% {
+    opacity: 0.4;
+  }
+  50% {
+    opacity: 0.6;
+  }
 }
 /* Los electrones pasan a orbitar la card (.suborbit): se apagan del núcleo para no convivir
    como dos cosas distintas con los sub-dots numerados. */
@@ -339,6 +362,17 @@
   line-height: 1.5;
   margin: 0 0 0.9rem;
 }
+/* En la vista molécula el árbol se DISUELVE igual que el código y las instrucciones: pierde su
+   hoja blanca (borde + sombra + grilla punteada) que en modo standalone lo hace lindo pero acá
+   se lee como una ventana pegada sobre la escena. Sin marco, sus nodos flotan en el campo del
+   átomo y la molécula viva de fondo puede verse a través. */
+.card--dissolve .subhost .tree-card {
+  background: none;
+  background-image: none;
+  border: none;
+  box-shadow: none;
+  padding: 0;
+}
 /* El árbol (ECharts) gana alto para que el grafo se despliegue y respire en vez de amontonarse. */
 .card--dissolve .subhost .demo-chart {
   height: 500px;
@@ -443,6 +477,11 @@
   border-color: transparent;
 }
 
+/* La capa "material unificado" (editor en carbón cálido, vidrio del contador, GIF como
+   pantalla, scroll oculto) vive en `src/styles.css`: alcanza internals de componentes
+   descendientes (theming cross-component, no scoped), así no presiona el budget de este
+   estilo ni depende del stamping. Ver ahí "Armonización material de los demos embebidos". */
+
 /* El anillo de sub-niveles debe rodear a la card, no quedar más chico que ella: quedó
    topeado en 900px de un momento a otro cuando .card--sub creció a 1440px en pasadas
    anteriores, así que los electrones numerados terminaban cayendo ADENTRO de la card
@@ -455,8 +494,11 @@
   height: auto;
   opacity: 0;
   transition: opacity 0.35s ease;
-  /* Encima de la card (antes 2): los electrones flotan por delante, no detrás. */
-  z-index: 3;
+  /* Por ENCIMA del topbar (z 6): en dissolve el arco de sub-niveles enmarca el título pegado al
+     borde superior, así que sus círculos deben ir por delante del degradado del topbar (si no, la
+     parte de arriba del dot activo se atenúa bajo el crema). El svg es pointer-events:none y sus
+     dots no pisan el texto/links del topbar, así que ganar la capa no roba clicks ni tapa texto. */
+  z-index: 7;
   pointer-events: none;
   overflow: visible;
 }
@@ -470,6 +512,48 @@
    punteado alrededor de la card sin marco se leería como el borde de una ventana. */
 .suborbit.dissolve .sub-ring {
   opacity: 0;
+}
+/* En dissolve los electrones dejan la card y se acomodan en una constelación fija bajo el
+   topbar: sub-arc es el hilo punteado que los conecta, invisible en el resto de los conceptos
+   (que siguen orbitando la card sobre .sub-ring). */
+.sub-arc {
+  fill: none;
+  stroke-width: 1.5;
+  stroke-dasharray: 2 5;
+  opacity: 0;
+}
+.suborbit.dissolve .sub-arc {
+  opacity: 0.68;
+}
+/* La chispa recorre sub-arc en loop (SMIL, ver molecule-engine): siempre en movimiento, sin
+   esperar ninguna interacción — es lo que hace que la constelación se sienta viva en reposo. */
+.sub-spark {
+  opacity: 0;
+  filter: url(#glow);
+}
+.suborbit.dissolve .sub-spark {
+  opacity: 0.9;
+}
+/* El sonar respira alrededor del nodo actual: un anillo que se expande y se apaga en loop. */
+.sub-sonar {
+  fill: none;
+  stroke-width: 1.5;
+  opacity: 0;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+.suborbit.dissolve .sub-sonar {
+  animation: sub-sonar-pulse 2.4s ease-out infinite;
+}
+@keyframes sub-sonar-pulse {
+  0% {
+    transform: scale(0.7);
+    opacity: 0.55;
+  }
+  100% {
+    transform: scale(1.9);
+    opacity: 0;
+  }
 }
 .sub-e {
   cursor: pointer;
@@ -491,6 +575,16 @@
   transition:
     cx 0.4s ease,
     cy 0.4s ease,
+    r 0.25s ease,
+    fill 0.35s ease;
+}
+/* En dissolve los dots NO se reubican al cambiar de sub-nivel (cada uno vive fijo en su frac
+   del arco que enmarca el título), así que la transición cx/cy del círculo sólo produciría el
+   "barrido" del boot (vuela desde su posición inicial mientras su número ya está puesto). Se
+   apaga acá (tamaño/color siguen animando); el orbit no-dissolve la conserva, donde el actual
+   sí vuela al tope. Sólo el círculo: el número usa x/y, cx/cy nunca lo movía. */
+.suborbit.dissolve .sub-e.current .sub-dot {
+  transition:
     r 0.25s ease,
     fill 0.35s ease;
 }

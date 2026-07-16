@@ -383,8 +383,32 @@ export function initMolecule(
   // que la abraza por fuera (el actual se resalta en su lugar, sin volar hasta arriba).
   const suborbit = el('svg', { class: 'suborbit', viewBox: '0 0 900 600' });
   const subRing = el('rect', { class: 'sub-ring', rx: 40 });
+  // En dissolve los electrones dejan de orbitar la card: se acomodan en fila fija, uno por
+  // sub-nivel, sobre un arco angosto pegado al topbar (la "constelación" del recorrido). subArc
+  // es la curva punteada que los conecta; solo se pinta cuando el concepto es dissolve.
+  const subArcId = 'sub-arc-' + Math.random().toString(36).slice(2);
+  const subArc = el('path', { class: 'sub-arc', id: subArcId });
+  // La vida del arco: un pulso viaja recorriéndolo en loop (SMIL, no rAF — se mueve solo,
+  // sin costo de JS) y un sonar respira alrededor del nodo actual. Ambos son gratis en reposo:
+  // no dependen de que el usuario interactúe para sentirse "vivos".
+  const subSpark = el('circle', { class: 'sub-spark', r: 4 });
+  const subSparkMotion = el('animateMotion', {
+    dur: '2.6s',
+    repeatCount: 'indefinite',
+    keyPoints: '0;1',
+    keyTimes: '0;1',
+    calcMode: 'linear',
+  });
+  const subSparkMpath = document.createElementNS('http://www.w3.org/2000/svg', 'mpath');
+  subSparkMpath.setAttributeNS('http://www.w3.org/1999/xlink', 'href', '#' + subArcId);
+  subSparkMotion.appendChild(subSparkMpath);
+  subSpark.appendChild(subSparkMotion);
+  const subSonar = el('circle', { class: 'sub-sonar', r: 16 });
   const subEG = el('g', {});
   suborbit.appendChild(subRing);
+  suborbit.appendChild(subArc);
+  suborbit.appendChild(subSpark);
+  suborbit.appendChild(subSonar);
   suborbit.appendChild(subEG);
 
   let orbitFor = -1;
@@ -451,6 +475,9 @@ export function initMolecule(
     const col = COL[cc.accent];
     const nsub = cc.subN;
     subRing.setAttribute('stroke', col);
+    subArc.setAttribute('stroke', col);
+    subSpark.setAttribute('fill', col);
+    subSonar.setAttribute('stroke', col);
     subEG.textContent = '';
     subDots = [];
     for (let k = 0; k < nsub; k++) {
@@ -507,6 +534,12 @@ export function initMolecule(
       let topbarY = -1e9;
       let bottomY = 1e9;
       let railX = -1e9;
+      // Bordes del bloque título+contador (`.tb-center`) en coords del suborbit: el arco de
+      // sub-niveles arranca ANTES de su borde izquierdo y termina DESPUÉS del derecho, así ningún
+      // dot (ni el activo, agrandado) pisa el texto — el título queda "enmarcado" por el arco.
+      let blockL = 360;
+      let blockR = 540;
+      let blockBottomY = -1e9;
       const m0 = suborbit.getScreenCTM();
       if (m0 && cc.card) {
         const m = m0.inverse();
@@ -534,6 +567,18 @@ export function initMolecule(
         p.x = railEl ? railEl.getBoundingClientRect().right : 0;
         p.y = 0;
         railX = p.matrixTransform(m).x;
+        if (tbCenterEl) {
+          const tr = tbCenterEl.getBoundingClientRect();
+          p.x = tr.left;
+          p.y = tr.top;
+          const bl = p.matrixTransform(m);
+          p.x = tr.right;
+          p.y = tr.bottom;
+          const brc = p.matrixTransform(m);
+          blockL = bl.x;
+          blockR = brc.x;
+          blockBottomY = brc.y;
+        }
       }
       // Rect redondeado que envuelve la card por fuera (PAD de separación), clampeado al chrome.
       // El riel MANDA siempre en el lado izquierdo: si el margen hacia el riel es menor al PAD
@@ -551,37 +596,65 @@ export function initMolecule(
       subRing.setAttribute('width', (R - L).toFixed(1));
       subRing.setAttribute('height', (B - T).toFixed(1));
       subRing.setAttribute('rx', rad.toFixed(1));
-      const cur = cc.subIdx;
-      // En dissolve el anillo rect está oculto (.suborbit.dissolve .sub-ring): los electrones
-      // orbitan una ELIPSE inscrita en los mismos límites, que abraza el contenido de forma
-      // redonda. Así los 4 dots dejan de caer en las 4 esquinas (desparramados) y se leen como
-      // electrones girando. En el resto se mantiene el recorrido sobre el rect redondeado, cuyo
-      // anillo punteado sí se ve, para no descalzar dots y anillo.
+      // En dissolve los electrones dejan de orbitar la card: se leen mejor como una CONSTELACIÓN
+      // fija del recorrido (uno por sub-nivel, en su propio lugar, izquierda a derecha) que como
+      // puntos volando alrededor de un contenido sin marco. En el resto se mantiene el recorrido
+      // giratorio sobre el rect redondeado que abraza la card.
       const dissolve = DISSOLVE.has(orbitFor);
-      const per = rrectPerimeter(R - L, B - T, rad);
-      const ecx = (L + R) / 2;
-      const ecy = (T + B) / 2;
-      const erx = (R - L) / 2;
-      const ery = (B - T) / 2;
-      for (let k = 0; k < subDots.length; k++) {
-        const o = subDots[k];
-        // El sub-nivel actual queda fijo arriba del todo (12 en punto), sin el giro continuo:
-        // es "dónde estoy", no debería moverse solo. Los demás recorren el contorno.
-        let pt: { x: number; y: number };
-        if (k === cur) {
-          pt = dissolve ? { x: ecx, y: ecy - ery } : { x: (L + R) / 2, y: T };
-        } else if (dissolve) {
-          const ang = (o.frac + t / SPIN) * 2 * Math.PI - Math.PI / 2;
-          pt = { x: ecx + erx * Math.cos(ang), y: ecy + ery * Math.sin(ang) };
-        } else {
-          pt = rrectPoint(L, T, R, B, rad, (o.frac + t / SPIN) * per);
+      if (dissolve) {
+        const nsub = subDots.length;
+        // Opción A: el arco ARRANCA antes del bloque título+contador y TERMINA después, curvando
+        // hacia abajo (∪) para enmarcarlo. Los extremos lo flanquean por los costados (fuera del
+        // texto) y los pasos del medio hunden por debajo; el título flota dentro del arco. El
+        // margen izquierdo deja lugar para el dot ACTIVO agrandado + su sonar cuando el paso 1 es
+        // el actual, así nunca colisiona con el contador. Escala parejo de 2 a 10+ pasos porque el
+        // ancho lo fija el título (no la cantidad de dots): sumar pasos sólo los reparte en la curva.
+        const archL = blockL - 46;
+        const archR = blockR + 40;
+        const archCX = (archL + archR) / 2;
+        // Separación bajo el título: da aire a los extremos para que el dot ACTIVO agrandado no
+        // roce el borde superior de la ventana cuando el paso actual es un extremo (p.ej. sub-1).
+        const archY = (blockBottomY > -1e8 ? blockBottomY : topbarY + 40) + 18;
+        const archDepth = 42;
+        for (let k = 0; k < nsub; k++) {
+          const o = subDots[k];
+          const frac = nsub > 1 ? k / (nsub - 1) : 0.5;
+          o.lx = archL + (archR - archL) * frac;
+          o.ly = archY + archDepth * Math.sin(Math.PI * frac);
+          o.dot.setAttribute('cx', o.lx.toFixed(1));
+          o.dot.setAttribute('cy', o.ly.toFixed(1));
+          o.num.setAttribute('x', o.lx.toFixed(1));
+          o.num.setAttribute('y', (o.ly + 4).toFixed(1));
         }
-        o.lx = pt.x;
-        o.ly = pt.y;
-        o.dot.setAttribute('cx', o.lx.toFixed(1));
-        o.dot.setAttribute('cy', o.ly.toFixed(1));
-        o.num.setAttribute('x', o.lx.toFixed(1));
-        o.num.setAttribute('y', (o.ly + 4).toFixed(1));
+        subArc.setAttribute(
+          'd',
+          `M ${archL.toFixed(1)} ${archY.toFixed(1)} Q ${archCX.toFixed(1)} ${(archY + archDepth * 2).toFixed(1)} ${archR.toFixed(1)} ${archY.toFixed(1)}`,
+        );
+        // El sonar respira alrededor del nodo actual: sigue su posición cuadro a cuadro (la
+        // animación de escala/opacidad la hace el CSS, acá solo lo perseguimos).
+        const curDot = subDots[cc.subIdx];
+        if (curDot) {
+          subSonar.setAttribute('cx', curDot.lx.toFixed(1));
+          subSonar.setAttribute('cy', curDot.ly.toFixed(1));
+        }
+      } else {
+        const per = rrectPerimeter(R - L, B - T, rad);
+        const cur = cc.subIdx;
+        for (let k = 0; k < subDots.length; k++) {
+          const o = subDots[k];
+          // El sub-nivel actual queda fijo arriba del todo (12 en punto), sin el giro continuo:
+          // es "dónde estoy", no debería moverse solo. Los demás recorren el contorno.
+          const pt =
+            k === cur
+              ? { x: (L + R) / 2, y: T }
+              : rrectPoint(L, T, R, B, rad, (o.frac + t / SPIN) * per);
+          o.lx = pt.x;
+          o.ly = pt.y;
+          o.dot.setAttribute('cx', o.lx.toFixed(1));
+          o.dot.setAttribute('cy', o.ly.toFixed(1));
+          o.num.setAttribute('x', o.lx.toFixed(1));
+          o.num.setAttribute('y', (o.ly + 4).toFixed(1));
+        }
       }
     }
     raf(orbitLoop);
@@ -657,6 +730,7 @@ export function initMolecule(
   const introEl = q<HTMLElement>('.intro');
   const topbarEl = q<HTMLElement>('.topbar');
   const tbTitleEl = q<HTMLElement>('.tb-title');
+  const tbCenterEl = q<HTMLElement>('.tb-center');
   const tbCountEl = q<HTMLElement>('.tb-count');
   const captionEl = q<HTMLElement>('.caption');
   const spaceSpineEl = q<HTMLElement>('#spaceSpine');
