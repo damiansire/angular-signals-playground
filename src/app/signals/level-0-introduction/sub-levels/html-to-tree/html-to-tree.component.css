@@ -1,0 +1,21 @@
+/* Los conectores no son líneas muertas: el guion FLUYE del código hacia el nodo del árbol,
+   como la señal propagándose (el tema mismo de la app). El motor reescribe `d` cada frame para
+   seguir el nodo; el desplazamiento del dash es puramente CSS, así que perseguir y fluir no
+   pelean. `M` del path arranca en el árbol y termina en el código, por eso el offset va hacia
+   valores negativos: el patrón viaja código → árbol. */
+.connector {
+  /* Glow del color del conector (currentColor = line.color, seteado inline): sobre el clima
+     claro la traza se lee "encendida" como en la referencia, no una línea plana. */
+  filter: drop-shadow(0 0 4px currentColor);
+  animation: connector-flow 0.85s linear infinite;
+}
+@keyframes connector-flow {
+  to {
+    stroke-dashoffset: -14;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .connector {
+    animation: none;
+  }
+}

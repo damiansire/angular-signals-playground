@@ -70,11 +70,19 @@ export class OldChangeDetectionComponent {
     },
   ] as NodeTree[];
 
-  // Computed signal to derive node data based on 'step'
+  // Un nodo esta REVISADO cuando el barrido ya llego a su profundidad (y/100). El verde claro
+  // original dejaba la etiqueta blanca casi ilegible y el pendiente caia al gris default de
+  // echarts (lavado sobre el crema): verde mas hondo para que el label blanco contraste, y
+  // pendiente en el tono ink del nivel (visible y en clave con el concepto).
+  private static readonly SWEPT = '#2fa06d';
+  private static readonly PENDING = '#9a9081';
   data = computed<NodeTree[]>(() =>
     this.baseElement.map((node) => ({
       ...node,
-      color: this.step() >= node.y / 100 ? '#90EE90' : '',
+      color:
+        this.step() >= node.y / 100
+          ? OldChangeDetectionComponent.SWEPT
+          : OldChangeDetectionComponent.PENDING,
     })),
   );
 

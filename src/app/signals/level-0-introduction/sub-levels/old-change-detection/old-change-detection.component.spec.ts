@@ -24,16 +24,16 @@ describe('OldChangeDetectionComponent', () => {
 
   it('arranca con step en 0 y ningun nodo pintado', () => {
     expect(component.step()).toBe(0);
-    const pintados = component.data().filter((n) => n.color === '#90EE90');
+    const pintados = component.data().filter((n) => n.color === '#2fa06d');
     expect(pintados.length).toBe(0);
   });
 
   it('incrementStep avanza de a 2 y pinta los nodos del nivel alcanzado', () => {
     component.incrementStep(); // step = 2
     expect(component.step()).toBe(2);
-    // el nodo main (y=100 -> nivel 1) queda pintado con step>=1
+    // el nodo main (y=100 -> nivel 1) queda pintado (revisado) con step>=1
     const main = component.data().find((n) => n.name === 'main')!;
-    expect(main.color).toBe('#90EE90');
+    expect(main.color).toBe('#2fa06d');
   });
 
   it('decrementStep no baja de 0', () => {
