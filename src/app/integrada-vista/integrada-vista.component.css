@@ -555,6 +555,31 @@
     opacity: 0;
   }
 }
+/* La pelota del sub-nivel actual (sonar + disco + número): un grupo que se DESLIZA de un dot al
+   siguiente al cambiar de nivel. La transición SÓLO vive en dissolve; en el boot el motor la apaga
+   un frame para colocarla directa. En dissolve el dot de abajo se oculta (`.sub-e.current`) para
+   que la pelota sea el único marcador y el highlight viaje en vez de saltar por handoff. */
+.sub-puck {
+  opacity: 0;
+  pointer-events: none;
+}
+.suborbit.dissolve .sub-puck {
+  opacity: 1;
+  transition: transform 0.5s cubic-bezier(0.34, 0.8, 0.3, 1);
+}
+.sub-puck-dot {
+  filter: url(#glow);
+}
+.sub-puck-n {
+  font-family: var(--mono);
+  font-size: 13px;
+  font-weight: 700;
+  fill: #fff;
+  text-anchor: middle;
+}
+.suborbit.dissolve .sub-e.current {
+  opacity: 0;
+}
 .sub-e {
   cursor: pointer;
   pointer-events: none;

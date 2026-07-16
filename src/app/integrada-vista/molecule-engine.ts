@@ -404,15 +404,29 @@ export function initMolecule(
   subSparkMotion.appendChild(subSparkMpath);
   subSpark.appendChild(subSparkMotion);
   const subSonar = el('circle', { class: 'sub-sonar', r: 16 });
+  // La "pelota" del sub-nivel actual: un grupo (sonar + disco + número) que se DESLIZA de un dot
+  // al siguiente al cambiar de nivel (transición de transform) y sólo entonces — en el boot aparece
+  // directo en su lugar. Es el ÚNICO marcador del actual en dissolve (el dot de abajo se oculta),
+  // así el highlight "viaja" en vez de saltar por handoff de tamaño entre dos dots distintos.
+  const subPuckDot = el('circle', { class: 'sub-puck-dot', r: 22 });
+  const subPuckNum = el('text', { class: 'sub-puck-n', y: 5 });
+  const subPuckG = el('g', { class: 'sub-puck' });
+  subPuckG.appendChild(subSonar);
+  subPuckG.appendChild(subPuckDot);
+  subPuckG.appendChild(subPuckNum);
   const subEG = el('g', {});
   suborbit.appendChild(subRing);
   suborbit.appendChild(subArc);
   suborbit.appendChild(subSpark);
-  suborbit.appendChild(subSonar);
   suborbit.appendChild(subEG);
+  suborbit.appendChild(subPuckG);
 
   let orbitFor = -1;
   let subDots: SubDot[] = [];
+  // Estado de la pelota: dónde quedó, para decidir snap (boot / concepto nuevo) vs glide (cambió
+  // el sub-nivel dentro del mismo concepto).
+  let puckIdx = -1;
+  let puckConcept = -1;
 
   // El orbe del sub-nivel nuevo NACE en el electrón actual y se fusiona al centro de la card.
   function fuse(cc: Concept): void {
@@ -478,6 +492,7 @@ export function initMolecule(
     subArc.setAttribute('stroke', col);
     subSpark.setAttribute('fill', col);
     subSonar.setAttribute('stroke', col);
+    subPuckDot.setAttribute('fill', col);
     subEG.textContent = '';
     subDots = [];
     for (let k = 0; k < nsub; k++) {
@@ -630,12 +645,27 @@ export function initMolecule(
           'd',
           `M ${archL.toFixed(1)} ${archY.toFixed(1)} Q ${archCX.toFixed(1)} ${(archY + archDepth * 2).toFixed(1)} ${archR.toFixed(1)} ${archY.toFixed(1)}`,
         );
-        // El sonar respira alrededor del nodo actual: sigue su posición cuadro a cuadro (la
-        // animación de escala/opacidad la hace el CSS, acá solo lo perseguimos).
+        // La pelota se coloca sobre el dot actual: en el boot / cambio de concepto aparece DIRECTO
+        // (transición apagada), y al cambiar de sub-nivel DENTRO del concepto DESLIZA (la transición
+        // de transform la hace el CSS). Si no cambió nada no se toca: el arco está anclado al topbar
+        // (estable), así que no hay que perseguirlo cuadro a cuadro (y no se reinicia el glide).
         const curDot = subDots[cc.subIdx];
         if (curDot) {
-          subSonar.setAttribute('cx', curDot.lx.toFixed(1));
-          subSonar.setAttribute('cy', curDot.ly.toFixed(1));
+          const boot = puckConcept !== orbitFor || puckIdx < 0;
+          if (boot || puckIdx !== cc.subIdx) {
+            const to = `translate(${curDot.lx.toFixed(1)},${curDot.ly.toFixed(1)})`;
+            if (boot) {
+              subPuckG.style.transition = 'none';
+              subPuckG.setAttribute('transform', to);
+              void suborbit.getBoundingClientRect();
+              subPuckG.style.transition = '';
+            } else {
+              subPuckG.setAttribute('transform', to);
+            }
+            subPuckNum.textContent = String(cc.subIdx + 1);
+            puckIdx = cc.subIdx;
+            puckConcept = orbitFor;
+          }
         }
       } else {
         const per = rrectPerimeter(R - L, B - T, rad);
