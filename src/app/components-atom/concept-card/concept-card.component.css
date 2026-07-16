@@ -1,0 +1,18 @@
+/* Container query en vez de breakpoint de viewport: este card se embebe en contextos MUY
+   angostos (la vista molécula, /integrada-vista) aunque la ventana sea ancha, así que un
+   `sm:` de Tailwind (basado en el viewport) no sirve — necesita reaccionar al ancho real
+   del contenedor propio. */
+:host {
+  container-type: inline-size;
+}
+
+.concept-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+}
+
+@container (min-width: 28rem) {
+  .concept-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}

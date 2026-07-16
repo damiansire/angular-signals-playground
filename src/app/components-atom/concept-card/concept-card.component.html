@@ -1,17 +1,20 @@
-<div
-  class="mx-auto max-w-2xl mb-6 rounded-lg border border-gray-200 bg-gray-50 px-5 py-4 text-left"
->
-  <p class="text-sm text-gray-700">
-    <span class="font-semibold text-gray-900">Concepto:</span> {{ concept() }}
-  </p>
-  @if (action()) {
-    <p class="text-sm text-gray-700 mt-1">
-      <span class="font-semibold text-gray-900">Qué hacer:</span> {{ action() }}
-    </p>
-  }
-  @if (observe()) {
-    <p class="text-sm text-gray-700 mt-1">
-      <span class="font-semibold text-emerald-700">Qué observar:</span> {{ observe() }}
-    </p>
-  }
+<div class="mb-6 w-full rounded-lg border border-gray-200 bg-gray-50 px-6 py-4">
+  <div class="concept-grid gap-x-8 gap-y-3 text-left">
+    <div class="border-l-2 border-gray-400 pl-3">
+      <p class="truncate text-xs font-semibold uppercase tracking-wide text-gray-600">Concepto</p>
+      <p class="mt-1 text-sm text-gray-700">{{ concept() }}</p>
+    </div>
+    @if (action()) {
+      <div class="border-l-2 border-sky-500 pl-3">
+        <p class="truncate text-xs font-semibold uppercase tracking-wide text-sky-700">Qué hacer</p>
+        <p class="mt-1 text-sm text-gray-700">{{ action() }}</p>
+      </div>
+    }
+    @if (observe()) {
+      <div class="border-l-2 border-emerald-500 pl-3">
+        <p class="truncate text-xs font-semibold uppercase tracking-wide text-emerald-700">Qué observar</p>
+        <p class="mt-1 text-sm text-gray-700">{{ observe() }}</p>
+      </div>
+    }
+  </div>
 </div>
