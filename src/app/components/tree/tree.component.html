@@ -1,1 +1,7 @@
-<app-node-tree [links]="links()" [nodes]="nodes()"></app-node-tree>
+<div class="tree-card rounded-md border border-gray-200 bg-gray-50 shadow-md p-2">
+  <app-node-tree
+    [links]="links()"
+    [nodes]="nodes()"
+    (viewChanged)="viewChanged.emit()"
+  ></app-node-tree>
+</div>

@@ -1,0 +1,5 @@
+/* Fondo punteado sutil: evoca la grilla de un editor sin competir con los nodos. */
+.tree-card {
+  background-image: radial-gradient(circle, rgba(15, 23, 42, 0.08) 1px, transparent 1px);
+  background-size: 18px 18px;
+}
