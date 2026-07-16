@@ -99,6 +99,33 @@ export class HtmlToTreeComponent {
     // no-op: el árbol se actualiza vía codeClickHandler; este handler queda como punto de extensión
   }
 
+  /** Total de tags revelables = nodos del árbol (en orden de documento). Lo consume el motor del
+   *  recorrido para gatear el scroll: no te deja pasar al siguiente sub-nivel hasta revelarlos todos. */
+  revealStepCount(): number {
+    return this.treeRef()?.nodesData().length ?? 0;
+  }
+
+  /**
+   * Deja revelados exactamente los primeros `n` tags (orden de documento), clickeando los que
+   * falten y des-clickeando los que sobren. Usa el click REAL sobre el elemento del código, así el
+   * efecto es idéntico a hacerlo a mano: resalta el tag, agrega/saca el nodo y su conector.
+   * Idempotente (sincroniza contra el estado actual), robusto ante clicks manuales previos.
+   */
+  revealTo(n: number): void {
+    const tree = this.treeRef();
+    if (!tree) return;
+    const ordered = tree.nodesData().map((node) => node.id);
+    const shown = new Set(this.nodesToShow());
+    ordered.forEach((id, i) => {
+      const wantShown = i < n;
+      if (wantShown === shown.has(id)) return;
+      const el = this.hostElement.querySelector<HTMLElement>(`[data-el-id="${CSS.escape(id)}"]`);
+      if (el) el.click();
+      else if (wantShown) this.addNode(id);
+      else this.removeNode(id);
+    });
+  }
+
   protected followTick() {
     const svg = this.overlay()?.nativeElement;
     const tree = this.treeRef();
