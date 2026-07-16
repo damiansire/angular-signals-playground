@@ -1,1 +1,9 @@
-<div echarts [options]="chartOption()" class="demo-chart"></div>
+<div
+  echarts
+  [options]="chartOption()"
+  class="demo-chart"
+  (chartInit)="onChartInit($event)"
+  (chartRendered)="emitViewChanged()"
+  (chartFinished)="emitViewChanged()"
+  (chartGraphRoam)="emitViewChanged()"
+></div>

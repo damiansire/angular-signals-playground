@@ -4,20 +4,3 @@
   width: 100%;
   height: 400px;
 }
-
-.graph {
-  position: relative; /* For absolute positioning of connections */
-}
-
-.node {
-  background-color: #90ee90; /* Light green for nodes */
-  padding: 5px 10px;
-  border-radius: 5px;
-  position: absolute; /* Position nodes freely */
-}
-
-.connection {
-  position: absolute;
-  height: 2px;
-  background-color: brown; /* Brown for connections */
-}
