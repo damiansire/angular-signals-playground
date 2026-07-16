@@ -81,7 +81,7 @@ export class IntegradaVistaComponent {
   /** Monta el componente REAL del sub-nivel (concepto ci, sub si) y lo integra a la CD. */
   private readonly mountSub: MountSub = (host, ci, si) => {
     const type = this.subComponents[ci]?.[si];
-    if (!type) return () => undefined;
+    if (!type) return { dispose: () => undefined, reveal: null };
     // No pasamos `hostElement: host`: al destruir, `ref.destroy()` borraría ESE nodo, y `host`
     // es la `.subhost` persistente de la card. Creamos el componente en su propio nodo y lo
     // appendeamos adentro; así `destroy()` solo se lleva el nodo del componente, no la `.subhost`.
@@ -92,9 +92,30 @@ export class IntegradaVistaComponent {
     // así que la vista recién adjuntada nunca correría su primera CD y quedaría en blanco.
     // Forzamos la detección inicial acá; las interacciones posteriores ya agendan su propio tick.
     ref.changeDetectorRef.detectChanges();
-    return () => {
-      this.appRef.detachView(ref.hostView);
-      ref.destroy();
+    // Reveal opcional: si el sub-nivel expone revealTo/revealStepCount (hoy html-to-tree), el motor
+    // usa esta API para gatear el scroll. `to()` fuerza CD porque muta signals fuera del ciclo.
+    const inst = ref.instance as {
+      revealTo?: (n: number) => void;
+      revealStepCount?: () => number;
+    };
+    const reveal =
+      typeof inst.revealTo === 'function' && typeof inst.revealStepCount === 'function'
+        ? {
+            get steps(): number {
+              return inst.revealStepCount!();
+            },
+            to: (n: number): void => {
+              inst.revealTo!(n);
+              ref.changeDetectorRef.detectChanges();
+            },
+          }
+        : null;
+    return {
+      dispose: () => {
+        this.appRef.detachView(ref.hostView);
+        ref.destroy();
+      },
+      reveal,
     };
   };
 }
