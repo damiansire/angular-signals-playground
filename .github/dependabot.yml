@@ -1,0 +1,20 @@
+# Actualización automática de dependencias. Surfacea como PR cada semana lo que hoy solo se ve
+# corriendo `npm audit` a mano (p.ej. el XSS de echarts <6.1.0). Los minor/patch se agrupan en un
+# solo PR; los majors quedan sueltos para revisarlos con cuidado (como el bump echarts 5→6).
+version: 2
+updates:
+  - package-ecosystem: 'npm'
+    directory: '/'
+    schedule:
+      interval: 'weekly'
+    open-pull-requests-limit: 10
+    groups:
+      minor-and-patch:
+        update-types:
+          - 'minor'
+          - 'patch'
+
+  - package-ecosystem: 'github-actions'
+    directory: '/'
+    schedule:
+      interval: 'weekly'

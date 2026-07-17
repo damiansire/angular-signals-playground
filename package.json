@@ -3,6 +3,9 @@
   "version": "0.0.0",
   "description": "An interactive playground and introduction to learning Angular Signals (computed, effect, linkedSignal, resource) hands-on.",
   "license": "MIT",
+  "engines": {
+    "node": ">=22"
+  },
   "keywords": [
     "angular",
     "signals",
