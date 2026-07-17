@@ -5,6 +5,14 @@ Instead of reading about reactivity, you *watch it happen*: every concept is a
 small, self-contained screen where you can click, type and toggle to see how
 signals, `computed`, `effect` and change detection actually behave.
 
+![The integrated "reactive molecule" tour: each of the 12 concepts is an atom you dive into, with its numbered sub-levels orbiting the card and the real demo embedded inside](public/preview.jpeg)
+
+The default entry (`/`) is the **integrated view**: a "reactive molecule" tour
+where each of the 12 concepts is an atom. Scroll to dive into an atom and its
+sub-levels orbit the card, each one embedding the *real* demo component of that
+lesson. Deep-links are shareable: `?nivel=1&sub-nivel=2` reopens exactly where
+you were.
+
 Built with **Angular 22** (standalone components, `OnPush` everywhere, signal-first
 APIs) and styled with **Tailwind CSS**.
 
@@ -76,7 +84,9 @@ npm start
 
 ```
 src/app/
+├── integrada-vista/  # The default entry (/): the "reactive molecule" tour of the 12 concepts
 ├── signals/          # The learning levels (0–11) and their sub-levels
+├── practice/         # Applied examples that use what you learned (/practica/*)
 ├── lab/              # Signals Lab: bench-frame, hub and instruments
 ├── components/       # Feature components (sidebar menu, histories, trees…)
 ├── components-atom/  # Atomic UI building blocks (button, code, input, title…)

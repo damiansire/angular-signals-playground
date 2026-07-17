@@ -136,11 +136,10 @@ falta o hay que sostener:
   no por su tipo interno.
 - **Comentarios explican el PORQUÉ, nunca el QUÉ** (ítem b): si un comentario
   parafrasea la línea de abajo, se borra o se renombra la variable en su lugar.
-- **README con prueba visible** (ítem k) — **PENDIENTE, no resuelto todavía**:
-  es un playground interactivo desplegado (GitHub Pages) y el README no tiene
-  ninguna captura/GIF; la descripción textual sola no alcanza para un artefacto
-  visual. Ver `_audits/DECISIONES.md` (screenshot falló por infraestructura de
-  sesión, no del repo — pendiente real).
+- **README con prueba visible** (ítem k) — **RESUELTO (2026-07-17)**: el README
+  lidera con una captura real de la vista integrada (`public/preview.jpeg`), que
+  también sirve de `og:image`. Captura tomada vía `chrome-devtools` (el Browser
+  pane cuelga con esta app, ver la receta de verificación arriba).
 - **Fail-fast en los pocos boundaries async** (ítem i): si se agrega fetch de
   datos o timers en `lab/`, van con timeout/cleanup explícito (`effect` con
   `onCleanup`, no un `setTimeout` suelto).
