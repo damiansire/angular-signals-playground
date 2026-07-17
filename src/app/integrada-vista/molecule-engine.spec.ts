@@ -1,4 +1,5 @@
-import { scrollLayout, snapStops } from './molecule-engine';
+import { scrollLayout, snapStops, initMolecule, CONCEPT_COUNT } from './molecule-engine';
+import { signalsRoutesTree } from '../app.routes';
 
 describe('scrollLayout', () => {
   it('un concepto sin sub-niveles ocupa 2 unidades (nace + bucea)', () => {
@@ -40,5 +41,21 @@ describe('snapStops', () => {
     for (let i = 1; i < stops.length; i++) {
       expect(stops[i]).toBeGreaterThan(stops[i - 1]);
     }
+  });
+});
+
+describe('CONCEPT_COUNT — RAW ↔ signalsRoutesTree acoplados por índice', () => {
+  it('RAW tiene la misma cantidad de conceptos que el árbol de rutas de signals', () => {
+    // Si alguien agrega/quita un nivel en app.routes sin tocar RAW, este test rompe antes
+    // de que el motor descarte el nivel en silencio.
+    expect(signalsRoutesTree.length).toBe(CONCEPT_COUNT);
+  });
+
+  it('initMolecule falla ruidoso si subCounts no coincide con RAW', () => {
+    const root = document.createElement('div');
+    const mountStub = () => ({ dispose: () => undefined, reveal: null });
+    expect(() =>
+      initMolecule(root, mountStub, [1, 2, 3], null, () => undefined, null),
+    ).toThrowError(/subCounts tiene 3 conceptos pero RAW tiene 12/);
   });
 });

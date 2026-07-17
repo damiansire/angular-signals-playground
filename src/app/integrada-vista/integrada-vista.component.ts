@@ -15,6 +15,7 @@ import { RouterLink } from '@angular/router';
 
 import { signalsRoutesTree } from '../app.routes';
 import { initMolecule, type MountSub } from './molecule-engine';
+import { buildWhereQuery, parseWhereQuery } from './url-sync';
 
 /**
  * Vista integrada: el recorrido de los 12 conceptos como una MOLÉCULA reactiva.
@@ -67,13 +68,12 @@ export class IntegradaVistaComponent {
     });
   }
 
-  /** Deep-link: lee ?nivel=X&sub-nivel=Z de la URL para abrir el recorrido en ese sub-nivel. */
+  /**
+   * Deep-link: lee `?nivel=X(&sub-nivel=Z)` de la URL para abrir el recorrido donde quedó.
+   * `?nivel=X` solo (sin sub-nivel, la vista molécula) también es válido: encuadra el átomo.
+   */
   private initialFromUrl(): { concept: number; sub: number } | null {
-    const params = new URLSearchParams(window.location.search);
-    const nivel = Number(params.get('nivel'));
-    const sub = Number(params.get('sub-nivel'));
-    if (!Number.isInteger(nivel) || nivel < 0 || !Number.isInteger(sub) || sub < 1) return null;
-    return { concept: nivel, sub };
+    return parseWhereQuery(window.location.search);
   }
 
   /**
@@ -82,9 +82,7 @@ export class IntegradaVistaComponent {
    * así el componente no se desmonta ni se pierde el scroll. `subIdx` -1 = vista molécula.
    */
   private readonly onWhere = (conceptIdx: number, subIdx: number): void => {
-    const query =
-      subIdx >= 0 ? `nivel=${conceptIdx}&sub-nivel=${subIdx + 1}` : `nivel=${conceptIdx}`;
-    this.location.replaceState('/integrada-vista', query);
+    this.location.replaceState('/integrada-vista', buildWhereQuery(conceptIdx, subIdx));
   };
 
   /** Monta el componente REAL del sub-nivel (concepto ci, sub si) y lo integra a la CD. */

@@ -93,6 +93,13 @@ const RAW: RawConcept[] = [
 // (hoy nivel 0); agregar índices acá lo extiende a más conceptos.
 const DISSOLVE = new Set<number>([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]);
 
+/**
+ * Cantidad de conceptos del recorrido (metadata hardcodeada en RAW). DEBE coincidir con
+ * `signalsRoutesTree.length`: RAW y el árbol de rutas son dos fuentes de verdad acopladas por
+ * índice. El guard de `initMolecule` lo verifica en runtime; un test lo ata en tiempo de build.
+ */
+export const CONCEPT_COUNT = RAW.length;
+
 const CX = 410;
 const CY = 290;
 const ORX = 34;
@@ -216,9 +223,19 @@ export function initMolecule(
   // llama cuando cambia el par (nivel, sub-nivel), no en cada frame.
   onWhere: (conceptIdx: number, subIdx: number) => void,
   // Deep-link: si viene con `concept` (nivel) y `sub` (sub-nivel 1-based), el recorrido abre
-  // scrolleado directo a ese sub-nivel en vez de arriba con el overlay. Se clampea al rango real.
+  // scrolleado directo a ese sub-nivel en vez de arriba con el overlay. `sub` 0/ausente = vista
+  // molécula: abre encuadrando el átomo del concepto. Se clampea al rango real.
   initial: { concept: number; sub: number } | null = null,
 ): () => void {
+  // RAW (metadata de los 12 conceptos) y `subCounts` (derivado de signalsRoutesTree) están
+  // acoplados por índice: si no cuadran, un concepto se pintaría sin sub-niveles o se descartaría
+  // en silencio. Fallamos ruidoso en el boot en vez de degradar mudo.
+  if (subCounts.length !== RAW.length) {
+    throw new Error(
+      `molecule-engine: subCounts tiene ${subCounts.length} conceptos pero RAW tiene ${RAW.length}. ` +
+        `RAW y signalsRoutesTree deben mantener la misma cantidad de conceptos.`,
+    );
+  }
   const C: Concept[] = RAW.map((r, i) => ({
     ...r,
     x: 0,
@@ -1229,7 +1246,10 @@ export function initMolecule(
   const bootScroll = (): number => {
     if (!initial) return 0;
     const c = Math.max(0, Math.min(N - 1, Math.round(initial.concept)));
-    if (C[c].subN <= 0) return off[c];
+    // Sin sub-nivel (deep-link `?nivel=X` en vista molécula): encuadrar el ÁTOMO del concepto
+    // (parada `off[c] + 1.3`, ver snapStops), no el tope de su tramo. Así `?nivel=7` reabre
+    // en el átomo 7 en vez de aterrizar arriba de todo.
+    if (C[c].subN <= 0 || initial.sub < 1) return off[c] + 1.3;
     const k = Math.max(0, Math.min(C[c].subN - 1, Math.round(initial.sub) - 1));
     return stopS(c, k);
   };
