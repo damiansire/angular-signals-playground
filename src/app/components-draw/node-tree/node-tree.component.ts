@@ -27,6 +27,11 @@ const NODE_SYMBOL_WIDTH = 78;
   styleUrl: './node-tree.component.css',
 })
 export class NodeTreeComponent {
+  // El grafo se monta embebido en cards que pueden tener 0px (u ocultas) el instante del mount.
+  // Con dimensiones explícitas de arranque, echarts NO lee el DOM en 0 (que en v6 lanza en el
+  // primer setOption, no solo warnea); el autoResize de ngx-echarts corrige al tamaño real al mostrarse.
+  protected readonly INIT_OPTS = { width: 800, height: 400 };
+
   readonly nodes = input<NodeTree[]>([]);
   readonly links = input<Link[]>([]);
   // Se dispara cada vez que el canvas termina de pintar (carga, animación o roam del

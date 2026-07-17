@@ -1,6 +1,7 @@
 <div
   echarts
   [options]="chartOption()"
+  [initOpts]="INIT_OPTS"
   class="demo-chart"
   (chartInit)="onChartInit($event)"
   (chartRendered)="emitViewChanged()"
