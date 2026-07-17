@@ -38,3 +38,8 @@ jobs:
       # ChromeHeadless corre sin display. --watch=false para no colgar el runner.
       - name: Tests (ng test, ChromeHeadless)
         run: npm test -- --watch=false --browsers=ChromeHeadless
+
+      # Gatea la config de producción (budgets, prod-only) en el PR, no recién en el deploy
+      # post-merge: un PR que rompa solo el build de prod se descubría con el deploy ya fallado.
+      - name: Build de producción
+        run: npm run build -- --configuration production
