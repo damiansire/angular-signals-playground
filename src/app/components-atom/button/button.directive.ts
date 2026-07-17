@@ -5,7 +5,8 @@ import { APP_BUTTON_OPTIONS, type AppButtonAppearance, type AppButtonSize } from
 const BASE_CLASSES =
   'inline-flex items-center justify-center text-center cursor-pointer ' +
   'font-semibold font-body transition ease-in-out duration-300 border-0 ' +
-  'rounded focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-60';
+  'rounded outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-gray-600 ' +
+  'disabled:cursor-not-allowed disabled:opacity-60';
 
 const SIZE_CLASSES: Record<AppButtonSize, string> = {
   s: 'text-xs px-4 py-2 h-10',
