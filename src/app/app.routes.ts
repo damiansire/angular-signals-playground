@@ -53,7 +53,6 @@ import { OscilloscopeComponent } from './lab/instruments/oscilloscope/oscillosco
 import { ReactiveCellsComponent } from './lab/instruments/reactive-cells/reactive-cells.component';
 import { ManualComponent } from './lab/instruments/manual/manual.component';
 import { LabHubComponent } from './lab/lab-hub/lab-hub.component';
-import { JourneyComponent } from './journey/journey.component';
 import { CartExampleComponent } from './practice/cart/cart-example.component';
 import { IntegradaVistaComponent } from './integrada-vista/integrada-vista.component';
 
@@ -209,7 +208,6 @@ export const routes: Routes = [
   { path: 'lab/effect', component: OscilloscopeComponent },
   { path: 'lab/computed', component: ReactiveCellsComponent },
   { path: 'lab/manual', component: ManualComponent },
-  { path: 'recorrido', component: JourneyComponent },
   { path: 'practica/carrito', component: CartExampleComponent },
   { path: 'integrada-vista', component: IntegradaVistaComponent },
   { path: '', redirectTo: 'integrada-vista', pathMatch: 'full' },

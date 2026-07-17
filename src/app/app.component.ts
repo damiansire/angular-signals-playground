@@ -16,8 +16,8 @@ export class AppComponent {
   private readonly router = inject(Router);
 
   /**
-   * Las pantallas-viaje (la vista integrada `/` y el recorrido) son full-bleed:
-   * el sidebar del banco competiría con la bienvenida. En los niveles y el Lab,
+   * Las pantallas full-bleed (la vista integrada `/` y las de práctica) ocultan
+   * el sidebar del banco: competiría con la bienvenida. En los niveles y el Lab,
    * el chrome vuelve.
    */
   protected readonly fullBleed = toSignal(
@@ -34,7 +34,6 @@ function isFullBleed(url: string): boolean {
   const path = url.split('?')[0].split('#')[0];
   return (
     path === '/' ||
-    path === '/recorrido' ||
     path === '/integrada-vista' ||
     path.startsWith('/practica')
   );
