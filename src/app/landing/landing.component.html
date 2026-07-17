@@ -76,7 +76,13 @@
 
         <!-- Puntos de pulso viajeros: uno por cambio de la fuente; varios a la vez = flujo continuo -->
         @for (p of pulsePoints(); track p.id) {
-          <circle class="pulse pulse--on" [attr.cx]="p.x" [attr.cy]="p.y" r="8" aria-hidden="true" />
+          <circle
+            class="pulse pulse--on"
+            [attr.cx]="p.x"
+            [attr.cy]="p.y"
+            r="8"
+            aria-hidden="true"
+          />
         }
 
         <!-- Nodo EFFECT -->

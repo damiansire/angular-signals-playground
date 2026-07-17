@@ -50,10 +50,19 @@ export class IntegradaVistaComponent {
       // Nombre del atributo de encapsulación que Angular pone a los elementos del template;
       // el motor lo estampa en lo que crea a mano para que el CSS scopeado les aplique.
       const enc =
-        this.host.querySelector('#stage')?.getAttributeNames().find((a) => a.startsWith('_ngcontent')) ??
-        null;
+        this.host
+          .querySelector('#stage')
+          ?.getAttributeNames()
+          .find((a) => a.startsWith('_ngcontent')) ?? null;
       const subCounts = this.subComponents.map((subs) => subs.length);
-      const dispose = initMolecule(this.host, this.mountSub, subCounts, enc, this.onWhere, this.initialFromUrl());
+      const dispose = initMolecule(
+        this.host,
+        this.mountSub,
+        subCounts,
+        enc,
+        this.onWhere,
+        this.initialFromUrl(),
+      );
       this.destroyRef.onDestroy(dispose);
     });
   }

@@ -68,7 +68,13 @@ interface SubDot {
 
 /** Los 12 conceptos (metadata del atomo). Los sub-niveles reales se embeben en cada dive. */
 const RAW: RawConcept[] = [
-  { name: 'Introducción', code: 'detección de cambios', accent: 'ink', dotted: false, tagline: 'Cómo la pantalla sabe qué cambió' },
+  {
+    name: 'Introducción',
+    code: 'detección de cambios',
+    accent: 'ink',
+    dotted: false,
+    tagline: 'Cómo la pantalla sabe qué cambió',
+  },
   { name: 'Signals', code: 'signal()', accent: 'source', dotted: false },
   { name: 'Computed', code: 'computed()', accent: 'derived', dotted: true },
   { name: 'Effects', code: 'effect()', accent: 'effect', dotted: false },
@@ -170,18 +176,29 @@ function rrectPoint(
   const sTop = R - L - 2 * r;
   const sSide = B - T - 2 * r;
   const arc = (Math.PI * r) / 2;
-  let x = ((d % (2 * sTop + 2 * sSide + 4 * arc)) + 2 * sTop + 2 * sSide + 4 * arc) % (2 * sTop + 2 * sSide + 4 * arc);
+  let x =
+    ((d % (2 * sTop + 2 * sSide + 4 * arc)) + 2 * sTop + 2 * sSide + 4 * arc) %
+    (2 * sTop + 2 * sSide + 4 * arc);
   if (x < sTop) return { x: L + r + x, y: T };
   x -= sTop;
-  if (x < arc) { const a = -Math.PI / 2 + (x / arc) * (Math.PI / 2); return { x: R - r + r * Math.cos(a), y: T + r + r * Math.sin(a) }; }
+  if (x < arc) {
+    const a = -Math.PI / 2 + (x / arc) * (Math.PI / 2);
+    return { x: R - r + r * Math.cos(a), y: T + r + r * Math.sin(a) };
+  }
   x -= arc;
   if (x < sSide) return { x: R, y: T + r + x };
   x -= sSide;
-  if (x < arc) { const a = (x / arc) * (Math.PI / 2); return { x: R - r + r * Math.cos(a), y: B - r + r * Math.sin(a) }; }
+  if (x < arc) {
+    const a = (x / arc) * (Math.PI / 2);
+    return { x: R - r + r * Math.cos(a), y: B - r + r * Math.sin(a) };
+  }
   x -= arc;
   if (x < sTop) return { x: R - r - x, y: B };
   x -= sTop;
-  if (x < arc) { const a = Math.PI / 2 + (x / arc) * (Math.PI / 2); return { x: L + r + r * Math.cos(a), y: B - r + r * Math.sin(a) }; }
+  if (x < arc) {
+    const a = Math.PI / 2 + (x / arc) * (Math.PI / 2);
+    return { x: L + r + r * Math.cos(a), y: B - r + r * Math.sin(a) };
+  }
   x -= arc;
   if (x < sSide) return { x: L, y: B - r - x };
   x -= sSide;
@@ -309,7 +326,13 @@ export function initMolecule(
 
   const bondEls: SVGLineElement[] = [];
   for (let i = 1; i < N; i++) {
-    const ln = el('line', { class: 'bond', x1: C[i - 1].x, y1: C[i - 1].y, x2: C[i].x, y2: C[i].y });
+    const ln = el('line', {
+      class: 'bond',
+      x1: C[i - 1].x,
+      y1: C[i - 1].y,
+      x2: C[i].x,
+      y2: C[i].y,
+    });
     bondsG.appendChild(ln);
     bondEls.push(ln);
   }
@@ -732,8 +755,7 @@ export function initMolecule(
       ? '' // en dissolve el nivel/sub-nivel viven en el riel, el topbar y la órbita; sin header en la card
       : `<p class="card__k">Adentro · ${cc.name} · nivel ${i}</p>` +
         `<p class="subtop">sub-nivel <b class="subnum">1</b> / ${cc.subN}</p>`;
-    card.innerHTML =
-      `<span class="subflash"></span>${header}<div class="subbody"><div class="subhost"></div></div>`;
+    card.innerHTML = `<span class="subflash"></span>${header}<div class="subbody"><div class="subhost"></div></div>`;
     contentEl.appendChild(card);
     cc.card = card;
     stamp(card);
@@ -745,7 +767,13 @@ export function initMolecule(
 
   // ---- Onda reactiva al nacer un átomo ----
   function ripat(i: number): void {
-    const r = el('circle', { class: 'ripple', cx: C[i].x, cy: C[i].y, r: NUC + 8, stroke: COL[C[i].accent] });
+    const r = el('circle', {
+      class: 'ripple',
+      cx: C[i].x,
+      cy: C[i].y,
+      r: NUC + 8,
+      stroke: COL[C[i].accent],
+    });
     ripG.appendChild(r);
     window.setTimeout(() => r.remove(), 810);
   }
@@ -851,7 +879,10 @@ export function initMolecule(
       fy = lerp(cen.y, C[c].y, t);
       diveDepth = Math.min(1, (w - 1.3) / 0.7);
     }
-    sceneG.setAttribute('transform', `translate(${(CX - K * fx).toFixed(1)},${(300 - K * fy).toFixed(1)}) scale(${K.toFixed(3)})`);
+    sceneG.setAttribute(
+      'transform',
+      `translate(${(CX - K * fx).toFixed(1)},${(300 - K * fy).toFixed(1)}) scale(${K.toFixed(3)})`,
+    );
     // La cámara ya centró y agrandó el átomo detrás de la card (K llega a FK=2.7): dejarlo
     // brillar de fondo, en vez de apagarlo casi del todo, es lo que hace que la card se lea
     // "parada sobre el átomo" en vez de "algo nuevo que tapó la escena".
@@ -880,7 +911,8 @@ export function initMolecule(
       topbarEl.style.opacity = dissolve ? '1' : (1 - 0.4 * diveDepth).toFixed(3);
     }
     if (railEl) railEl.style.opacity = (1 - 0.35 * diveDepth).toFixed(3);
-    if (captionEl) captionEl.style.opacity = dissolve ? Math.max(0, 1 - diveDepth / 0.5).toFixed(2) : '1';
+    if (captionEl)
+      captionEl.style.opacity = dissolve ? Math.max(0, 1 - diveDepth / 0.5).toFixed(2) : '1';
     // Título vertical del concepto (espina de identidad) pegado al riel: aparece al bucear en
     // dissolve, con el color del concepto. Es la casa del nombre en la escena.
     if (spaceSpineEl) {
@@ -1046,8 +1078,7 @@ export function initMolecule(
   // apagamos el snap durante la animación y lo restauramos al asentar en la parada exacta, que
   // ya es un punto de snap, así no hay reajuste visible. Con `prefers-reduced-motion` o un
   // salto nulo vamos directo, sin animar.
-  const easeInOut = (p: number): number =>
-    p < 0.5 ? 2 * p * p : 1 - Math.pow(-2 * p + 2, 2) / 2;
+  const easeInOut = (p: number): number => (p < 0.5 ? 2 * p * p : 1 - Math.pow(-2 * p + 2, 2) / 2);
   let scrollAnimId = 0;
   const prefersReducedMotion = (): boolean =>
     typeof window.matchMedia === 'function' &&
@@ -1122,8 +1153,8 @@ export function initMolecule(
     const eps = 0.05;
     const target =
       dir > 0
-        ? stopUnits.find((s) => s > cur + eps) ?? stopUnits[stopUnits.length - 1]
-        : [...stopUnits].reverse().find((s) => s < cur - eps) ?? stopUnits[0];
+        ? (stopUnits.find((s) => s > cur + eps) ?? stopUnits[stopUnits.length - 1])
+        : ([...stopUnits].reverse().find((s) => s < cur - eps) ?? stopUnits[0]);
     goToUnit(target);
   };
   // Un paso del gate de reveal. Devuelve true si lo consumió (reveló/ocultó un tag); false si no hay

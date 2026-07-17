@@ -25,7 +25,10 @@
             (click)="selectBy() === 'Element' ? onElementClick(item, element) : null"
             (keyup.enter)="selectBy() === 'Element' ? onElementClick(item, element) : null"
           >
-            <span [class.text-green-400]="element.reservedWord" [class.font-semibold]="element.reservedWord">
+            <span
+              [class.text-green-400]="element.reservedWord"
+              [class.font-semibold]="element.reservedWord"
+            >
               {{ element.text }}
             </span>
           </div>

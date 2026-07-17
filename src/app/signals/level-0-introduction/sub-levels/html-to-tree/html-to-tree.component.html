@@ -17,9 +17,24 @@
     [htmlCode]="htmlCode"
     right
   ></app-code>
-  <svg #overlay overlay class="pointer-events-none absolute inset-0 h-full w-full" aria-hidden="true">
+  <svg
+    #overlay
+    overlay
+    class="pointer-events-none absolute inset-0 h-full w-full"
+    aria-hidden="true"
+  >
     @for (line of connectors(); track line.id) {
-      <path class="connector" [attr.d]="line.path" fill="none" [attr.stroke]="line.color" [style.color]="line.color" stroke-width="2.5" stroke-dasharray="6 8" stroke-linecap="round" opacity="0.9" />
+      <path
+        class="connector"
+        [attr.d]="line.path"
+        fill="none"
+        [attr.stroke]="line.color"
+        [style.color]="line.color"
+        stroke-width="2.5"
+        stroke-dasharray="6 8"
+        stroke-linecap="round"
+        opacity="0.9"
+      />
     }
   </svg>
 </app-two-column-layout>

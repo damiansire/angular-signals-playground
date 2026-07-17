@@ -72,12 +72,14 @@ export class HtmlToTreeComponent {
       this.followTick();
 
       const deadline = performance.now() + FOLLOW_WINDOW_MS;
-      let rafId = requestAnimationFrame(function loop(this: HtmlToTreeComponent) {
-        this.followTick();
-        if (performance.now() < deadline) {
-          rafId = requestAnimationFrame(loop.bind(this));
-        }
-      }.bind(this));
+      let rafId = requestAnimationFrame(
+        function loop(this: HtmlToTreeComponent) {
+          this.followTick();
+          if (performance.now() < deadline) {
+            rafId = requestAnimationFrame(loop.bind(this));
+          }
+        }.bind(this),
+      );
       onCleanup(() => cancelAnimationFrame(rafId));
     });
   }
@@ -138,7 +140,9 @@ export class HtmlToTreeComponent {
 
     this.nodesToShow().forEach((id) => {
       const treePos = tree.getScreenEdgePosition(id);
-      const codeEl = this.hostElement.querySelector<HTMLElement>(`[data-el-id="${CSS.escape(id)}"]`);
+      const codeEl = this.hostElement.querySelector<HTMLElement>(
+        `[data-el-id="${CSS.escape(id)}"]`,
+      );
       const node = nodesByid.get(id);
       if (!treePos || !codeEl || !node) {
         return;
