@@ -68,4 +68,50 @@ describe('CodeComponent', () => {
     const tag = elements.find((e) => e.text.includes('div'));
     expect(tag?.reservedWord).toBeTrue();
   });
+
+  describe('modo estático (snippet pre-armado vía `lines`)', () => {
+    it('entra en modo estático y muestra item.line cuando se pasan `lines`', () => {
+      fixture.componentRef.setInput('lines', [
+        { id: 'a', line: 'const x = 1;' },
+        { id: 'b', line: 'const y = 2;' },
+      ] satisfies CodeLine[]);
+      fixture.detectChanges();
+
+      expect(component.isStatic()).toBeTrue();
+      const rows = fixture.nativeElement.querySelectorAll('[role="button"]');
+      expect(rows.length).toBe(2);
+      expect(rows[0].textContent?.trim()).toBe('const x = 1;');
+      expect(rows[1].textContent?.trim()).toBe('const y = 2;');
+    });
+
+    it('staticLineClasses resalta en verde cuando la linea esta active', () => {
+      expect(component.staticLineClasses({ id: 'a', active: true })).toContain('bg-green-700');
+      expect(component.staticLineClasses({ id: 'b', active: false })).toContain('bg-gray-800');
+    });
+
+    it('trata las líneas con texto como interactivas y las vacías/sin `line` como no interactivas', () => {
+      expect(component.isInteractive({ line: 'const x = 1;' })).toBeTrue();
+      expect(component.isInteractive({ line: '' })).toBeFalse();
+      expect(component.isInteractive({ line: '   ' })).toBeFalse();
+      expect(component.isInteractive({ active: false })).toBeFalse();
+    });
+
+    it('no expone role="button" ni tabindex en las líneas en blanco (sin nombre accesible)', () => {
+      fixture.componentRef.setInput('lines', [
+        { id: 'a', line: 'const x = 1;', active: true },
+        { id: 'b', line: '', active: false },
+      ] satisfies CodeLine[]);
+      fixture.detectChanges();
+
+      const rows: HTMLElement[] = Array.from(
+        fixture.nativeElement.querySelectorAll('[class*="font-mono"]'),
+      );
+      const [interactiveRow, blankRow] = rows;
+
+      expect(interactiveRow.getAttribute('role')).toBe('button');
+      expect(interactiveRow.getAttribute('tabindex')).toBe('0');
+      expect(blankRow.getAttribute('role')).toBeNull();
+      expect(blankRow.getAttribute('tabindex')).toBeNull();
+    });
+  });
 });

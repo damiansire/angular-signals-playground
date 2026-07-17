@@ -5,35 +5,49 @@
     <span class="h-2.5 w-2.5 rounded-full bg-green-400/70"></span>
   </div>
   <div class="p-4">
-    @for (item of codeLines(); track $index) {
-      <div
-        class="text-2xl font-mono whitespace-pre-wrap break-words py-1.5 cursor-pointer flex rounded"
-        [class]="lineClasses(item)"
-        tabindex="0"
-        role="button"
-        (click)="selectBy() === 'Line' ? onLineClick(item) : null"
-        (keyup.enter)="selectBy() === 'Line' ? onLineClick(item) : null"
-      >
-        <div [style.paddingLeft.px]="(item.indent || 0) * characterIndentSize"></div>
-        @for (element of item.elements; track $index) {
-          <div
-            [attr.data-el-id]="element.id"
-            [class.bg-green-700]="element.selected"
-            class="rounded px-0.5 transition-colors"
-            tabindex="0"
-            role="button"
-            (click)="selectBy() === 'Element' ? onElementClick(item, element) : null"
-            (keyup.enter)="selectBy() === 'Element' ? onElementClick(item, element) : null"
-          >
-            <span
-              [class.text-green-400]="element.reservedWord"
-              [class.font-semibold]="element.reservedWord"
+    @if (isStatic()) {
+      @for (item of lines(); track $index) {
+        <div
+          class="text-2xl font-mono whitespace-pre-wrap break-words py-1.5 rounded"
+          [class]="staticLineClasses(item)"
+          [class.cursor-pointer]="isInteractive(item)"
+          [attr.tabindex]="isInteractive(item) ? 0 : null"
+          [attr.role]="isInteractive(item) ? 'button' : null"
+        >
+          {{ item.line }}
+        </div>
+      }
+    } @else {
+      @for (item of codeLines(); track $index) {
+        <div
+          class="text-2xl font-mono whitespace-pre-wrap break-words py-1.5 cursor-pointer flex rounded"
+          [class]="lineClasses(item)"
+          tabindex="0"
+          role="button"
+          (click)="selectBy() === 'Line' ? onLineClick(item) : null"
+          (keyup.enter)="selectBy() === 'Line' ? onLineClick(item) : null"
+        >
+          <div [style.paddingLeft.px]="(item.indent || 0) * characterIndentSize"></div>
+          @for (element of item.elements; track $index) {
+            <div
+              [attr.data-el-id]="element.id"
+              [class.bg-green-700]="element.selected"
+              class="rounded px-0.5 transition-colors"
+              tabindex="0"
+              role="button"
+              (click)="selectBy() === 'Element' ? onElementClick(item, element) : null"
+              (keyup.enter)="selectBy() === 'Element' ? onElementClick(item, element) : null"
             >
-              {{ element.text }}
-            </span>
-          </div>
-        }
-      </div>
+              <span
+                [class.text-green-400]="element.reservedWord"
+                [class.font-semibold]="element.reservedWord"
+              >
+                {{ element.text }}
+              </span>
+            </div>
+          }
+        </div>
+      }
     }
   </div>
 </div>
