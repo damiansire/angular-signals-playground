@@ -46,7 +46,7 @@ que funciona; no volver a explorar alternativas ya descartadas.
   numérico con `getBoundingClientRect()` contra TODOS los vecinos (título,
   contador, dots, órbita), no contra uno solo.
 - **Gate de diseño:** todo cambio que toque el motor visual (`molecule-engine`,
-  CSS de `journey/`) cierra con una pasada de `design-reviewer` contra
+  CSS de `integrada-vista/`) cierra con una pasada de `design-reviewer` contra
   `DESIGN-CHECKLIST.md` ANTES de declararlo bueno. La palabra del propio
   agente ("quedó hermoso") no es veredicto.
 
@@ -70,8 +70,7 @@ realmente tocás; no inventes scopes nuevos.
 
 | Directorio              | Qué contiene                                              | Scope        |
 | ----------------------- | -------------------------------------------------------- | ------------ |
-| `src/app/landing/`      | Landing de bienvenida (grafo reactivo vivo, ruta `/`)    | `landing`    |
-| `src/app/journey/`      | El recorrido: mapa-viaje de los 12 niveles (`/recorrido`) | `journey`   |
+| `src/app/integrada-vista/` | Vista integrada: recorrido molécula de los 12 niveles, entrada por defecto (ruta `/`) | `integrada` |
 | `src/app/practice/`     | Ejemplos aplicados para usar lo aprendido (`/practica/*`) | `practice`   |
 | `src/app/signals/`      | Los niveles de aprendizaje (0–11) y sus sub-niveles      | `signals`    |
 | `src/app/lab/`          | Signals Lab: bench-frame, hub e instrumentos             | `lab`        |
