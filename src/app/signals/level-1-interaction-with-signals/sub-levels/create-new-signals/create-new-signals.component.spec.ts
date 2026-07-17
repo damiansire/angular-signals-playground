@@ -40,7 +40,7 @@ describe('CreateNewSignalsComponent', () => {
   });
 
   it('renderiza dos bloques de codigo (html + ts)', () => {
-    const codeBlocks = fixture.nativeElement.querySelectorAll('app-code-legacy');
+    const codeBlocks = fixture.nativeElement.querySelectorAll('app-code');
     expect(codeBlocks.length).toBe(2);
   });
 });

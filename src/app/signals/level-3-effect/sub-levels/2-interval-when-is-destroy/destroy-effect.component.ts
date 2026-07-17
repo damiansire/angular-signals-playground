@@ -3,7 +3,7 @@ import { DestroyBoxComponent } from './destroy-box/destroy-box.component';
 import { CodeLine } from '../../../../components-atom/component-atom.interface';
 import { HistoryElement } from '../../../../components/component.interface';
 import { EventHistoryComponent } from '../../../../components/event-history/event-history.component';
-import { CodeLegacyComponent } from '../../../../components-atom/code-legacy/code-legacy.component';
+import { CodeComponent } from '../../../../components-atom/code/code.component';
 import { ConceptCardComponent } from '../../../../components-atom/concept-card/concept-card.component';
 
 @Component({
@@ -11,7 +11,7 @@ import { ConceptCardComponent } from '../../../../components-atom/concept-card/c
   templateUrl: './destroy-effect.component.html',
   styleUrl: './destroy-effect.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [DestroyBoxComponent, EventHistoryComponent, CodeLegacyComponent, ConceptCardComponent],
+  imports: [DestroyBoxComponent, EventHistoryComponent, CodeComponent, ConceptCardComponent],
 })
 export class DestroyEffectComponent {
   autoRefresh = signal(false);

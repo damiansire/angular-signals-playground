@@ -56,8 +56,8 @@ describe('WhatIsSignalsComponent', () => {
     expect(containers.length).toBe(1);
   });
 
-  it('no muestra el code-legacy del wrapper hasta el primer click', () => {
-    expect(fixture.nativeElement.querySelector('app-code-legacy')).toBeNull();
+  it('no muestra el bloque de código del wrapper hasta el primer click', () => {
+    expect(fixture.nativeElement.querySelector('app-code')).toBeNull();
 
     const firstBox = fixture.nativeElement.querySelector(
       'app-variable-box-draw [role="button"]',
@@ -65,6 +65,6 @@ describe('WhatIsSignalsComponent', () => {
     firstBox.click();
     fixture.detectChanges();
 
-    expect(fixture.nativeElement.querySelector('app-code-legacy')).toBeTruthy();
+    expect(fixture.nativeElement.querySelector('app-code')).toBeTruthy();
   });
 });

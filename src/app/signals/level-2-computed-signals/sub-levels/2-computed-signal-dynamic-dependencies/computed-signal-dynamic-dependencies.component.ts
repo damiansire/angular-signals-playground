@@ -5,7 +5,7 @@ import { VariableBoxComponent } from '../../../../components-atom/variable-box/v
 import { HistoryElement } from '../../../../components/component.interface';
 import { DependenciesStatusComponent } from '../../../../components/dependencies-status/dependencies-status.component';
 import { EventHistoryComponent } from '../../../../components/event-history/event-history.component';
-import { CodeLegacyComponent } from '../../../../components-atom/code-legacy/code-legacy.component';
+import { CodeComponent } from '../../../../components-atom/code/code.component';
 import { ConceptCardComponent } from '../../../../components-atom/concept-card/concept-card.component';
 
 @Component({
@@ -17,7 +17,7 @@ import { ConceptCardComponent } from '../../../../components-atom/concept-card/c
     VariableBoxComponent,
     EventHistoryComponent,
     DependenciesStatusComponent,
-    CodeLegacyComponent,
+    CodeComponent,
     ConceptCardComponent,
   ],
 })

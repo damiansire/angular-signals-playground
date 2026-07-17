@@ -2,7 +2,7 @@ import { Component, computed, signal, ChangeDetectionStrategy, OnInit } from '@a
 import { VariableBoxDrawComponent } from '../../../../components-draw/variable-box-draw/variable-box-draw.component';
 import { CodeLine } from '../../../../components-atom/component-atom.interface';
 import { TitleComponent } from '../../../../components-atom/title/title.component';
-import { CodeLegacyComponent } from '../../../../components-atom/code-legacy/code-legacy.component';
+import { CodeComponent } from '../../../../components-atom/code/code.component';
 import { ConceptCardComponent } from '../../../../components-atom/concept-card/concept-card.component';
 
 interface DataTypeExample {
@@ -12,7 +12,7 @@ interface DataTypeExample {
 
 @Component({
   selector: 'app-variables',
-  imports: [VariableBoxDrawComponent, TitleComponent, CodeLegacyComponent, ConceptCardComponent],
+  imports: [VariableBoxDrawComponent, TitleComponent, CodeComponent, ConceptCardComponent],
   templateUrl: './variables.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   styleUrl: './variables.component.css',

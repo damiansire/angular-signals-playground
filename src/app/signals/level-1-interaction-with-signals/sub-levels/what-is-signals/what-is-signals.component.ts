@@ -5,7 +5,7 @@ import { ContainerVariableBoxDrawComponent } from '../../../../components-draw/c
 import { TextDescriptionComponent } from '../../../../components-atom/text-description/text-description.component';
 import { VariableBoxDrawComponent } from '../../../../components-draw/variable-box-draw/variable-box-draw.component';
 import { CodeLine } from '../../../../components-atom/component-atom.interface';
-import { CodeLegacyComponent } from '../../../../components-atom/code-legacy/code-legacy.component';
+import { CodeComponent } from '../../../../components-atom/code/code.component';
 import { ConceptCardComponent } from '../../../../components-atom/concept-card/concept-card.component';
 
 @Component({
@@ -16,7 +16,7 @@ import { ConceptCardComponent } from '../../../../components-atom/concept-card/c
     ContainerVariableBoxDrawComponent,
     TextDescriptionComponent,
     VariableBoxDrawComponent,
-    CodeLegacyComponent,
+    CodeComponent,
     ConceptCardComponent,
   ],
   templateUrl: './what-is-signals.component.html',
