@@ -190,14 +190,29 @@ export class CartExampleComponent {
   }
 }
 
+/**
+ * `qty` cruza un boundary externo (localStorage es mutable a mano): validamos que
+ * cada cantidad sea un número finito antes de confiar en ella. Sin esto, un `qty`
+ * editado a strings propaga `NaN` al subtotal. No validamos las claves contra el
+ * catálogo: una clave de más se ignora sola (`subtotal` recorre el catálogo).
+ */
+function isValidQuantities(value: unknown): value is Quantities {
+  if (typeof value !== 'object' || value === null) return false;
+  return Object.values(value as Record<string, unknown>).every(
+    (n) => typeof n === 'number' && Number.isFinite(n),
+  );
+}
+
 function readSaved(): Saved | null {
   try {
     if (typeof localStorage === 'undefined') return null;
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return null;
-    const parsed = JSON.parse(raw) as Saved;
-    if (!parsed || typeof parsed.qty !== 'object') return null;
-    return { qty: parsed.qty, coupon: Boolean(parsed.coupon) };
+    const parsed: unknown = JSON.parse(raw);
+    if (typeof parsed !== 'object' || parsed === null) return null;
+    const { qty, coupon } = parsed as { qty?: unknown; coupon?: unknown };
+    if (!isValidQuantities(qty)) return null;
+    return { qty, coupon: Boolean(coupon) };
   } catch {
     return null;
   }
