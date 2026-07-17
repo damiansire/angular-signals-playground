@@ -1,7 +1,7 @@
 import { Component, input, ChangeDetectionStrategy } from '@angular/core';
 import { TitleComponent } from '../../components-atom/title/title.component';
 import { CodeLine } from '../../components-atom/component-atom.interface';
-import { CodeLegacyComponent } from '../../components-atom/code-legacy/code-legacy.component';
+import { CodeComponent } from '../../components-atom/code/code.component';
 import { ConceptCardComponent } from '../../components-atom/concept-card/concept-card.component';
 
 @Component({
@@ -9,7 +9,7 @@ import { ConceptCardComponent } from '../../components-atom/concept-card/concept
   templateUrl: './column-and-code-layout.component.html',
   styleUrl: './column-and-code-layout.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [TitleComponent, CodeLegacyComponent, ConceptCardComponent],
+  imports: [TitleComponent, CodeComponent, ConceptCardComponent],
 })
 export class ColumnAndCodeLayoutComponent {
   readonly title = input('No Title');

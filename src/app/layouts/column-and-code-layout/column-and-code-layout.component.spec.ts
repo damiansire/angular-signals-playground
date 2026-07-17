@@ -64,11 +64,11 @@ describe('ColumnAndCodeLayoutComponent', () => {
       hostFixture.detectChanges();
     });
 
-    it('proyecta el contenido del ng-content y renderiza el code-legacy', () => {
+    it('proyecta el contenido del ng-content y renderiza el bloque de código', () => {
       const projected = hostFixture.nativeElement.querySelector('.proyectado') as HTMLElement;
       expect(projected).toBeTruthy();
       expect(projected.textContent?.trim()).toBe('contenido proyectado');
-      expect(hostFixture.nativeElement.querySelector('app-code-legacy')).toBeTruthy();
+      expect(hostFixture.nativeElement.querySelector('app-code')).toBeTruthy();
     });
   });
 });
