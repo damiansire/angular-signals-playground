@@ -331,7 +331,13 @@
   overflow-x: auto;
 }
 .card--dissolve .subhost app-code div {
-  white-space: pre;
+  /* pre-wrap (no `pre`): preserva la indentación pero deja que las líneas largas (imports, strings)
+     WRAPPEEN dentro del panel en vez de cortarse contra el borde derecho y perder caracteres. Es
+     código de solo lectura: envolver no pierde nada y garantiza que se lea completo. `anywhere`
+     permite cortar tokens sin espacios (p.ej. un path de import largo). Las líneas cortas (HTML
+     del nivel 0) no wrappean, así que su lectura no cambia. */
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
   font-size: 1.05rem;
   line-height: 1.5;
 }
@@ -376,6 +382,55 @@
 /* El árbol (ECharts) gana alto para que el grafo se despliegue y respire en vez de amontonarse. */
 .card--dissolve .subhost .demo-chart {
   height: 500px;
+}
+/* De-encajonar los paneles claros de las demos. La mayoría de los sub-niveles envuelven su
+   contenido en un panel claro (bg-white / bg-gray-50 + sombra + esquinas): en modo standalone
+   lo hace lindo, pero sin marco se lee como una "ventanita" flotando sobre el campo del átomo
+   (el hallazgo #1 del diagnóstico). Le sacamos el fondo y la sombra, así los controles internos
+   (chips con borde de acento, botones, contadores, terminales oscuros) flotan sobre la misma
+   superficie que el resto — como ya lo hacen las instrucciones, el código y el árbol. Alcance:
+   solo fondos CLAROS; los oscuros intencionales (app-code, chips carbón) no matchean y quedan. */
+.card--dissolve .subhost [class*='bg-white'],
+.card--dissolve .subhost [class*='bg-gray-50'],
+.card--dissolve .subhost [class*='bg-gray-100'],
+.card--dissolve .subhost [class*='bg-slate-50'],
+.card--dissolve .subhost [class*='bg-slate-100'] {
+  background-color: transparent;
+}
+.card--dissolve .subhost [class*='shadow-'] {
+  box-shadow: none;
+}
+/* Bordes finos de los paneles claros (border-gray-100/200): sin fondo ya no encierran nada, pero
+   el hilo claro residual todavía dibuja el contorno de una ventana. Se desvanece. Los bordes de
+   ACENTO (chips de color, seleccionados) usan otro tono y no matchean, así que se conservan. */
+.card--dissolve .subhost [class*='border-gray-100'],
+.card--dissolve .subhost [class*='border-gray-200'] {
+  border-color: transparent;
+}
+/* Demos con código lado a lado: column-and-code-layout (y algunas demos directas) ponen el DEMO
+   y el CÓDIGO en la misma fila (.flex con un app-code adentro). Dentro de la columna del grid
+   dissolve esa fila se aprieta y el código (líneas largas, pre) se corta contra el borde. Los
+   apilamos (demo arriba, código full-width abajo) para que el código recupere el ancho y se lea.
+   `:has(app-code)` apunta SOLO a las filas demo+código, no a las filas de chips (que no tienen
+   código adentro y deben seguir en horizontal). */
+.card--dissolve .subhost .flex:has(app-code) {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 1.4rem;
+}
+/* Grises secundarios que vivían sobre blanco: sin el panel, sobre el campo de color bajan de
+   contraste, así que los llevamos al ink del campo para que se sigan leyendo. */
+.card--dissolve .subhost [class*='text-gray-400'],
+.card--dissolve .subhost [class*='text-gray-500'],
+.card--dissolve .subhost [class*='text-gray-600'] {
+  color: #4a4436;
+}
+/* Los inputs traen fill blanco propio: translúcido para que no lean como cajas blancas sobre
+   el campo, con el ink del campo como texto. El foco ya lo tiñe el acento (regla de más abajo). */
+.card--dissolve .subhost input[type='text'],
+.card--dissolve .subhost input[type='number'] {
+  background-color: rgba(255, 255, 255, 0.4);
+  color: #201d16;
 }
 /* El título del sub-ejemplo (h1) se promovió al topbar: se oculta acá para no duplicarlo. */
 .card--dissolve .subhost h1 {

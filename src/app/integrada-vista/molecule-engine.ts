@@ -91,7 +91,7 @@ const RAW: RawConcept[] = [
 // Conceptos que usan el tratamiento "disolver el marco": la card deja de ser una ventana y su
 // contenido flota en el campo del átomo (escena viva sin velo, aura grande). Experimento acotado
 // (hoy nivel 0); agregar índices acá lo extiende a más conceptos.
-const DISSOLVE = new Set<number>([0]);
+const DISSOLVE = new Set<number>([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]);
 
 const CX = 410;
 const CY = 290;
