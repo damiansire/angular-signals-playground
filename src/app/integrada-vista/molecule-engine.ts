@@ -60,8 +60,6 @@ interface SubDot {
   g: SVGGElement;
   dot: SVGCircleElement;
   num: SVGTextElement;
-  /** Fracción base [0,1) sobre el perímetro de la órbita (rect redondeado). */
-  frac: number;
   lx: number;
   ly: number;
 }
@@ -88,10 +86,9 @@ const RAW: RawConcept[] = [
   { name: 'Zoneless', code: 'zoneless', accent: 'capstone', dotted: false },
 ];
 
-// Conceptos que usan el tratamiento "disolver el marco": la card deja de ser una ventana y su
-// contenido flota en el campo del átomo (escena viva sin velo, aura grande). Experimento acotado
-// (hoy nivel 0); agregar índices acá lo extiende a más conceptos.
-const DISSOLVE = new Set<number>([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]);
+// Todos los conceptos usan el tratamiento "disolver el marco": la card deja de ser una ventana y su
+// contenido flota en el campo del átomo (escena viva sin velo, aura grande), con el nivel/sub-nivel
+// en el riel, el topbar y la constelación de la órbita.
 
 /**
  * Cantidad de conceptos del recorrido (metadata hardcodeada en RAW). DEBE coincidir con
@@ -105,7 +102,6 @@ const CY = 290;
 const ORX = 34;
 const ORY = 11;
 const NUC = 13;
-const SPIN = 55;
 const VISITED = '#8791a8';
 
 /**
@@ -160,57 +156,6 @@ function smoothstep(t: number): number {
 
 function lerp(a: number, b: number, t: number): number {
   return a + (b - a) * t;
-}
-
-/** Perímetro de un rectángulo redondeado (para repartir electrones sobre él). */
-function rrectPerimeter(w: number, h: number, r: number): number {
-  return 2 * (w - 2 * r) + 2 * (h - 2 * r) + 2 * Math.PI * r;
-}
-
-/**
- * Punto a distancia `d` sobre el perímetro de un rect redondeado (L,T,R,B, radio r),
- * en sentido horario arrancando por el borde superior. Así los electrones ENVUELVEN la
- * card (siguen su contorno por fuera) en vez de una elipse que la corta.
- */
-function rrectPoint(
-  L: number,
-  T: number,
-  R: number,
-  B: number,
-  r: number,
-  d: number,
-): { x: number; y: number } {
-  const sTop = R - L - 2 * r;
-  const sSide = B - T - 2 * r;
-  const arc = (Math.PI * r) / 2;
-  let x =
-    ((d % (2 * sTop + 2 * sSide + 4 * arc)) + 2 * sTop + 2 * sSide + 4 * arc) %
-    (2 * sTop + 2 * sSide + 4 * arc);
-  if (x < sTop) return { x: L + r + x, y: T };
-  x -= sTop;
-  if (x < arc) {
-    const a = -Math.PI / 2 + (x / arc) * (Math.PI / 2);
-    return { x: R - r + r * Math.cos(a), y: T + r + r * Math.sin(a) };
-  }
-  x -= arc;
-  if (x < sSide) return { x: R, y: T + r + x };
-  x -= sSide;
-  if (x < arc) {
-    const a = (x / arc) * (Math.PI / 2);
-    return { x: R - r + r * Math.cos(a), y: B - r + r * Math.sin(a) };
-  }
-  x -= arc;
-  if (x < sTop) return { x: R - r - x, y: B };
-  x -= sTop;
-  if (x < arc) {
-    const a = Math.PI / 2 + (x / arc) * (Math.PI / 2);
-    return { x: L + r + r * Math.cos(a), y: B - r + r * Math.sin(a) };
-  }
-  x -= arc;
-  if (x < sSide) return { x: L, y: B - r - x };
-  x -= sSide;
-  const a = Math.PI + (x / arc) * (Math.PI / 2);
-  return { x: L + r + r * Math.cos(a), y: T + r + r * Math.sin(a) };
 }
 
 export function initMolecule(
@@ -357,6 +302,9 @@ export function initMolecule(
   const opath = (): string =>
     `M ${-ORX} 0 A ${ORX} ${ORY} 0 1 0 ${ORX} 0 A ${ORX} ${ORY} 0 1 0 ${-ORX} 0`;
   const atomEls: SVGGElement[] = [];
+  // Referencia al `.orb` de cada átomo, cacheada acá: render() la lee 12 veces por frame de scroll;
+  // sin el cache haría 12 querySelector('.orb') por frame.
+  const orbEls: SVGGElement[] = [];
   C.forEach((cc, i) => {
     const accent = COL[cc.accent];
     const g = el('g', {
@@ -429,15 +377,15 @@ export function initMolecule(
     g.appendChild(nm);
     atomsG.appendChild(g);
     atomEls.push(g);
+    orbEls.push(orb);
   });
 
   // Órbita de sub-niveles: los electrones ENVUELVEN la card recorriendo un rect redondeado
   // que la abraza por fuera (el actual se resalta en su lugar, sin volar hasta arriba).
   const suborbit = el('svg', { class: 'suborbit', viewBox: '0 0 900 600' });
   const subRing = el('rect', { class: 'sub-ring', rx: 40 });
-  // En dissolve los electrones dejan de orbitar la card: se acomodan en fila fija, uno por
-  // sub-nivel, sobre un arco angosto pegado al topbar (la "constelación" del recorrido). subArc
-  // es la curva punteada que los conecta; solo se pinta cuando el concepto es dissolve.
+  // Los electrones se acomodan en fila fija, uno por sub-nivel, sobre un arco angosto pegado al
+  // topbar (la "constelación" del recorrido). subArc es la curva punteada que los conecta.
   const subArcId = 'sub-arc-' + Math.random().toString(36).slice(2);
   const subArc = el('path', { class: 'sub-arc', id: subArcId });
   // La vida del arco: un pulso viaja recorriéndolo en loop (SMIL, no rAF — se mueve solo,
@@ -475,6 +423,12 @@ export function initMolecule(
 
   let orbitFor = -1;
   let subDots: SubDot[] = [];
+  // ¿Hay que recalcular la geometría de la órbita? La constelación de sub-niveles está anclada al
+  // topbar (estable): solo se mueve si algo se movió (scroll/resize/cambio de sub-nivel). Con este
+  // flag, estando parado dentro de un concepto orbitLoop no fuerza reflow ni reescribe los dots.
+  let orbitDirty = true;
+  // SVGPoint reusable para las conversiones de coordenadas de orbitLoop (evita alocar uno por frame).
+  const orbitPoint = suborbit.createSVGPoint();
   // Estado de la pelota: dónde quedó, para decidir snap (boot / concepto nuevo) vs glide (cambió
   // el sub-nivel dentro del mismo concepto).
   let puckIdx = -1;
@@ -513,8 +467,6 @@ export function initMolecule(
 
   function renderSubCard(cc: Concept): void {
     const card = cc.card!;
-    const subnumEl = card.querySelector('.subnum'); // solo en el header clásico (no-dissolve)
-    if (subnumEl) subnumEl.textContent = String(cc.subIdx + 1);
     // Montar el componente REAL del sub-nivel actual, desmontando el del sub anterior.
     const host = card.querySelector<HTMLElement>('.subhost')!;
     cc.subDispose?.();
@@ -550,8 +502,6 @@ export function initMolecule(
     subEG.textContent = '';
     subDots = [];
     for (let k = 0; k < nsub; k++) {
-      // Repartidos parejo sobre el perímetro; arrancan por arriba (fracción 0 = borde superior).
-      const frac = k / nsub;
       const g = el('g', { class: 'sub-e' });
       const dot = el('circle', { class: 'sub-dot', cx: 450, cy: 90, r: 12 });
       const num = el('text', { class: 'sub-n', x: 450, y: 94 });
@@ -561,7 +511,7 @@ export function initMolecule(
       const idx = k;
       g.addEventListener('click', () => subScrollTo(cc, idx));
       subEG.appendChild(g);
-      subDots.push({ g, dot, num, frac, lx: 450, ly: 90 });
+      subDots.push({ g, dot, num, lx: 450, ly: 90 });
     }
     updateOrbitFill(cc);
   }
@@ -588,14 +538,16 @@ export function initMolecule(
     }
   }
 
-  // Loop VIVO: los electrones recorren un rect redondeado que ABRAZA la card por fuera.
-  // El actual se resalta en su lugar (no vuela hasta arriba, que se leía forzado).
-  function orbitLoop(ts: number): void {
+  // Constelación de sub-niveles: uno por sub-nivel sobre un arco fijo pegado al topbar, con la
+  // pelota (sub-nivel actual) que desliza entre ellos. El arco está anclado al topbar (estable),
+  // así que la geometría solo se recalcula cuando `orbitDirty` lo pide (scroll/resize/cambio de
+  // sub-nivel): estando parado dentro de un concepto, el loop no fuerza reflow ni reescribe dots.
+  function orbitLoop(): void {
     if (destroyed) return;
     const vis = orbitFor >= 0 && subDots.length > 0 && (+suborbit.style.opacity || 0) > 0.05;
-    if (vis) {
+    if (vis && orbitDirty) {
+      orbitDirty = false;
       const cc = C[orbitFor];
-      const t = (ts || 0) / 1000;
       let ccx = 450;
       let ccy = 300;
       let hw = 380;
@@ -613,7 +565,7 @@ export function initMolecule(
       if (m0 && cc.card) {
         const m = m0.inverse();
         const cr = cc.card.getBoundingClientRect();
-        const p = suborbit.createSVGPoint();
+        const p = orbitPoint;
         p.x = cr.left;
         p.y = cr.top;
         const tl = p.matrixTransform(m);
@@ -665,91 +617,58 @@ export function initMolecule(
       subRing.setAttribute('width', (R - L).toFixed(1));
       subRing.setAttribute('height', (B - T).toFixed(1));
       subRing.setAttribute('rx', rad.toFixed(1));
-      // En dissolve los electrones dejan de orbitar la card: se leen mejor como una CONSTELACIÓN
-      // fija del recorrido (uno por sub-nivel, en su propio lugar, izquierda a derecha) que como
-      // puntos volando alrededor de un contenido sin marco. En el resto se mantiene el recorrido
-      // giratorio sobre el rect redondeado que abraza la card.
-      const dissolve = DISSOLVE.has(orbitFor);
-      if (dissolve) {
-        const nsub = subDots.length;
-        // Opción A: el arco ARRANCA antes del bloque título+contador y TERMINA después, curvando
-        // hacia abajo (∪) para enmarcarlo. Los extremos lo flanquean por los costados (fuera del
-        // texto) y los pasos del medio hunden por debajo; el título flota dentro del arco. El
-        // margen izquierdo deja lugar para el dot ACTIVO agrandado + su sonar cuando el paso 1 es
-        // el actual, así nunca colisiona con el contador. Escala parejo de 2 a 10+ pasos porque el
-        // ancho lo fija el título (no la cantidad de dots): sumar pasos sólo los reparte en la curva.
-        const archL = blockL - 46;
-        const archR = blockR + 40;
-        const archCX = (archL + archR) / 2;
-        // Separación bajo el título: da aire a los extremos para que el dot ACTIVO agrandado no
-        // roce el borde superior de la ventana cuando el paso actual es un extremo (p.ej. sub-1).
-        const archY = (blockBottomY > -1e8 ? blockBottomY : topbarY + 40) + 18;
-        const archDepth = 42;
-        for (let k = 0; k < nsub; k++) {
-          const o = subDots[k];
-          const frac = nsub > 1 ? k / (nsub - 1) : 0.5;
-          o.lx = archL + (archR - archL) * frac;
-          o.ly = archY + archDepth * Math.sin(Math.PI * frac);
-          o.dot.setAttribute('cx', o.lx.toFixed(1));
-          o.dot.setAttribute('cy', o.ly.toFixed(1));
-          o.num.setAttribute('x', o.lx.toFixed(1));
-          o.num.setAttribute('y', (o.ly + 4).toFixed(1));
-        }
-        subArc.setAttribute(
-          'd',
-          `M ${archL.toFixed(1)} ${archY.toFixed(1)} Q ${archCX.toFixed(1)} ${(archY + archDepth * 2).toFixed(1)} ${archR.toFixed(1)} ${archY.toFixed(1)}`,
-        );
-        // La pelota se coloca sobre el dot actual: en el boot / cambio de concepto aparece DIRECTO
-        // (transición apagada), y al cambiar de sub-nivel DENTRO del concepto DESLIZA (la transición
-        // de transform la hace el CSS). Si no cambió nada no se toca: el arco está anclado al topbar
-        // (estable), así que no hay que perseguirlo cuadro a cuadro (y no se reinicia el glide).
-        const curDot = subDots[cc.subIdx];
-        if (curDot) {
-          const boot = puckConcept !== orbitFor || puckIdx < 0;
-          if (boot || puckIdx !== cc.subIdx) {
-            const to = `translate(${curDot.lx.toFixed(1)},${curDot.ly.toFixed(1)})`;
-            if (boot) {
-              subPuckG.style.transition = 'none';
-              subPuckG.setAttribute('transform', to);
-              void suborbit.getBoundingClientRect();
-              subPuckG.style.transition = '';
-            } else {
-              subPuckG.setAttribute('transform', to);
-            }
-            subPuckNum.textContent = String(cc.subIdx + 1);
-            puckIdx = cc.subIdx;
-            puckConcept = orbitFor;
+      const nsub = subDots.length;
+      // El arco ARRANCA antes del bloque título+contador y TERMINA después, curvando hacia abajo
+      // (∪) para enmarcarlo. Los extremos lo flanquean por los costados (fuera del texto) y los
+      // pasos del medio hunden por debajo; el título flota dentro del arco. El margen izquierdo deja
+      // lugar para el dot ACTIVO agrandado + su sonar cuando el paso 1 es el actual, así nunca
+      // colisiona con el contador. Escala parejo de 2 a 10+ pasos porque el ancho lo fija el título
+      // (no la cantidad de dots): sumar pasos sólo los reparte en la curva.
+      const archL = blockL - 46;
+      const archR = blockR + 40;
+      const archCX = (archL + archR) / 2;
+      // Separación bajo el título: da aire a los extremos para que el dot ACTIVO agrandado no
+      // roce el borde superior de la ventana cuando el paso actual es un extremo (p.ej. sub-1).
+      const archY = (blockBottomY > -1e8 ? blockBottomY : topbarY + 40) + 18;
+      const archDepth = 42;
+      for (let k = 0; k < nsub; k++) {
+        const o = subDots[k];
+        const frac = nsub > 1 ? k / (nsub - 1) : 0.5;
+        o.lx = archL + (archR - archL) * frac;
+        o.ly = archY + archDepth * Math.sin(Math.PI * frac);
+        o.dot.setAttribute('cx', o.lx.toFixed(1));
+        o.dot.setAttribute('cy', o.ly.toFixed(1));
+        o.num.setAttribute('x', o.lx.toFixed(1));
+        o.num.setAttribute('y', (o.ly + 4).toFixed(1));
+      }
+      subArc.setAttribute(
+        'd',
+        `M ${archL.toFixed(1)} ${archY.toFixed(1)} Q ${archCX.toFixed(1)} ${(archY + archDepth * 2).toFixed(1)} ${archR.toFixed(1)} ${archY.toFixed(1)}`,
+      );
+      // La pelota se coloca sobre el dot actual: en el boot / cambio de concepto aparece DIRECTO
+      // (transición apagada), y al cambiar de sub-nivel DENTRO del concepto DESLIZA (la transición
+      // de transform la hace el CSS).
+      const curDot = subDots[cc.subIdx];
+      if (curDot) {
+        const boot = puckConcept !== orbitFor || puckIdx < 0;
+        if (boot || puckIdx !== cc.subIdx) {
+          const to = `translate(${curDot.lx.toFixed(1)},${curDot.ly.toFixed(1)})`;
+          if (boot) {
+            subPuckG.style.transition = 'none';
+            subPuckG.setAttribute('transform', to);
+            void suborbit.getBoundingClientRect();
+            subPuckG.style.transition = '';
+          } else {
+            subPuckG.setAttribute('transform', to);
           }
-        }
-      } else {
-        const per = rrectPerimeter(R - L, B - T, rad);
-        const cur = cc.subIdx;
-        for (let k = 0; k < subDots.length; k++) {
-          const o = subDots[k];
-          // El sub-nivel actual queda fijo arriba del todo (12 en punto), sin el giro continuo:
-          // es "dónde estoy", no debería moverse solo. Los demás recorren el contorno.
-          const pt =
-            k === cur
-              ? { x: (L + R) / 2, y: T }
-              : rrectPoint(L, T, R, B, rad, (o.frac + t / SPIN) * per);
-          o.lx = pt.x;
-          o.ly = pt.y;
-          o.dot.setAttribute('cx', o.lx.toFixed(1));
-          o.dot.setAttribute('cy', o.ly.toFixed(1));
-          o.num.setAttribute('x', o.lx.toFixed(1));
-          o.num.setAttribute('y', (o.ly + 4).toFixed(1));
+          subPuckNum.textContent = String(cc.subIdx + 1);
+          puckIdx = cc.subIdx;
+          puckConcept = orbitFor;
         }
       }
     }
     raf(orbitLoop);
   }
-
-  // Velo: al bucear, oscurece sutilmente el fondo alrededor del card (spotlight) para que el
-  // color del concepto resalte parejo (si no, el teal se funde con el fondo verdoso de la página).
-  const diveVeil = document.createElement('div');
-  diveVeil.className = 'dive-veil';
-  stamp(diveVeil);
-  contentEl.appendChild(diveVeil);
 
   // Aura del concepto: al bucear, el átomo actual "crece" y se vuelve el fondo de color
   // donde vive el ejemplo, así el card no aparece como un rectángulo suelto sino nacido del
@@ -760,19 +679,13 @@ export function initMolecule(
   contentEl.appendChild(diveAura);
 
   // ---- Contenido de cada concepto: cada sub-nivel embebe el componente REAL del nivel ----
-  C.forEach((cc, i) => {
+  C.forEach((cc) => {
     const card = document.createElement('div');
-    card.className = 'card live card--sub' + (DISSOLVE.has(i) ? ' card--dissolve' : '');
+    // Todos los conceptos usan el tratamiento "disolver el marco": la card no es una ventana, el
+    // nivel/sub-nivel viven en el riel, el topbar y la órbita (sin header meta dentro de la card).
+    card.className = 'card live card--sub card--dissolve';
     card.style.setProperty('--glow', COL[cc.accent]);
-    // En modo "disolver el marco" la info se depura: el nombre del concepto se PROMUEVE a título
-    // del espacio (el nivel ya lo dice el riel, "Adentro" es obvio) y el sub-nivel queda como un
-    // contador pegado a ese título (su otra casa son los electrones de la órbita). En el resto,
-    // el header meta clásico (Adentro · X · nivel N + sub-nivel Y/N).
-    const header = DISSOLVE.has(i)
-      ? '' // en dissolve el nivel/sub-nivel viven en el riel, el topbar y la órbita; sin header en la card
-      : `<p class="card__k">Adentro · ${cc.name} · nivel ${i}</p>` +
-        `<p class="subtop">sub-nivel <b class="subnum">1</b> / ${cc.subN}</p>`;
-    card.innerHTML = `<span class="subflash"></span>${header}<div class="subbody"><div class="subhost"></div></div>`;
+    card.innerHTML = `<span class="subflash"></span><div class="subbody"><div class="subhost"></div></div>`;
     contentEl.appendChild(card);
     cc.card = card;
     stamp(card);
@@ -900,46 +813,31 @@ export function initMolecule(
       'transform',
       `translate(${(CX - K * fx).toFixed(1)},${(300 - K * fy).toFixed(1)}) scale(${K.toFixed(3)})`,
     );
-    // La cámara ya centró y agrandó el átomo detrás de la card (K llega a FK=2.7): dejarlo
-    // brillar de fondo, en vez de apagarlo casi del todo, es lo que hace que la card se lea
-    // "parada sobre el átomo" en vez de "algo nuevo que tapó la escena".
-    // Conceptos "disolver el marco": la card no es una ventana sino el interior del átomo, así
-    // que al bucear NO se atenúa la escena (sin velo, molécula viva) y el aura crece más para
-    // volverse la sala. En el resto, la atmósfera normal (escena tenue de fondo + velo suave).
-    const dissolve = DISSOLVE.has(c);
-    sceneG.style.opacity = (1 - (dissolve ? 0.1 : 0.62) * diveDepth).toFixed(2);
+    // La cámara ya centró y agrandó el átomo detrás de la card (K llega a FK=2.7). La card no es
+    // una ventana sino el interior del átomo: al bucear la escena casi no se atenúa (molécula viva,
+    // sin velo) y el aura crece para volverse la sala, así la card se lee "parada sobre el átomo".
+    sceneG.style.opacity = (1 - 0.1 * diveDepth).toFixed(2);
 
     // El aura del concepto crece desde el átomo (chica) hasta el fondo del card (grande),
-    // tomando el color del concepto: el card queda "nacido" del átomo, no suelto. El velo
-    // es una atmósfera suave (no un scrim de modal): apenas entona el entorno para que el
-    // color resalte parejo en todos los conceptos, sin apagar la escena.
+    // tomando el color del concepto: el card queda "nacido" del átomo, no suelto.
     diveAura.style.setProperty('--glow', COL[C[c].accent]);
-    diveAura.style.opacity = ((dissolve ? 0.92 : 0.72) * diveDepth).toFixed(3);
-    diveAura.style.transform = `scale(${((dissolve ? 0.5 : 0.32) + (dissolve ? 1.15 : 0.68) * diveDepth).toFixed(3)})`;
-    diveVeil.style.opacity = ((dissolve ? 0 : 0.32) * diveDepth).toFixed(3);
-    // El topbar y el riel acompañan la misma atmósfera al bucear (en vez de quedar fijos y
-    // brillantes mientras todo se apaga alrededor, que es la gramática visual de un modal
-    // sobre un app-shell). Siguen legibles/clickeables, solo bajan de intensidad.
-    // En dissolve el topbar deja de ser chrome tenue: su centro muestra el TÍTULO del sub-ejemplo
-    // actual (promovido desde el h1 del demo) con protagonismo, así que se mantiene presente. En
-    // el resto conserva "El recorrido" y se atenúa al bucear. El caption inferior sí se va (abajo).
+    diveAura.style.opacity = (0.92 * diveDepth).toFixed(3);
+    diveAura.style.transform = `scale(${(0.5 + 1.15 * diveDepth).toFixed(3)})`;
+    // El topbar deja de ser chrome tenue: su centro muestra el TÍTULO del sub-ejemplo actual
+    // (promovido desde el h1 del demo) con protagonismo, así que se mantiene presente al bucear.
+    // El riel se atenúa y el caption inferior se va.
     if (topbarEl) {
-      topbarEl.classList.toggle('contextual', dissolve);
-      topbarEl.style.opacity = dissolve ? '1' : (1 - 0.4 * diveDepth).toFixed(3);
+      topbarEl.classList.add('contextual');
+      topbarEl.style.opacity = '1';
     }
     if (railEl) railEl.style.opacity = (1 - 0.35 * diveDepth).toFixed(3);
-    if (captionEl)
-      captionEl.style.opacity = dissolve ? Math.max(0, 1 - diveDepth / 0.5).toFixed(2) : '1';
-    // Título vertical del concepto (espina de identidad) pegado al riel: aparece al bucear en
-    // dissolve, con el color del concepto. Es la casa del nombre en la escena.
+    if (captionEl) captionEl.style.opacity = Math.max(0, 1 - diveDepth / 0.5).toFixed(2);
+    // Título vertical del concepto (espina de identidad) pegado al riel: aparece al bucear, con
+    // el color del concepto. Es la casa del nombre en la escena.
     if (spaceSpineEl) {
-      if (dissolve) {
-        if (spaceSpineEl.textContent !== C[c].name) spaceSpineEl.textContent = C[c].name;
-        spaceSpineEl.style.setProperty('--glow', COL[C[c].accent]);
-        spaceSpineEl.style.opacity = Math.min(1, diveDepth / 0.55).toFixed(2);
-      } else {
-        spaceSpineEl.style.opacity = '0';
-      }
+      if (spaceSpineEl.textContent !== C[c].name) spaceSpineEl.textContent = C[c].name;
+      spaceSpineEl.style.setProperty('--glow', COL[C[c].accent]);
+      spaceSpineEl.style.opacity = Math.min(1, diveDepth / 0.55).toFixed(2);
     }
 
     const dc = C[c];
@@ -952,23 +850,18 @@ export function initMolecule(
         if (orbitFor === c) updateOrbitFill(dc);
       }
     }
-    // Título del topbar en dissolve: antes de bucear (vista molécula) enmarca el nivel con su
-    // tagline; adentro, el título del sub-ejemplo actual. Va DESPUÉS de renderSubCard para leer
-    // el exampleTitle recién montado (si no, va un sub-nivel atrasado). En el resto, "El recorrido".
+    // Título del topbar: antes de bucear (vista molécula) enmarca el nivel con su tagline; adentro,
+    // el título del sub-ejemplo actual. Va DESPUÉS de renderSubCard para leer el exampleTitle recién
+    // montado (si no, va un sub-nivel atrasado). Si el sub-nivel no tiene h1 propio, cae al tagline
+    // del nivel (no al nombre, que ya está en la espina vertical).
     if (tbTitleEl) {
-      // Adentro: título del sub-ejemplo; si el sub-nivel no tiene h1 propio, cae al tagline del
-      // nivel (no al nombre, que ya está en la espina vertical). Antes de bucear: el tagline.
-      tbTitleEl.textContent = dissolve
-        ? diveDepth > 0.5
-          ? dc.exampleTitle || dc.tagline || dc.name
-          : dc.tagline || dc.name
-        : 'El recorrido';
+      tbTitleEl.textContent =
+        diveDepth > 0.5 ? dc.exampleTitle || dc.tagline || dc.name : dc.tagline || dc.name;
     }
     // El contador de sub-nivel vive a nivel del título (en el topbar, como prefijo), no adentro
-    // de la card. Solo cuando estás en un sub-ejemplo (buceado en dissolve).
+    // de la card. Solo cuando estás en un sub-ejemplo (buceado).
     if (tbCountEl) {
-      tbCountEl.textContent =
-        dissolve && diveDepth > 0.5 && dc.subN > 0 ? `${dc.subIdx + 1} / ${dc.subN}` : '';
+      tbCountEl.textContent = diveDepth > 0.5 && dc.subN > 0 ? `${dc.subIdx + 1} / ${dc.subN}` : '';
     }
     if (dc.subN > 0 && diveDepth > 0.35) {
       if (orbitFor !== c) {
@@ -976,9 +869,9 @@ export function initMolecule(
         orbitFor = c;
       }
       suborbit.classList.add('on');
-      // En conceptos dissolve se oculta el anillo punteado (deja solo los electrones): con la
-      // card sin marco, el rect punteado volvería a leerse como el borde de una ventana.
-      suborbit.classList.toggle('dissolve', dissolve);
+      // Se oculta el anillo punteado (deja solo los electrones): con la card sin marco, el rect
+      // punteado se leería como el borde de una ventana.
+      suborbit.classList.add('dissolve');
       suborbit.style.opacity = Math.min(1, (diveDepth - 0.35) / 0.4).toFixed(2);
     } else if (orbitFor !== -1) {
       suborbit.classList.remove('on');
@@ -987,10 +880,10 @@ export function initMolecule(
     }
 
     atomEls.forEach((g, i) => {
-      const orb = g.querySelector<SVGGElement>('.orb')!;
-      // El nombre del átomo se desvanece al bucear en dissolve: su rol de etiqueta lo toma el
-      // título promovido dentro de la card, no debe repetirse en la escena. Solo el actual.
-      g.classList.toggle('dived-dissolve', i === c && dissolve && diveDepth > 0.4);
+      const orb = orbEls[i];
+      // El nombre del átomo se desvanece al bucear: su rol de etiqueta lo toma el título promovido
+      // dentro de la card, no debe repetirse en la escena. Solo el actual.
+      g.classList.toggle('dived-dissolve', i === c && diveDepth > 0.4);
       if (i < c) {
         g.classList.add('on');
         g.classList.remove('current');
@@ -1079,6 +972,9 @@ export function initMolecule(
     gateReady = settled;
     if (!settled) activeReveal = null;
     lastRenderS = s;
+    // La vista se movió (scroll/nav/cambio de sub-nivel): que orbitLoop recalcule la constelación
+    // en el próximo frame. Estando parado, render() no corre y la órbita no se recalcula sola.
+    orbitDirty = true;
   }
 
   // ---- Scroll 100% NATIVO + snap ----
@@ -1157,6 +1053,7 @@ export function initMolecule(
   };
   const onResize = (): void => {
     track.style.height = (TOTAL + 0.2) * unit() + 'px';
+    orbitDirty = true; // cambió la geometría: que orbitLoop reubique la constelación
   };
   // Los pasos saltan a la parada ADYACENTE (nivel o sub-nivel), no un desplazamiento fijo:
   // con scroll-snap mandatory un medio-paso queda por debajo del intervalo de snap y el
