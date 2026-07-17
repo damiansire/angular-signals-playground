@@ -93,6 +93,13 @@ realmente tocás; no inventes scopes nuevos.
 - El mensaje describe **solo el cambio**. Header ≤ 100 caracteres.
 - Sin atribución a herramientas ni `Co-Authored-By`.
 
+## Contribuciones
+
+Repo educativo personal. Se aceptan PRs de: **bugfixes**, **nuevas lecciones o
+sub-niveles** de la API de signals, y **mejoras de documentación**. NO se aceptan
+reescrituras masivas ni cambios de stack (Angular signals-first es deliberado).
+Todo PR pasa el mismo gate que CI: lint + format:check + tests en verde.
+
 ## Do NOT (anti-over-engineering)
 
 - No agregues abstracciones para operaciones de una sola vez.

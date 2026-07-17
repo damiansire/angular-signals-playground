@@ -104,6 +104,14 @@ src/app/
   (e.g. router-event-driven menu state) explicitly call `markForCheck()`.
 - **Standalone components** with explicit `imports` — no `NgModule`s.
 
+## Non-goals
+
+This is a **teaching playground**, not a library:
+
+- It is **not** a reusable component or state library to `npm install`. The demos are meant to be read and run, not consumed as a dependency.
+- It does **not** try to cover all of Angular, only the **signals** surface (reactivity, `computed`, `effect`, `resource`, zoneless).
+- The integrated "molecule" view is a visual explainer, not a production UI pattern to copy verbatim.
+
 ## License
 
 Released under the [MIT License](./LICENSE).
