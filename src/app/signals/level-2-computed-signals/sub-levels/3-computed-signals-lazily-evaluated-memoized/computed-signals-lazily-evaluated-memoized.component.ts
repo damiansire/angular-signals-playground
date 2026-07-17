@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy } from '@angular/core';
+import { Component, ChangeDetectionStrategy, signal } from '@angular/core';
 import { ComputedTrackerComponent } from '../../../../components/computed-tracker/computed-tracker.component';
 import { ClickInButton } from '../../../../components/component.interface';
 import { BasicFormComponent } from '../../../../components/basic-form/basic-form.component';
@@ -18,14 +18,18 @@ import { ConceptCardComponent } from '../../../../components-atom/concept-card/c
   ],
 })
 export class ComputedSignalsLazilyEvaluatedMemoizedComponent {
-  computedTracker: ClickInButton[] = [];
-  clickHistory: ClickInButton[] = [];
+  // El estado que alimenta los paneles vive en signals y se actualiza con una NUEVA referencia
+  // (no `push` sobre el mismo array): bajo OnPush + zoneless, mutar el array in situ no dispara
+  // detección de cambios y los hijos (que reciben la lista por `input()`) nunca se refrescarían.
+  // Es justo el patrón que esta lección enseña; el componente lo modela en su propio estado.
+  readonly computedTracker = signal<ClickInButton[]>([]);
+  readonly clickHistory = signal<ClickInButton[]>([]);
 
   addComputedSignal(data: ClickInButton) {
-    this.computedTracker.push(data);
+    this.computedTracker.update((prev) => [...prev, data]);
   }
 
   addClickToHistory(event: ClickInButton) {
-    this.clickHistory.push(event);
+    this.clickHistory.update((prev) => [...prev, event]);
   }
 }
