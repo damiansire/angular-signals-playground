@@ -25,50 +25,18 @@ export class OldChangeDetectionComponent {
     }
   }
 
-  baseElement = [
-    {
-      name: 'main',
-      x: 550,
-      y: 100,
-      color: this.step() > 0 ? '#90EE90' : '',
-    },
-    {
-      name: 'article',
-      x: 700,
-      y: 300,
-      color: this.step() > 1 ? '#90EE90' : '',
-    },
-    {
-      name: 'section',
-      x: 400,
-      y: 300,
-      color: this.step() > 1 ? '#90EE90' : '',
-    },
-    {
-      name: 'h2',
-      x: 300,
-      y: 500,
-      color: this.step() > 2 ? '#90EE90' : '',
-    },
-    {
-      name: 'p',
-      x: 500,
-      y: 500,
-      color: this.step() > 2 ? '#90EE90' : '',
-    },
-    {
-      name: 'h3',
-      x: 600,
-      y: 500,
-      color: this.step() > 2 ? '#90EE90' : '',
-    },
-    {
-      name: 'p2',
-      x: 800,
-      y: 500,
-      color: this.step() > 2 ? '#90EE90' : '',
-    },
-  ] as NodeTree[];
+  // Árbol DOM de ejemplo. `id`/`level` (que `NodeTree` exige) se derivan en `data`:
+  // el id es el nombre del tag y el level es la profundidad (y/100). El color no vive
+  // acá porque `data` lo recalcula por `step()`.
+  private readonly baseElement: readonly { name: string; x: number; y: number }[] = [
+    { name: 'main', x: 550, y: 100 },
+    { name: 'article', x: 700, y: 300 },
+    { name: 'section', x: 400, y: 300 },
+    { name: 'h2', x: 300, y: 500 },
+    { name: 'p', x: 500, y: 500 },
+    { name: 'h3', x: 600, y: 500 },
+    { name: 'p2', x: 800, y: 500 },
+  ];
 
   // Un nodo esta REVISADO cuando el barrido ya llego a su profundidad (y/100). El verde claro
   // original dejaba la etiqueta blanca casi ilegible y el pendiente caia al gris default de
@@ -79,6 +47,8 @@ export class OldChangeDetectionComponent {
   data = computed<NodeTree[]>(() =>
     this.baseElement.map((node) => ({
       ...node,
+      id: node.name,
+      level: node.y / 100,
       color:
         this.step() >= node.y / 100
           ? OldChangeDetectionComponent.SWEPT
