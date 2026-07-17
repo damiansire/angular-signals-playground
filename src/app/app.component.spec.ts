@@ -25,12 +25,12 @@ describe('AppComponent', () => {
     expect(fixture.componentInstance.title).toBe('angular-examples');
   });
 
-  it('en la landing (/) es full-bleed: oculta el sidebar del banco', () => {
+  it('en la vista integrada (/) es full-bleed: oculta el sidebar del banco', () => {
     const fixture = TestBed.createComponent(AppComponent);
     fixture.detectChanges();
     const el = fixture.nativeElement as HTMLElement;
 
-    // La landing entra por defecto (url === '/') → sin chrome, solo contenido.
+    // La vista integrada entra por defecto (url === '/') → sin chrome, solo contenido.
     expect(el.querySelector('app-sidebar-menu')).toBeFalsy();
     expect(el.querySelector('router-outlet')).toBeTruthy();
 
@@ -40,7 +40,7 @@ describe('AppComponent', () => {
     expect(el.querySelector('#main-content')).toBeTruthy();
   });
 
-  it('fuera de la landing muestra el chrome del banco (sidebar)', async () => {
+  it('fuera de la vista integrada muestra el chrome del banco (sidebar)', async () => {
     const router = TestBed.inject(Router);
     const fixture = TestBed.createComponent(AppComponent);
     fixture.detectChanges();

@@ -53,10 +53,8 @@ import { OscilloscopeComponent } from './lab/instruments/oscilloscope/oscillosco
 import { ReactiveCellsComponent } from './lab/instruments/reactive-cells/reactive-cells.component';
 import { ManualComponent } from './lab/instruments/manual/manual.component';
 import { LabHubComponent } from './lab/lab-hub/lab-hub.component';
-import { LandingComponent } from './landing/landing.component';
 import { JourneyComponent } from './journey/journey.component';
 import { CartExampleComponent } from './practice/cart/cart-example.component';
-import { PocComponent } from './poc/poc.component';
 import { IntegradaVistaComponent } from './integrada-vista/integrada-vista.component';
 
 export const signalsRoutesTree: RouteItem[] = [
@@ -213,8 +211,9 @@ export const routes: Routes = [
   { path: 'lab/manual', component: ManualComponent },
   { path: 'recorrido', component: JourneyComponent },
   { path: 'practica/carrito', component: CartExampleComponent },
-  { path: 'poc', component: PocComponent },
   { path: 'integrada-vista', component: IntegradaVistaComponent },
-  { path: '', component: LandingComponent, pathMatch: 'full' },
+  { path: '', redirectTo: 'integrada-vista', pathMatch: 'full' },
+  // Cualquier URL desconocida (incluidos bookmarks viejos como /poc) rebota a la vista integrada.
+  { path: '**', redirectTo: 'integrada-vista' },
 ];
 export const menuItems = baseRoutes;
