@@ -407,6 +407,19 @@
 .card--dissolve .subhost [class*='border-gray-200'] {
   border-color: transparent;
 }
+/* Algunos demos dibujan el borde del contenedor desde su PROPIO CSS scopeado (border: 1px solid
+   #ccc en .counter-container / .profile-container), no con clases Tailwind, así que la regla de
+   arriba no los alcanza. Los desvanecemos por nombre para que la card no quede contorneada. */
+.card--dissolve .subhost .counter-container,
+.card--dissolve .subhost .profile-container {
+  border-color: transparent;
+}
+/* Chips de tags en fucsia-100: sobre el campo (sin la hoja blanca detrás) el relleno pálido casi
+   desaparece. Un fill un toque más presente para que se lean como etiquetas; el texto fucsia-800
+   ya contrasta. */
+.card--dissolve .subhost [class*='bg-fuchsia-100'] {
+  background-color: rgba(217, 70, 239, 0.28);
+}
 /* Demos con código lado a lado: column-and-code-layout (y algunas demos directas) ponen el DEMO
    y el CÓDIGO en la misma fila (.flex con un app-code adentro). Dentro de la columna del grid
    dissolve esa fila se aprieta y el código (líneas largas, pre) se corta contra el borde. Los
@@ -521,6 +534,27 @@
 .subhost button[class*='bg-indigo-']:hover:not(:disabled),
 .subhost button[class*='bg-emerald-']:hover:not(:disabled),
 .subhost button[class*='bg-gray-']:hover:not(:disabled) {
+  filter: brightness(1.08);
+}
+/* Botones SIN clase de color Tailwind (p.ej. el <button>Destroy</button> pelado de effect-destroy,
+   o los estilados desde el CSS del componente): sueltos sobre el campo se leen como texto plano,
+   sin afford de acción. Les damos la misma pastilla base que a los grises, así todo lo clickeable
+   se lee como control. Los bg-* ya tienen su tratamiento arriba y quedan excluidos. */
+.subhost button:not([class*='bg-']) {
+  font-family: var(--sans);
+  font-weight: 600;
+  border: none;
+  border-radius: 999px;
+  padding: 0.6rem 1.35rem;
+  /* Ancho-contenido (no estirado): dentro de un flex-col w-full el botón se estiraría a banner;
+     lo acotamos a su contenido para que se lea como los demás botones-pastilla. */
+  width: fit-content;
+  background: #3a352d;
+  color: #f2ecdc;
+  cursor: pointer;
+  transition: filter 0.15s ease;
+}
+.subhost button:not([class*='bg-']):hover:not(:disabled) {
   filter: brightness(1.08);
 }
 /* Foco de los inputs de texto en el acento del concepto en vez del cian/teal/rosa/naranja
