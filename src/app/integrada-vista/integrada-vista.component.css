@@ -833,6 +833,13 @@
   color: #6a6355;
   text-decoration: none;
 }
+/* El botón "← Recorrido" se oculta hasta que tenga un destino real, pero se mantiene en el DOM
+   ocupando su slot: el topbar es flex space-between de 3 zonas y sin ese ancho el título dejaría
+   de estar centrado. visibility:hidden lo saca de la vista, del foco y de los clicks; para
+   reactivarlo, borrar esta regla. */
+.tb-back {
+  visibility: hidden;
+}
 
 .rail {
   position: absolute;
