@@ -341,6 +341,15 @@
   font-size: 1.05rem;
   line-height: 1.5;
 }
+/* Hanging indent para las líneas de un snippet que WRAPPEAN: el remanente de una línea larga se
+   indenta como continuación en vez de arrancar en la columna 0, así se lee que sigue la misma
+   línea. Alcance acotado a las líneas ESTÁTICAS (hijas directas del cuerpo del editor y sin
+   `flex`): las interactivas del nivel 0 (`.flex`, con tokens anidados) quedan afuera y además no
+   wrappean, así que su layout no se toca. */
+.card--dissolve .subhost app-code .p-4 > div:not(.flex) {
+  padding-left: 1.8em;
+  text-indent: -1.8em;
+}
 /* Con todos los tags seleccionados, el fondo verde SÓLIDO (bg-green-700) tapaba el código y
    gritaba. Lo hacemos translúcido: marca el nodo activo sin ahogar la lectura. Y compactamos el
    interlineado (py-2 era demasiado) para que el bloque entre y respire. */
@@ -415,10 +424,13 @@
   border-color: transparent;
 }
 /* Chips de tags en fucsia-100: sobre el campo (sin la hoja blanca detrás) el relleno pálido casi
-   desaparece. Un fill un toque más presente para que se lean como etiquetas; el texto fucsia-800
-   ya contrasta. */
+   desaparece. Un fill un toque más presente para que se lean como etiquetas, y el texto un tono
+   más hondo (fucsia-900) para que el contraste sobre ese fill quede holgado, no justo. */
 .card--dissolve .subhost [class*='bg-fuchsia-100'] {
-  background-color: rgba(217, 70, 239, 0.28);
+  background-color: rgba(217, 70, 239, 0.32);
+}
+.card--dissolve .subhost [class*='text-fuchsia-800'] {
+  color: #6b1560;
 }
 /* Demos con código lado a lado: column-and-code-layout (y algunas demos directas) ponen el DEMO
    y el CÓDIGO en la misma fila (.flex con un app-code adentro). Dentro de la columna del grid
