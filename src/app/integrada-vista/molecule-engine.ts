@@ -680,22 +680,26 @@ export function initMolecule(
         // como mucho a ~x56, clareando la espina vertical "Signals" (arranca en ~x60). Alineado con
         // el centro visual del riel de conceptos (.rail, left:13) para que el morph no salte de eje.
         const barXpx = 30;
-        // El sub-track vive ENTRE las dos flechas ▲/▼ del riel (que quedan cerca de los bordes): así
-        // los extremos de la barra se abren hasta tocar el stepper sin pisarlo, y las flechas flanquean
-        // la barra de sub-niveles igual que flanqueaban los conceptos. Fallback al topbar/borde si aún
-        // no hay layout de las flechas.
+        // Destino de los extremos: la barra abierta va ENTRE las flechas ▲/▼ (cerca de los bordes),
+        // que la flanquean sin que las paradas las pisen. Fallback al topbar/borde si aún no hay layout.
         const upR = railUpEl?.getBoundingClientRect();
         const downR = railDownEl?.getBoundingClientRect();
         const topbarBot = topbarEl ? topbarEl.getBoundingClientRect().bottom : 56;
-        const topPx = upR ? upR.bottom + 16 : topbarBot + 24;
-        const botPx = downR ? downR.top - 16 : window.innerHeight - 30;
-        const midPx = (topPx + botPx) / 2;
-        // Los extremos "vuelan" desde el centro (colapsados, como el punto del concepto en el riel)
-        // hacia los bordes a medida que entrás: es el gesto de la barra abriéndose. `curDive` lo
-        // actualiza render() cada frame; se remapea a 0..1 sobre el tramo donde la barra ya es visible.
+        const endTopPx = upR ? upR.bottom + 16 : topbarBot + 24;
+        const endBotPx = downR ? downR.top - 16 : window.innerHeight - 30;
+        const midPx = (endTopPx + endBotPx) / 2;
+        // El morph ABRE el intervalo [concepto c, concepto c+1]: los extremos ARRANCAN en la posición
+        // de esos dos ticks en la escala de conceptos y VUELAN a los bordes (c → arriba, c+1 → abajo) a
+        // medida que entrás. Así el sub-nivel 1 (primero) nace DONDE ESTABA el concepto c y sube al
+        // borde de arriba (no salta al centro), y el último baja adonde iba el concepto c+1. `curDive`
+        // (lo publica render()) mapea 0..1 sobre el tramo donde la barra ya es visible.
+        const tickC = railTicks[orbitFor]?.getBoundingClientRect();
+        const tickC1 = railTicks[orbitFor + 1]?.getBoundingClientRect();
+        const startTopPx = tickC ? tickC.top + tickC.height / 2 : midPx;
+        const startBotPx = tickC1 ? tickC1.top + tickC1.height / 2 : midPx;
         const dd = Math.max(0, Math.min(1, (curDive - 0.35) / 0.5));
-        const topY = toSvg(barXpx, lerp(midPx, topPx, dd)).y;
-        const botY = toSvg(barXpx, lerp(midPx, botPx, dd)).y;
+        const topY = toSvg(barXpx, lerp(startTopPx, endTopPx, dd)).y;
+        const botY = toSvg(barXpx, lerp(startBotPx, endBotPx, dd)).y;
         const barX = toSvg(barXpx, midPx).x;
         for (let k = 0; k < nsub; k++) {
           const o = subDots[k];
