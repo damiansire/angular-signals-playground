@@ -1,4 +1,4 @@
-import { scrollLayout, snapStops, initMolecule, CONCEPT_COUNT } from './molecule-engine';
+import { scrollLayout, snapStops, initMolecule, cameraAt, CONCEPT_COUNT } from './molecule-engine';
 import { signalsRoutesTree } from '../app.routes';
 
 describe('scrollLayout', () => {
@@ -41,6 +41,46 @@ describe('snapStops', () => {
     for (let i = 1; i < stops.length; i++) {
       expect(stops[i]).toBeGreaterThan(stops[i - 1]);
     }
+  });
+});
+
+describe('cameraAt — matemática de cámara del recorrido (pura, sin DOM)', () => {
+  // Geometría con números redondos para poder verificar el lerp/smoothstep a mano.
+  const geom = {
+    W: 1,
+    cen: { x: 100, y: 100 },
+    target: { x: 200, y: 200 },
+    parent: { x: 0, y: 0 },
+  };
+  const FK = 2.7;
+
+  it('en la zona de sub-niveles (w>=2) fija el zoom máximo sobre el átomo, buceo total', () => {
+    expect(cameraAt(2.5, false, geom)).toEqual({ K: FK, fx: 200, fy: 200, diveDepth: 1 });
+  });
+
+  it('primer átomo en vista molécula (w<1.3): zoom wide centrado en el centroide, sin buceo', () => {
+    expect(cameraAt(1.0, true, geom)).toEqual({ K: 1, fx: 100, fy: 100, diveDepth: 0 });
+  });
+
+  it('primer átomo buceando (w=1.65): interpola wide→FK y foco centroide→átomo (t=0.5)', () => {
+    const cam = cameraAt(1.65, true, geom); // smoothstep(0.5)=0.5
+    expect(cam.K).toBeCloseTo(1.85, 5); // lerp(1, 2.7, 0.5)
+    expect(cam.fx).toBeCloseTo(150, 5); // lerp(100, 200, 0.5)
+    expect(cam.diveDepth).toBeCloseTo(0.5, 5);
+  });
+
+  it('átomo interno naciendo (w=0.35): interpola FK→wide desde el padre, sin buceo', () => {
+    const cam = cameraAt(0.35, false, geom); // smoothstep(0.5)=0.5
+    expect(cam.K).toBeCloseTo(1.85, 5); // lerp(2.7, 1, 0.5)
+    expect(cam.fx).toBeCloseTo(50, 5); // lerp(0, 100, 0.5)
+    expect(cam.diveDepth).toBe(0);
+  });
+
+  it('átomo interno buceando (w=1.65): interpola wide→FK con buceo creciente', () => {
+    const cam = cameraAt(1.65, false, geom);
+    expect(cam.K).toBeCloseTo(1.85, 5);
+    expect(cam.fx).toBeCloseTo(150, 5);
+    expect(cam.diveDepth).toBeCloseTo(0.5, 5);
   });
 });
 

@@ -158,6 +158,67 @@ function lerp(a: number, b: number, t: number): number {
   return a + (b - a) * t;
 }
 
+/** Geometría (en coords de la molécula) que necesita la cámara para un concepto. */
+export interface CameraGeom {
+  /** Zoom "wide" que encuadra la molécula hasta este concepto (`wideK`). */
+  W: number;
+  /** Centroide de la cadena hasta este concepto. */
+  cen: { x: number; y: number };
+  /** Átomo enfocado del concepto actual. */
+  target: { x: number; y: number };
+  /** Átomo del concepto anterior (o el centro para el primero). */
+  parent: { x: number; y: number };
+}
+
+/**
+ * Estado de cámara (zoom `K`, punto de foco `fx`/`fy`, profundidad de buceo `diveDepth`) en la
+ * posición de scroll `w` (0..len dentro del concepto): nace → wide → bucea al átomo, y en la zona
+ * de sub-niveles (`w >= 2`) se queda adentro. `isFirst` = concepto 0 (nace en el centro, sin padre).
+ * Función PURA: toda la geometría entra por `geom`, así se testea el corazón del motor sin DOM.
+ */
+export function cameraAt(
+  w: number,
+  isFirst: boolean,
+  geom: CameraGeom,
+): { K: number; fx: number; fy: number; diveDepth: number } {
+  const { W, cen, target, parent } = geom;
+  const FK = 2.7;
+  if (w >= 2) {
+    return { K: FK, fx: target.x, fy: target.y, diveDepth: 1 };
+  }
+  if (isFirst) {
+    if (w < 1.3) {
+      return { K: W, fx: cen.x, fy: cen.y, diveDepth: 0 };
+    }
+    const t = smoothstep((w - 1.3) / 0.7);
+    return {
+      K: lerp(W, FK, t),
+      fx: lerp(cen.x, target.x, t),
+      fy: lerp(cen.y, target.y, t),
+      diveDepth: Math.min(1, (w - 1.3) / 0.7),
+    };
+  }
+  if (w < 0.7) {
+    const t = smoothstep(w / 0.7);
+    return {
+      K: lerp(FK, W, t),
+      fx: lerp(parent.x, cen.x, t),
+      fy: lerp(parent.y, cen.y, t),
+      diveDepth: 0,
+    };
+  }
+  if (w < 1.3) {
+    return { K: W, fx: cen.x, fy: cen.y, diveDepth: 0 };
+  }
+  const t = smoothstep((w - 1.3) / 0.7);
+  return {
+    K: lerp(W, FK, t),
+    fx: lerp(cen.x, target.x, t),
+    fy: lerp(cen.y, target.y, t),
+    diveDepth: Math.min(1, (w - 1.3) / 0.7),
+  };
+}
+
 export function initMolecule(
   root: HTMLElement,
   mountSub: MountSub,
@@ -767,48 +828,13 @@ export function initMolecule(
     const birth = smoothstep(Math.max(0, Math.min(1, w / 0.7)));
 
     // Cámara: nace → wide → bucea al átomo; en la zona de sub-niveles (w>=2) se queda adentro.
-    const W = wideK(c);
-    const cen = centroid(c);
-    const FK = 2.7;
-    let K: number;
-    let fx: number;
-    let fy: number;
-    let diveDepth: number;
-    if (w >= 2) {
-      K = FK;
-      fx = C[c].x;
-      fy = C[c].y;
-      diveDepth = 1;
-    } else if (c === 0) {
-      if (w < 1.3) {
-        K = W;
-        fx = cen.x;
-        fy = cen.y;
-      } else {
-        const t = smoothstep((w - 1.3) / 0.7);
-        K = lerp(W, FK, t);
-        fx = lerp(cen.x, C[0].x, t);
-        fy = lerp(cen.y, C[0].y, t);
-      }
-      diveDepth = w > 1.3 ? Math.min(1, (w - 1.3) / 0.7) : 0;
-    } else if (w < 0.7) {
-      const t = smoothstep(w / 0.7);
-      K = lerp(FK, W, t);
-      fx = lerp(parent.x, cen.x, t);
-      fy = lerp(parent.y, cen.y, t);
-      diveDepth = 0;
-    } else if (w < 1.3) {
-      K = W;
-      fx = cen.x;
-      fy = cen.y;
-      diveDepth = 0;
-    } else {
-      const t = smoothstep((w - 1.3) / 0.7);
-      K = lerp(W, FK, t);
-      fx = lerp(cen.x, C[c].x, t);
-      fy = lerp(cen.y, C[c].y, t);
-      diveDepth = Math.min(1, (w - 1.3) / 0.7);
-    }
+    // La matemática vive en `cameraAt` (pura, testeada); acá solo se aplica al DOM.
+    const { K, fx, fy, diveDepth } = cameraAt(w, c === 0, {
+      W: wideK(c),
+      cen: centroid(c),
+      target: C[c],
+      parent,
+    });
     sceneG.setAttribute(
       'transform',
       `translate(${(CX - K * fx).toFixed(1)},${(300 - K * fy).toFixed(1)}) scale(${K.toFixed(3)})`,
