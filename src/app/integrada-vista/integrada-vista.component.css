@@ -904,12 +904,92 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 1.3rem;
+  gap: 0.5rem;
   pointer-events: none;
   background: radial-gradient(90% 72% at 50% 46%, #fbf9f2, #e6f1ea 92%);
   transition: opacity 0.6s ease;
 }
+/* Identidad viva del landing: un átomo "Signals" que respira (núcleo con glow pulsante), dos anillos
+   elípticos tejiéndolo y un electrón orbitando. Reemplaza el vacío desértico (era solo la cápsula-mouse
+   + una línea) por una primera pantalla que ya dice "esto es un juguete reactivo, no algo cargando". */
+.intro__atom {
+  position: relative;
+  width: 148px;
+  height: 148px;
+  display: grid;
+  place-items: center;
+}
+.intro__ring {
+  position: absolute;
+  inset: 22px 0;
+  border-radius: 50%;
+  border: 1.5px solid color-mix(in srgb, var(--source) 42%, transparent);
+}
+.intro__ring--a {
+  animation: intro-spin 13s linear infinite;
+}
+.intro__ring--b {
+  border-color: color-mix(in srgb, var(--derived) 42%, transparent);
+  animation: intro-spin 9s linear infinite reverse;
+}
+.intro__electron {
+  position: absolute;
+  inset: 22px 0;
+  animation: intro-spin 7s linear infinite;
+}
+.intro__electron::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: -4px;
+  width: 9px;
+  height: 9px;
+  margin-top: -4.5px;
+  border-radius: 50%;
+  background: var(--derived);
+  box-shadow: 0 0 9px 1px color-mix(in srgb, var(--derived) 70%, transparent);
+}
+.intro__nucleus {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 38% 34%, #fff7e8, var(--source));
+  animation: intro-breathe 3.2s ease-in-out infinite;
+}
+@keyframes intro-breathe {
+  0%,
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 22px 4px color-mix(in srgb, var(--source) 42%, transparent);
+  }
+  50% {
+    transform: scale(1.13);
+    box-shadow: 0 0 38px 10px color-mix(in srgb, var(--source) 62%, transparent);
+  }
+}
+@keyframes intro-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+.intro__title {
+  font-family: var(--serif);
+  font-weight: 600;
+  font-size: clamp(2.2rem, 5.2vw, 3.5rem);
+  line-height: 1.05;
+  color: #201d16;
+  margin: 0.5rem 0 0;
+  letter-spacing: -0.015em;
+}
+.intro__tagline {
+  font-family: var(--sans);
+  font-size: 1.02rem;
+  color: #6a6355;
+  margin: 0.3rem 0 0;
+  letter-spacing: 0.01em;
+}
 .intro__mouse {
+  margin-top: 1.5rem;
   width: 30px;
   height: 48px;
   border: 2.5px solid #b1a892;
@@ -1093,14 +1173,16 @@
 .rail-dot {
   position: absolute;
   left: 50%;
-  width: 15px;
-  height: 15px;
+  width: 16px;
+  height: 16px;
   border-radius: 50%;
-  background: #fff;
+  /* Núcleo encendido (no un anillo hueco): centro claro que funde al color del concepto, con doble
+     halo, para que el "estás acá" lea vivo aun quieto en la vista molécula. */
+  background: radial-gradient(circle at 40% 35%, #fff8ea, var(--dotcol, var(--source)));
   transform: translate(-50%, -50%);
   box-shadow:
-    0 0 0 3px var(--dotcol, var(--source)),
-    0 0 14px 2px color-mix(in srgb, var(--dotcol, var(--source)) 65%, transparent);
+    0 0 0 2.5px color-mix(in srgb, var(--dotcol, var(--source)) 45%, #fff),
+    0 0 16px 3px color-mix(in srgb, var(--dotcol, var(--source)) 70%, transparent);
   transition:
     top 0.18s ease,
     box-shadow 0.3s ease,
