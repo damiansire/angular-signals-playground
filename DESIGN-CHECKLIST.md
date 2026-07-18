@@ -17,11 +17,13 @@ rondas de review porque cada ronda auditaba solo lo último reportado.
 - [ ] Componentes embebidos (`createComponent`) sin costura: sin fondo propio
       distinto, sin scroll propio, no deben "parecer un iframe".
 
-## Barra única de navegación (borde derecho, morphea conceptos ↔ sub-niveles)
+## Barra única de navegación (borde izquierdo, morphea conceptos ↔ sub-niveles)
 
 Desde 2026-07-18 la navegación es UNA sola barra vertical pegada al borde
-DERECHO (antes: riel de conceptos a la izquierda + ascensor/órbita de
-sub-niveles, que se pisaban entre sí y con las instrucciones).
+IZQUIERDO (antes: riel de conceptos a la izquierda + ascensor/órbita de
+sub-niveles, que se pisaban entre sí y con las instrucciones). El electrón
+actual (dot + órbita + sonar) se mantiene CEÑIDO al ancho del riel para no pisar
+la espina vertical "Signals" que vive a su derecha.
 
 - [ ] Una SOLA barra visible por vez: en la vista molécula muestra los 12
       conceptos (0-11); al bucear, su cuerpo (ticks + línea) se desvanece y la

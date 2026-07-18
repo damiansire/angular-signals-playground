@@ -488,13 +488,17 @@ export function initMolecule(
   subSparkMpath.setAttributeNS('http://www.w3.org/1999/xlink', 'href', '#' + subArcId);
   subSparkMotion.appendChild(subSparkMpath);
   subSpark.appendChild(subSparkMotion);
-  const subSonar = el('circle', { class: 'sub-sonar', r: 16 });
+  // Sonar chico (r10): en la barra izquierda, pegada a la espina "Signals", un sonar grande al
+  // expandirse pisaba el wordmark cuando el sub-nivel actual caía a su altura. Ceñido al riel no lo toca.
+  const subSonar = el('circle', { class: 'sub-sonar', r: 10 });
   // El sub-nivel actual es un MINI-ÁTOMO que sube el riel (el "electrón-ascensor"): sonar + núcleo +
   // un electrón orbitando. Se DESLIZA de una parada a la siguiente (transición de transform) y en el
   // boot aparece directo. Es el único marcador del actual (el dot de abajo se oculta), así el
   // resaltado "viaja" en vez de saltar. Distinto del riel de conceptos (plano): éste tiene vida.
   const subPuckDot = el('circle', { class: 'sub-puck-dot', r: 18 });
-  const subPuckOrbit = el('ellipse', { class: 'sub-puck-orbit', rx: 28, ry: 11 });
+  // Órbita compacta (rx16): en la barra izquierda, pegada a la espina vertical "Signals", una órbita
+  // ancha se saldría hacia el texto. Chica queda ceñida al riel. El path SMIL de abajo la acompaña.
+  const subPuckOrbit = el('ellipse', { class: 'sub-puck-orbit', rx: 16, ry: 7 });
   const subPuckE = el('circle', { class: 'sub-puck-e', r: 3.4 });
   if (!reduceMotion) {
     // El electrón recorre la órbita en loop (SMIL): la vida en reposo del ascensor. Con reduce no va.
@@ -502,7 +506,7 @@ export function initMolecule(
       el('animateMotion', {
         dur: '1.9s',
         repeatCount: 'indefinite',
-        path: 'M 28 0 A 28 11 0 1 1 -28 0 A 28 11 0 1 1 28 0',
+        path: 'M 16 0 A 16 7 0 1 1 -16 0 A 16 7 0 1 1 16 0',
       }),
     );
   }
@@ -672,7 +676,10 @@ export function initMolecule(
         // bordes (arriba/abajo) de la pantalla y la barra se convierte en la de sub-niveles del concepto
         // actual. Así no hay dos barras ni se ocupa ancho: la nav de conceptos y la de sub-niveles
         // comparten el MISMO eje vertical a la derecha, una se transforma en la otra.
-        const barXpx = window.innerWidth - 40;
+        // Centro del riel izquierdo. A 30px, el electrón-actual (dot r18 → ~26px en pantalla) llega
+        // como mucho a ~x56, clareando la espina vertical "Signals" (arranca en ~x60). Alineado con
+        // el centro visual del riel de conceptos (.rail, left:13) para que el morph no salte de eje.
+        const barXpx = 30;
         // El sub-track vive ENTRE las dos flechas ▲/▼ del riel (que quedan cerca de los bordes): así
         // los extremos de la barra se abren hasta tocar el stepper sin pisarlo, y las flechas flanquean
         // la barra de sub-niveles igual que flanqueaban los conceptos. Fallback al topbar/borde si aún
