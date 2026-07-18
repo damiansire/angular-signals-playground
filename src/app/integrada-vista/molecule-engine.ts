@@ -604,6 +604,9 @@ export function initMolecule(
     subSpark.setAttribute('fill', col);
     subSonar.setAttribute('stroke', col);
     subPuckDot.setAttribute('fill', col);
+    // `color` para que el drop-shadow (currentColor) del glow constante del nodo activo tome el
+    // color del concepto (ver .sub-puck-dot en el CSS).
+    subPuckDot.style.color = col;
     subEG.textContent = '';
     subDots = [];
     for (let k = 0; k < nsub; k++) {
@@ -801,13 +804,14 @@ export function initMolecule(
   const stage = q<HTMLDivElement>('#stage')!;
   const track = q<HTMLDivElement>('#track')!;
   const railDot = q<HTMLElement>('#railDot');
+  const railFillEl = q<HTMLElement>('#railFill');
+  const railLineEl = q<HTMLElement>('.rail-line');
   const introEl = q<HTMLElement>('.intro');
   const topbarEl = q<HTMLElement>('.topbar');
   const tbTitleEl = q<HTMLElement>('.tb-title');
   const tbCountEl = q<HTMLElement>('.tb-count');
   const captionEl = q<HTMLElement>('.caption');
   const spaceSpineEl = q<HTMLElement>('#spaceSpine');
-  const railBodyEl = q<HTMLElement>('.rail-body');
   const railUpEl = q<HTMLElement>('#railUp');
   const railDownEl = q<HTMLElement>('#railDown');
   const railTicksOl = q<HTMLElement>('#railTicks')!;
@@ -869,10 +873,26 @@ export function initMolecule(
       topbarEl.classList.add('contextual');
       topbarEl.style.opacity = '1';
     }
-    // La barra derecha MORPHea: al bucear, el cuerpo del riel (ticks 0-11 + línea + dot de progreso)
-    // se desvanece y su lugar lo toma la barra de sub-niveles (que se abre hacia los bordes). Las
-    // flechas ▲/▼ (el stepper) quedan siempre visibles: navegan tanto conceptos como sub-niveles.
-    if (railBodyEl) railBodyEl.style.opacity = (1 - Math.min(1, diveDepth / 0.55)).toFixed(3);
+    // El riel MORPHea al bucear: en vez de desvanecer el cuerpo entero de golpe (se leía como un
+    // CORTE), los ticks de concepto se ABSORBEN hacia el activo (scaleY con origen en su posición) y
+    // se apagan mientras el track de concepto se desvanece; su lugar lo toma la barra de sub-niveles
+    // que crece hacia los bordes. Las flechas ▲/▼ quedan siempre visibles (navegan ambos modos).
+    // `railProg` (0..1) = avance por la escala de conceptos, anclado a la posición de los ticks (no al
+    // scroll continuo, que desalineaba porque cada concepto ocupa distinto scroll según sus sub-niveles).
+    const railProg = Math.min(
+      1,
+      (c + Math.max(0, Math.min(1, (w - 1.3) / Math.max(0.8, len[c] - 1)))) / (N - 1),
+    );
+    // Fade de los ticks ADELANTADO respecto a la aparición de los sub-niveles (suborbit, 0.35→0.75):
+    // los conceptos se absorben primero y los sub-niveles entran después, para que el punto medio del
+    // morph no muestre las dos escalas pisadas a la vez.
+    const morphT = Math.max(0, Math.min(1, (diveDepth - 0.15) / 0.35));
+    railTicksOl.style.transformOrigin = `left ${((c / (N - 1)) * 100).toFixed(1)}%`;
+    railTicksOl.style.transform = `scaleY(${(1 - 0.82 * morphT).toFixed(3)})`;
+    railTicksOl.style.opacity = (1 - morphT).toFixed(3);
+    if (railLineEl) railLineEl.style.opacity = (0.5 * (1 - morphT)).toFixed(3);
+    if (railFillEl) railFillEl.style.opacity = (0.95 * (1 - morphT)).toFixed(3);
+    if (railDot) railDot.style.opacity = (1 - morphT).toFixed(3);
     if (captionEl) captionEl.style.opacity = Math.max(0, 1 - diveDepth / 0.5).toFixed(2);
     // Título vertical del concepto (espina de identidad) pegado al riel: aparece al bucear, con
     // el color del concepto. Es la casa del nombre en la escena.
@@ -991,8 +1011,16 @@ export function initMolecule(
       lastBorn = c + 1;
     }
     if (s < 0.05) lastBorn = 0;
-    capS.textContent = (diveDepth > 0.5 ? 'Adentro · ' : 'Molécula · ') + C[c].name;
-    if (railDot) railDot.style.top = ((s / TOTAL) * 100).toFixed(1) + '%';
+    // El nombre del concepto ya vive en el label del átomo y en el topbar: el caption solo marca el
+    // MODO (evita la triple repetición del nombre en la vista molécula).
+    capS.textContent = diveDepth > 0.5 ? 'Adentro' : 'Molécula';
+    // El nodo y el llenado se anclan a la posición del tick activo y se tiñen del color del concepto.
+    const railPct = (railProg * 100).toFixed(1) + '%';
+    if (railFillEl) railFillEl.style.height = railPct;
+    if (railDot) {
+      railDot.style.top = railPct;
+      railDot.style.setProperty('--dotcol', COL[C[c].accent]);
+    }
     for (let ti = 0; ti < railTicks.length; ti++) railTicks[ti].classList.toggle('on', ti === c);
     if (introEl) introEl.style.opacity = s < 0.12 ? '1' : '0';
 
