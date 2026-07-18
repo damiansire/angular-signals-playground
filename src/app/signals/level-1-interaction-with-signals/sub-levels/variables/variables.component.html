@@ -4,31 +4,37 @@
   observe="El valor elegido aparece en las tres declaraciones (var/const/let difieren en alcance y reasignación)."
 />
 
-<div class="mb-6">
-  <app-title title="Variables (repaso pre-signals)"></app-title>
-</div>
-<section class="flex flex-wrap justify-around mb-6">
-  @for (type of dataTypes; track $index) {
-    <app-variable-box-draw
-      [variableName]="type"
-      (clicked)="selectType($event)"
-    ></app-variable-box-draw>
-  }
-</section>
-<section class="flex flex-col justify-around">
-  <div class="flex justify-around">
-    <div class="flex flex-col justify-around">
-      @for (item of selectedType().examples; track $index) {
-        <div class="mb-4">
-          <app-variable-box-draw
-            [variableName]="item"
-            (clicked)="selectExample($event)"
-          ></app-variable-box-draw>
-        </div>
-      }
-    </div>
-    <div class="content-center">
-      <app-code [lines]="lines()"></app-code>
-    </div>
+<!-- Demo agrupado en UN contenedor: en la vista integrada la card "disuelve" el marco y reparte el
+     contenido en un grid (instrucciones | demo). Sin este wrapper, los tres bloques (título, tipos,
+     valores+código) caían en filas separadas del grid y se apilaban a lo alto (se pasaba del fold en
+     laptop). Agrupados, entran como una sola columna al lado de las instrucciones. -->
+<div>
+  <div class="mb-6">
+    <app-title title="Variables (repaso pre-signals)"></app-title>
   </div>
-</section>
+  <section class="flex flex-wrap justify-around mb-6">
+    @for (type of dataTypes; track $index) {
+      <app-variable-box-draw
+        [variableName]="type"
+        (clicked)="selectType($event)"
+      ></app-variable-box-draw>
+    }
+  </section>
+  <section class="flex flex-col justify-around">
+    <div class="flex justify-around">
+      <div class="grid grid-cols-2 gap-x-4 content-center">
+        @for (item of selectedType().examples; track $index) {
+          <div class="mb-4">
+            <app-variable-box-draw
+              [variableName]="item"
+              (clicked)="selectExample($event)"
+            ></app-variable-box-draw>
+          </div>
+        }
+      </div>
+      <div class="content-center">
+        <app-code [lines]="lines()"></app-code>
+      </div>
+    </div>
+  </section>
+</div>

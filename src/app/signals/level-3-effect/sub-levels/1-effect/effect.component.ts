@@ -15,6 +15,10 @@ import { EventHistoryComponent } from '../../../../components/event-history/even
 import { CodeComponent } from '../../../../components-atom/code/code.component';
 import { ConceptCardComponent } from '../../../../components-atom/concept-card/concept-card.component';
 
+/** Tope del historial de eventos: Count1 late por un intervalo, así que sin límite la lista (y la
+ *  altura de la card en la vista integrada) crecería sin fin. Mostramos la actividad reciente. */
+const MAX_HISTORY = 4;
+
 @Component({
   selector: 'app-effect',
   templateUrl: './effect.component.html',
@@ -101,7 +105,10 @@ export class EffectComponent {
         newState,
         isCountIncrement,
       });
-      return newHistory;
+      // Count1 late solo por un intervalo, así que el historial CRECERÍA sin tope y la card se
+      // estiraría infinito (bajo el fold). Nos quedamos con los últimos eventos: en un demo "vivo"
+      // lo que importa es la actividad reciente, no una lista infinita.
+      return newHistory.length > MAX_HISTORY ? newHistory.slice(-MAX_HISTORY) : newHistory;
     });
   }
 }
