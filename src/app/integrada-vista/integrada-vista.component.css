@@ -1035,7 +1035,19 @@
   .bond.on,
   .sub-e.current .sub-dot,
   .intro__wheel,
-  .atom.current .halo {
+  .atom.current .halo,
+  .atom.dived-dissolve .halo,
+  .atom.dived-dissolve .ring,
+  .suborbit.dissolve .sub-sonar,
+  .subbody.warp,
+  .ripple {
     animation: none;
+  }
+  /* Las transiciones ambiente van directas: el estado avanza sin desplazamiento animado
+     (el puck salta al dot, el electrón actual se coloca sin deslizar). El SENTIDO se mantiene. */
+  .suborbit.dissolve .sub-puck,
+  .sub-e.current .sub-dot,
+  .sub-e.current .sub-n {
+    transition: none;
   }
 }

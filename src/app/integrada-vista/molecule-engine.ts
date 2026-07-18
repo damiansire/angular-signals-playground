@@ -333,6 +333,16 @@ export function initMolecule(
   const bondsG = q<SVGGElement>('#bonds')!;
   const atomsG = q<SVGGElement>('#atoms')!;
   const ripG = q<SVGGElement>('#ripples')!;
+
+  // prefers-reduced-motion (snapshot al construir): con reduce apagamos la vida ambiente SMIL
+  // —estrellas y electrones en órbita en la escena, chispa que recorre el arco de sub-niveles—.
+  // El SMIL no respeta el `@media (prefers-reduced-motion)` del CSS, así que hay que gatearlo acá:
+  // congelamos el timeline de la escena (los electrones tienen `begin` negativo → quedan quietos ya
+  // distribuidos, no amontonados) y omitimos la chispa. El glide ya va instantáneo (goToUnit) y el
+  // CSS apaga breath/sonar/warp/puck. El SENTIDO se mantiene: el estado avanza, sin desplazamiento.
+  const reduceMotion =
+    typeof window.matchMedia === 'function' &&
+    window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const contentEl = q<HTMLDivElement>('#content')!;
 
   for (let s = 0; s < 60; s++) {
@@ -478,7 +488,8 @@ export function initMolecule(
   const subEG = el('g', {});
   suborbit.appendChild(subRing);
   suborbit.appendChild(subArc);
-  suborbit.appendChild(subSpark);
+  // La chispa es pura vida ambiente (un pulso viajando por el arco); con reduce no se agrega.
+  if (!reduceMotion) suborbit.appendChild(subSpark);
   suborbit.appendChild(subEG);
   suborbit.appendChild(subPuckG);
 
@@ -1188,6 +1199,9 @@ export function initMolecule(
     track.style.height = (TOTAL + 0.2) * unit() + 'px';
     openAt();
     raf(openAt);
+    // Con reduce, congelar el timeline SMIL de la escena una vez que el clock corre: los electrones
+    // (begin negativo) quedan quietos ya distribuidos alrededor de sus núcleos, sin orbitar.
+    if (reduceMotion) sceneG.ownerSVGElement?.pauseAnimations();
   }, 30);
   window.addEventListener('load', openAt);
 
