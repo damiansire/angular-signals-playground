@@ -10,6 +10,7 @@
       @for (kind of kinds; track kind.id) {
         <button
           type="button"
+          [attr.aria-pressed]="kind.id === selectedId()"
           class="px-4 py-2 rounded-lg border text-left text-sm font-semibold transition-colors"
           [class]="
             kind.id === selectedId()
