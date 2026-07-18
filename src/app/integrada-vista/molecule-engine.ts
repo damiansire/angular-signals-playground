@@ -996,13 +996,16 @@ export function initMolecule(
       lastBorn = c + 1;
     }
     if (s < 0.05) lastBorn = 0;
-    capS.textContent = (w > 1.3 ? 'Adentro · ' : 'Molécula · ') + C[c].name;
+    capS.textContent = (diveDepth > 0.5 ? 'Adentro · ' : 'Molécula · ') + C[c].name;
     if (railDot) railDot.style.top = ((s / TOTAL) * 100).toFixed(1) + '%';
     for (let ti = 0; ti < railTicks.length; ti++) railTicks[ti].classList.toggle('on', ti === c);
     if (introEl) introEl.style.opacity = s < 0.12 ? '1' : '0';
 
-    // Reflejar en la URL el nivel actual y, si estás adentro, el sub-nivel. -1 = vista molécula.
-    const subNow = w > 1.3 && dc.subN > 0 ? dc.subIdx : -1;
+    // Reflejar en la URL el nivel actual y, si estás adentro, el sub-nivel. -1 = vista molécula. Se
+    // keyea por `diveDepth > 0.5` (el mismo umbral que el título del topbar), NO por `w > 1.3`: en la
+    // parada de encuadre del átomo (w≈1.3) el `>` estricto flipeaba por redondeo sub-pixel y dejaba la
+    // URL/caption en "sub-nivel 1 / Adentro" con la card ya disuelta. Así el estado reportado = el visual.
+    const subNow = diveDepth > 0.5 && dc.subN > 0 ? dc.subIdx : -1;
     if (whereC !== c || whereSub !== subNow) {
       whereC = c;
       whereSub = subNow;
