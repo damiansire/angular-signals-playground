@@ -10,6 +10,12 @@ import { FormsModule } from '@angular/forms';
 import { CodeLine } from '../../../../components-atom/component-atom.interface';
 import { ColumnAndCodeLayoutComponent } from '../../../../layouts/column-and-code-layout/column-and-code-layout.component';
 
+/** Lee el value de un target de evento con un type guard real (no un `as` a ciegas): si el target
+ *  no es un `<input>`, devuelve ''. Mismo criterio que el resto del repo en boundaries no confiables. */
+function inputValue(eventTarget: EventTarget | null): string {
+  return eventTarget instanceof HTMLInputElement ? eventTarget.value : '';
+}
+
 @Component({
   selector: 'app-computed-signals',
   templateUrl: './computed-signals.component.html',
@@ -25,13 +31,11 @@ export class ComputedSignalsComponent {
   });
 
   setFirstName(eventTarget: EventTarget | null) {
-    const value = (eventTarget as HTMLInputElement | null)?.value || '';
-    this.firstName.set(value);
+    this.firstName.set(inputValue(eventTarget));
   }
 
   setLastName(eventTarget: EventTarget | null) {
-    const value = (eventTarget as HTMLInputElement | null)?.value || '';
-    this.surname.set(value);
+    this.surname.set(inputValue(eventTarget));
   }
 
   lines = computed<CodeLine[]>(() => [

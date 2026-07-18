@@ -29,8 +29,12 @@ describe('ComputedSignalsComponent', () => {
   });
 
   it('setFirstName/setLastName recalculan el computed fullName', () => {
-    component.setFirstName({ value: 'Ada' } as HTMLInputElement);
-    component.setLastName({ value: 'Lovelace' } as HTMLInputElement);
+    const first = document.createElement('input');
+    first.value = 'Ada';
+    const last = document.createElement('input');
+    last.value = 'Lovelace';
+    component.setFirstName(first);
+    component.setLastName(last);
     fixture.detectChanges();
 
     expect(component.fullName()).toBe('Ada Lovelace');
