@@ -17,15 +17,34 @@ rondas de review porque cada ronda auditaba solo lo último reportado.
 - [ ] Componentes embebidos (`createComponent`) sin costura: sin fondo propio
       distinto, sin scroll propio, no deben "parecer un iframe".
 
+## Barra única de navegación (borde derecho, morphea conceptos ↔ sub-niveles)
+
+Desde 2026-07-18 la navegación es UNA sola barra vertical pegada al borde
+DERECHO (antes: riel de conceptos a la izquierda + ascensor/órbita de
+sub-niveles, que se pisaban entre sí y con las instrucciones).
+
+- [ ] Una SOLA barra visible por vez: en la vista molécula muestra los 12
+      conceptos (0-11); al bucear, su cuerpo (ticks + línea) se desvanece y la
+      barra de sub-niveles ocupa el mismo eje. Nunca dos barras a la vez.
+- [ ] Al bucear, los extremos de la barra de sub-niveles se ABREN hacia los
+      bordes (arriba/abajo) — el gesto de "morph" — en vez de aparecer de golpe.
+- [ ] Las flechas ▲/▼ (stepper) quedan siempre visibles y FLANQUEAN la barra
+      (arriba de la primera parada, abajo de la última), sin pisar el sub-nivel
+      1 ni el N.
+- [ ] El lado IZQUIERDO queda libre de navegación: solo el título vertical del
+      concepto (espina) y la columna de instrucciones. Cero colisiones de la
+      barra derecha con las instrucciones.
+
 ## Z-order y geometría
 
 - [ ] Dots/círculos del riel por ENCIMA de los degradados del topbar; ningún
       degradado tapa contenido interactivo.
 - [ ] El degradado inferior queda por DEBAJO del contenido, no encima.
-- [ ] La órbita/elipse CONTIENE la card (la abraza, no la corta ni la pisa).
-- [ ] Cero colisiones entre título, contador (1/4), dot activo y órbita:
-      overlap medido con `getBoundingClientRect()` contra todos los vecinos,
-      no a ojo.
+- [ ] La barra derecha NO invade la card ni la columna de instrucciones: vive
+      en la canaleta del borde derecho.
+- [ ] Cero colisiones entre la barra de sub-niveles y sus vecinos (card,
+      instrucciones, topbar/título, link "Practicá"): overlap medido con
+      `getBoundingClientRect()` contra TODOS los vecinos, no a ojo.
 
 ## Composición y chrome
 
@@ -35,7 +54,13 @@ rondas de review porque cada ronda auditaba solo lo último reportado.
 - [ ] Título de la card en un renglón armónico, no partido en dos renglones
       sueltos.
 - [ ] Espacio horizontal aprovechado; sin margen superior sin overlay.
-- [ ] El sub-nivel actual queda fijo arriba, sin movimiento.
+- [ ] El sub-nivel actual se marca con el electrón-ascensor (puck) que se
+      DESLIZA de una parada a la siguiente en la barra derecha, sin saltar.
+- [ ] Sin overflow: CADA sub-nivel entra en la card a 860px de alto (contenido
+      ≤ el `max-height` de la card) sin depender del scroll interno. Verificado
+      con `scrollHeight` de la card en los 35 sub-niveles, no a ojo. Ojo con
+      demos de lista que crecen por timer (cap explícito) y con demos de varios
+      bloques que se apilan en el grid dissolve (agruparlos en un contenedor).
 
 ## Vistas y estado
 

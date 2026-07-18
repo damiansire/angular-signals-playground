@@ -532,6 +532,9 @@ export function initMolecule(
   // el sub-nivel dentro del mismo concepto).
   let puckIdx = -1;
   let puckConcept = -1;
+  // Profundidad de buceo del frame actual (0 = molécula, 1 = adentro): render() la publica y
+  // orbitLoop la lee para abrir la barra de sub-niveles hacia los bordes según cuánto entraste.
+  let curDive = 0;
 
   // El orbe del sub-nivel nuevo NACE en el electrón actual y se fusiona al centro de la card.
   function fuse(cc: Concept): void {
@@ -654,80 +657,55 @@ export function initMolecule(
     if (vis && orbitDirty) {
       orbitDirty = false;
       const cc = C[orbitFor];
-      let ccx = 450;
-      let ccy = 300;
-      let hw = 380;
-      let hh = 190;
-      let topbarY = -1e9;
-      let bottomY = 1e9;
-      let railX = -1e9;
-      let spineRight = -1e9;
+      const nsub = subDots.length;
       const m0 = suborbit.getScreenCTM();
       if (m0 && cc.card) {
         const m = m0.inverse();
-        const cr = cc.card.getBoundingClientRect();
         const p = orbitPoint;
-        p.x = cr.left;
-        p.y = cr.top;
-        const tl = p.matrixTransform(m);
-        p.x = cr.right;
-        p.y = cr.bottom;
-        const br = p.matrixTransform(m);
-        ccx = (tl.x + br.x) / 2;
-        ccy = (tl.y + br.y) / 2;
-        hw = (br.x - tl.x) / 2;
-        hh = (br.y - tl.y) / 2;
-        // Límites de chrome (topbar arriba, pastilla de controles abajo, riel de conceptos a
-        // la izquierda) para que la órbita no cruce ninguno: se clampea el rect contra ellos.
-        p.x = 0;
-        p.y = topbarEl ? topbarEl.getBoundingClientRect().bottom : 0;
-        topbarY = p.matrixTransform(m).y;
-        // Sin pastilla de controles abajo, el único chrome inferior es el caption tenue:
-        // la órbita puede bajar casi hasta el borde (antes reservaba 92px para la pastilla).
-        p.y = window.innerHeight - 40;
-        bottomY = p.matrixTransform(m).y;
-        p.x = railEl ? railEl.getBoundingClientRect().right : 0;
-        p.y = 0;
-        railX = p.matrixTransform(m).x;
-        // El título vertical del concepto (.space-spine) vive entre el riel y la card; el ascensor
-        // debe quedar a la DERECHA de él, si no sus pastillas pisan el texto en viewports angostos.
-        if (spaceSpineEl) {
-          p.x = spaceSpineEl.getBoundingClientRect().right;
-          p.y = 0;
-          spineRight = p.matrixTransform(m).x;
+        const toSvg = (sx: number, sy: number): DOMPoint => {
+          p.x = sx;
+          p.y = sy;
+          return p.matrixTransform(m);
+        };
+        // UNA sola barra en el borde DERECHO que MORPHea. En la vista molécula la barra muestra los 12
+        // conceptos (el riel .rail, ahora a la derecha); al bucear, sus dos extremos se abren hacia los
+        // bordes (arriba/abajo) de la pantalla y la barra se convierte en la de sub-niveles del concepto
+        // actual. Así no hay dos barras ni se ocupa ancho: la nav de conceptos y la de sub-niveles
+        // comparten el MISMO eje vertical a la derecha, una se transforma en la otra.
+        const barXpx = window.innerWidth - 40;
+        // El sub-track vive ENTRE las dos flechas ▲/▼ del riel (que quedan cerca de los bordes): así
+        // los extremos de la barra se abren hasta tocar el stepper sin pisarlo, y las flechas flanquean
+        // la barra de sub-niveles igual que flanqueaban los conceptos. Fallback al topbar/borde si aún
+        // no hay layout de las flechas.
+        const upR = railUpEl?.getBoundingClientRect();
+        const downR = railDownEl?.getBoundingClientRect();
+        const topbarBot = topbarEl ? topbarEl.getBoundingClientRect().bottom : 56;
+        const topPx = upR ? upR.bottom + 16 : topbarBot + 24;
+        const botPx = downR ? downR.top - 16 : window.innerHeight - 30;
+        const midPx = (topPx + botPx) / 2;
+        // Los extremos "vuelan" desde el centro (colapsados, como el punto del concepto en el riel)
+        // hacia los bordes a medida que entrás: es el gesto de la barra abriéndose. `curDive` lo
+        // actualiza render() cada frame; se remapea a 0..1 sobre el tramo donde la barra ya es visible.
+        const dd = Math.max(0, Math.min(1, (curDive - 0.35) / 0.5));
+        const topY = toSvg(barXpx, lerp(midPx, topPx, dd)).y;
+        const botY = toSvg(barXpx, lerp(midPx, botPx, dd)).y;
+        const barX = toSvg(barXpx, midPx).x;
+        for (let k = 0; k < nsub; k++) {
+          const o = subDots[k];
+          o.lx = barX;
+          o.ly = nsub > 1 ? topY + (botY - topY) * (k / (nsub - 1)) : (topY + botY) / 2;
+          o.dot.setAttribute('cx', o.lx.toFixed(1));
+          o.dot.setAttribute('cy', o.ly.toFixed(1));
+          o.num.setAttribute('x', o.lx.toFixed(1));
+          o.num.setAttribute('y', (o.ly + 4).toFixed(1));
         }
+        // El riel es la línea vertical (subArc repurposeado) del primer al último electrón: el "hilo de
+        // energía" por el que sube el electrón-actual. La chispa SMIL lo recorre.
+        subArc.setAttribute(
+          'd',
+          `M ${barX.toFixed(1)} ${subDots[0].ly.toFixed(1)} L ${barX.toFixed(1)} ${subDots[nsub - 1].ly.toFixed(1)}`,
+        );
       }
-      // Ascensor vertical: un riel pegado al borde IZQUIERDO de la card (distinto del riel de
-      // conceptos, que vive más a la izquierda) con las paradas de sub-nivel repartidas parejo a lo
-      // alto de la card. El electrón-ascensor (la pelota) sube y baja entre ellas. Antes esto era un
-      // arco-sonrisa anclado al título: con muchos sub-niveles se amontonaban (fallaba legibilidad).
-      const nsub = subDots.length;
-      // X del riel: en pantallas anchas va en el hueco a la izquierda de la card (`ccx - hw - 30`). En
-      // angostas, donde ese hueco se achica, SIEMPRE queda a la derecha del título vertical del
-      // concepto (.space-spine): el +40 cuenta la media-anchura del electrón (órbita rx28) para que su
-      // borde IZQUIERDO quede al lado del spine y el derecho caiga en el padding de la card, sin pisar
-      // ni el texto vertical ni el contenido. El riel de conceptos es el piso duro de la izquierda.
-      const railElevX = Math.max(ccx - hw - 30, spineRight + 40, railX + 40);
-      // Rango vertical de las paradas: a lo alto de la card, con aire arriba/abajo, clampeado al chrome
-      // (topbar arriba, borde inferior). El margen interno evita que el electrón agrandado se salga.
-      const stopTop = Math.max(ccy - hh + 16, topbarY + 26);
-      const stopBot = Math.min(ccy + hh - 16, bottomY - 16);
-      for (let k = 0; k < nsub; k++) {
-        const o = subDots[k];
-        o.lx = railElevX;
-        o.ly =
-          nsub > 1 ? stopTop + (stopBot - stopTop) * (k / (nsub - 1)) : (stopTop + stopBot) / 2;
-        o.dot.setAttribute('cx', o.lx.toFixed(1));
-        o.dot.setAttribute('cy', o.ly.toFixed(1));
-        o.num.setAttribute('x', o.lx.toFixed(1));
-        o.num.setAttribute('y', (o.ly + 4).toFixed(1));
-      }
-      // El riel es una línea vertical (subArc repurposeado) del primer al último stop: el "hilo de
-      // energía" por donde sube el electrón. Su color (el del concepto) lo pone paintOrbit una vez.
-      subArc.setAttribute(
-        'd',
-        `M ${railElevX.toFixed(1)} ${subDots[0].ly.toFixed(1)} L ${railElevX.toFixed(1)} ${subDots[nsub - 1].ly.toFixed(1)}`,
-      );
       // La pelota se coloca sobre el dot actual: en el boot / cambio de concepto aparece DIRECTO
       // (transición apagada), y al cambiar de sub-nivel DENTRO del concepto DESLIZA (la transición
       // de transform la hace el CSS).
@@ -818,7 +796,9 @@ export function initMolecule(
   const tbCountEl = q<HTMLElement>('.tb-count');
   const captionEl = q<HTMLElement>('.caption');
   const spaceSpineEl = q<HTMLElement>('#spaceSpine');
-  const railEl = q<HTMLElement>('.rail');
+  const railBodyEl = q<HTMLElement>('.rail-body');
+  const railUpEl = q<HTMLElement>('#railUp');
+  const railDownEl = q<HTMLElement>('#railDown');
   const railTicksOl = q<HTMLElement>('#railTicks')!;
   for (let t = 0; t < N; t++) {
     const li = document.createElement('li');
@@ -864,6 +844,7 @@ export function initMolecule(
     // una ventana sino el interior del átomo: al bucear la escena casi no se atenúa (molécula viva,
     // sin velo) y el aura crece para volverse la sala, así la card se lee "parada sobre el átomo".
     sceneG.style.opacity = (1 - 0.1 * diveDepth).toFixed(2);
+    curDive = diveDepth; // publicar para orbitLoop (apertura de la barra hacia los bordes)
 
     // El aura del concepto crece desde el átomo (chica) hasta el fondo del card (grande),
     // tomando el color del concepto: el card queda "nacido" del átomo, no suelto.
@@ -877,7 +858,10 @@ export function initMolecule(
       topbarEl.classList.add('contextual');
       topbarEl.style.opacity = '1';
     }
-    if (railEl) railEl.style.opacity = (1 - 0.35 * diveDepth).toFixed(3);
+    // La barra derecha MORPHea: al bucear, el cuerpo del riel (ticks 0-11 + línea + dot de progreso)
+    // se desvanece y su lugar lo toma la barra de sub-niveles (que se abre hacia los bordes). Las
+    // flechas ▲/▼ (el stepper) quedan siempre visibles: navegan tanto conceptos como sub-niveles.
+    if (railBodyEl) railBodyEl.style.opacity = (1 - Math.min(1, diveDepth / 0.55)).toFixed(3);
     if (captionEl) captionEl.style.opacity = Math.max(0, 1 - diveDepth / 0.5).toFixed(2);
     // Título vertical del concepto (espina de identidad) pegado al riel: aparece al bucear, con
     // el color del concepto. Es la casa del nombre en la escena.
