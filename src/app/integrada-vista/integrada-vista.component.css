@@ -954,6 +954,9 @@
   height: 30px;
   border-radius: 50%;
   background: radial-gradient(circle at 38% 34%, #fff7e8, var(--source));
+  /* Glow base (no solo en el keyframe): así con prefers-reduced-motion, que apaga el breathe, el
+     núcleo sigue encendido en vez de quedar un disco plano. */
+  box-shadow: 0 0 26px 5px color-mix(in srgb, var(--source) 50%, transparent);
   animation: intro-breathe 3.2s ease-in-out infinite;
 }
 @keyframes intro-breathe {
@@ -1220,6 +1223,10 @@
   .bond.on,
   .sub-e.current .sub-dot,
   .intro__wheel,
+  .intro__ring--a,
+  .intro__ring--b,
+  .intro__electron,
+  .intro__nucleus,
   .atom.current .halo,
   .atom.dived-dissolve .halo,
   .atom.dived-dissolve .ring,
