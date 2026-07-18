@@ -351,8 +351,10 @@
      del nivel 0) no wrappean, así que su lectura no cambia. */
   white-space: pre-wrap;
   overflow-wrap: anywhere;
-  font-size: 1.05rem;
-  line-height: 1.5;
+  /* Densidad del embed: el código bajó de 1.05rem/1.5 a 0.92rem/1.38 para recuperar alto sin perder
+     legibilidad (sigue holgado sobre el terminal oscuro). Ayuda a que los sub-niveles entren en laptop. */
+  font-size: 0.92rem;
+  line-height: 1.38;
 }
 /* Hanging indent para las líneas de un snippet que WRAPPEAN: el remanente de una línea larga se
    indenta como continuación en vez de arrancar en la columna 0, así se lee que sigue la misma
@@ -468,8 +470,8 @@
    `:has(app-code)` apunta SOLO a las filas demo+código, no a las filas de chips (que no tienen
    código adentro y deben seguir en horizontal). */
 .card--dissolve .subhost .flex:has(app-code) {
-  flex-direction: column;
-  align-items: stretch;
+  flex-direction: row;
+  align-items: flex-start;
   gap: 1.4rem;
 }
 /* Grises secundarios que vivían sobre blanco: sin el panel, sobre el campo de color bajan de
