@@ -468,7 +468,6 @@ export function initMolecule(
   // Órbita de sub-niveles: los electrones ENVUELVEN la card recorriendo un rect redondeado
   // que la abraza por fuera (el actual se resalta en su lugar, sin volar hasta arriba).
   const suborbit = el('svg', { class: 'suborbit', viewBox: '0 0 900 600' });
-  const subRing = el('rect', { class: 'sub-ring', rx: 40 });
   // Los electrones se acomodan en fila fija, uno por sub-nivel, sobre un arco angosto pegado al
   // topbar (la "constelación" del recorrido). subArc es la curva punteada que los conecta.
   const subArcId = 'sub-arc-' + Math.random().toString(36).slice(2);
@@ -489,18 +488,31 @@ export function initMolecule(
   subSparkMotion.appendChild(subSparkMpath);
   subSpark.appendChild(subSparkMotion);
   const subSonar = el('circle', { class: 'sub-sonar', r: 16 });
-  // La "pelota" del sub-nivel actual: un grupo (sonar + disco + número) que se DESLIZA de un dot
-  // al siguiente al cambiar de nivel (transición de transform) y sólo entonces — en el boot aparece
-  // directo en su lugar. Es el ÚNICO marcador del actual en dissolve (el dot de abajo se oculta),
-  // así el highlight "viaja" en vez de saltar por handoff de tamaño entre dos dots distintos.
-  const subPuckDot = el('circle', { class: 'sub-puck-dot', r: 22 });
+  // El sub-nivel actual es un MINI-ÁTOMO que sube el riel (el "electrón-ascensor"): sonar + núcleo +
+  // un electrón orbitando. Se DESLIZA de una parada a la siguiente (transición de transform) y en el
+  // boot aparece directo. Es el único marcador del actual (el dot de abajo se oculta), así el
+  // resaltado "viaja" en vez de saltar. Distinto del riel de conceptos (plano): éste tiene vida.
+  const subPuckDot = el('circle', { class: 'sub-puck-dot', r: 18 });
+  const subPuckOrbit = el('ellipse', { class: 'sub-puck-orbit', rx: 28, ry: 11 });
+  const subPuckE = el('circle', { class: 'sub-puck-e', r: 3.4 });
+  if (!reduceMotion) {
+    // El electrón recorre la órbita en loop (SMIL): la vida en reposo del ascensor. Con reduce no va.
+    subPuckE.appendChild(
+      el('animateMotion', {
+        dur: '1.9s',
+        repeatCount: 'indefinite',
+        path: 'M 28 0 A 28 11 0 1 1 -28 0 A 28 11 0 1 1 28 0',
+      }),
+    );
+  }
   const subPuckNum = el('text', { class: 'sub-puck-n', y: 5 });
   const subPuckG = el('g', { class: 'sub-puck' });
   subPuckG.appendChild(subSonar);
+  subPuckG.appendChild(subPuckOrbit);
   subPuckG.appendChild(subPuckDot);
+  if (!reduceMotion) subPuckG.appendChild(subPuckE);
   subPuckG.appendChild(subPuckNum);
   const subEG = el('g', {});
-  suborbit.appendChild(subRing);
   suborbit.appendChild(subArc);
   // La chispa es pura vida ambiente (un pulso viajando por el arco); con reduce no se agrega.
   if (!reduceMotion) suborbit.appendChild(subSpark);
@@ -580,7 +592,6 @@ export function initMolecule(
   function paintOrbit(cc: Concept): void {
     const col = COL[cc.accent];
     const nsub = cc.subN;
-    subRing.setAttribute('stroke', col);
     subArc.setAttribute('stroke', col);
     subSpark.setAttribute('fill', col);
     subSonar.setAttribute('stroke', col);
@@ -641,12 +652,7 @@ export function initMolecule(
       let topbarY = -1e9;
       let bottomY = 1e9;
       let railX = -1e9;
-      // Bordes del bloque título+contador (`.tb-center`) en coords del suborbit: el arco de
-      // sub-niveles arranca ANTES de su borde izquierdo y termina DESPUÉS del derecho, así ningún
-      // dot (ni el activo, agrandado) pisa el texto — el título queda "enmarcado" por el arco.
-      let blockL = 360;
-      let blockR = 540;
-      let blockBottomY = -1e9;
+      let spineRight = -1e9;
       const m0 = suborbit.getScreenCTM();
       if (m0 && cc.card) {
         const m = m0.inverse();
@@ -674,62 +680,44 @@ export function initMolecule(
         p.x = railEl ? railEl.getBoundingClientRect().right : 0;
         p.y = 0;
         railX = p.matrixTransform(m).x;
-        if (tbCenterEl) {
-          const tr = tbCenterEl.getBoundingClientRect();
-          p.x = tr.left;
-          p.y = tr.top;
-          const bl = p.matrixTransform(m);
-          p.x = tr.right;
-          p.y = tr.bottom;
-          const brc = p.matrixTransform(m);
-          blockL = bl.x;
-          blockR = brc.x;
-          blockBottomY = brc.y;
+        // El título vertical del concepto (.space-spine) vive entre el riel y la card; el ascensor
+        // debe quedar a la DERECHA de él, si no sus pastillas pisan el texto en viewports angostos.
+        if (spaceSpineEl) {
+          p.x = spaceSpineEl.getBoundingClientRect().right;
+          p.y = 0;
+          spineRight = p.matrixTransform(m).x;
         }
       }
-      // Rect redondeado que envuelve la card por fuera (PAD de separación), clampeado al chrome.
-      // El riel MANDA siempre en el lado izquierdo: si el margen hacia el riel es menor al PAD
-      // completo, el rect se pega más a la card (o incluso roza su borde) en vez de invadir el
-      // riel. Pisar el riel es un bug de legibilidad real (números pegados); rozar la card es
-      // solo estético — entre las dos, gana la que no rompe la lectura.
-      const PAD = 30;
-      const L = Math.max(ccx - hw - PAD, railX + 22);
-      const R = ccx + hw + PAD;
-      const T = Math.max(ccy - hh - PAD, topbarY + 22);
-      const B = Math.min(ccy + hh + PAD, bottomY - 12);
-      const rad = Math.min(40, (R - L) / 2, (B - T) / 2);
-      subRing.setAttribute('x', L.toFixed(1));
-      subRing.setAttribute('y', T.toFixed(1));
-      subRing.setAttribute('width', (R - L).toFixed(1));
-      subRing.setAttribute('height', (B - T).toFixed(1));
-      subRing.setAttribute('rx', rad.toFixed(1));
+      // Ascensor vertical: un riel pegado al borde IZQUIERDO de la card (distinto del riel de
+      // conceptos, que vive más a la izquierda) con las paradas de sub-nivel repartidas parejo a lo
+      // alto de la card. El electrón-ascensor (la pelota) sube y baja entre ellas. Antes esto era un
+      // arco-sonrisa anclado al título: con muchos sub-niveles se amontonaban (fallaba legibilidad).
       const nsub = subDots.length;
-      // El arco ARRANCA antes del bloque título+contador y TERMINA después, curvando hacia abajo
-      // (∪) para enmarcarlo. Los extremos lo flanquean por los costados (fuera del texto) y los
-      // pasos del medio hunden por debajo; el título flota dentro del arco. El margen izquierdo deja
-      // lugar para el dot ACTIVO agrandado + su sonar cuando el paso 1 es el actual, así nunca
-      // colisiona con el contador. Escala parejo de 2 a 10+ pasos porque el ancho lo fija el título
-      // (no la cantidad de dots): sumar pasos sólo los reparte en la curva.
-      const archL = blockL - 46;
-      const archR = blockR + 40;
-      const archCX = (archL + archR) / 2;
-      // Separación bajo el título: da aire a los extremos para que el dot ACTIVO agrandado no
-      // roce el borde superior de la ventana cuando el paso actual es un extremo (p.ej. sub-1).
-      const archY = (blockBottomY > -1e8 ? blockBottomY : topbarY + 40) + 18;
-      const archDepth = 42;
+      // X del riel: en pantallas anchas va en el hueco a la izquierda de la card (`ccx - hw - 30`). En
+      // angostas, donde ese hueco se achica, SIEMPRE queda a la derecha del título vertical del
+      // concepto (.space-spine): el +40 cuenta la media-anchura del electrón (órbita rx28) para que su
+      // borde IZQUIERDO quede al lado del spine y el derecho caiga en el padding de la card, sin pisar
+      // ni el texto vertical ni el contenido. El riel de conceptos es el piso duro de la izquierda.
+      const railElevX = Math.max(ccx - hw - 30, spineRight + 40, railX + 40);
+      // Rango vertical de las paradas: a lo alto de la card, con aire arriba/abajo, clampeado al chrome
+      // (topbar arriba, borde inferior). El margen interno evita que el electrón agrandado se salga.
+      const stopTop = Math.max(ccy - hh + 16, topbarY + 26);
+      const stopBot = Math.min(ccy + hh - 16, bottomY - 16);
       for (let k = 0; k < nsub; k++) {
         const o = subDots[k];
-        const frac = nsub > 1 ? k / (nsub - 1) : 0.5;
-        o.lx = archL + (archR - archL) * frac;
-        o.ly = archY + archDepth * Math.sin(Math.PI * frac);
+        o.lx = railElevX;
+        o.ly =
+          nsub > 1 ? stopTop + (stopBot - stopTop) * (k / (nsub - 1)) : (stopTop + stopBot) / 2;
         o.dot.setAttribute('cx', o.lx.toFixed(1));
         o.dot.setAttribute('cy', o.ly.toFixed(1));
         o.num.setAttribute('x', o.lx.toFixed(1));
         o.num.setAttribute('y', (o.ly + 4).toFixed(1));
       }
+      // El riel es una línea vertical (subArc repurposeado) del primer al último stop: el "hilo de
+      // energía" por donde sube el electrón. Su color (el del concepto) lo pone paintOrbit una vez.
       subArc.setAttribute(
         'd',
-        `M ${archL.toFixed(1)} ${archY.toFixed(1)} Q ${archCX.toFixed(1)} ${(archY + archDepth * 2).toFixed(1)} ${archR.toFixed(1)} ${archY.toFixed(1)}`,
+        `M ${railElevX.toFixed(1)} ${subDots[0].ly.toFixed(1)} L ${railElevX.toFixed(1)} ${subDots[nsub - 1].ly.toFixed(1)}`,
       );
       // La pelota se coloca sobre el dot actual: en el boot / cambio de concepto aparece DIRECTO
       // (transición apagada), y al cambiar de sub-nivel DENTRO del concepto DESLIZA (la transición
@@ -818,7 +806,6 @@ export function initMolecule(
   const introEl = q<HTMLElement>('.intro');
   const topbarEl = q<HTMLElement>('.topbar');
   const tbTitleEl = q<HTMLElement>('.tb-title');
-  const tbCenterEl = q<HTMLElement>('.tb-center');
   const tbCountEl = q<HTMLElement>('.tb-count');
   const captionEl = q<HTMLElement>('.caption');
   const spaceSpineEl = q<HTMLElement>('#spaceSpine');
@@ -912,9 +899,11 @@ export function initMolecule(
     // El contador de sub-nivel vive a nivel del título (en el topbar, como prefijo), no adentro
     // de la card. Solo cuando estás en un sub-ejemplo (buceado).
     if (tbCountEl) {
-      tbCountEl.textContent = diveDepth > 0.5 && dc.subN > 0 ? `${dc.subIdx + 1} / ${dc.subN}` : '';
+      tbCountEl.textContent = diveDepth > 0.5 && dc.subN > 1 ? `${dc.subIdx + 1} / ${dc.subN}` : '';
     }
-    if (dc.subN > 0 && diveDepth > 0.35) {
+    // El ascensor solo tiene sentido con una SERIE de sub-niveles; con uno solo (p.ej. Zoneless) no
+    // hay "dónde vas de N", así que no se muestra (ni el contador 1/1). El componente igual se monta.
+    if (dc.subN > 1 && diveDepth > 0.35) {
       if (orbitFor !== c) {
         paintOrbit(dc);
         orbitFor = c;
@@ -1167,18 +1156,34 @@ export function initMolecule(
       revealStep(dir);
     }
   };
-  // Teclado: mismas reglas para flechas / AvPág / espacio mientras el gate está activo.
+  // Teclado. Con el gate de reveal activo y asentado en la parada, flechas / AvPág / espacio revelan
+  // u ocultan tags. Fuera del gate, las flechas ▲/▼ (y AvPág) navegan el recorrido paso a paso, para
+  // que el viaje sea accesible por teclado igual que con los botones del riel (no solo por scroll).
   const onKeyGate = (e: KeyboardEvent): void => {
-    if (!gateReady || !activeReveal) return;
-    if (Math.abs(stage.scrollTop / unit() - HTT_STOP) > 0.06) return;
-    const down = e.key === 'ArrowDown' || e.key === 'PageDown' || e.key === ' ';
-    const up = e.key === 'ArrowUp' || e.key === 'PageUp';
-    if (down && revealN < activeReveal.steps) {
+    if (gateReady && activeReveal && Math.abs(stage.scrollTop / unit() - HTT_STOP) <= 0.06) {
+      const down = e.key === 'ArrowDown' || e.key === 'PageDown' || e.key === ' ';
+      const up = e.key === 'ArrowUp' || e.key === 'PageUp';
+      if (down && revealN < activeReveal.steps) {
+        e.preventDefault();
+        revealStep(1);
+        return;
+      }
+      if (up && revealN > 0) {
+        e.preventDefault();
+        revealStep(-1);
+        return;
+      }
+    }
+    // No secuestramos las flechas dentro de un campo editable del demo (ni el espacio, que activa
+    // botones): solo ▲/▼ y AvPág mueven el recorrido.
+    const t = e.target as HTMLElement | null;
+    if (t && (t.isContentEditable || t.tagName === 'INPUT' || t.tagName === 'TEXTAREA')) return;
+    if (e.key === 'ArrowDown' || e.key === 'PageDown') {
       e.preventDefault();
-      revealStep(1);
-    } else if (up && revealN > 0) {
+      onNext();
+    } else if (e.key === 'ArrowUp' || e.key === 'PageUp') {
       e.preventDefault();
-      revealStep(-1);
+      onPrev();
     }
   };
 
