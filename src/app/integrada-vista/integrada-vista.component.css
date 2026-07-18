@@ -106,6 +106,16 @@
   filter: drop-shadow(0 0 4px currentColor);
   transition: opacity 0.45s ease;
 }
+/* El concepto anterior inmediato al bucear: sus anillos punteados a 0.45 se leían como un fantasma.
+   Acá gana presencia (anillos más nítidos + electrones con más glow) para leerse como el "de dónde
+   venís" que asoma desde el borde, sin necesidad de etiqueta. */
+.atom.peek-prev .ring {
+  opacity: 0.7;
+  transition: opacity 0.5s ease;
+}
+.atom.peek-prev .electron {
+  filter: drop-shadow(0 0 7px currentColor);
+}
 .nucleus {
   stroke: rgba(255, 255, 255, 0.5);
   stroke-width: 1.4;

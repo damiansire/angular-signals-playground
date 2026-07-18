@@ -54,8 +54,17 @@ describe('cameraAt — matemática de cámara del recorrido (pura, sin DOM)', ()
   };
   const FK = 2.7;
 
-  it('en la zona de sub-niveles (w>=2) fija el zoom máximo sobre el átomo, buceo total', () => {
-    expect(cameraAt(2.5, false, geom)).toEqual({ K: FK, fx: 200, fy: 200, diveDepth: 1 });
+  it('en la zona de sub-niveles (w>=2): zoom máximo y buceo total, con la cámara inclinada un toque hacia el concepto anterior', () => {
+    const cam = cameraAt(2.5, false, geom);
+    expect(cam.K).toBe(FK);
+    expect(cam.diveDepth).toBe(1);
+    // lean 0.2 desde el átomo actual (200,200) hacia el anterior (0,0): el vecino asoma en el frame.
+    expect(cam.fx).toBeCloseTo(160, 5);
+    expect(cam.fy).toBeCloseTo(160, 5);
+  });
+
+  it('primer concepto en sub-niveles (w>=2, isFirst): sin lean porque no tiene anterior', () => {
+    expect(cameraAt(2.5, true, geom)).toEqual({ K: FK, fx: 200, fy: 200, diveDepth: 1 });
   });
 
   it('primer átomo en vista molécula (w<1.3): zoom wide centrado en el centroide, sin buceo', () => {

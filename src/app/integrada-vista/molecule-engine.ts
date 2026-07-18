@@ -170,6 +170,10 @@ export interface CameraGeom {
   parent: { x: number; y: number };
 }
 
+/** Cuánto se inclina la cámara hacia el concepto anterior al bucear (0 = nada, 1 = encima del vecino).
+ *  Chico a propósito: revela el peek del anterior sin desacomodar el átomo actual detrás de la card. */
+const DIVE_LEAN = 0.2;
+
 /**
  * Estado de cámara (zoom `K`, punto de foco `fx`/`fy`, profundidad de buceo `diveDepth`) en la
  * posición de scroll `w` (0..len dentro del concepto): nace → wide → bucea al átomo, y en la zona
@@ -184,7 +188,17 @@ export function cameraAt(
   const { W, cen, target, parent } = geom;
   const FK = 2.7;
   if (w >= 2) {
-    return { K: FK, fx: target.x, fy: target.y, diveDepth: 1 };
+    // Al bucear en los sub-niveles, la cámara se inclina un toque hacia el concepto ANTERIOR para
+    // que ese vecino (de donde venís) asome dentro del frame, como en Size of Life. La card sticky
+    // tapa el centro, así que el átomo actual sigue detrás y solo se revela más del anterior. El
+    // primer concepto no tiene anterior al que inclinarse.
+    const lean = isFirst ? 0 : DIVE_LEAN;
+    return {
+      K: FK,
+      fx: lerp(target.x, parent.x, lean),
+      fy: lerp(target.y, parent.y, lean),
+      diveDepth: 1,
+    };
   }
   if (isFirst) {
     if (w < 1.3) {
@@ -921,6 +935,9 @@ export function initMolecule(
       // El nombre del átomo se desvanece al bucear: su rol de etiqueta lo toma el título promovido
       // dentro de la card, no debe repetirse en la escena. Solo el actual.
       g.classList.toggle('dived-dissolve', i === c && diveDepth > 0.4);
+      // El concepto anterior INMEDIATO se realza al bucear: es el "de dónde venís" que asoma desde el
+      // borde, y con sus anillos punteados a 0.45 se leía como un fantasma. Con peek-prev gana presencia.
+      g.classList.toggle('peek-prev', i === c - 1 && diveDepth > 0.4);
       if (i < c) {
         g.classList.add('on');
         g.classList.remove('current');
