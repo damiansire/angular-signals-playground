@@ -422,6 +422,22 @@
 .card--dissolve .subhost [class*='shadow-'] {
   box-shadow: none;
 }
+/* Densidad del embed (design-review #1/#2): sin la hoja blanca, el padding de página completa de los
+   paneles de demo ya no encierra nada, así que se recupera para que los sub-niveles largos entren en
+   laptop sin depender del scroll interno. Y los márgenes de apilado (mb-5/mt-4/mt-5) se comprimen un
+   toque. No toca los 35 templates; el scroll único de la card se mantiene. */
+.card--dissolve .subhost section[class*='bg-'],
+.card--dissolve .subhost [class*='bg-gray-50'],
+.card--dissolve .subhost [class*='bg-slate-50'] {
+  padding: 0.15rem 0;
+}
+.card--dissolve .subhost [class*='mb-5'] {
+  margin-bottom: 0.7rem;
+}
+.card--dissolve .subhost [class*='mt-4'],
+.card--dissolve .subhost [class*='mt-5'] {
+  margin-top: 0.7rem;
+}
 /* Bordes finos de los paneles claros (border-gray-100/200): sin fondo ya no encierran nada, pero
    el hilo claro residual todavía dibuja el contorno de una ventana. Se desvanece. Los bordes de
    ACENTO (chips de color, seleccionados) usan otro tono y no matchean, así que se conservan. */
