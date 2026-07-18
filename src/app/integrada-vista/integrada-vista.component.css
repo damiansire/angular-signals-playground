@@ -321,9 +321,12 @@
   /* Instrucciones angostas a la izquierda; el DEMO se lleva el resto del ancho (1fr) y estira
      para que el árbol y el código respiren. */
   grid-template-columns: minmax(0, 14rem) minmax(0, 1fr);
-  gap: 2.4rem;
+  gap: 1.7rem;
   align-items: center;
-  zoom: 1.2;
+  /* Densidad del embed: en una laptop (~860px de alto) los sub-niveles más largos se pasaban del
+     viewport y quedaban bajo el fold (design-review). El zoom bajó de 1.2 a 1.0 para que entren sin
+     depender del scroll interno de la card; sigue legible porque la card es ancha. */
+  zoom: 1;
 }
 .card--dissolve .subhost > * > app-concept-card {
   grid-column: 1;
@@ -384,8 +387,8 @@
 }
 .card--dissolve .subhost app-concept-card p {
   font-size: 0.92rem;
-  line-height: 1.5;
-  margin: 0 0 0.9rem;
+  line-height: 1.45;
+  margin: 0 0 0.55rem;
 }
 /* En la vista molécula el árbol se DISUELVE igual que el código y las instrucciones: pierde su
    hoja blanca (borde + sombra + grilla punteada) que en modo standalone lo hace lindo pero acá
@@ -400,7 +403,7 @@
 }
 /* El árbol (ECharts) gana alto para que el grafo se despliegue y respire en vez de amontonarse. */
 .card--dissolve .subhost .demo-chart {
-  height: 500px;
+  height: 400px;
 }
 /* De-encajonar los paneles claros de las demos. La mayoría de los sub-niveles envuelven su
    contenido en un panel claro (bg-white / bg-gray-50 + sombra + esquinas): en modo standalone
