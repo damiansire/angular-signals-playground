@@ -1,4 +1,12 @@
-import { Component, computed, effect, signal, ChangeDetectionStrategy } from '@angular/core';
+import {
+  Component,
+  computed,
+  effect,
+  signal,
+  ChangeDetectionStrategy,
+  DestroyRef,
+  inject,
+} from '@angular/core';
 import { CodeLine } from '../../../../components-atom/component-atom.interface';
 import { VariableBoxComponent } from '../../../../components-atom/variable-box/variable-box.component';
 import { HistoryElement } from '../../../../components/component.interface';
@@ -43,6 +51,20 @@ export class EffectComponent {
       // eslint-disable-next-line no-console -- demo didactica: refleja el console.log mostrado en pantalla
       console.log(`The current count is: ${this.count2()}`);
     });
+
+    // Vida autónoma: Count1 late solo (una fuente que cambia sin que el usuario toque nada), así se
+    // ve a effect(1) reaccionar por su cuenta en vez de quedar el demo congelado esperando input.
+    // Count2 queda manual como contraste ("este cambia solo, ese solo si vos lo tocás"). El intervalo
+    // (< 1.5s) se limpia al destruir el componente —la vista integrada lo monta y desmonta por scroll—
+    // y se pausa con prefers-reduced-motion (la vida se atenúa, el demo sigue andando con clicks).
+    const prefersReducedMotion =
+      typeof window !== 'undefined' &&
+      typeof window.matchMedia === 'function' &&
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (!prefersReducedMotion) {
+      const beatId = setInterval(() => this.count.update((c) => c + 1), 1300);
+      inject(DestroyRef).onDestroy(() => clearInterval(beatId));
+    }
   }
   lines = computed<CodeLine[]>(() => [
     { line: 'count = signal(0);', active: false },
