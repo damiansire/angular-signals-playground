@@ -103,6 +103,7 @@ const ORX = 34;
 const ORY = 11;
 const NUC = 13;
 const VISITED = '#8791a8';
+const PENDING_DOT = '#c2b9a6';
 
 /**
  * Layout de scroll del recorrido: cada concepto ocupa [nace(1) + bucear(1)] = 2 unidades;
@@ -621,15 +622,23 @@ export function initMolecule(
       const cur = cc.subIdx;
       const state = k === cur ? 'current' : k < cur ? 'visited' : 'pending';
       o.g.setAttribute('class', 'sub-e ' + state);
-      o.dot.setAttribute('r', String(state === 'current' ? 22 : state === 'visited' ? 13 : 12));
+      // Estados claramente distintos y más livianos: VISITADO = disco lleno (hecho), PENDIENTE =
+      // anillo hueco (todavía no), ACTUAL = lo tapa el electrón-ascensor. Se usa inline style (no una
+      // presentation attribute) porque el `fill` de `.sub-dot` en el CSS la pisaría: ESO era por qué
+      // visitado y pendiente se leían igual (ambos quedaban del taupe del CSS, ignorando el VISITED).
+      o.dot.setAttribute('r', String(state === 'current' ? 18 : 11));
       if (state === 'current') {
-        o.dot.setAttribute('fill', col);
+        o.dot.style.fill = col;
+        o.dot.style.stroke = 'none';
         o.dot.setAttribute('filter', 'url(#glow)');
       } else if (state === 'visited') {
-        o.dot.setAttribute('fill', VISITED);
+        o.dot.style.fill = VISITED;
+        o.dot.style.stroke = 'none';
         o.dot.removeAttribute('filter');
       } else {
-        o.dot.removeAttribute('fill');
+        o.dot.style.fill = 'transparent';
+        o.dot.style.stroke = PENDING_DOT;
+        o.dot.style.strokeWidth = '1.6';
         o.dot.removeAttribute('filter');
       }
     }
