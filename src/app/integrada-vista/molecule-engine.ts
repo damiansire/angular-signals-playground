@@ -368,7 +368,7 @@ export function initMolecule(
     window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const contentEl = q<HTMLDivElement>('#content')!;
 
-  for (let s = 0; s < 60; s++) {
+  for (let s = 0; s < 30; s++) {
     const st = el('circle', {
       class: 'star',
       cx: (Math.random() * 820).toFixed(0),
@@ -748,8 +748,18 @@ export function initMolecule(
         }
       }
     }
-    raf(orbitLoop);
   }
+  // orbitLoop corre ON-DEMAND, no en un rAF perpetuo a 60fps que quemaba CPU aun en reposo: se agenda
+  // un ÚNICO frame cuando algo cambió (scroll/resize/cambio de sub-nivel, vía `requestOrbit`). Estando
+  // parado no hay ningún wakeup. La transición del puck entre paradas la hace el CSS, no el loop.
+  let orbitRaf = 0;
+  const requestOrbit = (): void => {
+    if (orbitRaf || destroyed) return;
+    orbitRaf = requestAnimationFrame(() => {
+      orbitRaf = 0;
+      orbitLoop();
+    });
+  };
 
   // Aura del concepto: al bucear, el átomo actual "crece" y se vuelve el fondo de color
   // donde vive el ejemplo, así el card no aparece como un rectángulo suelto sino nacido del
@@ -1061,9 +1071,10 @@ export function initMolecule(
     gateReady = settled;
     if (!settled) activeReveal = null;
     lastRenderS = s;
-    // La vista se movió (scroll/nav/cambio de sub-nivel): que orbitLoop recalcule la constelación
-    // en el próximo frame. Estando parado, render() no corre y la órbita no se recalcula sola.
+    // La vista se movió (scroll/nav/cambio de sub-nivel): marcamos la órbita como sucia y agendamos
+    // un frame para recalcularla. Estando parado, render() no corre → no se agenda nada.
     orbitDirty = true;
+    requestOrbit();
   }
 
   // ---- Scroll 100% NATIVO + snap ----
@@ -1143,6 +1154,7 @@ export function initMolecule(
   const onResize = (): void => {
     track.style.height = (TOTAL + 0.2) * unit() + 'px';
     orbitDirty = true; // cambió la geometría: que orbitLoop reubique la constelación
+    requestOrbit();
   };
   // Los pasos saltan a la parada ADYACENTE (nivel o sub-nivel), no un desplazamiento fijo:
   // con scroll-snap mandatory un medio-paso queda por debajo del intervalo de snap y el
@@ -1273,18 +1285,38 @@ export function initMolecule(
   }, 30);
   window.addEventListener('load', openAt);
 
-  raf(orbitLoop);
+  // Ahorro de CPU/GPU cuando la pestaña NO está visible: el navegador throttlea rAF en background pero
+  // NO el SMIL (electrones/chispa/sonar) ni las animaciones CSS (estrellas/halos/intro), que siguen
+  // quemando ciclos (y el ventilador) con la vista oculta. Al ocultarse congelamos TODO; al volver se
+  // reanuda (salvo reduced-motion, que ya deja la escena quieta).
+  const molSvg = sceneG.ownerSVGElement;
+  const onVisibility = (): void => {
+    const hidden = document.hidden;
+    root.classList.toggle('anims-frozen', hidden);
+    if (hidden) {
+      molSvg?.pauseAnimations();
+      suborbit.pauseAnimations();
+    } else if (!reduceMotion) {
+      molSvg?.unpauseAnimations();
+      suborbit.unpauseAnimations();
+    }
+  };
+  document.addEventListener('visibilitychange', onVisibility);
+
+  requestOrbit();
 
   return () => {
     destroyed = true;
     window.clearTimeout(bootTimer);
     cancelAnimationFrame(scrollAnimId);
+    cancelAnimationFrame(orbitRaf);
     rafIds.forEach((id) => cancelAnimationFrame(id));
     stage.removeEventListener('scroll', onScroll);
     stage.removeEventListener('wheel', onWheelGate);
     window.removeEventListener('keydown', onKeyGate);
     window.removeEventListener('resize', onResize);
     window.removeEventListener('load', openAt);
+    document.removeEventListener('visibilitychange', onVisibility);
     C.forEach((cc) => cc.subDispose?.());
   };
 }

@@ -103,7 +103,10 @@
   stroke-dasharray: 3 4;
 }
 .electron {
-  filter: drop-shadow(0 0 4px currentColor);
+  /* Sin `filter: drop-shadow` de base: son ~35 electrones EN MOVIMIENTO (SMIL) y un filtro por
+     electrón obliga a re-rasterizar su glow en CADA frame = mucho GPU/ventilador en la vista molécula.
+     El color del electrón + el glow del núcleo alcanzan para leer "átomo vivo". El realce del concepto
+     anterior (.peek-prev, pocos electrones y solo al bucear) sí conserva su drop-shadow abajo. */
   transition: opacity 0.45s ease;
 }
 /* El concepto anterior inmediato al bucear: sus anillos punteados a 0.45 se leían como un fantasma.
@@ -1244,6 +1247,15 @@
   color: #201d16;
   transform: scale(1.5);
   font-weight: 700;
+}
+
+/* Congelar TODA la vida ambiente CSS cuando la pestaña no está visible (el motor pone `anims-frozen`
+   en el host por visibilitychange; el SMIL lo pausa `pauseAnimations()`). Ahorra CPU/GPU (ventilador)
+   con la vista en background, donde el navegador NO frena solo ni el CSS ni el SMIL. */
+:host(.anims-frozen) *,
+:host(.anims-frozen) *::before,
+:host(.anims-frozen) *::after {
+  animation-play-state: paused !important;
 }
 
 @media (prefers-reduced-motion: reduce) {
