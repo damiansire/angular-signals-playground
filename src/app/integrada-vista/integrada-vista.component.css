@@ -1237,37 +1237,6 @@
     height 0.18s ease,
     opacity 0.3s ease;
 }
-/* Nodo "estás acá": disco blanco con halo del color del concepto actual (`--dotcol`, lo pone el
-   motor). Glow CONSTANTE (no depende del movimiento) para que lea vivo aun en reposo. */
-/* El concepto ACTUAL es un ÁTOMO: núcleo encendido (color del concepto) + una órbita elíptica
-   inclinada (::before), como los átomos de la escena. Es el marcador "estás acá" de la cadena. */
-.rail-dot {
-  position: absolute;
-  left: 50%;
-  width: 13px;
-  height: 13px;
-  border-radius: 50%;
-  background: radial-gradient(circle at 40% 35%, #fff8ea, var(--dotcol, var(--source)));
-  transform: translate(-50%, -50%);
-  box-shadow: 0 0 15px 3px color-mix(in srgb, var(--dotcol, var(--source)) 70%, transparent);
-  transition:
-    top 0.18s ease,
-    box-shadow 0.3s ease,
-    opacity 0.25s ease;
-  z-index: 2;
-}
-.rail-dot::before {
-  content: '';
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  width: 29px;
-  height: 11px;
-  border: 1.5px solid var(--dotcol, var(--source));
-  border-radius: 50%;
-  transform: translate(-50%, -50%) rotate(-24deg);
-  opacity: 0.6;
-}
 .rail-ticks {
   display: flex;
   flex-direction: column;
@@ -1279,7 +1248,7 @@
 }
 .rail-ticks li {
   font-family: var(--mono);
-  font-size: 0.8rem;
+  font-size: 1rem;
   color: #aba28f;
   opacity: 0.7;
   transition:
@@ -1293,6 +1262,14 @@
   color: #201d16;
   transform: scale(1.5);
   font-weight: 700;
+}
+/* Durante el buceo el motor mueve/escala cada tick por frame (zoom-in) vía transform inline: se apaga
+   la transición de `transform` para que la animación scroll-driven no se arrastre con el ease de 0.2s.
+   El color/opacity siguen suavizados (y el ease de `transform` vuelve en reposo, para el activo). */
+.rail-ticks.zooming li {
+  transition:
+    color 0.2s ease,
+    opacity 0.2s ease;
 }
 
 /* Congelar TODA la vida ambiente CSS cuando la pestaña no está visible (el motor pone `anims-frozen`

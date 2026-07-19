@@ -812,7 +812,6 @@ export function initMolecule(
   const capS = q<HTMLElement>('#capS')!;
   const stage = q<HTMLDivElement>('#stage')!;
   const track = q<HTMLDivElement>('#track')!;
-  const railDot = q<HTMLElement>('#railDot');
   const railFillEl = q<HTMLElement>('#railFill');
   const railLineEl = q<HTMLElement>('.rail-line');
   const railEl = q<HTMLElement>('.rail');
@@ -833,9 +832,12 @@ export function initMolecule(
     railTicksOl.appendChild(li);
   }
   const railTicks = Array.from(root.querySelectorAll<HTMLElement>('#railTicks li'));
+  // Zoom-in del riel al bucear (ver el morph en render): alto cacheado + campana para la escala por tick.
+  let railTicksH = 0;
+  const gaussTick = (x: number): number => Math.exp(-(x * x) / (2 * 1.4 * 1.4));
   // "Cadena molecular": cada concepto es un nodo-átomo SOBRE el enlace (la línea del riel). El motor
   // los crea y les fija el color de su concepto; render() marca visitado / actual / pendiente. El
-  // activo lo tapa el átomo con órbita (.rail-dot), así el riel = la molécula vista de canto.
+  // activo lo marca el número en negrita (1.5×), así el riel = la molécula vista de canto.
   const railNodes: HTMLElement[] = [];
   for (let i = 0; i < N; i++) {
     const nd = document.createElement('span');
@@ -902,10 +904,11 @@ export function initMolecule(
     // hasta que empezás a scrollear, desvaneciéndose a la par que el intro.
     if (tbCenterEl)
       tbCenterEl.style.opacity = Math.max(0, Math.min(1, (s - 0.03) / 0.09)).toFixed(2);
-    // El riel MORPHea al bucear: en vez de desvanecer el cuerpo entero de golpe (se leía como un
-    // CORTE), los ticks de concepto se ABSORBEN hacia el activo (scaleY con origen en su posición) y
-    // se apagan mientras el track de concepto se desvanece; su lugar lo toma la barra de sub-niveles
-    // que crece hacia los bordes. Las flechas ▲/▼ quedan siempre visibles (navegan ambos modos).
+    // El riel hace ZOOM-IN al bucear: en vez de desvanecer el cuerpo entero de golpe (se leía como un
+    // CORTE), los ticks se SEPARAN alrededor del concepto activo (que queda fijo) y crecen, los lejanos
+    // salen del cuadro, mientras se apagan y el track de concepto se desvanece; su lugar lo toma la barra
+    // de sub-niveles. Da la sensación de "meterse" en el concepto (antes se COMPRIMÍAN hacia el activo,
+    // que se leía al revés). Las flechas ▲/▼ quedan siempre visibles (navegan ambos modos).
     // `railProg` (0..1) = avance por la escala de conceptos, anclado a la posición de los ticks (no al
     // scroll continuo, que desalineaba porque cada concepto ocupa distinto scroll según sus sub-niveles).
     const railProg = Math.min(
@@ -913,15 +916,30 @@ export function initMolecule(
       (c + Math.max(0, Math.min(1, (w - 1.3) / Math.max(0.8, len[c] - 1)))) / (N - 1),
     );
     // Fade de los ticks ADELANTADO respecto a la aparición de los sub-niveles (suborbit, 0.35→0.75):
-    // los conceptos se absorben primero y los sub-niveles entran después, para que el punto medio del
-    // morph no muestre las dos escalas pisadas a la vez.
+    // los conceptos hacen zoom y se apagan primero, y los sub-niveles entran después, para que el punto
+    // medio del morph no muestre las dos escalas pisadas a la vez.
     const morphT = Math.max(0, Math.min(1, (diveDepth - 0.15) / 0.35));
-    railTicksOl.style.transformOrigin = `left ${((c / (N - 1)) * 100).toFixed(1)}%`;
-    railTicksOl.style.transform = `scaleY(${(1 - 0.82 * morphT).toFixed(3)})`;
+    // Zoom-in por tick: cada uno se aleja del activo (que queda fijo) y crece con escala UNIFORME (sin
+    // distorsión de glifo). `railTicksH` = alto sobre el que se reparten los ticks; se cachea y se
+    // recalcula en resize. En reposo (morphT=0) se limpia el transform inline para que mande el CSS
+    // (activo en negrita a 1.5×). La clase `zooming` apaga la transición de `transform` mientras dura
+    // el buceo (si no, la animación scroll-driven se arrastraría con el ease de 0.2s).
+    if (morphT > 0) {
+      if (!railTicksH) railTicksH = railTicksOl.getBoundingClientRect().height;
+      railTicksOl.classList.add('zooming');
+      const spread = 6 * morphT;
+      for (let ti = 0; ti < railTicks.length; ti++) {
+        const dy = ((ti - c) / (N - 1)) * spread * railTicksH;
+        const k = (ti === c ? 1.5 : 1) * (1 + 0.9 * morphT * gaussTick(ti - c));
+        railTicks[ti].style.transform = `translateY(${dy.toFixed(1)}px) scale(${k.toFixed(3)})`;
+      }
+    } else {
+      railTicksOl.classList.remove('zooming');
+      for (const li of railTicks) li.style.transform = '';
+    }
     railTicksOl.style.opacity = (1 - morphT).toFixed(3);
     if (railLineEl) railLineEl.style.opacity = (0.5 * (1 - morphT)).toFixed(3);
     if (railFillEl) railFillEl.style.opacity = (0.95 * (1 - morphT)).toFixed(3);
-    if (railDot) railDot.style.opacity = (1 - morphT).toFixed(3);
     if (captionEl) captionEl.style.opacity = Math.max(0, 1 - diveDepth / 0.5).toFixed(2);
     // Título vertical del concepto (espina de identidad) pegado al riel: aparece al bucear, con
     // el color del concepto. Es la casa del nombre en la escena.
@@ -1043,13 +1061,9 @@ export function initMolecule(
     // El nombre del concepto ya vive en el label del átomo y en el topbar: el caption solo marca el
     // MODO (evita la triple repetición del nombre en la vista molécula).
     capS.textContent = diveDepth > 0.5 ? 'Adentro' : 'Molécula';
-    // El nodo y el llenado se anclan a la posición del tick activo y se tiñen del color del concepto.
+    // El llenado se ancla a la posición del tick activo (progreso del recorrido).
     const railPct = (railProg * 100).toFixed(1) + '%';
     if (railFillEl) railFillEl.style.height = railPct;
-    if (railDot) {
-      railDot.style.top = railPct;
-      railDot.style.setProperty('--dotcol', COL[C[c].accent]);
-    }
     for (let ti = 0; ti < railTicks.length; ti++) railTicks[ti].classList.toggle('on', ti === c);
     for (let ni = 0; ni < railNodes.length; ni++) {
       const nd = railNodes[ni];
@@ -1170,6 +1184,7 @@ export function initMolecule(
   };
   const onResize = (): void => {
     track.style.height = (TOTAL + 0.2) * unit() + 'px';
+    railTicksH = 0; // el alto del riel cambió: que el zoom lo vuelva a medir
     orbitDirty = true; // cambió la geometría: que orbitLoop reubique la constelación
     requestOrbit();
   };
