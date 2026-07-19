@@ -209,9 +209,9 @@ export const routes: Routes = [
   { path: 'lab/computed', component: ReactiveCellsComponent },
   { path: 'lab/manual', component: ManualComponent },
   { path: 'practica/carrito', component: CartExampleComponent },
-  { path: 'integrada-vista', component: IntegradaVistaComponent },
-  { path: '', redirectTo: 'integrada-vista', pathMatch: 'full' },
-  // Cualquier URL desconocida (incluidos bookmarks viejos como /poc) rebota a la vista integrada.
-  { path: '**', redirectTo: 'integrada-vista' },
+  // La vista integrada (recorrido molécula) ES la raíz `/`, no una ruta aparte: es la entrada.
+  { path: '', component: IntegradaVistaComponent },
+  // Cualquier URL desconocida (incluidos bookmarks viejos como /integrada-vista o /poc) rebota a la raíz.
+  { path: '**', redirectTo: '' },
 ];
 export const menuItems = baseRoutes;

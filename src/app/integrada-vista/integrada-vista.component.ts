@@ -82,7 +82,7 @@ export class IntegradaVistaComponent {
    * así el componente no se desmonta ni se pierde el scroll. `subIdx` -1 = vista molécula.
    */
   private readonly onWhere = (conceptIdx: number, subIdx: number): void => {
-    this.location.replaceState('/integrada-vista', buildWhereQuery(conceptIdx, subIdx));
+    this.location.replaceState('/', buildWhereQuery(conceptIdx, subIdx));
   };
 
   /** Monta el componente REAL del sub-nivel (concepto ci, sub si) y lo integra a la CD. */

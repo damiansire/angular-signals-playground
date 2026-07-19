@@ -1,5 +1,5 @@
 /**
- * Motor del recorrido "molécula reactiva" de `/integrada-vista`.
+ * Motor del recorrido "molécula reactiva" de la vista integrada (la raíz `/`).
  *
  * Es una animación imperativa (SVG + canvas + cámara con zoom + órbita de
  * sub-niveles + stepping por wheel) que no encaja en el modelo declarativo de
