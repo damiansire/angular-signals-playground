@@ -918,143 +918,14 @@
   transition: opacity 0.4s ease;
 }
 
-/* Overlay de bienvenida: tapa todo con "Scrolleá para empezar"; al scrollear se
-   desvanece y revela la molécula. Sin scroll no se lee como "algo cargando". */
+/* Contenedor del landing "par de Tusi": el motor lo fadea con el scroll (opacity + pointer-events).
+   Todo el contenido (canvas, hero, controles, overlay Dark/Light) vive en `.tusi`, ver intro-tusi.css. */
 .intro {
   position: absolute;
   inset: 0;
-  /* Debajo del topbar/rail (z-index 6): el "← Inicio" y el riel 0-11 quedan
-     visibles desde el arranque, no tapados por el overlay de bienvenida. */
+  /* Debajo del topbar/rail (z-index 6): el "← Recorrido" y el riel 0-11 quedan visibles desde el arranque. */
   z-index: 5;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  pointer-events: none;
-  background: radial-gradient(90% 72% at 50% 46%, #fbf9f2, #e6f1ea 92%);
   transition: opacity 0.6s ease;
-}
-/* Identidad viva del landing: un átomo "Signals" que respira (núcleo con glow pulsante), dos anillos
-   elípticos tejiéndolo y un electrón orbitando. Reemplaza el vacío desértico (era solo la cápsula-mouse
-   + una línea) por una primera pantalla que ya dice "esto es un juguete reactivo, no algo cargando". */
-.intro__atom {
-  position: relative;
-  width: 148px;
-  height: 148px;
-  display: grid;
-  place-items: center;
-}
-.intro__ring {
-  position: absolute;
-  inset: 22px 0;
-  border-radius: 50%;
-  border: 1.5px solid color-mix(in srgb, var(--source) 42%, transparent);
-}
-.intro__ring--a {
-  animation: intro-spin 13s linear infinite;
-}
-.intro__ring--b {
-  border-color: color-mix(in srgb, var(--derived) 42%, transparent);
-  animation: intro-spin 9s linear infinite reverse;
-}
-.intro__electron {
-  position: absolute;
-  inset: 22px 0;
-  animation: intro-spin 7s linear infinite;
-}
-.intro__electron::before {
-  content: '';
-  position: absolute;
-  top: 50%;
-  left: -4px;
-  width: 9px;
-  height: 9px;
-  margin-top: -4.5px;
-  border-radius: 50%;
-  background: var(--derived);
-  box-shadow: 0 0 9px 1px color-mix(in srgb, var(--derived) 70%, transparent);
-}
-.intro__nucleus {
-  width: 30px;
-  height: 30px;
-  border-radius: 50%;
-  background: radial-gradient(circle at 38% 34%, #fff7e8, var(--source));
-  /* Glow base (no solo en el keyframe): así con prefers-reduced-motion, que apaga el breathe, el
-     núcleo sigue encendido en vez de quedar un disco plano. */
-  box-shadow: 0 0 26px 5px color-mix(in srgb, var(--source) 50%, transparent);
-  animation: intro-breathe 3.2s ease-in-out infinite;
-}
-@keyframes intro-breathe {
-  0%,
-  100% {
-    transform: scale(1);
-    box-shadow: 0 0 22px 4px color-mix(in srgb, var(--source) 42%, transparent);
-  }
-  50% {
-    transform: scale(1.13);
-    box-shadow: 0 0 38px 10px color-mix(in srgb, var(--source) 62%, transparent);
-  }
-}
-@keyframes intro-spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-.intro__title {
-  font-family: var(--serif);
-  font-weight: 600;
-  font-size: clamp(2.2rem, 5.2vw, 3.5rem);
-  line-height: 1.05;
-  color: #201d16;
-  margin: 0.5rem 0 0;
-  letter-spacing: -0.015em;
-}
-.intro__tagline {
-  font-family: var(--sans);
-  font-size: 1.02rem;
-  color: #6a6355;
-  margin: 0.3rem 0 0;
-  letter-spacing: 0.01em;
-}
-.intro__mouse {
-  margin-top: 1.5rem;
-  width: 30px;
-  height: 48px;
-  border: 2.5px solid #b1a892;
-  border-radius: 16px;
-  display: flex;
-  justify-content: center;
-  padding-top: 8px;
-}
-.intro__wheel {
-  width: 5px;
-  height: 10px;
-  border-radius: 3px;
-  background: var(--source);
-  animation: intro-wheel 1.5s ease-in-out infinite;
-}
-@keyframes intro-wheel {
-  0% {
-    transform: translateY(0);
-    opacity: 1;
-  }
-  55% {
-    transform: translateY(15px);
-    opacity: 0;
-  }
-  100% {
-    transform: translateY(0);
-    opacity: 0;
-  }
-}
-.intro__label {
-  font-family: var(--mono);
-  font-size: 1.05rem;
-  letter-spacing: 0.22em;
-  text-transform: uppercase;
-  color: #8a8272;
-  margin: 0;
 }
 
 .topbar {
@@ -1284,11 +1155,6 @@
 @media (prefers-reduced-motion: reduce) {
   .bond.on,
   .sub-e.current .sub-dot,
-  .intro__wheel,
-  .intro__ring--a,
-  .intro__ring--b,
-  .intro__electron,
-  .intro__nucleus,
   .atom.current .halo,
   .atom.dived-dissolve .halo,
   .atom.dived-dissolve .ring,

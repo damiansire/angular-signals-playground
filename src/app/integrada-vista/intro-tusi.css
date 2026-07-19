@@ -1,0 +1,388 @@
+/* Landing "par de Tusi": animación que se construye sola + audio + controles. Themeable (Dark/Light)
+   solo para el intro (el resto de la app sigue claro; el dark global es otra fase). Ver intro-tusi.ts. */
+
+.tusi {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  background: radial-gradient(90% 72% at 50% 38%, #fbf9f2, #e6f1ea 92%);
+  transition: background 0.4s;
+
+  --tusi-ink: #201d16;
+  --tusi-ink-soft: #6a6355;
+  --tusi-hair: #b1a892;
+  --tusi-label: #8a8272;
+  --tusi-amber: #eb9b3c;
+  --tusi-menu-bg: #ffffff;
+  --tusi-menu-bd: #e4dbc9;
+}
+.tusi.dark {
+  background: radial-gradient(72% 68% at 50% 38%, #0c0e14, #05060a 92%);
+  --tusi-ink: #ece7dd;
+  --tusi-ink-soft: #b8b1a2;
+  --tusi-hair: #6b6456;
+  --tusi-label: #8f897c;
+  --tusi-menu-bg: #14161d;
+  --tusi-menu-bd: #2a2d38;
+}
+
+.tusi__canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  z-index: 1;
+}
+
+/* hero: epígrafe arriba, título centrado, cue de scroll abajo (nada superpuesto a la animación) */
+.tusi__hero {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  top: 66%;
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.15rem;
+  padding: 1.6% 16px 3.2%;
+}
+.tusi__epigraph {
+  font-family: var(--font-editorial, Georgia, serif);
+  font-style: italic;
+  font-size: clamp(0.92rem, 1.9vw, 1.1rem);
+  color: var(--tusi-ink-soft);
+  margin: 0;
+  letter-spacing: 0.01em;
+  transition: color 0.4s;
+  text-wrap: balance;
+}
+.tusi__title {
+  font-family: var(--font-editorial, Georgia, serif);
+  font-weight: 600;
+  font-size: clamp(2rem, 4.4vw, 3rem);
+  line-height: 1;
+  letter-spacing: -0.018em;
+  margin: 0;
+  color: var(--tusi-ink);
+  transition: color 0.4s;
+}
+.tusi__scroll {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+}
+.tusi__mouse {
+  width: 24px;
+  height: 38px;
+  border: 2px solid color-mix(in srgb, var(--tusi-hair) 82%, transparent);
+  border-radius: 13px;
+  display: flex;
+  justify-content: center;
+  padding-top: 6px;
+}
+.tusi__mouse span {
+  width: 4px;
+  height: 8px;
+  border-radius: 3px;
+  background: var(--tusi-amber);
+  animation: tusi-wheel 1.6s ease-in-out infinite;
+}
+@keyframes tusi-wheel {
+  0% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  55% {
+    transform: translateY(11px);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 0;
+  }
+}
+.tusi__cue {
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 0.66rem;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--tusi-label) 90%, transparent);
+  margin: 0;
+}
+
+/* recompensa lateral: barra continua que llega al tope en n=8 (nunca se siente trancada) */
+.tusi__reward {
+  position: absolute;
+  right: 22px;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 12px;
+}
+.tusi__reward-top {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+}
+.tusi__reward-msg {
+  max-width: 10ch;
+  text-align: right;
+  font-family: var(--font-editorial, Georgia, serif);
+  font-style: italic;
+  font-size: 0.82rem;
+  line-height: 1.25;
+  color: var(--tusi-ink-soft);
+  margin: 0;
+  transition: color 0.4s;
+  text-wrap: balance;
+}
+.tusi__rtrack {
+  width: 6px;
+  height: 132px;
+  border-radius: 4px;
+  overflow: hidden;
+  display: flex;
+  align-items: flex-end;
+  background: color-mix(in srgb, var(--tusi-hair) 34%, transparent);
+}
+.tusi__rfill {
+  width: 100%;
+  height: 0;
+  border-radius: 4px;
+  background: linear-gradient(180deg, #62c4ad, var(--tusi-amber));
+}
+.tusi__reward.done .tusi__reward-msg {
+  color: var(--tusi-amber);
+  font-style: normal;
+  font-weight: 600;
+}
+.tusi__help {
+  pointer-events: auto;
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 0.72rem;
+  color: var(--tusi-ink);
+  background: color-mix(in srgb, var(--tusi-amber) 18%, transparent);
+  border: 1px solid color-mix(in srgb, var(--tusi-amber) 55%, transparent);
+  border-radius: 999px;
+  padding: 7px 13px;
+  cursor: pointer;
+  transition: background 0.16s;
+  white-space: nowrap;
+}
+.tusi__help:hover {
+  background: color-mix(in srgb, var(--tusi-amber) 30%, transparent);
+}
+.tusi__help:focus-visible {
+  outline: 2px solid var(--tusi-amber);
+  outline-offset: 2px;
+}
+.tusi__help[hidden] {
+  display: none;
+}
+
+/* controles del usuario: sonido · reset · pausa · velocidad */
+.tusi__hud {
+  position: absolute;
+  right: 14px;
+  bottom: 12px;
+  z-index: 5;
+  display: flex;
+  gap: 6px;
+  pointer-events: auto;
+}
+.tusi__hud button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 0.72rem;
+  color: var(--tusi-ink-soft);
+  background: color-mix(in srgb, var(--tusi-ink) 6%, transparent);
+  border: 1px solid color-mix(in srgb, var(--tusi-hair) 55%, transparent);
+  border-radius: 999px;
+  padding: 7px 12px;
+  cursor: pointer;
+  transition:
+    background 0.16s,
+    border-color 0.16s;
+}
+.tusi__hud button:hover {
+  background: color-mix(in srgb, var(--tusi-ink) 11%, transparent);
+  border-color: var(--tusi-amber);
+}
+.tusi__hud button:focus-visible {
+  outline: 2px solid var(--tusi-amber);
+  outline-offset: 2px;
+}
+.tusi__hud b {
+  color: var(--tusi-ink);
+  font-weight: 600;
+}
+
+/* selector de velocidad tipo YouTube */
+.tusi__speed-wrap {
+  position: relative;
+  display: inline-flex;
+}
+.tusi__menu {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  right: 0;
+  min-width: 168px;
+  background: var(--tusi-menu-bg);
+  border: 1px solid var(--tusi-menu-bd);
+  border-radius: 11px;
+  padding: 5px;
+  display: none;
+  flex-direction: column;
+  z-index: 6;
+  box-shadow: 0 16px 34px -16px rgba(0, 0, 0, 0.45);
+}
+.tusi__menu.open {
+  display: flex;
+}
+.tusi__menu-h {
+  font-family: var(--font-display, system-ui, sans-serif);
+  font-size: 0.6rem;
+  text-transform: uppercase;
+  letter-spacing: 0.13em;
+  color: var(--tusi-label);
+  padding: 5px 10px 6px;
+}
+.tusi__menu button {
+  justify-content: flex-start;
+  gap: 8px;
+  width: 100%;
+  border: 0;
+  background: transparent;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 0.74rem;
+  color: var(--tusi-ink-soft);
+  padding: 8px 12px;
+  border-radius: 7px;
+  cursor: pointer;
+}
+.tusi__menu button:hover {
+  background: color-mix(in srgb, var(--tusi-ink) 9%, transparent);
+}
+.tusi__menu button[aria-checked='true'] {
+  color: var(--tusi-ink);
+  font-weight: 600;
+}
+.tusi__ck {
+  width: 13px;
+  display: inline-block;
+  color: var(--tusi-amber);
+}
+
+/* overlay Dark/Light: elección obligatoria que arranca la experiencia */
+.tusi__overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 8;
+  pointer-events: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 24px;
+  background: color-mix(in srgb, var(--tusi-menu-bg) 80%, transparent);
+  backdrop-filter: blur(3px);
+  transition: opacity 0.5s;
+}
+.tusi__overlay.gone {
+  opacity: 0;
+  pointer-events: none;
+}
+.tusi__ov-screen {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.1rem;
+}
+.tusi__ov-msg {
+  font-family: var(--font-editorial, Georgia, serif);
+  font-style: italic;
+  font-size: clamp(1.1rem, 2.7vw, 1.5rem);
+  color: var(--tusi-ink);
+  margin: 0;
+  max-width: 22ch;
+  line-height: 1.3;
+  text-wrap: balance;
+}
+.tusi__ov-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: nowrap;
+  justify-content: center;
+  margin-top: 0.2rem;
+  width: min(430px, 82vw);
+}
+.tusi__ov-btn {
+  flex: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  white-space: nowrap;
+  font-family: var(--font-display, system-ui, sans-serif);
+  font-weight: 600;
+  font-size: 0.9rem;
+  border-radius: 999px;
+  padding: 12px 20px;
+  cursor: pointer;
+  transition:
+    transform 0.16s,
+    background 0.16s,
+    border-color 0.16s;
+}
+.tusi__ov-btn:focus-visible {
+  outline: 2px solid var(--tusi-amber);
+  outline-offset: 2px;
+}
+.tusi__ov-dark {
+  background: #14161d;
+  color: #ece7dd;
+  border: 1px solid #2a2d38;
+}
+.tusi__ov-dark:hover {
+  background: #1c1f28;
+  transform: translateY(-2px);
+}
+.tusi__ov-light {
+  background: #fbf9f2;
+  color: #201d16;
+  border: 1px solid #e4dbc9;
+}
+.tusi__ov-light:hover {
+  background: #fff;
+  transform: translateY(-2px);
+}
+.tusi__ov-legend {
+  font-family: var(--font-display, system-ui, sans-serif);
+  font-size: 0.76rem;
+  color: var(--tusi-ink-soft);
+  margin: 0.4rem 0 0;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tusi__mouse span {
+    animation: none;
+  }
+}

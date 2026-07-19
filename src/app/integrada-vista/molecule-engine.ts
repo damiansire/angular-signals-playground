@@ -1071,7 +1071,13 @@ export function initMolecule(
       nd.classList.toggle('current', ni === c);
       nd.classList.toggle('pending', ni > c);
     }
-    if (introEl) introEl.style.opacity = s < 0.12 ? '1' : '0';
+    if (introEl) {
+      const introVisible = s < 0.12;
+      introEl.style.opacity = introVisible ? '1' : '0';
+      // El intro ahora tiene controles interactivos (Tusi): al desvanecerse no debe capturar clicks
+      // sobre el recorrido que quedó debajo.
+      introEl.style.pointerEvents = introVisible ? '' : 'none';
+    }
     // En la landing el riel es un HINT tenue (no compite con el hero "Angular Signals"); gana presencia
     // apenas empezás el recorrido. Fade propio del `.rail` entero (independiente del morph interno).
     if (railEl) railEl.style.opacity = (0.4 + 0.6 * Math.min(1, s / 0.14)).toFixed(2);

@@ -15,6 +15,7 @@ import { RouterLink } from '@angular/router';
 
 import { signalsRoutesTree } from '../app.routes';
 import { initMolecule, type MountSub } from './molecule-engine';
+import { initIntroTusi } from './intro-tusi';
 import { buildWhereQuery, parseWhereQuery } from './url-sync';
 
 /**
@@ -31,7 +32,7 @@ import { buildWhereQuery, parseWhereQuery } from './url-sync';
   selector: 'app-integrada-vista',
   imports: [RouterLink],
   templateUrl: './integrada-vista.component.html',
-  styleUrl: './integrada-vista.component.css',
+  styleUrls: ['./integrada-vista.component.css', './intro-tusi.css'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class IntegradaVistaComponent {
@@ -65,6 +66,9 @@ export class IntegradaVistaComponent {
         this.initialFromUrl(),
       );
       this.destroyRef.onDestroy(dispose);
+
+      // Landing "par de Tusi" (canvas + audio + overlay Dark/Light). El motor ya fadea el `.intro`.
+      this.destroyRef.onDestroy(initIntroTusi(this.host));
     });
   }
 

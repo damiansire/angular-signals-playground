@@ -45,17 +45,96 @@
            dissolve; el motor le pone el nombre y lo muestra al bucear. -->
       <div class="space-spine" id="spaceSpine" aria-hidden="true"></div>
 
-      <div class="intro" id="intro" aria-hidden="true">
-        <div class="intro__atom">
-          <span class="intro__ring intro__ring--a"></span>
-          <span class="intro__ring intro__ring--b"></span>
-          <span class="intro__electron"></span>
-          <span class="intro__nucleus"></span>
+      <!-- Landing "par de Tusi": se construye sola por choques (ver intro-tusi.ts). El motor fadea el
+           `.intro` con el scroll, así el handoff al recorrido sigue automático. -->
+      <div class="intro" id="intro">
+        <div class="tusi">
+          <canvas class="tusi__canvas"></canvas>
+
+          <div class="tusi__hero">
+            <p class="tusi__epigraph">Las cosas son sencillas si las analizás por partes</p>
+            <h1 class="tusi__title">Angular Signals</h1>
+            <div class="tusi__scroll">
+              <div class="tusi__mouse"><span></span></div>
+              <p class="tusi__cue">Esta página es scrolleable</p>
+            </div>
+          </div>
+
+          <div class="tusi__reward">
+            <div class="tusi__reward-top">
+              <p class="tusi__reward-msg">Esperá y tendrás tu recompensa</p>
+              <div class="tusi__rtrack" aria-hidden="true"><span class="tusi__rfill"></span></div>
+            </div>
+            <button class="tusi__help" type="button" hidden>No la veo, ayudame</button>
+          </div>
+
+          <div class="tusi__hud">
+            <button data-role="sound" type="button" aria-label="Silenciar" title="Sonido">
+              🔊
+            </button>
+            <button
+              data-role="reset"
+              type="button"
+              aria-label="Reiniciar animación"
+              title="Reiniciar"
+            >
+              ↻
+            </button>
+            <button data-role="pause" type="button" aria-label="Pausar animación" title="Pausar">
+              ⏸
+            </button>
+            <div class="tusi__speed-wrap">
+              <button
+                data-role="speed"
+                type="button"
+                aria-haspopup="true"
+                aria-expanded="false"
+                aria-label="Velocidad de la intro"
+                title="Velocidad"
+              >
+                vel <b class="tusi__speed-val">×1</b>
+              </button>
+              <div class="tusi__menu" role="menu" aria-label="Velocidad de la intro">
+                <div class="tusi__menu-h">Velocidad</div>
+                <button role="menuitemradio" aria-checked="false" data-speed="0.25" type="button">
+                  <span class="tusi__ck"></span>×0.25
+                </button>
+                <button role="menuitemradio" aria-checked="false" data-speed="0.5" type="button">
+                  <span class="tusi__ck"></span>×0.5
+                </button>
+                <button role="menuitemradio" aria-checked="true" data-speed="1" type="button">
+                  <span class="tusi__ck"></span>×1 (normal)
+                </button>
+                <button role="menuitemradio" aria-checked="false" data-speed="2" type="button">
+                  <span class="tusi__ck"></span>×2
+                </button>
+                <button role="menuitemradio" aria-checked="false" data-speed="4" type="button">
+                  <span class="tusi__ck"></span>×4
+                </button>
+                <button role="menuitemradio" aria-checked="false" data-speed="8" type="button">
+                  <span class="tusi__ck"></span>×8
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="tusi__overlay">
+            <div class="tusi__ov-screen">
+              <p class="tusi__ov-msg">¿Cómo te auto percibís?</p>
+              <div class="tusi__ov-actions">
+                <button class="tusi__ov-btn tusi__ov-dark" data-role="pick-dark" type="button">
+                  🌑 Dark
+                </button>
+                <button class="tusi__ov-btn tusi__ov-light" data-role="pick-light" type="button">
+                  ☀️ Light
+                </button>
+              </div>
+              <p class="tusi__ov-legend">
+                🔊 Al elegir, la página va a sonar. Bajá el volumen si lo tenés muy alto.
+              </p>
+            </div>
+          </div>
         </div>
-        <h1 class="intro__title">Angular Signals</h1>
-        <p class="intro__tagline">Un recorrido molecular por la reactividad</p>
-        <span class="intro__mouse"><span class="intro__wheel"></span></span>
-        <p class="intro__label">Scrolleá para empezar</p>
       </div>
       <div class="caption"><p class="s" id="capS">Molécula · escena 1</p></div>
     </div>

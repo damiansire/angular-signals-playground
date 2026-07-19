@@ -1,0 +1,53 @@
+/**
+ * Matemática del intro "par de Tusi": N puntos hacen movimiento armónico simple sobre N diámetros
+ * repartidos cada π/n; sincronizados, sus posiciones caen en cada instante sobre un círculo (de radio
+ * R/2) que parece rodar. Todo acá es función pura sobre números: se testea sin DOM ni navegador.
+ */
+
+/** Ángulo del diámetro k dentro de un total de n (repartidos uniformemente cada π/n). */
+export function lineAngle(k: number, n: number): number {
+  return (k * Math.PI) / n;
+}
+
+/**
+ * Distancia con signo del punto al centro sobre su diámetro, en la fase `ph`: s = R·cos(ph − θ).
+ * Es MAS puro: máximo (±R) en los extremos, cero al pasar por el centro.
+ */
+export function dotOffset(radius: number, ph: number, theta: number): number {
+  return radius * Math.cos(ph - theta);
+}
+
+/**
+ * Centro del círculo emergente (radio R/2) sobre el que caen los puntos de un mismo color en la fase
+ * `ph`. `sign` +1 para un color y −1 para el opuesto (los dos círculos entrelazados).
+ */
+export function emergentCircleCenter(
+  radius: number,
+  ph: number,
+  cx: number,
+  cy: number,
+  sign: 1 | -1,
+): { x: number; y: number } {
+  return {
+    x: cx + (sign * radius * Math.cos(ph)) / 2,
+    y: cy + (sign * radius * Math.sin(ph)) / 2,
+  };
+}
+
+/** Fase en la que aparece la línea número `n` (1-indexado) si hacen falta `hitsPerLine` choques por línea. */
+export function phaseForLine(n: number, hitsPerLine: number): number {
+  return (n - 1) * hitsPerLine * Math.PI;
+}
+
+/** Grados de la escala de La menor natural (teclas blancas), en semitonos desde la tónica. */
+const A_MINOR = [0, 2, 3, 5, 7, 8, 10] as const;
+
+/**
+ * Frecuencia (Hz) de la nota de la línea k: sube por la escala de La menor desde A3 (MIDI 57), una nota
+ * fija por línea. Timbre y escala salen del video original (análisis FFT de los "pings" de cada choque).
+ */
+export function lineFreq(k: number): number {
+  const octave = Math.floor(k / 7);
+  const midi = 57 + octave * 12 + A_MINOR[k % 7];
+  return 440 * Math.pow(2, (midi - 69) / 12);
+}
