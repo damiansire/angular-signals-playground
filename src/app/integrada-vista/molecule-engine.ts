@@ -815,6 +815,7 @@ export function initMolecule(
   const introEl = q<HTMLElement>('.intro');
   const topbarEl = q<HTMLElement>('.topbar');
   const tbTitleEl = q<HTMLElement>('.tb-title');
+  const tbCenterEl = q<HTMLElement>('.tb-center');
   const tbCountEl = q<HTMLElement>('.tb-count');
   const captionEl = q<HTMLElement>('.caption');
   const spaceSpineEl = q<HTMLElement>('#spaceSpine');
@@ -879,6 +880,10 @@ export function initMolecule(
       topbarEl.classList.add('contextual');
       topbarEl.style.opacity = '1';
     }
+    // En la pantalla inicial (overlay de bienvenida, s≈0) el título del topbar (el tagline del concepto
+    // 0, "Cómo la pantalla sabe qué cambió") competía con el "Angular Signals" del intro. Se oculta
+    // hasta que empezás a scrollear, desvaneciéndose a la par que el intro.
+    if (tbCenterEl) tbCenterEl.style.opacity = Math.max(0, Math.min(1, (s - 0.03) / 0.09)).toFixed(2);
     // El riel MORPHea al bucear: en vez de desvanecer el cuerpo entero de golpe (se leía como un
     // CORTE), los ticks de concepto se ABSORBEN hacia el activo (scaleY con origen en su posición) y
     // se apagan mientras el track de concepto se desvanece; su lugar lo toma la barra de sub-niveles
