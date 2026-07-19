@@ -134,7 +134,7 @@
   gap: 11px;
 }
 .tusi__reward-msg {
-  max-width: 10ch;
+  max-width: 13ch;
   text-align: right;
   font-family: var(--font-editorial, Georgia, serif);
   font-style: italic;

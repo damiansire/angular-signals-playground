@@ -897,7 +897,10 @@ export function initMolecule(
     // El riel se atenúa y el caption inferior se va.
     if (topbarEl) {
       topbarEl.classList.add('contextual');
-      topbarEl.style.opacity = '1';
+      // En la landing (s≈0) el topbar se atenúa como el título: su banda y "Practicá" no deben flotar
+      // sobre la portada (ni cruzar como franja clara el intro en tema oscuro). Gana presencia al
+      // scrollear y, al bucear (s alto), queda en 1.
+      topbarEl.style.opacity = Math.max(0, Math.min(1, (s - 0.03) / 0.09)).toFixed(2);
     }
     // En la pantalla inicial (overlay de bienvenida, s≈0) el título del topbar (el tagline del concepto
     // 0, "Cómo la pantalla sabe qué cambió") competía con el "Angular Signals" del intro. Se oculta
