@@ -815,6 +815,7 @@ export function initMolecule(
   const railDot = q<HTMLElement>('#railDot');
   const railFillEl = q<HTMLElement>('#railFill');
   const railLineEl = q<HTMLElement>('.rail-line');
+  const railEl = q<HTMLElement>('.rail');
   const introEl = q<HTMLElement>('.intro');
   const topbarEl = q<HTMLElement>('.topbar');
   const tbTitleEl = q<HTMLElement>('.tb-title');
@@ -1056,6 +1057,9 @@ export function initMolecule(
       nd.classList.toggle('pending', ni > c);
     }
     if (introEl) introEl.style.opacity = s < 0.12 ? '1' : '0';
+    // En la landing el riel es un HINT tenue (no compite con el hero "Angular Signals"); gana presencia
+    // apenas empezás el recorrido. Fade propio del `.rail` entero (independiente del morph interno).
+    if (railEl) railEl.style.opacity = (0.4 + 0.6 * Math.min(1, s / 0.14)).toFixed(2);
 
     // Reflejar en la URL el nivel actual y, si estás adentro, el sub-nivel. -1 = vista molécula. Se
     // keyea por `diveDepth > 0.5` (el mismo umbral que el título del topbar), NO por `w > 1.3`: en la

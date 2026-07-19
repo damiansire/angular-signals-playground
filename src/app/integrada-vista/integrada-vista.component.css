@@ -1140,7 +1140,9 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 11px;
+  /* Aire entre las flechas ▲/▼ y la cadena: el átomo del primer/último concepto (con su órbita) no
+     se pega a la flecha. */
+  gap: 20px;
 }
 /* La línea + los ticks (decorativos, aria-hidden) van en fila; los pasos ▲/▼ los
    flanquean arriba y abajo, sobre el mismo eje vertical que navegan. */
@@ -1189,8 +1191,10 @@
   width: 2.5px;
   height: 100%;
   border-radius: 3px;
-  background: repeating-linear-gradient(to bottom, #b7ad9c 0 3px, transparent 3px 9px);
-  opacity: 0.6;
+  /* Enlace sólido tenue (no punteado): el punteado en un hilo fino leía como "esqueleto/cargando".
+     El tramo recorrido lo tapa `.rail-fill` con el color cálido. */
+  background: #cbc3b2;
+  opacity: 0.7;
   overflow: visible;
   transition: opacity 0.3s ease;
 }
@@ -1257,9 +1261,9 @@
   position: absolute;
   left: 50%;
   top: 50%;
-  width: 34px;
-  height: 13px;
-  border: 1.6px solid var(--dotcol, var(--source));
+  width: 29px;
+  height: 11px;
+  border: 1.5px solid var(--dotcol, var(--source));
   border-radius: 50%;
   transform: translate(-50%, -50%) rotate(-24deg);
   opacity: 0.6;
