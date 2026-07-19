@@ -690,13 +690,15 @@
   stroke-dasharray: 2 5;
   opacity: 0;
 }
-/* El riel del ascensor: un hilo vertical tenue teñido con el color del concepto (el motor le pone
-   el stroke), sólido y suave en vez del punteado del viejo arco. */
+/* ESPINA DE ENERGÍA: el sub-track es un CONDUCTO grueso y glowy teñido del color del concepto (el
+   motor le pone el stroke), no un hilo fino. Al bucear entrás DENTRO del átomo y recorrés sus niveles
+   de energía; los orbes (sub-dots) se encienden a lo largo del conducto. */
 .suborbit.dissolve .sub-arc {
-  opacity: 0.3;
+  opacity: 0.4;
   stroke-dasharray: none;
-  stroke-width: 2.5;
+  stroke-width: 6;
   stroke-linecap: round;
+  filter: url(#glow);
 }
 /* La chispa recorre sub-arc en loop (SMIL, ver molecule-engine): siempre en movimiento, sin
    esperar ninguna interacción — es lo que hace que la constelación se sienta viva en reposo. */
@@ -1179,14 +1181,44 @@
 /* El track tiene MATERIA (no un hairline de 1px): una cápsula tenue = el camino por delante
    (vacío/frío), y `.rail-fill` la LLENA de color cálido hasta donde vas (recorrido). El llenado
    SIGNIFICA progreso; el degradado corre por los colores de los conceptos. */
+/* CADENA MOLECULAR: la línea es el ENLACE (bond) del recorrido. El tramo pendiente queda PUNTEADO
+   como los bonds de la molécula; el recorrido lo tapa `.rail-fill` sólido. Más fino (2.5px) para que
+   protagonicen los nodos-átomo, no la línea. */
 .rail-line {
   position: relative;
-  width: 5px;
+  width: 2.5px;
   height: 100%;
-  border-radius: 5px;
-  background: #d8d1c1;
-  opacity: 0.5;
+  border-radius: 3px;
+  background: repeating-linear-gradient(to bottom, #b7ad9c 0 3px, transparent 3px 9px);
+  opacity: 0.6;
+  overflow: visible;
   transition: opacity 0.3s ease;
+}
+/* Cada concepto = un nodo sobre el enlace: pendiente = anillo hueco (todavía no), visitado = átomo
+   lleno del color del concepto (`--nc`), actual = lo tapa `.rail-dot` (el átomo con órbita). */
+.rail-node {
+  position: absolute;
+  left: 50%;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  box-sizing: border-box;
+  transform: translate(-50%, -50%);
+  transition:
+    background 0.25s ease,
+    border-color 0.25s ease,
+    opacity 0.25s ease;
+}
+.rail-node.pending {
+  background: transparent;
+  border: 1.6px solid #c2b9a6;
+}
+.rail-node.visited {
+  background: var(--nc, #b7ad9c);
+  opacity: 0.9;
+}
+.rail-node.current {
+  opacity: 0;
 }
 .rail-fill {
   position: absolute;
@@ -1203,24 +1235,34 @@
 }
 /* Nodo "estás acá": disco blanco con halo del color del concepto actual (`--dotcol`, lo pone el
    motor). Glow CONSTANTE (no depende del movimiento) para que lea vivo aun en reposo. */
+/* El concepto ACTUAL es un ÁTOMO: núcleo encendido (color del concepto) + una órbita elíptica
+   inclinada (::before), como los átomos de la escena. Es el marcador "estás acá" de la cadena. */
 .rail-dot {
   position: absolute;
   left: 50%;
-  width: 16px;
-  height: 16px;
+  width: 13px;
+  height: 13px;
   border-radius: 50%;
-  /* Núcleo encendido (no un anillo hueco): centro claro que funde al color del concepto, con doble
-     halo, para que el "estás acá" lea vivo aun quieto en la vista molécula. */
   background: radial-gradient(circle at 40% 35%, #fff8ea, var(--dotcol, var(--source)));
   transform: translate(-50%, -50%);
-  box-shadow:
-    0 0 0 2.5px color-mix(in srgb, var(--dotcol, var(--source)) 45%, #fff),
-    0 0 16px 3px color-mix(in srgb, var(--dotcol, var(--source)) 70%, transparent);
+  box-shadow: 0 0 15px 3px color-mix(in srgb, var(--dotcol, var(--source)) 70%, transparent);
   transition:
     top 0.18s ease,
     box-shadow 0.3s ease,
     opacity 0.25s ease;
   z-index: 2;
+}
+.rail-dot::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 34px;
+  height: 13px;
+  border: 1.6px solid var(--dotcol, var(--source));
+  border-radius: 50%;
+  transform: translate(-50%, -50%) rotate(-24deg);
+  opacity: 0.6;
 }
 .rail-ticks {
   display: flex;

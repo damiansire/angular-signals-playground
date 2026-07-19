@@ -102,8 +102,6 @@ const CY = 290;
 const ORX = 34;
 const ORY = 11;
 const NUC = 13;
-const VISITED = '#8791a8';
-const PENDING_DOT = '#c2b9a6';
 
 /**
  * Layout de scroll del recorrido: cada concepto ocupa [nace(1) + bucear(1)] = 2 unidades;
@@ -645,24 +643,19 @@ export function initMolecule(
       const cur = cc.subIdx;
       const state = k === cur ? 'current' : k < cur ? 'visited' : 'pending';
       o.g.setAttribute('class', 'sub-e ' + state);
-      // Estados claramente distintos y más livianos: VISITADO = disco lleno (hecho), PENDIENTE =
-      // anillo hueco (todavía no), ACTUAL = lo tapa el electrón-ascensor. Se usa inline style (no una
-      // presentation attribute) porque el `fill` de `.sub-dot` en el CSS la pisaría: ESO era por qué
-      // visitado y pendiente se leían igual (ambos quedaban del taupe del CSS, ignorando el VISITED).
-      o.dot.setAttribute('r', String(state === 'current' ? 18 : 11));
-      if (state === 'current') {
-        o.dot.style.fill = col;
-        o.dot.style.stroke = 'none';
-        o.dot.setAttribute('filter', 'url(#glow)');
-      } else if (state === 'visited') {
-        o.dot.style.fill = VISITED;
-        o.dot.style.stroke = 'none';
+      // Espina de energía: los sub-niveles son ORBES en el conducto, teñidos del color del concepto.
+      // VISITADO = orbe encendido (ya cargado), PENDIENTE = orbe tenue (sin cargar), ACTUAL = lo tapa el
+      // átomo-puck. Inline style (no presentation attribute) porque el `fill` de `.sub-dot` en CSS lo
+      // pisaría. La opacidad separa cargado de sin-cargar; el glow refuerza el "encendido".
+      o.dot.setAttribute('r', String(state === 'current' ? 18 : state === 'visited' ? 8 : 6));
+      o.dot.style.fill = col;
+      o.dot.style.stroke = 'none';
+      if (state === 'pending') {
+        o.dot.style.fillOpacity = '0.28';
         o.dot.removeAttribute('filter');
       } else {
-        o.dot.style.fill = 'transparent';
-        o.dot.style.stroke = PENDING_DOT;
-        o.dot.style.strokeWidth = '1.6';
-        o.dot.removeAttribute('filter');
+        o.dot.style.fillOpacity = state === 'current' ? '1' : '0.92';
+        o.dot.setAttribute('filter', 'url(#glow)');
       }
     }
   }
@@ -839,6 +832,19 @@ export function initMolecule(
     railTicksOl.appendChild(li);
   }
   const railTicks = Array.from(root.querySelectorAll<HTMLElement>('#railTicks li'));
+  // "Cadena molecular": cada concepto es un nodo-átomo SOBRE el enlace (la línea del riel). El motor
+  // los crea y les fija el color de su concepto; render() marca visitado / actual / pendiente. El
+  // activo lo tapa el átomo con órbita (.rail-dot), así el riel = la molécula vista de canto.
+  const railNodes: HTMLElement[] = [];
+  for (let i = 0; i < N; i++) {
+    const nd = document.createElement('span');
+    nd.className = 'rail-node';
+    nd.style.top = ((i / (N - 1)) * 100).toFixed(2) + '%';
+    nd.style.setProperty('--nc', COL[C[i].accent]);
+    stamp(nd);
+    railLineEl?.appendChild(nd);
+    railNodes.push(nd);
+  }
 
   // ---- Gate de reveal (hoy html-to-tree): mientras estás parado en un sub-nivel que revela sus
   // elementos de a uno, el scroll NO avanza — cada paso revela/oculta un tag (click real) hasta
@@ -1043,6 +1049,12 @@ export function initMolecule(
       railDot.style.setProperty('--dotcol', COL[C[c].accent]);
     }
     for (let ti = 0; ti < railTicks.length; ti++) railTicks[ti].classList.toggle('on', ti === c);
+    for (let ni = 0; ni < railNodes.length; ni++) {
+      const nd = railNodes[ni];
+      nd.classList.toggle('visited', ni < c);
+      nd.classList.toggle('current', ni === c);
+      nd.classList.toggle('pending', ni > c);
+    }
     if (introEl) introEl.style.opacity = s < 0.12 ? '1' : '0';
 
     // Reflejar en la URL el nivel actual y, si estás adentro, el sub-nivel. -1 = vista molécula. Se
