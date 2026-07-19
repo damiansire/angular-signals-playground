@@ -506,10 +506,11 @@ export function initMolecule(
   // un electrón orbitando. Se DESLIZA de una parada a la siguiente (transición de transform) y en el
   // boot aparece directo. Es el único marcador del actual (el dot de abajo se oculta), así el
   // resaltado "viaja" en vez de saltar. Distinto del riel de conceptos (plano): éste tiene vida.
-  const subPuckDot = el('circle', { class: 'sub-puck-dot', r: 18 });
-  // Órbita compacta (rx16): en la barra izquierda, pegada a la espina vertical "Signals", una órbita
-  // ancha se saldría hacia el texto. Chica queda ceñida al riel. El path SMIL de abajo la acompaña.
-  const subPuckOrbit = el('ellipse', { class: 'sub-puck-orbit', rx: 16, ry: 7 });
+  // El núcleo del sub-nivel actual: MÁS CHICO que la órbita (r12 < rx17) para que el electrón se vea
+  // orbitando POR FUERA (si el núcleo es más grande, la órbita queda escondida detrás y se pierde la
+  // identidad de átomo — era el bug). El path SMIL del electrón (abajo) matchea la órbita.
+  const subPuckDot = el('circle', { class: 'sub-puck-dot', r: 12 });
+  const subPuckOrbit = el('ellipse', { class: 'sub-puck-orbit', rx: 17, ry: 8 });
   const subPuckE = el('circle', { class: 'sub-puck-e', r: 3.4 });
   if (!reduceMotion) {
     // El electrón recorre la órbita en loop (SMIL): la vida en reposo del ascensor. Con reduce no va.
@@ -517,7 +518,7 @@ export function initMolecule(
       el('animateMotion', {
         dur: '1.9s',
         repeatCount: 'indefinite',
-        path: 'M 16 0 A 16 7 0 1 1 -16 0 A 16 7 0 1 1 16 0',
+        path: 'M 17 0 A 17 8 0 1 1 -17 0 A 17 8 0 1 1 17 0',
       }),
     );
   }
@@ -615,6 +616,7 @@ export function initMolecule(
     subSpark.setAttribute('fill', col);
     subSonar.setAttribute('stroke', col);
     subPuckDot.setAttribute('fill', col);
+    subPuckOrbit.setAttribute('stroke', col);
     // `color` para que el drop-shadow (currentColor) del glow constante del nodo activo tome el
     // color del concepto (ver .sub-puck-dot en el CSS).
     subPuckDot.style.color = col;
@@ -685,36 +687,29 @@ export function initMolecule(
           p.y = sy;
           return p.matrixTransform(m);
         };
-        // UNA sola barra en el borde DERECHO que MORPHea. En la vista molécula la barra muestra los 12
-        // conceptos (el riel .rail, ahora a la derecha); al bucear, sus dos extremos se abren hacia los
-        // bordes (arriba/abajo) de la pantalla y la barra se convierte en la de sub-niveles del concepto
-        // actual. Así no hay dos barras ni se ocupa ancho: la nav de conceptos y la de sub-niveles
-        // comparten el MISMO eje vertical a la derecha, una se transforma en la otra.
-        // Centro del riel izquierdo. A 30px, el electrón-actual (dot r18 → ~26px en pantalla) llega
-        // como mucho a ~x56, clareando la espina vertical "Signals" (arranca en ~x60). Alineado con
-        // el centro visual del riel de conceptos (.rail, left:13) para que el morph no salte de eje.
-        const barXpx = 30;
-        // Destino de los extremos: la barra abierta va ENTRE las flechas ▲/▼ (cerca de los bordes),
-        // que la flanquean sin que las paradas las pisen. Fallback al topbar/borde si aún no hay layout.
+        // UNA sola barra vertical a la IZQUIERDA que MORPHea: en la vista molécula muestra los 12
+        // conceptos (el riel .rail); al bucear, su cuerpo se absorbe y la barra se DESPLIEGA en los
+        // sub-niveles del concepto actual. Una se transforma en la otra sobre el mismo eje.
+        // El eje X del sub-track SIGUE al riel real (centro de las flechas ▲/▼), así queda alineado con
+        // los ticks de concepto en cualquier viewport (el riel tiene margen responsivo desde el borde).
         const upR = railUpEl?.getBoundingClientRect();
         const downR = railDownEl?.getBoundingClientRect();
         const topbarBot = topbarEl ? topbarEl.getBoundingClientRect().bottom : 56;
-        const endTopPx = upR ? upR.bottom + 16 : topbarBot + 24;
-        const endBotPx = downR ? downR.top - 16 : window.innerHeight - 30;
-        const midPx = (endTopPx + endBotPx) / 2;
-        // El morph ABRE el intervalo [concepto c, concepto c+1]: los extremos ARRANCAN en la posición
-        // de esos dos ticks en la escala de conceptos y VUELAN a los bordes (c → arriba, c+1 → abajo) a
-        // medida que entrás. Así el sub-nivel 1 (primero) nace DONDE ESTABA el concepto c y sube al
-        // borde de arriba (no salta al centro), y el último baja adonde iba el concepto c+1. `curDive`
-        // (lo publica render()) mapea 0..1 sobre el tramo donde la barra ya es visible.
-        const tickC = railTicks[orbitFor]?.getBoundingClientRect();
-        const tickC1 = railTicks[orbitFor + 1]?.getBoundingClientRect();
-        const startTopPx = tickC ? tickC.top + tickC.height / 2 : midPx;
-        const startBotPx = tickC1 ? tickC1.top + tickC1.height / 2 : midPx;
+        const barXpx = upR ? (upR.left + upR.right) / 2 : 30;
+        // Los sub-niveles se despliegan ENTRE las flechas ▲/▼, que los flanquean con AIRE desde los
+        // bordes (el +26 les da margen para que el primero/último no queden pegados al borde de la
+        // pantalla). Fallback al topbar/borde si aún no hay layout de las flechas.
+        const endTopPx = upR ? upR.bottom + 26 : topbarBot + 34;
+        const endBotPx = downR ? downR.top - 26 : window.innerHeight - 44;
+        // El morph se DESPLIEGA DESDE ARRIBA: el sub-nivel 1 (primero) queda FIJO en el borde de arriba
+        // y los demás se abren hacia abajo a medida que entrás (`dd` 0→1, lo publica render()). Antes los
+        // extremos arrancaban en la posición del concepto (media altura en los niveles del medio) y el
+        // nodo activo viajaba por el CENTRO — se leía como "se va al centro". Anclando el tope arriba,
+        // el primero nunca cruza el centro.
         const dd = Math.max(0, Math.min(1, (curDive - 0.35) / 0.5));
-        const topY = toSvg(barXpx, lerp(startTopPx, endTopPx, dd)).y;
-        const botY = toSvg(barXpx, lerp(startBotPx, endBotPx, dd)).y;
-        const barX = toSvg(barXpx, midPx).x;
+        const topY = toSvg(barXpx, endTopPx).y;
+        const botY = toSvg(barXpx, lerp(endTopPx, endBotPx, dd)).y;
+        const barX = toSvg(barXpx, (endTopPx + endBotPx) / 2).x;
         for (let k = 0; k < nsub; k++) {
           const o = subDots[k];
           o.lx = barX;

@@ -754,8 +754,10 @@
    identidad "átomo" al marcador del sub-nivel actual, distinta del riel plano de conceptos. */
 .sub-puck-orbit {
   fill: none;
-  stroke: rgba(235, 155, 60, 0.55);
-  stroke-width: 1.3;
+  /* El color lo pone el motor (`paintOrbit`) con el acento del concepto; acá solo el grosor/opacidad.
+     Visible (no un hilo fantasma) para que se lea la órbita del electrón = identidad de átomo. */
+  stroke-width: 1.6;
+  opacity: 0.85;
 }
 .sub-puck-e {
   fill: #fff;
@@ -890,7 +892,9 @@
    el color del concepto (--glow) y lo desvanece según el buceo. */
 .space-spine {
   position: absolute;
-  left: 60px;
+  /* Se corre a la derecha en pantallas anchas para dejarle lugar al átomo del riel (que ganó órbita
+     visible); pegada (60px) en angostas, donde comparte poco espacio con las instrucciones. */
+  left: clamp(60px, calc(60px + (100vw - 1440px) * 0.08), 108px);
   top: 50%;
   transform: translateY(-50%) rotate(180deg);
   writing-mode: vertical-rl;
@@ -1114,14 +1118,20 @@
    ocupar ancho horizontal del contenido. */
 .rail {
   position: absolute;
-  left: 13px;
+  /* Margen responsivo desde el borde IZQUIERDO: pegado (13px) en viewports angostos, donde la card
+     ancha deja poca canaleta; con aire creciente en pantallas anchas (a 1920 queda ~42px del borde),
+     donde sobra lugar. El sub-track sigue el centro real del riel (ver molecule-engine), así queda
+     alineado en cualquier ancho. */
+  left: clamp(13px, calc(13px + (100vw - 1440px) * 0.06), 48px);
   top: 50%;
   transform: translateY(-50%);
   z-index: 6;
   /* Alto casi completo: así las flechas ▲/▼ (stepper) flotan cerca de los bordes en la vista
      molécula Y flanquean la barra de sub-niveles (que se abre a los bordes) al bucear. Antes, a
      78%, las flechas caían a media altura y se leían como sub-niveles más. */
-  height: min(88%, 900px);
+  /* Alto acotado con AIRE arriba/abajo: las flechas ▲/▼ y (al bucear) el primer/último sub-nivel no
+     quedan pegados a los bordes de la pantalla. */
+  height: min(84%, 860px);
   display: flex;
   flex-direction: column;
   align-items: center;
