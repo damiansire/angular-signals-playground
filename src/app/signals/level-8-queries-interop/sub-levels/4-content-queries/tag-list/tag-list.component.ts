@@ -29,5 +29,5 @@ export class TagListComponent {
 
   // contentChild(): el primero (o undefined).
   private readonly firstTag = contentChild<ElementRef<HTMLElement>>('tag');
-  readonly firstText = computed(() => this.firstTag()?.nativeElement.textContent?.trim() ?? '—');
+  readonly firstText = computed(() => this.firstTag()?.nativeElement.textContent?.trim() ?? '(vacío)');
 }
