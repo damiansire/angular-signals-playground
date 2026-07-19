@@ -335,6 +335,15 @@
   grid-column: 2;
   width: 100%;
 }
+/* Demos que se auto-contienen en app-column-and-code-layout (traen título + concept-card + la fila
+   demo|código ADENTRO): al ser un ÚNICO hijo `:not(app-concept-card)`, la regla de arriba los mandaba
+   a la col2 y dejaba la col1 (instrucciones) vacía, corriendo las instrucciones ~245px a la derecha y
+   rompiendo la estabilidad de la composición al navegar (design-review B3: la x de las instrucciones
+   saltaba entre sub-niveles). Como ya traen su propio layout, salen del grid instrucciones|demo y van
+   full-width, con las instrucciones arriba-izquierda alineadas como el resto de los sub-niveles. */
+.card--dissolve .subhost > *:has(> app-column-and-code-layout) {
+  display: block;
+}
 /* El bloque de código (app-code) trae fuente text-2xl y whitespace-pre-wrap: en su columna se
    partía a mitad de statement (rompe el sentido de "así se arma el árbol"). Lo bajamos a un
    tamaño que respira y lo preformateamos (sin wrap; scroll horizontal propio si hiciera falta),
@@ -383,6 +392,14 @@
 .card--dissolve .subhost app-two-column-layout app-code div {
   font-size: 0.8rem;
   line-height: 1.3;
+}
+/* El historial de eventos (app-event-history) es una LISTA DE DATOS, no un panel-ventana: al
+   des-encajonar los fondos claros, sus filas quedaban transparentes flotando sobre el aura del
+   concepto y el texto ("Count Number" sobre el flower rojo) perdía contraste. Un respaldo translúcido
+   tenue las reagrupa y las hace legibles sobre cualquier color del concepto, sin leerse como ventana. */
+.card--dissolve .subhost app-event-history .space-y-4 > div {
+  background: rgba(253, 251, 245, 0.6);
+  border-radius: 10px;
 }
 /* La caja de instrucciones se DES-ENCAJONA: deja de ser un panel (borde + fondo) y pasa a texto
    suelto sobre la escena, con sus tres partes (Concepto / Qué hacer / Qué observar) separadas y

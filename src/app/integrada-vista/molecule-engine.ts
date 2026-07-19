@@ -321,14 +321,22 @@ export function initMolecule(
   // espiral es más grande ahora (radio base 135), así que el piso sube a 0.6 para llenar más el
   // alto del viewport en la vista completa (12 átomos) sin que los de arriba/abajo se corten.
   const wideK = (c: number): number => Math.max(0.6, Math.min(1.2, 265 / (outerRadius(c) + 62)));
-  const centroid = (c: number): { x: number; y: number } => {
-    let sx = 0;
-    let sy = 0;
+  // Centro del ENCUADRE de la vista molécula: el centro de la bounding-box de los átomos nacidos
+  // (0..c), NO el centroide de masa. El centroide de masa se corría hacia la zona más densa del
+  // espiral y dejaba medio viewport muerto (design-review A8); el centro de la caja reparte la
+  // constelación pareja en el frame.
+  const frameCenter = (c: number): { x: number; y: number } => {
+    let minx = Infinity;
+    let maxx = -Infinity;
+    let miny = Infinity;
+    let maxy = -Infinity;
     for (let i = 0; i <= c; i++) {
-      sx += C[i].x;
-      sy += C[i].y;
+      if (C[i].x < minx) minx = C[i].x;
+      if (C[i].x > maxx) maxx = C[i].x;
+      if (C[i].y < miny) miny = C[i].y;
+      if (C[i].y > maxy) maxy = C[i].y;
     }
-    return { x: sx / (c + 1), y: sy / (c + 1) };
+    return { x: (minx + maxx) / 2, y: (miny + maxy) / 2 };
   };
 
   function el<K extends keyof SVGElementTagNameMap>(
@@ -445,7 +453,10 @@ export function initMolecule(
         cy: 0,
         r: NUC,
         fill: accent,
-        'fill-opacity': cc.dotted ? 0.4 : 0.95,
+        // Los conceptos "derived" (dotted) se dibujan más livianos a propósito, pero a 0.4 el núcleo
+        // teal casi desaparecía sobre el fondo claro (flower invisible). 0.62 los hace presentes sin
+        // perder que lean más tenues que los sólidos (0.95).
+        'fill-opacity': cc.dotted ? 0.62 : 0.95,
         style: 'color:' + accent,
       }),
     );
@@ -847,7 +858,7 @@ export function initMolecule(
     // La matemática vive en `cameraAt` (pura, testeada); acá solo se aplica al DOM.
     const { K, fx, fy, diveDepth } = cameraAt(w, c === 0, {
       W: wideK(c),
-      cen: centroid(c),
+      cen: frameCenter(c),
       target: C[c],
       parent,
     });
