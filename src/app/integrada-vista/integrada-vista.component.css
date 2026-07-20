@@ -776,9 +776,13 @@
 .sub-puck-orbit {
   fill: none;
   /* El color lo pone el motor (`paintOrbit`) con el acento del concepto; acá solo el grosor/opacidad.
-     Visible (no un hilo fantasma) para que se lea como órbita = identidad de átomo del marcador. */
+     Visible (no un hilo fantasma) para que se lea la órbita del electrón = identidad de átomo. */
   stroke-width: 1.6;
   opacity: 0.85;
+}
+.sub-puck-e {
+  fill: #fff;
+  filter: drop-shadow(0 0 3px var(--source, #eb9b3c));
 }
 .suborbit.dissolve .sub-e.current {
   opacity: 0;
