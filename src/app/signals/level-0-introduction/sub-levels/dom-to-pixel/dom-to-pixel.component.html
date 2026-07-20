@@ -1,0 +1,44 @@
+<app-concept-card
+  concept="Entre cambiar un nodo y verlo hay una cadena: DOM → style → layout → paint → composite. Cambiar de más la dispara de más."
+  action="Probá cada tipo de cambio y mirá qué etapas se encienden."
+  observe="transform y opacity saltan layout y paint: por eso son las animaciones baratas."
+/>
+
+<div class="dtp-controls">
+  @for (demo of demos; track demo.kind) {
+    <button class="dtp-btn" [class.dtp-active]="selected().kind === demo.kind" (click)="pick(demo)">
+      {{ demo.label }}
+    </button>
+  }
+</div>
+
+<div class="dtp-code">{{ selected().code }}</div>
+
+<div class="dtp-pipeline">
+  <span class="dtp-stage dtp-source">DOM</span>
+  @for (stage of stages; track stage) {
+    <span class="dtp-arrow" aria-hidden="true">→</span>
+    <span
+      class="dtp-stage"
+      [class.dtp-on]="triggered().has(stage)"
+      [class.dtp-skip]="!triggered().has(stage)"
+    >
+      {{ stage }}
+    </span>
+  }
+</div>
+
+<p class="dtp-cost" [attr.data-cost]="cost()">
+  Costo: <strong>{{ cost() }}</strong>
+  @switch (cost()) {
+    @case ('barato') {
+      <span>&nbsp;solo compone en la GPU, sin re-layout ni repintado.</span>
+    }
+    @case ('medio') {
+      <span>&nbsp;recalcula estilo y repinta, pero no rehace la geometría.</span>
+    }
+    @case ('caro') {
+      <span>&nbsp;rehace la geometría (layout) y repinta todo.</span>
+    }
+  }
+</p>

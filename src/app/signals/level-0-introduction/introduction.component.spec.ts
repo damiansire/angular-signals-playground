@@ -27,10 +27,10 @@ describe('IntroductionComponent', () => {
     expect(title.textContent?.trim()).toBe('Introducción: ¿por qué signals?!');
   });
 
-  it('habla de deteccion de cambios y lista los cuatro sub-niveles', () => {
+  it('habla de deteccion de cambios y lista los cinco sub-niveles', () => {
     const text = (fixture.nativeElement as HTMLElement).textContent ?? '';
     expect(text).toContain('detecta cambios');
     const items = fixture.nativeElement.querySelectorAll('ul li');
-    expect(items.length).toBe(4);
+    expect(items.length).toBe(5);
   });
 });
