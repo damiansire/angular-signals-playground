@@ -504,28 +504,16 @@ export function initMolecule(
   // un electrón orbitando. Se DESLIZA de una parada a la siguiente (transición de transform) y en el
   // boot aparece directo. Es el único marcador del actual (el dot de abajo se oculta), así el
   // resaltado "viaja" en vez de saltar. Distinto del riel de conceptos (plano): éste tiene vida.
-  // El núcleo del sub-nivel actual: MÁS CHICO que la órbita (r12 < rx17) para que el electrón se vea
-  // orbitando POR FUERA (si el núcleo es más grande, la órbita queda escondida detrás y se pierde la
-  // identidad de átomo — era el bug). El path SMIL del electrón (abajo) matchea la órbita.
+  // El núcleo del sub-nivel actual: MÁS CHICO que la órbita (r12 < rx17) para que el anillo se lea POR
+  // FUERA del núcleo (si el núcleo es más grande, la órbita queda escondida detrás y se pierde la
+  // identidad de átomo — era el bug).
   const subPuckDot = el('circle', { class: 'sub-puck-dot', r: 12 });
   const subPuckOrbit = el('ellipse', { class: 'sub-puck-orbit', rx: 17, ry: 8 });
-  const subPuckE = el('circle', { class: 'sub-puck-e', r: 3.4 });
-  if (!reduceMotion) {
-    // El electrón recorre la órbita en loop (SMIL): la vida en reposo del ascensor. Con reduce no va.
-    subPuckE.appendChild(
-      el('animateMotion', {
-        dur: '1.9s',
-        repeatCount: 'indefinite',
-        path: 'M 17 0 A 17 8 0 1 1 -17 0 A 17 8 0 1 1 17 0',
-      }),
-    );
-  }
   const subPuckNum = el('text', { class: 'sub-puck-n', y: 5 });
   const subPuckG = el('g', { class: 'sub-puck' });
   subPuckG.appendChild(subSonar);
   subPuckG.appendChild(subPuckOrbit);
   subPuckG.appendChild(subPuckDot);
-  if (!reduceMotion) subPuckG.appendChild(subPuckE);
   subPuckG.appendChild(subPuckNum);
   const subEG = el('g', {});
   suborbit.appendChild(subArc);
