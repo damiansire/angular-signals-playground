@@ -16,15 +16,18 @@ describe('DomToPixelComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('renderiza el pipeline con las 4 etapas posteriores al DOM', () => {
-    const stages = fixture.nativeElement.querySelectorAll(
-      '.dtp-pipeline .dtp-stage:not(.dtp-source)',
-    );
-    expect(stages.length).toBe(4);
+  it('dibuja las cinco estaciones del pipeline', () => {
+    const stations = fixture.nativeElement.querySelectorAll('.dtp-pipe .dtp-station');
+    expect(stations.length).toBe(5);
   });
 
-  it('por defecto (cambiar texto) enciende las 4 etapas', () => {
-    const on = fixture.nativeElement.querySelectorAll('.dtp-pipeline .dtp-stage.dtp-on');
+  it('marca DOM como la fuente', () => {
+    const source = fixture.nativeElement.querySelectorAll('.dtp-station.dtp-source');
+    expect(source.length).toBe(1);
+  });
+
+  it('por defecto (cambiar texto) enciende las 4 etapas posteriores al DOM', () => {
+    const on = fixture.nativeElement.querySelectorAll('.dtp-station.dtp-on');
     expect(on.length).toBe(4);
   });
 });

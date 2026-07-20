@@ -1,44 +1,75 @@
-<app-concept-card
-  concept="Entre cambiar un nodo y verlo hay una cadena: DOM → style → layout → paint → composite. Cambiar de más la dispara de más."
-  action="Probá cada tipo de cambio y mirá qué etapas se encienden."
-  observe="transform y opacity saltan layout y paint: por eso son las animaciones baratas."
-/>
+<section class="dtp">
+  <header class="dtp-head">
+    <p class="dtp-eyebrow">un cambio en el DOM viaja hasta el pixel</p>
+    <h2 class="dtp-title">No todo cambio cuesta lo mismo.</h2>
+    <p class="dtp-sub">
+      Elegí qué tocaste. El flujo salta las etapas que tu cambio no necesita: cuanto más salta, más
+      barato.
+    </p>
+  </header>
 
-<div class="dtp-controls">
-  @for (demo of demos; track demo.kind) {
-    <button class="dtp-btn" [class.dtp-active]="selected().kind === demo.kind" (click)="pick(demo)">
-      {{ demo.label }}
-    </button>
-  }
-</div>
-
-<div class="dtp-code">{{ selected().code }}</div>
-
-<div class="dtp-pipeline">
-  <span class="dtp-stage dtp-source">DOM</span>
-  @for (stage of stages; track stage) {
-    <span class="dtp-arrow" aria-hidden="true">→</span>
-    <span
-      class="dtp-stage"
-      [class.dtp-on]="triggered().has(stage)"
-      [class.dtp-skip]="!triggered().has(stage)"
-    >
-      {{ stage }}
-    </span>
-  }
-</div>
-
-<p class="dtp-cost" [attr.data-cost]="cost()">
-  Costo: <strong>{{ cost() }}</strong>
-  @switch (cost()) {
-    @case ('barato') {
-      <span>&nbsp;solo compone en la GPU, sin re-layout ni repintado.</span>
+  <div class="dtp-controls">
+    @for (demo of demos; track demo.kind) {
+      <button
+        class="dtp-btn"
+        [class.dtp-active]="selected().kind === demo.kind"
+        (click)="pick(demo)"
+      >
+        {{ demo.label }}
+      </button>
     }
-    @case ('medio') {
-      <span>&nbsp;recalcula estilo y repinta, pero no rehace la geometría.</span>
+  </div>
+
+  <code class="dtp-code">{{ selected().code }}</code>
+
+  <svg
+    class="dtp-pipe"
+    viewBox="0 0 1000 240"
+    role="img"
+    aria-label="Pipeline de render: el flujo salta las etapas que el cambio no dispara"
+  >
+    <!-- Zona cara: layout + paint, la que las animaciones baratas sobrevuelan. -->
+    <rect class="dtp-zone" x="420" y="52" width="360" height="150" rx="16" />
+    <text class="dtp-zone-label" x="600" y="40" text-anchor="middle">
+      capas caras · layout + paint
+    </text>
+
+    <!-- Riel base tenue: todo el recorrido posible. -->
+    <path class="dtp-rail" d="M60,150 L940,150" pathLength="100" />
+
+    <!-- Flujo real: se redibuja y se re-anima al cambiar el costo. -->
+    @for (c of [cost()]; track c) {
+      <path class="dtp-flow" [attr.d]="flowPath()" [attr.stroke]="costColor()" pathLength="100" />
     }
-    @case ('caro') {
-      <span>&nbsp;rehace la geometría (layout) y repinta todo.</span>
+
+    <!-- Estaciones. -->
+    @for (s of stations; track s.id) {
+      <g
+        class="dtp-station"
+        [class.dtp-source]="s.id === 'DOM'"
+        [class.dtp-on]="stageOn(s.id)"
+        [class.dtp-skip]="s.id !== 'DOM' && !stageOn(s.id)"
+      >
+        <circle [attr.cx]="s.x" cy="150" r="13" />
+        <text class="dtp-station-label" [attr.x]="s.x" y="192" text-anchor="middle">
+          {{ s.id }}
+        </text>
+      </g>
     }
-  }
-</p>
+  </svg>
+
+  <p class="dtp-cost">
+    <span class="dtp-cost-word" [style.color]="costColor()">{{ cost() }}</span>
+    @switch (cost()) {
+      @case ('barato') {
+        <span>solo compone en la GPU: se saltea layout y paint enteros.</span>
+      }
+      @case ('medio') {
+        <span>recalcula estilo y repinta, pero se saltea el re-layout.</span>
+      }
+      @case ('caro') {
+        <span>recorre todo: rehace la geometría (layout) y repinta.</span>
+      }
+    }
+  </p>
+</section>

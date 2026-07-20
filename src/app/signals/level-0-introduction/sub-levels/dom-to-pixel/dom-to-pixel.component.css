@@ -1,53 +1,87 @@
-/* Clases con prefijo `dtp-`: este componente se EMBEBE en la vista integrada, que
-   estampa su propio atributo de encapsulación sobre lo montado. Sin el prefijo, clases
-   genéricas (`stage`, `content`…) del motor de la molécula le pegan a las nuestras
-   (p.ej. `.stage { height: 100vh }` estiraba los pills a pantalla completa). */
+/* Clases con prefijo `dtp-`: este componente se embebe en la vista integrada, que estampa
+   su propio atributo de encapsulación. Sin prefijo, clases del motor de la molécula
+   (`stage`, `content`…) pisan las nuestras. */
 :host {
   display: block;
-  max-width: 42rem;
+  width: 100%;
+  max-width: 82rem;
   margin: 0 auto;
+  padding: 0 1.5rem;
+  color: #1c1e24;
 }
 
+.dtp {
+  display: flex;
+  flex-direction: column;
+  gap: 1.6rem;
+}
+
+/* Encabezado con carácter (reemplaza el concepto/qué-hacer/qué-observar). */
+.dtp-head {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.dtp-eyebrow {
+  margin: 0;
+  font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+  font-size: 0.72rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #8a8172;
+}
+
+.dtp-title {
+  margin: 0;
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: clamp(1.9rem, 3.6vw, 2.9rem);
+  line-height: 1.05;
+  letter-spacing: -0.01em;
+  color: #17140f;
+  text-wrap: balance;
+}
+
+.dtp-sub {
+  margin: 0;
+  max-width: 46ch;
+  font-size: 1rem;
+  color: #5c5648;
+}
+
+/* Selector de mutación. */
 .dtp-controls {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.5rem;
-  justify-content: center;
-  margin: 1rem 0;
+  gap: 0.55rem;
 }
 
 .dtp-btn {
   font: inherit;
-  font-size: 0.875rem;
+  font-size: 0.95rem;
   line-height: 1.2;
   height: auto;
-  padding: 0.4rem 0.75rem;
-  border-radius: 0.5rem;
+  padding: 0.5rem 1rem;
+  border-radius: 0.6rem;
   border: 1px solid #d6dbe2;
   background: #ffffff;
   color: #374151;
   box-shadow: none;
   cursor: pointer;
   transition:
-    background 0.15s,
-    border-color 0.15s;
+    opacity 0.15s,
+    outline-color 0.15s;
 }
 
-.dtp-btn:hover {
-  background: #f4f6f8;
-}
-
-/* La vista integrada impone su propio fondo oscuro a los botones (`.subhost button`,
-   especificidad mayor que la nuestra). En vez de pelear especificidad, marcamos el
-   activo con propiedades que ESA regla no toca: `outline` y `opacity`. Así el estado
-   seleccionado se lee en las dos superficies (molécula oscura y página legacy clara). */
+/* En la molécula, el card impone su propio fondo oscuro a los botones (mayor especificidad).
+   Diferenciamos el activo con propiedades que ESA regla no toca: `outline` y `opacity`. */
 .dtp-btn:not(.dtp-active) {
-  opacity: 0.55;
+  opacity: 0.5;
 }
 
 .dtp-btn.dtp-active {
-  border-color: #15171c;
-  background: #15171c;
+  border-color: #17140f;
+  background: #17140f;
   color: #ffffff;
   font-weight: 600;
   outline: 2px solid #e0a13a;
@@ -60,79 +94,131 @@
 }
 
 .dtp-code {
+  align-self: flex-start;
   font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
-  font-size: 0.8125rem;
-  background: #0f141b;
-  color: #e6e9ef;
-  padding: 0.625rem 0.875rem;
+  font-size: 0.8rem;
+  background: #14120e;
+  color: #f0ede4;
+  padding: 0.5rem 0.85rem;
   border-radius: 0.5rem;
-  margin: 0 auto 1.25rem;
-  max-width: max-content;
+  max-width: 100%;
   overflow-x: auto;
 }
 
-.dtp-pipeline {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: center;
-  gap: 0.4rem;
-  margin-bottom: 1.25rem;
-}
-
-.dtp-arrow {
-  color: #98a1b0;
-  font-family: ui-monospace, monospace;
-}
-
-.dtp-stage {
+/* Pipeline héroe. */
+.dtp-pipe {
+  width: 100%;
   height: auto;
-  font-family: ui-monospace, monospace;
-  font-size: 0.8125rem;
-  padding: 0.35rem 0.6rem;
-  border-radius: 0.5rem;
-  border: 1px solid #c2c9d3;
-  color: #5b6472;
-  background: #ffffff;
+  overflow: visible;
+}
+
+.dtp-rail {
+  fill: none;
+  stroke: #ddd8cd;
+  stroke-width: 3;
+  stroke-linecap: round;
+}
+
+.dtp-flow {
+  fill: none;
+  stroke-width: 6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 100;
+  stroke-dashoffset: 100;
+  animation: dtp-draw 0.75s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+@keyframes dtp-draw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+.dtp-zone {
+  fill: rgba(217, 38, 38, 0.055);
+  stroke: rgba(217, 38, 38, 0.22);
+  stroke-width: 1.5;
+  stroke-dasharray: 4 5;
+}
+
+.dtp-zone-label {
+  fill: #b5544a;
+  font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+  font-size: 13px;
+  letter-spacing: 0.04em;
+}
+
+.dtp-station circle {
   transition:
-    background 0.15s,
-    border-color 0.15s,
-    opacity 0.15s;
+    fill 0.3s,
+    stroke 0.3s;
 }
 
-.dtp-stage.dtp-source {
-  border-color: #2563eb;
-  color: #2563eb;
-  background: #eff4ff;
-  font-weight: 600;
+.dtp-station-label {
+  font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+  font-size: 15px;
 }
 
-.dtp-stage.dtp-on {
-  border-color: #c07a12;
-  color: #8a5a0f;
-  background: #fcf3e4;
-  font-weight: 600;
+.dtp-station.dtp-source circle {
+  fill: #eef3ff;
+  stroke: #2563eb;
+  stroke-width: 2.5;
 }
 
-.dtp-stage.dtp-skip {
-  opacity: 0.45;
+.dtp-station.dtp-source .dtp-station-label {
+  fill: #2563eb;
+  font-weight: 700;
+}
+
+.dtp-station.dtp-on circle {
+  fill: #17140f;
+  stroke: #17140f;
+  stroke-width: 2;
+}
+
+.dtp-station.dtp-on .dtp-station-label {
+  fill: #17140f;
+  font-weight: 700;
+}
+
+.dtp-station.dtp-skip circle {
+  fill: #ffffff;
+  stroke: #cfc9bd;
+  stroke-width: 2;
+  stroke-dasharray: 3 3;
+}
+
+.dtp-station.dtp-skip .dtp-station-label {
+  fill: #a99f8e;
   text-decoration: line-through;
 }
 
+/* Lectura del costo. */
 .dtp-cost {
-  text-align: center;
-  font-size: 0.9375rem;
-  color: #5b6472;
+  margin: 0;
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  font-size: 1rem;
+  color: #5c5648;
 }
 
-.dtp-cost[data-cost='barato'] strong {
-  color: #15905a;
+.dtp-cost-word {
+  font-family: Georgia, 'Times New Roman', serif;
+  font-weight: 700;
+  font-style: italic;
+  font-size: clamp(1.5rem, 2.6vw, 2.1rem);
+  line-height: 1;
 }
 
-.dtp-cost[data-cost='medio'] strong {
-  color: #b5730f;
-}
-
-.dtp-cost[data-cost='caro'] strong {
-  color: #d92626;
+@media (prefers-reduced-motion: reduce) {
+  .dtp-flow {
+    animation: none;
+    stroke-dashoffset: 0;
+  }
+  .dtp-station circle {
+    transition: none;
+  }
 }
