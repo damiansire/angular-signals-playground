@@ -13,9 +13,11 @@ export interface WhereState {
 
 /**
  * Query string (sin `?`) para un punto del recorrido. `subIdx` es 0-based dentro del concepto,
- * o -1 en la vista molécula (átomo enfocado, sin sub-nivel) → solo `nivel=`.
+ * o -1 en la vista molécula (átomo enfocado, sin sub-nivel) → solo `nivel=`. `conceptIdx < 0` = landing
+ * (hero, todavía sin entrar al recorrido) → query VACÍA, así la URL queda limpia (`/`) en el arranque.
  */
 export function buildWhereQuery(conceptIdx: number, subIdx: number): string {
+  if (conceptIdx < 0) return '';
   return subIdx >= 0 ? `nivel=${conceptIdx}&sub-nivel=${subIdx + 1}` : `nivel=${conceptIdx}`;
 }
 

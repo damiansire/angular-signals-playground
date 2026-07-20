@@ -8,6 +8,12 @@ describe('url-sync — buildWhereQuery (estado → URL)', () => {
   it('adentro de un sub-nivel escribe nivel + sub-nivel 1-based', () => {
     expect(buildWhereQuery(3, 2)).toBe('nivel=3&sub-nivel=3');
   });
+
+  it('landing (conceptIdx < 0): query vacía, la URL queda limpia (no `?nivel=0`)', () => {
+    expect(buildWhereQuery(-1, -1)).toBe('');
+    // round-trip: la URL limpia se relee como "sin deep-link" (landing), no como concepto 0.
+    expect(parseWhereQuery(buildWhereQuery(-1, -1))).toBeNull();
+  });
 });
 
 describe('url-sync — parseWhereQuery (URL → estado)', () => {

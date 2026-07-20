@@ -1077,10 +1077,13 @@ export function initMolecule(
     // parada de encuadre del átomo (w≈1.3) el `>` estricto flipeaba por redondeo sub-pixel y dejaba la
     // URL/caption en "sub-nivel 1 / Adentro" con la card ya disuelta. Así el estado reportado = el visual.
     const subNow = diveDepth > 0.5 && dc.subN > 0 ? dc.subIdx : -1;
-    if (whereC !== c || whereSub !== subNow) {
-      whereC = c;
+    // En la landing (hero visible, s < 0.12) todavía no entraste al recorrido: reportamos concepto -1
+    // para que la URL quede LIMPIA (`/`) en el arranque, no `?nivel=0`. Apenas empezás, ya refleja el nivel.
+    const cForUrl = s < 0.12 ? -1 : c;
+    if (whereC !== cForUrl || whereSub !== subNow) {
+      whereC = cForUrl;
       whereSub = subNow;
-      onWhere(c, subNow);
+      onWhere(cForUrl, subNow);
     }
 
     // Arma/desarma el gate de reveal. "Asentado" = adentro (diveDepth alto), cerca de la parada del
