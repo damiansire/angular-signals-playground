@@ -482,21 +482,8 @@ export function initMolecule(
   // topbar (la "constelación" del recorrido). subArc es la curva punteada que los conecta.
   const subArcId = 'sub-arc-' + Math.random().toString(36).slice(2);
   const subArc = el('path', { class: 'sub-arc', id: subArcId });
-  // La vida del arco: un pulso viaja recorriéndolo en loop (SMIL, no rAF — se mueve solo,
-  // sin costo de JS) y un sonar respira alrededor del nodo actual. Ambos son gratis en reposo:
-  // no dependen de que el usuario interactúe para sentirse "vivos".
-  const subSpark = el('circle', { class: 'sub-spark', r: 4 });
-  const subSparkMotion = el('animateMotion', {
-    dur: '2.6s',
-    repeatCount: 'indefinite',
-    keyPoints: '0;1',
-    keyTimes: '0;1',
-    calcMode: 'linear',
-  });
-  const subSparkMpath = document.createElementNS('http://www.w3.org/2000/svg', 'mpath');
-  subSparkMpath.setAttributeNS('http://www.w3.org/1999/xlink', 'href', '#' + subArcId);
-  subSparkMotion.appendChild(subSparkMpath);
-  subSpark.appendChild(subSparkMotion);
+  // La vida del arco: un sonar respira alrededor del nodo actual (SMIL, no rAF — se mueve solo, sin
+  // costo de JS). Es gratis en reposo: no depende de que el usuario interactúe para sentirse vivo.
   // Sonar chico (r10): en la barra izquierda, pegada a la espina "Signals", un sonar grande al
   // expandirse pisaba el wordmark cuando el sub-nivel actual caía a su altura. Ceñido al riel no lo toca.
   const subSonar = el('circle', { class: 'sub-sonar', r: 10 });
@@ -529,8 +516,6 @@ export function initMolecule(
   subPuckG.appendChild(subPuckNum);
   const subEG = el('g', {});
   suborbit.appendChild(subArc);
-  // La chispa es pura vida ambiente (un pulso viajando por el arco); con reduce no se agrega.
-  if (!reduceMotion) suborbit.appendChild(subSpark);
   suborbit.appendChild(subEG);
   suborbit.appendChild(subPuckG);
 
@@ -611,7 +596,6 @@ export function initMolecule(
     const col = COL[cc.accent];
     const nsub = cc.subN;
     subArc.setAttribute('stroke', col);
-    subSpark.setAttribute('fill', col);
     subSonar.setAttribute('stroke', col);
     subPuckDot.setAttribute('fill', col);
     subPuckOrbit.setAttribute('stroke', col);

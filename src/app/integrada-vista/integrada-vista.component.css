@@ -716,15 +716,6 @@
   stroke-linecap: round;
   filter: url(#glow);
 }
-/* La chispa recorre sub-arc en loop (SMIL, ver molecule-engine): siempre en movimiento, sin
-   esperar ninguna interacción — es lo que hace que la constelación se sienta viva en reposo. */
-.sub-spark {
-  opacity: 0;
-  filter: url(#glow);
-}
-.suborbit.dissolve .sub-spark {
-  opacity: 0.9;
-}
 /* El sonar respira alrededor del nodo actual: un anillo que se expande y se apaga en loop. */
 .sub-sonar {
   fill: none;
