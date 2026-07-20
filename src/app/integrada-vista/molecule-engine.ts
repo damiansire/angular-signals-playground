@@ -844,8 +844,11 @@ export function initMolecule(
   let revealN = 0; // cuántos tags revelados ahora
   let gateReady = false; // ¿estamos asentados en el sub revelable? (gate activo)
   let lastRenderS = 0; // posición previa, para saber la dirección de entrada
-  let wheelAccum = 0; // acumulador de deltaY del trackpad (throttle: un reveal por tramo)
-  const WHEEL_STEP = 90; // px de scroll por reveal (amortigua el momentum del trackpad)
+  // Un scroll ARRANCA la generación completa del árbol: los tags se revelan de a uno en el tiempo
+  // hasta terminar, y mientras corre el avance queda bloqueado (autoReveal != null). La animación de
+  // cada nodo es el feedback (sin indicador extra). Con reduce-motion se salta directo al final.
+  let autoReveal: number | null = null; // handle del timer del auto-play (null = no está generando)
+  const AUTO_REVEAL_MS = 340; // intervalo entre tags durante la generación automática
   const HTT_STOP = off[0] + subStopOffset(0); // parada de scroll de html-to-tree (concepto 0, sub 0)
 
   // ---- render(s): dibuja el estado del recorrido en la posición de scroll s (0..TOTAL) ----
@@ -1093,11 +1096,13 @@ export function initMolecule(
     if (settled && !gateReady && revealApi) {
       activeReveal = revealApi;
       revealN = lastRenderS > s + 0.02 ? revealApi.steps : 0;
-      wheelAccum = 0;
       revealApi.to(revealN);
     }
     gateReady = settled;
-    if (!settled) activeReveal = null;
+    if (!settled) {
+      activeReveal = null;
+      cancelAutoReveal();
+    }
     lastRenderS = s;
     // La vista se movió (scroll/nav/cambio de sub-nivel): marcamos la órbita como sucia y agendamos
     // un frame para recalcularla. Estando parado, render() no corre → no se agenda nada.
@@ -1217,31 +1222,68 @@ export function initMolecule(
     }
     return false;
   };
+  const cancelAutoReveal = (): void => {
+    if (autoReveal != null) {
+      window.clearTimeout(autoReveal);
+      autoReveal = null;
+    }
+  };
+  // Dispara la generación (dir 1) o el colapso (dir -1) completos: revela un tag cada AUTO_REVEAL_MS
+  // hasta llegar al borde, y deja `autoReveal` seteado mientras corre (avance bloqueado). Idempotente:
+  // si ya está corriendo no reinicia. Con reduce-motion no impone la animación: salta al final directo.
+  const startAutoReveal = (dir: 1 | -1): void => {
+    if (autoReveal != null || !gateReady || !activeReveal) return;
+    if (reduceMotion) {
+      revealN = dir > 0 ? activeReveal.steps : 0;
+      activeReveal.to(revealN);
+      return;
+    }
+    const tick = (): void => {
+      if (!revealStep(dir)) {
+        autoReveal = null;
+        return;
+      }
+      autoReveal = window.setTimeout(tick, AUTO_REVEAL_MS);
+    };
+    tick();
+  };
+  const atRevealStop = (): boolean =>
+    gateReady && !!activeReveal && Math.abs(stage.scrollTop / unit() - HTT_STOP) <= 0.06;
   const onPrev = (): void => {
-    if (!revealStep(-1)) stepTo(-1);
+    if (autoReveal != null) return;
+    if (atRevealStop() && revealN > 0) {
+      startAutoReveal(-1);
+      return;
+    }
+    stepTo(-1);
   };
   const onNext = (): void => {
-    if (!revealStep(1)) stepTo(1);
+    if (autoReveal != null) return;
+    if (atRevealStop() && activeReveal && revealN < activeReveal.steps) {
+      startAutoReveal(1);
+      return;
+    }
+    stepTo(1);
   };
-  // Con el gate activo el wheel NO scrollea: se acumula y cada tramo revela/oculta un tag (el
-  // acumulador amortigua el momentum del trackpad para que sea de a uno). En el borde (todo revelado
-  // y bajás, o nada revelado y subís) NO se previene: ahí el scroll avanza/retrocede de sub-nivel.
+  // Con el gate activo el wheel NO scrollea: un scroll ARRANCA la generación completa del árbol (o el
+  // colapso al subir) y el avance queda bloqueado hasta que termina. En el borde (todo revelado y
+  // bajás, o nada revelado y subís) NO se previene: ahí el scroll avanza/retrocede de sub-nivel.
   const onWheelGate = (e: WheelEvent): void => {
     if (!gateReady || !activeReveal) return;
     // Sólo gateamos cuando estás REALMENTE asentado en la parada; si venís bajando/subiendo hacia
     // ella (aún no snapeaste), dejamos que el scroll termine de aterrizar antes de empezar a revelar.
     if (Math.abs(stage.scrollTop / unit() - HTT_STOP) > 0.06) return;
+    // Generando: el scroll queda totalmente bloqueado hasta que la animación termine.
+    if (autoReveal != null) {
+      e.preventDefault();
+      return;
+    }
     const dir = e.deltaY > 0 ? 1 : e.deltaY < 0 ? -1 : 0;
     if (dir === 0) return;
     const atEdge = dir > 0 ? revealN >= activeReveal.steps : revealN <= 0;
     if (atEdge) return;
     e.preventDefault();
-    if (wheelAccum !== 0 && wheelAccum > 0 !== dir > 0) wheelAccum = 0;
-    wheelAccum += e.deltaY;
-    if (Math.abs(wheelAccum) >= WHEEL_STEP) {
-      wheelAccum = 0;
-      revealStep(dir);
-    }
+    startAutoReveal(dir); // un solo scroll dispara la generación (o el colapso) completa
   };
   // Teclado. Con el gate de reveal activo y asentado en la parada, flechas / AvPág / espacio revelan
   // u ocultan tags. Fuera del gate, las flechas ▲/▼ (y AvPág) navegan el recorrido paso a paso, para
@@ -1250,14 +1292,18 @@ export function initMolecule(
     if (gateReady && activeReveal && Math.abs(stage.scrollTop / unit() - HTT_STOP) <= 0.06) {
       const down = e.key === 'ArrowDown' || e.key === 'PageDown' || e.key === ' ';
       const up = e.key === 'ArrowUp' || e.key === 'PageUp';
+      if (autoReveal != null) {
+        if (down || up) e.preventDefault(); // generando: teclas de avance bloqueadas
+        return;
+      }
       if (down && revealN < activeReveal.steps) {
         e.preventDefault();
-        revealStep(1);
+        startAutoReveal(1);
         return;
       }
       if (up && revealN > 0) {
         e.preventDefault();
-        revealStep(-1);
+        startAutoReveal(-1);
         return;
       }
     }
@@ -1340,6 +1386,7 @@ export function initMolecule(
     cancelAnimationFrame(scrollAnimId);
     cancelAnimationFrame(orbitRaf);
     rafIds.forEach((id) => cancelAnimationFrame(id));
+    cancelAutoReveal();
     stage.removeEventListener('scroll', onScroll);
     stage.removeEventListener('wheel', onWheelGate);
     window.removeEventListener('keydown', onKeyGate);
