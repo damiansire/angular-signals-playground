@@ -37,9 +37,17 @@
     <!-- Riel base tenue: todo el recorrido posible. -->
     <path class="dtp-rail" d="M60,150 L940,150" pathLength="100" />
 
-    <!-- Flujo real: se redibuja y se re-anima al cambiar el costo. -->
+    <!-- Flujo real + pulso que lo recorre: se redibujan y re-animan al cambiar el costo. -->
     @for (c of [cost()]; track c) {
       <path class="dtp-flow" [attr.d]="flowPath()" [attr.stroke]="costColor()" pathLength="100" />
+      <circle
+        class="dtp-pulse"
+        cx="0"
+        cy="0"
+        r="8"
+        [attr.fill]="costColor()"
+        [style.offset-path]="pulsePath()"
+      />
     }
 
     <!-- Estaciones. -->

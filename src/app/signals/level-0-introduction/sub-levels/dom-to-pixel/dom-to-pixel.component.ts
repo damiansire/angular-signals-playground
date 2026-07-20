@@ -66,6 +66,7 @@ export class DomToPixelComponent {
   );
   protected readonly cost = computed<RenderCost>(() => renderCost(this.selected().kind));
   protected readonly flowPath = computed(() => FLOW_PATHS[this.cost()]);
+  protected readonly pulsePath = computed(() => `path("${this.flowPath()}")`);
   protected readonly costColor = computed(() => COST_COLOR[this.cost()]);
 
   protected pick(demo: MutationDemo): void {

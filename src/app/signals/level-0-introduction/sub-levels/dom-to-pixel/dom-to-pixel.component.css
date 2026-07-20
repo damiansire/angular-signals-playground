@@ -135,6 +135,32 @@
   }
 }
 
+/* Pulso que recorre el flujo una sola vez al elegir (no hay loop perpetuo: motion en la
+   interacción, no ambiente, para no dejar un rAF/animación corriendo siempre). */
+.dtp-pulse {
+  offset-distance: 0%;
+  offset-rotate: 0deg;
+  opacity: 0;
+  animation: dtp-travel 0.75s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+@keyframes dtp-travel {
+  0% {
+    offset-distance: 0%;
+    opacity: 0;
+  }
+  15% {
+    opacity: 0.9;
+  }
+  85% {
+    opacity: 0.9;
+  }
+  100% {
+    offset-distance: 100%;
+    opacity: 0;
+  }
+}
+
 .dtp-zone {
   fill: rgba(217, 38, 38, 0.055);
   stroke: rgba(217, 38, 38, 0.22);
@@ -220,5 +246,9 @@
   }
   .dtp-station circle {
     transition: none;
+  }
+  .dtp-pulse {
+    animation: none;
+    display: none;
   }
 }
