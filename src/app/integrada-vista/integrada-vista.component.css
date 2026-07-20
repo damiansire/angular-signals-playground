@@ -377,6 +377,20 @@
   padding-left: 1.8em;
   text-indent: -1.8em;
 }
+/* Las líneas interactivas del árbol (nivel 0) son `.flex` con cada token en su propio div. La regla
+   general de arriba les aplica `overflow-wrap: anywhere` (pensado para wrappear imports/strings largos
+   de las líneas ESTÁTICAS), pero acá, en la columna angosta del embed, parte cada token caracter por
+   caracter: "of a DOM tree" caía en una tira vertical de una letra por línea. Los tokens del árbol son
+   cortos y no deben romperse: la línea se mantiene entera y, si no entra, scrollea horizontal (app-code
+   ya tiene overflow-x:auto), como un editor de código de verdad. */
+.card--dissolve .subhost app-code .flex {
+  flex-wrap: nowrap;
+}
+.card--dissolve .subhost app-code .flex > div {
+  flex-shrink: 0;
+  overflow-wrap: normal;
+  white-space: nowrap;
+}
 /* Con todos los tags seleccionados, el fondo verde SÓLIDO (bg-green-700) tapaba el código y
    gritaba. Lo hacemos translúcido: marca el nodo activo sin ahogar la lectura. Y compactamos el
    interlineado (py-2 era demasiado) para que el bloque entre y respire. */
