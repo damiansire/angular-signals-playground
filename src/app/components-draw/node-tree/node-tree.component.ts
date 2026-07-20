@@ -117,7 +117,10 @@ export class NodeTreeComponent {
   /** Posición en pantalla (viewport) del borde derecho del nodo `id`, o `null` si no está
    * pintado. Es el borde (no el centro) porque un conector debe verse SALIR del rectángulo,
    * no nacer de un punto perdido detrás suyo. */
-  getScreenEdgePosition(id: string): { x: number; y: number } | null {
+  getScreenEdgePosition(
+    id: string,
+    side: 'left' | 'right' = 'right',
+  ): { x: number; y: number } | null {
     const node = this.nodes().find((n) => n.id === id);
     if (!this.chart || !node) {
       return null;
@@ -127,6 +130,10 @@ export class NodeTreeComponent {
       return null;
     }
     const rect = this.chart.getDom().getBoundingClientRect();
-    return { x: rect.left + pixel[0] + NODE_SYMBOL_WIDTH / 2, y: rect.top + pixel[1] };
+    // Borde derecho o izquierdo del símbolo según de qué lado sale el conector (el código puede
+    // estar a la derecha del árbol o a su izquierda): el conector debe SALIR del rectángulo hacia
+    // el código, no cruzarlo por encima.
+    const edgeX = pixel[0] + (side === 'left' ? -NODE_SYMBOL_WIDTH / 2 : NODE_SYMBOL_WIDTH / 2);
+    return { x: rect.left + edgeX, y: rect.top + pixel[1] };
   }
 }

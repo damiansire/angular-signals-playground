@@ -139,7 +139,7 @@ export class HtmlToTreeComponent {
     const lines: ConnectorLine[] = [];
 
     this.nodesToShow().forEach((id) => {
-      const treePos = tree.getScreenEdgePosition(id);
+      const treePos = tree.getScreenEdgePosition(id, 'left');
       const codeEl = this.hostElement.querySelector<HTMLElement>(
         `[data-el-id="${CSS.escape(id)}"]`,
       );
@@ -150,7 +150,7 @@ export class HtmlToTreeComponent {
       const codeRect = codeEl.getBoundingClientRect();
       const x1 = treePos.x - hostRect.left;
       const y1 = treePos.y - hostRect.top;
-      const x2 = codeRect.left - hostRect.left;
+      const x2 = codeRect.right - hostRect.left;
       const y2 = codeRect.top + codeRect.height / 2 - hostRect.top;
       const midX = (x1 + x2) / 2;
 
