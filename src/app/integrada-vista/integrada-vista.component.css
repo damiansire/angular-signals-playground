@@ -378,17 +378,19 @@
   text-indent: -1.8em;
 }
 /* Las líneas interactivas del árbol (nivel 0) son `.flex` con cada token en su propio div. La regla
-   general de arriba les aplica `overflow-wrap: anywhere` (pensado para wrappear imports/strings largos
-   de las líneas ESTÁTICAS), pero acá, en la columna angosta del embed, parte cada token caracter por
-   caracter: "of a DOM tree" caía en una tira vertical de una letra por línea. Los tokens del árbol son
-   cortos y no deben romperse: la línea se mantiene entera y, si no entra, scrollea horizontal (app-code
-   ya tiene overflow-x:auto), como un editor de código de verdad. */
+   general de arriba les aplica `overflow-wrap: anywhere`, que en un flex-item colapsa su min-content al
+   ancho de UN CARÁCTER: en la columna angosta del embed cada token se partía letra por letra ("of a DOM
+   tree" caía en una tira vertical). Para estas líneas bajamos a `break-word`: no colapsa el item a 1ch
+   (las palabras quedan enteras, solo rompe una palabra si de verdad no entra) y dejamos que la línea
+   así los tokens no se parten a 1ch. La línea se mantiene ENTERA (`flex-wrap: nowrap`, tokens que no
+   se encogen): wrappear tokens sueltos los tira a la columna 0 (cierres flotando), peor que el bug. El
+   ancho lo resuelve la densidad de fuente de abajo, no el wrap. */
 .card--dissolve .subhost app-code .flex {
   flex-wrap: nowrap;
 }
 .card--dissolve .subhost app-code .flex > div {
   flex-shrink: 0;
-  overflow-wrap: normal;
+  overflow-wrap: break-word;
   white-space: nowrap;
 }
 /* Con todos los tags seleccionados, el fondo verde SÓLIDO (bg-green-700) tapaba el código y
@@ -407,7 +409,7 @@
    Acá el código de ESOS demos baja un escalón más de densidad (más específico que la regla general
    de arriba, así gana): entra completo sin scroll interno. Los otros demos no matchean y quedan. */
 .card--dissolve .subhost app-two-column-layout app-code div {
-  font-size: 0.8rem;
+  font-size: 0.72rem;
   line-height: 1.3;
 }
 /* El historial de eventos (app-event-history) es una LISTA DE DATOS, no un panel-ventana: al
