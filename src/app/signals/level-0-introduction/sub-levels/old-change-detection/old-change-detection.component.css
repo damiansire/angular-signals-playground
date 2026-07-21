@@ -1,0 +1,218 @@
+/* Clases con prefijo `ocd-`: se embebe en la vista integrada, que estampa su enc; sin prefijo,
+   las clases del motor de la molécula pisarían las nuestras. */
+:host {
+  display: block;
+  width: 100%;
+  max-width: 82rem;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+  color: #1c1e24;
+}
+
+.ocd {
+  display: flex;
+  flex-direction: column;
+  gap: 1.4rem;
+}
+
+.ocd-head {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.ocd-eyebrow {
+  margin: 0;
+  font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+  font-size: 0.72rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #8a8172;
+}
+
+.ocd-title {
+  margin: 0;
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: clamp(1.9rem, 3.6vw, 2.9rem);
+  line-height: 1.05;
+  letter-spacing: -0.01em;
+  color: #17140f;
+  text-wrap: balance;
+}
+
+.ocd-sub {
+  margin: 0;
+  max-width: 60ch;
+  font-size: 1rem;
+  color: #5c5648;
+}
+
+.ocd-sub em {
+  font-style: normal;
+  font-weight: 600;
+  color: #17140f;
+}
+
+/* APIs que Zone.js parchea: cada una dispara el barrido. */
+.ocd-apis {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.ocd-apis-hint {
+  font-size: 0.85rem;
+  color: #8a8172;
+}
+
+.ocd-api {
+  font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+  font-size: 0.8rem;
+  padding: 0.4rem 0.8rem;
+  border-radius: 0.5rem;
+  border: 1px solid #2b2822;
+  background: #14120e;
+  color: #f0ede4;
+  cursor: pointer;
+  transition:
+    border-color 0.15s,
+    transform 0.06s;
+}
+
+.ocd-api:hover {
+  border-color: #d99b2b;
+}
+
+.ocd-api:active {
+  transform: translateY(1px);
+}
+
+.ocd-api:focus-visible {
+  outline: 2px solid #d99b2b;
+  outline-offset: 2px;
+}
+
+/* Escena: árbol + lectura. */
+.ocd-stage {
+  display: grid;
+  grid-template-columns: minmax(0, 1.3fr) minmax(0, 0.7fr);
+  gap: 1.5rem;
+  align-items: center;
+}
+
+.ocd-tree {
+  width: 100%;
+  height: auto;
+  max-width: 34rem;
+}
+
+.ocd-edge {
+  fill: none;
+  stroke: #ddd8cd;
+  stroke-width: 2;
+}
+
+.ocd-node circle {
+  fill: #ffffff;
+  stroke: #cfc9bd;
+  stroke-width: 2;
+  transition:
+    fill 0.3s,
+    stroke 0.3s;
+}
+
+.ocd-node text {
+  font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+  font-size: 12px;
+  fill: #7c7566;
+}
+
+.ocd-node.ocd-swept circle {
+  fill: #c07a12;
+  stroke: #9a610d;
+}
+
+.ocd-node.ocd-swept text {
+  fill: #ffffff;
+  font-weight: 700;
+}
+
+.ocd-readout {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  align-items: flex-start;
+}
+
+.ocd-fired {
+  margin: 0;
+  font-size: 0.9rem;
+  color: #5c5648;
+}
+
+.ocd-fired code {
+  font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+  color: #9a610d;
+}
+
+.ocd-count {
+  margin: 0;
+  font-size: 1rem;
+  color: #5c5648;
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.ocd-count strong {
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 1.6rem;
+  color: #c07a12;
+}
+
+.ocd-all {
+  font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #9a610d;
+  background: rgba(192, 122, 18, 0.14);
+  padding: 0.15rem 0.5rem;
+  border-radius: 999px;
+}
+
+.ocd-reset {
+  font: inherit;
+  font-size: 0.85rem;
+  padding: 0.4rem 0.85rem;
+  border-radius: 0.5rem;
+  border: 1px solid #cfc9bd;
+  background: transparent;
+  color: #5c5648;
+  cursor: pointer;
+  transition: border-color 0.15s;
+}
+
+.ocd-reset:hover {
+  border-color: #8a8172;
+}
+
+.ocd-reset:focus-visible {
+  outline: 2px solid #2563eb;
+  outline-offset: 2px;
+}
+
+@media (max-width: 720px) {
+  .ocd-stage {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ocd-node circle {
+    transition: none;
+  }
+}

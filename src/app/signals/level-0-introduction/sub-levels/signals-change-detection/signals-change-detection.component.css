@@ -1,0 +1,203 @@
+/* Clases con prefijo `scd-`: se embebe en la vista integrada, que estampa su enc; sin prefijo,
+   las clases del motor de la molécula pisarían las nuestras. */
+:host {
+  display: block;
+  width: 100%;
+  max-width: 82rem;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+  color: #1c1e24;
+}
+
+.scd {
+  display: flex;
+  flex-direction: column;
+  gap: 1.4rem;
+}
+
+.scd-head {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.scd-eyebrow {
+  margin: 0;
+  font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+  font-size: 0.72rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #8a8172;
+}
+
+.scd-title {
+  margin: 0;
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: clamp(1.9rem, 3.6vw, 2.9rem);
+  line-height: 1.05;
+  letter-spacing: -0.01em;
+  color: #17140f;
+  text-wrap: balance;
+}
+
+.scd-sub {
+  margin: 0;
+  max-width: 58ch;
+  font-size: 1rem;
+  color: #5c5648;
+}
+
+.scd-sub em {
+  font-style: normal;
+  font-weight: 600;
+  color: #17140f;
+}
+
+.scd-actions {
+  display: flex;
+  gap: 0.6rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.scd-change {
+  font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+  font-size: 0.85rem;
+  padding: 0.5rem 1rem;
+  border-radius: 0.6rem;
+  border: 1px solid #b0173a;
+  background: #e11d48;
+  color: #ffffff;
+  cursor: pointer;
+  transition: transform 0.06s;
+}
+
+.scd-change:active {
+  transform: translateY(1px);
+}
+
+.scd-change:focus-visible {
+  outline: 2px solid #17140f;
+  outline-offset: 2px;
+}
+
+.scd-reset {
+  font: inherit;
+  font-size: 0.85rem;
+  padding: 0.4rem 0.85rem;
+  border-radius: 0.5rem;
+  border: 1px solid #cfc9bd;
+  background: transparent;
+  color: #5c5648;
+  cursor: pointer;
+  transition: border-color 0.15s;
+}
+
+.scd-reset:hover {
+  border-color: #8a8172;
+}
+
+.scd-reset:focus-visible {
+  outline: 2px solid #2563eb;
+  outline-offset: 2px;
+}
+
+/* Escena: árbol + lectura. */
+.scd-stage {
+  display: grid;
+  grid-template-columns: minmax(0, 1.3fr) minmax(0, 0.7fr);
+  gap: 1.5rem;
+  align-items: center;
+}
+
+.scd-tree {
+  width: 100%;
+  height: auto;
+  max-width: 34rem;
+}
+
+.scd-edge {
+  fill: none;
+  stroke: #ddd8cd;
+  stroke-width: 2;
+}
+
+.scd-node circle {
+  fill: #ffffff;
+  stroke: #cfc9bd;
+  stroke-width: 2;
+  transition:
+    fill 0.3s,
+    stroke 0.3s,
+    opacity 0.3s;
+}
+
+.scd-node text {
+  font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+  font-size: 12px;
+  fill: #7c7566;
+  transition: opacity 0.3s;
+}
+
+/* Dependiente: se re-chequea (rosa reactivo). */
+.scd-node.scd-lit circle {
+  fill: #e11d48;
+  stroke: #b0173a;
+}
+
+.scd-node.scd-lit text {
+  fill: #ffffff;
+  font-weight: 700;
+}
+
+/* Podado: el signal no lo toca. */
+.scd-node.scd-pruned circle,
+.scd-node.scd-pruned text {
+  opacity: 0.32;
+}
+
+.scd-readout {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  align-items: flex-start;
+}
+
+.scd-count {
+  margin: 0;
+  font-size: 1rem;
+  color: #5c5648;
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+}
+
+.scd-count strong {
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 1.6rem;
+  color: #e11d48;
+}
+
+.scd-contrast {
+  margin: 0;
+  font-size: 0.9rem;
+  color: #5c5648;
+}
+
+.scd-contrast strong {
+  font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+  color: #17140f;
+}
+
+@media (max-width: 720px) {
+  .scd-stage {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .scd-node circle,
+  .scd-node text {
+    transition: none;
+  }
+}

@@ -1,42 +1,58 @@
-<app-concept-card
-  concept="Zone.js avisa a Angular que pasó algo async; entonces Angular recorre el árbol (en estrategia default, entero)."
-  action="Avanzá con las flechas."
-  observe="El barrido pinta los nodos nivel por nivel (verde = revisado)."
-/>
-<div>
-  <app-node-tree [nodes]="data()" [links]="links()"></app-node-tree>
-</div>
+<section class="ocd">
+  <header class="ocd-head">
+    <p class="ocd-eyebrow">la detección de cambios "clásica"</p>
+    <h2 class="ocd-title">Zone.js revisa todo el árbol.</h2>
+    <p class="ocd-sub">
+      Angular no sabe <em>cuándo</em> ni <em>qué</em> cambió. Zone.js parchea todo lo async y le
+      avisa que "pasó algo"; sin saber qué, re-chequea el árbol entero. La respuesta a "te olvidás
+      un lugar" fue "los reviso a todos".
+    </p>
+  </header>
 
-<div class="flex justify-center space-x-4">
-  <button
-    class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded disabled:opacity-50"
-    (click)="decrementStep()"
-    [disabled]="step() === 0"
-  >
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      class="h-6 w-6"
-      fill="none"
-      viewBox="0 0 24 24"
-      stroke="currentColor"
-    >
-      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-    </svg>
-  </button>
+  <div class="ocd-apis" role="group" aria-label="APIs que Zone.js parchea">
+    <span class="ocd-apis-hint">Zone.js parchea:</span>
+    @for (api of patchedApis; track api) {
+      <button class="ocd-api" (click)="trigger(api)">{{ api }}</button>
+    }
+  </div>
 
-  <button
-    class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded disabled:opacity-50"
-    (click)="incrementStep()"
-    [disabled]="step() === 6"
-  >
+  <div class="ocd-stage">
     <svg
-      xmlns="http://www.w3.org/2000/svg"
-      class="h-6 w-6"
-      fill="none"
-      viewBox="0 0 24 24"
-      stroke="currentColor"
+      class="ocd-tree"
+      viewBox="0 0 340 240"
+      role="img"
+      aria-label="Árbol DOM: Zone.js re-chequea todos los nodos"
     >
-      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+      @for (path of edgePaths; track path) {
+        <path class="ocd-edge" [attr.d]="path" />
+      }
+      @for (node of nodes; track node.id) {
+        <g class="ocd-node" [class.ocd-swept]="swept()">
+          <circle
+            [attr.cx]="node.x"
+            [attr.cy]="node.y"
+            r="15"
+            [style.transition-delay]="node.depth * 0.15 + 's'"
+          />
+          <text [attr.x]="node.x" [attr.y]="node.y + 4" text-anchor="middle">{{ node.label }}</text>
+        </g>
+      }
     </svg>
-  </button>
-</div>
+
+    <div class="ocd-readout">
+      @if (lastTrigger()) {
+        <p class="ocd-fired">
+          <code>{{ lastTrigger() }}</code> disparó algo → Zone.js avisa → Angular revisa
+        </p>
+      }
+      <p class="ocd-count">
+        nodos re-chequeados:
+        <strong>{{ rechecked() }} / {{ total }}</strong>
+        @if (swept()) {
+          <span class="ocd-all">todos</span>
+        }
+      </p>
+      <button class="ocd-reset" (click)="reset()">Reiniciar</button>
+    </div>
+  </div>
+</section>

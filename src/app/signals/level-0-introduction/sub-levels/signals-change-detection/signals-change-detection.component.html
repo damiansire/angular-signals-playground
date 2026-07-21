@@ -1,9 +1,52 @@
-<app-concept-card
-  concept="Cuando cambia un signal, Angular re-chequea SOLO los componentes que lo consumen (no todo el árbol) y, dentro de cada uno, re-evalúa sus bindings."
-  action="Compará el diagrama NgZone contra signals."
-  observe="Con OnPush + zoneless, Angular poda los subárboles que no cambiaron en vez de recorrerlos enteros."
-/>
-<img
-  src="/assets/images/signals/ng_zone_vs_signal.gif"
-  alt="Comparación animada entre la detección de cambios con NgZone y con signals"
-/>
+<section class="scd">
+  <header class="scd-head">
+    <p class="scd-eyebrow">la detección con signals</p>
+    <h2 class="scd-title">El signal avisa quién lo lee.</h2>
+    <p class="scd-sub">
+      Cuando cambia un signal, Angular re-chequea <em>solo</em> los nodos que lo leen y poda el
+      resto del árbol. Sin barrer todo, sin Zone.js.
+    </p>
+  </header>
+
+  <div class="scd-actions">
+    <button class="scd-change" (click)="changeSignal()">count.set(1)</button>
+    <button class="scd-reset" (click)="reset()">Reiniciar</button>
+  </div>
+
+  <div class="scd-stage">
+    <svg
+      class="scd-tree"
+      viewBox="0 0 340 240"
+      role="img"
+      aria-label="Árbol DOM: con signals solo se re-chequean los nodos dependientes"
+    >
+      @for (path of edgePaths; track path) {
+        <path class="scd-edge" [attr.d]="path" />
+      }
+      @for (node of nodes; track node.id) {
+        <g
+          class="scd-node"
+          [class.scd-lit]="changed() && isDependent(node.id)"
+          [class.scd-pruned]="changed() && !isDependent(node.id)"
+        >
+          <circle [attr.cx]="node.x" [attr.cy]="node.y" r="15" />
+          <text [attr.x]="node.x" [attr.y]="node.y + 4" text-anchor="middle">{{ node.label }}</text>
+        </g>
+      }
+    </svg>
+
+    <div class="scd-readout">
+      <p class="scd-count">
+        nodos re-chequeados:
+        <strong>{{ changed() ? recheckedSignals : 0 }} / {{ recheckedZone }}</strong>
+      </p>
+      @if (changed()) {
+        <p class="scd-contrast">
+          Zone.js habría revisado los <strong>{{ recheckedZone }}</strong
+          >. El signal tocó <strong>{{ recheckedSignals }}</strong
+          >.
+        </p>
+      }
+    </div>
+  </div>
+</section>
