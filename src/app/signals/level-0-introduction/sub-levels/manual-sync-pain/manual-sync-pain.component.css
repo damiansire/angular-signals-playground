@@ -1,0 +1,243 @@
+/* Clases con prefijo `msp-`: se embebe en la vista integrada, que estampa su enc; sin prefijo,
+   las clases del motor de la molécula pisarían las nuestras. */
+:host {
+  display: block;
+  width: 100%;
+  max-width: 82rem;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+  color: #1c1e24;
+}
+
+.msp {
+  display: flex;
+  flex-direction: column;
+  gap: 1.4rem;
+}
+
+.msp-head {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.msp-eyebrow {
+  margin: 0;
+  font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+  font-size: 0.72rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #8a8172;
+}
+
+.msp-title {
+  margin: 0;
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: clamp(1.9rem, 3.6vw, 2.9rem);
+  line-height: 1.05;
+  letter-spacing: -0.01em;
+  color: #17140f;
+  text-wrap: balance;
+}
+
+.msp-sub {
+  margin: 0;
+  max-width: 56ch;
+  font-size: 1rem;
+  color: #5c5648;
+}
+
+.msp-sub code {
+  font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+  font-size: 0.9em;
+  color: #17140f;
+}
+
+/* Toggle handler incompleto / completo. */
+.msp-toggle {
+  display: inline-flex;
+  gap: 0.4rem;
+  align-self: flex-start;
+}
+
+.msp-tab {
+  font: inherit;
+  font-size: 0.85rem;
+  padding: 0.4rem 0.85rem;
+  border-radius: 0.5rem;
+  border: 1px solid #cfc9bd;
+  background: transparent;
+  color: #7c7566;
+  cursor: pointer;
+  transition:
+    border-color 0.15s,
+    color 0.15s;
+}
+
+/* En la molécula el card impone fondo oscuro a los botones; marcamos el activo con
+   propiedades que esa regla no toca: `outline` + `opacity` (mismo recurso que dom-to-pixel). */
+.msp-tab:not(.msp-on) {
+  opacity: 0.5;
+}
+
+.msp-tab.msp-on {
+  border-color: #17140f;
+  color: #17140f;
+  font-weight: 600;
+  outline: 2px solid #e0a13a;
+  outline-offset: 2px;
+}
+
+.msp-tab:focus-visible {
+  outline: 2px solid #2563eb;
+  outline-offset: 2px;
+}
+
+/* Escena: código a la izquierda, spots del DOM a la derecha. */
+.msp-stage {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+  gap: 1.5rem;
+  align-items: start;
+}
+
+.msp-left {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.msp-code {
+  margin: 0;
+  font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+  font-size: 0.8rem;
+  line-height: 1.7;
+  background: #14120e;
+  color: #cfc7b6;
+  padding: 1rem 1.1rem;
+  border-radius: 0.6rem;
+  overflow-x: auto;
+}
+
+.msp-cmt {
+  color: #7d7660;
+}
+
+.msp-hl {
+  color: #f0ede4;
+}
+
+.msp-added {
+  color: #6ac48f;
+}
+
+.msp-hidden {
+  display: none;
+}
+
+.msp-actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.msp-inc {
+  font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+  font-size: 0.85rem;
+  padding: 0.5rem 1rem;
+  border-radius: 0.6rem;
+  border: 1px solid #17140f;
+  background: #17140f;
+  color: #ffffff;
+  cursor: pointer;
+  transition: transform 0.06s;
+}
+
+.msp-inc:active {
+  transform: translateY(1px);
+}
+
+.msp-inc:focus-visible {
+  outline: 2px solid #e0a13a;
+  outline-offset: 2px;
+}
+
+.msp-lines {
+  font-size: 0.9rem;
+  color: #5c5648;
+}
+
+.msp-lines strong {
+  font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+  color: #17140f;
+}
+
+/* Los tres lugares del DOM y su valor renderizado. */
+.msp-spots {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.msp-spot {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.7rem 0.95rem;
+  border-radius: 0.6rem;
+  border: 1.5px solid #dcd6ca;
+  background: rgba(255, 255, 255, 0.55);
+  transition:
+    border-color 0.3s,
+    background 0.3s;
+}
+
+.msp-spot-label {
+  flex: 1;
+  font-size: 0.95rem;
+  color: #5c5648;
+}
+
+.msp-spot-val {
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 1.4rem;
+  line-height: 1;
+  color: #17140f;
+}
+
+.msp-spot.msp-stale {
+  border-color: #d92626;
+  background: #fdecec;
+}
+
+.msp-spot.msp-stale .msp-spot-val {
+  color: #d92626;
+}
+
+.msp-badge {
+  font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: #d92626;
+  background: rgba(217, 38, 38, 0.12);
+  padding: 0.2rem 0.5rem;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+@media (max-width: 720px) {
+  .msp-stage {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .msp-spot {
+    transition: none;
+  }
+}

@@ -1,0 +1,46 @@
+<section class="msp">
+  <header class="msp-head">
+    <p class="msp-eyebrow">un estado, muchos lugares en el DOM</p>
+    <h2 class="msp-title">A mano, te olvidás un lugar.</h2>
+    <p class="msp-sub">
+      El mismo <code>count</code> alimenta tres vistas. Con el handler escrito a mano tenés que
+      actualizar cada una: si te falta alguna, queda vieja. Ese es el bug que los signals borran.
+    </p>
+  </header>
+
+  <div class="msp-toggle" role="group" aria-label="Versión del handler">
+    <button class="msp-tab" [class.msp-on]="!handlerComplete()" (click)="setComplete(false)">
+      handler incompleto
+    </button>
+    <button class="msp-tab" [class.msp-on]="handlerComplete()" (click)="setComplete(true)">
+      handler completo
+    </button>
+  </div>
+
+  <div class="msp-stage">
+    <div class="msp-left">
+      <pre
+        class="msp-code"
+      ><span class="msp-hl">{{ handlerBase }}</span><span class="msp-added" [class.msp-hidden]="!handlerComplete()">{{ handlerAdded }}</span><span class="msp-cmt">{{ handlerClose }}</span></pre>
+
+      <div class="msp-actions">
+        <button class="msp-inc" (click)="increment()">increment()</button>
+        <span class="msp-lines"
+          >líneas de sync que mantenés a mano: <strong>{{ syncLines() }}</strong></span
+        >
+      </div>
+    </div>
+
+    <ul class="msp-spots">
+      @for (spot of spots; track spot.id) {
+        <li class="msp-spot" [class.msp-stale]="isStale(spot.id)">
+          <span class="msp-spot-label">{{ spot.label }}</span>
+          <span class="msp-spot-val">{{ rendered()[spot.id] }}</span>
+          @if (isStale(spot.id)) {
+            <span class="msp-badge">quedó viejo ✗</span>
+          }
+        </li>
+      }
+    </ul>
+  </div>
+</section>
