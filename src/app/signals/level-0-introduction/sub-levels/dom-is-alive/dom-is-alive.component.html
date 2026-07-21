@@ -1,0 +1,35 @@
+<section class="dia">
+  <header class="dia-head">
+    <p class="dia-eyebrow">actualizar la pantalla = mutar un nodo</p>
+    <h2 class="dia-title">El DOM está vivo.</h2>
+    <p class="dia-sub">
+      JS entra al árbol, encuentra el nodo con <code>querySelector</code> y le cambia el texto.
+      Corré una línea y miralo.
+    </p>
+  </header>
+
+  <div class="dia-console">
+    @for (m of mutations; track m.id) {
+      <button class="dia-run" (click)="run(m)">
+        <span class="dia-run-icon" aria-hidden="true">▸</span>
+        <code>{{ m.code }}</code>
+      </button>
+    }
+  </div>
+
+  <div class="dia-dom" role="group" aria-label="Nodos del DOM">
+    @for (node of dom(); track node.id) {
+      <div class="dia-node" [class.dia-touched]="isTouched(node.id)">
+        <span class="dia-node-sel">{{ node.selector }}</span>
+        <span class="dia-node-val">{{ node.text }}</span>
+        @if (isTouched(node.id)) {
+          @for (r of [runId()]; track r) {
+            <span class="dia-ping" aria-hidden="true"></span>
+          }
+        }
+      </div>
+    }
+  </div>
+
+  <button class="dia-reset" (click)="reset()">Reiniciar el DOM</button>
+</section>

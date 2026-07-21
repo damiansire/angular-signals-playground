@@ -1,0 +1,201 @@
+/* Clases con prefijo `dia-`: este componente se embebe en la vista integrada, que estampa
+   su propio atributo de encapsulación; sin prefijo, clases del motor de la molécula pisan
+   las nuestras. */
+:host {
+  display: block;
+  width: 100%;
+  max-width: 82rem;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+  color: #1c1e24;
+}
+
+.dia {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.dia-head {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.dia-eyebrow {
+  margin: 0;
+  font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+  font-size: 0.72rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #8a8172;
+}
+
+.dia-title {
+  margin: 0;
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: clamp(1.9rem, 3.6vw, 2.9rem);
+  line-height: 1.05;
+  letter-spacing: -0.01em;
+  color: #17140f;
+  text-wrap: balance;
+}
+
+.dia-sub {
+  margin: 0;
+  max-width: 52ch;
+  font-size: 1rem;
+  color: #5c5648;
+}
+
+.dia-sub code {
+  font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+  font-size: 0.9em;
+  color: #17140f;
+}
+
+/* Consola: cada línea de JS es un botón que corre la mutación. */
+.dia-console {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  align-items: flex-start;
+}
+
+.dia-run {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  max-width: 100%;
+  padding: 0.55rem 0.9rem;
+  border-radius: 0.6rem;
+  border: 1px solid #2b2822;
+  background: #14120e;
+  color: #f0ede4;
+  cursor: pointer;
+  text-align: left;
+  transition:
+    border-color 0.15s,
+    transform 0.06s;
+}
+
+.dia-run:hover {
+  border-color: #6ac48f;
+}
+
+.dia-run:active {
+  transform: translateY(1px);
+}
+
+.dia-run:focus-visible {
+  outline: 2px solid #6ac48f;
+  outline-offset: 2px;
+}
+
+.dia-run-icon {
+  color: #6ac48f;
+  font-size: 0.8rem;
+}
+
+.dia-run code {
+  font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+  font-size: 0.8rem;
+  overflow-x: auto;
+}
+
+/* El "DOM" vivo: los nodos y su valor actual. */
+.dia-dom {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.dia-node {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  min-width: 9rem;
+  padding: 0.9rem 1.1rem;
+  border-radius: 0.75rem;
+  border: 1.5px solid #dcd6ca;
+  background: rgba(255, 255, 255, 0.55);
+  transition:
+    border-color 0.3s,
+    background 0.3s;
+}
+
+.dia-node.dia-touched {
+  border-color: #2563eb;
+  background: #eef3ff;
+}
+
+.dia-node-sel {
+  font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+  font-size: 0.75rem;
+  color: #8a8172;
+}
+
+.dia-node.dia-touched .dia-node-sel {
+  color: #2563eb;
+}
+
+.dia-node-val {
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 1.6rem;
+  line-height: 1.1;
+  color: #17140f;
+}
+
+/* Ping one-shot en el nodo tocado (sin loop perpetuo). */
+.dia-ping {
+  position: absolute;
+  inset: -5px;
+  border-radius: 0.9rem;
+  border: 2px solid #2563eb;
+  pointer-events: none;
+  animation: dia-ping 0.6s ease-out forwards;
+}
+
+@keyframes dia-ping {
+  from {
+    transform: scale(0.92);
+    opacity: 0.8;
+  }
+  to {
+    transform: scale(1.22);
+    opacity: 0;
+  }
+}
+
+.dia-reset {
+  align-self: flex-start;
+  font: inherit;
+  font-size: 0.85rem;
+  padding: 0.4rem 0.85rem;
+  border-radius: 0.5rem;
+  border: 1px solid #cfc9bd;
+  background: transparent;
+  color: #5c5648;
+  cursor: pointer;
+  transition: border-color 0.15s;
+}
+
+.dia-reset:hover {
+  border-color: #8a8172;
+}
+
+.dia-reset:focus-visible {
+  outline: 2px solid #2563eb;
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dia-node {
+    transition: none;
+  }
+  .dia-ping {
+    animation: none;
+    display: none;
+  }
+}
