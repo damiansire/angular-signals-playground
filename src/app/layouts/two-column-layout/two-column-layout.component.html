@@ -1,5 +1,7 @@
 <section class="flex text-center">
-  <app-title [title]="title()" class="flex-grow"></app-title>
+  @if (title()) {
+    <app-title [title]="title()" class="flex-grow"></app-title>
+  }
   <ng-content select="[menuRight]" class="content-center"></ng-content>
 </section>
 <div class="relative flex items-start gap-8 mt-5">
