@@ -17,7 +17,7 @@ import { ReadOnlySignalsComponent } from './signals/level-1-interaction-with-sig
 import { HtmlToTreeComponent } from './signals/level-0-introduction/sub-levels/html-to-tree/html-to-tree.component';
 import { OldChangeDetectionComponent } from './signals/level-0-introduction/sub-levels/old-change-detection/old-change-detection.component';
 import { SignalsChangeDetectionComponent } from './signals/level-0-introduction/sub-levels/signals-change-detection/signals-change-detection.component';
-import { VariableRefreshAndTreeComponent } from './signals/level-0-introduction/sub-levels/variable-refresh-and-tree/variable-refresh-and-tree.component';
+import { ManualSyncPainComponent } from './signals/level-0-introduction/sub-levels/manual-sync-pain/manual-sync-pain.component';
 import { DomToPixelComponent } from './signals/level-0-introduction/sub-levels/dom-to-pixel/dom-to-pixel.component';
 import { DomIsAliveComponent } from './signals/level-0-introduction/sub-levels/dom-is-alive/dom-is-alive.component';
 import { VariablesComponent } from './signals/level-1-interaction-with-signals/sub-levels/variables/variables.component';
@@ -57,7 +57,7 @@ export const signalsRoutesTree: RouteItem[] = [
       { path: '1', component: HtmlToTreeComponent },
       { path: '2', component: DomIsAliveComponent },
       { path: '3', component: DomToPixelComponent },
-      { path: '4', component: VariableRefreshAndTreeComponent },
+      { path: '4', component: ManualSyncPainComponent },
       { path: '5', component: OldChangeDetectionComponent },
       { path: '6', component: SignalsChangeDetectionComponent },
     ],
