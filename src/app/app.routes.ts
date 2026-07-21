@@ -25,6 +25,7 @@ import { OldChangeDetectionComponent } from './signals/level-0-introduction/sub-
 import { SignalsChangeDetectionComponent } from './signals/level-0-introduction/sub-levels/signals-change-detection/signals-change-detection.component';
 import { VariableRefreshAndTreeComponent } from './signals/level-0-introduction/sub-levels/variable-refresh-and-tree/variable-refresh-and-tree.component';
 import { DomToPixelComponent } from './signals/level-0-introduction/sub-levels/dom-to-pixel/dom-to-pixel.component';
+import { DomIsAliveComponent } from './signals/level-0-introduction/sub-levels/dom-is-alive/dom-is-alive.component';
 import { VariablesComponent } from './signals/level-1-interaction-with-signals/sub-levels/variables/variables.component';
 import { LinkedSignalLevelComponent } from './signals/level-5-linked-signal/linked-signal-level.component';
 import { BasicLinkedSignalComponent } from './signals/level-5-linked-signal/sub-levels/1-basic-linked-signal/basic-linked-signal.component';
@@ -63,10 +64,11 @@ export const signalsRoutesTree: RouteItem[] = [
     component: IntroductionComponent,
     subLevels: [
       { path: '1', component: HtmlToTreeComponent },
-      { path: '2', component: DomToPixelComponent },
-      { path: '3', component: VariableRefreshAndTreeComponent },
-      { path: '4', component: OldChangeDetectionComponent },
-      { path: '5', component: SignalsChangeDetectionComponent },
+      { path: '2', component: DomIsAliveComponent },
+      { path: '3', component: DomToPixelComponent },
+      { path: '4', component: VariableRefreshAndTreeComponent },
+      { path: '5', component: OldChangeDetectionComponent },
+      { path: '6', component: SignalsChangeDetectionComponent },
     ],
   },
   {
