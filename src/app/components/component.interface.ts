@@ -15,7 +15,9 @@ export interface HistoryElement {
 
 export interface RouteItem {
   path: string;
-  component: Type<unknown>; // Asegúrate de importar tus componentes
+  // Los niveles no llevan componente propio (en la molécula son átomos, no páginas);
+  // sí lo llevan los sub-niveles, que la vista integrada embebe.
+  component?: Type<unknown>;
   subLevels?: RouteItem[];
 }
 

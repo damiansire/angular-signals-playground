@@ -42,8 +42,10 @@ export class IntegradaVistaComponent {
   private readonly appRef = inject(ApplicationRef);
   private readonly location = inject(Location);
 
-  /** Componentes reales de cada sub-nivel, por concepto (del árbol de rutas de /signals). */
-  private readonly subComponents: Type<unknown>[][] = signalsRoutesTree.map((lvl) =>
+  /** Componentes reales de cada sub-nivel, por concepto (del árbol de conceptos). Un sub-nivel
+   *  siempre trae componente; el tipo admite `undefined` porque `RouteItem.component` es opcional
+   *  (los niveles no lo llevan) y `mountSub` ya cubre el caso faltante. */
+  private readonly subComponents: (Type<unknown> | undefined)[][] = signalsRoutesTree.map((lvl) =>
     (lvl.subLevels ?? []).map((sl) => sl.component),
   );
 
