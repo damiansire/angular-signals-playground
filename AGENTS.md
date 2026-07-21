@@ -73,7 +73,6 @@ realmente tocás; no inventes scopes nuevos.
 | `src/app/integrada-vista/` | Vista integrada: recorrido molécula de los 12 niveles, entrada por defecto (ruta `/`) | `integrada` |
 | `src/app/practice/`     | Ejemplos aplicados para usar lo aprendido (`/practica/*`) | `practice`   |
 | `src/app/signals/`      | Los niveles de aprendizaje (0–11) y sus sub-niveles      | `signals`    |
-| `src/app/lab/`          | Signals Lab: bench-frame, hub e instrumentos             | `lab`        |
 | `src/app/components/`   | Componentes de feature (sidebar, histories, trees…)      | `components` |
 | `src/app/components-atom/` | Bloques atómicos de UI (button, code, input, title…)  | `atom`       |
 | `src/app/components-draw/` | Componentes de dibujo/visualización                   | `draw`       |
@@ -148,8 +147,9 @@ falta o hay que sostener:
   también sirve de `og:image`. Captura tomada vía `chrome-devtools` (el Browser
   pane cuelga con esta app, ver la receta de verificación arriba).
 - **Fail-fast en los pocos boundaries async** (ítem i): si se agrega fetch de
-  datos o timers en `lab/`, van con timeout/cleanup explícito (`effect` con
-  `onCleanup`, no un `setTimeout` suelto).
+  datos o timers (p.ej. en `signals/level-6-resource/` o `level-10-debounced/`),
+  van con timeout/cleanup explícito (`effect` con `onCleanup`, no un `setTimeout`
+  suelto).
 
 Gap de corpus: ninguno para este stack — `refs/angular/` tiene notas
 distiladas (`from-ngrx-platform`, `from-angular-components`,

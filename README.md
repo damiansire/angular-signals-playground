@@ -41,12 +41,6 @@ The content is organized as progressive **levels**, each with focused sub-levels
 | **10** | Debounced signals | A debounced value, two ways: RxJS (`debounceTime`) and by hand (`effect` + `onCleanup`) |
 | **11** | Capstone: zoneless | Why signals + OnPush let Angular drop Zone.js (`provideZonelessChangeDetection()`) |
 
-### Signals Lab 🧪
-
-Beyond the levels there's a **Lab** (`/lab`) — a "workbench" of small instruments
-(signal flow, an effect *oscilloscope*, reactive cells for `computed`, and a manual
-playground) to experiment freely.
-
 ## Getting started
 
 ```bash
@@ -87,7 +81,6 @@ src/app/
 ├── integrada-vista/  # The default entry (/): the "reactive molecule" tour of the 12 concepts
 ├── signals/          # The learning levels (0–11) and their sub-levels
 ├── practice/         # Applied examples that use what you learned (/practica/*)
-├── lab/              # Signals Lab: bench-frame, hub and instruments
 ├── components/       # Feature components (sidebar menu, histories, trees…)
 ├── components-atom/  # Atomic UI building blocks (button, code, input, title…)
 ├── components-draw/  # Drawing/visualization components (variable boxes, node tree)
