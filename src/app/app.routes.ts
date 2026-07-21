@@ -37,11 +37,6 @@ import { OnCleanupComponent } from './signals/level-9-after-render-effect/sub-le
 import { DebouncedRxjsComponent } from './signals/level-10-debounced/sub-levels/1-debounced-rxjs/debounced-rxjs.component';
 import { DebouncedManualComponent } from './signals/level-10-debounced/sub-levels/2-debounced-manual/debounced-manual.component';
 import { ZonelessComponent } from './signals/level-11-zoneless/sub-levels/1-zoneless/zoneless.component';
-import { SignalFlowComponent } from './lab/instruments/signal-flow/signal-flow.component';
-import { OscilloscopeComponent } from './lab/instruments/oscilloscope/oscilloscope.component';
-import { ReactiveCellsComponent } from './lab/instruments/reactive-cells/reactive-cells.component';
-import { ManualComponent } from './lab/instruments/manual/manual.component';
-import { LabHubComponent } from './lab/lab-hub/lab-hub.component';
 import { CartExampleComponent } from './practice/cart/cart-example.component';
 import { IntegradaVistaComponent } from './integrada-vista/integrada-vista.component';
 
@@ -149,15 +144,10 @@ export const signalsRoutesTree: RouteItem[] = [
 ];
 
 export const routes: Routes = [
-  // Lab multi-estética (instrumentos sobre el mismo banco)
-  { path: 'lab', component: LabHubComponent },
-  { path: 'lab/signal', component: SignalFlowComponent },
-  { path: 'lab/effect', component: OscilloscopeComponent },
-  { path: 'lab/computed', component: ReactiveCellsComponent },
-  { path: 'lab/manual', component: ManualComponent },
   { path: 'practica/carrito', component: CartExampleComponent },
   // La vista integrada (recorrido molécula) ES la raíz `/`: es la entrada.
   { path: '', component: IntegradaVistaComponent },
-  // Cualquier URL desconocida (incluidos bookmarks viejos como /signals/level/... o /poc) rebota a la raíz.
+  // Cualquier URL desconocida (incluidos bookmarks viejos como /signals/level/..., /lab o /poc)
+  // rebota a la raíz.
   { path: '**', redirectTo: '' },
 ];
