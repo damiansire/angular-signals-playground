@@ -170,12 +170,15 @@
   display: flex;
   align-items: baseline;
   gap: 0.5rem;
+  flex-wrap: wrap;
+  hyphens: none;
 }
 
 .scd-count strong {
   font-family: Georgia, 'Times New Roman', serif;
   font-size: 1.6rem;
   color: #e11d48;
+  white-space: nowrap;
 }
 
 .scd-contrast {

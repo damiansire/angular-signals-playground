@@ -24,6 +24,8 @@
    el motor de la molécula, que estampa su enc sobre lo embebido. */
 :host {
   display: block;
+  max-width: 82rem;
+  margin: 0 auto;
   color: #1c1e24;
 }
 

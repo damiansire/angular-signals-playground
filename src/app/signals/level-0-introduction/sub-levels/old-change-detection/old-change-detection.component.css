@@ -170,6 +170,7 @@
   font-family: Georgia, 'Times New Roman', serif;
   font-size: 1.6rem;
   color: #c07a12;
+  white-space: nowrap;
 }
 
 .ocd-all {
