@@ -27,10 +27,11 @@ const NODE_SYMBOL_WIDTH = 78;
   styleUrl: './node-tree.component.css',
 })
 export class NodeTreeComponent {
-  // Solo alto explícito (el ancho lo lee del DOM): un `width` fijo pinea el canvas y `resize()`
-  // no lo achica, desbordando en cards angostas. El card ya está montado y visible cuando se crea
-  // el sub-nivel, así que el ancho del DOM es > 0 (el caso 0px que se temía no se da acá).
-  protected readonly INIT_OPTS = { height: 400 };
+  // Dimensiones de arranque explícitas: echarts v6 LANZA si hace el primer setOption sobre un
+  // contenedor de 0px, y en la molécula el card puede montarse en 0px (mid-animación). El ancho
+  // fijo evita eso; después `onChartInit` lo corrige al ancho real del DOM (con dims explícitas,
+  // no `resize()` a secas, que no destraba el ancho de arranque).
+  protected readonly INIT_OPTS = { width: 800, height: 400 };
 
   readonly nodes = input<NodeTree[]>([]);
   readonly links = input<Link[]>([]);
@@ -107,15 +108,19 @@ export class NodeTreeComponent {
 
   onChartInit(instance: ECharts) {
     this.chart = instance;
-    // El canvas arranca con `INIT_OPTS` (width 800) para no romper si el card se monta en 0px. En el
-    // montaje imperativo de la vista integrada el autoResize de ngx-echarts no dispara, dejando el
-    // canvas en 800 (desborda en anchos angostos). Observamos el contenedor nosotros y forzamos
-    // `resize()` al tamaño real ante cada cambio (incluido el primer settle del layout).
+    // El canvas arranca con `INIT_OPTS` (width 800, para no romper en 0px). En el montaje imperativo
+    // de la molécula el autoResize de ngx-echarts no dispara, dejando el canvas en 800 (desborda en
+    // cards angostas). Observamos el contenedor y forzamos las dimensiones REALES del DOM: `resize()`
+    // sin args no destraba el ancho de arranque, hay que pasarlas explícitas.
     const dom = instance.getDom();
-    this.resizeObserver = new ResizeObserver(() => {
-      if (!this.destroyed) instance.resize();
-    });
+    const applySize = (): void => {
+      if (this.destroyed) return;
+      const width = dom.clientWidth;
+      if (width > 0) instance.resize({ width, height: dom.clientHeight || 400 });
+    };
+    this.resizeObserver = new ResizeObserver(applySize);
     this.resizeObserver.observe(dom);
+    applySize();
     this.emitViewChanged();
   }
 
