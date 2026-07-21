@@ -135,8 +135,8 @@ export class HtmlToTreeComponent {
     this.parsePlaying.set(false);
   }
 
-  /** Total de tags revelables = nodos del árbol (en orden de documento). Lo consume el motor del
-   *  recorrido para gatear el scroll: no te deja pasar al siguiente sub-nivel hasta revelarlos todos. */
+  /** Total de tags revelables = nodos del árbol (en orden de documento). Lo usa `playParse` para
+   *  saber cuántos pasos revelar al "leer el HTML" de corrido. */
   revealStepCount(): number {
     return this.treeRef()?.nodesData().length ?? 0;
   }

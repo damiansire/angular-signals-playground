@@ -102,7 +102,7 @@ describe('CONCEPT_COUNT — RAW ↔ signalsRoutesTree acoplados por índice', ()
 
   it('initMolecule falla ruidoso si subCounts no coincide con RAW', () => {
     const root = document.createElement('div');
-    const mountStub = () => ({ dispose: () => undefined, reveal: null });
+    const mountStub = () => ({ dispose: () => undefined });
     expect(() =>
       initMolecule(root, mountStub, [1, 2, 3], null, () => undefined, null),
     ).toThrowError(/subCounts tiene 3 conceptos pero RAW tiene 12/);

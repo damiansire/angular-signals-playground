@@ -22,16 +22,9 @@ const COL: Record<AccentKey, string> = {
   capstone: '#c98a2a',
 };
 
-/** API opcional de un sub-nivel que revela sus elementos de a uno (hoy, html-to-tree): el motor
- *  la usa para GATEAR el scroll — cada paso revela un tag y no te deja pasar hasta terminarlos. */
-export interface RevealApi {
-  steps: number;
-  to: (n: number) => void;
-}
-/** Handle de un sub-nivel montado: su disposer + (si aplica) su API de reveal. */
+/** Handle de un sub-nivel montado: su disposer. */
 export interface SubHandle {
   dispose: () => void;
-  reveal: RevealApi | null;
 }
 /** Monta el componente real de un sub-nivel (concepto ci, sub si) y devuelve su handle. */
 export type MountSub = (host: HTMLElement, conceptIdx: number, subIdx: number) => SubHandle;
@@ -52,7 +45,6 @@ interface Concept extends RawConcept {
   card?: HTMLDivElement;
   subIdx: number;
   subDispose?: () => void; // disposer del componente montado del sub actual
-  subReveal?: RevealApi | null; // API de reveal del sub actual (si expone una), para gatear el scroll
   exampleTitle?: string; // título del sub-ejemplo actual (h1 del componente montado), para el topbar
 }
 
@@ -574,7 +566,6 @@ export function initMolecule(
     host.textContent = '';
     const handle = mountSub(host, C.indexOf(cc), cc.subIdx);
     cc.subDispose = handle.dispose;
-    cc.subReveal = handle.reveal;
     // Re-estampar: cada mount trae su propio árbol nuevo (Angular no le pone el atributo
     // de encapsulación de integrada-vista), así que sin esto el CSS de armonización de
     // .subhost (h1/botones) nunca matchea nada.
@@ -833,20 +824,6 @@ export function initMolecule(
     railNodes.push(nd);
   }
 
-  // ---- Gate de reveal (hoy html-to-tree): mientras estás parado en un sub-nivel que revela sus
-  // elementos de a uno, el scroll NO avanza — cada paso revela/oculta un tag (click real) hasta
-  // terminarlos, para no pasarse sin querer. `render` arma/desarma el gate según dónde estás. ----
-  let activeReveal: RevealApi | null = null; // API del sub actual si está asentado y es "revelable"
-  let revealN = 0; // cuántos tags revelados ahora
-  let gateReady = false; // ¿estamos asentados en el sub revelable? (gate activo)
-  let lastRenderS = 0; // posición previa, para saber la dirección de entrada
-  // Un scroll ARRANCA la generación completa del árbol: los tags se revelan de a uno en el tiempo
-  // hasta terminar, y mientras corre el avance queda bloqueado (autoReveal != null). La animación de
-  // cada nodo es el feedback (sin indicador extra). Con reduce-motion se salta directo al final.
-  let autoReveal: number | null = null; // handle del timer del auto-play (null = no está generando)
-  const AUTO_REVEAL_MS = 340; // intervalo entre tags durante la generación automática
-  const HTT_STOP = off[0] + subStopOffset(0); // parada de scroll de html-to-tree (concepto 0, sub 0)
-
   // ---- render(s): dibuja el estado del recorrido en la posición de scroll s (0..TOTAL) ----
   function render(sIn: number): void {
     const s = Math.max(0, Math.min(TOTAL - 0.0001, sIn));
@@ -1086,23 +1063,6 @@ export function initMolecule(
       onWhere(cForUrl, subNow);
     }
 
-    // Arma/desarma el gate de reveal. "Asentado" = adentro (diveDepth alto), cerca de la parada del
-    // sub revelable, y con el componente ya sabiendo cuántos pasos tiene. Al asentar recién, arranca
-    // en 0 si venís de arriba (buceo) o lleno si venís de abajo (para ir quitando al subir).
-    const revealApi = w > 1.3 && dc.subReveal ? dc.subReveal : null;
-    const settled =
-      !!revealApi && diveDepth > 0.85 && Math.abs(s - HTT_STOP) < 0.12 && revealApi.steps > 0;
-    if (settled && !gateReady && revealApi) {
-      activeReveal = revealApi;
-      revealN = lastRenderS > s + 0.02 ? revealApi.steps : 0;
-      revealApi.to(revealN);
-    }
-    gateReady = settled;
-    if (!settled) {
-      activeReveal = null;
-      cancelAutoReveal();
-    }
-    lastRenderS = s;
     // La vista se movió (scroll/nav/cambio de sub-nivel): marcamos la órbita como sucia y agendamos
     // un frame para recalcularla. Estando parado, render() no corre → no se agenda nada.
     orbitDirty = true;
@@ -1205,107 +1165,11 @@ export function initMolecule(
         : ([...stopUnits].reverse().find((s) => s < cur - eps) ?? stopUnits[0]);
     goToUnit(target);
   };
-  // Un paso del gate de reveal. Devuelve true si lo consumió (reveló/ocultó un tag); false si no hay
-  // gate o estás en el borde, y ahí el llamador deja seguir el scroll/step normal (avanza de sub-nivel).
-  const revealStep = (dir: 1 | -1): boolean => {
-    if (!gateReady || !activeReveal) return false;
-    if (dir > 0 && revealN < activeReveal.steps) {
-      revealN++;
-      activeReveal.to(revealN);
-      return true;
-    }
-    if (dir < 0 && revealN > 0) {
-      revealN--;
-      activeReveal.to(revealN);
-      return true;
-    }
-    return false;
-  };
-  const cancelAutoReveal = (): void => {
-    if (autoReveal != null) {
-      window.clearTimeout(autoReveal);
-      autoReveal = null;
-    }
-  };
-  // Dispara la generación (dir 1) o el colapso (dir -1) completos: revela un tag cada AUTO_REVEAL_MS
-  // hasta llegar al borde, y deja `autoReveal` seteado mientras corre (avance bloqueado). Idempotente:
-  // si ya está corriendo no reinicia. Con reduce-motion no impone la animación: salta al final directo.
-  const startAutoReveal = (dir: 1 | -1): void => {
-    if (autoReveal != null || !gateReady || !activeReveal) return;
-    if (reduceMotion) {
-      revealN = dir > 0 ? activeReveal.steps : 0;
-      activeReveal.to(revealN);
-      return;
-    }
-    const tick = (): void => {
-      if (!revealStep(dir)) {
-        autoReveal = null;
-        return;
-      }
-      autoReveal = window.setTimeout(tick, AUTO_REVEAL_MS);
-    };
-    tick();
-  };
-  const atRevealStop = (): boolean =>
-    gateReady && !!activeReveal && Math.abs(stage.scrollTop / unit() - HTT_STOP) <= 0.06;
-  const onPrev = (): void => {
-    if (autoReveal != null) return;
-    if (atRevealStop() && revealN > 0) {
-      startAutoReveal(-1);
-      return;
-    }
-    stepTo(-1);
-  };
-  const onNext = (): void => {
-    if (autoReveal != null) return;
-    if (atRevealStop() && activeReveal && revealN < activeReveal.steps) {
-      startAutoReveal(1);
-      return;
-    }
-    stepTo(1);
-  };
-  // Con el gate activo el wheel NO scrollea: un scroll ARRANCA la generación completa del árbol (o el
-  // colapso al subir) y el avance queda bloqueado hasta que termina. En el borde (todo revelado y
-  // bajás, o nada revelado y subís) NO se previene: ahí el scroll avanza/retrocede de sub-nivel.
-  const onWheelGate = (e: WheelEvent): void => {
-    if (!gateReady || !activeReveal) return;
-    // Sólo gateamos cuando estás REALMENTE asentado en la parada; si venís bajando/subiendo hacia
-    // ella (aún no snapeaste), dejamos que el scroll termine de aterrizar antes de empezar a revelar.
-    if (Math.abs(stage.scrollTop / unit() - HTT_STOP) > 0.06) return;
-    // Generando: el scroll queda totalmente bloqueado hasta que la animación termine.
-    if (autoReveal != null) {
-      e.preventDefault();
-      return;
-    }
-    const dir = e.deltaY > 0 ? 1 : e.deltaY < 0 ? -1 : 0;
-    if (dir === 0) return;
-    const atEdge = dir > 0 ? revealN >= activeReveal.steps : revealN <= 0;
-    if (atEdge) return;
-    e.preventDefault();
-    startAutoReveal(dir); // un solo scroll dispara la generación (o el colapso) completa
-  };
-  // Teclado. Con el gate de reveal activo y asentado en la parada, flechas / AvPág / espacio revelan
-  // u ocultan tags. Fuera del gate, las flechas ▲/▼ (y AvPág) navegan el recorrido paso a paso, para
-  // que el viaje sea accesible por teclado igual que con los botones del riel (no solo por scroll).
-  const onKeyGate = (e: KeyboardEvent): void => {
-    if (gateReady && activeReveal && Math.abs(stage.scrollTop / unit() - HTT_STOP) <= 0.06) {
-      const down = e.key === 'ArrowDown' || e.key === 'PageDown' || e.key === ' ';
-      const up = e.key === 'ArrowUp' || e.key === 'PageUp';
-      if (autoReveal != null) {
-        if (down || up) e.preventDefault(); // generando: teclas de avance bloqueadas
-        return;
-      }
-      if (down && revealN < activeReveal.steps) {
-        e.preventDefault();
-        startAutoReveal(1);
-        return;
-      }
-      if (up && revealN > 0) {
-        e.preventDefault();
-        startAutoReveal(-1);
-        return;
-      }
-    }
+  const onPrev = (): void => stepTo(-1);
+  const onNext = (): void => stepTo(1);
+  // Teclado: las flechas ▲/▼ (y AvPág) navegan el recorrido paso a paso, para que el viaje sea
+  // accesible por teclado igual que con los botones del riel (no solo por scroll).
+  const onKeyNav = (e: KeyboardEvent): void => {
     // No secuestramos las flechas dentro de un campo editable del demo (ni el espacio, que activa
     // botones): solo ▲/▼ y AvPág mueven el recorrido.
     const t = e.target as HTMLElement | null;
@@ -1320,8 +1184,7 @@ export function initMolecule(
   };
 
   stage.addEventListener('scroll', onScroll, { passive: true });
-  stage.addEventListener('wheel', onWheelGate, { passive: false });
-  window.addEventListener('keydown', onKeyGate);
+  window.addEventListener('keydown', onKeyNav);
   window.addEventListener('resize', onResize);
   // Los pasos viven arriba y abajo del riel vertical (el eje que mueven): ▲ = anterior
   // (scroll hacia 0), ▼ = siguiente (scroll hacia 11). Cada click avanza un paso del
@@ -1385,10 +1248,8 @@ export function initMolecule(
     cancelAnimationFrame(scrollAnimId);
     cancelAnimationFrame(orbitRaf);
     rafIds.forEach((id) => cancelAnimationFrame(id));
-    cancelAutoReveal();
     stage.removeEventListener('scroll', onScroll);
-    stage.removeEventListener('wheel', onWheelGate);
-    window.removeEventListener('keydown', onKeyGate);
+    window.removeEventListener('keydown', onKeyNav);
     window.removeEventListener('resize', onResize);
     window.removeEventListener('load', openAt);
     document.removeEventListener('visibilitychange', onVisibility);
