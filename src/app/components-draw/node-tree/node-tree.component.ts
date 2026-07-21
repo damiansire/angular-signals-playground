@@ -27,10 +27,10 @@ const NODE_SYMBOL_WIDTH = 78;
   styleUrl: './node-tree.component.css',
 })
 export class NodeTreeComponent {
-  // El grafo se monta embebido en cards que pueden tener 0px (u ocultas) el instante del mount.
-  // Con dimensiones explícitas de arranque, echarts NO lee el DOM en 0 (que en v6 lanza en el
-  // primer setOption, no solo warnea); el autoResize de ngx-echarts corrige al tamaño real al mostrarse.
-  protected readonly INIT_OPTS = { width: 800, height: 400 };
+  // Solo alto explícito (el ancho lo lee del DOM): un `width` fijo pinea el canvas y `resize()`
+  // no lo achica, desbordando en cards angostas. El card ya está montado y visible cuando se crea
+  // el sub-nivel, así que el ancho del DOM es > 0 (el caso 0px que se temía no se da acá).
+  protected readonly INIT_OPTS = { height: 400 };
 
   readonly nodes = input<NodeTree[]>([]);
   readonly links = input<Link[]>([]);
@@ -39,6 +39,7 @@ export class NodeTreeComponent {
   readonly viewChanged = output<void>();
 
   private chart: ECharts | null = null;
+  private resizeObserver: ResizeObserver | null = null;
   // echarts inicializa y re-pinta de forma asíncrona; sin esta guarda, un evento tardío
   // puede emitir después de que el componente ya fue destruido (NG0953).
   private destroyed = false;
@@ -46,6 +47,7 @@ export class NodeTreeComponent {
   constructor() {
     inject(DestroyRef).onDestroy(() => {
       this.destroyed = true;
+      this.resizeObserver?.disconnect();
       // ngx-echarts no dispone la instancia al destruirse: sin esto, el canvas y sus
       // listeners quedan vivos en el DOM más allá de la vida del componente.
       this.chart?.dispose();
@@ -105,6 +107,15 @@ export class NodeTreeComponent {
 
   onChartInit(instance: ECharts) {
     this.chart = instance;
+    // El canvas arranca con `INIT_OPTS` (width 800) para no romper si el card se monta en 0px. En el
+    // montaje imperativo de la vista integrada el autoResize de ngx-echarts no dispara, dejando el
+    // canvas en 800 (desborda en anchos angostos). Observamos el contenedor nosotros y forzamos
+    // `resize()` al tamaño real ante cada cambio (incluido el primer settle del layout).
+    const dom = instance.getDom();
+    this.resizeObserver = new ResizeObserver(() => {
+      if (!this.destroyed) instance.resize();
+    });
+    this.resizeObserver.observe(dom);
     this.emitViewChanged();
   }
 
