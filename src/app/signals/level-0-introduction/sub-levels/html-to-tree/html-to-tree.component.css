@@ -19,3 +19,75 @@
     animation: none;
   }
 }
+
+/* Header al lenguaje nuevo (reemplaza el ConceptCard). Clases `htt-` para no colisionar con
+   el motor de la molécula, que estampa su enc sobre lo embebido. */
+:host {
+  display: block;
+  color: #1c1e24;
+}
+
+.htt-head {
+  max-width: 82rem;
+  margin: 0 auto 1.2rem;
+  padding: 0 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  align-items: flex-start;
+}
+
+.htt-eyebrow {
+  margin: 0;
+  font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+  font-size: 0.72rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #8a8172;
+}
+
+.htt-title {
+  margin: 0;
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: clamp(1.9rem, 3.6vw, 2.9rem);
+  line-height: 1.05;
+  letter-spacing: -0.01em;
+  color: #17140f;
+  text-wrap: balance;
+}
+
+.htt-sub {
+  margin: 0;
+  max-width: 58ch;
+  font-size: 1rem;
+  color: #5c5648;
+}
+
+.htt-play {
+  margin-top: 0.5rem;
+  font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+  font-size: 0.85rem;
+  padding: 0.5rem 1rem;
+  border-radius: 0.6rem;
+  border: 1px solid #17140f;
+  background: #17140f;
+  color: #ffffff;
+  cursor: pointer;
+  transition:
+    opacity 0.15s,
+    transform 0.06s;
+}
+
+.htt-play:active {
+  transform: translateY(1px);
+}
+
+.htt-play:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+
+.htt-play:focus-visible {
+  outline: 2px solid #e0a13a;
+  outline-offset: 2px;
+}

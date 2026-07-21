@@ -1,5 +1,6 @@
 import {
   Component,
+  DestroyRef,
   ElementRef,
   effect,
   inject,
@@ -11,7 +12,6 @@ import { CodeComponent } from '../../../../components-atom/code/code.component';
 import { CodeClick } from '../../../../components-atom/code/code.interface';
 import { TreeComponent } from '../../../../components/tree/tree.component';
 import { TwoColumnLayoutComponent } from '../../../../layouts/two-column-layout/two-column-layout.component';
-import { ConceptCardComponent } from '../../../../components-atom/concept-card/concept-card.component';
 import { getLevelColor } from '../../../../components-draw/node-level-color';
 
 interface ConnectorLine {
@@ -26,7 +26,7 @@ const FOLLOW_WINDOW_MS = 700;
 
 @Component({
   selector: 'app-html-to-tree',
-  imports: [CodeComponent, TreeComponent, TwoColumnLayoutComponent, ConceptCardComponent],
+  imports: [CodeComponent, TreeComponent, TwoColumnLayoutComponent],
   templateUrl: './html-to-tree.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   styleUrl: './html-to-tree.component.css',
@@ -34,6 +34,8 @@ const FOLLOW_WINDOW_MS = 700;
 export class HtmlToTreeComponent {
   private readonly hostElement: HTMLElement = inject(ElementRef).nativeElement;
   private readonly treeRef = viewChild(TreeComponent);
+  private parseTimer: ReturnType<typeof setTimeout> | null = null;
+  protected readonly parsePlaying = signal(false);
   private readonly overlay = viewChild<ElementRef<SVGSVGElement>>('overlay');
   htmlCode = ` <main> 
      <section> 
@@ -82,6 +84,8 @@ export class HtmlToTreeComponent {
       );
       onCleanup(() => cancelAnimationFrame(rafId));
     });
+
+    inject(DestroyRef).onDestroy(() => this.stopParse());
   }
 
   codeClickHandler(event: CodeClick) {
@@ -99,6 +103,36 @@ export class HtmlToTreeComponent {
   }
   onParsedCodeHandler() {
     // no-op: el árbol se actualiza vía codeClickHandler; este handler queda como punto de extensión
+  }
+
+  /** "Leer el HTML": revela los nodos en orden de documento, como si el parser recorriera el
+   *  texto. One-shot con timer (no rAF perpetuo); el cleanup lo corta si se desmonta a mitad. */
+  protected playParse(): void {
+    const steps = this.revealStepCount();
+    if (steps === 0) return;
+    this.stopParse();
+    this.revealTo(0);
+    this.parsePlaying.set(true);
+    let revealed = 0;
+    const tick = (): void => {
+      revealed++;
+      this.revealTo(revealed);
+      if (revealed < steps) {
+        this.parseTimer = setTimeout(tick, 320);
+      } else {
+        this.parseTimer = null;
+        this.parsePlaying.set(false);
+      }
+    };
+    this.parseTimer = setTimeout(tick, 320);
+  }
+
+  private stopParse(): void {
+    if (this.parseTimer !== null) {
+      clearTimeout(this.parseTimer);
+      this.parseTimer = null;
+    }
+    this.parsePlaying.set(false);
   }
 
   /** Total de tags revelables = nodos del árbol (en orden de documento). Lo consume el motor del
