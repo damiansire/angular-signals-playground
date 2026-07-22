@@ -285,6 +285,12 @@ export function initMolecule(
 
   // Layout de scroll (ver scrollLayout): cada concepto arranca en off[i] y ocupa len[i].
   const { off, len, total: TOTAL } = scrollLayout(C.map((c) => c.subN || null));
+  // Unidad de cola de la pista. Cada concepto bucea usando parte del tramo del SIGUIENTE (su
+  // `nace`), así que a los intermedios les alcanza el largo propio. El ÚLTIMO concepto no tiene
+  // siguiente del que tomar prestado: sin una unidad extra al final, el scroll frena antes de
+  // completar su buceo y el sub-nivel del último concepto (Zoneless) queda inalcanzable. Con +1
+  // el scroll llega a `w = TOTAL` y el dive del último concepto se completa como el de los demás.
+  const TRACK_TAIL = 1;
 
   const pos = (i: number): { x: number; y: number } => {
     if (i === 0) return { x: CX, y: CY };
@@ -1170,7 +1176,7 @@ export function initMolecule(
     });
   };
   const onResize = (): void => {
-    track.style.height = (TOTAL + 0.2) * unit() + 'px';
+    track.style.height = (TOTAL + TRACK_TAIL) * unit() + 'px';
     orbitDirty = true; // cambió la geometría: que orbitLoop reubique la constelación
     requestOrbit();
   };
@@ -1232,7 +1238,7 @@ export function initMolecule(
     render(s);
   };
   const bootTimer = window.setTimeout(() => {
-    track.style.height = (TOTAL + 0.2) * unit() + 'px';
+    track.style.height = (TOTAL + TRACK_TAIL) * unit() + 'px';
     openAt();
     raf(openAt);
     // Con reduce, congelar el timeline SMIL de la escena una vez que el clock corre: los electrones
