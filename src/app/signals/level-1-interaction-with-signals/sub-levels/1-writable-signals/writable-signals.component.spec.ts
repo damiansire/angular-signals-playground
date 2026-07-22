@@ -35,7 +35,7 @@ describe('WritableSignalsComponent', () => {
   });
 
   it('setValue toma el numero del input y lo asigna al signal', () => {
-    component.myInput.nativeElement.value = '42';
+    component.signalSetInput().nativeElement.value = '42';
     component.setValue();
     fixture.detectChanges();
     expect(component.count()).toBe(42);
@@ -45,7 +45,7 @@ describe('WritableSignalsComponent', () => {
 
   it('setValue ignora valores no numericos', () => {
     component.count.set(7);
-    component.myInput.nativeElement.value = 'abc';
+    component.signalSetInput().nativeElement.value = 'abc';
     component.setValue();
     expect(component.count()).toBe(7);
   });

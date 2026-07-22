@@ -1,7 +1,7 @@
 import {
   Component,
   ElementRef,
-  ViewChild,
+  viewChild,
   computed,
   signal,
   ChangeDetectionStrategy,
@@ -18,7 +18,9 @@ import { ColumnAndCodeLayoutComponent } from '../../../../layouts/column-and-cod
 })
 export class WritableSignalsComponent {
   count = signal(0);
-  @ViewChild('signalSetInput') myInput!: ElementRef<HTMLInputElement>;
+  // viewChild() como signal: se resuelve tras inicializar la vista y es el estándar del repo
+  // (en vez del decorador @ViewChild + ElementRef).
+  readonly signalSetInput = viewChild.required<ElementRef<HTMLInputElement>>('signalSetInput');
   update() {
     this.count.update((value) => value + 1);
   }
@@ -30,7 +32,7 @@ export class WritableSignalsComponent {
     { line: '}', active: false },
   ]);
   setValue() {
-    const inputValue = parseInt(this.myInput.nativeElement.value, 10);
+    const inputValue = parseInt(this.signalSetInput().nativeElement.value, 10);
     if (!isNaN(inputValue)) {
       this.count.set(inputValue);
     }

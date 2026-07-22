@@ -1,11 +1,4 @@
-import {
-  Component,
-  ElementRef,
-  ViewChild,
-  computed,
-  signal,
-  ChangeDetectionStrategy,
-} from '@angular/core';
+import { Component, computed, signal, ChangeDetectionStrategy } from '@angular/core';
 import { CodeLine } from '../../../../components-atom/component-atom.interface';
 import { ColumnAndCodeLayoutComponent } from '../../../../layouts/column-and-code-layout/column-and-code-layout.component';
 
@@ -18,7 +11,6 @@ import { ColumnAndCodeLayoutComponent } from '../../../../layouts/column-and-cod
 })
 export class UpdateSignalComponent {
   count = signal(0);
-  @ViewChild('signalSetInput') myInput!: ElementRef<HTMLInputElement>;
   update() {
     this.count.update((value) => value + 1);
     // eslint-disable-next-line no-console -- demo didactica: refleja el console.log mostrado en pantalla
