@@ -380,14 +380,21 @@ export function initMolecule(
     starsG.appendChild(st);
   }
 
-  const bondEls: SVGLineElement[] = [];
+  // Enlace curvo entre dos átomos: una cuadrática con el punto de control corrido perpendicular al
+  // segmento (mismo lado siempre), así la cadena "respira" en arcos en vez de rectas de compás.
+  const bondPath = (x1: number, y1: number, x2: number, y2: number): string => {
+    const dx = x2 - x1;
+    const dy = y2 - y1;
+    const cx = (x1 + x2) / 2 - dy * 0.16;
+    const cy = (y1 + y2) / 2 + dx * 0.16;
+    return `M ${x1.toFixed(1)} ${y1.toFixed(1)} Q ${cx.toFixed(1)} ${cy.toFixed(1)} ${x2.toFixed(1)} ${y2.toFixed(1)}`;
+  };
+  const bondEls: SVGPathElement[] = [];
   for (let i = 1; i < N; i++) {
-    const ln = el('line', {
+    const ln = el('path', {
       class: 'bond',
-      x1: C[i - 1].x,
-      y1: C[i - 1].y,
-      x2: C[i].x,
-      y2: C[i].y,
+      d: bondPath(C[i - 1].x, C[i - 1].y, C[i].x, C[i].y),
+      fill: 'none',
     });
     bondsG.appendChild(ln);
     bondEls.push(ln);
@@ -1012,14 +1019,18 @@ export function initMolecule(
     bondEls.forEach((ln, j) => {
       if (j + 1 < c) {
         ln.classList.add('on');
-        ln.setAttribute('x2', String(C[j + 1].x));
-        ln.setAttribute('y2', String(C[j + 1].y));
+        ln.setAttribute('d', bondPath(C[j].x, C[j].y, C[j + 1].x, C[j + 1].y));
       } else if (j + 1 === c) {
         ln.classList.toggle('on', birth > 0.12);
-        ln.setAttribute('x1', String(C[j].x));
-        ln.setAttribute('y1', String(C[j].y));
-        ln.setAttribute('x2', lerp(parent.x, C[j + 1].x, birth).toFixed(1));
-        ln.setAttribute('y2', lerp(parent.y, C[j + 1].y, birth).toFixed(1));
+        ln.setAttribute(
+          'd',
+          bondPath(
+            C[j].x,
+            C[j].y,
+            lerp(parent.x, C[j + 1].x, birth),
+            lerp(parent.y, C[j + 1].y, birth),
+          ),
+        );
       } else {
         ln.classList.remove('on');
       }
