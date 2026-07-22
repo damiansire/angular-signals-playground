@@ -91,6 +91,10 @@ export const CONCEPT_COUNT = RAW.length;
 
 const CX = 410;
 const CY = 290;
+// El panel del recorrido (variante B) ocupa la franja izquierda; la molécula se corre a la DERECHA
+// esta cantidad (unidades del viewBox 820×600) en la vista molécula, y vuelve al centro al bucear
+// (lerp por diveDepth) para quedar alineada detrás de la card centrada. Ver el transform en render().
+const PANEL_SHIFT = 116;
 const ORX = 34;
 const ORY = 11;
 const NUC = 13;
@@ -799,29 +803,55 @@ export function initMolecule(
   const spaceSpineEl = q<HTMLElement>('#spaceSpine');
   const railUpEl = q<HTMLElement>('#railUp');
   const railDownEl = q<HTMLElement>('#railDown');
+  const railHeadEl = q<HTMLElement>('.rail-head');
+  const railCountEl = q<HTMLElement>('#railCount');
+  const railSegEl = q<HTMLElement>('#railSeg');
   const railTicksOl = q<HTMLElement>('#railTicks')!;
-  for (let t = 0; t < N; t++) {
-    const li = document.createElement('li');
-    li.textContent = String(t);
-    stamp(li);
-    railTicksOl.appendChild(li);
-  }
-  const railTicks = Array.from(root.querySelectorAll<HTMLElement>('#railTicks li'));
-  // Zoom-in del riel al bucear (ver el morph en render): alto cacheado + campana para la escala por tick.
-  let railTicksH = 0;
-  const gaussTick = (x: number): number => Math.exp(-(x * x) / (2 * 1.4 * 1.4));
-  // "Cadena molecular": cada concepto es un nodo-átomo SOBRE el enlace (la línea del riel). El motor
-  // los crea y les fija el color de su concepto; render() marca visitado / actual / pendiente. El
-  // activo lo marca el número en negrita (1.5×), así el riel = la molécula vista de canto.
-  const railNodes: HTMLElement[] = [];
+
+  // Los 12 conceptos, agrupados en 3 ACTOS (chunking tipo battle-pass). Un acto arranca en su
+  // primer concepto; el motor inserta la cabecera antes de esa parada. Índices atados a RAW.
+  const ACTS: { at: number; label: string }[] = [
+    { at: 0, label: 'Acto I · fundamentos' },
+    { at: 4, label: 'Acto II · derivar' },
+    { at: 7, label: 'Acto III · avanzado' },
+  ];
+
+  // Barra segmentada del progreso (una marca por concepto): render() enciende las de los ya hechos.
+  const railSegs: HTMLElement[] = [];
   for (let i = 0; i < N; i++) {
-    const nd = document.createElement('span');
-    nd.className = 'rail-node';
-    nd.style.top = ((i / (N - 1)) * 100).toFixed(2) + '%';
-    nd.style.setProperty('--nc', COL[C[i].accent]);
-    stamp(nd);
-    railLineEl?.appendChild(nd);
-    railNodes.push(nd);
+    const seg = document.createElement('i');
+    stamp(seg);
+    railSegEl?.appendChild(seg);
+    railSegs.push(seg);
+  }
+
+  // Paradas del riel: número + nombre por concepto, con su marca-átomo (el actual = átomo vivo), el
+  // badge "estás acá" y el trofeo del capstone (Zoneless). render() les pone hecho / estás acá /
+  // bloqueado. Las cabeceras de acto se intercalan en el mismo <ol> (aria-hidden, decorativas).
+  const railStops: HTMLElement[] = [];
+  for (let i = 0; i < N; i++) {
+    const act = ACTS.find((a) => a.at === i);
+    if (act) {
+      const h = document.createElement('li');
+      h.className = 'rail-act';
+      h.textContent = act.label;
+      stamp(h);
+      railTicksOl.appendChild(h);
+    }
+    const li = document.createElement('li');
+    li.className = 'rail-stop';
+    li.style.setProperty('--nc', COL[C[i].accent]);
+    const trophy = i === N - 1 ? '<span class="rail-trophy">🏆</span>' : '';
+    li.innerHTML =
+      `<span class="rail-mark"><i class="rail-halo"></i><i class="rail-orb"></i><i class="rail-core"></i></span>` +
+      `<span class="rail-num">${i}</span>` +
+      `<span class="rail-name">${C[i].name}</span>` +
+      trophy +
+      `<span class="rail-badge">estás acá</span>`;
+    stamp(li);
+    stampTree(li);
+    railTicksOl.appendChild(li);
+    railStops.push(li);
   }
 
   // ---- render(s): dibuja el estado del recorrido en la posición de scroll s (0..TOTAL) ----
@@ -841,9 +871,14 @@ export function initMolecule(
       target: C[c],
       parent,
     });
+    // En la vista molécula la escena se corre a la derecha (PANEL_SHIFT) para despejar el panel del
+    // recorrido; al bucear (diveDepth→1) el shift se apaga y el átomo actual queda centrado bajo la card.
+    // En pantallas angostas el panel se colapsa a un riel fino (CSS), así que no hace falta correr nada.
+    const shiftNow = window.innerWidth <= 820 ? 0 : PANEL_SHIFT;
+    const frameShift = shiftNow * (1 - diveDepth);
     sceneG.setAttribute(
       'transform',
-      `translate(${(CX - K * fx).toFixed(1)},${(300 - K * fy).toFixed(1)}) scale(${K.toFixed(3)})`,
+      `translate(${(CX + frameShift - K * fx).toFixed(1)},${(300 - K * fy).toFixed(1)}) scale(${K.toFixed(3)})`,
     );
     // La cámara ya centró y agrandó el átomo detrás de la card (K llega a FK=2.7). La card no es
     // una ventana sino el interior del átomo: al bucear la escena casi no se atenúa (molécula viva,
@@ -886,27 +921,12 @@ export function initMolecule(
     // los conceptos hacen zoom y se apagan primero, y los sub-niveles entran después, para que el punto
     // medio del morph no muestre las dos escalas pisadas a la vez.
     const morphT = Math.max(0, Math.min(1, (diveDepth - 0.15) / 0.35));
-    // Zoom-in por tick: cada uno se aleja del activo (que queda fijo) y crece con escala UNIFORME (sin
-    // distorsión de glifo). `railTicksH` = alto sobre el que se reparten los ticks; se cachea y se
-    // recalcula en resize. En reposo (morphT=0) se limpia el transform inline para que mande el CSS
-    // (activo en negrita a 1.5×). La clase `zooming` apaga la transición de `transform` mientras dura
-    // el buceo (si no, la animación scroll-driven se arrastraría con el ease de 0.2s).
-    if (morphT > 0) {
-      if (!railTicksH) railTicksH = railTicksOl.getBoundingClientRect().height;
-      railTicksOl.classList.add('zooming');
-      const spread = 6 * morphT;
-      for (let ti = 0; ti < railTicks.length; ti++) {
-        const dy = ((ti - c) / (N - 1)) * spread * railTicksH;
-        const k = (ti === c ? 1.5 : 1) * (1 + 0.9 * morphT * gaussTick(ti - c));
-        railTicks[ti].style.transform = `translateY(${dy.toFixed(1)}px) scale(${k.toFixed(3)})`;
-      }
-    } else {
-      railTicksOl.classList.remove('zooming');
-      for (const li of railTicks) li.style.transform = '';
-    }
+    // El panel nombrado se DESVANECE al bucear (cross-fade con la barra de sub-niveles que se abre en
+    // el mismo eje); el eje y las flechas ▲/▼ quedan visibles (navegan ambos modos). Antes los ticks
+    // hacían zoom-spread, que no encaja en filas con número + nombre.
+    if (railHeadEl) railHeadEl.style.opacity = (1 - morphT).toFixed(3);
     railTicksOl.style.opacity = (1 - morphT).toFixed(3);
     if (railLineEl) railLineEl.style.opacity = (0.5 * (1 - morphT)).toFixed(3);
-    if (railFillEl) railFillEl.style.opacity = (0.95 * (1 - morphT)).toFixed(3);
     if (captionEl) captionEl.style.opacity = Math.max(0, 1 - diveDepth / 0.5).toFixed(2);
     // Título vertical del concepto (espina de identidad) pegado al riel: aparece al bucear, con
     // el color del concepto. Es la casa del nombre en la escena.
@@ -1028,15 +1048,17 @@ export function initMolecule(
     // El nombre del concepto ya vive en el label del átomo y en el topbar: el caption solo marca el
     // MODO (evita la triple repetición del nombre en la vista molécula).
     capS.textContent = diveDepth > 0.5 ? 'Adentro' : 'Molécula';
-    // El llenado se ancla a la posición del tick activo (progreso del recorrido).
-    const railPct = (railProg * 100).toFixed(1) + '%';
-    if (railFillEl) railFillEl.style.height = railPct;
-    for (let ti = 0; ti < railTicks.length; ti++) railTicks[ti].classList.toggle('on', ti === c);
-    for (let ni = 0; ni < railNodes.length; ni++) {
-      const nd = railNodes[ni];
-      nd.classList.toggle('visited', ni < c);
-      nd.classList.toggle('current', ni === c);
-      nd.classList.toggle('pending', ni > c);
+    // El llenado del eje se ancla a la posición del concepto activo (progreso del recorrido).
+    if (railFillEl) railFillEl.style.height = (railProg * 100).toFixed(1) + '%';
+    // Contador goal-gradient ("te faltan N") + segmentos + estado por parada: hecho / estás acá /
+    // bloqueado. `done = c` (conceptos previos), `here = c`, y "te faltan" cuenta el actual + los que faltan.
+    if (railCountEl) railCountEl.textContent = `${c} de ${N} · te faltan ${N - c}`;
+    for (let si = 0; si < railSegs.length; si++) railSegs[si].classList.toggle('on', si < c);
+    for (let si = 0; si < railStops.length; si++) {
+      const st = railStops[si];
+      st.classList.toggle('done', si < c);
+      st.classList.toggle('here', si === c);
+      st.classList.toggle('lock', si > c);
     }
     if (introEl) {
       const introVisible = s < 0.12;
@@ -1045,9 +1067,10 @@ export function initMolecule(
       // sobre el recorrido que quedó debajo.
       introEl.style.pointerEvents = introVisible ? '' : 'none';
     }
-    // En la landing el riel es un HINT tenue (no compite con el hero "Angular Signals"); gana presencia
-    // apenas empezás el recorrido. Fade propio del `.rail` entero (independiente del morph interno).
-    if (railEl) railEl.style.opacity = (0.4 + 0.6 * Math.min(1, s / 0.14)).toFixed(2);
+    // En la landing (intro "Primera luz" + hero) el panel del recorrido queda OCULTO: es rico (nombres,
+    // actos, contador) y a media opacidad competía con la entrada. Aparece al empezar a scrollear el
+    // recorrido. Fade propio del `.rail` entero (independiente del morph interno).
+    if (railEl) railEl.style.opacity = Math.min(1, s / 0.14).toFixed(2);
 
     // Reflejar en la URL el nivel actual y, si estás adentro, el sub-nivel. -1 = vista molécula. Se
     // keyea por `diveDepth > 0.5` (el mismo umbral que el título del topbar), NO por `w > 1.3`: en la
@@ -1145,7 +1168,6 @@ export function initMolecule(
   };
   const onResize = (): void => {
     track.style.height = (TOTAL + 0.2) * unit() + 'px';
-    railTicksH = 0; // el alto del riel cambió: que el zoom lo vuelva a medir
     orbitDirty = true; // cambió la geometría: que orbitLoop reubique la constelación
     requestOrbit();
   };

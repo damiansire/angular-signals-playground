@@ -30,13 +30,25 @@
           <a routerLink="/practica/carrito">Practicá</a>
         </span>
       </div>
+      <!-- Riel = panel del recorrido (variante B): eje a la izquierda (línea + flechas ▲/▼, ancla del
+           morph a sub-niveles) y a la derecha número + nombre por parada, agrupadas en actos, con el
+           contador "te faltan N". El motor llena #railTicks (paradas + cabeceras de acto) y #railSeg,
+           y marca hecho / estás acá / bloqueado. Al bucear, el cuerpo se desvanece (cross-fade con la
+           barra de sub-niveles). aria-hidden: es navegación decorativa; se opera por ▲/▼, scroll y teclado. -->
       <aside class="rail">
         <button class="rail-step" id="railUp" type="button" aria-label="paso anterior">▲</button>
         <div class="rail-body" aria-hidden="true">
-          <div class="rail-line">
-            <span class="rail-fill" id="railFill"></span>
+          <div class="rail-head">
+            <span class="rail-kicker">Tu recorrido</span>
+            <span class="rail-count" id="railCount"></span>
+            <span class="rail-seg" id="railSeg"></span>
           </div>
-          <ol class="rail-ticks" id="railTicks"></ol>
+          <div class="rail-axis">
+            <span class="rail-line">
+              <span class="rail-fill" id="railFill"></span>
+            </span>
+            <ol class="rail-ticks" id="railTicks"></ol>
+          </div>
         </div>
         <button class="rail-step" id="railDown" type="button" aria-label="paso siguiente">▼</button>
       </aside>

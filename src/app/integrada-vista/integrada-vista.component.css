@@ -289,7 +289,11 @@
      que siempre se lee como "ventana aparte"). El color del concepto entra como acento tenue
      abajo + glow, no como fondo: la card es una sección más de la página, no un panel sobre ella. */
   background:
-    radial-gradient(120% 62% at 50% 100%, color-mix(in srgb, var(--glow, #eb9b3c) 16%, transparent), transparent 54%),
+    radial-gradient(
+      120% 62% at 50% 100%,
+      color-mix(in srgb, var(--glow, #eb9b3c) 16%, transparent),
+      transparent 54%
+    ),
     linear-gradient(180deg, #fcfbf5, #f5f2e8);
   box-shadow: 0 0 80px -30px var(--glow, #eb9b3c);
   z-index: 2;
@@ -999,37 +1003,76 @@
    (ticks 0-11); al bucear, su cuerpo se desvanece y la barra de sub-niveles (dibujada por el motor en
    el mismo eje) se abre hacia los bordes, morpheando conceptos → sub-niveles. Una sola barra, sin
    ocupar ancho horizontal del contenido. */
+/* Riel = PANEL del recorrido (variante B): el EJE (línea + flechas ▲/▼, ancla del morph a sub-niveles)
+   queda a la izquierda, y a la derecha número + nombre por parada, agrupadas en actos, con el contador
+   "te faltan N". Al bucear, el cuerpo se desvanece (cross-fade con la barra de sub-niveles en el mismo eje). */
 .rail {
   position: absolute;
-  /* Margen responsivo desde el borde IZQUIERDO: pegado (13px) en viewports angostos, donde la card
-     ancha deja poca canaleta; con aire creciente en pantallas anchas (a 1920 queda ~42px del borde),
-     donde sobra lugar. El sub-track sigue el centro real del riel (ver molecule-engine), así queda
-     alineado en cualquier ancho. */
-  left: clamp(13px, calc(13px + (100vw - 1440px) * 0.06), 48px);
+  /* Margen responsivo desde el borde IZQUIERDO: pegado en viewports angostos; con aire creciente en
+     pantallas anchas. El sub-track sigue el centro real del eje (ver molecule-engine), alineado en
+     cualquier ancho. align-items: flex-start deja el eje/flechas a la izquierda; los nombres crecen a la derecha. */
+  left: clamp(13px, calc(13px + (100vw - 1440px) * 0.06), 40px);
   top: 50%;
   transform: translateY(-50%);
   z-index: 6;
-  /* Alto casi completo: así las flechas ▲/▼ (stepper) flotan cerca de los bordes en la vista
-     molécula Y flanquean la barra de sub-niveles (que se abre a los bordes) al bucear. Antes, a
-     78%, las flechas caían a media altura y se leían como sub-niveles más. */
-  /* Alto acotado con AIRE arriba/abajo: las flechas ▲/▼ y (al bucear) el primer/último sub-nivel no
-     quedan pegados a los bordes de la pantalla. */
-  height: min(84%, 860px);
+  height: min(88%, 900px);
   display: flex;
   flex-direction: column;
-  align-items: center;
-  /* Aire entre las flechas ▲/▼ y la cadena: el átomo del primer/último concepto (con su órbita) no
-     se pega a la flecha. */
-  gap: 20px;
+  align-items: flex-start;
+  gap: 10px;
+  font-family: var(--mono);
 }
-/* La línea + los ticks (decorativos, aria-hidden) van en fila; los pasos ▲/▼ los
-   flanquean arriba y abajo, sobre el mismo eje vertical que navegan. */
 .rail-body {
   flex: 1;
   min-height: 0;
   display: flex;
-  gap: 13px;
+  flex-direction: column;
+  gap: 14px;
+  width: clamp(186px, 15vw, 236px);
+  /* Decorativo (aria-hidden) y nunca bloquea el contenido: al bucear se desvanece sobre la card. */
   pointer-events: none;
+}
+.rail-head {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding-left: 2px;
+  transition: opacity 0.3s ease;
+}
+.rail-kicker {
+  font-size: 0.62rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #8a8272;
+}
+.rail-count {
+  font-family: var(--serif);
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #241f18;
+  line-height: 1.1;
+}
+.rail-seg {
+  display: flex;
+  gap: 3px;
+  margin-top: 2px;
+}
+.rail-seg i {
+  flex: 1;
+  height: 4px;
+  border-radius: 2px;
+  background: rgba(32, 29, 22, 0.1);
+  transition: background 0.3s ease;
+}
+.rail-seg i.on {
+  background: linear-gradient(90deg, var(--source), var(--derived));
+}
+/* Eje: la línea vertical (con el llenado de progreso) detrás, y las paradas encima. */
+.rail-axis {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  display: flex;
 }
 /* Flechas ▲/▼ integradas (chevrons livianos, sin pastilla que flote suelta): son los remates del
    track, no botones aparte. Se encienden con el color del concepto al hover. */
@@ -1058,49 +1101,18 @@
   outline: 2px solid var(--source);
   outline-offset: 3px;
 }
-/* El track tiene MATERIA (no un hairline de 1px): una cápsula tenue = el camino por delante
-   (vacío/frío), y `.rail-fill` la LLENA de color cálido hasta donde vas (recorrido). El llenado
-   SIGNIFICA progreso; el degradado corre por los colores de los conceptos. */
-/* CADENA MOLECULAR: la línea es el ENLACE (bond) del recorrido. El tramo pendiente queda PUNTEADO
-   como los bonds de la molécula; el recorrido lo tapa `.rail-fill` sólido. Más fino (2.5px) para que
-   protagonicen los nodos-átomo, no la línea. */
+/* Eje vertical = el ENLACE (bond) del recorrido, detrás de las paradas, con el llenado de progreso
+   (`.rail-fill`) que corre por los colores de los conceptos. Alineado con el centro de las marcas. */
 .rail-line {
-  position: relative;
-  width: 2.5px;
-  height: 100%;
-  border-radius: 3px;
-  /* Enlace sólido tenue (no punteado): el punteado en un hilo fino leía como "esqueleto/cargando".
-     El tramo recorrido lo tapa `.rail-fill` con el color cálido. */
-  background: #cbc3b2;
-  opacity: 0.7;
-  overflow: visible;
-  transition: opacity 0.3s ease;
-}
-/* Cada concepto = un nodo sobre el enlace: pendiente = anillo hueco (todavía no), visitado = átomo
-   lleno del color del concepto (`--nc`), actual = lo tapa `.rail-dot` (el átomo con órbita). */
-.rail-node {
   position: absolute;
-  left: 50%;
-  width: 9px;
-  height: 9px;
-  border-radius: 50%;
-  box-sizing: border-box;
-  transform: translate(-50%, -50%);
-  transition:
-    background 0.25s ease,
-    border-color 0.25s ease,
-    opacity 0.25s ease;
-}
-.rail-node.pending {
-  background: transparent;
-  border: 1.6px solid #c2b9a6;
-}
-.rail-node.visited {
-  background: var(--nc, #b7ad9c);
-  opacity: 0.9;
-}
-.rail-node.current {
-  opacity: 0;
+  left: 9px;
+  top: 6px;
+  bottom: 6px;
+  width: 2px;
+  border-radius: 2px;
+  background: #cbc3b2;
+  opacity: 0.6;
+  transition: opacity 0.3s ease;
 }
 .rail-fill {
   position: absolute;
@@ -1108,46 +1120,187 @@
   top: 0;
   width: 100%;
   height: 0;
-  border-radius: 5px;
+  border-radius: 2px;
   background: linear-gradient(var(--source), var(--derived) 55%, var(--effect));
-  opacity: 0.95;
-  transition:
-    height 0.18s ease,
-    opacity 0.3s ease;
+  opacity: 0.9;
+  transition: height 0.18s ease;
 }
+/* Paradas (número + nombre) + cabeceras de acto, repartidas sobre el alto del eje. */
 .rail-ticks {
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
+  position: relative;
+  flex: 1;
   margin: 0;
   padding: 0;
   list-style: none;
-  transform-origin: left center;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: opacity 0.3s ease;
 }
-.rail-ticks li {
-  font-family: var(--mono);
-  font-size: 1rem;
-  color: #aba28f;
-  opacity: 0.7;
+.rail-act {
+  padding-left: 26px;
+  font-size: 0.6rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #b3a891;
+}
+.rail-stop {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #857e6d;
+  transition: color 0.25s ease;
+}
+.rail-mark {
+  position: relative;
+  width: 18px;
+  height: 18px;
+  flex: none;
+  display: grid;
+  place-items: center;
   transition:
-    color 0.2s ease,
-    opacity 0.2s ease,
-    transform 0.2s ease;
-  transform-origin: left center;
+    width 0.25s ease,
+    height 0.25s ease;
 }
-.rail-ticks li.on {
+.rail-core {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  box-sizing: border-box;
+  background: transparent;
+  border: 1.6px solid #c2b9a6;
+  transition: all 0.25s ease;
+}
+.rail-halo,
+.rail-orb {
+  position: absolute;
+  border-radius: 50%;
+  opacity: 0;
+  transition: opacity 0.25s ease;
+  pointer-events: none;
+}
+.rail-halo {
+  inset: -20%;
+  background: radial-gradient(
+    circle,
+    color-mix(in srgb, var(--nc) 42%, transparent),
+    transparent 66%
+  );
+}
+.rail-orb {
+  left: 50%;
+  top: 50%;
+  width: 165%;
+  height: 58%;
+  transform: translate(-50%, -50%) rotate(24deg);
+  border: 1.2px solid color-mix(in srgb, var(--nc) 60%, transparent);
+}
+.rail-num {
+  flex: none;
+  width: 1.4em;
+  text-align: right;
+  font-size: 0.82rem;
+  color: #b0a794;
+  transition: color 0.25s ease;
+}
+.rail-name {
+  font-size: 0.86rem;
+  color: #857e6d;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: color 0.25s ease;
+}
+.rail-badge {
+  flex: none;
+  font-size: 0.54rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: #fff;
+  background: var(--nc);
+  padding: 0.16em 0.42em;
+  border-radius: 4px;
+  opacity: 0;
+  transition: opacity 0.25s ease;
+  white-space: nowrap;
+}
+.rail-trophy {
+  font-size: 0.9rem;
+  line-height: 1;
+}
+/* Estados: bloqueado (anillo hueco/tenue) · hecho (átomo lleno del color) · estás acá (átomo vivo + badge). */
+.rail-stop.lock .rail-num,
+.rail-stop.lock .rail-name {
+  opacity: 0.55;
+}
+.rail-stop.done .rail-core {
+  background: var(--nc);
+  border-color: var(--nc);
+}
+.rail-stop.done .rail-num {
+  color: #4a4638;
+}
+.rail-stop.done .rail-name {
+  color: #3a352b;
+}
+.rail-stop.here .rail-mark {
+  width: 24px;
+  height: 24px;
+}
+.rail-stop.here .rail-core {
+  width: 11px;
+  height: 11px;
+  background: var(--nc);
+  border-color: var(--nc);
+  box-shadow: 0 0 10px color-mix(in srgb, var(--nc) 70%, transparent);
+}
+.rail-stop.here .rail-halo,
+.rail-stop.here .rail-orb {
   opacity: 1;
+}
+.rail-stop.here .rail-halo {
+  animation: railHalo 3.4s ease-in-out infinite;
+}
+.rail-stop.here .rail-num {
   color: #201d16;
-  transform: scale(1.5);
   font-weight: 700;
 }
-/* Durante el buceo el motor mueve/escala cada tick por frame (zoom-in) vía transform inline: se apaga
-   la transición de `transform` para que la animación scroll-driven no se arrastre con el ease de 0.2s.
-   El color/opacity siguen suavizados (y el ease de `transform` vuelve en reposo, para el activo). */
-.rail-ticks.zooming li {
-  transition:
-    color 0.2s ease,
-    opacity 0.2s ease;
+.rail-stop.here .rail-name {
+  color: #201d16;
+  font-weight: 700;
+  font-size: 0.94rem;
+}
+.rail-stop.here .rail-badge {
+  opacity: 1;
+}
+@keyframes railHalo {
+  0%,
+  100% {
+    transform: scale(0.9);
+    opacity: 0.6;
+  }
+  50% {
+    transform: scale(1.5);
+    opacity: 0.12;
+  }
+}
+/* En pantallas angostas el panel nombrado (affordance de desktop) se COLAPSA a un riel fino: solo
+   el eje + marca-átomo + número, para que la molécula respire. El motor también apaga el shift ≤820px. */
+@media (max-width: 820px) {
+  .rail-body {
+    width: auto;
+  }
+  .rail-head,
+  .rail-act,
+  .rail-name,
+  .rail-badge,
+  .rail-trophy {
+    display: none;
+  }
+  .rail-num {
+    width: auto;
+  }
 }
 
 /* Congelar TODA la vida ambiente CSS cuando la pestaña no está visible (el motor pone `anims-frozen`
@@ -1167,6 +1320,7 @@
   .atom.dived-dissolve .ring,
   .suborbit.dissolve .sub-sonar,
   .subbody.warp,
+  .rail-stop.here .rail-halo,
   .ripple {
     animation: none;
   }
