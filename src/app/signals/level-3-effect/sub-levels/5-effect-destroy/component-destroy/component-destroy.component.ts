@@ -16,7 +16,7 @@ export class ComponentDestroyComponent {
   count = signal(0);
   intervalSave: ReturnType<typeof setInterval> | undefined;
   constructor() {
-    effect(() => {
+    effect((onCleanup) => {
       if (this.autoRefresh()) {
         this.intervalSave = setInterval(() => {
           const now = new Date();
@@ -24,8 +24,10 @@ export class ComponentDestroyComponent {
           this.count.update((x) => x + 1);
           this.newIntervalOutput.emit(now);
         }, 1000);
-      } else {
-        clearInterval(this.intervalSave);
+        // Es la lección del onCleanup idiomático: se limpia al re-evaluar el effect
+        // (autoRefresh -> false) Y al destruirse el componente, así el intervalo no
+        // queda huérfano ni siquiera si se sale por navegación.
+        onCleanup(() => clearInterval(this.intervalSave));
       }
     });
   }
