@@ -380,6 +380,11 @@ export function initIntroTusi(host: HTMLElement): () => void {
     const nowVisible = !introEl || introEl.style.opacity !== '0';
     if (nowVisible !== visible) {
       visible = nowVisible;
+      // El overlay cubre el viewport; si el intro no es la vista activa (scroll o deep-link directo al
+      // recorrido SIN elegir tema), su subárbol interceptaría los clicks de los demos que quedaron
+      // debajo (pointer-events se hereda, así que apagarlo en el overlay apaga todo el subárbol). Solo
+      // mientras no se eligió tema: tras `start()`, `.gone` ya lo maneja y no hay que reactivarlo.
+      if (!started) overlay.classList.toggle('gone', !visible);
       if (actx) {
         if (visible && soundOn) void actx.resume();
         else if (!visible) void actx.suspend();

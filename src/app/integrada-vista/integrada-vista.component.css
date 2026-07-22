@@ -1043,7 +1043,7 @@
   font-size: 0.62rem;
   letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: #8a8272;
+  color: #6a6355;
 }
 .rail-count {
   font-family: var(--serif);
@@ -1232,7 +1232,7 @@
 /* Estados: bloqueado (anillo hueco/tenue) · hecho (átomo lleno del color) · estás acá (átomo vivo + badge). */
 .rail-stop.lock .rail-num,
 .rail-stop.lock .rail-name {
-  opacity: 0.55;
+  opacity: 0.66;
 }
 .rail-stop.done .rail-core {
   background: var(--nc);
