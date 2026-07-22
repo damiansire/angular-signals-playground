@@ -180,6 +180,28 @@
 .atom.dived-dissolve .aname {
   opacity: 0;
 }
+/* Subtítulo de la ENTRADA (bajo el nombre del concepto 0): capítulos + cue de scroll. Solo lo
+   muestra el átomo actual (la entrada); se apaga en la constelación y al bucear, como el nombre. */
+.asub {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  text-anchor: middle;
+  fill: #6a6355;
+  paint-order: stroke;
+  stroke: #fdfbf5;
+  stroke-width: 3px;
+  stroke-linejoin: round;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+.atom.current .asub {
+  opacity: 0.9;
+}
+#atoms.diving .asub,
+.atom.dived-dissolve .asub {
+  opacity: 0;
+}
 /* ...y el átomo gana presencia para ANCLAR el centro de la escena (ahí arranca el árbol del
    demo). Con el árbol ya disuelto (transparente), esta molécula se ve a través del contenido:
    así que en vez de quedar congelada, RESPIRA lento — un latido calmo y amplio que hace sentir

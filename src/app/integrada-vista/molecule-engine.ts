@@ -479,6 +479,14 @@ export function initMolecule(
     });
     nm.textContent = cc.name;
     g.appendChild(nm);
+    // Entrada (concepto 0): es el frame más vacío del recorrido. Le sumamos un subtítulo bajo el
+    // nombre (cuántos capítulos + cue de scroll) para llenarlo e invitar a bucear, SIN sacar el
+    // átomo ni el nombre. Solo lo muestra el átomo actual (la entrada); se apaga al bucear.
+    if (i === 0) {
+      const sub = el('text', { class: 'asub', x: '0', y: (NUC + 66).toFixed(0) });
+      sub.textContent = `${cc.subN} capítulos · scrolleá para bucear ↓`;
+      g.appendChild(sub);
+    }
     atomsG.appendChild(g);
     atomEls.push(g);
     orbEls.push(orb);
