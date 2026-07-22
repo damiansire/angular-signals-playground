@@ -1037,7 +1037,12 @@ export function initMolecule(
       // el card solo necesita asentar, no volver a "aparecer creciendo" por su cuenta.
       card.style.transform = `scale(${(0.97 + 0.03 * amt).toFixed(3)})`;
       // Cada card embebe el componente real del sub-nivel: siempre interactivo cuando está visible.
-      card.style.pointerEvents = amt > 0.6 ? 'auto' : 'none';
+      const live = amt > 0.6;
+      card.style.pointerEvents = live ? 'auto' : 'none';
+      // Las 12 cards están pre-montadas en el DOM; las que no son la visible quedan `inert` para que
+      // sus controles (inputs, botones de los demos) no sean alcanzables por Tab ni por lectores de
+      // pantalla mientras están ocultas. Solo la card viva participa del tab-order y del árbol de a11y.
+      card.inert = !live;
     });
 
     if (w > 0.7 && lastBorn < c + 1) {

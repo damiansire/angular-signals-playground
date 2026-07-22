@@ -1301,6 +1301,11 @@
   .rail-num {
     width: auto;
   }
+  /* En móvil el viewBox se escala a la baja (portrait): el nombre del átomo actual queda muy chico.
+     Lo agrandamos para que el concepto sea legible (solo se ve el label del átomo actual). */
+  .aname {
+    font-size: 21px;
+  }
 }
 
 /* Congelar TODA la vida ambiente CSS cuando la pestaña no está visible (el motor pone `anims-frozen`
