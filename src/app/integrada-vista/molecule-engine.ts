@@ -94,7 +94,7 @@ const CY = 290;
 // El panel del recorrido (variante B) ocupa la franja izquierda; la molécula se corre a la DERECHA
 // esta cantidad (unidades del viewBox 820×600) en la vista molécula, y vuelve al centro al bucear
 // (lerp por diveDepth) para quedar alineada detrás de la card centrada. Ver el transform en render().
-const PANEL_SHIFT = 116;
+const PANEL_SHIFT = 128;
 const ORX = 34;
 const ORY = 11;
 const NUC = 13;
@@ -314,7 +314,7 @@ export function initMolecule(
   // Encuadre de la molécula: mapea el radio del espiral a un radio en pantalla objetivo. El
   // espiral es más grande ahora (radio base 135), así que el piso sube a 0.6 para llenar más el
   // alto del viewport en la vista completa (12 átomos) sin que los de arriba/abajo se corten.
-  const wideK = (c: number): number => Math.max(0.6, Math.min(1.2, 265 / (outerRadius(c) + 62)));
+  const wideK = (c: number): number => Math.max(0.6, Math.min(1.5, 310 / (outerRadius(c) + 62)));
   // Centro del ENCUADRE de la vista molécula: el centro de la bounding-box de los átomos nacidos
   // (0..c), NO el centroide de masa. El centroide de masa se corría hacia la zona más densa del
   // espiral y dejaba medio viewport muerto (design-review A8); el centro de la caja reparte la
@@ -977,6 +977,8 @@ export function initMolecule(
       orbitFor = -1;
     }
 
+    // Al bucear se apagan TODOS los nombres de átomo (el título vive en la card); ver el CSS #atoms.diving.
+    atomsG.classList.toggle('diving', diveDepth > 0.4);
     atomEls.forEach((g, i) => {
       const orb = orbEls[i];
       // El nombre del átomo se desvanece al bucear: su rol de etiqueta lo toma el título promovido

@@ -163,11 +163,20 @@
   opacity: 0;
   transition: opacity 0.4s ease;
 }
+/* TODOS los átomos nacidos llevan su nombre (mapa legible, no blobs sin etiqueta), con jerarquía:
+   los ya vistos algo más tenues y el actual a full. */
+.atom.on .aname {
+  opacity: 0.7;
+}
 .atom.current .aname {
   opacity: 1;
 }
-/* En dissolve, al bucear, el nombre del átomo se apaga: su rol de etiqueta lo toma el título
-   promovido dentro de la card (no se repite en la escena). Va DESPUÉS de .atom.current para ganar. */
+/* En dissolve, al bucear, TODOS los nombres se apagan: su rol de etiqueta lo toma el título
+   promovido dentro de la card (no se repite en la escena). El id `#atoms` gana especificidad
+   sobre `.atom.on .aname`, así que apaga todo el conjunto. */
+#atoms.diving .aname {
+  opacity: 0;
+}
 .atom.dived-dissolve .aname {
   opacity: 0;
 }
@@ -1027,8 +1036,8 @@
   min-height: 0;
   display: flex;
   flex-direction: column;
-  gap: 14px;
-  width: clamp(186px, 15vw, 236px);
+  gap: 16px;
+  width: clamp(210px, 17vw, 312px);
   /* Decorativo (aria-hidden) y nunca bloquea el contenido: al bucear se desvanece sobre la card. */
   pointer-events: none;
 }
@@ -1040,14 +1049,14 @@
   transition: opacity 0.3s ease;
 }
 .rail-kicker {
-  font-size: 0.62rem;
-  letter-spacing: 0.18em;
+  font-size: 0.7rem;
+  letter-spacing: 0.2em;
   text-transform: uppercase;
   color: #6a6355;
 }
 .rail-count {
   font-family: var(--serif);
-  font-size: 1.1rem;
+  font-size: 1.4rem;
   font-weight: 600;
   color: #241f18;
   line-height: 1.1;
@@ -1138,8 +1147,8 @@
   transition: opacity 0.3s ease;
 }
 .rail-act {
-  padding-left: 26px;
-  font-size: 0.6rem;
+  padding-left: 27px;
+  font-size: 0.66rem;
   letter-spacing: 0.14em;
   text-transform: uppercase;
   color: #b3a891;
@@ -1200,12 +1209,12 @@
   flex: none;
   width: 1.4em;
   text-align: right;
-  font-size: 0.82rem;
+  font-size: 0.9rem;
   color: #b0a794;
   transition: color 0.25s ease;
 }
 .rail-name {
-  font-size: 0.86rem;
+  font-size: 0.95rem;
   color: #857e6d;
   white-space: nowrap;
   overflow: hidden;
