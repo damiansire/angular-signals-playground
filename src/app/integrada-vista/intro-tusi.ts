@@ -330,8 +330,25 @@ export function initIntroTusi(host: HTMLElement): () => void {
   document.addEventListener('click', onDocClick);
   document.addEventListener('keydown', onKeyDown);
 
-  // overlay Dark/Light: la elección arranca todo (y desbloquea el audio)
+  // overlay "Primera luz": elegir tema arranca todo (y desbloquea el audio). El sonido es un
+  // toggle amable que se pre-elige ANTES de entrar; `start` respeta esa preferencia.
   const overlay = q<HTMLElement>('.tusi__overlay');
+  const ovSoundBtn = q<HTMLButtonElement>('[data-role="ov-sound"]');
+  const ovSoundTxt = q<HTMLElement>('.tusi__ov-sound-txt');
+  function refreshOvSound(): void {
+    ovSoundBtn.setAttribute('aria-pressed', String(soundOn));
+    ovSoundBtn.setAttribute(
+      'aria-label',
+      soundOn ? 'Silenciar el sonido de la intro' : 'Activar el sonido de la intro',
+    );
+    ovSoundTxt.textContent = soundOn
+      ? 'Sonido activado · tocá para silenciar'
+      : 'Sonido silenciado · tocá para activar';
+  }
+  ovSoundBtn.addEventListener('click', () => {
+    soundOn = !soundOn;
+    refreshOvSound();
+  });
   function applyTheme(t: 'light' | 'dark'): void {
     pal = PALETTES[t];
     root.classList.toggle('dark', t === 'dark');
@@ -340,16 +357,18 @@ export function initIntroTusi(host: HTMLElement): () => void {
     if (started) return;
     applyTheme(theme);
     started = true;
-    soundOn = true;
-    soundBtn.textContent = '🔊';
-    soundBtn.setAttribute('aria-label', 'Silenciar');
-    initAudio();
-    if (actx?.state === 'suspended') void actx.resume();
+    soundBtn.textContent = soundOn ? '🔊' : '🔇';
+    soundBtn.setAttribute('aria-label', soundOn ? 'Silenciar' : 'Activar sonido');
+    if (soundOn) {
+      initAudio();
+      if (actx?.state === 'suspended') void actx.resume();
+    }
     reset();
     overlay.classList.add('gone');
   }
   q<HTMLButtonElement>('[data-role="pick-dark"]').addEventListener('click', () => start('dark'));
   q<HTMLButtonElement>('[data-role="pick-light"]').addEventListener('click', () => start('light'));
+  refreshOvSound();
 
   // ── loop ──
   let rafId = 0;

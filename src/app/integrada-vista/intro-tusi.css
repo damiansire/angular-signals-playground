@@ -287,102 +287,311 @@
   color: var(--tusi-amber);
 }
 
-/* overlay Dark/Light: elección obligatoria que arranca la experiencia */
+/* overlay "Primera luz": split-screen Dark/Light, cada mitad con preview viva del tema.
+   La elección arranca la experiencia (y desbloquea el audio). */
 .tusi__overlay {
   position: absolute;
   inset: 0;
   z-index: 8;
   pointer-events: auto;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  padding: 24px;
-  background: color-mix(in srgb, var(--tusi-menu-bg) 80%, transparent);
-  backdrop-filter: blur(3px);
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  font-family: var(--font-display, system-ui, sans-serif);
   transition: opacity 0.5s;
 }
 .tusi__overlay.gone {
   opacity: 0;
   pointer-events: none;
 }
-.tusi__ov-screen {
+
+.tusi__ov-half {
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 1.1rem;
-}
-.tusi__ov-msg {
-  font-family: var(--font-editorial, Georgia, serif);
-  font-style: italic;
-  font-size: clamp(1.1rem, 2.7vw, 1.5rem);
-  color: var(--tusi-ink);
-  margin: 0;
-  max-width: 22ch;
-  line-height: 1.3;
-  text-wrap: balance;
-}
-.tusi__ov-actions {
-  display: flex;
-  gap: 12px;
-  flex-wrap: nowrap;
   justify-content: center;
-  margin-top: 0.2rem;
-  width: min(430px, 82vw);
+  gap: clamp(0.5rem, 1.4vh, 1rem);
+  padding: 6% 5% 9%;
+  overflow: hidden;
+  text-align: center;
 }
+.tusi__ov-half--dark {
+  background: radial-gradient(120% 90% at 50% 30%, #21262e, #0c0f14 90%);
+  color: #eef1f6;
+}
+.tusi__ov-half--light {
+  background: radial-gradient(120% 90% at 50% 34%, #fbf9f2, #e6f1ea 92%);
+  color: #201d16;
+}
+
+/* raya divisoria central, tenue */
+.tusi__ov-divider {
+  position: absolute;
+  left: 50%;
+  top: 10%;
+  bottom: 10%;
+  width: 1px;
+  z-index: 5;
+  background: linear-gradient(
+    rgba(128, 128, 128, 0),
+    rgba(128, 128, 128, 0.35),
+    rgba(128, 128, 128, 0)
+  );
+}
+
+/* pregunta flotante, centrada arriba, por encima de las dos mitades */
+.tusi__ov-prompt {
+  position: absolute;
+  left: 50%;
+  top: 7%;
+  transform: translateX(-50%);
+  z-index: 6;
+  margin: 0;
+  font-family: var(--font-editorial, Georgia, serif);
+  font-weight: 600;
+  font-size: clamp(1rem, 2.5vw, 1.5rem);
+  color: #efeee9;
+  background: rgba(20, 22, 26, 0.55);
+  backdrop-filter: blur(4px);
+  padding: 0.5em 1.1em;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+.tusi__ov-kicker {
+  font-family: var(--mono, ui-monospace, monospace);
+  font-size: clamp(0.62rem, 1.1vw, 0.78rem);
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  opacity: 0.62;
+}
+.tusi__ov-h {
+  font-family: var(--font-editorial, Georgia, serif);
+  font-size: clamp(1.3rem, 3vw, 2rem);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  margin: 0.05em 0 0.2em;
+}
+
 .tusi__ov-btn {
-  flex: 1;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  gap: 0.5em;
   white-space: nowrap;
   font-family: var(--font-display, system-ui, sans-serif);
-  font-weight: 600;
-  font-size: 0.9rem;
+  font-weight: 700;
+  font-size: clamp(0.85rem, 1.5vw, 1rem);
   border-radius: 999px;
-  padding: 12px 20px;
+  border: 0;
+  padding: 0.7em 1.6em;
   cursor: pointer;
   transition:
     transform 0.16s,
-    background 0.16s,
-    border-color 0.16s;
+    filter 0.16s;
 }
 .tusi__ov-btn:focus-visible {
   outline: 2px solid var(--tusi-amber);
-  outline-offset: 2px;
+  outline-offset: 3px;
+}
+.tusi__ov-btn:hover {
+  transform: translateY(-2px);
+  filter: brightness(1.06);
 }
 .tusi__ov-dark {
-  background: #14161d;
-  color: #ece7dd;
-  border: 1px solid #2a2d38;
-}
-.tusi__ov-dark:hover {
-  background: #1c1f28;
-  transform: translateY(-2px);
+  background: #f0b64a;
+  color: #16130c;
 }
 .tusi__ov-light {
-  background: #fbf9f2;
-  color: #201d16;
-  border: 1px solid #e4dbc9;
+  background: #16130c;
+  color: #f7f3e8;
 }
-.tusi__ov-light:hover {
-  background: #fff;
-  transform: translateY(-2px);
+
+/* barra inferior: el sonido como toggle amable (no advertencia) */
+.tusi__ov-capbar {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2.4% 4%;
 }
-.tusi__ov-legend {
-  font-family: var(--font-display, system-ui, sans-serif);
-  font-size: 0.76rem;
-  color: var(--tusi-ink-soft);
-  margin: 0.4rem 0 0;
-  white-space: nowrap;
+.tusi__ov-sound {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: 0.6em;
+  font-family: var(--mono, ui-monospace, monospace);
+  font-size: clamp(0.68rem, 1.2vw, 0.82rem);
+  letter-spacing: 0.02em;
+  color: #d7dae0;
+  background: rgba(20, 22, 26, 0.5);
+  backdrop-filter: blur(4px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 999px;
+  padding: 0.5em 1em;
+  cursor: pointer;
+  transition:
+    color 0.16s,
+    border-color 0.16s;
+}
+.tusi__ov-sound:focus-visible {
+  outline: 2px solid var(--tusi-amber);
+  outline-offset: 2px;
+}
+.tusi__ov-swi {
+  position: relative;
+  width: 2.4em;
+  height: 1.3em;
+  flex: none;
+  border-radius: 999px;
+  background: var(--tusi-amber);
+  transition:
+    background 0.18s,
+    opacity 0.18s;
+}
+.tusi__ov-swi::after {
+  content: '';
+  position: absolute;
+  top: 0.18em;
+  right: 0.18em;
+  width: 0.94em;
+  height: 0.94em;
+  border-radius: 50%;
+  background: #fff;
+  transition: transform 0.18s;
+}
+.tusi__ov-sound[aria-pressed='false'] .tusi__ov-swi {
+  background: rgba(255, 255, 255, 0.28);
+}
+.tusi__ov-sound[aria-pressed='false'] .tusi__ov-swi::after {
+  transform: translateX(-1.1em);
+}
+
+/* ── molécula viva de preview (pura CSS, sin canvas): núcleo + halo que respira +
+   electrones orbitando por offset-path. Colores por mitad vía --ec/--rc/--haloc. ── */
+.tusi__ov-mol {
+  position: relative;
+  width: clamp(120px, 22vh, 240px);
+  aspect-ratio: 1 / 1;
+}
+.tusi__ov-guide {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 96%;
+  aspect-ratio: 1 / 1;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  border: 1px solid var(--rc);
+  opacity: 0.5;
+}
+.tusi__ov-halo {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 44%;
+  aspect-ratio: 1 / 1;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  background: radial-gradient(circle, var(--haloc), transparent 66%);
+  z-index: 1;
+  animation: tusiOvHalo 3.8s ease-in-out infinite;
+}
+.tusi__ov-ogrp {
+  position: absolute;
+  inset: 0;
+  transform: rotate(var(--rot));
+  z-index: 2;
+}
+.tusi__ov-ring {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 92%;
+  height: 34%;
+  transform: translate(-50%, -50%);
+  border: 1.5px solid var(--rc);
+  border-radius: 50%;
+}
+.tusi__ov-el {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 8%;
+  max-width: 11px;
+  aspect-ratio: 1 / 1;
+  border-radius: 50%;
+  background: var(--ec);
+  box-shadow: 0 0 9px var(--ec);
+  offset-path: ellipse(46% 17% at 50% 50%);
+  offset-rotate: 0deg;
+  animation: tusiOvOrbit var(--dur, 8s) linear infinite;
+  animation-delay: var(--dly, 0s);
+}
+.tusi__ov-nuc {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 27%;
+  aspect-ratio: 1 / 1;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  background: radial-gradient(circle at 40% 36%, #ffe3ad 0%, #f2ab41 55%, #d9861f 100%);
+  box-shadow:
+    0 0 22px 3px rgba(240, 168, 62, 0.5),
+    inset 0 -3px 8px rgba(170, 100, 18, 0.45),
+    inset 0 3px 7px rgba(255, 240, 205, 0.75);
+  z-index: 3;
+}
+@keyframes tusiOvHalo {
+  0%,
+  100% {
+    transform: translate(-50%, -50%) scale(0.9);
+    opacity: 0.62;
+  }
+  50% {
+    transform: translate(-50%, -50%) scale(1.32);
+    opacity: 0.16;
+  }
+}
+@keyframes tusiOvOrbit {
+  to {
+    offset-distance: 100%;
+  }
+}
+
+/* En pantallas angostas (portrait/móvil) el split se apila vertical. */
+@media (max-width: 560px) {
+  .tusi__overlay {
+    grid-template-columns: 1fr;
+    grid-template-rows: 1fr 1fr;
+  }
+  .tusi__ov-divider {
+    left: 10%;
+    right: 10%;
+    top: 50%;
+    bottom: auto;
+    width: auto;
+    height: 1px;
+    background: linear-gradient(
+      90deg,
+      rgba(128, 128, 128, 0),
+      rgba(128, 128, 128, 0.35),
+      rgba(128, 128, 128, 0)
+    );
+  }
+  .tusi__ov-mol {
+    width: clamp(90px, 16vh, 150px);
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .tusi__mouse span {
+  .tusi__mouse span,
+  .tusi__ov-halo,
+  .tusi__ov-el {
     animation: none;
   }
 }

@@ -118,20 +118,73 @@
             </div>
           </div>
 
+          <!-- 01 "Primera luz": split-screen, cada mitad es una preview VIVA del tema (molécula real
+               orbitando) y el sonido es un toggle amable. El click elige tema + arranca todo (intro-tusi.ts). -->
           <div class="tusi__overlay">
-            <div class="tusi__ov-screen">
-              <p class="tusi__ov-msg">¿Cómo te auto percibís?</p>
-              <div class="tusi__ov-actions">
-                <button class="tusi__ov-btn tusi__ov-dark" data-role="pick-dark" type="button">
-                  🌑 Dark
-                </button>
-                <button class="tusi__ov-btn tusi__ov-light" data-role="pick-light" type="button">
-                  ☀️ Light
-                </button>
+            <span class="tusi__ov-divider" aria-hidden="true"></span>
+            <p class="tusi__ov-prompt">Elegí el clima del recorrido</p>
+
+            <div class="tusi__ov-half tusi__ov-half--dark">
+              <div
+                class="tusi__ov-mol"
+                style="--rc: rgba(255, 238, 215, 0.24); --haloc: rgba(240, 168, 62, 0.5)"
+                aria-hidden="true"
+              >
+                <span class="tusi__ov-guide"></span>
+                <span class="tusi__ov-halo"></span>
+                <span class="tusi__ov-ogrp" style="--rot: 24deg">
+                  <span class="tusi__ov-ring"></span>
+                  <span class="tusi__ov-el" style="--ec: #62c4ad; --dur: 7s"></span>
+                </span>
+                <span class="tusi__ov-ogrp" style="--rot: -40deg">
+                  <span class="tusi__ov-ring"></span>
+                  <span class="tusi__ov-el" style="--ec: #ff5a4a; --dur: 9s; --dly: -3.5s"></span>
+                </span>
+                <span class="tusi__ov-nuc"></span>
               </div>
-              <p class="tusi__ov-legend">
-                🔊 Al elegir, la página va a sonar. Bajá el volumen si lo tenés muy alto.
-              </p>
+              <span class="tusi__ov-kicker">En penumbra</span>
+              <span class="tusi__ov-h">Modo noche</span>
+              <button class="tusi__ov-btn tusi__ov-dark" data-role="pick-dark" type="button">
+                Entrar en penumbra →
+              </button>
+            </div>
+
+            <div class="tusi__ov-half tusi__ov-half--light">
+              <div
+                class="tusi__ov-mol"
+                style="--rc: rgba(120, 92, 40, 0.32); --haloc: rgba(235, 155, 60, 0.34)"
+                aria-hidden="true"
+              >
+                <span class="tusi__ov-guide"></span>
+                <span class="tusi__ov-halo"></span>
+                <span class="tusi__ov-ogrp" style="--rot: 22deg">
+                  <span class="tusi__ov-ring"></span>
+                  <span class="tusi__ov-el" style="--ec: #2f9e7f; --dur: 7.5s"></span>
+                </span>
+                <span class="tusi__ov-ogrp" style="--rot: -38deg">
+                  <span class="tusi__ov-ring"></span>
+                  <span class="tusi__ov-el" style="--ec: #e0503a; --dur: 9.5s; --dly: -4s"></span>
+                </span>
+                <span class="tusi__ov-nuc"></span>
+              </div>
+              <span class="tusi__ov-kicker">A plena luz</span>
+              <span class="tusi__ov-h">Modo día</span>
+              <button class="tusi__ov-btn tusi__ov-light" data-role="pick-light" type="button">
+                Entrar a plena luz →
+              </button>
+            </div>
+
+            <div class="tusi__ov-capbar">
+              <button
+                class="tusi__ov-sound"
+                data-role="ov-sound"
+                type="button"
+                aria-pressed="true"
+                aria-label="Silenciar el sonido de la intro"
+              >
+                <span class="tusi__ov-swi" aria-hidden="true"></span>
+                <span class="tusi__ov-sound-txt">Sonido activado · tocá para silenciar</span>
+              </button>
             </div>
           </div>
         </div>
