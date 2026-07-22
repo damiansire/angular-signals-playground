@@ -32,7 +32,9 @@
   color: var(--ink-soft);
   text-decoration: none;
 }
-.practice__back:hover { color: var(--source); }
+.practice__back:hover {
+  color: var(--source);
+}
 .practice__kicker {
   font-family: var(--font-mono);
   font-size: 0.72rem;
@@ -120,8 +122,13 @@
   line-height: 1;
   cursor: pointer;
 }
-.stepper__btn:hover:not(:disabled) { border-color: var(--source); }
-.stepper__btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.stepper__btn:hover:not(:disabled) {
+  border-color: var(--source);
+}
+.stepper__btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
 .stepper__btn:focus-visible {
   outline: 2.5px solid var(--source-deep);
   outline-offset: 2px;
@@ -203,7 +210,9 @@
   cursor: pointer;
   padding: 0.3rem 0;
 }
-.cart__reset:hover { color: var(--source-deep); }
+.cart__reset:hover {
+  color: var(--source-deep);
+}
 
 /* ── Reto ───────────────────────────────────────────────────────────────────── */
 .aside {
@@ -228,7 +237,9 @@
   color: var(--source-deep);
   margin: 0 0 0.3rem;
 }
-.goal--done .goal__label { color: var(--derived); }
+.goal--done .goal__label {
+  color: var(--derived);
+}
 .goal__text {
   font-size: 0.95rem;
   line-height: 1.5;
@@ -246,7 +257,9 @@
   background: var(--source);
   transition: width var(--propagation-duration) var(--propagation-ease);
 }
-.goal--done .goal__fill { background: var(--derived); }
+.goal--done .goal__fill {
+  background: var(--derived);
+}
 .goal__status {
   font-family: var(--font-mono);
   font-size: 0.78rem;
@@ -281,9 +294,15 @@
   height: 11px;
   border-radius: 50%;
 }
-.how__dot--s { background: var(--source); }
-.how__dot--d { background: var(--derived); }
-.how__dot--e { background: var(--effect); }
+.how__dot--s {
+  background: var(--source);
+}
+.how__dot--d {
+  background: var(--derived);
+}
+.how__dot--e {
+  background: var(--effect);
+}
 .how__file {
   margin-left: 6px;
   font-family: var(--font-mono);
@@ -302,14 +321,31 @@
   overflow-x: auto;
 }
 /* Paleta de tokens: los keywords reactivos llevan su acento semántico. */
-.how__code .c { color: #8f8778; font-style: italic; }
-.how__code .t-sig { color: #f3ad4b; }
-.how__code .t-cmp { color: #6fd0b8; }
-.how__code .t-eff { color: #ff8a7c; }
-.how__code .t-fn { color: #8fb7ff; }
-.how__code .t-str { color: #bfe88f; }
-.how__code .t-num { color: #e2b6ff; }
-.how__code .t-prop { color: #9fe0d6; }
+.how__code .c {
+  color: #8f8778;
+  font-style: italic;
+}
+.how__code .t-sig {
+  color: #f3ad4b;
+}
+.how__code .t-cmp {
+  color: #6fd0b8;
+}
+.how__code .t-eff {
+  color: #ff8a7c;
+}
+.how__code .t-fn {
+  color: #8fb7ff;
+}
+.how__code .t-str {
+  color: #bfe88f;
+}
+.how__code .t-num {
+  color: #e2b6ff;
+}
+.how__code .t-prop {
+  color: #9fe0d6;
+}
 .how__hint {
   font-size: 0.8rem;
   color: var(--ink-soft);
@@ -327,7 +363,9 @@
   opacity: 0;
   transition: opacity 160ms ease;
 }
-.wires.is-on { opacity: 1; }
+.wires.is-on {
+  opacity: 1;
+}
 .wire {
   fill: none;
   stroke: currentColor;
@@ -356,13 +394,26 @@
   border-radius: 10px;
   transition: outline-color 160ms ease;
 }
-.cart__list.is-linked { outline-color: var(--source); }
-.summary__row.is-linked { outline-color: var(--derived); }
-.goal.is-linked { outline-color: var(--derived); }
-.saved.is-linked { outline-color: var(--effect); }
+.cart__list.is-linked {
+  outline-color: var(--source);
+}
+.summary__row.is-linked {
+  outline-color: var(--derived);
+}
+.goal.is-linked {
+  outline-color: var(--derived);
+}
+.saved.is-linked {
+  outline-color: var(--effect);
+}
 
 .saved {
-  display: inline-flex;
+  /* Block-level (no inline-flex) para que ocupe su propia línea: si no, el <p> "Se guarda solo" y el
+     botón "Vaciar carrito" que le sigue caían en el mismo renglón, pegados ("soloVaciar"). El botón
+     ya trae su margin-top:1rem para la separación. width:fit-content mantiene el outline del estado
+     linked ceñido al contenido. */
+  display: flex;
+  width: fit-content;
   align-items: center;
   gap: 0.35rem;
   margin: 0.25rem 0 0;
@@ -373,7 +424,9 @@
 
 /* ── Responsive ─────────────────────────────────────────────────────────────── */
 @media (max-width: 720px) {
-  .practice__grid { grid-template-columns: 1fr; }
+  .practice__grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
