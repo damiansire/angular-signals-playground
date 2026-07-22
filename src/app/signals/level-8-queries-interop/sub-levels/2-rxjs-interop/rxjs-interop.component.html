@@ -10,7 +10,7 @@
       <p class="text-xs font-semibold uppercase tracking-wide text-gray-400 mb-1">
         Observable → signal (toSignal)
       </p>
-      <p class="text-2xl font-bold tabular-nums text-fuchsia-700">{{ seconds() }}s</p>
+      <p class="text-2xl font-bold tabular-nums text-[#0f6b54]">{{ seconds() }}s</p>
       <p class="text-xs text-gray-500">
         Un <code class="font-mono">interval()</code> de RxJS leído como signal.
       </p>
@@ -22,7 +22,7 @@
       </p>
       <p class="text-sm text-gray-700">
         count = <strong>{{ count() }}</strong> · emisiones contadas =
-        <strong class="text-fuchsia-700">{{ emissions() }}</strong>
+        <strong class="text-[#0f6b54]">{{ emissions() }}</strong>
       </p>
       <button
         type="button"
@@ -37,7 +37,7 @@
       <p class="text-xs font-semibold uppercase tracking-wide text-gray-400 mb-1">untracked()</p>
       <p class="text-sm text-gray-700 mb-1">
         result = base × multiplier =
-        <strong class="text-fuchsia-700">{{ result() }}</strong>
+        <strong class="text-[#0f6b54]">{{ result() }}</strong>
       </p>
       <p class="text-xs text-gray-500 mb-2">
         base = {{ base() }} · multiplier = {{ multiplier() }} — subir <em>multiplier</em> NO
@@ -46,7 +46,7 @@
       <div class="flex gap-2">
         <button
           type="button"
-          class="flex-1 bg-fuchsia-600 hover:bg-fuchsia-700 text-white text-sm font-bold py-1.5 px-3 rounded"
+          class="flex-1 bg-[#1c6b56] hover:bg-[#17594a] text-white text-sm font-bold py-1.5 px-3 rounded"
           (click)="incBase()"
         >
           base + 1

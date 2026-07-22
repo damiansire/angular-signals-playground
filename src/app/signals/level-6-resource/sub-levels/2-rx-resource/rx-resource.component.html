@@ -16,8 +16,8 @@
           class="w-10 h-10 rounded-full border text-sm font-bold transition-colors"
           [class]="
             id === userId()
-              ? 'bg-indigo-600 border-indigo-600 text-white'
-              : 'bg-white border-gray-300 text-gray-700 hover:border-indigo-400'
+              ? 'bg-[#1c6b56] border-[#1c6b56] text-white'
+              : 'bg-white border-gray-300 text-gray-700 hover:border-[#62c4ad]'
           "
           (click)="setUser(id)"
         >
@@ -28,7 +28,7 @@
 
     <div class="min-h-[6rem] rounded-md border border-gray-100 bg-gray-50 p-4 mb-4">
       @if (userResource.isLoading()) {
-        <p class="text-indigo-600 font-medium animate-pulse motion-reduce:animate-none">
+        <p class="text-[#0f6b54] font-medium animate-pulse motion-reduce:animate-none">
           ⏳ Cargando…
         </p>
       } @else if (userResource.error()) {
