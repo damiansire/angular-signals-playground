@@ -1,15 +1,16 @@
 .inner-box {
   width: 100%;
   height: 100%;
-  border: 3px solid blue; /* Blue inner border */
+  border: 2px solid #eb9b3c; /* ámbar (source), en paleta */
   border-radius: 10px;
-  background-color: #ffe0b2; /* Light orange background */
+  background-color: #ffe0b2; /* ámbar tenue */
   display: flex;
   justify-content: center;
   align-items: center;
 }
 
 span {
-  font-size: 32px;
-  font-family: "Caveat", cursive; /* Cursive font for the word "string" */
+  font-size: 30px;
+  /* Mono del app (era "Caveat" cursiva, fuera del sistema editorial). */
+  font-family: var(--font-mono, "JetBrains Mono", ui-monospace, monospace);
 }
