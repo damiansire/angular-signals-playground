@@ -1,4 +1,13 @@
-import { dotOffset, emergentCircleCenter, lineAngle, lineFreq, phaseForLine } from './tusi-math';
+import {
+  dotOffset,
+  emergentCircleCenter,
+  introNarration,
+  lineAngle,
+  lineFreq,
+  NARRATION_DONE,
+  NARRATION_IDLE,
+  phaseForLine,
+} from './tusi-math';
 
 describe('tusi-math', () => {
   it('reparte los diámetros cada π/n', () => {
@@ -44,5 +53,22 @@ describe('tusi-math', () => {
     expect(lineFreq(1)).toBeCloseTo(246.94, 2); // B3
     expect(lineFreq(2)).toBeCloseTo(261.63, 2); // C4
     expect(lineFreq(7)).toBeCloseTo(440.0, 2); // A4 (una octava arriba de A3)
+  });
+
+  it('introNarration: reposo sin arrancar, evoluciona con el progreso, cierra al completar', () => {
+    expect(introNarration(0, false)).toBe(NARRATION_IDLE);
+    expect(introNarration(0.5, false)).toBe(NARRATION_IDLE); // sin arrancar, siempre reposo
+    expect(introNarration(0, true)).not.toBe(NARRATION_IDLE); // ya arrancó
+    expect(introNarration(1, true)).toBe(NARRATION_DONE);
+    expect(introNarration(1.5, true)).toBe(NARRATION_DONE); // clamp por las dudas
+  });
+
+  it('introNarration: es monótona (el texto nunca retrocede al subir el progreso)', () => {
+    const probes = [0, 0.1, 0.3, 0.5, 0.8, 0.99, 1];
+    let changes = 0;
+    for (let i = 1; i < probes.length; i++) {
+      if (introNarration(probes[i], true) !== introNarration(probes[i - 1], true)) changes++;
+    }
+    expect(changes).toBeGreaterThanOrEqual(3); // hay varias etapas distintas en el camino
   });
 });

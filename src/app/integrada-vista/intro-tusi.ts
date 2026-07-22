@@ -1,4 +1,11 @@
-import { dotOffset, emergentCircleCenter, lineAngle, lineFreq, phaseForLine } from './tusi-math';
+import {
+  dotOffset,
+  emergentCircleCenter,
+  introNarration,
+  lineAngle,
+  lineFreq,
+  phaseForLine,
+} from './tusi-math';
 
 /**
  * Intro "par de Tusi": la landing se CONSTRUYE sola. Arranca con una línea; cada 4 choques del punto
@@ -256,13 +263,10 @@ export function initIntroTusi(host: HTMLElement): () => void {
     }
   }
 
-  // ── UI: recompensa, ayuda, controles, overlay ──
-  const rfill = q<HTMLElement>('.tusi__rfill');
-  const rewardEl = q<HTMLElement>('.tusi__reward');
-  const rewardMsg = q<HTMLElement>('.tusi__reward-msg');
+  // ── UI: narración, ayuda, controles, overlay ──
+  const narrateEl = q<HTMLElement>('.tusi__epigraph');
   const helpBtn = q<HTMLButtonElement>('.tusi__help');
-  const MSG_WAIT = 'Esperá y tendrás tu recompensa';
-  const MSG_DONE = 'Ahí está tu recompensa';
+  let lastNarration = '';
 
   helpBtn.addEventListener('click', () => {
     helpOn = !helpOn;
@@ -392,13 +396,15 @@ export function initIntroTusi(host: HTMLElement): () => void {
     }
     if (!reduce && !paused && started) step(t, dt);
     draw(t);
-    const prog = started ? Math.min(1, (ph - phBase) / REWARD_FULL_PHASE) : 0;
-    rfill.style.height = prog * 100 + '%';
+    const prog = started ? (reduce ? 1 : Math.min(1, (ph - phBase) / REWARD_FULL_PHASE)) : 0;
+    const narration = introNarration(prog, started);
+    if (narration !== lastNarration) {
+      narrateEl.textContent = narration;
+      lastNarration = narration;
+    }
     const done = prog >= 1;
     if (done !== rewardDone) {
       rewardDone = done;
-      rewardEl.classList.toggle('done', done);
-      rewardMsg.textContent = done ? MSG_DONE : MSG_WAIT;
       helpBtn.hidden = !done;
       if (!done) {
         helpOn = false;

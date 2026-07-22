@@ -51,3 +51,29 @@ export function lineFreq(k: number): number {
   const midi = 57 + octave * 12 + A_MINOR[k % 7];
   return 440 * Math.pow(2, (midi - 69) / 12);
 }
+
+/** Línea en reposo (antes de arrancar): el epígrafe que resume la idea del intro. */
+export const NARRATION_IDLE = 'Las cosas son sencillas si las analizás por partes';
+/** Línea de cierre: el caos se reveló como un círculo. */
+export const NARRATION_DONE = '¿Lo ves? Un círculo, hecho de puras líneas rectas.';
+
+/** Etapas de la narración durante la construcción, por umbral de progreso ascendente (0..1). */
+const NARRATION_STEPS: readonly { readonly at: number; readonly text: string }[] = [
+  { at: 0, text: 'Una línea. Un punto que rebota contra el borde.' },
+  { at: 0.2, text: 'Aparece otra, y otra. Cada choque llama a la que sigue.' },
+  { at: 0.45, text: 'El caos, de a poco, tiene una forma.' },
+  { at: 0.75, text: 'Seguí mirando, ya casi.' },
+];
+
+/**
+ * Texto de la narración de la intro según el progreso de la construcción (reemplaza la barra de
+ * recompensa por una sola línea que evoluciona). `started` false = reposo; `prog` >= 1 = círculo
+ * completo. Función pura: se testea sin DOM.
+ */
+export function introNarration(prog: number, started: boolean): string {
+  if (!started) return NARRATION_IDLE;
+  if (prog >= 1) return NARRATION_DONE;
+  let text = NARRATION_STEPS[0].text;
+  for (const step of NARRATION_STEPS) if (prog >= step.at) text = step.text;
+  return text;
+}
