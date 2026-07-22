@@ -1083,33 +1083,6 @@
   min-height: 0;
   display: flex;
 }
-/* Flechas ▲/▼ integradas (chevrons livianos, sin pastilla que flote suelta): son los remates del
-   track, no botones aparte. Se encienden con el color del concepto al hover. */
-.rail-step {
-  width: 26px;
-  height: 26px;
-  border-radius: 50%;
-  border: none;
-  background: transparent;
-  color: #b3a891;
-  font-size: 0.72rem;
-  line-height: 1;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition:
-    color 0.18s ease,
-    transform 0.18s ease;
-}
-.rail-step:hover {
-  color: var(--source);
-  transform: scale(1.2);
-}
-.rail-step:focus-visible {
-  outline: 2px solid var(--source);
-  outline-offset: 3px;
-}
 /* Eje vertical = el ENLACE (bond) del recorrido, detrás de las paradas, con el llenado de progreso
    (`.rail-fill`) que corre por los colores de los conceptos. Alineado con el centro de las marcas. */
 .rail-line {

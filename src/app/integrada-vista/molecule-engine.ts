@@ -662,17 +662,15 @@ export function initMolecule(
         // UNA sola barra vertical a la IZQUIERDA que MORPHea: en la vista molécula muestra los 12
         // conceptos (el riel .rail); al bucear, su cuerpo se absorbe y la barra se DESPLIEGA en los
         // sub-niveles del concepto actual. Una se transforma en la otra sobre el mismo eje.
-        // El eje X del sub-track SIGUE al riel real (centro de las flechas ▲/▼), así queda alineado con
-        // los ticks de concepto en cualquier viewport (el riel tiene margen responsivo desde el borde).
-        const upR = railUpEl?.getBoundingClientRect();
-        const downR = railDownEl?.getBoundingClientRect();
+        // El eje X del sub-track SIGUE al riel real (su borde izquierdo + el offset del eje), así queda
+        // alineado con las paradas de concepto en cualquier viewport (el riel tiene margen responsivo).
+        const railR = railEl?.getBoundingClientRect();
         const topbarBot = topbarEl ? topbarEl.getBoundingClientRect().bottom : 56;
-        const barXpx = upR ? (upR.left + upR.right) / 2 : 30;
-        // Los sub-niveles se despliegan ENTRE las flechas ▲/▼, que los flanquean con AIRE desde los
-        // bordes (el +26 les da margen para que el primero/último no queden pegados al borde de la
-        // pantalla). Fallback al topbar/borde si aún no hay layout de las flechas.
-        const endTopPx = upR ? upR.bottom + 26 : topbarBot + 34;
-        const endBotPx = downR ? downR.top - 26 : window.innerHeight - 44;
+        const barXpx = railR ? railR.left + 9 : 30;
+        // Los sub-niveles se despliegan a lo largo del riel, con AIRE arriba/abajo (el margen evita que
+        // el primero/último queden pegados a los bordes). Fallback al topbar/borde si aún no hay layout.
+        const endTopPx = railR ? railR.top + 20 : topbarBot + 34;
+        const endBotPx = railR ? railR.bottom - 20 : window.innerHeight - 44;
         // El morph se DESPLIEGA DESDE ARRIBA: el sub-nivel 1 (primero) queda FIJO en el borde de arriba
         // y los demás se abren hacia abajo a medida que entrás (`dd` 0→1, lo publica render()). Antes los
         // extremos arrancaban en la posición del concepto (media altura en los niveles del medio) y el
@@ -801,8 +799,6 @@ export function initMolecule(
   const tbCountEl = q<HTMLElement>('.tb-count');
   const captionEl = q<HTMLElement>('.caption');
   const spaceSpineEl = q<HTMLElement>('#spaceSpine');
-  const railUpEl = q<HTMLElement>('#railUp');
-  const railDownEl = q<HTMLElement>('#railDown');
   const railHeadEl = q<HTMLElement>('.rail-head');
   const railCountEl = q<HTMLElement>('#railCount');
   const railSegEl = q<HTMLElement>('#railSeg');
@@ -1196,8 +1192,7 @@ export function initMolecule(
   };
   const onPrev = (): void => stepTo(-1);
   const onNext = (): void => stepTo(1);
-  // Teclado: las flechas ▲/▼ (y AvPág) navegan el recorrido paso a paso, para que el viaje sea
-  // accesible por teclado igual que con los botones del riel (no solo por scroll).
+  // Teclado: ↑/↓ (y AvPág) navegan el recorrido paso a paso — la vía accesible además del scroll.
   const onKeyNav = (e: KeyboardEvent): void => {
     // No secuestramos las flechas dentro de un campo editable del demo (ni el espacio, que activa
     // botones): solo ▲/▼ y AvPág mueven el recorrido.
@@ -1215,11 +1210,6 @@ export function initMolecule(
   stage.addEventListener('scroll', onScroll, { passive: true });
   window.addEventListener('keydown', onKeyNav);
   window.addEventListener('resize', onResize);
-  // Los pasos viven arriba y abajo del riel vertical (el eje que mueven): ▲ = anterior
-  // (scroll hacia 0), ▼ = siguiente (scroll hacia 11). Cada click avanza un paso del
-  // recorrido (nivel o sub-nivel) dejando que el snap asiente en la próxima parada.
-  q<HTMLElement>('#railUp')?.addEventListener('click', onPrev);
-  q<HTMLElement>('#railDown')?.addEventListener('click', onNext);
 
   // Posición de apertura: normalmente 0 (arriba, con el overlay). Con deep-link (?nivel&sub-nivel)
   // arranca scrolleado directo a ese sub-nivel, clampeado al rango real de conceptos/sub-niveles.
