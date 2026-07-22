@@ -146,8 +146,15 @@ export function initIntroTusi(host: HTMLElement): () => void {
     for (let k = 0; k < n; k++) lines[k].target = lineAngle(k, n);
   }
   function reset(): void {
-    lines = [{ angle: 0, target: 0 }];
-    phase = 'grow';
+    if (reduce) {
+      // Sin animación: figura estática ya formada (9 líneas → círculo), coherente con el copy de cierre.
+      lines = Array.from({ length: 9 }, (_v, k) => ({ angle: lineAngle(k, 9), target: lineAngle(k, 9) }));
+      phase = 'hold';
+      holdUntil = Infinity;
+    } else {
+      lines = [{ angle: 0, target: 0 }];
+      phase = 'grow';
+    }
     prevExtreme = Math.floor(ph / Math.PI);
     hits = 0;
     flashes = [];
@@ -419,14 +426,6 @@ export function initIntroTusi(host: HTMLElement): () => void {
   resize();
   reset();
   refreshSpeedMenu();
-  if (reduce) {
-    lines = Array.from({ length: 9 }, (_v, k) => ({
-      angle: lineAngle(k, 9),
-      target: lineAngle(k, 9),
-    }));
-    phase = 'hold';
-    holdUntil = Infinity;
-  }
   rafId = window.requestAnimationFrame(loop);
 
   return (): void => {
