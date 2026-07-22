@@ -5,14 +5,16 @@
       <p class="mt-1 text-sm text-gray-700">{{ concept() }}</p>
     </div>
     @if (action()) {
-      <div class="border-l-2 border-sky-500 pl-3">
-        <p class="truncate text-xs font-semibold uppercase tracking-wide text-sky-700">Qué hacer</p>
+      <div class="border-l-2 border-[#eb9b3c] pl-3">
+        <p class="truncate text-xs font-semibold uppercase tracking-wide text-[#8a5512]">
+          Qué hacer
+        </p>
         <p class="mt-1 text-sm text-gray-700">{{ action() }}</p>
       </div>
     }
     @if (observe()) {
-      <div class="border-l-2 border-emerald-500 pl-3">
-        <p class="truncate text-xs font-semibold uppercase tracking-wide text-emerald-700">
+      <div class="border-l-2 border-[#62c4ad] pl-3">
+        <p class="truncate text-xs font-semibold uppercase tracking-wide text-[#0f6b54]">
           Qué observar
         </p>
         <p class="mt-1 text-sm text-gray-700">{{ observe() }}</p>
