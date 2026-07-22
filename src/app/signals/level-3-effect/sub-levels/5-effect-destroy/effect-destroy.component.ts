@@ -5,6 +5,10 @@ import { HistoryElement } from '../../../../components/component.interface';
 import { EventHistoryComponent } from '../../../../components/event-history/event-history.component';
 import { ConceptCardComponent } from '../../../../components-atom/concept-card/concept-card.component';
 
+/** Tope del historial: el intervalo evalúa cada segundo, así que sin límite la lista crecería sin
+ *  fin y estiraría la card bajo el fold. Con los últimos eventos alcanza para ver la actividad. */
+const MAX_HISTORY = 5;
+
 @Component({
   selector: 'app-effect-destroy',
   templateUrl: './effect-destroy.component.html',
@@ -68,7 +72,7 @@ export class EffectDestroyComponent {
         newState,
         isCountIncrement,
       });
-      return newHistory;
+      return newHistory.length > MAX_HISTORY ? newHistory.slice(-MAX_HISTORY) : newHistory;
     });
   }
   getFormattedTime(date: Date) {

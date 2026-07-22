@@ -8,6 +8,10 @@ import { EventHistoryComponent } from '../../../../components/event-history/even
 import { CodeComponent } from '../../../../components-atom/code/code.component';
 import { ConceptCardComponent } from '../../../../components-atom/concept-card/concept-card.component';
 
+/** Tope de cada historial: en la vista integrada la card no debe crecer sin fin bajo el fold con
+ *  el uso. Mostramos la actividad reciente, que es lo que importa para leer las recomputaciones. */
+const MAX_HISTORY = 6;
+
 @Component({
   selector: 'app-computed-signal-dynamic-dependencies',
   templateUrl: './computed-signal-dynamic-dependencies.component.html',
@@ -76,7 +80,7 @@ export class ComputedSignalDynamicDependenciesComponent {
         newState,
         isCountIncrement,
       });
-      return newHistory;
+      return newHistory.length > MAX_HISTORY ? newHistory.slice(-MAX_HISTORY) : newHistory;
     });
   }
 
@@ -89,7 +93,7 @@ export class ComputedSignalDynamicDependenciesComponent {
         newState,
         isCountIncrement: true,
       });
-      return newHistory;
+      return newHistory.length > MAX_HISTORY ? newHistory.slice(-MAX_HISTORY) : newHistory;
     });
   }
 }

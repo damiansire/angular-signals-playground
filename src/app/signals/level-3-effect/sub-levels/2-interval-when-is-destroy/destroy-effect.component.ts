@@ -6,6 +6,11 @@ import { EventHistoryComponent } from '../../../../components/event-history/even
 import { CodeComponent } from '../../../../components-atom/code/code.component';
 import { ConceptCardComponent } from '../../../../components-atom/concept-card/concept-card.component';
 
+/** Tope de la lista visible: el intervalo evalúa cada segundo y sin límite estiraría la card sin
+ *  fin. La evidencia del leak (que "sigue creciendo") no la lleva la lista sino el contador total
+ *  `intervalEvals`, que sí sube para siempre: un solo número, no una lista infinita bajo el fold. */
+const MAX_HISTORY = 5;
+
 @Component({
   selector: 'app-destroy-effect',
   templateUrl: './destroy-effect.component.html',
@@ -16,6 +21,8 @@ import { ConceptCardComponent } from '../../../../components-atom/concept-card/c
 export class DestroyEffectComponent {
   autoRefresh = signal(false);
   appEventHistory = signal<HistoryElement[]>([]);
+  /** Total de evaluaciones del intervalo. Sigue subiendo aun tras Destroy: ESA es la prueba del leak. */
+  intervalEvals = signal(0);
   lines = computed<CodeLine[]>(() => [
     { line: 'effect(() => {', active: false },
     { line: '  if (this.autoRefresh()) {', active: this.autoRefresh() },
@@ -40,6 +47,7 @@ export class DestroyEffectComponent {
       if (this.autoRefresh()) {
         this.intervalSave = setInterval(() => {
           const event = new Date();
+          this.intervalEvals.update((n) => n + 1);
           this.addConditionalCountRecomputation('interval', this.getFormattedTime(event), false);
         }, 1000);
       } else {
@@ -67,7 +75,7 @@ export class DestroyEffectComponent {
         newState,
         isCountIncrement,
       });
-      return newHistory;
+      return newHistory.length > MAX_HISTORY ? newHistory.slice(-MAX_HISTORY) : newHistory;
     });
   }
   getFormattedTime(date: Date) {
