@@ -1,6 +1,5 @@
 import { Component, computed, Signal, ChangeDetectionStrategy } from '@angular/core';
 import { TitleComponent } from '../../../../components-atom/title/title.component';
-import { WrapperAnimationComponent } from './wrapper-animation/wrapper-animation.component';
 import { ContainerVariableBoxDrawComponent } from '../../../../components-draw/container-variable-box-draw/container-variable-box-draw.component';
 import { TextDescriptionComponent } from '../../../../components-atom/text-description/text-description.component';
 import { VariableBoxDrawComponent } from '../../../../components-draw/variable-box-draw/variable-box-draw.component';
@@ -12,7 +11,6 @@ import { ConceptCardComponent } from '../../../../components-atom/concept-card/c
   selector: 'app-what-is-signals',
   imports: [
     TitleComponent,
-    WrapperAnimationComponent,
     ContainerVariableBoxDrawComponent,
     TextDescriptionComponent,
     VariableBoxDrawComponent,
