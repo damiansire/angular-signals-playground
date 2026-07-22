@@ -608,6 +608,10 @@
 .subhost button[class*='bg-amber-'],
 .subhost button[class*='bg-indigo-'],
 .subhost button[class*='bg-emerald-'],
+.subhost button[class*='bg-fuchsia-'],
+.subhost button[class*='bg-purple-'],
+.subhost button[class*='bg-sky-'],
+.subhost button[class*='bg-cyan-'],
 .subhost button[class*='bg-gray-'] {
   font-family: var(--sans);
   font-weight: 600;
@@ -620,7 +624,11 @@
 .subhost button[class*='bg-green-'],
 .subhost button[class*='bg-amber-'],
 .subhost button[class*='bg-indigo-'],
-.subhost button[class*='bg-emerald-'] {
+.subhost button[class*='bg-emerald-'],
+.subhost button[class*='bg-fuchsia-'],
+.subhost button[class*='bg-purple-'],
+.subhost button[class*='bg-sky-'],
+.subhost button[class*='bg-cyan-'] {
   background: var(--glow, #eb9b3c);
   color: #201d16;
 }
@@ -633,7 +641,11 @@
    clima. Solo aplica a colores decorativos de la familia índigo/violeta/púrpura. */
 .subhost [class*='text-indigo-'],
 .subhost [class*='text-violet-'],
-.subhost [class*='text-purple-'] {
+.subhost [class*='text-purple-'],
+.subhost [class*='text-blue-'],
+.subhost [class*='text-sky-'],
+.subhost [class*='text-cyan-'],
+.subhost [class*='text-fuchsia-'] {
   color: var(--glow, #eb9b3c);
 }
 .subhost button[class*='bg-blue-']:hover:not(:disabled),
@@ -641,6 +653,10 @@
 .subhost button[class*='bg-amber-']:hover:not(:disabled),
 .subhost button[class*='bg-indigo-']:hover:not(:disabled),
 .subhost button[class*='bg-emerald-']:hover:not(:disabled),
+.subhost button[class*='bg-fuchsia-']:hover:not(:disabled),
+.subhost button[class*='bg-purple-']:hover:not(:disabled),
+.subhost button[class*='bg-sky-']:hover:not(:disabled),
+.subhost button[class*='bg-cyan-']:hover:not(:disabled),
 .subhost button[class*='bg-gray-']:hover:not(:disabled) {
   filter: brightness(1.08);
 }
