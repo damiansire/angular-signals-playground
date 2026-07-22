@@ -2,7 +2,7 @@
   @for (star of stars; track star) {
     <button
       type="button"
-      class="text-3xl leading-none transition-transform hover:scale-110"
+      class="text-3xl leading-none transition-transform motion-safe:hover:scale-110"
       [class]="star <= value() ? 'text-amber-400' : 'text-gray-300'"
       [attr.aria-label]="star + ' estrellas'"
       (click)="setValue(star)"
