@@ -3,7 +3,7 @@ import {
   ElementRef,
   output,
   Signal,
-  ViewChild,
+  viewChild,
   WritableSignal,
   computed,
   signal,
@@ -30,8 +30,8 @@ export class BasicFormComponent {
   fullName: Signal<string> = computed(() => {
     return `${this.firstName()} ${this.surname()}`;
   });
-  @ViewChild('firstNameInput') firstNameInput!: ElementRef<HTMLInputElement>;
-  @ViewChild('surnameInput') surnameInput!: ElementRef<HTMLInputElement>;
+  readonly firstNameInput = viewChild.required<ElementRef<HTMLInputElement>>('firstNameInput');
+  readonly surnameInput = viewChild.required<ElementRef<HTMLInputElement>>('surnameInput');
   // Derivamos la salida del estado en vez de emitir desde un effect(): el
   // computed expone el par firstName/surname y outputFromObservable emite el
   // valor inicial y cada recomputo (cuando cambia algun signal que lee).
@@ -45,8 +45,8 @@ export class BasicFormComponent {
   readonly buttonClicked = output<ClickInButton>();
 
   setValue() {
-    const firstName = this.firstNameInput.nativeElement.value;
-    const surname = this.surnameInput.nativeElement.value;
+    const firstName = this.firstNameInput().nativeElement.value;
+    const surname = this.surnameInput().nativeElement.value;
     this.firstName.set(firstName);
     this.surname.set(surname);
     this.buttonClicked.emit({

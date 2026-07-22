@@ -41,8 +41,8 @@ describe('BasicFormComponent', () => {
     let clicked: { firstName: string; surname: string } | undefined;
     component.buttonClicked.subscribe((e) => (clicked = e));
 
-    component.firstNameInput.nativeElement.value = 'Grace';
-    component.surnameInput.nativeElement.value = 'Hopper';
+    component.firstNameInput().nativeElement.value = 'Grace';
+    component.surnameInput().nativeElement.value = 'Hopper';
     component.setValue();
 
     expect(component.firstName()).toBe('Grace');
