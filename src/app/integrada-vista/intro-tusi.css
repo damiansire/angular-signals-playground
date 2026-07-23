@@ -223,7 +223,8 @@
 .tusi__bubble {
   position: relative;
   margin: 0;
-  max-width: 25ch;
+  /* ancho para que la frase se estire (2 líneas), no un bloque angosto de 3 líneas cortas */
+  max-width: 36ch;
   background: color-mix(in srgb, var(--tusi-ink) 8%, transparent);
   border: 1px solid color-mix(in srgb, var(--tusi-hair) 60%, transparent);
   color: var(--tusi-ink);
