@@ -61,6 +61,27 @@
         <div class="tusi">
           <canvas class="tusi__canvas"></canvas>
 
+          <!-- progreso arriba: cuenta las líneas REALES que se van sumando (el mecanismo, no un %
+               abstracto). Fila compacta para no invadir la molécula; se desvanece al completarse,
+               porque a partir de ahí la narración de abajo es la que anuncia el círculo. -->
+          <div class="tusi__counter" aria-hidden="true">
+            <span class="tusi__counter-kick">Se está formando algo</span>
+            <!-- los 8 pips van en el template, no creados por JS: un elemento creado con
+                 createElement no recibe el atributo de encapsulación y el CSS del componente no le
+                 aplicaría (quedaban en 0×0). -->
+            <span class="tusi__pips">
+              <span class="tusi__pip"></span>
+              <span class="tusi__pip"></span>
+              <span class="tusi__pip"></span>
+              <span class="tusi__pip"></span>
+              <span class="tusi__pip"></span>
+              <span class="tusi__pip"></span>
+              <span class="tusi__pip"></span>
+              <span class="tusi__pip"></span>
+            </span>
+            <span class="tusi__counter-sub"><b class="tusi__counter-n">1</b> de 8 líneas</span>
+          </div>
+
           <div class="tusi__hero">
             <div class="tusi__narrate">
               <p class="tusi__epigraph" aria-live="polite">

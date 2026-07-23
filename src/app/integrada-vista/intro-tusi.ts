@@ -47,7 +47,8 @@ const OMEGA = 2.513; // 5ta línea a los ~20 s
 const HITS_PER_LINE = 4;
 const SPEEDS = [0.25, 0.5, 1, 2, 4, 8];
 const SPEED_START = 2; // índice de ×1
-const REWARD_FULL_PHASE = phaseForLine(8, HITS_PER_LINE); // barra llena al llegar a n=8
+const REWARD_LINES = 8; // el contador de arriba se completa al llegar a 8 líneas
+const REWARD_FULL_PHASE = phaseForLine(REWARD_LINES, HITS_PER_LINE);
 
 interface Line {
   angle: number;
@@ -270,10 +271,15 @@ export function initIntroTusi(host: HTMLElement): () => void {
     }
   }
 
-  // ── UI: narración, ayuda, controles, overlay ──
+  // ── UI: progreso, narración, ayuda, controles, overlay ──
   const narrateEl = q<HTMLElement>('.tusi__epigraph');
   const helpBtn = q<HTMLButtonElement>('.tusi__help');
   let lastNarration = '';
+
+  const counterEl = q<HTMLElement>('.tusi__counter');
+  const counterN = q<HTMLElement>('.tusi__counter-n');
+  const pipEls = Array.from(host.querySelectorAll<HTMLElement>('.tusi__pip'));
+  let lastShown = -1;
 
   helpBtn.addEventListener('click', () => {
     helpOn = !helpOn;
@@ -409,9 +415,16 @@ export function initIntroTusi(host: HTMLElement): () => void {
       narrateEl.textContent = narration;
       lastNarration = narration;
     }
+    const shown = Math.min(lines.length, REWARD_LINES);
+    if (shown !== lastShown) {
+      lastShown = shown;
+      counterN.textContent = String(shown);
+      for (let k = 0; k < REWARD_LINES; k++) pipEls[k].classList.toggle('on', k < shown);
+    }
     const done = prog >= 1;
     if (done !== rewardDone) {
       rewardDone = done;
+      counterEl.classList.toggle('done', done);
       helpBtn.hidden = !done;
       if (!done) {
         helpOn = false;

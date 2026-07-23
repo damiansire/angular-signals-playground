@@ -36,6 +36,67 @@
   z-index: 1;
 }
 
+/* progreso arriba: fila compacta (kicker · pips · contador). Va en fila y no apilado a propósito:
+   sobre la molécula solo hay ~7% del alto libre y un bloque apilado la invadiría. Se desvanece al
+   completarse; de ahí en más la narración del hero es la que anuncia el círculo. */
+.tusi__counter {
+  position: absolute;
+  left: 50%;
+  top: 18px;
+  transform: translateX(-50%);
+  z-index: 4;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  white-space: nowrap;
+  transition: opacity 0.5s;
+}
+.tusi__counter.done {
+  opacity: 0;
+}
+.tusi__counter-kick {
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 0.66rem;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--tusi-label) 90%, transparent);
+}
+.tusi__pips {
+  display: flex;
+  gap: 7px;
+}
+.tusi__pip {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  border: 1px solid color-mix(in srgb, var(--tusi-hair) 75%, transparent);
+  transition:
+    background 0.35s,
+    border-color 0.35s,
+    box-shadow 0.35s;
+}
+.tusi__pip.on {
+  background: var(--tusi-amber);
+  border-color: var(--tusi-amber);
+  box-shadow: 0 0 7px color-mix(in srgb, var(--tusi-amber) 55%, transparent);
+}
+.tusi__counter-sub {
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 0.7rem;
+  color: var(--tusi-ink-soft);
+  font-variant-numeric: tabular-nums;
+}
+.tusi__counter-sub b {
+  color: var(--tusi-ink);
+  font-weight: 600;
+}
+/* en angosto el kicker no entra en la fila: quedan pips + contador, que es lo informativo */
+@media (max-width: 560px) {
+  .tusi__counter-kick {
+    display: none;
+  }
+}
+
 /* hero: epígrafe arriba, título centrado, cue de scroll abajo (nada superpuesto a la animación) */
 .tusi__hero {
   position: absolute;
