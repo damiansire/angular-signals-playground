@@ -9,7 +9,7 @@ import {
 } from './tusi-math';
 
 /**
- * Intro "par de Tusi": la landing se CONSTRUYE sola. Arranca con una línea; cada 2 choques del punto
+ * Intro "par de Tusi": la landing se CONSTRUYE sola. Arranca con una línea; cada 3 choques del punto
  * contra el extremo dispara la siguiente (propagación, como un signal actualizando a su dependiente),
  * hasta que el caos aparente se revela como un círculo. Suena en La menor (una nota por línea, timbre
  * sacado del video original). El usuario elige tema (Dark/Light) al entrar; ese click además desbloquea
@@ -44,8 +44,8 @@ const PALETTES: Record<'light' | 'dark', Pal> = {
 };
 
 const MAX = 30;
-const OMEGA = 2.513; // 5ta línea a los ~10 s
-const HITS_PER_LINE = 2;
+const OMEGA = 2.513; // 5ta línea a los ~15 s
+const HITS_PER_LINE = 3;
 const SPEEDS = [0.25, 0.5, 1, 2, 4, 8];
 const SPEED_START = 2; // índice de ×1
 const REWARD_LINES = 8; // el contador de arriba se completa al llegar a 8 líneas
