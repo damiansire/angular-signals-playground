@@ -380,13 +380,28 @@ export function initMolecule(
     starsG.appendChild(st);
   }
 
-  // Enlace curvo entre dos átomos: una cuadrática con el punto de control corrido perpendicular al
-  // segmento (mismo lado siempre), así la cadena "respira" en arcos en vez de rectas de compás.
+  // Cuánto se exagera el arco por encima del geométricamente exacto (1 = calcado a la espiral).
+  // Por encima de ~1.6 los enlaces empiezan a abombarse y a invadir la nube de los átomos vecinos.
+  const BOND_BOW = 1.35;
+
+  // Enlace entre dos átomos: la cadena ya está dispuesta sobre una espiral (ver `pos`), así que el
+  // enlace TRAZA ese arco en vez de cortarlo por la cuerda. El punto de control de la cuadrática se
+  // corre radialmente desde el centro de la espiral, de modo que el punto medio de la curva caiga
+  // sobre el radio promedio de los extremos. Antes el control se corría perpendicular al segmento
+  // y siempre hacia el mismo lado: como la cadena da más de media vuelta, en buena parte del
+  // recorrido eso comba EN CONTRA de la espiral y la curva se lee recta.
   const bondPath = (x1: number, y1: number, x2: number, y2: number): string => {
-    const dx = x2 - x1;
-    const dy = y2 - y1;
-    const cx = (x1 + x2) / 2 - dy * 0.16;
-    const cy = (y1 + y2) / 2 + dx * 0.16;
+    const mx = (x1 + x2) / 2;
+    const my = (y1 + y2) / 2;
+    const dx = mx - CX;
+    const dy = my - CY;
+    const d = Math.hypot(dx, dy);
+    // El átomo 0 vive en el centro de la espiral: ese enlace es un rayo y no admite arco.
+    if (d < 1) return `M ${x1.toFixed(1)} ${y1.toFixed(1)} L ${x2.toFixed(1)} ${y2.toFixed(1)}`;
+    const rMid = (Math.hypot(x1 - CX, y1 - CY) + Math.hypot(x2 - CX, y2 - CY)) / 2;
+    const k = (d + 2 * (rMid - d) * BOND_BOW) / d;
+    const cx = CX + dx * k;
+    const cy = CY + dy * k;
     return `M ${x1.toFixed(1)} ${y1.toFixed(1)} Q ${cx.toFixed(1)} ${cy.toFixed(1)} ${x2.toFixed(1)} ${y2.toFixed(1)}`;
   };
   const bondEls: SVGPathElement[] = [];
