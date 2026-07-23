@@ -39,6 +39,24 @@ export function phaseForLine(n: number, hitsPerLine: number): number {
   return (n - 1) * hitsPerLine * Math.PI;
 }
 
+/**
+ * Ángulo del diámetro número `k` (0-indexado) en orden de BISECCIÓN: cada línea nueva cae en la mitad
+ * de un hueco existente, así las ya dibujadas nunca se mueven (a diferencia de repartir n cada π/n, que
+ * rota todo en cada alta). Es la secuencia de van der Corput base 2 escalada a [0, π): 0 (horizontal),
+ * π/2 (vertical), π/4, 3π/4, π/8, 5π/8, 3π/8, 7π/8… El ángulo de `k` no depende de cuántas líneas haya.
+ */
+export function bisectAngle(k: number): number {
+  let frac = 0;
+  let denom = 1;
+  let n = k;
+  while (n > 0) {
+    denom *= 2;
+    frac += (n % 2) / denom;
+    n = Math.floor(n / 2);
+  }
+  return frac * Math.PI;
+}
+
 /** Grados de la escala de La menor natural (teclas blancas), en semitonos desde la tónica. */
 const A_MINOR = [0, 2, 3, 5, 7, 8, 10] as const;
 

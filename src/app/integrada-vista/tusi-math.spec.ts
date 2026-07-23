@@ -1,4 +1,5 @@
 import {
+  bisectAngle,
   dotOffset,
   emergentCircleCenter,
   introNarration,
@@ -46,6 +47,26 @@ describe('tusi-math', () => {
   it('con 4 choques por línea, la línea 8 aparece a fase 28·π', () => {
     expect(phaseForLine(1, 4)).toBe(0);
     expect(phaseForLine(8, 4)).toBeCloseTo(28 * Math.PI, 10);
+  });
+
+  it('bisectAngle: horizontal, vertical, y luego bisecando (las ya puestas no se mueven)', () => {
+    expect(bisectAngle(0)).toBe(0); // horizontal
+    expect(bisectAngle(1)).toBeCloseTo(Math.PI / 2, 12); // vertical
+    expect(bisectAngle(2)).toBeCloseTo(Math.PI / 4, 12); // 45° de un lado
+    expect(bisectAngle(3)).toBeCloseTo((3 * Math.PI) / 4, 12); // 135° del otro
+    expect(bisectAngle(4)).toBeCloseTo(Math.PI / 8, 12); // 22.5°, bisecando el primer hueco
+  });
+
+  it('bisectAngle: el ángulo de cada línea es fijo (no depende de cuántas haya) y vive en [0, π)', () => {
+    // Si el ángulo de k dependiera del total, agregar líneas movería las anteriores: acá no.
+    const seen = new Set<string>();
+    for (let k = 0; k < 12; k++) {
+      const a = bisectAngle(k);
+      expect(a).toBeGreaterThanOrEqual(0);
+      expect(a).toBeLessThan(Math.PI);
+      seen.add(a.toFixed(9));
+    }
+    expect(seen.size).toBe(12); // 12 diámetros distintos
   });
 
   it('lineFreq sube por La menor: A3, B3, C4… A4', () => {

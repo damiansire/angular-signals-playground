@@ -1,4 +1,5 @@
 import {
+  bisectAngle,
   dotOffset,
   emergentCircleCenter,
   introNarration,
@@ -52,7 +53,6 @@ const REWARD_FULL_PHASE = phaseForLine(REWARD_LINES, HITS_PER_LINE);
 
 interface Line {
   angle: number;
-  target: number;
   phFloor?: number;
 }
 
@@ -142,18 +142,15 @@ export function initIntroTusi(host: HTMLElement): () => void {
 
   const curR = (): number => 0.27 * Math.min(W, H);
   const curCenter = (): { x: number; y: number } => ({ x: W / 2, y: H * 0.34 });
-  function redistribute(): void {
-    const n = lines.length;
-    for (let k = 0; k < n; k++) lines[k].target = lineAngle(k, n);
-  }
   function reset(): void {
     if (reduce) {
       // Sin animación: figura estática ya formada (9 líneas → círculo), coherente con el copy de cierre.
-      lines = Array.from({ length: 9 }, (_v, k) => ({ angle: lineAngle(k, 9), target: lineAngle(k, 9) }));
+      // Acá sí conviene equiespaciar (lineAngle): es una foto fija, no una construcción que deba quedar quieta.
+      lines = Array.from({ length: 9 }, (_v, k) => ({ angle: lineAngle(k, 9) }));
       phase = 'hold';
       holdUntil = Infinity;
     } else {
-      lines = [{ angle: 0, target: 0 }];
+      lines = [{ angle: bisectAngle(0) }];
       phase = 'grow';
     }
     prevExtreme = Math.floor(ph / Math.PI);
@@ -169,7 +166,6 @@ export function initIntroTusi(host: HTMLElement): () => void {
 
   function step(t: number, dt: number): void {
     ph += dt * OMEGA * SPEEDS[speedIdx];
-    for (const L of lines) L.angle += (L.target - L.angle) * Math.min(1, dt * 6);
 
     // Cada choque (un punto llega al extremo de su línea) dispara la nota de esa línea + su octava grave.
     for (let k = 0; k < lines.length; k++) {
@@ -198,8 +194,8 @@ export function initIntroTusi(host: HTMLElement): () => void {
         if (hits >= HITS_PER_LINE) {
           hits -= HITS_PER_LINE;
           if (lines.length < MAX) {
-            lines.push({ angle: (lines.length * Math.PI) / (lines.length + 1), target: 0 });
-            redistribute();
+            // Bisección: la nueva cae en la mitad de un hueco; las ya dibujadas no se mueven.
+            lines.push({ angle: bisectAngle(lines.length) });
           } else {
             phase = 'hold';
             holdUntil = t + 4.5;
