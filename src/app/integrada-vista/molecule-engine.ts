@@ -35,6 +35,7 @@ interface RawConcept {
   accent: AccentKey;
   dotted: boolean;
   tagline?: string; // título de encuadre del nivel (topbar en vista molécula, antes de bucear)
+  tip: string; // frase de la mascota-guía para este concepto (globo en la vista mapa)
 }
 
 interface Concept extends RawConcept {
@@ -64,18 +65,85 @@ const RAW: RawConcept[] = [
     accent: 'ink',
     dotted: false,
     tagline: 'Cómo la pantalla sabe qué cambió',
+    tip: 'Primero lo primero: ¿cómo se entera Angular de qué parte de la pantalla volver a dibujar?',
   },
-  { name: 'Signals', code: 'signal()', accent: 'source', dotted: false },
-  { name: 'Computed', code: 'computed()', accent: 'derived', dotted: true },
-  { name: 'Effects', code: 'effect()', accent: 'effect', dotted: false },
-  { name: 'Igualdad', code: 'equality', accent: 'source', dotted: false },
-  { name: 'Linked', code: 'linkedSignal()', accent: 'derived', dotted: true },
-  { name: 'Resource', code: 'resource()', accent: 'derived', dotted: true },
-  { name: 'Inputs & Outputs', code: 'input · model', accent: 'source', dotted: false },
-  { name: 'Queries', code: 'viewChild', accent: 'ink', dotted: true },
-  { name: 'After render', code: 'afterRenderEffect()', accent: 'effect', dotted: false },
-  { name: 'Debounce', code: 'debounce', accent: 'effect', dotted: true },
-  { name: 'Zoneless', code: 'zoneless', accent: 'capstone', dotted: false },
+  {
+    name: 'Signals',
+    code: 'signal()',
+    accent: 'source',
+    dotted: false,
+    tip: 'Una caja con un valor. La leés, la cambiás, y quien la mira se entera solo.',
+  },
+  {
+    name: 'Computed',
+    code: 'computed()',
+    accent: 'derived',
+    dotted: true,
+    tip: 'Un valor que se arma a partir de otros. Cambian ellos, se recalcula solo. Vos no lo tocás.',
+  },
+  {
+    name: 'Effects',
+    code: 'effect()',
+    accent: 'effect',
+    dotted: false,
+    tip: 'Cuando algo cambia y hay que salir de Angular (loggear, tocar el DOM, guardar), eso es un effect.',
+  },
+  {
+    name: 'Igualdad',
+    code: 'equality',
+    accent: 'source',
+    dotted: false,
+    tip: '¿Cambió de verdad? Angular compara antes de avisar. Acá decidís con qué criterio.',
+  },
+  {
+    name: 'Linked',
+    code: 'linkedSignal()',
+    accent: 'derived',
+    dotted: true,
+    tip: 'Un derivado que igual podés pisar a mano cuando querés. Lo mejor de los dos mundos.',
+  },
+  {
+    name: 'Resource',
+    code: 'resource()',
+    accent: 'derived',
+    dotted: true,
+    tip: 'Datos async como signal: te da cargando, error y valor, sin un subscribe suelto por ahí.',
+  },
+  {
+    name: 'Inputs & Outputs',
+    code: 'input · model',
+    accent: 'source',
+    dotted: false,
+    tip: 'Cómo entran y salen datos de un componente, ahora también como signals.',
+  },
+  {
+    name: 'Queries',
+    code: 'viewChild',
+    accent: 'ink',
+    dotted: true,
+    tip: 'Agarrar un pedazo del template (un hijo, un elemento) y tenerlo como signal.',
+  },
+  {
+    name: 'After render',
+    code: 'afterRenderEffect()',
+    accent: 'effect',
+    dotted: false,
+    tip: 'Correr algo justo después de que Angular pintó, con su limpieza incluida.',
+  },
+  {
+    name: 'Debounce',
+    code: 'debounce',
+    accent: 'effect',
+    dotted: true,
+    tip: 'Esperá a que el usuario frene antes de reaccionar. Menos ruido, mejor señal.',
+  },
+  {
+    name: 'Zoneless',
+    code: 'zoneless',
+    accent: 'capstone',
+    dotted: false,
+    tip: 'Sin Zone.js: los signals avisan solos cuándo repintar. Acá termina el viaje.',
+  },
 ];
 
 // Todos los conceptos usan el tratamiento "disolver el marco": la card deja de ser una ventana y su
@@ -859,6 +927,8 @@ export function initMolecule(
   const captionEl = q<HTMLElement>('.caption');
   const spaceSpineEl = q<HTMLElement>('#spaceSpine');
   const railHeadEl = q<HTMLElement>('.rail-head');
+  const recGuideEl = q<HTMLElement>('.rec-guide');
+  const recGuideBubbleEl = q<HTMLElement>('.rec-guide__bubble');
   const railCountEl = q<HTMLElement>('#railCount');
   const railSegEl = q<HTMLElement>('#railSeg');
   const railTicksOl = q<HTMLElement>('#railTicks')!;
@@ -989,6 +1059,15 @@ export function initMolecule(
       if (spaceSpineEl.textContent !== C[c].name) spaceSpineEl.textContent = C[c].name;
       spaceSpineEl.style.setProperty('--glow', COL[C[c].accent]);
       spaceSpineEl.style.opacity = Math.min(1, diveDepth / 0.55).toFixed(2);
+    }
+
+    // La mascota-guía acompaña la vista mapa: su globo da el tip del concepto actual. Se apaga al
+    // bucear (adentro mandan la card y la espina) y mientras el intro está visible (s < 0.12).
+    if (recGuideEl) {
+      if (recGuideBubbleEl && recGuideBubbleEl.textContent !== C[c].tip) {
+        recGuideBubbleEl.textContent = C[c].tip;
+      }
+      recGuideEl.style.opacity = (s < 0.12 ? 0 : Math.max(0, 1 - diveDepth / 0.5)).toFixed(2);
     }
 
     const dc = C[c];

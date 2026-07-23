@@ -65,6 +65,71 @@
   height: 100vh;
   overflow: hidden;
 }
+
+/* Mascota-guía del recorrido: fija abajo-DERECHA (el riel ocupa la izquierda). El motor le pone el
+   texto del globo (tip del concepto) y la opacidad (0 en el intro, se apaga al bucear). Clima claro
+   como el resto del recorrido; decorativa, no captura clicks. row-reverse = mascota al borde derecho
+   y globo a su izquierda, con el pico apuntándola. */
+.rec-guide {
+  position: absolute;
+  right: clamp(14px, 3vw, 40px);
+  bottom: clamp(14px, 4vh, 38px);
+  z-index: 6;
+  display: flex;
+  flex-direction: row-reverse;
+  align-items: flex-end;
+  gap: clamp(6px, 1vw, 12px);
+  max-width: min(48%, 470px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s;
+}
+.rec-guide__mascot {
+  flex: none;
+  width: clamp(58px, 8vw, 104px);
+  height: auto;
+  filter: drop-shadow(0 8px 16px rgba(60, 40, 20, 0.22));
+}
+.rec-guide__bubble {
+  position: relative;
+  margin: 0;
+  max-width: 34ch;
+  background: rgba(255, 253, 247, 0.74);
+  border: 1px solid rgba(177, 168, 146, 0.6);
+  color: #201d16;
+  border-radius: 14px;
+  padding: 0.6em 0.9em;
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: clamp(0.8rem, 1.5vw, 1rem);
+  line-height: 1.4;
+  text-wrap: balance;
+  backdrop-filter: blur(3px);
+}
+.rec-guide__bubble::after {
+  content: '';
+  position: absolute;
+  right: -7px;
+  bottom: 30px;
+  width: 12px;
+  height: 12px;
+  background: rgba(255, 253, 247, 0.74);
+  border-right: 1px solid rgba(177, 168, 146, 0.6);
+  border-top: 1px solid rgba(177, 168, 146, 0.6);
+  transform: rotate(45deg);
+}
+@media (max-width: 620px) {
+  .rec-guide {
+    max-width: 76%;
+  }
+  .rec-guide__mascot {
+    width: clamp(44px, 13vw, 62px);
+  }
+  .rec-guide__bubble {
+    font-size: 0.78rem;
+    max-width: 24ch;
+  }
+}
 .mol {
   position: absolute;
   inset: 0;

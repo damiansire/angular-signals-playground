@@ -55,6 +55,21 @@
            dissolve; el motor le pone el nombre y lo muestra al bucear. -->
       <div class="space-spine" id="spaceSpine" aria-hidden="true"></div>
 
+      <!-- La mascota-guía acompaña la vista mapa del recorrido: el motor le pone el tip del concepto
+           actual (campo `tip` en RAW de molecule-engine) y su opacidad (se apaga al bucear y mientras
+           el intro está visible). Va abajo-derecha porque el riel ocupa la izquierda. Decorativa
+           (aria-hidden): el nombre del concepto ya vive en el topbar y en la espina vertical. -->
+      <div class="rec-guide" aria-hidden="true">
+        <img
+          class="rec-guide__mascot"
+          src="angular-mascot-idea.svg"
+          alt=""
+          width="240"
+          height="300"
+        />
+        <p class="rec-guide__bubble"></p>
+      </div>
+
       <!-- Landing "par de Tusi": se construye sola por choques (ver intro-tusi.ts). El motor fadea el
            `.intro` con el scroll, así el handoff al recorrido sigue automático. -->
       <div class="intro" id="intro">
