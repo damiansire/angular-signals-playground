@@ -1,5 +1,51 @@
-import { scrollLayout, snapStops, initMolecule, cameraAt, CONCEPT_COUNT } from './molecule-engine';
+import {
+  scrollLayout,
+  snapStops,
+  initMolecule,
+  cameraAt,
+  CONCEPT_COUNT,
+  conceptPos,
+  wideZoom,
+  ATOM_CLOUD_R,
+  SPIRAL_GROWTH,
+  WIDE_ZOOM_FLOOR,
+} from './molecule-engine';
 import { signalsRoutesTree } from '../app.routes';
+
+describe('conceptPos (espiral de la molécula)', () => {
+  const all = Array.from({ length: CONCEPT_COUNT }, (_, i) => conceptPos(i));
+  const center = conceptPos(0);
+  const radius = (i: number): number => Math.hypot(all[i].x - center.x, all[i].y - center.y);
+
+  it('es logarítmica: el radio se multiplica por una constante en cada paso', () => {
+    // Es lo que hace que cada vuelta se abra más que la anterior (la forma de la espiral áurea).
+    // Una arquimediana (radio que SUMA una constante) daría razones decrecientes.
+    for (let i = 2; i < CONCEPT_COUNT - 1; i++) {
+      expect(radius(i + 1) / radius(i)).toBeCloseTo(SPIRAL_GROWTH, 6);
+    }
+  });
+
+  it('ningún par de átomos se pisa las nubes', () => {
+    // El átomo tiene tamaño FIJO, así que la única defensa contra el amontonamiento es el radio
+    // de la espiral. Se chequean TODOS los pares, no solo los consecutivos: al dar más de una
+    // vuelta, dos átomos de vueltas distintas pueden acercarse por el lado radial.
+    for (let i = 0; i < CONCEPT_COUNT; i++) {
+      for (let j = i + 1; j < CONCEPT_COUNT; j++) {
+        const d = Math.hypot(all[i].x - all[j].x, all[i].y - all[j].y);
+        expect(d)
+          .withContext(`átomos ${i} y ${j} a ${d.toFixed(1)} de distancia`)
+          .toBeGreaterThanOrEqual(2 * ATOM_CLOUD_R);
+      }
+    }
+  });
+
+  it('la molécula completa entra en el encuadre sin pegar el piso del zoom', () => {
+    // Si el zoom que la encuadra cae al piso, el clamp deja de achicar y los átomos de los
+    // extremos se salen del frame. Es el techo que impide subir el crecimiento hasta el áureo.
+    const outer = Math.max(...all.map((_, i) => radius(i)));
+    expect(wideZoom(outer)).toBeGreaterThan(WIDE_ZOOM_FLOOR);
+  });
+});
 
 describe('scrollLayout', () => {
   it('un concepto sin sub-niveles ocupa 2 unidades (nace + bucea)', () => {

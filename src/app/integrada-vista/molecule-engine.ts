@@ -100,6 +100,47 @@ const ORY = 11;
 const NUC = 13;
 
 /**
+ * Radio ocupado por un átomo: la órbita (ORX) más el electrón que la recorre. Dos átomos a menos
+ * de 2×ATOM_CLOUD_R de distancia se pisan las nubes. Es la restricción que acota la espiral.
+ */
+export const ATOM_CLOUD_R = 38;
+
+/**
+ * Espiral de la cadena de conceptos. Es LOGARÍTMICA: el radio se MULTIPLICA por `SPIRAL_GROWTH`
+ * en cada paso en vez de sumar una constante. Ese crecimiento geométrico es lo que hace que cada
+ * vuelta se abra más que la anterior, la firma visual de la espiral áurea.
+ *
+ * Por qué 1.15 y no φ: la áurea exacta a este paso angular multiplica por 1.262, y con átomos de
+ * tamaño FIJO no entra. Necesita 1.96× el encuadre disponible (el suelo de `wideK` corta en
+ * outerRadius ≈ 455). 1.15 es el crecimiento más grande que satisface a la vez las dos
+ * restricciones, nubes que no se tocan y molécula dentro del frame: ~60% del crecimiento áureo,
+ * 4.05× de punta a punta contra el 2.40× de la arquimediana que había antes. `spec` ata ambos
+ * invariantes para que un retoque futuro no los rompa en silencio.
+ */
+export const SPIRAL_R0 = 100;
+export const SPIRAL_GROWTH = 1.15;
+export const SPIRAL_STEP = 0.76;
+
+/**
+ * Encuadre de la molécula: mapea la extensión de la espiral a un zoom. Se aplana en
+ * `WIDE_ZOOM_FLOOR` para llenar el alto del viewport con los 12 átomos sin cortar los de
+ * arriba/abajo, y por eso mismo ese piso es el TECHO real de la espiral: si `outerRadius` crece
+ * tanto que el zoom quedaría por debajo, el clamp lo frena y la molécula se sale del frame.
+ */
+export const WIDE_ZOOM_FLOOR = 0.6;
+export function wideZoom(outerRadius: number): number {
+  return Math.max(WIDE_ZOOM_FLOOR, Math.min(1.5, 310 / (outerRadius + 62)));
+}
+
+/** Posición del átomo `i`. El concepto 0 vive en el centro; el resto sale por la espiral. */
+export function conceptPos(i: number): { x: number; y: number } {
+  if (i === 0) return { x: CX, y: CY };
+  const ang = (i - 1) * SPIRAL_STEP - Math.PI / 2;
+  const r = SPIRAL_R0 * Math.pow(SPIRAL_GROWTH, i - 1);
+  return { x: CX + r * Math.cos(ang), y: CY + r * Math.sin(ang) };
+}
+
+/**
  * Layout de scroll del recorrido: cada concepto ocupa [nace(1) + bucear(1)] = 2 unidades;
  * si tiene N sub-niveles, suma +1 unidad de scroll por cada uno (N + 1 en total). Devuelve
  * el offset de arranque de cada concepto, su largo y el total. Es la fuente de verdad de
@@ -292,19 +333,8 @@ export function initMolecule(
   // el scroll llega a `w = TOTAL` y el dive del último concepto se completa como el de los demás.
   const TRACK_TAIL = 1;
 
-  const pos = (i: number): { x: number; y: number } => {
-    if (i === 0) return { x: CX, y: CY };
-    // Espiral de la cadena. El átomo tiene tamaño FIJO (núcleo + nube de electrones ~38 de radio)
-    // y la cámara auto-encuadra el espiral, así que lo que evita que las nubes se pisen es el
-    // radio del espiral RELATIVO a ese tamaño fijo: radio base alto (135) para despegar ya al
-    // átomo 1 del centro, y crecimiento por paso (26) calculado para que el primer gap (1→2, el
-    // más apretado) supere el diámetro de la nube. Los internos dejan de amontonarse.
-    const ang = (i - 1) * 0.76 - Math.PI / 2;
-    const r = 172 + (i - 1) * 24;
-    return { x: CX + r * Math.cos(ang), y: CY + r * Math.sin(ang) };
-  };
   C.forEach((cc, i) => {
-    const pp = pos(i);
+    const pp = conceptPos(i);
     cc.x = pp.x;
     cc.y = pp.y;
   });
@@ -317,10 +347,7 @@ export function initMolecule(
     }
     return m;
   };
-  // Encuadre de la molécula: mapea el radio del espiral a un radio en pantalla objetivo. El
-  // espiral es más grande ahora (radio base 135), así que el piso sube a 0.6 para llenar más el
-  // alto del viewport en la vista completa (12 átomos) sin que los de arriba/abajo se corten.
-  const wideK = (c: number): number => Math.max(0.6, Math.min(1.5, 310 / (outerRadius(c) + 62)));
+  const wideK = (c: number): number => wideZoom(outerRadius(c));
   // Centro del ENCUADRE de la vista molécula: el centro de la bounding-box de los átomos nacidos
   // (0..c), NO el centroide de masa. El centroide de masa se corría hacia la zona más densa del
   // espiral y dejaba medio viewport muerto (design-review A8); el centro de la caja reparte la
