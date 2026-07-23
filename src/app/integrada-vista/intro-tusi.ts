@@ -176,8 +176,11 @@ export function initIntroTusi(host: HTMLElement): () => void {
         L.phFloor = f;
         if (soundOn && visible) {
           const base = lineFreq(k);
-          playNote(base, 0.5);
-          playNote(base / 2, 0.2);
+          // con muchas líneas los choques se agolpan; bajamos el volumen por nota para que el cúmulo
+          // no sature (hasta 7 líneas queda igual que antes)
+          const soft = 0.4 + 0.6 * Math.min(1, 7 / lines.length);
+          playNote(base, 0.5 * soft);
+          playNote(base / 2, 0.2 * soft);
         }
       }
     }

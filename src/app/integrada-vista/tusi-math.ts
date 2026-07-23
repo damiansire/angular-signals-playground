@@ -65,7 +65,9 @@ const A_MINOR = [0, 2, 3, 5, 7, 8, 10] as const;
  * fija por línea. Timbre y escala salen del video original (análisis FFT de los "pings" de cada choque).
  */
 export function lineFreq(k: number): number {
-  const octave = Math.floor(k / 7);
+  // La octava se pliega cada 3: con hasta 30 líneas, sin plegar, los agudos treparían a ~4.7 kHz y
+  // sonaban estridentes cuando se juntan muchos puntos. Plegado, el tono queda contenido en A3–G6.
+  const octave = Math.floor(k / 7) % 3;
   const midi = 57 + octave * 12 + A_MINOR[k % 7];
   return 440 * Math.pow(2, (midi - 69) / 12);
 }

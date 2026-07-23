@@ -76,6 +76,12 @@ describe('tusi-math', () => {
     expect(lineFreq(7)).toBeCloseTo(440.0, 2); // A4 (una octava arriba de A3)
   });
 
+  it('lineFreq pliega la octava cada 3: con muchas líneas el tono no se dispara a agudos', () => {
+    expect(lineFreq(21)).toBeCloseTo(lineFreq(0), 6); // la octava vuelve al inicio (no sigue subiendo)
+    // ninguna de las 30 líneas del intro supera G6 (~1568 Hz): sin plegar, la 30 llegaba a ~4.7 kHz
+    for (let k = 0; k < 30; k++) expect(lineFreq(k)).toBeLessThan(1600);
+  });
+
   it('introNarration: reposo sin arrancar, evoluciona con el progreso, cierra al completar', () => {
     expect(introNarration(0, false)).toBe(NARRATION_IDLE);
     expect(introNarration(0.5, false)).toBe(NARRATION_IDLE); // sin arrancar, siempre reposo
