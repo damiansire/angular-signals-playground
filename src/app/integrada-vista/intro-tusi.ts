@@ -280,6 +280,10 @@ export function initIntroTusi(host: HTMLElement): () => void {
   const counterN = q<HTMLElement>('.tusi__counter-n');
   const pipEls = Array.from(host.querySelectorAll<HTMLElement>('.tusi__pip'));
   let lastShown = -1;
+  let lastCounterOff: boolean | null = null;
+  // El topbar del recorrido entra en la misma banda que el contador. Al primer gesto de scroll el
+  // usuario ya se está yendo del intro: apagamos el contador antes de que los dos textos se pisen.
+  let scrolled = false;
 
   helpBtn.addEventListener('click', () => {
     helpOn = !helpOn;
@@ -419,13 +423,18 @@ export function initIntroTusi(host: HTMLElement): () => void {
     if (shown !== lastShown) {
       lastShown = shown;
       counterN.textContent = String(shown);
+      counterEl.setAttribute('aria-valuenow', String(shown));
       for (let k = 0; k < REWARD_LINES; k++) pipEls[k].classList.toggle('on', k < shown);
     }
     const done = prog >= 1;
+    const counterOff = done || scrolled;
+    if (counterOff !== lastCounterOff) {
+      lastCounterOff = counterOff;
+      counterEl.classList.toggle('done', counterOff);
+    }
     if (done !== rewardDone) {
       rewardDone = done;
-      counterEl.classList.toggle('done', done);
-      helpBtn.hidden = !done;
+      helpBtn.classList.toggle('in', done);
       if (!done) {
         helpOn = false;
         helpBtn.textContent = 'No la veo, ayudame';
@@ -435,15 +444,24 @@ export function initIntroTusi(host: HTMLElement): () => void {
   }
 
   const onResize = (): void => resize();
+  const onUserScroll = (): void => {
+    scrolled = true;
+  };
   window.addEventListener('resize', onResize);
+  window.addEventListener('wheel', onUserScroll, { passive: true });
+  window.addEventListener('touchmove', onUserScroll, { passive: true });
   resize();
   reset();
   refreshSpeedMenu();
+  // sin animación no hay construcción que contar: el contador solo aportaría un parpadeo
+  if (reduce) counterEl.hidden = true;
   rafId = window.requestAnimationFrame(loop);
 
   return (): void => {
     window.cancelAnimationFrame(rafId);
     window.removeEventListener('resize', onResize);
+    window.removeEventListener('wheel', onUserScroll);
+    window.removeEventListener('touchmove', onUserScroll);
     document.removeEventListener('click', onDocClick);
     document.removeEventListener('keydown', onKeyDown);
     void actx?.close();

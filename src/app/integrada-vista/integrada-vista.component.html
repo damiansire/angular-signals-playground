@@ -64,12 +64,19 @@
           <!-- progreso arriba: cuenta las líneas REALES que se van sumando (el mecanismo, no un %
                abstracto). Fila compacta para no invadir la molécula; se desvanece al completarse,
                porque a partir de ahí la narración de abajo es la que anuncia el círculo. -->
-          <div class="tusi__counter" aria-hidden="true">
+          <div
+            class="tusi__counter"
+            role="progressbar"
+            aria-valuemin="0"
+            aria-valuemax="8"
+            aria-valuenow="1"
+            aria-label="Líneas formadas"
+          >
             <span class="tusi__counter-kick">Se está formando algo</span>
             <!-- los 8 pips van en el template, no creados por JS: un elemento creado con
                  createElement no recibe el atributo de encapsulación y el CSS del componente no le
                  aplicaría (quedaban en 0×0). -->
-            <span class="tusi__pips">
+            <span class="tusi__pips" aria-hidden="true">
               <span class="tusi__pip"></span>
               <span class="tusi__pip"></span>
               <span class="tusi__pip"></span>
@@ -87,7 +94,7 @@
               <p class="tusi__epigraph" aria-live="polite">
                 Las cosas son sencillas si las analizás por partes
               </p>
-              <button class="tusi__help" type="button" hidden>No la veo, ayudame</button>
+              <button class="tusi__help" type="button">No la veo, ayudame</button>
             </div>
             <h1 class="tusi__title">Angular Signals</h1>
             <div class="tusi__scroll">

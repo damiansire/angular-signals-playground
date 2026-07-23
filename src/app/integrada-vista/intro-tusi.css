@@ -42,7 +42,8 @@
 .tusi__counter {
   position: absolute;
   left: 50%;
-  top: 18px;
+  /* atado al alto: con `top` fijo el aire contra la molécula caía a ~7px en laptops bajas */
+  top: clamp(8px, 1.8vh, 18px);
   transform: translateX(-50%);
   z-index: 4;
   display: flex;
@@ -54,12 +55,17 @@
 .tusi__counter.done {
   opacity: 0;
 }
+/* sin reduced-motion no hay construcción que contar: el TS lo oculta y esto lo saca del layout */
+.tusi__counter[hidden] {
+  display: none;
+}
 .tusi__counter-kick {
   font-family: var(--font-mono, ui-monospace, monospace);
   font-size: 0.66rem;
   letter-spacing: 0.28em;
   text-transform: uppercase;
-  color: color-mix(in srgb, var(--tusi-label) 90%, transparent);
+  /* full ink-soft, no label al 90%: es la etiqueta que dice QUÉ es esto y tiene que pasar AA */
+  color: var(--tusi-ink-soft);
 }
 .tusi__pips {
   display: flex;
@@ -69,7 +75,8 @@
   width: 7px;
   height: 7px;
   border-radius: 50%;
-  border: 1px solid color-mix(in srgb, var(--tusi-hair) 75%, transparent);
+  /* los pips apagados son la mitad del dato ("N de 8"): tienen que verse, no insinuarse */
+  border: 1.5px solid color-mix(in srgb, var(--tusi-ink-soft) 75%, transparent);
   transition:
     background 0.35s,
     border-color 0.35s,
@@ -119,13 +126,14 @@
   flex-direction: column;
   align-items: center;
   gap: 0.7rem;
-  min-height: 5.4em;
 }
 .tusi__epigraph {
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 2.6em;
+  /* alto de 2 líneas completas: la línea de cierre es más larga que las de build y, sin esto, el
+     título se corría 5px justo en el clímax */
+  min-height: 3.1em;
   max-width: 34ch;
   text-align: center;
   font-family: var(--font-editorial, Georgia, serif);
@@ -192,8 +200,15 @@
   margin: 0;
 }
 
-/* ayuda: aparece al completarse el círculo; dibuja el círculo emergente sobre la escena. */
+/* ayuda: aparece al completarse el círculo; dibuja el círculo emergente sobre la escena.
+   Entra con fade+rise (el TS agrega `.in` un frame después de mostrarlo): el contador SALE con
+   glide, así que lo que lo releva no puede entrar de golpe. */
 .tusi__help {
+  /* siempre en el layout: si entrara y saliera del flujo, el título se correría al aparecer.
+     `visibility` además lo saca del tab order y del árbol de accesibilidad mientras no aplica. */
+  visibility: hidden;
+  opacity: 0;
+  transform: translateY(4px);
   pointer-events: auto;
   font-family: var(--font-mono, ui-monospace, monospace);
   font-size: 0.72rem;
@@ -203,8 +218,16 @@
   border-radius: 999px;
   padding: 7px 13px;
   cursor: pointer;
-  transition: background 0.16s;
+  transition:
+    background 0.16s,
+    opacity 0.35s,
+    transform 0.35s;
   white-space: nowrap;
+}
+.tusi__help.in {
+  visibility: visible;
+  opacity: 1;
+  transform: none;
 }
 .tusi__help:hover {
   background: color-mix(in srgb, var(--tusi-amber) 30%, transparent);
@@ -212,9 +235,6 @@
 .tusi__help:focus-visible {
   outline: 2px solid var(--tusi-amber);
   outline-offset: 2px;
-}
-.tusi__help[hidden] {
-  display: none;
 }
 
 /* controles del usuario: sonido · reset · pausa · velocidad */
@@ -621,5 +641,8 @@
   .tusi__ov-halo,
   .tusi__ov-el {
     animation: none;
+  }
+  .tusi__help {
+    transition: none;
   }
 }
