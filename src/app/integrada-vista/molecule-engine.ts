@@ -106,19 +106,15 @@ const NUC = 13;
 export const ATOM_CLOUD_R = 38;
 
 /**
- * Espiral de la cadena de conceptos. Es LOGARÍTMICA: el radio se MULTIPLICA por `SPIRAL_GROWTH`
- * en cada paso en vez de sumar una constante. Ese crecimiento geométrico es lo que hace que cada
- * vuelta se abra más que la anterior, la firma visual de la espiral áurea.
- *
- * Por qué 1.15 y no φ: la áurea exacta a este paso angular multiplica por 1.262, y con átomos de
- * tamaño FIJO no entra. Necesita 1.96× el encuadre disponible (el suelo de `wideK` corta en
- * outerRadius ≈ 455). 1.15 es el crecimiento más grande que satisface a la vez las dos
- * restricciones, nubes que no se tocan y molécula dentro del frame: ~60% del crecimiento áureo,
- * 4.05× de punta a punta contra el 2.40× de la arquimediana que había antes. `spec` ata ambos
- * invariantes para que un retoque futuro no los rompa en silencio.
+ * Espiral de la cadena de conceptos. El átomo tiene tamaño FIJO (núcleo más nube, ver
+ * `ATOM_CLOUD_R`) y la cámara auto-encuadra la espiral, así que lo que evita que las nubes se
+ * pisen es el radio RELATIVO a ese tamaño fijo: radio base alto para despegar ya al átomo 1 del
+ * centro, y crecimiento por paso calculado para que el primer gap (1→2, el más apretado) supere
+ * el diámetro de la nube. `spec` ata ese invariante y el del encuadre, para que un retoque futuro
+ * no los rompa en silencio.
  */
-export const SPIRAL_R0 = 100;
-export const SPIRAL_GROWTH = 1.15;
+export const SPIRAL_R0 = 172;
+export const SPIRAL_RSTEP = 24;
 export const SPIRAL_STEP = 0.76;
 
 /**
@@ -136,7 +132,7 @@ export function wideZoom(outerRadius: number): number {
 export function conceptPos(i: number): { x: number; y: number } {
   if (i === 0) return { x: CX, y: CY };
   const ang = (i - 1) * SPIRAL_STEP - Math.PI / 2;
-  const r = SPIRAL_R0 * Math.pow(SPIRAL_GROWTH, i - 1);
+  const r = SPIRAL_R0 + (i - 1) * SPIRAL_RSTEP;
   return { x: CX + r * Math.cos(ang), y: CY + r * Math.sin(ang) };
 }
 

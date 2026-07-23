@@ -7,7 +7,7 @@ import {
   conceptPos,
   wideZoom,
   ATOM_CLOUD_R,
-  SPIRAL_GROWTH,
+  SPIRAL_RSTEP,
   WIDE_ZOOM_FLOOR,
 } from './molecule-engine';
 import { signalsRoutesTree } from '../app.routes';
@@ -17,11 +17,9 @@ describe('conceptPos (espiral de la molécula)', () => {
   const center = conceptPos(0);
   const radius = (i: number): number => Math.hypot(all[i].x - center.x, all[i].y - center.y);
 
-  it('es logarítmica: el radio se multiplica por una constante en cada paso', () => {
-    // Es lo que hace que cada vuelta se abra más que la anterior (la forma de la espiral áurea).
-    // Una arquimediana (radio que SUMA una constante) daría razones decrecientes.
+  it('el radio crece un paso constante por átomo', () => {
     for (let i = 2; i < CONCEPT_COUNT - 1; i++) {
-      expect(radius(i + 1) / radius(i)).toBeCloseTo(SPIRAL_GROWTH, 6);
+      expect(radius(i + 1) - radius(i)).toBeCloseTo(SPIRAL_RSTEP, 6);
     }
   });
 
