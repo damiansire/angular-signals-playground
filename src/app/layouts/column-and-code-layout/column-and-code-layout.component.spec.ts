@@ -51,9 +51,12 @@ describe('ColumnAndCodeLayoutComponent', () => {
   it('muestra la tarjeta de concepto cuando se pasa concept', () => {
     fixture.componentRef.setInput('concept', 'Un concepto didactico');
     fixture.detectChanges();
-    const card = fixture.nativeElement.querySelector('app-concept-card');
+    const card = fixture.nativeElement.querySelector('app-concept-card') as HTMLElement;
     expect(card).toBeTruthy();
-    expect((card as HTMLElement).textContent).toContain('Un concepto didactico');
+    // La pista arranca oculta; la mascota la revela al tocarla.
+    (card.querySelector('.cc__mascot') as HTMLElement).click();
+    fixture.detectChanges();
+    expect(card.textContent).toContain('Un concepto didactico');
   });
 
   describe('con host de proyeccion', () => {
