@@ -1175,7 +1175,10 @@ export function initMolecule(
       // Escala casi plana: un pop 0.9→1 sincronizado con el fade es la curva típica de
       // "se abrió un diálogo". La cámara ya hizo el zoom hacia el átomo (sceneG arriba);
       // el card solo necesita asentar, no volver a "aparecer creciendo" por su cuenta.
-      card.style.transform = `scale(${(0.97 + 0.03 * amt).toFixed(3)})`;
+      // A pleno (amt=1) va sin transform: en scale(1) es visualmente idéntico, pero SIN transform la
+      // card deja de ser el bloque contenedor de sus `position: fixed` internos, y así la pista de la
+      // mascota del sub-nivel ancla a la esquina del viewport (no al centro de la card).
+      card.style.transform = amt >= 1 ? 'none' : `scale(${(0.97 + 0.03 * amt).toFixed(3)})`;
       // Cada card embebe el componente real del sub-nivel: siempre interactivo cuando está visible.
       const live = amt > 0.6;
       card.style.pointerEvents = live ? 'auto' : 'none';
