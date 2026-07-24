@@ -42,6 +42,10 @@ export class TreeComponent {
     return visible.map((n) => ({ ...n, x: axis - n.x }));
   });
   readonly links = computed(() => generateLinks(this.htmlCode()));
+  /** Todavía no se reveló ningún nodo. El área del árbol es el ESCENARIO donde va a crecer, pero
+   *  vacía no se lee como zona interactiva y el primerizo pasa de largo sin tocar nada: el hint la
+   *  nombra hasta que aparece el primer nodo. */
+  readonly isEmpty = computed(() => this.nodes().length === 0);
 
   private readonly nodeTree = viewChild(NodeTreeComponent);
 

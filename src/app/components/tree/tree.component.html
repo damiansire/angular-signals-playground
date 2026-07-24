@@ -1,4 +1,7 @@
 <div class="tree-card rounded-md border border-gray-200 bg-gray-50 shadow-md p-2">
+  @if (isEmpty()) {
+    <p class="tree-hint">clickeá un tag y su nodo aparece acá</p>
+  }
   <app-node-tree
     [links]="links()"
     [nodes]="nodes()"
