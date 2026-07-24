@@ -1030,7 +1030,10 @@ export function initMolecule(
     // El aura del concepto crece desde el átomo (chica) hasta el fondo del card (grande),
     // tomando el color del concepto: el card queda "nacido" del átomo, no suelto.
     diveAura.style.setProperty('--glow', COL[C[c].accent]);
-    diveAura.style.opacity = (0.92 * diveDepth).toFixed(3);
+    // 0.72 (antes 0.92): a pleno buceo el aura teñía el viewport entero y el color del concepto
+    // pasaba de identificar a dominar, comiéndole contraste al contenido (los chips y el código
+    // peleaban contra el fondo). Sigue leyéndose que la card nace del átomo, sin gritar.
+    diveAura.style.opacity = (0.72 * diveDepth).toFixed(3);
     diveAura.style.transform = `scale(${(0.5 + 1.15 * diveDepth).toFixed(3)})`;
     // El topbar deja de ser chrome tenue: su centro muestra el TÍTULO del sub-ejemplo actual
     // (promovido desde el h1 del demo) con protagonismo, así que se mantiene presente al bucear.

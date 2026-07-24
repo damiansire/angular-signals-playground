@@ -361,7 +361,9 @@
   opacity: 0;
   z-index: 1;
   pointer-events: none;
-  filter: blur(7px) saturate(1.15);
+  /* Sin `saturate()` extra: el boost sumado a la opacidad del aura volvía el wash del concepto
+     (sobre todo el ámbar de Signals) un campo saturado que dominaba la escena. El blur queda. */
+  filter: blur(7px);
   will-change: transform, opacity;
 }
 .card {
