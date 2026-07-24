@@ -29,7 +29,10 @@ describe('UpdateSignalComponent', () => {
   });
 
   it('al hacer click en Increase incrementa el contador y se refleja en pantalla', () => {
-    const button = fixture.nativeElement.querySelector('button') as HTMLElement;
+    // El primer <button> ahora es la mascota de la pista: apuntamos al de "Increase" por su texto.
+    const button = [...fixture.nativeElement.querySelectorAll('button')].find((b) =>
+      (b.textContent ?? '').includes('Increase'),
+    ) as HTMLElement;
     button.click();
     button.click();
     button.click();

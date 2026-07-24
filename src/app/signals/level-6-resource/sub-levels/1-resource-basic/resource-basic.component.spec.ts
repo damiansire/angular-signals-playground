@@ -8,7 +8,12 @@ import { ResourceBasicComponent } from './resource-basic.component';
 async function expectNoA11yViolations(element: Element): Promise<void> {
   const results = await axe.run(element);
   const summary = results.violations
-    .map((v) => `- ${v.id} (${v.impact}): ${v.nodes.length} nodo(s) — ${v.help}`)
+    .map(
+      (v) =>
+        `- ${v.id} (${v.impact}): ${v.nodes.length} nodo(s) — ${v.help}\n    ${v.nodes
+          .map((n) => n.target.join(' ') + ' :: ' + (n.failureSummary ?? '').replace(/\n/g, ' '))
+          .join('\n    ')}`,
+    )
     .join('\n');
   expect(results.violations.length).withContext(summary).toBe(0);
 }
