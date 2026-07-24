@@ -1324,7 +1324,12 @@ export function initMolecule(
   for (const s of snapStops(C.map((c) => c.subN || null))) {
     const a = document.createElement('div');
     a.className = 'snap snap--stop';
-    a.style.top = ((s / (TOTAL + 0.2)) * 100).toFixed(3) + '%';
+    // El % del ancla mapea la unidad de scroll `s` contra el ALTO del track, que mide
+    // (TOTAL + TRACK_TAIL) unidades. Con un divisor distinto (antes 0.2) el snap descansaba en un
+    // scrollTop que, releído como `s`, quedaba inflado: en la parada de intro al concepto (off[c]+1.3)
+    // la card recibía opacidad residual (fantasma detrás de la molécula) y la espina asomaba sobre el
+    // índice. Con el mismo divisor que el track, el ancla cae en su unidad exacta y en reposo amt=0.
+    a.style.top = ((s / (TOTAL + TRACK_TAIL)) * 100).toFixed(3) + '%';
     stamp(a);
     snaps.appendChild(a);
   }
