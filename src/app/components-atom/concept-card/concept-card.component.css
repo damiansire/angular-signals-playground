@@ -44,9 +44,25 @@
   height: auto;
   border: 0;
   filter: drop-shadow(0 6px 14px rgba(120, 10, 70, 0.3));
+  /* respiro idle: usa `translate` (no `transform`) para componer con el hover sin pisarlo */
+  animation: cc-breathe 3.6s ease-in-out infinite;
   transition:
     transform 0.18s ease,
     filter 0.18s ease;
+}
+@keyframes cc-breathe {
+  0%,
+  100% {
+    translate: 0 0;
+  }
+  50% {
+    translate: 0 -3px;
+  }
+}
+/* con el globo abierto la mascota queda quieta: el pico del globo es fijo y no debe derivar contra él */
+.cc--open .cc__mascot-img {
+  animation: none;
+  translate: 0;
 }
 .cc__mascot:hover .cc__mascot-img {
   transform: translateY(-2px) rotate(-2deg);
@@ -151,6 +167,10 @@
 @media (prefers-reduced-motion: reduce) {
   .cc__brief {
     animation: none;
+  }
+  .cc .cc__mascot-img {
+    animation: none;
+    translate: none;
   }
   .cc__mascot-img,
   .cc__mascot:hover .cc__mascot-img {
