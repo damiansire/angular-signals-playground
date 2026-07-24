@@ -1,52 +1,56 @@
-/* Container query en vez de breakpoint de viewport: este card se embebe en contextos MUY
-   angostos (la vista molécula, /integrada-vista) aunque la ventana sea ancha, así que reacciona
-   al ancho real de su contenedor, no al del viewport. */
+/* La pista de la mascota NO va en el flujo del ejemplo (quedaba "integrada" y rara): flota fija en
+   la esquina inferior derecha del sub-nivel, como la guía del recorrido. Cerrada = solo la mascota;
+   al tocarla, el brief se abre hacia la izquierda (libre de ancho, ya no lo aprieta la columna). */
 :host {
-  container-type: inline-size;
-  display: block;
+  position: fixed;
+  right: clamp(14px, 3vw, 30px);
+  bottom: clamp(14px, 4vh, 28px);
+  z-index: 40;
 }
 
-/* La mascota cuenta la pista. Cerrada = solo la mascota (+ "tocame"); abierta = mascota + brief
-   ancho a su derecha. La mascota es un botón real (foco, teclado, aria-expanded). */
 .cc {
   display: flex;
+  flex-direction: row-reverse; /* mascota a la derecha (esquina), brief a su izquierda */
   align-items: flex-end;
   gap: 12px;
-  margin-bottom: 1.5rem;
   text-align: left;
 }
 
-.cc__mascot {
+/* `.cc` para ganarle a la regla global del dive `.subhost button:not([class*='bg-'])`, que le ponía
+   fondo #3a352d + pastilla redonda (el "círculo oscuro" detrás de la mascota). Acá va sin chrome. */
+.cc .cc__mascot {
   flex: none;
   align-self: flex-end;
   display: inline-flex;
   flex-direction: column;
   align-items: center;
   gap: 5px;
-  padding: 0;
-  border: 0;
-  background: transparent;
+  /* !important: la regla del dive `.subhost button:not([class*='bg-'])` (fondo #3a352d + pastilla)
+     sobrevive por orden de cascada; acá la mascota va sin chrome de botón. */
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
   cursor: pointer;
-  border-radius: 12px;
 }
 .cc__mascot:focus-visible {
   outline: 2px solid #eb9b3c;
   outline-offset: 3px;
 }
 /* `.cc` en el selector para ganarle a la regla global del dive `.card--dissolve .subhost img`
-   (pensada para las imágenes de los ejemplos: le pone width:auto + borde y colapsaba la mascota). */
+   (le pone width:auto + borde y colapsaba la mascota a 2px). */
 .cc .cc__mascot-img {
   width: 74px;
   height: auto;
   border: 0;
-  filter: drop-shadow(0 6px 12px rgba(120, 10, 70, 0.26));
+  filter: drop-shadow(0 6px 14px rgba(120, 10, 70, 0.3));
   transition:
     transform 0.18s ease,
     filter 0.18s ease;
 }
 .cc__mascot:hover .cc__mascot-img {
   transform: translateY(-2px) rotate(-2deg);
-  filter: drop-shadow(0 9px 16px rgba(120, 10, 70, 0.32));
+  filter: drop-shadow(0 9px 18px rgba(120, 10, 70, 0.36));
 }
 /* Pista de que se puede tocar; desaparece al abrir. */
 .cc__hint {
@@ -54,36 +58,38 @@
   font-size: 0.62rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: #8a5512;
-  background: rgba(235, 155, 60, 0.16);
+  /* pastilla casi sólida + texto bien oscuro: pasa contraste AA sobre cualquier fondo de escena */
+  color: #4a3208;
+  background: rgba(255, 240, 214, 0.92);
+  border: 1px solid rgba(180, 120, 40, 0.3);
   border-radius: 999px;
   padding: 2px 8px;
 }
 
 .cc__brief {
   position: relative;
-  flex: 1 1 auto;
-  min-width: 0;
-  background: rgba(255, 255, 255, 0.7);
-  border: 1px solid rgba(120, 140, 120, 0.34);
+  max-width: min(46vw, 400px);
+  background: rgba(255, 253, 250, 0.86);
+  border: 1px solid rgba(120, 140, 120, 0.4);
   border-radius: 16px;
   padding: 15px 18px;
   display: grid;
   gap: 12px;
-  backdrop-filter: blur(3px);
+  box-shadow: 0 12px 32px -14px rgba(30, 40, 30, 0.4);
+  backdrop-filter: blur(6px);
   animation: cc-reveal 0.22s ease-out;
 }
-/* pico apuntando a la mascota (a su izquierda) */
-.cc__brief::before {
+/* pico a la derecha, apuntando a la mascota */
+.cc__brief::after {
   content: '';
   position: absolute;
-  left: -7px;
-  bottom: 24px;
+  right: -7px;
+  bottom: 22px;
   width: 12px;
   height: 12px;
-  background: rgba(255, 255, 255, 0.7);
-  border-left: 1px solid rgba(120, 140, 120, 0.34);
-  border-bottom: 1px solid rgba(120, 140, 120, 0.34);
+  background: rgba(255, 253, 250, 0.86);
+  border-right: 1px solid rgba(120, 140, 120, 0.4);
+  border-top: 1px solid rgba(120, 140, 120, 0.4);
   transform: rotate(45deg);
 }
 .cc__row {
@@ -107,8 +113,8 @@
   color: #3f3f46;
 }
 .cc__chip--do {
-  background: rgba(235, 155, 60, 0.18);
-  color: #8a5512;
+  background: rgba(235, 155, 60, 0.22);
+  color: #6e4410;
 }
 .cc__chip--see {
   background: rgba(98, 196, 173, 0.2);
@@ -124,7 +130,7 @@
 @keyframes cc-reveal {
   from {
     opacity: 0;
-    transform: translateX(-6px);
+    transform: translateX(8px);
   }
   to {
     opacity: 1;
@@ -132,20 +138,13 @@
   }
 }
 
-/* Contenedor angosto (dive de la molécula): mascota arriba, brief debajo a lo ancho. */
-@container (max-width: 26rem) {
-  .cc {
-    flex-direction: column;
-    align-items: flex-start;
-  }
+/* Pantallas chicas: el brief no debe cruzar toda la pantalla. */
+@media (max-width: 620px) {
   .cc__brief {
-    width: 100%;
+    max-width: 74vw;
   }
-  .cc__brief::before {
-    left: 24px;
-    top: -7px;
-    bottom: auto;
-    transform: rotate(135deg);
+  .cc .cc__mascot-img {
+    width: 56px;
   }
 }
 
