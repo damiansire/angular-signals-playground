@@ -6,6 +6,10 @@
   right: clamp(14px, 3vw, 30px);
   bottom: clamp(14px, 4vh, 28px);
   z-index: 40;
+  /* Arranca OCULTA: solo se revela al final del warpin (abajo). Cubre determinísticamente cualquier
+     ventana en la que un ancestro transformado (carga inicial, mount, pre-warp) la haría flotar en el
+     centro. En reposo la revela la animación (forwards fill → opacity 1). */
+  opacity: 0;
 }
 /* Al entrar a un sub-nivel, `.subbody.warp` corre `warpin` 0.8s (scale + blur): durante esos 0.8s
    ese contenedor es el bloque contenedor de nuestro `position: fixed`, y la mascota flotaba en el
@@ -18,7 +22,7 @@
 }
 @keyframes cc-warp-hide {
   0%,
-  62% {
+  82% {
     opacity: 0;
   }
   100% {
@@ -183,6 +187,13 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+  /* sin warpin no hay float: la mascota va visible directo (sin depender de la animación de revelado) */
+  :host {
+    opacity: 1;
+  }
+  :host-context(.warp) {
+    animation: none;
+  }
   .cc__brief {
     animation: none;
   }
