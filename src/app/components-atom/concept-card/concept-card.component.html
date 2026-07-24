@@ -1,24 +1,38 @@
-<div class="mb-6 w-full rounded-lg border border-gray-200 bg-gray-50 px-6 py-4">
-  <div class="concept-grid gap-x-8 gap-y-3 text-left">
-    <div class="border-l-2 border-gray-400 pl-3">
-      <p class="truncate text-xs font-semibold uppercase tracking-wide text-gray-600">Concepto</p>
-      <p class="mt-1 text-sm text-gray-700">{{ concept() }}</p>
+<div class="cc" [class.cc--open]="open()">
+  <button
+    type="button"
+    class="cc__mascot"
+    [attr.aria-expanded]="open()"
+    aria-controls="cc-brief"
+    [attr.aria-label]="
+      open() ? 'Ocultar la pista de la mascota' : 'La mascota te da una pista de este ejemplo'
+    "
+    (click)="toggle()"
+  >
+    <img class="cc__mascot-img" src="angular-mascot-idea.svg" alt="" width="240" height="300" />
+    @if (!open()) {
+      <span class="cc__hint">tocame</span>
+    }
+  </button>
+
+  @if (open()) {
+    <div class="cc__brief" id="cc-brief">
+      <div class="cc__row">
+        <span class="cc__chip cc__chip--concept">Concepto</span>
+        <p class="cc__text">{{ concept() }}</p>
+      </div>
+      @if (action()) {
+        <div class="cc__row">
+          <span class="cc__chip cc__chip--do">Qué hacer</span>
+          <p class="cc__text">{{ action() }}</p>
+        </div>
+      }
+      @if (observe()) {
+        <div class="cc__row">
+          <span class="cc__chip cc__chip--see">Qué observar</span>
+          <p class="cc__text">{{ observe() }}</p>
+        </div>
+      }
     </div>
-    @if (action()) {
-      <div class="border-l-2 border-[#eb9b3c] pl-3">
-        <p class="truncate text-xs font-semibold uppercase tracking-wide text-[#8a5512]">
-          Qué hacer
-        </p>
-        <p class="mt-1 text-sm text-gray-700">{{ action() }}</p>
-      </div>
-    }
-    @if (observe()) {
-      <div class="border-l-2 border-[#62c4ad] pl-3">
-        <p class="truncate text-xs font-semibold uppercase tracking-wide text-[#0f6b54]">
-          Qué observar
-        </p>
-        <p class="mt-1 text-sm text-gray-700">{{ observe() }}</p>
-      </div>
-    }
-  </div>
+  }
 </div>

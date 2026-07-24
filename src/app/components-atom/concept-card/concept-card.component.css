@@ -1,18 +1,161 @@
 /* Container query en vez de breakpoint de viewport: este card se embebe en contextos MUY
-   angostos (la vista molécula, /integrada-vista) aunque la ventana sea ancha, así que un
-   `sm:` de Tailwind (basado en el viewport) no sirve — necesita reaccionar al ancho real
-   del contenedor propio. */
+   angostos (la vista molécula, /integrada-vista) aunque la ventana sea ancha, así que reacciona
+   al ancho real de su contenedor, no al del viewport. */
 :host {
   container-type: inline-size;
+  display: block;
 }
 
-.concept-grid {
+/* La mascota cuenta la pista. Cerrada = solo la mascota (+ "tocame"); abierta = mascota + brief
+   ancho a su derecha. La mascota es un botón real (foco, teclado, aria-expanded). */
+.cc {
+  display: flex;
+  align-items: flex-end;
+  gap: 12px;
+  margin-bottom: 1.5rem;
+  text-align: left;
+}
+
+.cc__mascot {
+  flex: none;
+  align-self: flex-end;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  border-radius: 12px;
+}
+.cc__mascot:focus-visible {
+  outline: 2px solid #eb9b3c;
+  outline-offset: 3px;
+}
+/* `.cc` en el selector para ganarle a la regla global del dive `.card--dissolve .subhost img`
+   (pensada para las imágenes de los ejemplos: le pone width:auto + borde y colapsaba la mascota). */
+.cc .cc__mascot-img {
+  width: 74px;
+  height: auto;
+  border: 0;
+  filter: drop-shadow(0 6px 12px rgba(120, 10, 70, 0.26));
+  transition:
+    transform 0.18s ease,
+    filter 0.18s ease;
+}
+.cc__mascot:hover .cc__mascot-img {
+  transform: translateY(-2px) rotate(-2deg);
+  filter: drop-shadow(0 9px 16px rgba(120, 10, 70, 0.32));
+}
+/* Pista de que se puede tocar; desaparece al abrir. */
+.cc__hint {
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 0.62rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #8a5512;
+  background: rgba(235, 155, 60, 0.16);
+  border-radius: 999px;
+  padding: 2px 8px;
+}
+
+.cc__brief {
+  position: relative;
+  flex: 1 1 auto;
+  min-width: 0;
+  background: rgba(255, 255, 255, 0.7);
+  border: 1px solid rgba(120, 140, 120, 0.34);
+  border-radius: 16px;
+  padding: 15px 18px;
   display: grid;
-  grid-template-columns: 1fr;
+  gap: 12px;
+  backdrop-filter: blur(3px);
+  animation: cc-reveal 0.22s ease-out;
+}
+/* pico apuntando a la mascota (a su izquierda) */
+.cc__brief::before {
+  content: '';
+  position: absolute;
+  left: -7px;
+  bottom: 24px;
+  width: 12px;
+  height: 12px;
+  background: rgba(255, 255, 255, 0.7);
+  border-left: 1px solid rgba(120, 140, 120, 0.34);
+  border-bottom: 1px solid rgba(120, 140, 120, 0.34);
+  transform: rotate(45deg);
+}
+.cc__row {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 10px;
+  align-items: baseline;
+}
+.cc__chip {
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  padding: 2px 8px;
+  border-radius: 999px;
+}
+.cc__chip--concept {
+  background: rgba(90, 90, 90, 0.14);
+  color: #3f3f46;
+}
+.cc__chip--do {
+  background: rgba(235, 155, 60, 0.18);
+  color: #8a5512;
+}
+.cc__chip--see {
+  background: rgba(98, 196, 173, 0.2);
+  color: #0f6b54;
+}
+.cc__text {
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: 1.42;
+  color: #2b2b2b;
 }
 
-@container (min-width: 28rem) {
-  .concept-grid {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+@keyframes cc-reveal {
+  from {
+    opacity: 0;
+    transform: translateX(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Contenedor angosto (dive de la molécula): mascota arriba, brief debajo a lo ancho. */
+@container (max-width: 26rem) {
+  .cc {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .cc__brief {
+    width: 100%;
+  }
+  .cc__brief::before {
+    left: 24px;
+    top: -7px;
+    bottom: auto;
+    transform: rotate(135deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cc__brief {
+    animation: none;
+  }
+  .cc__mascot-img,
+  .cc__mascot:hover .cc__mascot-img {
+    transition: none;
+    transform: none;
   }
 }
