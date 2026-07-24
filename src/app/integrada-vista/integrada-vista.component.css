@@ -89,6 +89,22 @@
   width: clamp(58px, 8vw, 104px);
   height: auto;
   filter: drop-shadow(0 8px 16px rgba(60, 40, 20, 0.22));
+  /* respiro idle: un compañero vivo, no una estampa congelada (usa `translate`, no `transform`) */
+  animation: rec-guide-breathe 3.6s ease-in-out infinite;
+}
+@keyframes rec-guide-breathe {
+  0%,
+  100% {
+    translate: 0 0;
+  }
+  50% {
+    translate: 0 -3px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .rec-guide__mascot {
+    animation: none;
+  }
 }
 .rec-guide__bubble {
   position: relative;
