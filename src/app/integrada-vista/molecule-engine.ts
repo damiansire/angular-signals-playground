@@ -954,12 +954,16 @@ export function initMolecule(
   // badge "estás acá" y el trofeo del capstone (Zoneless). render() les pone hecho / estás acá /
   // bloqueado. Las cabeceras de acto se intercalan en el mismo <ol> (aria-hidden, decorativas).
   const railStops: HTMLElement[] = [];
+  const railStopBtns: HTMLButtonElement[] = [];
   for (let i = 0; i < N; i++) {
     const act = ACTS.find((a) => a.at === i);
     if (act) {
       const h = document.createElement('li');
       h.className = 'rail-act';
       h.textContent = act.label;
+      // Rótulo visual de agrupación: el nombre real del concepto ya viaja en el aria-label de cada
+      // botón, así que la cabecera no se anuncia por separado (evita duplicar en lectores de pantalla).
+      h.setAttribute('aria-hidden', 'true');
       stamp(h);
       railTicksOl.appendChild(h);
     }
@@ -967,16 +971,28 @@ export function initMolecule(
     li.className = 'rail-stop';
     li.style.setProperty('--nc', COL[C[i].accent]);
     const trophy = i === N - 1 ? '<span class="rail-trophy">🏆</span>' : '';
-    li.innerHTML =
-      `<span class="rail-mark"><i class="rail-halo"></i><i class="rail-orb"></i><i class="rail-core"></i></span>` +
+    // Cada parada es un BOTÓN real: click (y Enter/Espacio) navega al concepto. Antes el riel era
+    // decorativo (aria-hidden) y solo se navegaba por scroll/teclado ↑↓; ahora también saltás tocando
+    // el índice. La marca-átomo va aria-hidden: es decoración, el nombre lo lleva el aria-label.
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'rail-stop-btn';
+    btn.setAttribute('aria-label', `Ir al concepto ${i}: ${C[i].name}`);
+    btn.innerHTML =
+      `<span class="rail-mark" aria-hidden="true"><i class="rail-halo"></i><i class="rail-orb"></i><i class="rail-core"></i></span>` +
       `<span class="rail-num">${i}</span>` +
       `<span class="rail-name">${C[i].name}</span>` +
       trophy +
       `<span class="rail-badge">estás acá</span>`;
+    // Salta al ENCUADRE del átomo del concepto (misma parada que el deep-link `?nivel=i`): desde ahí
+    // se bucea scrolleando. goToUnit ya sincroniza la URL y respeta reduced-motion.
+    btn.addEventListener('click', () => goToUnit(off[i] + 1.3));
+    li.appendChild(btn);
     stamp(li);
     stampTree(li);
     railTicksOl.appendChild(li);
     railStops.push(li);
+    railStopBtns.push(btn);
   }
 
   // ---- render(s): dibuja el estado del recorrido en la posición de scroll s (0..TOTAL) ----
@@ -1051,6 +1067,10 @@ export function initMolecule(
     // hacían zoom-spread, que no encaja en filas con número + nombre.
     if (railHeadEl) railHeadEl.style.opacity = (1 - morphT).toFixed(3);
     railTicksOl.style.opacity = (1 - morphT).toFixed(3);
+    // Los botones del índice sólo son interactivos con el panel de conceptos presente: no en la
+    // landing (intro tapando, s<0.12) ni al bucear (morphT→1, los ticks se desvanecen). `inert` los
+    // saca del foco y de los clicks cuando no se ven, así no hay tabs ni clicks fantasma sobre ellos.
+    railTicksOl.inert = s < 0.12 || morphT > 0.5;
     if (railLineEl) railLineEl.style.opacity = (0.5 * (1 - morphT)).toFixed(3);
     if (captionEl) captionEl.style.opacity = Math.max(0, 1 - diveDepth / 0.5).toFixed(2);
     // Título vertical del concepto (espina de identidad) pegado al riel: aparece al bucear, con
@@ -1209,6 +1229,9 @@ export function initMolecule(
       st.classList.toggle('done', si < c);
       st.classList.toggle('here', si === c);
       st.classList.toggle('lock', si > c);
+      // aria-current marca el concepto actual para lectores de pantalla (paso del recorrido).
+      if (si === c) railStopBtns[si].setAttribute('aria-current', 'step');
+      else railStopBtns[si].removeAttribute('aria-current');
     }
     if (introEl) {
       const introVisible = s < 0.12;

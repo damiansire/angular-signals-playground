@@ -349,21 +349,6 @@
   /* Sin pastilla de controles: solo se reserva abajo el alto del caption tenue. */
   padding: 0.6rem 0.6rem 40px;
 }
-/* Velo de buceo: spotlight que oscurece el entorno del card (centro casi limpio, bordes
-   oscuros) para que el color del concepto resalte parejo, incluido el teal sobre el fondo
-   verdoso. La opacidad la sube el motor con el diveDepth. */
-/* SIN grid-area a propósito: dentro de `.content` (que tiene padding) un grid-item absoluto
-   se posiciona contra el ÁREA DE GRILLA (adentro del padding), dejando una franja superior
-   sin velo. Sin grid-area, `inset:0` se resuelve contra la caja de `.content` = viewport
-   completo, así el velo cubre de borde a borde (incluida la franja de arriba). */
-.dive-veil {
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(72% 64% at 50% 42%, transparent 30%, rgba(28, 24, 16, 0.6) 100%);
-  opacity: 0;
-  z-index: 0;
-  pointer-events: none;
-}
 /* Aura del concepto: disco de color que crece desde el átomo y se vuelve el fondo del
    contenedor (escala/opacidad/color las maneja el motor por diveDepth). Da la sensación de
    que el card nace del átomo, no que aparece suelto en el medio. */
@@ -1253,6 +1238,34 @@
   color: #857e6d;
   transition: color 0.25s ease;
 }
+/* Cada parada es un BOTÓN que navega al concepto. Hereda la fila (marca + número + nombre) y no
+   pinta chrome de botón salvo el realce de hover y el anillo de foco accesible. El motor lo pone
+   `inert` cuando el índice no se ve (landing / buceado), así no roba tabs ni clicks fantasma. */
+.rail-stop-btn {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  padding: 3px 5px;
+  border: none;
+  border-radius: 9px;
+  background: none;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+  pointer-events: auto;
+  transition: background 0.2s ease;
+}
+.rail-stop-btn:hover {
+  background: color-mix(in srgb, var(--nc) 14%, transparent);
+}
+.rail-stop-btn:focus-visible {
+  outline: 2px solid var(--nc);
+  outline-offset: 1px;
+}
 .rail-mark {
   position: relative;
   width: 18px;
@@ -1434,7 +1447,8 @@
      (el puck salta al dot, el electrón actual se coloca sin deslizar). El SENTIDO se mantiene. */
   .suborbit.dissolve .sub-puck,
   .sub-e.current .sub-dot,
-  .sub-e.current .sub-n {
+  .sub-e.current .sub-n,
+  .rail-stop-btn {
     transition: none;
   }
 }
