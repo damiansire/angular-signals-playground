@@ -7,6 +7,24 @@
   bottom: clamp(14px, 4vh, 28px);
   z-index: 40;
 }
+/* Al entrar a un sub-nivel, `.subbody.warp` corre `warpin` 0.8s (scale + blur): durante esos 0.8s
+   ese contenedor es el bloque contenedor de nuestro `position: fixed`, y la mascota flotaba en el
+   CENTRO de la escena y luego "bajaba" a la esquina al asentar. Corremos una animación GEMELA (misma
+   duración) que la mantiene oculta mientras dura el warp y la revela (fade) al final, ya anclada en
+   la esquina. `.warp` persiste pero la animación se dispara solo cuando la clase se agrega (= cuando
+   el warpin realmente corre), así que en reposo la mascota queda visible. */
+:host-context(.warp) {
+  animation: cc-warp-hide 0.8s both;
+}
+@keyframes cc-warp-hide {
+  0%,
+  62% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
 
 .cc {
   display: flex;
