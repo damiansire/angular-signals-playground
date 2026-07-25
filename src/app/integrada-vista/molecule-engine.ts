@@ -69,6 +69,7 @@ const RAW: RawConcept[] = [
   },
   {
     name: 'Signals',
+    tagline: 'El que avisa',
     code: 'signal()',
     accent: 'source',
     dotted: false,
@@ -76,6 +77,7 @@ const RAW: RawConcept[] = [
   },
   {
     name: 'Computed',
+    tagline: 'El que se entera por otro',
     code: 'computed()',
     accent: 'derived',
     dotted: true,
@@ -83,6 +85,7 @@ const RAW: RawConcept[] = [
   },
   {
     name: 'Effects',
+    tagline: 'El que sale a hacer algo',
     code: 'effect()',
     accent: 'effect',
     dotted: false,
@@ -90,6 +93,7 @@ const RAW: RawConcept[] = [
   },
   {
     name: 'Igualdad',
+    tagline: '¿Cambió, o solo se parece?',
     code: 'equality',
     accent: 'source',
     dotted: false,
@@ -97,6 +101,7 @@ const RAW: RawConcept[] = [
   },
   {
     name: 'Linked',
+    tagline: 'Cuando el observador interviene',
     code: 'linkedSignal()',
     accent: 'derived',
     dotted: true,
@@ -104,6 +109,7 @@ const RAW: RawConcept[] = [
   },
   {
     name: 'Resource',
+    tagline: 'El dato que todavía viaja',
     code: 'resource()',
     accent: 'derived',
     dotted: true,
@@ -111,6 +117,7 @@ const RAW: RawConcept[] = [
   },
   {
     name: 'Inputs & Outputs',
+    tagline: 'Los bordes del aparato',
     code: 'input · model',
     accent: 'source',
     dotted: false,
@@ -118,6 +125,7 @@ const RAW: RawConcept[] = [
   },
   {
     name: 'Queries',
+    tagline: 'Mirar la pantalla misma',
     code: 'viewChild',
     accent: 'ink',
     dotted: true,
@@ -125,6 +133,7 @@ const RAW: RawConcept[] = [
   },
   {
     name: 'After render',
+    tagline: 'Medir después de pintar',
     code: 'afterRenderEffect()',
     accent: 'effect',
     dotted: false,
@@ -132,6 +141,7 @@ const RAW: RawConcept[] = [
   },
   {
     name: 'Debounce',
+    tagline: 'Esperar a que se estabilice',
     code: 'debounce',
     accent: 'effect',
     dotted: true,
@@ -139,6 +149,7 @@ const RAW: RawConcept[] = [
   },
   {
     name: 'Zoneless',
+    tagline: 'Quien lee, avisa',
     code: 'zoneless',
     accent: 'capstone',
     dotted: false,
@@ -966,9 +977,9 @@ export function initMolecule(
   // Los 12 conceptos, agrupados en 3 ACTOS (chunking tipo battle-pass). Un acto arranca en su
   // primer concepto; el motor inserta la cabecera antes de esa parada. Índices atados a RAW.
   const ACTS: { at: number; label: string }[] = [
-    { at: 0, label: 'Acto I · fundamentos' },
-    { at: 4, label: 'Acto II · derivar' },
-    { at: 7, label: 'Acto III · avanzado' },
+    { at: 0, label: 'Acto I · quién avisa' },
+    { at: 4, label: 'Acto II · con qué precisión' },
+    { at: 7, label: 'Acto III · el aparato completo' },
   ];
 
   // Barra segmentada del progreso (una marca por concepto): render() enciende las de los ya hechos.
