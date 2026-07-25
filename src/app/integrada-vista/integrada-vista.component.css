@@ -904,6 +904,14 @@
 .suborbit.on .sub-e {
   pointer-events: auto;
 }
+/* Cada parada del índice es un botón: al llegar con teclado necesita un anillo visible. Va como
+   `outline` sobre el grupo y no como `stroke` del círculo porque el motor escribe `stroke` inline
+   (updateOrbitFill) y el estilo inline le ganaría a esta regla. */
+.sub-e:focus-visible {
+  outline: 2px solid #211e1a;
+  outline-offset: 3px;
+  border-radius: 50%;
+}
 .sub-dot {
   fill: #837a6b;
   transition:

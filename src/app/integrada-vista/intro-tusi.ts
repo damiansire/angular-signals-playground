@@ -385,6 +385,9 @@ export function initIntroTusi(host: HTMLElement): () => void {
     }
     reset();
     overlay.classList.add('gone');
+    // `.gone` sólo apaga opacidad y pointer-events: sin `inert` los botones del overlay siguen en el
+    // orden de tabulación y en el árbol de a11y, invisibles pero alcanzables con Tab.
+    overlay.inert = true;
   }
   q<HTMLButtonElement>('[data-role="pick-dark"]').addEventListener('click', () => start('dark'));
   q<HTMLButtonElement>('[data-role="pick-light"]').addEventListener('click', () => start('light'));
@@ -404,7 +407,14 @@ export function initIntroTusi(host: HTMLElement): () => void {
       // recorrido SIN elegir tema), su subárbol interceptaría los clicks de los demos que quedaron
       // debajo (pointer-events se hereda, así que apagarlo en el overlay apaga todo el subárbol). Solo
       // mientras no se eligió tema: tras `start()`, `.gone` ya lo maneja y no hay que reactivarlo.
-      if (!started) overlay.classList.toggle('gone', !visible);
+      if (!started) {
+        overlay.classList.toggle('gone', !visible);
+        overlay.inert = !visible;
+      }
+      // El intro entero (controles de sonido/pausa/velocidad y el overlay) se desvanece con opacity,
+      // que NO lo saca del tab-order ni del árbol de a11y. Con deep-link a un sub-nivel quedaban 7
+      // controles invisibles pero tabulables, capaces de cambiar el tema sin que se vea nada.
+      if (introEl) introEl.inert = !visible;
       if (actx) {
         if (visible && soundOn) void actx.resume();
         else if (!visible) void actx.suspend();

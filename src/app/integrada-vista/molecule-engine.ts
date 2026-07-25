@@ -644,6 +644,8 @@ export function initMolecule(
 
   let orbitFor = -1;
   let subDots: SubDot[] = [];
+  // Espejo del "el índice se ve": evita reescribir tabindex en cada frame del loop de órbita.
+  let orbitFocusable = false;
   // ¿Hay que recalcular la geometría de la órbita? La constelación de sub-niveles está anclada al
   // topbar (estable): solo se mueve si algo se movió (scroll/resize/cambio de sub-nivel). Con este
   // flag, estando parado dentro de un concepto orbitLoop no fuerza reflow ni reescribe los dots.
@@ -727,7 +729,15 @@ export function initMolecule(
     subEG.textContent = '';
     subDots = [];
     for (let k = 0; k < nsub; k++) {
-      const g = el('g', { class: 'sub-e' });
+      // Cada parada del índice es un BOTÓN de verdad, no un adorno con listener: sin rol, foco ni
+      // nombre accesible el índice era navegable sólo con mouse (con teclado quedaba únicamente el
+      // avance secuencial por flechas/PageDown, sin poder saltar a un capítulo).
+      const g = el('g', {
+        class: 'sub-e',
+        role: 'button',
+        tabindex: '-1',
+        'aria-label': `Sub-nivel ${k + 1} de ${cc.name}`,
+      });
       const dot = el('circle', { class: 'sub-dot', cx: 450, cy: 90, r: 12 });
       const num = el('text', { class: 'sub-n', x: 450, y: 94 });
       num.textContent = String(k + 1);
@@ -735,6 +745,12 @@ export function initMolecule(
       g.appendChild(num);
       const idx = k;
       g.addEventListener('click', () => subScrollTo(cc, idx));
+      g.addEventListener('keydown', (ev) => {
+        const e = ev as KeyboardEvent;
+        if (e.key !== 'Enter' && e.key !== ' ') return;
+        e.preventDefault(); // Space no debe scrollear la página al activar la parada.
+        subScrollTo(cc, idx);
+      });
       subEG.appendChild(g);
       subDots.push({ g, dot, num, lx: 450, ly: 90 });
     }
@@ -749,6 +765,12 @@ export function initMolecule(
       const cur = cc.subIdx;
       const state = k === cur ? 'current' : k < cur ? 'visited' : 'pending';
       o.g.setAttribute('class', 'sub-e ' + state);
+      // La parada actual la dibuja el puck (su `g` va a opacidad 0), así que no puede ser un destino
+      // de foco: el anillo quedaría invisible. Se marca con aria-current y sale del tab-order, igual
+      // que todas cuando el índice todavía no se ve.
+      o.g.setAttribute('tabindex', orbitFocusable && state !== 'current' ? '0' : '-1');
+      if (state === 'current') o.g.setAttribute('aria-current', 'true');
+      else o.g.removeAttribute('aria-current');
       // Espina de energía: los sub-niveles son ORBES en el conducto, teñidos del color del concepto.
       // VISITADO = orbe encendido (ya cargado), PENDIENTE = orbe tenue (sin cargar), ACTUAL = lo tapa el
       // átomo-puck. Inline style (no presentation attribute) porque el `fill` de `.sub-dot` en CSS lo
@@ -773,6 +795,14 @@ export function initMolecule(
   function orbitLoop(): void {
     if (destroyed) return;
     const vis = orbitFor >= 0 && subDots.length > 0 && (+suborbit.style.opacity || 0) > 0.05;
+    // Las paradas son focusables; mientras el índice no se ve (vista molécula, landing) salen del
+    // tab-order para no dejar tabs fantasma sobre controles invisibles. `inert` no sirve acá: es un
+    // atributo de HTML y estas paradas son nodos SVG.
+    if (vis !== orbitFocusable) {
+      orbitFocusable = vis;
+      if (vis) updateOrbitFill(C[orbitFor]);
+      else for (const o of subDots) o.g.setAttribute('tabindex', '-1');
+    }
     if (vis && orbitDirty) {
       orbitDirty = false;
       const cc = C[orbitFor];
