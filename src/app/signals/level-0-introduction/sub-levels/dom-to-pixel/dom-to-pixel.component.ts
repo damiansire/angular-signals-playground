@@ -24,8 +24,9 @@ const FLOW_PATHS: Record<RenderCost, string> = {
   caro: 'M60,150 L940,150',
   // hop chico sobre `layout` (style -> paint).
   medio: 'M60,150 L280,150 C 385,55 595,55 700,150 L940,150',
-  // arco grande sobre toda la zona cara (DOM -> composite).
-  barato: 'M60,150 C 350,20 650,20 940,150',
+  // arco grande sobre la zona cara entera (style -> composite): pasa por `style`, que un cambio de
+  // transform/opacity sí dispara, y se saltea layout y paint, que es lo que dice el texto de abajo.
+  barato: 'M60,150 L280,150 C 480,20 740,20 940,150',
 };
 
 const COST_COLOR: Record<RenderCost, string> = {
