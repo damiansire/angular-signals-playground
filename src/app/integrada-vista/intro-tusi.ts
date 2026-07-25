@@ -50,6 +50,10 @@ const SPEEDS = [0.25, 0.5, 1, 2, 4, 8];
 const SPEED_START = 2; // índice de ×1
 const REWARD_LINES = 8; // el contador de arriba se completa al llegar a 8 líneas
 const REWARD_FULL_PHASE = phaseForLine(REWARD_LINES, HITS_PER_LINE);
+// La frase musical cierra donde se completa el contador. Pasadas las 8 líneas los choques se agolpan
+// (todas las líneas chocan al mismo ritmo, desfasadas) y el cúmulo suena raro por más que se baje el
+// volumen: la construcción sigue creciendo en silencio.
+const SOUND_LINES = REWARD_LINES;
 
 interface Line {
   angle: number;
@@ -168,7 +172,8 @@ export function initIntroTusi(host: HTMLElement): () => void {
     ph += dt * OMEGA * SPEEDS[speedIdx];
 
     // Cada choque (un punto llega al extremo de su línea) dispara la nota de esa línea + su octava grave.
-    for (let k = 0; k < lines.length; k++) {
+    const sounding = Math.min(lines.length, SOUND_LINES);
+    for (let k = 0; k < sounding; k++) {
       const L = lines[k];
       const f = Math.floor((ph - L.angle) / Math.PI);
       if (L.phFloor === undefined) L.phFloor = f;
@@ -176,9 +181,8 @@ export function initIntroTusi(host: HTMLElement): () => void {
         L.phFloor = f;
         if (soundOn && visible) {
           const base = lineFreq(k);
-          // con muchas líneas los choques se agolpan; bajamos el volumen por nota para que el cúmulo
-          // no sature (hasta 7 líneas queda igual que antes)
-          const soft = 0.4 + 0.6 * Math.min(1, 7 / lines.length);
+          // hasta 7 líneas queda igual que antes; en la 8ª bajamos apenas el volumen por nota
+          const soft = 0.4 + 0.6 * Math.min(1, 7 / sounding);
           playNote(base, 0.5 * soft);
           playNote(base / 2, 0.2 * soft);
         }
