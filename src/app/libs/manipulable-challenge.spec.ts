@@ -7,7 +7,15 @@ import {
   SystemState,
   turn,
 } from './manipulable-challenge';
-import { EFFECT_READS_SYSTEM } from '../signals/level-3-effect/effect-systems';
+import {
+  EFFECT_CLEANUP_SYSTEM,
+  EFFECT_LEAK_SYSTEM,
+  EFFECT_READS_SYSTEM,
+} from '../signals/level-3-effect/effect-systems';
+import {
+  CUSTOM_EQUAL_SYSTEM,
+  REFERENCE_EQUALITY_SYSTEM,
+} from '../signals/level-4-signal-equality-functions/equality-systems';
 
 /** Sistema mínimo de prueba: una perilla de 3 posiciones y una lectura que la sigue. */
 const TRES_POSICIONES: ManipulableChallenge = {
@@ -115,10 +123,111 @@ describe('effect 3/1 · la lectura tiene que ocurrir adentro', () => {
   });
 });
 
+describe('effect 3/2 · la limpieza se registra con onCleanup', () => {
+  const sistema = EFFECT_LEAK_SYSTEM;
+
+  it('sin limpiar, destruir el componente deja el intervalo latiendo', () => {
+    expect(act(sistema, startOf(sistema)).values['vivos']).toBe(1);
+  });
+
+  it('devolver la limpieza al estilo React no apaga nada: Angular ignora el retorno', () => {
+    const state = act(sistema, turn(sistema, startOf(sistema), 'limpieza'));
+    expect(state.values['vivos']).toBe(1);
+    expect(sistema.healthy(state)).toBe(false);
+  });
+
+  it('con onCleanup el intervalo muere junto al componente', () => {
+    let state = turn(sistema, startOf(sistema), 'limpieza');
+    state = act(sistema, turn(sistema, state, 'limpieza'));
+    expect(state.values['vivos']).toBe(0);
+    expect(sistema.healthy(state)).toBe(true);
+  });
+});
+
+describe('effect 3/3 · onCleanup corre antes de cada re-ejecución', () => {
+  const sistema = EFFECT_CLEANUP_SYSTEM;
+
+  function vueltas(n: number, desde: SystemState): SystemState {
+    let state = desde;
+    for (let i = 0; i < n; i++) state = act(sistema, state);
+    return state;
+  }
+
+  it('limpiar al destruir acumula un reloj por vuelta', () => {
+    const state = vueltas(3, startOf(sistema));
+    expect(state.values['vivos']).toBe(4);
+    expect(sistema.healthy(state)).toBe(false);
+  });
+
+  it('ngOnDestroy tampoco alcanza: limpia una vez y solo el último', () => {
+    expect(vueltas(3, turn(sistema, startOf(sistema), 'limpieza')).values['vivos']).toBe(4);
+  });
+
+  it('con onCleanup queda uno solo, por más vueltas que des', () => {
+    let state = turn(sistema, startOf(sistema), 'limpieza');
+    state = vueltas(5, turn(sistema, state, 'limpieza'));
+    expect(state.values['vivos']).toBe(1);
+    expect(sistema.healthy(state)).toBe(true);
+  });
+
+  it('una sola vuelta no alcanza para notar la acumulación', () => {
+    let state = turn(sistema, startOf(sistema), 'limpieza');
+    state = act(sistema, turn(sistema, state, 'limpieza'));
+    expect(sistema.healthy(state)).toBe(false);
+  });
+});
+
+describe('igualdad 4/1 · un signal compara por referencia', () => {
+  const sistema = REFERENCE_EQUALITY_SYSTEM;
+
+  it('mutar en el lugar cambia el dato y no avisa a nadie', () => {
+    const state = act(sistema, act(sistema, startOf(sistema)));
+    expect(state.values['cambios']).toBe(2);
+    expect(state.values['avisos']).toBe(0);
+    expect(sistema.healthy(state)).toBe(false);
+  });
+
+  it('devolver un objeto nuevo avisa por cada cambio', () => {
+    const state = act(sistema, turn(sistema, startOf(sistema), 'escritura'));
+    expect(state.values['avisos']).toBe(state.values['cambios']);
+    expect(sistema.healthy(state)).toBe(true);
+  });
+});
+
+describe('igualdad 4/2 · con equal propio lo equivalente deja de ser un cambio', () => {
+  const sistema = CUSTOM_EQUAL_SYSTEM;
+
+  function cargar(n: number, desde: SystemState): SystemState {
+    let state = desde;
+    for (let i = 0; i < n; i++) state = act(sistema, state);
+    return state;
+  }
+
+  it('por referencia, cada carga de lo mismo recalcula de nuevo', () => {
+    const state = cargar(3, startOf(sistema));
+    expect(state.values['recalculos']).toBe(3);
+    expect(sistema.healthy(state)).toBe(false);
+  });
+
+  it('con equal propio solo recalcula la primera', () => {
+    const state = cargar(3, turn(sistema, startOf(sistema), 'comparacion'));
+    expect(state.values['recalculos']).toBe(1);
+    expect(sistema.healthy(state)).toBe(true);
+  });
+
+  it('con una sola carga todavía no hay desperdicio que notar', () => {
+    expect(sistema.healthy(cargar(1, turn(sistema, startOf(sistema), 'comparacion')))).toBe(false);
+  });
+});
+
 // Un sistema mal armado no se ve roto: se ve como un sub-nivel que no se puede resolver.
 describe('sistemas publicados', () => {
   const PUBLICADOS: readonly (readonly [string, ManipulableChallenge])[] = [
     ['3/1 lee adentro', EFFECT_READS_SYSTEM],
+    ['3/2 leak del intervalo', EFFECT_LEAK_SYSTEM],
+    ['3/3 onCleanup por re-ejecución', EFFECT_CLEANUP_SYSTEM],
+    ['4/1 igualdad por referencia', REFERENCE_EQUALITY_SYSTEM],
+    ['4/2 equal propio', CUSTOM_EQUAL_SYSTEM],
   ];
 
   PUBLICADOS.forEach(([nombre, sistema]) => {

@@ -4,8 +4,6 @@
  * razón escrita al acertar, a propósito: elegir entre tres piezas enseña a elegir entre tres
  * piezas, y un cartel de "muy bien" avisa que lo llevaron de la mano. Acá la lectura es la única
  * respuesta, y el usuario decide solo si el sistema quedó sano.
- *
- * Convive con `repair-challenge.ts` (la mecánica de elegir) mientras se migran los sub-niveles.
  */
 
 /** Una decisión del código que se cambia en el lugar. Cambiarla cicla entre sus posiciones. */

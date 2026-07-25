@@ -963,7 +963,7 @@ export function initMolecule(
    * mecánica manipulable; los que todavía no la tienen siguen encendiendo por scroll, así que la
    * molécula no se ve rota durante la migración.
    */
-  const GATED = new Set<number>([3]);
+  const GATED = new Set<number>([3, 4]);
   const established = new Set<number>();
   let liveConcept = 0;
   const track = q<HTMLDivElement>('#track')!;

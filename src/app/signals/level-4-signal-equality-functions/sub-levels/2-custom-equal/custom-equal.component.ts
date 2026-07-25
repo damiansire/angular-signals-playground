@@ -1,15 +1,18 @@
 import { Component, ChangeDetectionStrategy, computed, effect, signal } from '@angular/core';
 import { CodeLine } from '../../../../components-atom/component-atom.interface';
 import { ColumnAndCodeLayoutComponent } from '../../../../layouts/column-and-code-layout/column-and-code-layout.component';
+import { ManipulableSystemComponent } from '../../../../components-atom/manipulable-system/manipulable-system.component';
+import { CUSTOM_EQUAL_SYSTEM } from '../../equality-systems';
 
 @Component({
   selector: 'app-custom-equal',
   templateUrl: './custom-equal.component.html',
   styleUrl: './custom-equal.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ColumnAndCodeLayoutComponent],
+  imports: [ColumnAndCodeLayoutComponent, ManipulableSystemComponent],
 })
 export class CustomEqualComponent {
+  readonly closingSystem = CUSTOM_EQUAL_SYSTEM;
   // equal custom: dos usuarios son "iguales" si tienen el mismo name.
   readonly user = signal({ name: 'Ada' }, { equal: (a, b) => a.name === b.name });
 

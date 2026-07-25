@@ -1,15 +1,18 @@
 import { Component, ChangeDetectionStrategy, computed, effect, signal } from '@angular/core';
 import { CodeLine } from '../../../../components-atom/component-atom.interface';
 import { ColumnAndCodeLayoutComponent } from '../../../../layouts/column-and-code-layout/column-and-code-layout.component';
+import { ManipulableSystemComponent } from '../../../../components-atom/manipulable-system/manipulable-system.component';
+import { REFERENCE_EQUALITY_SYSTEM } from '../../equality-systems';
 
 @Component({
   selector: 'app-reference-equality',
   templateUrl: './reference-equality.component.html',
   styleUrl: './reference-equality.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ColumnAndCodeLayoutComponent],
+  imports: [ColumnAndCodeLayoutComponent, ManipulableSystemComponent],
 })
 export class ReferenceEqualityComponent {
+  readonly closingSystem = REFERENCE_EQUALITY_SYSTEM;
   // Igualdad por defecto: Object.is (por referencia).
   readonly user = signal({ name: 'Ada' });
 
