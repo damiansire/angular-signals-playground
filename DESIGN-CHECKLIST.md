@@ -100,6 +100,50 @@ el 0, ~87% en el 8), así que verificar solo el concepto 0 no alcanza.
       como espacio muerto y el primerizo pasa de largo (caso: el árbol del DOM en
       html-to-tree, que solo crece al clickear). El hint se va con el contenido.
 
+## Operable sin mouse y sin trampas de foco
+
+Origen: review de los niveles 0 y 1 del 2026-07-25. Las 12 cards viven
+pre-montadas y el intro se apaga con `opacity`, así que "no se ve" y "no se
+puede alcanzar" son dos cosas distintas y hay que chequear las dos.
+
+- [ ] Cero controles invisibles pero tabulables: nada oculto solo con
+      `opacity: 0` queda en el tab-order. Lo que se apaga va con `inert` (o
+      `visibility: hidden`). Medir contando focusables cuya cadena de ancestros
+      tenga opacidad 0, no a ojo.
+- [ ] Todo lo que responde al click responde también al teclado, con rol y
+      nombre accesible. Un `<g>` de SVG con listener no es un botón: necesita
+      `role`, `tabindex`, `aria-label`, handler de Enter/Espacio y anillo de
+      foco visible (en SVG el `outline` va sobre el grupo, porque el motor
+      escribe `stroke` inline y le ganaría a la regla CSS).
+- [ ] Focusable ⇒ hace algo. Nada de blancos muertos con `role="button"` que
+      al activarse no producen efecto, ni focusables anidados (contenedor y
+      contenido ambos tabulables) que duplican las paradas de tabulación.
+- [ ] Las paradas que están ocultas (índice fuera de vista, sub-nivel no
+      activo) salen del tab-order mientras no se ven.
+
+## Trabajo de fondo (lo que corre cuando no lo estás mirando)
+
+- [ ] Ningún timer, effect ni fetch de un sub-nivel corre mientras su capítulo
+      no está activo. La vista integrada NO desmonta las cards: marca `inert`
+      la que no se ve, así que el cleanup por `DestroyRef`/`ngOnDestroy` nunca
+      se dispara y un `setInterval` late desde que carga la página. Verificar
+      midiendo (contar logs o ticks durante N segundos parado en otro nivel),
+      no leyendo el código.
+- [ ] Consola limpia mientras se recorre: un `console.log` didáctico solo
+      aparece cuando el usuario está en el sub-nivel que lo enseña.
+
+## Legibilidad del contenido embebido
+
+- [ ] Texto que hay que LEER (valores de demo, resultados, aclaraciones) cumple
+      contraste AA sobre el wash del nivel: 4.5:1 normal, 3:1 para ≥24px.
+      Ojo con el remapeo de `[class*="text-blue-"]`/`text-indigo-` al acento del
+      nivel en `.subhost`: una clase que en aislado contrasta bien puede quedar
+      en ámbar sobre crema una vez embebida. Medir, no mirar.
+- [ ] Grupos de opciones con estado elegido visible Y anunciado
+      (`aria-pressed`), no solo un cambio que hay que adivinar.
+- [ ] Errores de entrada avisados: si el demo descarta lo que escribiste, lo
+      dice. Nada de fallar en silencio.
+
 ## Vistas y estado
 
 - [ ] Verificar la vista CERCANA (sub-nivel) y la ALEJADA (molécula completa,
