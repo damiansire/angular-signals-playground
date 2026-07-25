@@ -99,6 +99,13 @@ el 0, ~87% en el 8), así que verificar solo el concepto 0 no alcanza.
       mientras está vacía. Un área que ocupa media escena sin contenido se lee
       como espacio muerto y el primerizo pasa de largo (caso: el árbol del DOM en
       html-to-tree, que solo crece al clickear). El hint se va con el contenido.
+- [ ] Un `<button>` nuevo con estilo PROPIO no queda comido por la regla global
+      `.subhost button:not([class*='bg-'])` (0-2-1), que le encaja pastilla
+      oscura #3a352d, `border-radius: 999px` y `width: fit-content` a todo botón
+      sin clase Tailwind. Caso: las piezas de código de `repair-challenge`
+      salieron como manchones oscuros con el código ilegible. Ganarle con
+      especificidad desde el CSS del propio átomo (tres clases, p.ej.
+      `.rc .rc__pieces .rc__piece`), no con `!important`.
 
 ## Operable sin mouse y sin trampas de foco
 
@@ -143,6 +150,14 @@ puede alcanzar" son dos cosas distintas y hay que chequear las dos.
       (`aria-pressed`), no solo un cambio que hay que adivinar.
 - [ ] Errores de entrada avisados: si el demo descarta lo que escribiste, lo
       dice. Nada de fallar en silencio.
+- [ ] Bloques de CÓDIGO no se estiran al ancho completo de la card. A ~1100px
+      con el texto ocupando un quinto se leen como banners, no como opciones
+      clickeables: acotar al ancho del contenido (caso: las piezas de
+      `repair-challenge`, capadas a `34rem`).
+- [ ] Un enunciado en PRESENTE no sobrevive al cambio de estado que lo
+      contradice. Si el texto dice "el log quedó clavado" y el usuario ya
+      reparó el sistema, pasa a leerse como reporte histórico (atenuado, con el
+      eyebrow en "resuelto"), no como afirmación vigente.
 
 ## Vistas y estado
 
