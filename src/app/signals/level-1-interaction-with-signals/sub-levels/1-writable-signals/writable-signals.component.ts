@@ -21,9 +21,8 @@ export class WritableSignalsComponent {
   // viewChild() como signal: se resuelve tras inicializar la vista y es el estándar del repo
   // (en vez del decorador @ViewChild + ElementRef).
   readonly signalSetInput = viewChild.required<ElementRef<HTMLInputElement>>('signalSetInput');
-  update() {
-    this.count.update((value) => value + 1);
-  }
+  /** Se escribió algo que no es un número. Antes el valor inválido se descartaba en silencio. */
+  readonly rejected = signal(false);
 
   lines = computed<CodeLine[]>(() => [
     { line: 'count = signal(0);', active: true },
@@ -32,9 +31,18 @@ export class WritableSignalsComponent {
     { line: '}', active: false },
   ]);
   setValue() {
-    const inputValue = parseInt(this.signalSetInput().nativeElement.value, 10);
-    if (!isNaN(inputValue)) {
-      this.count.set(inputValue);
+    const raw = this.signalSetInput().nativeElement.value.trim();
+    const inputValue = Number(raw);
+    // `Number` en vez de `parseInt`: parseInt("12abc") daba 12 y el demo aceptaba basura a medias.
+    if (raw === '' || !Number.isFinite(inputValue)) {
+      this.rejected.set(true);
+      return;
     }
+    this.rejected.set(false);
+    this.count.set(inputValue);
+  }
+
+  clearRejected() {
+    if (this.rejected()) this.rejected.set(false);
   }
 }

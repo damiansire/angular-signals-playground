@@ -22,16 +22,16 @@ describe('UpdateSignalComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('arranca en 0 y lo muestra como Amount', () => {
+  it('arranca en 0 y lo muestra como Valor', () => {
     expect(component.count()).toBe(0);
     const text = (fixture.nativeElement as HTMLElement).textContent ?? '';
-    expect(text).toContain('Amount: 0');
+    expect(text).toContain('Valor: 0');
   });
 
-  it('al hacer click en Increase incrementa el contador y se refleja en pantalla', () => {
-    // El primer <button> ahora es la mascota de la pista: apuntamos al de "Increase" por su texto.
+  it('al hacer click en Incrementar sube el contador y se refleja en pantalla', () => {
+    // El primer <button> es la mascota de la pista: apuntamos al de "Incrementar" por su texto.
     const button = [...fixture.nativeElement.querySelectorAll('button')].find((b) =>
-      (b.textContent ?? '').includes('Increase'),
+      (b.textContent ?? '').includes('Incrementar'),
     ) as HTMLElement;
     button.click();
     button.click();
@@ -40,7 +40,7 @@ describe('UpdateSignalComponent', () => {
 
     expect(component.count()).toBe(3);
     const text = (fixture.nativeElement as HTMLElement).textContent ?? '';
-    expect(text).toContain('Amount: 3');
+    expect(text).toContain('Valor: 3');
   });
 
   it('lines marca como activa la linea de update()', () => {

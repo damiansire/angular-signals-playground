@@ -14,7 +14,9 @@
       modifica.
     </p>
 
-    <p class="text-5xl font-bold tabular-nums text-blue-700 mb-5">{{ count() }}</p>
+    <!-- El número es el foco del demo: va en tinta, no en el ámbar del fondo (sobre el degradado del
+         nivel el ámbar quedaba en 1.88:1, por debajo del 3:1 que pide texto grande). -->
+    <p class="text-5xl font-bold tabular-nums text-slate-900 mb-5">{{ count() }}</p>
 
     <div class="flex gap-2 justify-center">
       <button
@@ -29,7 +31,7 @@
         class="bg-gray-800 hover:bg-gray-900 text-white text-sm font-bold py-2 px-4 rounded"
         (click)="reset()"
       >
-        Reset
+        Reiniciar
       </button>
     </div>
 

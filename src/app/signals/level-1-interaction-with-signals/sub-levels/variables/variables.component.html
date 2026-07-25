@@ -16,6 +16,8 @@
     @for (type of dataTypes; track $index) {
       <app-variable-box-draw
         [variableName]="type"
+        [selectable]="true"
+        [selected]="type === selectedType().name"
         (clicked)="selectType($event)"
       ></app-variable-box-draw>
     }
@@ -27,6 +29,8 @@
           <div class="mb-4">
             <app-variable-box-draw
               [variableName]="item"
+              [selectable]="true"
+              [selected]="item === selectedExampleValue()"
               (clicked)="selectExample($event)"
             ></app-variable-box-draw>
           </div>

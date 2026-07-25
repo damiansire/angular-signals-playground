@@ -7,12 +7,25 @@
 >
   <section>
     <div class="counter-container">
-      <div class="counter-display">Amount: {{ count() }}</div>
+      <div class="counter-display">Valor: {{ count() }}</div>
     </div>
     <br />
     <div class="input-group">
-      <input #signalSetInput type="text" class="form-control" placeholder="Enter a value" />
+      <label class="sr-only" for="signalSetInput">Número a escribir en el signal</label>
+      <input
+        #signalSetInput
+        id="signalSetInput"
+        type="number"
+        class="form-control"
+        placeholder="Escribí un número"
+        [attr.aria-invalid]="rejected() ? 'true' : null"
+        (input)="clearRejected()"
+        (keyup.enter)="setValue()"
+      />
       <button class="btn btn-primary" (click)="setValue()">Set</button>
     </div>
+    @if (rejected()) {
+      <p class="input-error" role="alert">Escribí un número: el signal quedó como estaba.</p>
+    }
   </section>
 </app-column-and-code-layout>

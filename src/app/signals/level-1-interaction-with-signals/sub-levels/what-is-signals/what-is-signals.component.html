@@ -4,9 +4,14 @@
   observe="Cualquier tipo de valor puede ir adentro de un signal."
 />
 
-<app-title [title]="title"></app-title>
-
+<!-- Demo agrupado en UN contenedor: en la vista integrada la card "disuelve" el marco y reparte el
+     contenido en un grid de dos columnas (instrucciones | demo). Suelto, este componente le entregaba
+     cinco hijos y el grid los repartía en filas alternadas: la descripción caía en la columna angosta
+     de la izquierda y se superponía con el título vertical del nivel (.space-spine). Mismo wrapper que
+     usa `variables`. -->
 <div>
+  <app-title [title]="title"></app-title>
+
   <section class="flex flex-wrap justify-around mt-4">
     @for (type of dataTypes; track $index) {
       @if (type.isContainer) {
@@ -21,20 +26,23 @@
       }
     }
   </section>
-</div>
-@if (clickCount > 0) {
-  <div class="mt-4 mb-4">
-    <app-text-description
-      text="Un signal puede contener cualquier valor, desde primitivos hasta estructuras complejas."
-    >
-    </app-text-description>
-  </div>
-  <div class="flex justify-center">
-    <div class="max-w-fit">
-      <app-code [lines]="signalWrapperLines()" textSize="text-lg"></app-code>
-      <p class="text-xs text-gray-400 text-center mt-2">
-        SignalWrapper&lt;T&gt; es una metáfora para entender la idea; no es API real de Angular.
-      </p>
+
+  @if (clickCount > 0) {
+    <div class="mt-4 mb-4">
+      <app-text-description
+        text="Un signal puede contener cualquier valor, desde primitivos hasta estructuras complejas."
+      >
+      </app-text-description>
     </div>
-  </div>
-}
+    <div class="flex justify-center">
+      <div class="max-w-fit">
+        <app-code [lines]="signalWrapperLines()" textSize="text-lg"></app-code>
+        <!-- Aclaración importante (que esto NO es API real), así que tiene que leerse: en gray-400
+             quedaba en 2.17:1 sobre el fondo del nivel, menos de la mitad del 4.5:1 que pide. -->
+        <p class="text-xs text-gray-700 text-center mt-2">
+          SignalWrapper&lt;T&gt; es una metáfora para entender la idea; no es API real de Angular.
+        </p>
+      </div>
+    </div>
+  }
+</div>

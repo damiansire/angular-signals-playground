@@ -34,7 +34,7 @@ export class VariablesComponent implements OnInit {
     },
     Object: {
       name: 'Object',
-      examples: ['{}', '{name: "Damian"}', '{surname: "Sire", age : 26}'],
+      examples: ['{}', '{name: "Damian"}', '{surname: "Sire", age: 26}'],
     },
     Array: {
       name: 'Array',
@@ -64,5 +64,8 @@ export class VariablesComponent implements OnInit {
     const variableName: string = value.name;
     const newSelectedType = this.typesExamples[variableName];
     this.selectedType.set(newSelectedType);
+    // El código de abajo tiene que hablar del tipo recién elegido. Sin esto seguía mostrando el valor
+    // del tipo anterior hasta que además tocaras un ejemplo, y parecía que elegir tipo no hacía nada.
+    this.selectedExampleValue.set(newSelectedType.examples[0]);
   }
 }

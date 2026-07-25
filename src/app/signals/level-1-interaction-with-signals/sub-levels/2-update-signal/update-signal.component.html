@@ -2,11 +2,11 @@
   title="Update Signal"
   [codeLines]="lines()"
   concept="signal.update() calcula el nuevo valor a partir del anterior."
-  action="Tocá Increase varias veces."
+  action="Tocá Incrementar varias veces."
   observe="Cada click deriva del valor previo (value => value + 1)."
 >
   <div class="counter-container">
-    <div class="counter-display">Amount: {{ count() }}</div>
-    <button class="counter-button" (click)="update()">Increase</button>
+    <div class="counter-display">Valor: {{ count() }}</div>
+    <button class="counter-button" (click)="update()">Incrementar</button>
   </div>
 </app-column-and-code-layout>

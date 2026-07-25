@@ -13,6 +13,13 @@
     margin-right: 20px;
 }
 
+/* Aviso de entrada rechazada. Rojo de la paleta, con contraste suficiente sobre el fondo claro. */
+.input-error {
+    margin-top: 10px;
+    color: #b3261e;
+    font-size: 14px;
+}
+
 .counter-button {
     padding: 10px 20px;
     background-color: #4CAF50;

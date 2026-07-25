@@ -36,15 +36,17 @@
       <p class="text-sm text-gray-700">{{ selected().description }}</p>
     </div>
 
+    <!-- El resultado de la introspección es el dato que el sub-nivel enseña, así que se lee en tinta:
+         en `text-blue-*` la vista integrada lo remapea al ámbar del nivel y a 12px quedaba en 1.94:1. -->
     <div
-      class="mt-4 rounded-md border border-gray-100 bg-white p-3 text-xs font-mono text-gray-600"
+      class="mt-4 rounded-md border border-gray-100 bg-white p-3 text-xs font-mono text-gray-700"
     >
       <p>
-        isSignal() → <strong class="text-blue-700">{{ introspection().isSignal }}</strong>
+        isSignal() → <strong class="text-slate-900">{{ introspection().isSignal }}</strong>
       </p>
       <p>
         isWritableSignal() →
-        <strong class="text-blue-700">{{ introspection().isWritableSignal }}</strong>
+        <strong class="text-slate-900">{{ introspection().isWritableSignal }}</strong>
       </p>
     </div>
   </section>

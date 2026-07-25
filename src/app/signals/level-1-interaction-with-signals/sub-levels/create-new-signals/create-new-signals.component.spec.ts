@@ -24,7 +24,8 @@ describe('CreateNewSignalsComponent', () => {
 
   it('muestra el titulo sobre leer un signal', () => {
     const title = fixture.nativeElement.querySelector('app-title h1') as HTMLElement;
-    expect(title.textContent?.trim()).toBe('Leer un signal: el getter ()!');
+    // Sin "!" pegado: el título ya cierra con paréntesis (ver TitleComponent.displayTitle).
+    expect(title.textContent?.trim()).toBe('Leer un signal: el getter ()');
   });
 
   it('lines resalta la declaracion del signal', () => {

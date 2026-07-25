@@ -24,7 +24,8 @@ describe('WhatIsSignalsComponent', () => {
 
   it('muestra el titulo del componente via app-title', () => {
     const title = fixture.nativeElement.querySelector('app-title h1') as HTMLElement;
-    expect(title.textContent?.trim()).toBe('¿Qué es un signal?!');
+    // Sin "!" pegado: el título ya cierra con signo de pregunta (ver TitleComponent.displayTitle).
+    expect(title.textContent?.trim()).toBe('¿Qué es un signal?');
   });
 
   it('convertToContainer marca el tipo como contenedor e incrementa clickCount', () => {
