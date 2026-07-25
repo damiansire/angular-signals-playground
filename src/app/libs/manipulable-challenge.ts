@@ -96,6 +96,48 @@ export function readings(
 }
 
 /**
+ * Busca una secuencia de gestos que deje el sistema sano, explorando accionar y mover la perilla
+ * hasta `maxSteps`. Es el chequeo que ningún test de forma alcanza: un desafío puede estar
+ * perfectamente armado y ser IRRESOLUBLE si su `healthy` pide algo que sus propias lecturas nunca
+ * llegan a dar. En pantalla eso no se ve roto, se ve como un sub-nivel que no cierra nunca.
+ *
+ * Devuelve los gestos en orden, o `null` si no hay forma de resolverlo.
+ */
+export function solutionFor(
+  challenge: ManipulableChallenge,
+  maxSteps = 8,
+): readonly string[] | null {
+  const seen = new Set<string>();
+  const key = (s: SystemState): string => JSON.stringify([s.knobs, s.actions, s.values]);
+  let frontier: { state: SystemState; path: readonly string[] }[] = [
+    { state: startOf(challenge), path: [] },
+  ];
+
+  for (let step = 0; step < maxSteps; step++) {
+    const next: typeof frontier = [];
+    for (const { state, path } of frontier) {
+      const moves: [string, SystemState][] = [
+        [challenge.action, act(challenge, state)],
+        ...challenge.knobs.map((k): [string, SystemState] => [
+          `mover ${k.id}`,
+          turn(challenge, state, k.id),
+        ]),
+      ];
+      for (const [name, candidate] of moves) {
+        if (challenge.healthy(candidate)) return [...path, name];
+        const id = key(candidate);
+        if (seen.has(id)) continue;
+        seen.add(id);
+        next.push({ state: candidate, path: [...path, name] });
+      }
+    }
+    frontier = next;
+    if (!frontier.length) break;
+  }
+  return null;
+}
+
+/**
  * Presupuesto de forma. Con los 37 sub-niveles cerrando igual, la consistencia no se sostiene con
  * buena voluntad: si un desafío trae seis lecturas y otro dos, el cierre deja de leerse como el
  * mismo gesto. Estos números SON la forma del cierre, y por eso los verifica un test.

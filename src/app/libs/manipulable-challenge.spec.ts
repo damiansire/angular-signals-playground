@@ -1,6 +1,7 @@
 import {
   act,
   malformed,
+  solutionFor,
   ManipulableChallenge,
   readings,
   startOf,
@@ -255,6 +256,17 @@ describe('sistemas publicados', () => {
   PUBLICADOS.forEach(([nombre, sistema]) => {
     it(`${nombre} está bien armado`, () => {
       expect(malformed(sistema)).toEqual([]);
+    });
+
+    it(`${nombre} se puede resolver`, () => {
+      expect(solutionFor(sistema)).not.toBeNull();
+    });
+
+    // Un desafío que se resuelve sin tocar la perilla no enseña nada: alcanza con insistir en el
+    // botón hasta que los números den. La perilla ES la decisión que el sub-nivel pone a prueba.
+    it(`${nombre} exige mover la perilla, no solo insistir`, () => {
+      const pasos = solutionFor(sistema) ?? [];
+      expect(pasos.some((paso) => paso.startsWith('mover'))).toBe(true);
     });
   });
 
