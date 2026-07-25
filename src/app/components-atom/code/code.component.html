@@ -20,10 +20,11 @@
     } @else {
       @for (item of codeLines(); track $index) {
         <div
-          class="text-2xl font-mono whitespace-pre-wrap break-words py-1.5 cursor-pointer flex rounded"
+          class="text-2xl font-mono whitespace-pre-wrap break-words py-1.5 flex rounded"
           [class]="lineClasses(item)"
-          tabindex="0"
-          role="button"
+          [class.cursor-pointer]="selectBy() === 'Line'"
+          [attr.tabindex]="selectBy() === 'Line' ? 0 : null"
+          [attr.role]="selectBy() === 'Line' ? 'button' : null"
           (click)="selectBy() === 'Line' ? onLineClick(item) : null"
           (keyup.enter)="selectBy() === 'Line' ? onLineClick(item) : null"
         >
@@ -33,8 +34,9 @@
               [attr.data-el-id]="element.id"
               [class.bg-green-700]="element.selected"
               class="rounded px-0.5 transition-colors"
-              tabindex="0"
-              role="button"
+              [class.cursor-pointer]="isElementInteractive(element)"
+              [attr.tabindex]="isElementInteractive(element) ? 0 : null"
+              [attr.role]="isElementInteractive(element) ? 'button' : null"
               (click)="selectBy() === 'Element' ? onElementClick(item, element) : null"
               (keyup.enter)="selectBy() === 'Element' ? onElementClick(item, element) : null"
             >

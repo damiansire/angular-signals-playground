@@ -65,6 +65,17 @@ export class CodeComponent {
     return typeof item.line === 'string' && item.line.trim().length > 0;
   }
 
+  /**
+   * Mismo criterio que `isInteractive`, para el modo interactivo. Sólo es focusable lo que al
+   * activarse HACE algo: en modo `Line` manda la línea y los tokens son adorno; en modo `Element`
+   * manda el token, y aun así los separadores (espacios) salen porque `onElementClick` los ignora.
+   * Antes línea y tokens eran ambos `role="button"` con `tabindex`, así que un snippet de 11 líneas
+   * dejaba 31 paradas de tabulación anidadas y la línea era un blanco muerto que no hacía nada.
+   */
+  isElementInteractive(element: CodeLineElement): boolean {
+    return this.selectBy() === 'Element' && !HtmlHelper.isSpaceElement(element.id ?? '');
+  }
+
   parseCode(code: string): CodeLine[] {
     const htmlIdGenerator = new HtmlIdGeneratorService();
     const parsedCode = [];
