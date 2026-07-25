@@ -1,0 +1,163 @@
+/* Cierre del sub-nivel. Misma gramática que `repair-challenge`: sección aparte con regla arriba y
+   aire propio, heredando la hoja de papel de la card. */
+:host {
+  display: block;
+  margin-top: 2rem;
+  padding-top: 1.4rem;
+  padding-bottom: 1.5rem;
+  border-top: 1px solid #ddd6c6;
+}
+
+.ms {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  text-align: left;
+}
+
+.ms__eyebrow {
+  margin: 0;
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 0.62rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #9a9284;
+}
+
+/* El bloque es UNO solo, el real: no es una lista de opciones. Acotado al ancho del código para
+   que no se lea como un banner a lo ancho de la card. */
+.ms__code {
+  max-width: 34rem;
+  padding: 0.7rem 0.85rem;
+  border: 1px solid #ddd6c6;
+  border-radius: 3px;
+  background: #fffdf8;
+}
+
+/* Flex para que el espacio en blanco del template entre la sangría y el código no se renderice:
+   con display normal quedaba un espacio fantasma delante de cada línea. */
+.ms__line {
+  display: flex;
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 0.76rem;
+  line-height: 1.75;
+  color: #3a352d;
+}
+
+/* La línea que dejó de participar sigue a la vista: que se vea quedar afuera enseña más que
+   borrarla. */
+.ms__line--dead {
+  opacity: 0.36;
+}
+
+/* Selector de TRES clases a propósito: dentro de la vista integrada corre la regla global
+   `.subhost button:not([class*='bg-'])` (0-2-1), que le encaja pastilla oscura a todo botón sin
+   clase Tailwind. `.ms .ms__code .ms__knob` es 0-3-0 y le gana sin `!important`, igual que el
+   resto del repo pelea esta misma regla. */
+.ms__indent {
+  white-space: pre;
+}
+
+/* Inline y al ancho del código, no del bloque: el subrayado marca EL TOKEN que se mueve. A ancho
+   completo se leía como una línea divisoria debajo del código. */
+.ms .ms__code .ms__knob {
+  display: inline;
+  width: auto;
+  padding: 0;
+  text-align: left;
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 0.76rem;
+  line-height: 1.75;
+  font-weight: 400;
+  border: 0;
+  border-bottom: 1px dashed #b8791f;
+  border-radius: 0;
+  background: transparent;
+  color: #3a352d;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+.ms .ms__code .ms__knob:hover {
+  background: #fbf1dd;
+}
+.ms .ms__code .ms__knob:focus-visible {
+  outline: 2px solid #eb9b3c;
+  outline-offset: 2px;
+}
+
+/* La acción va pegada a las lecturas, no flotando lejos: el botón y los números son una sola
+   unidad de causa y efecto. */
+.ms__bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 1.4rem;
+  max-width: 34rem;
+}
+
+.ms__gauges {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  gap: 1.4rem;
+}
+
+/* La lectura del sistema: es la ÚNICA respuesta que recibe el usuario, así que pesa más que
+   cualquier texto de la sección. */
+.ms__gauge {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  color: #a03a26;
+  transition: color 0.2s ease;
+}
+.ms__gauge--ok {
+  color: #2f6b4f;
+}
+
+.ms__gauge-label {
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 0.62rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #9a9284;
+}
+
+.ms__gauge-value {
+  font-family: var(--font-editorial, Georgia, serif);
+  font-size: 1.9rem;
+  font-weight: 400;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  color: inherit;
+}
+
+/* Misma pelea de especificidad que la perilla. Verbo, no sustantivo: hace algo. */
+.ms .ms__bar .ms__act {
+  width: fit-content;
+  padding: 0.4rem 0.9rem;
+  border: 1px solid #ddd6c6;
+  border-radius: 3px;
+  background: transparent;
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 0.78rem;
+  font-weight: 400;
+  color: #3a352d;
+  cursor: pointer;
+}
+.ms .ms__bar .ms__act:hover {
+  border-color: #b8791f;
+  color: #201d16;
+}
+.ms .ms__bar .ms__act:focus-visible {
+  outline: 2px solid #eb9b3c;
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ms .ms__code .ms__knob,
+  .ms__gauge {
+    transition: none;
+  }
+}

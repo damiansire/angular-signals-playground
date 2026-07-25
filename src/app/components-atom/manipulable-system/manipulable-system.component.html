@@ -1,0 +1,39 @@
+<section class="ms">
+  <p class="ms__eyebrow">{{ healthy() ? 'Desafío · sano' : 'Desafío · tocá el código' }}</p>
+
+  <div class="ms__code">
+    @for (line of lines(); track $index) {
+      <!-- El texto va por binding de propiedad, no por interpolación entre etiquetas: el formateador
+           mueve los saltos de línea y con `white-space: pre` esos saltos se verían como sangría. -->
+      <div class="ms__line" [class.ms__line--dead]="line.dead">
+        <span class="ms__indent" [textContent]="line.indent"></span>
+        @if (line.knob) {
+          <button
+            type="button"
+            class="ms__knob"
+            [attr.aria-label]="knobLabel(line.knob)"
+            [textContent]="line.body"
+            (click)="move(line.knob)"
+          ></button>
+        } @else {
+          <span [textContent]="line.body"></span>
+        }
+      </div>
+    }
+  </div>
+
+  <!-- La lectura es lo único que le contesta al usuario, así que también tiene que ANUNCIARSE:
+       sin aria-live, quien usa lector de pantalla mueve la perilla y no se entera de nada. -->
+  <div class="ms__bar">
+    <ul class="ms__gauges" role="status" aria-live="polite">
+      @for (gauge of gauges(); track gauge.id) {
+        <li class="ms__gauge" [class.ms__gauge--ok]="healthy()">
+          <span class="ms__gauge-label">{{ gauge.label }}</span>
+          <b class="ms__gauge-value">{{ gauge.value }}</b>
+        </li>
+      }
+    </ul>
+
+    <button type="button" class="ms__act" (click)="press()">{{ system().action }}</button>
+  </div>
+</section>
