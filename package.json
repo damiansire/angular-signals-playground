@@ -18,8 +18,11 @@
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
     "lint": "ng lint",
-    "format": "prettier --write \"src/**/*.{ts,html,scss,json}\"",
-    "format:check": "prettier --check \"src/**/*.{ts,html,scss,json}\""
+    "format": "prettier --write \"src/**/*.{ts,html,scss,json}\" \"scripts/*.mjs\"",
+    "format:check": "prettier --check \"src/**/*.{ts,html,scss,json}\" \"scripts/*.mjs\"",
+    "gate:prosa": "node scripts/prose-budget.mjs",
+    "gate:prosa:update": "node scripts/prose-budget.mjs --update",
+    "test:scripts": "node --test \"scripts/*.test.mjs\""
   },
   "prettier": {
     "printWidth": 100,
