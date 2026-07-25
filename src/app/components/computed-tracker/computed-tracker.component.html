@@ -6,6 +6,8 @@
   </h1>
   <div class="boxs-container">
     <div class="box-container">
+      <!-- Un computed perezoso no corrió todavía, y eso es EL punto del sub-nivel: el panel vacío
+           tiene que decir que no corrió, no parecer que se rompió. -->
       @for (element of computedTracker().reverse(); track element) {
         <div class="box">
           <div class="date-box">{{ element.date | date: 'HH:mm:ss' }}</div>
@@ -14,6 +16,12 @@
             <div>Surname: {{ element.surname }}</div>
           </div>
         </div>
+      } @empty {
+        <p
+          class="rounded-md border border-dashed border-gray-300 p-4 text-center text-sm text-gray-500"
+        >
+          Todavía no se ejecutó.
+        </p>
       }
     </div>
   </div>

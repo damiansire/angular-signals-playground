@@ -5,8 +5,16 @@
     Clicks
   </h1>
   <div class="mt-5 flex flex-col gap-3 overflow-auto">
+    <!-- El default es lo más usado que se shippea: sin esto el panel abre como un rectángulo
+         vacío y se lee como espacio muerto, no como algo que se va a llenar. -->
     @for (click of clickHistory().reverse(); track $index) {
       <app-event [event]="click"></app-event>
+    } @empty {
+      <p
+        class="rounded-md border border-dashed border-gray-300 p-4 text-center text-sm text-gray-500"
+      >
+        Todavía no hubo clicks.
+      </p>
     }
   </div>
 </div>

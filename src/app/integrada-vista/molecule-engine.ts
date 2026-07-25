@@ -979,6 +979,7 @@ export function initMolecule(
   const recGuideEl = q<HTMLElement>('.rec-guide');
   const recGuideBubbleEl = q<HTMLElement>('.rec-guide__bubble');
   const railCountEl = q<HTMLElement>('#railCount');
+  const tbQEl = q<HTMLElement>('#tbQ');
   const railSegEl = q<HTMLElement>('#railSeg');
   const railTicksOl = q<HTMLElement>('#railTicks')!;
 
@@ -1019,14 +1020,21 @@ export function initMolecule(
     const li = document.createElement('li');
     li.className = 'rail-stop';
     li.style.setProperty('--nc', COL[C[i].accent]);
-    const trophy = i === N - 1 ? '<span class="rail-trophy">🏆</span>' : '';
+    // Marca especial de la parada. El final ya tenía su trofeo; el 6 (`resource`) suma el suyo
+    // porque es el PICO del medio: es donde el sistema deja de ser sincrónico y el dato empieza a
+    // tardar. Con 12 paradas, el medio es donde la información se muere si todas se tratan igual.
+    // Reusa la clase del trofeo a propósito: es el mismo slot, y no cuesta CSS nueva.
+    const PEAK = 6;
+    const mark = i === N - 1 ? '🏆' : i === PEAK ? '◆' : '';
+    const trophy = mark ? `<span class="rail-trophy" aria-hidden="true">${mark}</span>` : '';
     // Cada parada es un BOTÓN real: click (y Enter/Espacio) navega al concepto. Antes el riel era
     // decorativo (aria-hidden) y solo se navegaba por scroll/teclado ↑↓; ahora también saltás tocando
     // el índice. La marca-átomo va aria-hidden: es decoración, el nombre lo lleva el aria-label.
     const btn = document.createElement('button');
     btn.type = 'button';
     btn.className = 'rail-stop-btn';
-    btn.setAttribute('aria-label', `Ir al concepto ${i}: ${C[i].name}`);
+    const rol = i === N - 1 ? ', el cierre' : i === PEAK ? ', donde el dato empieza a tardar' : '';
+    btn.setAttribute('aria-label', `Ir al concepto ${i}: ${C[i].name}${rol}`);
     btn.innerHTML =
       `<span class="rail-mark" aria-hidden="true"><i class="rail-halo"></i><i class="rail-orb"></i><i class="rail-core"></i></span>` +
       `<span class="rail-num">${i}</span>` +
@@ -1277,7 +1285,26 @@ export function initMolecule(
     if (railFillEl) railFillEl.style.height = (railProg * 100).toFixed(1) + '%';
     // Contador goal-gradient ("te faltan N") + segmentos + estado por parada: hecho / estás acá /
     // bloqueado. `done = c` (conceptos previos), `here = c`, y "te faltan" cuenta el actual + los que faltan.
-    if (railCountEl) railCountEl.textContent = `${c} de ${N} · te faltan ${N - c}`;
+    // El hilo de punta a punta: la pregunta acompaña el recorrido y en el último capítulo se
+    // transforma en la respuesta, en el mismo lugar, sin que aparezca un cartel nuevo. En la
+    // landing no va: todavía no la hicimos.
+    if (tbQEl) {
+      const enElCierre = c === N - 1;
+      const texto =
+        s < 0.12 ? '' : enElCierre ? 'Quien lee, avisa.' : '¿Quién le avisó a la pantalla?';
+      if (tbQEl.textContent !== texto) tbQEl.textContent = texto;
+      tbQEl.classList.toggle('tb-q--answered', enElCierre);
+    }
+
+    // "te faltan N" era un contador de pendientes: presiona a completar en un recorrido que se
+    // presenta como una investigación, y lo que la app HACE le gana a lo que dice. Ahora nombra la
+    // deuda real (lo que quedó sin establecer) en vez de apurar, y cuenta lo que entendiste, no
+    // hasta dónde scrolleaste.
+    if (railCountEl) {
+      const pendientes = N - established.size;
+      railCountEl.textContent =
+        pendientes === 0 ? 'todo establecido' : `${pendientes} sin establecer`;
+    }
     for (let si = 0; si < railSegs.length; si++) railSegs[si].classList.toggle('on', si < c);
     for (let si = 0; si < railStops.length; si++) {
       const st = railStops[si];

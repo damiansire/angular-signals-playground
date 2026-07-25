@@ -639,25 +639,6 @@
 .card--dissolve .subhost h1 {
   display: none;
 }
-/* Header (meta) integrado: un solo bloque compacto pegado al contenido, sin hilo divisor ni
-   aire de más, para que "ADENTRO · X" + "sub-nivel Y/N" + el ejemplo se lean como una sola
-   superficie continua, no como rótulos sueltos arriba de una caja. */
-.card__k,
-.subtop {
-  max-width: 68ch;
-  margin-left: auto;
-  margin-right: auto;
-}
-.card__k {
-  font-family: var(--mono);
-  font-size: 0.88rem;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  /* Acento del concepto oscurecido para que TODOS los tonos (incluido el ámbar, el más
-     flojo sobre crema) tengan contraste parejo como texto. */
-  color: color-mix(in srgb, var(--glow, #eb9b3c) 55%, #35301f);
-  margin: 0 0 0.15rem;
-}
 .subbody {
   padding-top: 0.3rem;
 }
@@ -805,20 +786,9 @@
   pointer-events: none;
   overflow: visible;
 }
-.sub-ring {
-  fill: none;
-  stroke-width: 1.5;
-  stroke-dasharray: 2 10;
-  opacity: 0.5;
-}
-/* En modo "disolver el marco" el anillo se esconde (los electrones siguen orbitando): el rect
-   punteado alrededor de la card sin marco se leería como el borde de una ventana. */
-.suborbit.dissolve .sub-ring {
-  opacity: 0;
-}
 /* En dissolve los electrones dejan la card y se acomodan en una constelación fija bajo el
    topbar: sub-arc es el hilo punteado que los conecta, invisible en el resto de los conceptos
-   (que siguen orbitando la card sobre .sub-ring). */
+   (en el resto la constelación no se dibuja). */
 .sub-arc {
   fill: none;
   stroke-width: 1.5;
@@ -998,17 +968,6 @@
   z-index: -1;
 }
 
-.subtop {
-  font-family: var(--mono);
-  font-size: 0.9rem;
-  letter-spacing: 0.1em;
-  color: color-mix(in srgb, var(--glow, #eb9b3c) 50%, #4a4438);
-  margin: 0 0 0.7rem;
-}
-.subtop b {
-  color: #201d16;
-  font-size: 1.15rem;
-}
 .caption {
   position: absolute;
   left: 0;
@@ -1109,6 +1068,20 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+/* La pregunta del capítulo 0 acompaña los doce y se vuelve respuesta en el 11. Va tenue a
+   propósito: es un hilo, no un cartel. Al contestarse toma el dorado del capstone. */
+.tb-q {
+  margin-right: 1.1rem;
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 0.92rem;
+  color: #9a9284;
+  transition: color 0.28s ease;
+}
+.tb-q--answered {
+  font-style: normal;
+  color: #b8791f;
 }
 .topbar a {
   color: #6a6355;
