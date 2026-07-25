@@ -1,7 +1,9 @@
 <div
   class="inner-box cursor-pointer"
+  [class.is-selected]="selected()"
   tabindex="0"
   role="button"
+  [attr.aria-pressed]="selectable() ? selected() : null"
   (click)="_onClick()"
   (keyup.enter)="_onClick()"
 >

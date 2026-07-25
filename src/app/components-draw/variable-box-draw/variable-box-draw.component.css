@@ -7,6 +7,20 @@
   display: flex;
   justify-content: center;
   align-items: center;
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease;
+}
+
+/* Elegido: la caja se invierte (ámbar pleno) en vez de sumar un adorno. Sin esto las cajas quedaban
+   todas idénticas y no había forma de saber qué tipo estabas mirando. */
+.inner-box.is-selected {
+  background-color: #eb9b3c;
+  border-color: #211e1a;
+}
+.inner-box.is-selected span {
+  color: #211e1a;
+  font-weight: 600;
 }
 
 span {
