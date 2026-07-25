@@ -5,6 +5,7 @@ import {
   signal,
   ChangeDetectionStrategy,
   DestroyRef,
+  ElementRef,
   inject,
 } from '@angular/core';
 import { CodeLine } from '../../../../components-atom/component-atom.interface';
@@ -59,14 +60,23 @@ export class EffectComponent {
     // Vida autónoma: Count1 late solo (una fuente que cambia sin que el usuario toque nada), así se
     // ve a effect(1) reaccionar por su cuenta en vez de quedar el demo congelado esperando input.
     // Count2 queda manual como contraste ("este cambia solo, ese solo si vos lo tocás"). El intervalo
-    // (< 1.5s) se limpia al destruir el componente —la vista integrada lo monta y desmonta por scroll—
-    // y se pausa con prefers-reduced-motion (la vida se atenúa, el demo sigue andando con clicks).
+    // se limpia al destruir el componente y se pausa con prefers-reduced-motion (la vida se atenúa,
+    // el demo sigue andando con clicks).
+    //
+    // El latido SOLO corre con el capítulo activo. La vista integrada pre-monta las 12 cards y nunca
+    // las destruye: marca `inert` la que no se está viendo (ver molecule-engine, `card.inert = !live`).
+    // Sin este guard el intervalo late desde que carga la página, aunque estés en otro nivel, y sus
+    // effects ensucian la consola con "The current count is: N" a lo largo de todo el recorrido.
+    const host = inject(ElementRef).nativeElement as HTMLElement;
     const prefersReducedMotion =
       typeof window !== 'undefined' &&
       typeof window.matchMedia === 'function' &&
       window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     if (!prefersReducedMotion) {
-      const beatId = setInterval(() => this.count.update((c) => c + 1), 1300);
+      const beatId = setInterval(() => {
+        if (host.closest('[inert]')) return;
+        this.count.update((c) => c + 1);
+      }, 1300);
       inject(DestroyRef).onDestroy(() => clearInterval(beatId));
     }
   }
