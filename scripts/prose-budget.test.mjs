@@ -26,6 +26,10 @@ test('no cuenta la sintaxis de control flow', () => {
   assert.equal(countProse('@if (listo()) {<p>Ya está</p>}'), 2);
 });
 
+test('no cuenta las etiquetas de control: son verbos, no explicación', () => {
+  assert.equal(countProse('<p>Mirá.</p><button class="x">Reiniciar el DOM</button>'), 1);
+});
+
 test('una pantalla nueva nace cumpliendo el techo', () => {
   const nueva = [{ screen: 'nueva.html', words: CEILING + 1 }];
   assert.equal(offenders(nueva, {}).length, 1);

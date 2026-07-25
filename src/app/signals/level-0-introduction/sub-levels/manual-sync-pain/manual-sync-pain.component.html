@@ -1,11 +1,8 @@
 <section class="msp">
+  <!-- Sin bajada: con el handler incompleto una de las tres vistas se marca "quedó viejo" sola.
+       El bug se ve, no hace falta anunciarlo. -->
   <header class="msp-head">
-    <p class="msp-eyebrow">un estado, muchos lugares en el DOM</p>
     <h2 class="msp-title">A mano, te olvidás un lugar.</h2>
-    <p class="msp-sub">
-      El mismo <code>count</code> alimenta tres vistas. Con el handler escrito a mano tenés que
-      actualizar cada una: si te falta alguna, queda vieja. Ese es el bug que los signals borran.
-    </p>
   </header>
 
   <div class="msp-toggle" role="group" aria-label="Versión del handler">
@@ -26,7 +23,7 @@
       <div class="msp-actions">
         <button class="msp-inc" (click)="increment()">increment()</button>
         <span class="msp-lines"
-          >líneas de sync que mantenés a mano: <strong>{{ syncLines() }}</strong></span
+          >sync a mano <strong>{{ syncLines() }}</strong></span
         >
       </div>
     </div>

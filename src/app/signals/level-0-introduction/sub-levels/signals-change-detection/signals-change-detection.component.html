@@ -1,11 +1,8 @@
 <section class="scd">
+  <!-- Sin bajada: al cambiar el signal se prenden dos nodos y el resto del árbol se poda a la
+       vista. La comparación contra Zone.js queda como dos números, no como una frase. -->
   <header class="scd-head">
-    <p class="scd-eyebrow">la detección con signals</p>
     <h2 class="scd-title">El signal avisa quién lo lee.</h2>
-    <p class="scd-sub">
-      Cuando cambia un signal, Angular re-chequea <em>solo</em> los nodos que lo leen y poda el
-      resto del árbol. Sin barrer todo, sin Zone.js.
-    </p>
   </header>
 
   <div class="scd-actions">
@@ -37,14 +34,17 @@
 
     <div class="scd-readout">
       <p class="scd-count">
-        nodos re-chequeados:
+        re-chequeados
         <strong>{{ changed() ? recheckedSignals : 0 }} / {{ recheckedZone }}</strong>
       </p>
       @if (changed()) {
         <p class="scd-contrast">
-          Zone.js habría revisado los <strong>{{ recheckedZone }}</strong
-          >. El signal tocó <strong>{{ recheckedSignals }}</strong
-          >.
+          <span
+            >Zone.js <strong>{{ recheckedZone }}</strong></span
+          >
+          <span
+            >signal <strong>{{ recheckedSignals }}</strong></span
+          >
         </p>
       }
     </div>

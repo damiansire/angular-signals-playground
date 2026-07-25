@@ -1,11 +1,7 @@
 <section class="htt">
+  <!-- Sin bajada: el botón dice qué hacer y el árbol se arma nodo por nodo mientras lee. -->
   <header class="htt-head">
-    <p class="htt-eyebrow">el browser lee tu HTML</p>
     <h2 class="htt-title">El HTML es un árbol de nodos.</h2>
-    <p class="htt-sub">
-      El browser parsea el texto y arma el DOM: un árbol. Leelo de corrido, o clickeá un tag y mirá
-      aparecer su nodo.
-    </p>
     <button class="htt-play" (click)="playParse()" [disabled]="parsePlaying()">
       {{ parsePlaying() ? 'Leyendo…' : 'Leer el HTML' }}
     </button>

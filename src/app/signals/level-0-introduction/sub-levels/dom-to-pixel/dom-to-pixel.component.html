@@ -1,11 +1,8 @@
 <section class="dtp">
+  <!-- Sin bajada: el pipeline apaga las etapas que el cambio no dispara, así que decirlo por
+       escrito repite lo que se está viendo. -->
   <header class="dtp-head">
-    <p class="dtp-eyebrow">un cambio en el DOM viaja hasta el pixel</p>
     <h2 class="dtp-title">No todo cambio cuesta lo mismo.</h2>
-    <p class="dtp-sub">
-      Elegí qué tocaste. El flujo salta las etapas que tu cambio no necesita: cuanto más salta, más
-      barato.
-    </p>
   </header>
 
   <div class="dtp-controls">
@@ -66,18 +63,8 @@
     }
   </svg>
 
+  <!-- La palabra del costo sola: qué etapas se saltearon ya lo dicen las estaciones apagadas. -->
   <p class="dtp-cost">
     <span class="dtp-cost-word" [style.color]="costColor()">{{ cost() }}</span>
-    @switch (cost()) {
-      @case ('barato') {
-        <span>solo compone en la GPU: se saltea layout y paint enteros.</span>
-      }
-      @case ('medio') {
-        <span>recalcula estilo y repinta, pero se saltea el re-layout.</span>
-      }
-      @case ('caro') {
-        <span>recorre todo: rehace la geometría (layout) y repinta.</span>
-      }
-    }
   </p>
 </section>

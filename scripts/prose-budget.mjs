@@ -32,6 +32,9 @@ export const CEILING = 8;
  */
 export function countProse(html) {
   const text = html
+    // Las etiquetas de control son verbos que dicen qué hace el botón, no explicación: entran en
+    // el punto de "sustantivos para navegar, verbos para actuar", no en el presupuesto de prosa.
+    .replace(/<button[\s\S]*?<\/button>/g, ' ')
     .replace(/<app-code[\s\S]*?<\/app-code>/g, ' ')
     .replace(/<app-code\b[^>]*\/>/g, ' ')
     .replace(/<pre[\s\S]*?<\/pre>/g, ' ')

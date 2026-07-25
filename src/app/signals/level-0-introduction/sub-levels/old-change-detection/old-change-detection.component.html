@@ -1,16 +1,12 @@
 <section class="ocd">
+  <!-- Sin bajada: tocás una API parcheada y el árbol entero se prende. Eso ES "los reviso a
+       todos", y el contador lo confirma en N/N. -->
   <header class="ocd-head">
-    <p class="ocd-eyebrow">la detección de cambios "clásica"</p>
     <h2 class="ocd-title">Zone.js revisa todo el árbol.</h2>
-    <p class="ocd-sub">
-      Angular no sabe <em>cuándo</em> ni <em>qué</em> cambió. Zone.js parchea todo lo async y le
-      avisa que "pasó algo"; sin saber qué, re-chequea el árbol entero. La respuesta a "te olvidás
-      un lugar" fue "los reviso a todos".
-    </p>
   </header>
 
+  <!-- El rótulo visible salía sobrando: el grupo ya se anuncia por su aria-label. -->
   <div class="ocd-apis" role="group" aria-label="APIs que Zone.js parchea">
-    <span class="ocd-apis-hint">Zone.js parchea:</span>
     @for (api of patchedApis; track api) {
       <button class="ocd-api" (click)="trigger(api)">{{ api }}</button>
     }
@@ -42,15 +38,12 @@
     <div class="ocd-readout">
       @if (lastTrigger()) {
         <p class="ocd-fired">
-          <code>{{ lastTrigger() }}</code> disparó algo → Zone.js avisa → Angular revisa
+          <code>{{ lastTrigger() }}</code> →
         </p>
       }
       <p class="ocd-count">
-        nodos re-chequeados:
+        re-chequeados
         <strong>{{ rechecked() }} / {{ total }}</strong>
-        @if (swept()) {
-          <span class="ocd-all">todos</span>
-        }
       </p>
       <button class="ocd-reset" (click)="reset()">Reiniciar</button>
     </div>
