@@ -1,9 +1,16 @@
 import { stagesTriggered, renderCost, RENDER_STAGES, MutationKind } from './render-pipeline';
 
 describe('render-pipeline (dominio de "de la mutación al pixel")', () => {
-  it('transform y opacity solo compositan (las animaciones baratas)', () => {
-    expect(stagesTriggered('transform')).toEqual(['composite']);
-    expect(stagesTriggered('opacity')).toEqual(['composite']);
+  it('transform y opacity recalculan estilo pero se saltean layout y paint', () => {
+    expect(stagesTriggered('transform')).toEqual(['style', 'composite']);
+    expect(stagesTriggered('opacity')).toEqual(['style', 'composite']);
+  });
+
+  it('ninguna mutación llega a composite salteándose style', () => {
+    const kinds: MutationKind[] = ['transform', 'opacity', 'color', 'textContent', 'geometry'];
+    for (const kind of kinds) {
+      expect(stagesTriggered(kind)).toContain('style');
+    }
   });
 
   it('cambiar color recalcula estilo y repinta, sin re-layout', () => {

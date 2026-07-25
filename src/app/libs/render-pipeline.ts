@@ -12,9 +12,11 @@ export type MutationKind = 'transform' | 'opacity' | 'color' | 'textContent' | '
 export const RENDER_STAGES: readonly RenderStage[] = ['style', 'layout', 'paint', 'composite'];
 
 const STAGES_BY_KIND: Record<MutationKind, readonly RenderStage[]> = {
-  // transform/opacity viven en una capa ya compuesta: saltan layout y paint.
-  transform: ['composite'],
-  opacity: ['composite'],
+  // transform/opacity viven en una capa ya compuesta: saltan layout y paint, pero NO style: tocar la
+  // propiedad obliga igual a recalcular el estilo. Saltearlo contradecia al texto del sub-nivel
+  // ("se saltea layout y paint enteros") ademas de ser incorrecto.
+  transform: ['style', 'composite'],
+  opacity: ['style', 'composite'],
   // color no cambia geometría: recalcula estilo y repinta, sin re-layout.
   color: ['style', 'paint', 'composite'],
   // texto y geometría (width, top…) cambian el tamaño/posición: cadena entera.
