@@ -4,6 +4,8 @@ import { CodeLine } from '../../../../components-atom/component-atom.interface';
 import { HistoryElement } from '../../../../components/component.interface';
 import { EventHistoryComponent } from '../../../../components/event-history/event-history.component';
 import { ConceptCardComponent } from '../../../../components-atom/concept-card/concept-card.component';
+import { RepairChallengeComponent } from '../../../../components-atom/repair-challenge/repair-challenge.component';
+import { EFFECT_CLEANUP_CHALLENGE } from '../../effect-challenges';
 
 /** Tope del historial: el intervalo evalúa cada segundo, así que sin límite la lista crecería sin
  *  fin y estiraría la card bajo el fold. Con los últimos eventos alcanza para ver la actividad. */
@@ -14,9 +16,15 @@ const MAX_HISTORY = 5;
   templateUrl: './effect-destroy.component.html',
   styleUrl: './effect-destroy.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ComponentDestroyComponent, EventHistoryComponent, ConceptCardComponent],
+  imports: [
+    ComponentDestroyComponent,
+    EventHistoryComponent,
+    ConceptCardComponent,
+    RepairChallengeComponent,
+  ],
 })
 export class EffectDestroyComponent {
+  readonly repairChallenge = EFFECT_CLEANUP_CHALLENGE;
   autoRefresh = signal(false);
   appEventHistory = signal<HistoryElement[]>([]);
   count = signal(0);

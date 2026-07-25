@@ -15,6 +15,8 @@ import { DependenciesStatusComponent } from '../../../../components/dependencies
 import { EventHistoryComponent } from '../../../../components/event-history/event-history.component';
 import { CodeComponent } from '../../../../components-atom/code/code.component';
 import { ConceptCardComponent } from '../../../../components-atom/concept-card/concept-card.component';
+import { RepairChallengeComponent } from '../../../../components-atom/repair-challenge/repair-challenge.component';
+import { EFFECT_READS_CHALLENGE } from '../../effect-challenges';
 
 /** Tope del historial de eventos: Count1 late por un intervalo, así que sin límite la lista (y la
  *  altura de la card en la vista integrada) crecería sin fin. Mostramos la actividad reciente. */
@@ -31,9 +33,11 @@ const MAX_HISTORY = 4;
     DependenciesStatusComponent,
     CodeComponent,
     ConceptCardComponent,
+    RepairChallengeComponent,
   ],
 })
 export class EffectComponent {
+  readonly repairChallenge = EFFECT_READS_CHALLENGE;
   count = signal(0);
   count2 = signal(0);
   dependencies = computed<string[]>(() => {

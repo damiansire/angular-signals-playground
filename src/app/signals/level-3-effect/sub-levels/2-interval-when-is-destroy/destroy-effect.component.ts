@@ -5,6 +5,8 @@ import { HistoryElement } from '../../../../components/component.interface';
 import { EventHistoryComponent } from '../../../../components/event-history/event-history.component';
 import { CodeComponent } from '../../../../components-atom/code/code.component';
 import { ConceptCardComponent } from '../../../../components-atom/concept-card/concept-card.component';
+import { RepairChallengeComponent } from '../../../../components-atom/repair-challenge/repair-challenge.component';
+import { EFFECT_LEAK_CHALLENGE } from '../../effect-challenges';
 
 /** Tope de la lista visible: el intervalo evalúa cada segundo y sin límite estiraría la card sin
  *  fin. La evidencia del leak (que "sigue creciendo") no la lleva la lista sino el contador total
@@ -16,9 +18,16 @@ const MAX_HISTORY = 5;
   templateUrl: './destroy-effect.component.html',
   styleUrl: './destroy-effect.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [DestroyBoxComponent, EventHistoryComponent, CodeComponent, ConceptCardComponent],
+  imports: [
+    DestroyBoxComponent,
+    EventHistoryComponent,
+    CodeComponent,
+    ConceptCardComponent,
+    RepairChallengeComponent,
+  ],
 })
 export class DestroyEffectComponent {
+  readonly repairChallenge = EFFECT_LEAK_CHALLENGE;
   autoRefresh = signal(false);
   appEventHistory = signal<HistoryElement[]>([]);
   /** Total de evaluaciones del intervalo. Sigue subiendo aun tras Destroy: ESA es la prueba del leak. */
