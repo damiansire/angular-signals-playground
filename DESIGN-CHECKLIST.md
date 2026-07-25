@@ -167,3 +167,40 @@ puede alcanzar" son dos cosas distintas y hay que chequear las dos.
       restaura el estado (nivel y sub-nivel). Testear ambas direcciones.
 - [ ] Probar en la ruta ancha Y en el embed angosto: un fix de layout
       (`whitespace-nowrap`, etc.) debe verificarse en los dos contextos.
+
+## Cierre del sub-nivel (el desafío manipulable, los 37)
+
+Los 37 sub-niveles terminan con el mismo gesto: un bloque de código con una
+parte que se mueve, las lecturas del sistema y el verbo que lo acciona. Con esa
+cantidad, la uniformidad no se sostiene con buena voluntad: la forma está fijada
+en `SHAPE` (`libs/manipulable-challenge.ts`) y la verifica `malformed()` en cada
+posición de la perilla. Estos ítems son los defectos que YA aparecieron.
+
+- [ ] El subrayado de la perilla marca el TOKEN, no el ancho del bloque: a
+      ancho completo se lee como una línea divisoria debajo del código, no como
+      algo tocable.
+- [ ] La sangría va aparte del cuerpo del renglón, y el texto por binding de
+      propiedad: con interpolación entre etiquetas el formateador mueve los
+      saltos de línea y con `white-space: pre` se ven como sangría fantasma.
+- [ ] Un renglón vacío del bloque conserva su alto: `display:flex` lo colapsa a
+      cero y el mismo desafío se ve con distinto aire que el de al lado.
+- [ ] `role="status"` va en un ENVOLTORIO, nunca en el `<ul>` de las lecturas:
+      puesto en la lista le pisa el `role=list` y sus `<li>` quedan huérfanos
+      (lo detecta axe-core en los specs).
+- [ ] Una línea que no existe en esa variante NO es una línea apagada: se saca
+      del arreglo, no se marca `dead`. Si no, quedan cierres muertos y renglones
+      vacíos de relleno.
+- [ ] El bloque no desborda: máximo `SHAPE.maxCodeCols` columnas. Medir el
+      `scrollWidth` del bloque contra su `clientWidth`, no el de cada renglón
+      (son contenedores flex y siempre reportan el ancho del padre).
+
+## Lo que la app HACE, no lo que dice
+
+- [ ] Ningún contador de pendientes que apure ("te faltan N") en un recorrido
+      que se presenta como exploración: nombrar la deuda ("N sin establecer"),
+      y contar lo que se entendió, no hasta dónde se scrolleó.
+- [ ] Ningún panel de lista abre como un rectángulo vacío: sin estado vacío se
+      lee como espacio muerto o como algo roto.
+- [ ] Presupuesto de prosa por pantalla (`npm run gate:prosa`): lo que hoy es
+      párrafo tiene que poder verse en la demo. Si el texto explica lo que el
+      dibujo ya muestra, sobra el texto.

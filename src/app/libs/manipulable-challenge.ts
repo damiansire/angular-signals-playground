@@ -102,6 +102,8 @@ export function readings(
  */
 export const SHAPE = {
   maxCodeLines: 6,
+  /** El bloque mide 34rem a 0.76rem monoespaciada: pasadas ~74 columnas aparece scroll lateral. */
+  maxCodeCols: 68,
   maxGauges: 2,
   maxGaugeWords: 2,
   maxActionWords: 4,
@@ -150,6 +152,10 @@ export function malformed(challenge: ManipulableChallenge): readonly string[] {
     const lines = challenge.code({ [knob.id]: position });
     if (lines.length > SHAPE.maxCodeLines) {
       problems.push(`el bloque tiene ${lines.length} renglones en la posición ${position}`);
+    }
+    const ancha = lines.find((line) => line.text.length > SHAPE.maxCodeCols);
+    if (ancha) {
+      problems.push(`un renglón de ${ancha.text.length} columnas desborda el bloque`);
     }
     if (!lines.some((line) => line.knob)) {
       problems.push(`la perilla no se ve en la posición ${position}`);
