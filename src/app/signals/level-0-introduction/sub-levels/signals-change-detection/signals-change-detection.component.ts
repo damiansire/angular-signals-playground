@@ -6,14 +6,18 @@ import {
   recheckedBySignals,
   recheckedByZone,
 } from '../../../../libs/cd-tree';
+import { ManipulableSystemComponent } from '../../../../components-atom/manipulable-system/manipulable-system.component';
+import { SIGNAL_NOTIFY_SYSTEM } from '../../introduction-systems';
 
 @Component({
   selector: 'app-signals-change-detection',
   templateUrl: './signals-change-detection.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [ManipulableSystemComponent],
   styleUrl: './signals-change-detection.component.css',
 })
 export class SignalsChangeDetectionComponent {
+  readonly closingSystem = SIGNAL_NOTIFY_SYSTEM;
   protected readonly nodes = CD_NODES;
   private readonly dependents = new Set(SIGNAL_DEPENDENTS);
   protected readonly recheckedSignals = recheckedBySignals();

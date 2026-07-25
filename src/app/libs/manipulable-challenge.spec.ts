@@ -16,6 +16,16 @@ import {
   CUSTOM_EQUAL_SYSTEM,
   REFERENCE_EQUALITY_SYSTEM,
 } from '../signals/level-4-signal-equality-functions/equality-systems';
+import * as intro from '../signals/level-0-introduction/introduction-systems';
+import * as uno from '../signals/level-1-interaction-with-signals/signals-systems';
+import * as dos from '../signals/level-2-computed-signals/computed-systems';
+import * as cinco from '../signals/level-5-linked-signal/linked-systems';
+import * as seis from '../signals/level-6-resource/resource-systems';
+import * as siete from '../signals/level-7-signal-io/io-systems';
+import * as ocho from '../signals/level-8-queries-interop/queries-systems';
+import * as nueve from '../signals/level-9-after-render-effect/after-render-systems';
+import * as diez from '../signals/level-10-debounced/debounce-systems';
+import * as once from '../signals/level-11-zoneless/zoneless-systems';
 
 /** Sistema mínimo de prueba: una perilla de 3 posiciones y una lectura que la sigue. */
 const TRES_POSICIONES: ManipulableChallenge = {
@@ -228,6 +238,18 @@ describe('sistemas publicados', () => {
     ['3/3 onCleanup por re-ejecución', EFFECT_CLEANUP_SYSTEM],
     ['4/1 igualdad por referencia', REFERENCE_EQUALITY_SYSTEM],
     ['4/2 equal propio', CUSTOM_EQUAL_SYSTEM],
+    ...Object.entries({
+      ...intro,
+      ...uno,
+      ...dos,
+      ...cinco,
+      ...seis,
+      ...siete,
+      ...ocho,
+      ...nueve,
+      ...diez,
+      ...once,
+    }).map(([nombre, sistema]) => [nombre, sistema as ManipulableChallenge] as const),
   ];
 
   PUBLICADOS.forEach(([nombre, sistema]) => {
@@ -246,6 +268,6 @@ describe('sistemas publicados', () => {
       ...TRES_POSICIONES,
       code: () => [{ text: 'sin nada que tocar' }],
     };
-    expect(malformed(sinPerilla)).toContain('su código no expone ninguna perilla');
+    expect(malformed(sinPerilla)).toContain('la perilla no se ve en la posición 0');
   });
 });

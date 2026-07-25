@@ -1,15 +1,18 @@
 import { Component, ChangeDetectionStrategy, computed, signal } from '@angular/core';
 import { CodeLine } from '../../../../components-atom/component-atom.interface';
 import { ColumnAndCodeLayoutComponent } from '../../../../layouts/column-and-code-layout/column-and-code-layout.component';
+import { ManipulableSystemComponent } from '../../../../components-atom/manipulable-system/manipulable-system.component';
+import { ZONELESS_SYSTEM } from '../../zoneless-systems';
 
 @Component({
   selector: 'app-zoneless',
   templateUrl: './zoneless.component.html',
   styleUrl: './zoneless.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ColumnAndCodeLayoutComponent],
+  imports: [ManipulableSystemComponent, ColumnAndCodeLayoutComponent],
 })
 export class ZonelessComponent {
+  readonly closingSystem = ZONELESS_SYSTEM;
   readonly count = signal(0);
   readonly double = computed(() => this.count() * 2);
 

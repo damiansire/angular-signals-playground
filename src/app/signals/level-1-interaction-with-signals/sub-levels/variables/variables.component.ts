@@ -4,6 +4,8 @@ import { CodeLine } from '../../../../components-atom/component-atom.interface';
 import { TitleComponent } from '../../../../components-atom/title/title.component';
 import { CodeComponent } from '../../../../components-atom/code/code.component';
 import { ConceptCardComponent } from '../../../../components-atom/concept-card/concept-card.component';
+import { ManipulableSystemComponent } from '../../../../components-atom/manipulable-system/manipulable-system.component';
+import { PLAIN_VARIABLE_SYSTEM } from '../../signals-systems';
 
 interface DataTypeExample {
   name: string;
@@ -12,12 +14,19 @@ interface DataTypeExample {
 
 @Component({
   selector: 'app-variables',
-  imports: [VariableBoxDrawComponent, TitleComponent, CodeComponent, ConceptCardComponent],
+  imports: [
+    ManipulableSystemComponent,
+    VariableBoxDrawComponent,
+    TitleComponent,
+    CodeComponent,
+    ConceptCardComponent,
+  ],
   templateUrl: './variables.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   styleUrl: './variables.component.css',
 })
 export class VariablesComponent implements OnInit {
+  readonly closingSystem = PLAIN_VARIABLE_SYSTEM;
   dataTypes = ['Number'];
   typesExamples: Record<string, DataTypeExample> = {
     Number: {

@@ -9,6 +9,8 @@ import {
 } from '@angular/core';
 import { CodeLine } from '../../../../components-atom/component-atom.interface';
 import { ColumnAndCodeLayoutComponent } from '../../../../layouts/column-and-code-layout/column-and-code-layout.component';
+import { ManipulableSystemComponent } from '../../../../components-atom/manipulable-system/manipulable-system.component';
+import { SIGNAL_TYPES_SYSTEM } from '../../signals-systems';
 
 interface SignalKind {
   id: string;
@@ -20,12 +22,13 @@ interface SignalKind {
 
 @Component({
   selector: 'app-types-of-signals',
-  imports: [ColumnAndCodeLayoutComponent],
+  imports: [ManipulableSystemComponent, ColumnAndCodeLayoutComponent],
   templateUrl: './types-of-signals.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   styleUrl: './types-of-signals.component.css',
 })
 export class TypesOfSignalsComponent {
+  readonly closingSystem = SIGNAL_TYPES_SYSTEM;
   readonly kinds: SignalKind[] = [
     {
       id: 'writable',

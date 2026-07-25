@@ -8,15 +8,18 @@ import {
 } from '@angular/core';
 import { CodeLine } from '../../../../components-atom/component-atom.interface';
 import { ColumnAndCodeLayoutComponent } from '../../../../layouts/column-and-code-layout/column-and-code-layout.component';
+import { ManipulableSystemComponent } from '../../../../components-atom/manipulable-system/manipulable-system.component';
+import { VIEW_CHILDREN_SYSTEM } from '../../queries-systems';
 
 @Component({
   selector: 'app-view-children',
   templateUrl: './view-children.component.html',
   styleUrl: './view-children.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ColumnAndCodeLayoutComponent],
+  imports: [ManipulableSystemComponent, ColumnAndCodeLayoutComponent],
 })
 export class ViewChildrenComponent {
+  readonly closingSystem = VIEW_CHILDREN_SYSTEM;
   readonly names = signal<string[]>(['Ada', 'Alan', 'Grace']);
 
   // viewChildren() devuelve un signal con TODOS los elementos que matchean.

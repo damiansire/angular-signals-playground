@@ -1,13 +1,17 @@
 import { Component, ChangeDetectionStrategy, signal, computed } from '@angular/core';
 import { CD_NODES, CD_EDGES, recheckedByZone } from '../../../../libs/cd-tree';
+import { ManipulableSystemComponent } from '../../../../components-atom/manipulable-system/manipulable-system.component';
+import { ZONE_PATCH_SYSTEM } from '../../introduction-systems';
 
 @Component({
   selector: 'app-old-change-detection',
   templateUrl: './old-change-detection.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [ManipulableSystemComponent],
   styleUrl: './old-change-detection.component.css',
 })
 export class OldChangeDetectionComponent {
+  readonly closingSystem = ZONE_PATCH_SYSTEM;
   protected readonly nodes = CD_NODES;
   protected readonly total = CD_NODES.length;
   protected readonly patchedApis = ['setTimeout', 'addEventListener', 'fetch', 'Promise'];

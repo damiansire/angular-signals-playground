@@ -4,6 +4,8 @@ import { ClickInButton } from '../../../../components/component.interface';
 import { BasicFormComponent } from '../../../../components/basic-form/basic-form.component';
 import { ClickHistoryComponent } from '../../../../components/click-history/click-history.component';
 import { ConceptCardComponent } from '../../../../components-atom/concept-card/concept-card.component';
+import { ManipulableSystemComponent } from '../../../../components-atom/manipulable-system/manipulable-system.component';
+import { COMPUTED_MEMO_SYSTEM } from '../../computed-systems';
 
 /** Tope de cada panel: sin límite las listas crecerían sin fin y estirarían la card bajo el fold
  *  en la vista integrada. Con los últimos eventos alcanza para leer qué recomputó y qué no. */
@@ -15,6 +17,7 @@ const MAX_HISTORY = 6;
   styleUrl: './computed-signals-lazily-evaluated-memoized.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
+    ManipulableSystemComponent,
     ComputedTrackerComponent,
     BasicFormComponent,
     ClickHistoryComponent,
@@ -22,6 +25,7 @@ const MAX_HISTORY = 6;
   ],
 })
 export class ComputedSignalsLazilyEvaluatedMemoizedComponent {
+  readonly closingSystem = COMPUTED_MEMO_SYSTEM;
   // El estado que alimenta los paneles vive en signals y se actualiza con una NUEVA referencia
   // (no `push` sobre el mismo array): bajo OnPush + zoneless, mutar el array in situ no dispara
   // detección de cambios y los hijos (que reciben la lista por `input()`) nunca se refrescarían.

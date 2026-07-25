@@ -6,14 +6,18 @@ import {
   MUTATIONS,
   applyMutation,
 } from './dom-is-alive.data';
+import { ManipulableSystemComponent } from '../../../../components-atom/manipulable-system/manipulable-system.component';
+import { DOM_ALIVE_SYSTEM } from '../../introduction-systems';
 
 @Component({
   selector: 'app-dom-is-alive',
   templateUrl: './dom-is-alive.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [ManipulableSystemComponent],
   styleUrl: './dom-is-alive.component.css',
 })
 export class DomIsAliveComponent {
+  readonly closingSystem = DOM_ALIVE_SYSTEM;
   protected readonly mutations: readonly DomMutation[] = MUTATIONS;
   protected readonly dom = signal<DomNodeState[]>(INITIAL_DOM.map((node) => ({ ...node })));
   protected readonly lastTouched = signal<string | null>(null);

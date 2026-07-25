@@ -1,15 +1,18 @@
 import { Component, ChangeDetectionStrategy, computed, effect, signal } from '@angular/core';
 import { CodeLine } from '../../../../components-atom/component-atom.interface';
 import { ColumnAndCodeLayoutComponent } from '../../../../layouts/column-and-code-layout/column-and-code-layout.component';
+import { ManipulableSystemComponent } from '../../../../components-atom/manipulable-system/manipulable-system.component';
+import { ON_CLEANUP_SYSTEM } from '../../after-render-systems';
 
 @Component({
   selector: 'app-on-cleanup',
   templateUrl: './on-cleanup.component.html',
   styleUrl: './on-cleanup.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ColumnAndCodeLayoutComponent],
+  imports: [ManipulableSystemComponent, ColumnAndCodeLayoutComponent],
 })
 export class OnCleanupComponent {
+  readonly closingSystem = ON_CLEANUP_SYSTEM;
   readonly running = signal(false);
   readonly ticks = signal(0);
   readonly cleanups = signal(0);

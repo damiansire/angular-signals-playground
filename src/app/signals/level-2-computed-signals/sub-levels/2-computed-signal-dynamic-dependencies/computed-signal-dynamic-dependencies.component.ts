@@ -7,6 +7,8 @@ import { DependenciesStatusComponent } from '../../../../components/dependencies
 import { EventHistoryComponent } from '../../../../components/event-history/event-history.component';
 import { CodeComponent } from '../../../../components-atom/code/code.component';
 import { ConceptCardComponent } from '../../../../components-atom/concept-card/concept-card.component';
+import { ManipulableSystemComponent } from '../../../../components-atom/manipulable-system/manipulable-system.component';
+import { COMPUTED_DYNAMIC_DEPS_SYSTEM } from '../../computed-systems';
 
 /** Tope de cada historial: en la vista integrada la card no debe crecer sin fin bajo el fold con
  *  el uso. Mostramos la actividad reciente, que es lo que importa para leer las recomputaciones. */
@@ -18,6 +20,7 @@ const MAX_HISTORY = 6;
   styleUrl: './computed-signal-dynamic-dependencies.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
+    ManipulableSystemComponent,
     VariableBoxComponent,
     EventHistoryComponent,
     DependenciesStatusComponent,
@@ -26,6 +29,7 @@ const MAX_HISTORY = 6;
   ],
 })
 export class ComputedSignalDynamicDependenciesComponent {
+  readonly closingSystem = COMPUTED_DYNAMIC_DEPS_SYSTEM;
   showCount = signal(false);
   count = signal(0);
   conditionalCount = computed(() => {

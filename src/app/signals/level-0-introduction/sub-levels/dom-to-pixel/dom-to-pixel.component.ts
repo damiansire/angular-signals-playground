@@ -6,6 +6,8 @@ import {
   stagesTriggered,
   renderCost,
 } from '../../../../libs/render-pipeline';
+import { ManipulableSystemComponent } from '../../../../components-atom/manipulable-system/manipulable-system.component';
+import { DOM_PIXEL_SYSTEM } from '../../introduction-systems';
 
 interface MutationDemo {
   kind: MutationKind;
@@ -39,9 +41,11 @@ const COST_COLOR: Record<RenderCost, string> = {
   selector: 'app-dom-to-pixel',
   templateUrl: './dom-to-pixel.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [ManipulableSystemComponent],
   styleUrl: './dom-to-pixel.component.css',
 })
 export class DomToPixelComponent {
+  readonly closingSystem = DOM_PIXEL_SYSTEM;
   protected readonly stations: readonly Station[] = [
     { id: 'DOM', x: 60 },
     { id: 'style', x: 280 },

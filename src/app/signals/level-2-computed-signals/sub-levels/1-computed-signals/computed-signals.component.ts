@@ -9,6 +9,8 @@ import {
 import { FormsModule } from '@angular/forms';
 import { CodeLine } from '../../../../components-atom/component-atom.interface';
 import { ColumnAndCodeLayoutComponent } from '../../../../layouts/column-and-code-layout/column-and-code-layout.component';
+import { ManipulableSystemComponent } from '../../../../components-atom/manipulable-system/manipulable-system.component';
+import { COMPUTED_BASIC_SYSTEM } from '../../computed-systems';
 
 /** Lee el value de un target de evento con un type guard real (no un `as` a ciegas): si el target
  *  no es un `<input>`, devuelve ''. Mismo criterio que el resto del repo en boundaries no confiables. */
@@ -21,9 +23,10 @@ function inputValue(eventTarget: EventTarget | null): string {
   templateUrl: './computed-signals.component.html',
   styleUrl: './computed-signals.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [FormsModule, ColumnAndCodeLayoutComponent],
+  imports: [ManipulableSystemComponent, FormsModule, ColumnAndCodeLayoutComponent],
 })
 export class ComputedSignalsComponent {
+  readonly closingSystem = COMPUTED_BASIC_SYSTEM;
   firstName: WritableSignal<string> = signal('Damian');
   surname: WritableSignal<string> = signal('Sire');
   fullName: Signal<string> = computed(() => {

@@ -2,15 +2,18 @@ import { Component, ChangeDetectionStrategy, computed, signal } from '@angular/c
 import { CodeLine } from '../../../../components-atom/component-atom.interface';
 import { ColumnAndCodeLayoutComponent } from '../../../../layouts/column-and-code-layout/column-and-code-layout.component';
 import { TagListComponent } from './tag-list/tag-list.component';
+import { ManipulableSystemComponent } from '../../../../components-atom/manipulable-system/manipulable-system.component';
+import { CONTENT_QUERY_SYSTEM } from '../../queries-systems';
 
 @Component({
   selector: 'app-content-queries',
   templateUrl: './content-queries.component.html',
   styleUrl: './content-queries.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ColumnAndCodeLayoutComponent, TagListComponent],
+  imports: [ManipulableSystemComponent, ColumnAndCodeLayoutComponent, TagListComponent],
 })
 export class ContentQueriesComponent {
+  readonly closingSystem = CONTENT_QUERY_SYSTEM;
   readonly names = signal<string[]>(['Ada', 'Alan', 'Grace']);
   private readonly pool = ['Ada', 'Alan', 'Grace', 'Linus', 'Margaret'];
 

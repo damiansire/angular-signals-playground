@@ -2,15 +2,18 @@ import { Component, ChangeDetectionStrategy, computed, resource, signal } from '
 import { CodeLine } from '../../../../components-atom/component-atom.interface';
 import { ColumnAndCodeLayoutComponent } from '../../../../layouts/column-and-code-layout/column-and-code-layout.component';
 import { DemoUser, lookupUser } from '../../users.data';
+import { ManipulableSystemComponent } from '../../../../components-atom/manipulable-system/manipulable-system.component';
+import { RESOURCE_BASIC_SYSTEM } from '../../resource-systems';
 
 @Component({
   selector: 'app-resource-basic',
   templateUrl: './resource-basic.component.html',
   styleUrl: './resource-basic.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ColumnAndCodeLayoutComponent],
+  imports: [ManipulableSystemComponent, ColumnAndCodeLayoutComponent],
 })
 export class ResourceBasicComponent {
+  readonly closingSystem = RESOURCE_BASIC_SYSTEM;
   // id seleccionable (el #4 no existe → demuestra el estado de error).
   readonly userId = signal(1);
   readonly candidateIds = [1, 2, 3, 4];

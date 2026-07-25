@@ -2,15 +2,18 @@ import { Component, ChangeDetectionStrategy, computed, signal } from '@angular/c
 import { CodeLine } from '../../../../components-atom/component-atom.interface';
 import { ColumnAndCodeLayoutComponent } from '../../../../layouts/column-and-code-layout/column-and-code-layout.component';
 import { CounterInputComponent } from './counter-input/counter-input.component';
+import { ManipulableSystemComponent } from '../../../../components-atom/manipulable-system/manipulable-system.component';
+import { INPUT_OUTPUT_SYSTEM } from '../../io-systems';
 
 @Component({
   selector: 'app-input-output',
   templateUrl: './input-output.component.html',
   styleUrl: './input-output.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ColumnAndCodeLayoutComponent, CounterInputComponent],
+  imports: [ManipulableSystemComponent, ColumnAndCodeLayoutComponent, CounterInputComponent],
 })
 export class InputOutputComponent {
+  readonly closingSystem = INPUT_OUTPUT_SYSTEM;
   readonly step = signal(1);
   readonly lastEmitted = signal<number | null>(null);
 

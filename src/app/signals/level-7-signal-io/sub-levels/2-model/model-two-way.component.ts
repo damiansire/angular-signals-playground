@@ -2,15 +2,18 @@ import { Component, ChangeDetectionStrategy, computed, signal } from '@angular/c
 import { CodeLine } from '../../../../components-atom/component-atom.interface';
 import { ColumnAndCodeLayoutComponent } from '../../../../layouts/column-and-code-layout/column-and-code-layout.component';
 import { RatingComponent } from './rating/rating.component';
+import { ManipulableSystemComponent } from '../../../../components-atom/manipulable-system/manipulable-system.component';
+import { MODEL_SYSTEM } from '../../io-systems';
 
 @Component({
   selector: 'app-model-two-way',
   templateUrl: './model-two-way.component.html',
   styleUrl: './model-two-way.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ColumnAndCodeLayoutComponent, RatingComponent],
+  imports: [ManipulableSystemComponent, ColumnAndCodeLayoutComponent, RatingComponent],
 })
 export class ModelTwoWayComponent {
+  readonly closingSystem = MODEL_SYSTEM;
   // El padre tiene un signal y lo enlaza two-way con [(value)].
   readonly rating = signal(3);
 

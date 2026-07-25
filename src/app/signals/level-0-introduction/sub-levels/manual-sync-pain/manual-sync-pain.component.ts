@@ -6,14 +6,18 @@ import {
   renderedUnderHandler,
   staleSpots,
 } from './manual-sync-pain.data';
+import { ManipulableSystemComponent } from '../../../../components-atom/manipulable-system/manipulable-system.component';
+import { MANUAL_SYNC_SYSTEM } from '../../introduction-systems';
 
 @Component({
   selector: 'app-manual-sync-pain',
   templateUrl: './manual-sync-pain.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [ManipulableSystemComponent],
   styleUrl: './manual-sync-pain.component.css',
 })
 export class ManualSyncPainComponent {
+  readonly closingSystem = MANUAL_SYNC_SYSTEM;
   protected readonly spots = SPOTS;
   protected readonly count = signal(0);
   protected readonly handlerComplete = signal(false);

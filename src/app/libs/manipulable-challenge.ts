@@ -96,23 +96,65 @@ export function readings(
 }
 
 /**
+ * Presupuesto de forma. Con los 37 sub-niveles cerrando igual, la consistencia no se sostiene con
+ * buena voluntad: si un desafío trae seis lecturas y otro dos, el cierre deja de leerse como el
+ * mismo gesto. Estos números SON la forma del cierre, y por eso los verifica un test.
+ */
+export const SHAPE = {
+  maxCodeLines: 6,
+  maxGauges: 2,
+  maxGaugeWords: 2,
+  maxActionWords: 4,
+  maxEstablishesWords: 14,
+} as const;
+
+const words = (text: string): number => text.trim().split(/\s+/).filter(Boolean).length;
+
+/**
  * Un desafío mal armado no se ve roto en pantalla: se ve como un sub-nivel que no se puede
- * resolver. Estas son las condiciones que el contenido tiene que cumplir para llegar a shippear.
+ * resolver, o como un cierre que no se parece a los otros 36. Estas son las condiciones que el
+ * contenido tiene que cumplir para llegar a shippear.
  */
 export function malformed(challenge: ManipulableChallenge): readonly string[] {
   const problems: string[] = [];
   const start = startOf(challenge);
 
+  // Resolubilidad: sin esto el sub-nivel es una pared, no un desafío.
   if (challenge.knobs.length === 0) problems.push('no tiene ninguna perilla que mover');
   if (challenge.knobs.some((k) => k.positions < 2)) {
     problems.push('tiene una perilla de una sola posición');
   }
   if (challenge.gauges.length === 0) problems.push('no tiene lectura que conteste');
   if (challenge.healthy(start)) problems.push('arranca sano, así que no hay nada que notar');
-  if (!challenge.code(start.knobs).some((line) => line.knob)) {
-    problems.push('su código no expone ninguna perilla');
-  }
   if (challenge.establishes.trim() === '') problems.push('no deja línea establecida');
+
+  // Forma: que los 37 cierres se lean como el mismo gesto.
+  if (challenge.knobs.length > 1) {
+    problems.push('tiene más de una perilla: es un puzzle, no un control');
+  }
+  if (challenge.gauges.length > SHAPE.maxGauges) problems.push('muestra demasiadas lecturas');
+  if (challenge.gauges.some((g) => words(g.label) > SHAPE.maxGaugeWords)) {
+    problems.push('el rótulo de una lectura es una frase, no una etiqueta');
+  }
+  if (words(challenge.action) > SHAPE.maxActionWords) {
+    problems.push('el verbo de la acción es largo');
+  }
+  if (words(challenge.establishes) > SHAPE.maxEstablishesWords) {
+    problems.push('la línea establecida es un párrafo, no una línea');
+  }
+
+  // El bloque tiene que leerse de un vistazo, y la perilla tiene que estar a la vista en TODAS sus
+  // posiciones: una perilla que desaparece deja al sistema sin forma de arreglarse.
+  const knob = challenge.knobs[0];
+  for (let position = 0; knob && position < knob.positions; position++) {
+    const lines = challenge.code({ [knob.id]: position });
+    if (lines.length > SHAPE.maxCodeLines) {
+      problems.push(`el bloque tiene ${lines.length} renglones en la posición ${position}`);
+    }
+    if (!lines.some((line) => line.knob)) {
+      problems.push(`la perilla no se ve en la posición ${position}`);
+    }
+  }
 
   return problems;
 }

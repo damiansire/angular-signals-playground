@@ -20,7 +20,7 @@ export const REFERENCE_EQUALITY_SYSTEM: ManipulableChallenge = {
   knobs: [{ id: ESCRITURA, positions: 2, label: 'mutar el objeto o crear uno nuevo' }],
   gauges: [
     { id: 'cambios', label: 'cambios' },
-    { id: 'avisos', label: 'avisos a la vista' },
+    { id: 'avisos', label: 'avisos' },
   ],
   action: 'renombrar',
   start: { cambios: 0, avisos: 0 },
@@ -64,7 +64,7 @@ export const CUSTOM_EQUAL_SYSTEM: ManipulableChallenge = {
     { id: 'cargas', label: 'cargas' },
     { id: 'recalculos', label: 'recálculos' },
   ],
-  action: 'volver a cargar lo mismo',
+  action: 'recargar lo mismo',
   start: { cargas: 0, recalculos: 0 },
 
   code: (knobs) => {

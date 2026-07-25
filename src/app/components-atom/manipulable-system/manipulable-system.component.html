@@ -25,14 +25,18 @@
   <!-- La lectura es lo único que le contesta al usuario, así que también tiene que ANUNCIARSE:
        sin aria-live, quien usa lector de pantalla mueve la perilla y no se entera de nada. -->
   <div class="ms__bar">
-    <ul class="ms__gauges" role="status" aria-live="polite">
-      @for (gauge of gauges(); track gauge.id) {
-        <li class="ms__gauge" [class.ms__gauge--ok]="healthy()">
-          <span class="ms__gauge-label">{{ gauge.label }}</span>
-          <b class="ms__gauge-value">{{ gauge.value }}</b>
-        </li>
-      }
-    </ul>
+    <!-- El role="status" va en un envoltorio, NO en el <ul>: puesto en la lista le pisa el
+         role=list y sus <li> quedan huérfanos (lo detectó axe-core en los specs del repo). -->
+    <div role="status" aria-live="polite">
+      <ul class="ms__gauges">
+        @for (gauge of gauges(); track gauge.id) {
+          <li class="ms__gauge" [class.ms__gauge--ok]="healthy()">
+            <span class="ms__gauge-label">{{ gauge.label }}</span>
+            <b class="ms__gauge-value">{{ gauge.value }}</b>
+          </li>
+        }
+      </ul>
+    </div>
 
     <button type="button" class="ms__act" (click)="press()">{{ system().action }}</button>
   </div>

@@ -9,15 +9,18 @@ import {
 } from '@angular/core';
 import { CodeLine } from '../../../../components-atom/component-atom.interface';
 import { ColumnAndCodeLayoutComponent } from '../../../../layouts/column-and-code-layout/column-and-code-layout.component';
+import { ManipulableSystemComponent } from '../../../../components-atom/manipulable-system/manipulable-system.component';
+import { AFTER_RENDER_SYSTEM } from '../../after-render-systems';
 
 @Component({
   selector: 'app-after-render-effect',
   templateUrl: './after-render-effect.component.html',
   styleUrl: './after-render-effect.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ColumnAndCodeLayoutComponent],
+  imports: [ManipulableSystemComponent, ColumnAndCodeLayoutComponent],
 })
 export class AfterRenderEffectComponent {
+  readonly closingSystem = AFTER_RENDER_SYSTEM;
   readonly text = signal('Escribí algo y miro su ancho');
   private readonly measured = viewChild<ElementRef<HTMLElement>>('measured');
 

@@ -1,15 +1,18 @@
 import { Component, computed, signal, ChangeDetectionStrategy } from '@angular/core';
 import { CodeLine } from '../../../../components-atom/component-atom.interface';
 import { ColumnAndCodeLayoutComponent } from '../../../../layouts/column-and-code-layout/column-and-code-layout.component';
+import { ManipulableSystemComponent } from '../../../../components-atom/manipulable-system/manipulable-system.component';
+import { UPDATE_SIGNAL_SYSTEM } from '../../signals-systems';
 
 @Component({
   selector: 'app-update-signal',
   templateUrl: './update-signal.component.html',
   styleUrl: './update-signal.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ColumnAndCodeLayoutComponent],
+  imports: [ManipulableSystemComponent, ColumnAndCodeLayoutComponent],
 })
 export class UpdateSignalComponent {
+  readonly closingSystem = UPDATE_SIGNAL_SYSTEM;
   count = signal(0);
   update() {
     this.count.update((value) => value + 1);

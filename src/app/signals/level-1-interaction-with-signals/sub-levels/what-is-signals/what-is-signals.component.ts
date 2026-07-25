@@ -6,10 +6,13 @@ import { VariableBoxDrawComponent } from '../../../../components-draw/variable-b
 import { CodeLine } from '../../../../components-atom/component-atom.interface';
 import { CodeComponent } from '../../../../components-atom/code/code.component';
 import { ConceptCardComponent } from '../../../../components-atom/concept-card/concept-card.component';
+import { ManipulableSystemComponent } from '../../../../components-atom/manipulable-system/manipulable-system.component';
+import { WHAT_IS_SIGNAL_SYSTEM } from '../../signals-systems';
 
 @Component({
   selector: 'app-what-is-signals',
   imports: [
+    ManipulableSystemComponent,
     TitleComponent,
     ContainerVariableBoxDrawComponent,
     TextDescriptionComponent,
@@ -22,6 +25,7 @@ import { ConceptCardComponent } from '../../../../components-atom/concept-card/c
   styleUrl: './what-is-signals.component.css',
 })
 export class WhatIsSignalsComponent {
+  readonly closingSystem = WHAT_IS_SIGNAL_SYSTEM;
   title = '¿Qué es un signal?';
   showExample = false;
   clickCount = 0;

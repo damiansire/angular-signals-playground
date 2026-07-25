@@ -958,12 +958,10 @@ export function initMolecule(
   const stage = q<HTMLDivElement>('#stage')!;
 
   /**
-   * Conceptos cuyo enlace al siguiente exige haber ESTABLECIDO el sub-nivel (resolver su desafío),
-   * en vez de encenderse al pasar scrolleando. Crece a medida que los sub-niveles migran a la
-   * mecánica manipulable; los que todavía no la tienen siguen encendiendo por scroll, así que la
-   * molécula no se ve rota durante la migración.
+   * Conceptos ya establecidos: los 37 sub-niveles cierran con su desafío, así que TODOS los enlaces
+   * nacen al resolver y ninguno se enciende por pasar scrolleando. Alcanza con establecer un
+   * sub-nivel del concepto: el enlace marca que entendiste el tramo, no que lo completaste entero.
    */
-  const GATED = new Set<number>([3, 4]);
   const established = new Set<number>();
   let liveConcept = 0;
   const track = q<HTMLDivElement>('#track')!;
@@ -1218,9 +1216,9 @@ export function initMolecule(
     liveConcept = c;
     bondEls.forEach((ln, j) => {
       if (j + 1 < c) {
-        // El enlace de un concepto CON desafío nace al establecerlo, no al pasar scrolleando: la
-        // molécula se une porque entendiste. Sin resolver queda punteado, como deuda a la vista.
-        ln.classList.toggle('on', !GATED.has(j) || established.has(j));
+        // El enlace nace al establecer, no al pasar scrolleando: la molécula se une porque
+        // entendiste. Sin resolver queda punteado, como deuda a la vista.
+        ln.classList.toggle('on', established.has(j));
         ln.setAttribute('d', bondPath(C[j].x, C[j].y, C[j + 1].x, C[j + 1].y));
       } else if (j + 1 === c) {
         ln.classList.toggle('on', birth > 0.12);

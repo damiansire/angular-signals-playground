@@ -42,6 +42,9 @@
   font-size: 0.76rem;
   line-height: 1.75;
   color: #3a352d;
+  /* Un renglón vacío es un separador del bloque, no un renglón que no está: sin esto el flex lo
+     colapsa a cero y el mismo desafío se ve con distinto aire que el de al lado. */
+  min-height: 1.33rem;
 }
 
 /* La línea que dejó de participar sigue a la vista: que se vea quedar afuera enseña más que

@@ -13,6 +13,8 @@ import { CodeClick } from '../../../../components-atom/code/code.interface';
 import { TreeComponent } from '../../../../components/tree/tree.component';
 import { TwoColumnLayoutComponent } from '../../../../layouts/two-column-layout/two-column-layout.component';
 import { getLevelColor } from '../../../../components-draw/node-level-color';
+import { ManipulableSystemComponent } from '../../../../components-atom/manipulable-system/manipulable-system.component';
+import { HTML_TREE_SYSTEM } from '../../introduction-systems';
 
 interface ConnectorLine {
   id: string;
@@ -26,12 +28,13 @@ const FOLLOW_WINDOW_MS = 700;
 
 @Component({
   selector: 'app-html-to-tree',
-  imports: [CodeComponent, TreeComponent, TwoColumnLayoutComponent],
+  imports: [ManipulableSystemComponent, CodeComponent, TreeComponent, TwoColumnLayoutComponent],
   templateUrl: './html-to-tree.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   styleUrl: './html-to-tree.component.css',
 })
 export class HtmlToTreeComponent {
+  readonly closingSystem = HTML_TREE_SYSTEM;
   private readonly hostElement: HTMLElement = inject(ElementRef).nativeElement;
   private readonly treeRef = viewChild(TreeComponent);
   private parseTimer: ReturnType<typeof setTimeout> | null = null;

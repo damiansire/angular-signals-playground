@@ -1,15 +1,18 @@
 import { Component, ChangeDetectionStrategy, computed, linkedSignal, signal } from '@angular/core';
 import { CodeLine } from '../../../../components-atom/component-atom.interface';
 import { ColumnAndCodeLayoutComponent } from '../../../../layouts/column-and-code-layout/column-and-code-layout.component';
+import { ManipulableSystemComponent } from '../../../../components-atom/manipulable-system/manipulable-system.component';
+import { LINKED_BASIC_SYSTEM } from '../../linked-systems';
 
 @Component({
   selector: 'app-basic-linked-signal',
   templateUrl: './basic-linked-signal.component.html',
   styleUrl: './basic-linked-signal.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ColumnAndCodeLayoutComponent],
+  imports: [ManipulableSystemComponent, ColumnAndCodeLayoutComponent],
 })
 export class BasicLinkedSignalComponent {
+  readonly closingSystem = LINKED_BASIC_SYSTEM;
   // La fuente: cambiar esta lista hace que la selección se reinicie.
   readonly shippingOptions = signal<string[]>(['Ground', 'Air', 'Sea']);
 

@@ -3,15 +3,18 @@ import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { interval, map, scan } from 'rxjs';
 import { CodeLine } from '../../../../components-atom/component-atom.interface';
 import { ColumnAndCodeLayoutComponent } from '../../../../layouts/column-and-code-layout/column-and-code-layout.component';
+import { ManipulableSystemComponent } from '../../../../components-atom/manipulable-system/manipulable-system.component';
+import { RXJS_INTEROP_SYSTEM } from '../../queries-systems';
 
 @Component({
   selector: 'app-rxjs-interop',
   templateUrl: './rxjs-interop.component.html',
   styleUrl: './rxjs-interop.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ColumnAndCodeLayoutComponent],
+  imports: [ManipulableSystemComponent, ColumnAndCodeLayoutComponent],
 })
 export class RxjsInteropComponent {
+  readonly closingSystem = RXJS_INTEROP_SYSTEM;
   // Observable -> signal: un cronómetro de RxJS leído como signal.
   readonly seconds = toSignal(interval(1000).pipe(map((tick) => tick + 1)), { initialValue: 0 });
 

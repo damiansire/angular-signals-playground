@@ -1,15 +1,18 @@
 import { Component, ChangeDetectionStrategy, computed, linkedSignal, signal } from '@angular/core';
 import { CodeLine } from '../../../../components-atom/component-atom.interface';
 import { ColumnAndCodeLayoutComponent } from '../../../../layouts/column-and-code-layout/column-and-code-layout.component';
+import { ManipulableSystemComponent } from '../../../../components-atom/manipulable-system/manipulable-system.component';
+import { LINKED_SOURCE_SYSTEM } from '../../linked-systems';
 
 @Component({
   selector: 'app-linked-signal-with-source',
   templateUrl: './linked-signal-with-source.component.html',
   styleUrl: './linked-signal-with-source.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ColumnAndCodeLayoutComponent],
+  imports: [ManipulableSystemComponent, ColumnAndCodeLayoutComponent],
 })
 export class LinkedSignalWithSourceComponent {
+  readonly closingSystem = LINKED_SOURCE_SYSTEM;
   readonly shippingOptions = signal<string[]>(['Ground', 'Air', 'Sea']);
 
   // source + computation: si la selección previa sigue disponible, se preserva;

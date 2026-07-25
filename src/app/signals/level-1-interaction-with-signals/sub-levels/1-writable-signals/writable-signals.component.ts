@@ -8,15 +8,18 @@ import {
 } from '@angular/core';
 import { CodeLine } from '../../../../components-atom/component-atom.interface';
 import { ColumnAndCodeLayoutComponent } from '../../../../layouts/column-and-code-layout/column-and-code-layout.component';
+import { ManipulableSystemComponent } from '../../../../components-atom/manipulable-system/manipulable-system.component';
+import { SET_SIGNAL_SYSTEM } from '../../signals-systems';
 
 @Component({
   selector: 'app-writable-signals',
   templateUrl: './writable-signals.component.html',
   styleUrl: './writable-signals.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ColumnAndCodeLayoutComponent],
+  imports: [ManipulableSystemComponent, ColumnAndCodeLayoutComponent],
 })
 export class WritableSignalsComponent {
+  readonly closingSystem = SET_SIGNAL_SYSTEM;
   count = signal(0);
   // viewChild() como signal: se resuelve tras inicializar la vista y es el estándar del repo
   // (en vez del decorador @ViewChild + ElementRef).

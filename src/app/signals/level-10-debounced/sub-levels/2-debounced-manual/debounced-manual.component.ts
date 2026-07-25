@@ -1,15 +1,18 @@
 import { Component, ChangeDetectionStrategy, computed, effect, signal } from '@angular/core';
 import { CodeLine } from '../../../../components-atom/component-atom.interface';
 import { ColumnAndCodeLayoutComponent } from '../../../../layouts/column-and-code-layout/column-and-code-layout.component';
+import { ManipulableSystemComponent } from '../../../../components-atom/manipulable-system/manipulable-system.component';
+import { DEBOUNCE_MANUAL_SYSTEM } from '../../debounce-systems';
 
 @Component({
   selector: 'app-debounced-manual',
   templateUrl: './debounced-manual.component.html',
   styleUrl: './debounced-manual.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ColumnAndCodeLayoutComponent],
+  imports: [ManipulableSystemComponent, ColumnAndCodeLayoutComponent],
 })
 export class DebouncedManualComponent {
+  readonly closingSystem = DEBOUNCE_MANUAL_SYSTEM;
   readonly query = signal('');
   readonly debounced = signal('');
 

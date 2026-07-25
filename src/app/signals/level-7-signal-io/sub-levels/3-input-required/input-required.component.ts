@@ -2,15 +2,18 @@ import { Component, ChangeDetectionStrategy, computed, signal } from '@angular/c
 import { CodeLine } from '../../../../components-atom/component-atom.interface';
 import { ColumnAndCodeLayoutComponent } from '../../../../layouts/column-and-code-layout/column-and-code-layout.component';
 import { BadgeComponent } from './badge/badge.component';
+import { ManipulableSystemComponent } from '../../../../components-atom/manipulable-system/manipulable-system.component';
+import { INPUT_REQUIRED_SYSTEM } from '../../io-systems';
 
 @Component({
   selector: 'app-input-required',
   templateUrl: './input-required.component.html',
   styleUrl: './input-required.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ColumnAndCodeLayoutComponent, BadgeComponent],
+  imports: [ManipulableSystemComponent, ColumnAndCodeLayoutComponent, BadgeComponent],
 })
 export class InputRequiredComponent {
+  readonly closingSystem = INPUT_REQUIRED_SYSTEM;
   readonly count = signal(3);
   readonly highlight = signal(false);
 
