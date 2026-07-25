@@ -36,6 +36,32 @@ la espina vertical "Signals" que vive a su derecha.
 - [ ] El lado IZQUIERDO queda libre de navegación: solo el título vertical del
       concepto (espina) y la columna de instrucciones. Cero colisiones de la
       barra derecha con las instrucciones.
+- [ ] La espina vertical NO se superpone al índice de conceptos: overlap medido
+      contra TODAS las paradas del riel, no contra una. En la vista molécula la
+      espina va en 0 (su casa es el buceo).
+- [ ] El índice es NAVEGABLE, no decorativo (desde 2026-07-24): cada parada es un
+      `<button>` que salta a su concepto, con `aria-label`, `aria-current` en el
+      actual y foco visible. Queda `inert` cuando el índice no se ve (landing o
+      buceado) para no robar tabs ni recibir clicks fantasma.
+
+## Estado en REPOSO de cada parada (lo que se ve cuando el scroll asienta)
+
+Origen: 2026-07-24. En la parada de intro al concepto (`off[c]+1.3`) se veía
+FANTASMEADA la card del sub-nivel detrás de la molécula, y la espina vertical
+del concepto asomaba por encima del índice. Eran EL MISMO bug: las anclas de
+snap se posicionaban como fracción de `TOTAL + 0.2` mientras el alto del track
+usa `TOTAL + TRACK_TAIL`, así que el snap descansaba en un `scrollTop` que,
+releído como `s`, quedaba inflado (~×1.016) y metía el frame en la banda de
+fade de la card. El daño ESCALA con el índice del concepto (~3% de opacidad en
+el 0, ~87% en el 8), así que verificar solo el concepto 0 no alcanza.
+
+- [ ] El % de un ancla de snap divide por el MISMO total que el alto del track.
+      Si difieren, el estado en reposo NO es el que el motor cree.
+- [ ] En la parada de intro al concepto (antes de bucear): la card del sub-nivel
+      está en opacidad 0 EXACTA y la espina vertical en 0. Medido leyendo las
+      opacidades reales, no a ojo (al 3% el fantasma se ve pero casi no se mide).
+- [ ] Verificado en un concepto LEJANO (8-11), no solo en el 0: los defectos de
+      drift de scroll escalan con `off[c]`.
 
 ## Z-order y geometría
 
@@ -63,6 +89,16 @@ la espina vertical "Signals" que vive a su derecha.
       con `scrollHeight` de la card en los 35 sub-niveles, no a ojo. Ojo con
       demos de lista que crecen por timer (cap explícito) y con demos de varios
       bloques que se apilan en el grid dissolve (agruparlos en un contenedor).
+
+## Color y afordancia (que el clima no tape, que el vacío no confunda)
+
+- [ ] El wash del concepto (`.dive-aura`) IDENTIFICA, no domina: a pleno buceo el
+      contenido (chips, código, texto) mantiene contraste contra el fondo teñido.
+      Ojo con acumular opacidad alta + `saturate()`: se suman y lavan el contenido.
+- [ ] Toda zona grande que ESPERA una interacción para llenarse dice qué esperar
+      mientras está vacía. Un área que ocupa media escena sin contenido se lee
+      como espacio muerto y el primerizo pasa de largo (caso: el árbol del DOM en
+      html-to-tree, que solo crece al clickear). El hint se va con el contenido.
 
 ## Vistas y estado
 

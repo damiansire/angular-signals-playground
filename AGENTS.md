@@ -49,6 +49,20 @@ que funciona; no volver a explorar alternativas ya descartadas.
   CSS de `integrada-vista/`) cierra con una pasada de `design-reviewer` contra
   `DESIGN-CHECKLIST.md` ANTES de declararlo bueno. La palabra del propio
   agente ("quedó hermoso") no es veredicto.
+- **NO verifiques la navegación con eventos SINTÉTICOS** (2026-07-24, costó ~15
+  round-trips). `btn.click()` y `dispatchEvent(new MouseEvent/KeyboardEvent)`
+  disparan el handler pero `goToUnit` no avanza, y las mediciones carrean con
+  las animaciones de scroll: dan FALSOS NEGATIVOS ("el índice no navega") y
+  dejan la instancia en un estado inconsistente. Con **input REAL** (click de
+  puntero de chrome-devtools/claude-in-chrome, o rueda real) anda a la primera.
+  Ojo también con las coordenadas: el screenshot fluctúa (1456/1512/1520 px)
+  mientras el viewport real es 1920 → clickeá por `uid`/`ref`, o escalá por
+  `screenshotW / innerWidth`, si no le errás al elemento.
+- **Al terminar una review, actualizá el `DESIGN-CHECKLIST.md`** con cada defecto
+  detectado Y resuelto (es la regla del propio archivo, y es lo que evita que la
+  familia de defectos vuelva). Si la review se entregó como artefacto, ese
+  artefacto también se actualiza al aplicar los fixes: un reporte que quedó en
+  "roto" cuando ya está arreglado desinforma.
 
 ## Antes de construir features visuales grandes
 
