@@ -1,6 +1,8 @@
 <h2 class="text-2xl font-semibold mb-4 text-center">{{ title() }}</h2>
 
 <div class="space-y-4">
+  <!-- Sin esto el panel abre como un rectángulo vacío y se lee como espacio muerto o como algo
+       roto. El default es lo más usado que se shippea: casi nadie toca nada antes de juzgar. -->
   @for (item of history().reverse(); track $index) {
     <div class="bg-gray-100 p-4 rounded-md shadow-sm flex justify-between">
       <div class="flex justify-between items-center">
@@ -34,5 +36,11 @@
         </div>
       </div>
     </div>
+  } @empty {
+    <p
+      class="rounded-md border border-dashed border-gray-300 p-4 text-center text-sm text-gray-500"
+    >
+      Todavía no corrió nada.
+    </p>
   }
 </div>

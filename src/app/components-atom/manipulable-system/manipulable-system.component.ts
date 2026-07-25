@@ -1,9 +1,18 @@
-import { ChangeDetectionStrategy, Component, computed, input, linkedSignal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  ElementRef,
+  inject,
+  input,
+  linkedSignal,
+} from '@angular/core';
 import {
   act,
   ManipulableChallenge,
   readings,
   startOf,
+  SystemState,
   turn,
 } from '../../libs/manipulable-challenge';
 
@@ -40,12 +49,28 @@ export class ManipulableSystemComponent {
   readonly gauges = computed(() => readings(this.system(), this.state()));
   readonly healthy = computed(() => this.system().healthy(this.state()));
 
+  private readonly host: ElementRef<HTMLElement> = inject(ElementRef);
+
   press(): void {
-    this.state.update((current) => act(this.system(), current));
+    this.settle(() => act(this.system(), this.state()));
   }
 
   move(knobId: string): void {
-    this.state.update((current) => turn(this.system(), current, knobId));
+    this.settle(() => turn(this.system(), this.state(), knobId));
+  }
+
+  /**
+   * Al quedar sano avisa por evento del DOM: el recorrido traza el enlace al concepto siguiente.
+   * Sale solo en la TRANSICIÓN, no en cada toque, así el enlace se dibuja una vez.
+   */
+  private settle(next: () => SystemState): void {
+    const wasHealthy = this.healthy();
+    this.state.set(next());
+    if (!wasHealthy && this.healthy()) {
+      this.host.nativeElement.dispatchEvent(
+        new CustomEvent('sistema-establecido', { bubbles: true }),
+      );
+    }
   }
 
   /** Quien ve la pantalla lee la perilla del código; esto es para quien la escucha. */

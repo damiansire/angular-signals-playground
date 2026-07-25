@@ -956,6 +956,16 @@ export function initMolecule(
 
   const capS = q<HTMLElement>('#capS')!;
   const stage = q<HTMLDivElement>('#stage')!;
+
+  /**
+   * Conceptos cuyo enlace al siguiente exige haber ESTABLECIDO el sub-nivel (resolver su desafío),
+   * en vez de encenderse al pasar scrolleando. Crece a medida que los sub-niveles migran a la
+   * mecánica manipulable; los que todavía no la tienen siguen encendiendo por scroll, así que la
+   * molécula no se ve rota durante la migración.
+   */
+  const GATED = new Set<number>([3]);
+  const established = new Set<number>();
+  let liveConcept = 0;
   const track = q<HTMLDivElement>('#track')!;
   const railFillEl = q<HTMLElement>('#railFill');
   const railLineEl = q<HTMLElement>('.rail-line');
@@ -1205,9 +1215,12 @@ export function initMolecule(
       }
     });
 
+    liveConcept = c;
     bondEls.forEach((ln, j) => {
       if (j + 1 < c) {
-        ln.classList.add('on');
+        // El enlace de un concepto CON desafío nace al establecerlo, no al pasar scrolleando: la
+        // molécula se une porque entendiste. Sin resolver queda punteado, como deuda a la vista.
+        ln.classList.toggle('on', !GATED.has(j) || established.has(j));
         ln.setAttribute('d', bondPath(C[j].x, C[j].y, C[j + 1].x, C[j + 1].y));
       } else if (j + 1 === c) {
         ln.classList.toggle('on', birth > 0.12);
@@ -1426,6 +1439,13 @@ export function initMolecule(
     }
   };
 
+  // El cierre del sub-nivel avisa por evento del DOM cuando el sistema queda sano. Es a propósito
+  // el acoplamiento más flojo posible: el átomo no conoce al motor ni el motor al átomo, y el
+  // evento solo puede venir de la card montada, así que se atribuye al concepto en pantalla.
+  stage.addEventListener('sistema-establecido', () => {
+    established.add(liveConcept);
+    render(stage.scrollTop / unit());
+  });
   stage.addEventListener('scroll', onScroll, { passive: true });
   window.addEventListener('keydown', onKeyNav);
   window.addEventListener('resize', onResize);
