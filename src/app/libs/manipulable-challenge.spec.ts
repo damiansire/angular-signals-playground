@@ -1,4 +1,13 @@
-import { malformed, ManipulableChallenge, readings, startOf, turn } from './manipulable-challenge';
+import {
+  act,
+  malformed,
+  ManipulableChallenge,
+  readings,
+  startOf,
+  SystemState,
+  turn,
+} from './manipulable-challenge';
+import { EFFECT_READS_SYSTEM } from '../signals/level-3-effect/effect-systems';
 
 /** Sistema mínimo de prueba: una perilla de 3 posiciones y una lectura que la sigue. */
 const TRES_POSICIONES: ManipulableChallenge = {
@@ -47,15 +56,75 @@ describe('turn', () => {
 
 describe('readings', () => {
   it('devuelve los valores en el orden en que el desafío declaró las lecturas', () => {
-    const state = startOf(TRES_POSICIONES);
-    expect(readings(TRES_POSICIONES, state).map((r) => r.id)).toEqual(['v']);
+    const state = startOf(EFFECT_READS_SYSTEM);
+    expect(readings(EFFECT_READS_SYSTEM, state).map((r) => r.id)).toEqual(['count', 'log']);
+  });
+});
+
+// El piloto de la mecánica. Estos tests son la mecánica misma, no un detalle de implementación:
+// si dejan de pasar, el sub-nivel enseña otra cosa.
+describe('effect 3/1 · la lectura tiene que ocurrir adentro', () => {
+  const sistema = EFFECT_READS_SYSTEM;
+
+  function accionar(veces: number, desde: SystemState): SystemState {
+    let state = desde;
+    for (let i = 0; i < veces; i++) state = act(sistema, state);
+    return state;
+  }
+
+  it('con la lectura afuera, el log no sigue al count', () => {
+    const state = accionar(3, startOf(sistema));
+    expect(state.values['count']).toBe(3);
+    expect(state.values['log']).toBe(0);
+  });
+
+  it('no está sano mientras el log no siga', () => {
+    expect(sistema.healthy(accionar(3, startOf(sistema)))).toBe(false);
+  });
+
+  it('mover la lectura adentro hace correr el effect: el log se pone al día solo', () => {
+    const atrasado = accionar(3, startOf(sistema));
+    const alDia = turn(sistema, atrasado, 'lectura');
+    expect(alDia.values['log']).toBe(3);
+    expect(sistema.healthy(alDia)).toBe(true);
+  });
+
+  it('con la lectura adentro, el log sigue accionando', () => {
+    const state = accionar(2, turn(sistema, startOf(sistema), 'lectura'));
+    expect(state.values['count']).toBe(2);
+    expect(state.values['log']).toBe(2);
+  });
+
+  it('volver a sacar la lectura congela el log donde estaba', () => {
+    let state = accionar(2, turn(sistema, startOf(sistema), 'lectura'));
+    state = turn(sistema, state, 'lectura');
+    state = accionar(3, state);
+    expect(state.values['count']).toBe(5);
+    expect(state.values['log']).toBe(2);
+  });
+
+  it('no está sano sin haberlo accionado, aunque la perilla esté bien puesta', () => {
+    expect(sistema.healthy(turn(sistema, startOf(sistema), 'lectura'))).toBe(false);
+  });
+
+  it('apaga la declaración de afuera cuando deja de participar', () => {
+    const afuera = sistema.code(startOf(sistema).knobs);
+    const adentro = sistema.code(turn(sistema, startOf(sistema), 'lectura').knobs);
+    expect(afuera[0].dead).toBeFalsy();
+    expect(adentro[0].dead).toBe(true);
   });
 });
 
 // Un sistema mal armado no se ve roto: se ve como un sub-nivel que no se puede resolver.
-describe('detector de sistemas mal armados', () => {
-  it('acepta un sistema bien armado', () => {
-    expect(malformed(TRES_POSICIONES)).toEqual([]);
+describe('sistemas publicados', () => {
+  const PUBLICADOS: readonly (readonly [string, ManipulableChallenge])[] = [
+    ['3/1 lee adentro', EFFECT_READS_SYSTEM],
+  ];
+
+  PUBLICADOS.forEach(([nombre, sistema]) => {
+    it(`${nombre} está bien armado`, () => {
+      expect(malformed(sistema)).toEqual([]);
+    });
   });
 
   it('detecta un sistema que arranca sano', () => {
