@@ -128,7 +128,7 @@ export function initPrologoAnomalia(host: HTMLElement, opts: PrologoOpciones): (
     // La exploradora habla desde arriba, que es donde está: su voz viene de otro lado, y su
     // color es el mismo de su casco. A 0,16 el renglón le tocaba el casco (medido: 13 px adentro
     // en "¿por qué van hacia ahí?"), y como comparten color se leía como un solo borrón.
-    nave4: { y: 0.23, x: 0.62, tam: 25, color: '#7fd6bd', fuente: 'mono' },
+    nave4: { y: 0.3, x: 0.62, tam: 25, color: '#7fd6bd', fuente: 'mono' },
     // El grito va al centro y grande. Cae antes de que existan las moléculas, así que ahí no
     // pisa nada: es el único que se permite el medio de la pantalla.
     todos: { y: 0.5, x: 0.5, tam: 44, color: '#f6d9c0', fuente: 'mono' },
@@ -368,15 +368,15 @@ export function initPrologoAnomalia(host: HTMLElement, opts: PrologoOpciones): (
    */
   const OPERADORES = [
     { nave: 0, txt: 'switchMap', d: 0, lado: -1 },
-    { nave: 1, txt: 'retry', d: 300, lado: 1 },
-    { nave: 2, txt: 'mergeMap', d: 620, lado: -1 },
-    { nave: 0, txt: 'catchError', d: 940, lado: 1 },
-    { nave: 1, txt: 'debounceTime', d: 1280, lado: -1 },
-    { nave: 2, txt: 'combineLatest', d: 1620, lado: 1 },
+    { nave: 1, txt: 'retry', d: 780, lado: 1 },
+    { nave: 2, txt: 'mergeMap', d: 1560, lado: -1 },
+    { nave: 0, txt: 'catchError', d: 2340, lado: 1 },
   ];
-  // Vuelo corto y salidas separadas: con seis vivas a la vez las etiquetas se pisaban y el tramo
-  // se leía como ruido en vez de como una descarga. Así hay dos o tres en pantalla, nunca más.
-  const VUELO = 1700;
+  // Cuatro y bien separadas, no seis encimadas. Con seis a 1700 ms habia CINCO vivas a la vez y las
+  // etiquetas se pisaban hasta leerse "mergeMapetryrror": el nombre del operador ES el contenido de
+  // este beat, asi que ilegible equivale a no haberlo dibujado. Vuelo < separacion => nunca mas de
+  // dos en pantalla.
+  const VUELO = 1400;
 
   function operadores(t: number): void {
     const desde = linea('anom-rxjs').t0 + 400;
@@ -966,8 +966,8 @@ export function initPrologoAnomalia(host: HTMLElement, opts: PrologoOpciones): (
     }
 
     // El skip se invierte junto con el fondo y desaparece al llegar: ya no hay nada que saltar.
-    skipEl.classList.toggle('claro', fondo > 0.55);
-    skipEl.classList.toggle('oculto', t >= T.fin - 200);
+    raiz.classList.toggle('prologo--claro', fondo > 0.55);
+    raiz.classList.toggle('prologo--saliendo', t >= T.fin - 200);
   }
 
   /* ── voz del navegador ───────────────────────────────────────────────────────────────────────
@@ -1095,11 +1095,14 @@ export function initPrologoAnomalia(host: HTMLElement, opts: PrologoOpciones): (
 
   function arrancar(desde: number): void {
     cancelAnimationFrame(raf);
-    if (reducido()) {
-      // Sin movimiento el prólogo no aporta nada y sí molesta: se pasa directo al recorrido.
+    // Sin movimiento el prólogo no aporta nada y sí molesta: se pasa directo al recorrido. Va
+    // ANTES de destapar, porque destapar y terminar en el mismo turno dejaba el velo negro puesto
+    // sobre una escena ya terminada, con los tres botones muertos y la app bloqueada.
+    if (reducido() || terminado) {
       terminar();
       return;
     }
+    mostrar();
     inicio = null;
     dichas = new Set();
     if (window.speechSynthesis) speechSynthesis.cancel();
@@ -1116,13 +1119,35 @@ export function initPrologoAnomalia(host: HTMLElement, opts: PrologoOpciones): (
     });
   }
 
+  /** Hermanos del prólogo: el recorrido que quedó debajo del velo. */
+  const detras = (): HTMLElement[] =>
+    [...(raiz.parentElement?.children ?? [])].filter(
+      (el): el is HTMLElement => el instanceof HTMLElement && !el.contains(raiz),
+    );
+
+  /**
+   * Destapa el prólogo y apaga lo de atrás. Sin esto una sola pulsación de Space o de flecha abajo
+   * scrolleaba el recorrido por debajo y la cinemática desaparecía de pantalla; y el chrome
+   * invisible del recorrido (topbar y riel, con opacidad 0 pero clickeables) se comía los clicks
+   * del HUD, al punto de tapar el botón para entrar en pantallas de tablet.
+   */
+  function mostrar(): void {
+    raiz.hidden = false;
+    detras().forEach((el) => (el.inert = true));
+  }
+
+  function ocultar(): void {
+    raiz.hidden = true;
+    detras().forEach((el) => (el.inert = false));
+  }
+
   function terminar(): void {
     if (terminado) return;
     terminado = true;
     cancelAnimationFrame(raf);
     if (window.speechSynthesis) speechSynthesis.cancel();
     if (zumbidoGain) zumbidoGain.gain.value = 0;
-    raiz.hidden = true;
+    ocultar();
     opts.alTerminar();
   }
 
@@ -1159,7 +1184,10 @@ export function initPrologoAnomalia(host: HTMLElement, opts: PrologoOpciones): (
   }
 
   const alTeclado = (e: KeyboardEvent): void => {
-    // La barra espaciadora es el gesto de pausa que ya tiene aprendido cualquiera que mire un video.
+    // La barra espaciadora es el gesto de pausa que ya tiene aprendido cualquiera que mire un
+    // video. Va en `document`: colgado del contenedor no se disparaba nunca porque el foco jamás
+    // está ahí, así que la tecla caía en el scroll del recorrido de atrás.
+    if (terminado || raiz.hidden) return;
     if (e.code !== 'Space' || (e.target as HTMLElement | null)?.closest('button')) return;
     e.preventDefault();
     alternarPausa();
@@ -1180,13 +1208,12 @@ export function initPrologoAnomalia(host: HTMLElement, opts: PrologoOpciones): (
   skipEl.addEventListener('click', alSaltar);
   btnPausa.addEventListener('click', alPausar);
   btnVoz.addEventListener('click', alCambiarVoz);
-  raiz.addEventListener('keydown', alTeclado);
+  document.addEventListener('keydown', alTeclado);
   if (window.speechSynthesis) {
     cargarVoces();
     speechSynthesis.addEventListener('voiceschanged', cargarVoces);
   }
 
-  raiz.hidden = false;
   pintarVoz();
   arrancar(0);
 
@@ -1201,7 +1228,7 @@ export function initPrologoAnomalia(host: HTMLElement, opts: PrologoOpciones): (
     skipEl.removeEventListener('click', alSaltar);
     btnPausa.removeEventListener('click', alPausar);
     btnVoz.removeEventListener('click', alCambiarVoz);
-    raiz.removeEventListener('keydown', alTeclado);
+    document.removeEventListener('keydown', alTeclado);
     void ac?.close();
   };
 }

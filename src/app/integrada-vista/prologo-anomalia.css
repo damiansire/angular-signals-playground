@@ -88,10 +88,42 @@
   cursor: default;
 }
 
-/* Saltar pesa más que los otros dos: es el único que alguien va a buscar con apuro. */
-.prologo__skip {
-  border-color: rgb(235 155 60 / 55%) !important;
-  color: #f0b458 !important;
+/* Saltar pesa más que los otros dos: es el único que alguien va a buscar con apuro. Sin
+   `!important`: con él ganaba también sobre su propio `:hover` y era el único control del prólogo
+   que no daba ninguna señal al pasarle el mouse por encima. */
+.prologo__hud .prologo__skip {
+  border-color: rgb(235 155 60 / 55%);
+  color: #f0b458;
+}
+
+.prologo__hud .prologo__skip:hover:not(:disabled) {
+  border-color: #eb9b3c;
+  color: #ffd9a3;
+}
+
+/* Sobre el crema del final el HUD queda lavado: medido 1,2:1 contra el fondo. Se invierte junto con
+   la escena, igual que el resto de los controles de la intro. */
+.prologo.prologo--claro .prologo__hud button {
+  border-color: rgb(32 29 22 / 24%);
+  background: rgb(255 255 255 / 55%);
+  color: #6a6355;
+}
+
+.prologo.prologo--claro .prologo__hud button:hover:not(:disabled) {
+  border-color: #b8791f;
+  color: #201d16;
+}
+
+.prologo.prologo--claro .prologo__hud .prologo__skip {
+  border-color: rgb(184 121 31 / 55%);
+  color: #96601a;
+}
+
+/* Al llegar al final ya no hay nada que saltar ni que pausar. */
+.prologo.prologo--saliendo .prologo__hud {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s;
 }
 
 /* Sin movimiento la cinemática no aporta y sí molesta, así que el motor la saltea entera. Esto es
