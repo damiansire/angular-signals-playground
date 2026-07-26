@@ -204,3 +204,33 @@ posición de la perilla. Estos ítems son los defectos que YA aparecieron.
 - [ ] Presupuesto de prosa por pantalla (`npm run gate:prosa`): lo que hoy es
       párrafo tiene que poder verse en la demo. Si el texto explica lo que el
       dibujo ya muestra, sobra el texto.
+
+## Overlays que tapan el recorrido (prólogo, modales a pantalla completa)
+
+Del design-review del prólogo (2026-07-26): tres de los defectos más graves no
+eran de dibujo sino de que el recorrido seguía vivo por debajo del velo.
+
+- [ ] Mientras un overlay cubre la pantalla, el recorrido de atrás va `inert`.
+      No alcanza con taparlo: el chrome invisible (`topbar`, `rail`, con opacidad
+      0 pero `pointer-events` activos) se come los clicks del overlay, y en
+      tablet llegó a tapar el botón para entrar.
+- [ ] Un handler de teclado colgado del overlay NO se dispara: el foco nunca
+      está ahí. Va en `document`, y filtrando por overlay visible. Síntoma: la
+      tecla "no hace nada" y encima scrollea lo de atrás.
+- [ ] Mostrar y terminar no pueden ocurrir en el mismo turno. Si el overlay
+      puede autocancelarse (movimiento reducido, pantalla angosta, falta de una
+      capacidad), destapar después de decidir: si no, queda el velo puesto sobre
+      una escena terminada, con los controles muertos y la app bloqueada.
+- [ ] Todo estado visual que el motor togglea por clase tiene que existir en el
+      CSS. El motor marcaba `claro` y `oculto` sobre el botón de saltar y
+      ninguna de las dos estaba escrita: el HUD quedaba en 1,2:1 sobre el fondo
+      claro del final.
+- [ ] Los colores que cambian con el estado van por CUSTOM PROPERTIES, no por
+      reglas que se pisen. Con una regla por estado la cascada decide, y decide
+      mal; con variables hay una sola regla por propiedad y el estado solo
+      cambia el valor.
+- [ ] Nada de `!important` en un control: le gana también a su propio `:hover` y
+      lo deja sin ninguna señal al pasarle el mouse.
+- [ ] Si el texto es el contenido de un beat, verificar que no se pise consigo
+      mismo. Las etiquetas de operadores salían de a cinco y se leían
+      "mergeMapetryrror": ilegible equivale a no haberlo dibujado.

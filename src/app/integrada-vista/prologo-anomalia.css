@@ -48,7 +48,39 @@
 }
 
 /* Los controles son un TRÁMITE: siempre alcanzables, nunca compitiendo con la escena. Van en el
-   mismo rincón donde la intro ya tiene los suyos, para sumarse al grupo en vez de inventar lugar. */
+   mismo rincón donde la intro ya tiene los suyos, para sumarse al grupo en vez de inventar lugar.
+
+   El color va por CUSTOM PROPERTIES y no por reglas que se pisen. Con una regla por estado, el
+   estado claro perdía la cascada contra la base y el HUD quedaba lavado sobre el crema del final
+   (1,2:1 medido) aunque el CSS declarara lo contrario. Con variables hay UNA sola regla por
+   propiedad y el estado solo cambia el valor: no hay especificidad que pelear. */
+.prologo {
+  --hud-tinta: rgb(255 255 255 / 72%);
+  --hud-tinta-viva: #fff;
+  --hud-fondo: rgb(0 0 0 / 30%);
+  --hud-borde: rgb(255 255 255 / 28%);
+  --hud-borde-vivo: rgb(255 255 255 / 60%);
+  --hud-skip: #f0b458;
+  --hud-skip-borde: rgb(235 155 60 / 55%);
+  --hud-opacidad: 1;
+}
+
+/* Sobre el crema del final la escena se invierte, y el HUD con ella. */
+.prologo--claro {
+  --hud-tinta: #6a6355;
+  --hud-tinta-viva: #201d16;
+  --hud-fondo: rgb(255 255 255 / 55%);
+  --hud-borde: rgb(32 29 22 / 24%);
+  --hud-borde-vivo: #b8791f;
+  --hud-skip: #96601a;
+  --hud-skip-borde: rgb(184 121 31 / 55%);
+}
+
+/* Al llegar al final ya no hay nada que saltar ni que pausar. */
+.prologo--saliendo {
+  --hud-opacidad: 0;
+}
+
 .prologo__hud {
   position: absolute;
   right: 1.1rem;
@@ -56,17 +88,21 @@
   display: flex;
   gap: 0.5rem;
   align-items: center;
+  opacity: var(--hud-opacidad);
+  transition: opacity 0.3s;
 }
 
 .prologo__hud button {
   font-family: var(--mono, ui-monospace, monospace);
-  font-size: 0.72rem;
+  font-size: 0.78rem;
   letter-spacing: 0.08em;
-  padding: 0.4rem 0.8rem;
+  /* 44 px de alto: es el mínimo cómodo para apuntarle, y el skip es el único control que alguien
+     busca con apuro. */
+  padding: 0.72rem 1rem;
   border-radius: 999px;
-  border: 1px solid rgb(255 255 255 / 28%);
-  background: rgb(0 0 0 / 30%);
-  color: rgb(255 255 255 / 72%);
+  border: 1px solid var(--hud-borde);
+  background: var(--hud-fondo);
+  color: var(--hud-tinta);
   cursor: pointer;
   transition:
     color 0.15s,
@@ -74,8 +110,8 @@
 }
 
 .prologo__hud button:hover:not(:disabled) {
-  color: #fff;
-  border-color: rgb(255 255 255 / 60%);
+  color: var(--hud-tinta-viva);
+  border-color: var(--hud-borde-vivo);
 }
 
 .prologo__hud button:focus-visible {
@@ -83,47 +119,17 @@
   outline-offset: 2px;
 }
 
+/* Deshabilitado pero LEGIBLE: a 0,45 de opacidad quedaba en 2,4:1 y no se podía leer por qué. */
 .prologo__hud button:disabled {
-  opacity: 0.45;
+  opacity: 0.7;
   cursor: default;
 }
 
-/* Saltar pesa más que los otros dos: es el único que alguien va a buscar con apuro. Sin
-   `!important`: con él ganaba también sobre su propio `:hover` y era el único control del prólogo
-   que no daba ninguna señal al pasarle el mouse por encima. */
-.prologo__hud .prologo__skip {
-  border-color: rgb(235 155 60 / 55%);
-  color: #f0b458;
-}
-
-.prologo__hud .prologo__skip:hover:not(:disabled) {
-  border-color: #eb9b3c;
-  color: #ffd9a3;
-}
-
-/* Sobre el crema del final el HUD queda lavado: medido 1,2:1 contra el fondo. Se invierte junto con
-   la escena, igual que el resto de los controles de la intro. */
-.prologo.prologo--claro .prologo__hud button {
-  border-color: rgb(32 29 22 / 24%);
-  background: rgb(255 255 255 / 55%);
-  color: #6a6355;
-}
-
-.prologo.prologo--claro .prologo__hud button:hover:not(:disabled) {
-  border-color: #b8791f;
-  color: #201d16;
-}
-
-.prologo.prologo--claro .prologo__hud .prologo__skip {
-  border-color: rgb(184 121 31 / 55%);
-  color: #96601a;
-}
-
-/* Al llegar al final ya no hay nada que saltar ni que pausar. */
-.prologo.prologo--saliendo .prologo__hud {
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.3s;
+/* Saltar pesa más que los otros dos. Sin `!important`: con él ganaba también sobre su propio
+   `:hover` y era el único control que no daba ninguna señal al pasarle el mouse por encima. */
+.prologo__skip {
+  border-color: var(--hud-skip-borde);
+  color: var(--hud-skip);
 }
 
 /* Sin movimiento la cinemática no aporta y sí molesta, así que el motor la saltea entera. Esto es

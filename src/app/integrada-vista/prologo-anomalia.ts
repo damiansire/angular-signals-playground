@@ -244,6 +244,12 @@ export function initPrologoAnomalia(host: HTMLElement, opts: PrologoOpciones): (
     src.start(n);
   }
   const reducido = (): boolean => matchMedia('(prefers-reduced-motion: reduce)').matches;
+  /**
+   * Abajo de este ancho el lienzo queda tan chico que el dialogo cae a nueve pixeles: la cinematica
+   * no se puede seguir y ademas se lleva minutos por delante. Se saltea entera, igual que con
+   * movimiento reducido. Mostrarla rota seria peor que no mostrarla.
+   */
+  const angosto = (): boolean => innerWidth < 700;
   const clamp01 = (v: number): number => Math.max(0, Math.min(1, v));
   const ease = (v: number): number => (v < 0.5 ? 2 * v * v : 1 - Math.pow(-2 * v + 2, 2) / 2);
 
@@ -925,7 +931,13 @@ export function initPrologoAnomalia(host: HTMLElement, opts: PrologoOpciones): (
       // tres renglones de la frase final, que a esta altura le tocaba los pies, y de paso se lee
       // como que flota en vez de estar apoyada en el aire.
       const flota = ease(clamp01((t - CHOQUE - 400) / 1400)) * H * 0.075;
-      ponerMascota(CX, CY - flota, 0.25 + ease(n) * 0.85, n);
+      // RESPIRA. Sin esto se plantaba en el centro y no se movia mas mientras suelta catorce
+      // lineas: un minuto largo en el que el prologo dejaba de ser cine y pasaba a ser subtitulos
+      // sobre negro. Es lento y chico a proposito, para que acompane el dialogo sin robarselo.
+      const respira =
+        Math.sin((t - CHOQUE) * 0.00105) * H * 0.011 * ease(clamp01((t - CHOQUE) / 1200));
+      const late = 1 + Math.sin((t - CHOQUE) * 0.0009 + 1.1) * 0.018;
+      ponerMascota(CX, CY - flota + respira, (0.25 + ease(n) * 0.85) * late, n);
     } else if (t >= T.orden) {
       // Se corre abajo a la izquierda: le deja el centro al patrón que se está construyendo.
       const q = ease(clamp01((t - T.orden) / 2600));
@@ -1098,7 +1110,7 @@ export function initPrologoAnomalia(host: HTMLElement, opts: PrologoOpciones): (
     // Sin movimiento el prólogo no aporta nada y sí molesta: se pasa directo al recorrido. Va
     // ANTES de destapar, porque destapar y terminar en el mismo turno dejaba el velo negro puesto
     // sobre una escena ya terminada, con los tres botones muertos y la app bloqueada.
-    if (reducido() || terminado) {
+    if (reducido() || angosto() || terminado) {
       terminar();
       return;
     }
