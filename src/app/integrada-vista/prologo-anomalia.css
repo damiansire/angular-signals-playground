@@ -65,8 +65,11 @@
   --hud-opacidad: 1;
 }
 
-/* Sobre el crema del final la escena se invierte, y el HUD con ella. */
+/* Sobre el crema del final la escena se invierte, y el HUD con ella. El fondo del velo se aclara
+   TAMBIÉN: en viewports que no son 16:9 queda una franja de letterbox, el HUD cae encima de esa
+   franja y no del lienzo, y con el velo en negro la tinta oscura del estado claro daba 1,78:1. */
 .prologo--claro {
+  background: #f0ece0;
   --hud-tinta: #6a6355;
   --hud-tinta-viva: #201d16;
   --hud-fondo: rgb(255 255 255 / 55%);
@@ -127,7 +130,7 @@
 
 /* Saltar pesa más que los otros dos. Sin `!important`: con él ganaba también sobre su propio
    `:hover` y era el único control que no daba ninguna señal al pasarle el mouse por encima. */
-.prologo__skip {
+.prologo__hud .prologo__skip {
   border-color: var(--hud-skip-borde);
   color: var(--hud-skip);
 }

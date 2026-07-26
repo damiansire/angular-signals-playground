@@ -407,11 +407,24 @@ export function initIntroTusi(host: HTMLElement, options: IntroTusiOptions = {})
       if (actx?.state === 'suspended') void actx.resume();
     }
     reset();
+    tapados().forEach((el) => (el.inert = false));
     overlay.classList.add('gone');
     // `.gone` sólo apaga opacidad y pointer-events: sin `inert` los botones del overlay siguen en el
     // orden de tabulación y en el árbol de a11y, invisibles pero alcanzables con Tab.
     overlay.inert = true;
   }
+  /**
+   * El overlay cubre el viewport, pero el chrome del recorrido que queda debajo sigue clickeable
+   * (opacidad 0 y `pointer-events` activos). A 834 px de ancho el riel tapaba el centro del botón
+   * para entrar y la app quedaba trabada acá, sin forma de arrancar.
+   */
+  const tapados = (): HTMLElement[] => {
+    const intro = overlay.closest('.intro');
+    return [...(intro?.parentElement?.children ?? [])].filter(
+      (el): el is HTMLElement => el instanceof HTMLElement && el !== intro,
+    );
+  };
+  tapados().forEach((el) => (el.inert = true));
   q<HTMLButtonElement>('[data-role="pick-dark"]').addEventListener('click', () => start('dark'));
   q<HTMLButtonElement>('[data-role="pick-light"]').addEventListener('click', () => start('light'));
   refreshOvSound();

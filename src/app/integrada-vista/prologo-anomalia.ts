@@ -128,7 +128,7 @@ export function initPrologoAnomalia(host: HTMLElement, opts: PrologoOpciones): (
     // La exploradora habla desde arriba, que es donde está: su voz viene de otro lado, y su
     // color es el mismo de su casco. A 0,16 el renglón le tocaba el casco (medido: 13 px adentro
     // en "¿por qué van hacia ahí?"), y como comparten color se leía como un solo borrón.
-    nave4: { y: 0.3, x: 0.62, tam: 25, color: '#7fd6bd', fuente: 'mono' },
+    nave4: { y: 0.4, x: 0.62, tam: 25, color: '#7fd6bd', fuente: 'mono' },
     // El grito va al centro y grande. Cae antes de que existan las moléculas, así que ahí no
     // pisa nada: es el único que se permite el medio de la pantalla.
     todos: { y: 0.5, x: 0.5, tam: 44, color: '#f6d9c0', fuente: 'mono' },
