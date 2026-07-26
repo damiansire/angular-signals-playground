@@ -59,24 +59,30 @@ export interface PrologoOpciones {
 }
 
 export function initPrologoAnomalia(host: HTMLElement, opts: PrologoOpciones): () => void {
-  const raiz = host.querySelector<HTMLElement>('.prologo');
-  const lienzo = raiz?.querySelector<HTMLCanvasElement>('.prologo__canvas');
+  const contenedor = host.querySelector<HTMLElement>('.prologo');
+  // El escenario es el que MIDE: la mascota se ubica con `stage.clientWidth / W`, así que tiene
+  // que ser el elemento cuyo ancho coincide con el ancho renderizado del canvas.
+  const escenario = contenedor?.querySelector<HTMLElement>('.prologo__stage');
+  const lienzo = contenedor?.querySelector<HTMLCanvasElement>('.prologo__canvas');
   const ctx = lienzo?.getContext('2d');
-  const mascota = raiz?.querySelector<HTMLElement>('.prologo__mascot');
-  const saltar = raiz?.querySelector<HTMLButtonElement>('.prologo__skip');
-  const pausa = raiz?.querySelector<HTMLButtonElement>('.prologo__pause');
-  const habla = raiz?.querySelector<HTMLButtonElement>('.prologo__voice');
-  if (!raiz || !lienzo || !ctx || !mascota || !saltar || !pausa || !habla) return () => undefined;
+  const mascota = contenedor?.querySelector<HTMLElement>('.prologo__mascot');
+  const saltar = contenedor?.querySelector<HTMLButtonElement>('.prologo__skip');
+  const pausa = contenedor?.querySelector<HTMLButtonElement>('.prologo__pause');
+  const habla = contenedor?.querySelector<HTMLButtonElement>('.prologo__voice');
+  if (!contenedor || !escenario || !lienzo || !ctx || !mascota || !saltar || !pausa || !habla) {
+    return () => undefined;
+  }
 
   // Reasignados a constantes ya estrechadas: el motor son cien closures que dibujan, y sin esto
   // cada una tendría que volver a preguntar si el contexto existe.
+  const raiz = contenedor;
   const c = lienzo;
   const g = ctx;
   const mascotaEl = mascota;
   const skipEl = saltar;
   const btnPausa = pausa;
   const btnVoz = habla;
-  const stage = raiz;
+  const stage = escenario;
 
   const W = c.width;
   const H = c.height;
@@ -1116,6 +1122,7 @@ export function initPrologoAnomalia(host: HTMLElement, opts: PrologoOpciones): (
     cancelAnimationFrame(raf);
     if (window.speechSynthesis) speechSynthesis.cancel();
     if (zumbidoGain) zumbidoGain.gain.value = 0;
+    raiz.hidden = true;
     opts.alTerminar();
   }
 
@@ -1179,6 +1186,7 @@ export function initPrologoAnomalia(host: HTMLElement, opts: PrologoOpciones): (
     speechSynthesis.addEventListener('voiceschanged', cargarVoces);
   }
 
+  raiz.hidden = false;
   pintarVoz();
   arrancar(0);
 

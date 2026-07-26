@@ -60,7 +60,18 @@ interface Line {
   phFloor?: number;
 }
 
-export function initIntroTusi(host: HTMLElement): () => void {
+export interface IntroTusiOptions {
+  /**
+   * Si está, elegir el clima NO arranca la construcción: la deja lista y avisa, pasando el gatillo
+   * para cuando corresponda. Es lo que deja meter el prólogo en el medio, porque si la construcción
+   * corriera detrás durante esos minutos llegaría terminada y se comería su propio premio: el
+   * círculo apareciendo. El overlay igual se cierra y el audio igual se desbloquea, que es lo único
+   * que ese click tiene que hacer siempre.
+   */
+  readonly onThemePicked?: (startBuild: () => void) => void;
+}
+
+export function initIntroTusi(host: HTMLElement, options: IntroTusiOptions = {}): () => void {
   const q = <T extends HTMLElement>(sel: string): T => host.querySelector(sel) as T;
   const root = q<HTMLElement>('.tusi');
   const canvas = q<HTMLCanvasElement>('.tusi__canvas');
@@ -74,6 +85,8 @@ export function initIntroTusi(host: HTMLElement): () => void {
   let paused = false;
   let soundOn = true;
   let started = false;
+  /** El clima ya se eligió. Separado de `started` porque con prólogo hay un rato entre las dos. */
+  let picked = false;
   let helpOn = false;
   // El motor fadea el `.intro` (opacity inline 1↔0) al scrollear; cuando no es visible cortamos el audio.
   const introEl = host.querySelector('.intro') as HTMLElement | null;
@@ -377,10 +390,16 @@ export function initIntroTusi(host: HTMLElement): () => void {
     pal = PALETTES[t];
     root.classList.toggle('dark', t === 'dark');
   }
-  function start(theme: 'light' | 'dark'): void {
-    if (started) return;
-    applyTheme(theme);
+  /** Empieza a construir. Separado de `start` porque el prólogo lo dispara más tarde. */
+  function startBuild(): void {
     started = true;
+  }
+  function start(theme: 'light' | 'dark'): void {
+    if (started || picked) return;
+    picked = true;
+    applyTheme(theme);
+    if (options.onThemePicked) options.onThemePicked(startBuild);
+    else startBuild();
     soundBtn.textContent = soundOn ? '🔊' : '🔇';
     soundBtn.setAttribute('aria-label', soundOn ? 'Silenciar' : 'Activar sonido');
     if (soundOn) {
@@ -411,7 +430,9 @@ export function initIntroTusi(host: HTMLElement): () => void {
       // recorrido SIN elegir tema), su subárbol interceptaría los clicks de los demos que quedaron
       // debajo (pointer-events se hereda, así que apagarlo en el overlay apaga todo el subárbol). Solo
       // mientras no se eligió tema: tras `start()`, `.gone` ya lo maneja y no hay que reactivarlo.
-      if (!started) {
+      // Va contra `picked` y no contra `started`: con prólogo en el medio hay minutos en los que el
+      // clima ya se eligió y la construcción todavía no arrancó, y ahí el overlay volvería a tapar.
+      if (!picked) {
         overlay.classList.toggle('gone', !visible);
         overlay.inert = !visible;
       }

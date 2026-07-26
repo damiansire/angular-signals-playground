@@ -259,6 +259,31 @@
             </div>
           </div>
         </div>
+        <!-- Prologo "la anomalia": la cinematica que enmarca el recorrido (ver prologo-anomalia.ts).
+           Se destapa al elegir el clima, porque ese click es el gesto que el navegador exige para
+           dejar sonar, y al terminar le pasa la posta a la construccion de Tusi. -->
+        <div class="prologo" hidden>
+          <div class="prologo__stage">
+            <canvas
+              class="prologo__canvas"
+              width="1000"
+              height="562"
+              aria-label="Prologo animado: cuatro naves son arrastradas por una anomalia, y del otro lado lo que parecia caos se revela como un patron con orden"
+            ></canvas>
+            <img
+              class="prologo__mascot"
+              src="angular-mascot-idea.svg"
+              alt=""
+              width="240"
+              height="300"
+            />
+          </div>
+          <div class="prologo__hud">
+            <button class="prologo__pause" type="button" aria-pressed="false">Pausa</button>
+            <button class="prologo__voice" type="button" aria-pressed="true">Voz: si</button>
+            <button class="prologo__skip" type="button">Saltar intro &rarr;</button>
+          </div>
+        </div>
       </div>
       <div class="caption"><p class="s" id="capS">Molécula · escena 1</p></div>
     </div>

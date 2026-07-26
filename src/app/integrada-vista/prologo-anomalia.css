@@ -1,0 +1,107 @@
+/* Prólogo "la anomalía". Tapa la intro entera mientras corre: es una cinemática, no un adorno al
+   costado, y compartir pantalla con la construcción de Tusi haría que las dos compitan.
+   El motor solo saca y pone el atributo `hidden`; toda la geometría vive acá. */
+
+.prologo {
+  position: absolute;
+  inset: 0;
+  z-index: 30;
+  /* Casi negro, no negro puro: el patrón dibuja sobre este fondo y el negro absoluto le come el
+     degradado de las estelas. Es el mismo valor con el que se aprobó la escena. */
+  background: #07080c;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+}
+
+.prologo[hidden] {
+  display: none;
+}
+
+/* El escenario mantiene la proporción del lienzo (1000 × 562) y siempre CABE, en pantallas anchas
+   por altura y en angostas por ancho. No es cosmética: el motor ubica la mascota con
+   `stage.clientWidth / 1000`, así que si este ancho deja de coincidir con el del canvas, la mascota
+   nace corrida del choque que la produce. */
+.prologo__stage {
+  position: relative;
+  width: min(100%, calc(100vh * 1000 / 562));
+  aspect-ratio: 1000 / 562;
+}
+
+.prologo__canvas {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+/* La mascota es la REAL, un <img> encima del canvas, para que se vea igual de nítida que en la card
+   de concepto y sea el mismo asset. El motor le escribe `transform` y `opacity`. */
+.prologo__mascot {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 18%;
+  opacity: 0;
+  transform-origin: 50% 50%;
+  pointer-events: none;
+  will-change: transform, opacity;
+}
+
+/* Los controles son un TRÁMITE: siempre alcanzables, nunca compitiendo con la escena. Van en el
+   mismo rincón donde la intro ya tiene los suyos, para sumarse al grupo en vez de inventar lugar. */
+.prologo__hud {
+  position: absolute;
+  right: 1.1rem;
+  bottom: 1.1rem;
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.prologo__hud button {
+  font-family: var(--mono, ui-monospace, monospace);
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  padding: 0.4rem 0.8rem;
+  border-radius: 999px;
+  border: 1px solid rgb(255 255 255 / 28%);
+  background: rgb(0 0 0 / 30%);
+  color: rgb(255 255 255 / 72%);
+  cursor: pointer;
+  transition:
+    color 0.15s,
+    border-color 0.15s;
+}
+
+.prologo__hud button:hover:not(:disabled) {
+  color: #fff;
+  border-color: rgb(255 255 255 / 60%);
+}
+
+.prologo__hud button:focus-visible {
+  outline: 2px solid #eb9b3c;
+  outline-offset: 2px;
+}
+
+.prologo__hud button:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+/* Saltar pesa más que los otros dos: es el único que alguien va a buscar con apuro. */
+.prologo__skip {
+  border-color: rgb(235 155 60 / 55%) !important;
+  color: #f0b458 !important;
+}
+
+/* Sin movimiento la cinemática no aporta y sí molesta, así que el motor la saltea entera. Esto es
+   la red por si algún día se muestra igual: nada de lo de acá parpadea. */
+@media (prefers-reduced-motion: reduce) {
+  .prologo {
+    transition: none;
+  }
+
+  .prologo__mascot {
+    will-change: auto;
+  }
+}

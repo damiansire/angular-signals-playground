@@ -16,6 +16,7 @@ import { RouterLink } from '@angular/router';
 import { signalsRoutesTree } from '../app.routes';
 import { initMolecule, type MountSub } from './molecule-engine';
 import { initIntroTusi } from './intro-tusi';
+import { initPrologoAnomalia } from './prologo-anomalia';
 import { buildWhereQuery, parseWhereQuery } from './url-sync';
 
 /**
@@ -32,7 +33,7 @@ import { buildWhereQuery, parseWhereQuery } from './url-sync';
   selector: 'app-integrada-vista',
   imports: [RouterLink],
   templateUrl: './integrada-vista.component.html',
-  styleUrls: ['./integrada-vista.component.css', './intro-tusi.css'],
+  styleUrls: ['./integrada-vista.component.css', './intro-tusi.css', './prologo-anomalia.css'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class IntegradaVistaComponent {
@@ -70,7 +71,20 @@ export class IntegradaVistaComponent {
       this.destroyRef.onDestroy(dispose);
 
       // Landing "par de Tusi" (canvas + audio + overlay Dark/Light). El motor ya fadea el `.intro`.
-      this.destroyRef.onDestroy(initIntroTusi(this.host));
+      //
+      // Entre el clima y la construcción va el PRÓLOGO. El orden importa y no es arbitrario: elegir
+      // clima es el gesto que el navegador exige para dejar sonar, así que el prólogo arranca con
+      // audio ya desbloqueado y sin pedirle nada más a nadie. Y la construcción de Tusi espera de
+      // verdad: si corriera detrás durante esos minutos, llegaría terminada y se comería su propio
+      // premio, que es ver aparecer el círculo.
+      this.destroyRef.onDestroy(
+        initIntroTusi(this.host, {
+          onThemePicked: (startBuild) => {
+            const cerrarPrologo = initPrologoAnomalia(this.host, { alTerminar: startBuild });
+            this.destroyRef.onDestroy(cerrarPrologo);
+          },
+        }),
+      );
     });
   }
 
