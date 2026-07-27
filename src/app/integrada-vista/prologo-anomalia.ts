@@ -70,6 +70,7 @@ export function initPrologoAnomalia(host: HTMLElement, opts: PrologoOpciones): (
   const pausa = contenedor?.querySelector<HTMLButtonElement>('.prologo__pause');
   const habla = contenedor?.querySelector<HTMLButtonElement>('.prologo__voice');
   const suena = contenedor?.querySelector<HTMLButtonElement>('.prologo__sound');
+  const pantalla = contenedor?.querySelector<HTMLButtonElement>('.prologo__full');
   if (
     !contenedor ||
     !escenario ||
@@ -79,7 +80,8 @@ export function initPrologoAnomalia(host: HTMLElement, opts: PrologoOpciones): (
     !saltar ||
     !pausa ||
     !habla ||
-    !suena
+    !suena ||
+    !pantalla
   ) {
     return () => undefined;
   }
@@ -94,6 +96,7 @@ export function initPrologoAnomalia(host: HTMLElement, opts: PrologoOpciones): (
   const btnPausa = pausa;
   const btnVoz = habla;
   const btnSonido = suena;
+  const btnPantalla = pantalla;
   const stage = escenario;
 
   const W = c.width;
@@ -101,6 +104,15 @@ export function initPrologoAnomalia(host: HTMLElement, opts: PrologoOpciones): (
   const CX = W / 2;
   const CY = H / 2;
 
+  /**
+   * Lo que se QUIERE: la voz viene prendida de fabrica y nadie tiene que ir a buscarla. Separada
+   * de `vozOn` a proposito, y esa separacion ES el arreglo de un bug feo: `getVoices()` devuelve
+   * vacio en la primera llamada casi siempre, asi que el prologo concluia "no hay voz", apagaba, y
+   * cuando las voces llegaban un instante despues ya no habia forma de volver a prenderla sola.
+   * Habia que activarla a mano en cada carga.
+   */
+  let vozDeseada = true;
+  /** Lo que EFECTIVAMENTE pasa: la quiere y ademas hay con que hablar. */
   let vozOn = true;
   let sonando = opts.conSonido !== false;
 
@@ -1071,11 +1083,14 @@ export function initPrologoAnomalia(host: HTMLElement, opts: PrologoOpciones): (
       btnVoz.setAttribute('aria-pressed', 'false');
       btnVoz.textContent = 'Sin voz en español';
       btnVoz.title = 'El sistema no tiene ninguna voz en español instalada.';
-      // Sin nadie que la hable, el reloj tiene que volver al ritmo de lectura: si no, la escena
-      // dura lo que dura hablarla y no habla nadie.
+      // Sin nadie que la hable, el reloj vuelve al ritmo de lectura: si no, la escena dura lo que
+      // dura hablarla y no habla nadie. La preferencia queda intacta, esperando que aparezcan.
       vozOn = false;
     } else {
       btnVoz.disabled = false;
+      btnVoz.title = '';
+      // Las voces llegaron: se respeta lo que se quería, sin pedirle nada a nadie.
+      vozOn = vozDeseada;
       pintarVoz();
     }
     // Las voces llegan DESPUÉS del primer armado, así que si acá cambia el modo hay que rearmar.
@@ -1253,6 +1268,22 @@ export function initPrologoAnomalia(host: HTMLElement, opts: PrologoOpciones): (
 
   const alSaltar = (): void => terminar();
   const alPausar = (): void => alternarPausa();
+  const pintarPantalla = (): void => {
+    const activa = document.fullscreenElement === raiz;
+    btnPantalla.textContent = activa ? 'Salir de pantalla completa' : 'Pantalla completa';
+    btnPantalla.setAttribute('aria-pressed', String(activa));
+  };
+
+  /**
+   * El navegador rechaza la promesa si no viene de un gesto o si la política lo prohíbe (iframes sin
+   * `allow="fullscreen"`, por ejemplo). Se traga el error a propósito: no poder agrandar no es
+   * motivo para romper la reproducción, y el botón queda diciendo la verdad igual.
+   */
+  const alCambiarPantalla = (): void => {
+    if (document.fullscreenElement === raiz) void document.exitFullscreen().catch(() => undefined);
+    else void raiz.requestFullscreen().catch(() => undefined);
+  };
+
   const pintarSonido = (): void => {
     btnSonido.textContent = sonando ? 'Sonido: sí' : 'Sonido: no';
     btnSonido.setAttribute('aria-pressed', String(sonando));
@@ -1271,7 +1302,8 @@ export function initPrologoAnomalia(host: HTMLElement, opts: PrologoOpciones): (
   };
 
   const alCambiarVoz = (): void => {
-    vozOn = !vozOn;
+    vozDeseada = !vozDeseada;
+    vozOn = vozDeseada && vocesEs.length > 0;
     if (!vozOn && window.speechSynthesis) speechSynthesis.cancel();
     pintarVoz();
     // Prender la voz rearma el reloj: las ventanas pasan a durar lo que tarda el habla. Sin esto la
@@ -1284,6 +1316,9 @@ export function initPrologoAnomalia(host: HTMLElement, opts: PrologoOpciones): (
   btnPausa.addEventListener('click', alPausar);
   btnVoz.addEventListener('click', alCambiarVoz);
   btnSonido.addEventListener('click', alCambiarSonido);
+  btnPantalla.addEventListener('click', alCambiarPantalla);
+  // También cambia por Escape o por F11, que no pasan por el botón.
+  document.addEventListener('fullscreenchange', pintarPantalla);
   document.addEventListener('keydown', alTeclado);
   if (window.speechSynthesis) {
     cargarVoces();
@@ -1292,6 +1327,7 @@ export function initPrologoAnomalia(host: HTMLElement, opts: PrologoOpciones): (
 
   pintarVoz();
   pintarSonido();
+  pintarPantalla();
   arrancar(0);
 
   return () => {
@@ -1306,6 +1342,10 @@ export function initPrologoAnomalia(host: HTMLElement, opts: PrologoOpciones): (
     btnPausa.removeEventListener('click', alPausar);
     btnVoz.removeEventListener('click', alCambiarVoz);
     btnSonido.removeEventListener('click', alCambiarSonido);
+    btnPantalla.removeEventListener('click', alCambiarPantalla);
+    document.removeEventListener('fullscreenchange', pintarPantalla);
+    // Salir del prólogo no puede dejar la pantalla tomada.
+    if (document.fullscreenElement === raiz) void document.exitFullscreen().catch(() => undefined);
     document.removeEventListener('keydown', alTeclado);
     void ac?.close();
   };

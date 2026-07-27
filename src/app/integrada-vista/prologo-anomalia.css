@@ -154,3 +154,13 @@
     will-change: auto;
   }
 }
+
+/* En pantalla completa el velo ES la pantalla: sin esto el `:fullscreen` del navegador le pone
+   fondo negro propio y el escenario queda flotando sobre un negro distinto al de la escena. */
+.prologo:fullscreen {
+  background: #07080c;
+}
+
+.prologo--claro:fullscreen {
+  background: #f0ece0;
+}
