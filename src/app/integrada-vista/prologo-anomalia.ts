@@ -69,7 +69,18 @@ export function initPrologoAnomalia(host: HTMLElement, opts: PrologoOpciones): (
   const saltar = contenedor?.querySelector<HTMLButtonElement>('.prologo__skip');
   const pausa = contenedor?.querySelector<HTMLButtonElement>('.prologo__pause');
   const habla = contenedor?.querySelector<HTMLButtonElement>('.prologo__voice');
-  if (!contenedor || !escenario || !lienzo || !ctx || !mascota || !saltar || !pausa || !habla) {
+  const suena = contenedor?.querySelector<HTMLButtonElement>('.prologo__sound');
+  if (
+    !contenedor ||
+    !escenario ||
+    !lienzo ||
+    !ctx ||
+    !mascota ||
+    !saltar ||
+    !pausa ||
+    !habla ||
+    !suena
+  ) {
     return () => undefined;
   }
 
@@ -82,6 +93,7 @@ export function initPrologoAnomalia(host: HTMLElement, opts: PrologoOpciones): (
   const skipEl = saltar;
   const btnPausa = pausa;
   const btnVoz = habla;
+  const btnSonido = suena;
   const stage = escenario;
 
   const W = c.width;
@@ -90,7 +102,7 @@ export function initPrologoAnomalia(host: HTMLElement, opts: PrologoOpciones): (
   const CY = H / 2;
 
   let vozOn = true;
-  const sonando = opts.conSonido !== false;
+  let sonando = opts.conSonido !== false;
 
   /**
    * El reloj y los anclajes se GUARDAN en variables reasignables, no en constantes: prender la voz
@@ -759,6 +771,31 @@ export function initPrologoAnomalia(host: HTMLElement, opts: PrologoOpciones): (
   }
 
   /** La mascota es un <img> encima del canvas: se ubica en coordenadas del canvas escaladas. */
+  /**
+   * El pulso cálido de la lamparita que la mascota sostiene, dibujado DETRÁS de ella. La mascota es
+   * un <img> y no se le puede animar una parte por dentro, así que la señal de vida va en el
+   * lienzo. Late lento y no la ilumina de más: durante el pacto ella habla catorce líneas quieta, y
+   * sin esto el tramo se lee como una foto sobre negro en vez de como alguien explicando.
+   */
+  function lamparita(t: number, x: number, y: number, nacida: number): void {
+    if (nacida < 0.6) return;
+    const pulso = 0.5 + 0.5 * Math.sin((t - T.choque) * 0.0016);
+    const r = W * 0.042 * (0.86 + pulso * 0.24);
+    // Arriba a la izquierda del cuerpo, que es donde el asset tiene la lámpara.
+    const lx = x - W * 0.066;
+    const ly = y - H * 0.077;
+    const halo = g.createRadialGradient(lx, ly, 0, lx, ly, r);
+    halo.addColorStop(0, `rgba(255,214,120,${(0.2 + pulso * 0.16) * nacida})`);
+    halo.addColorStop(0.45, `rgba(255,190,90,${(0.08 + pulso * 0.07) * nacida})`);
+    halo.addColorStop(1, 'rgba(255,190,90,0)');
+    g.save();
+    g.fillStyle = halo;
+    g.beginPath();
+    g.arc(lx, ly, r, 0, 7);
+    g.fill();
+    g.restore();
+  }
+
   function ponerMascota(x: number, y: number, escala: number, alfa: number): void {
     const k = stage.clientWidth / W;
     const ancho = mascotaEl.clientWidth || stage.clientWidth * 0.18;
@@ -937,7 +974,9 @@ export function initPrologoAnomalia(host: HTMLElement, opts: PrologoOpciones): (
       const respira =
         Math.sin((t - CHOQUE) * 0.00105) * H * 0.011 * ease(clamp01((t - CHOQUE) / 1200));
       const late = 1 + Math.sin((t - CHOQUE) * 0.0009 + 1.1) * 0.018;
-      ponerMascota(CX, CY - flota + respira, (0.25 + ease(n) * 0.85) * late, n);
+      const alto = CY - flota + respira;
+      lamparita(t, CX, alto, n);
+      ponerMascota(CX, alto, (0.25 + ease(n) * 0.85) * late, n);
     } else if (t >= T.orden) {
       // Se corre abajo a la izquierda: le deja el centro al patrón que se está construyendo.
       const q = ease(clamp01((t - T.orden) / 2600));
@@ -1207,6 +1246,23 @@ export function initPrologoAnomalia(host: HTMLElement, opts: PrologoOpciones): (
 
   const alSaltar = (): void => terminar();
   const alPausar = (): void => alternarPausa();
+  const pintarSonido = (): void => {
+    btnSonido.textContent = sonando ? 'Sonido: sí' : 'Sonido: no';
+    btnSonido.setAttribute('aria-pressed', String(sonando));
+  };
+
+  const alCambiarSonido = (): void => {
+    sonando = !sonando;
+    pintarSonido();
+    if (sonando) {
+      abrirAudio();
+      if (ac && ac.state === 'suspended') void ac.resume();
+    } else if (zumbidoGain) {
+      // El zumbido es continuo: sin esto seguiría sonando hasta el próximo cuadro que lo escriba.
+      zumbidoGain.gain.value = 0;
+    }
+  };
+
   const alCambiarVoz = (): void => {
     vozOn = !vozOn;
     if (!vozOn && window.speechSynthesis) speechSynthesis.cancel();
@@ -1220,6 +1276,7 @@ export function initPrologoAnomalia(host: HTMLElement, opts: PrologoOpciones): (
   skipEl.addEventListener('click', alSaltar);
   btnPausa.addEventListener('click', alPausar);
   btnVoz.addEventListener('click', alCambiarVoz);
+  btnSonido.addEventListener('click', alCambiarSonido);
   document.addEventListener('keydown', alTeclado);
   if (window.speechSynthesis) {
     cargarVoces();
@@ -1227,6 +1284,7 @@ export function initPrologoAnomalia(host: HTMLElement, opts: PrologoOpciones): (
   }
 
   pintarVoz();
+  pintarSonido();
   arrancar(0);
 
   return () => {
@@ -1240,6 +1298,7 @@ export function initPrologoAnomalia(host: HTMLElement, opts: PrologoOpciones): (
     skipEl.removeEventListener('click', alSaltar);
     btnPausa.removeEventListener('click', alPausar);
     btnVoz.removeEventListener('click', alCambiarVoz);
+    btnSonido.removeEventListener('click', alCambiarSonido);
     document.removeEventListener('keydown', alTeclado);
     void ac?.close();
   };
