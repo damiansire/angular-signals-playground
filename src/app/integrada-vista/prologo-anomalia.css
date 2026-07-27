@@ -61,6 +61,7 @@
   --hud-borde: rgb(255 255 255 / 28%);
   --hud-borde-vivo: rgb(255 255 255 / 60%);
   --hud-skip: #f0b458;
+  --hud-skip-vivo: #ffd9a3;
   --hud-skip-borde: rgb(235 155 60 / 55%);
   --hud-opacidad: 1;
 }
@@ -76,6 +77,7 @@
   --hud-borde: rgb(32 29 22 / 24%);
   --hud-borde-vivo: #b8791f;
   --hud-skip: #96601a;
+  --hud-skip-vivo: #5c3a08;
   --hud-skip-borde: rgb(184 121 31 / 55%);
 }
 
@@ -124,7 +126,7 @@
 
 /* Deshabilitado pero LEGIBLE: a 0,45 de opacidad quedaba en 2,4:1 y no se podía leer por qué. */
 .prologo__hud button:disabled {
-  opacity: 0.7;
+  opacity: 0.82;
   cursor: default;
 }
 
@@ -133,6 +135,12 @@
 .prologo__hud .prologo__skip {
   border-color: var(--hud-skip-borde);
   color: var(--hud-skip);
+}
+
+/* Al apuntarlo NO se despinta a blanco: es el unico control con color de prioridad y perder el
+   ambar justo en el hover le borra la identidad que tiene por algo. */
+.prologo__hud .prologo__skip:hover:not(:disabled) {
+  color: var(--hud-skip-vivo);
 }
 
 /* Sin movimiento la cinemática no aporta y sí molesta, así que el motor la saltea entera. Esto es
