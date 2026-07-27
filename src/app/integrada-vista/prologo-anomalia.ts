@@ -71,6 +71,7 @@ export function initPrologoAnomalia(host: HTMLElement, opts: PrologoOpciones): (
   const habla = contenedor?.querySelector<HTMLButtonElement>('.prologo__voice');
   const suena = contenedor?.querySelector<HTMLButtonElement>('.prologo__sound');
   const pantalla = contenedor?.querySelector<HTMLButtonElement>('.prologo__full');
+  const veloz = contenedor?.querySelector<HTMLButtonElement>('.prologo__speed');
   if (
     !contenedor ||
     !escenario ||
@@ -81,7 +82,8 @@ export function initPrologoAnomalia(host: HTMLElement, opts: PrologoOpciones): (
     !pausa ||
     !habla ||
     !suena ||
-    !pantalla
+    !pantalla ||
+    !veloz
   ) {
     return () => undefined;
   }
@@ -97,6 +99,7 @@ export function initPrologoAnomalia(host: HTMLElement, opts: PrologoOpciones): (
   const btnVoz = habla;
   const btnSonido = suena;
   const btnPantalla = pantalla;
+  const btnVelocidad = veloz;
   const stage = escenario;
 
   const W = c.width;
@@ -152,7 +155,10 @@ export function initPrologoAnomalia(host: HTMLElement, opts: PrologoOpciones): (
     // La exploradora habla desde arriba, que es donde está: su voz viene de otro lado, y su
     // color es el mismo de su casco. A 0,16 el renglón le tocaba el casco (medido: 13 px adentro
     // en "¿por qué van hacia ahí?"), y como comparten color se leía como un solo borrón.
-    nave4: { y: 0.4, x: 0.62, tam: 25, color: '#7fd6bd', fuente: 'mono' },
+    // 0,20: la franja libre entre su nave (que sube de 0,30 a 0,11 mientras escapa) y la escena
+    // que ocurre abajo. A 0,23 le cruzaba su propio casco; a 0,40 tapaba las naves arrastradas y la
+    // anomalía, que es lo único que hay que mirar en ese momento.
+    nave4: { y: 0.2, x: 0.62, tam: 25, color: '#7fd6bd', fuente: 'mono' },
     // El grito va al centro y grande. Cae antes de que existan las moléculas, así que ahí no
     // pisa nada: es el único que se permite el medio de la pantalla.
     todos: { y: 0.5, x: 0.5, tam: 44, color: '#f6d9c0', fuente: 'mono' },
@@ -405,9 +411,20 @@ export function initPrologoAnomalia(host: HTMLElement, opts: PrologoOpciones): (
    */
   const OPERADORES = [
     { nave: 0, txt: 'switchMap', d: 0, lado: -1 },
-    { nave: 1, txt: 'retry', d: 780, lado: 1 },
-    { nave: 2, txt: 'mergeMap', d: 1560, lado: -1 },
-    { nave: 0, txt: 'catchError', d: 2340, lado: 1 },
+    { nave: 1, txt: 'retry', d: 760, lado: 1 },
+    { nave: 2, txt: 'mergeMap', d: 1520, lado: -1 },
+    { nave: 0, txt: 'catchError', d: 2280, lado: 1 },
+    { nave: 1, txt: 'concatMap', d: 3040, lado: -1 },
+    { nave: 2, txt: 'takeUntil', d: 3800, lado: 1 },
+    { nave: 0, txt: 'debounceTime', d: 4560, lado: -1 },
+  ];
+  /** La segunda descarga: los pipes, cuando alguien dice que están recargando. */
+  const PIPES = [
+    { nave: 1, txt: 'pipe', d: 0, lado: 1 },
+    { nave: 2, txt: 'pipe', d: 620, lado: -1 },
+    { nave: 0, txt: 'pipe', d: 1240, lado: 1 },
+    { nave: 1, txt: 'pipe', d: 1860, lado: -1 },
+    { nave: 2, txt: 'pipe', d: 2480, lado: 1 },
   ];
   // Cuatro y bien separadas, no seis encimadas. Con seis a 1700 ms habia CINCO vivas a la vez y las
   // etiquetas se pisaban hasta leerse "mergeMapetryrror": el nombre del operador ES el contenido de
@@ -416,13 +433,21 @@ export function initPrologoAnomalia(host: HTMLElement, opts: PrologoOpciones): (
   const VUELO = 1400;
 
   function operadores(t: number): void {
-    const desde = linea('anom-rxjs').t0 + 400;
-    const ultima = OPERADORES[OPERADORES.length - 1].d;
+    descarga(t, OPERADORES, linea('anom-rxjs').t0 + 400);
+    descarga(t, PIPES, linea('anom-pipes').t0 + 300);
+  }
+
+  function descarga(
+    t: number,
+    tanda: readonly { nave: number; txt: string; d: number; lado: number }[],
+    desde: number,
+  ): void {
+    const ultima = tanda[tanda.length - 1].d;
     if (t < desde || t > desde + ultima + VUELO) return;
     g.save();
     g.font = '11px "JetBrains Mono","Cascadia Mono",Consolas,ui-monospace,monospace';
     g.textAlign = 'left';
-    for (const op of OPERADORES) {
+    for (const op of tanda) {
       const p = clamp01((t - (desde + op.d)) / VUELO);
       if (p <= 0 || p >= 1) continue;
       const cuna = antesDelSalto(desde + op.d);
@@ -976,7 +1001,7 @@ export function initPrologoAnomalia(host: HTMLElement, opts: PrologoOpciones): (
         // oía un tajo a mitad de palabra) o callar una (quedaba en pantalla sin voz). Encoladas
         // se oyen las dos, uma después de la otra, y el precio es que el audio de ese par queda
         // un segundo detrás del dibujo.
-        hablar(d.txt, d.quien, d.t1 - d.t0, !!(d.junto || d.pisa));
+        hablar(d.txt, d.quien, (d.t1 - d.t0) / velocidad, !!(d.junto || d.pisa));
       }
     }
 
@@ -1135,7 +1160,9 @@ export function initPrologoAnomalia(host: HTMLElement, opts: PrologoOpciones): (
     // Contra el ritmo REAL del motor, no contra un número supuesto. Las ventanas del modo voz ya
     // están hechas a su medida, así que esto queda cerca de 1 y el rango es una red, no un ajuste.
     const seg = Math.max(0.8, (ventana - 350) / 1000);
-    u.rate = Math.min(1.05, Math.max(0.95, limpio.length / HABLA_CPS / seg));
+    // El tope sube con la velocidad: a ×2 la frase tiene la mitad de tiempo, y dejarlo en 1,05
+    // haría que cada línea siguiera sonando cuando en pantalla ya entró la siguiente.
+    u.rate = Math.min(1.05 * velocidad, Math.max(0.95, limpio.length / HABLA_CPS / seg));
     let sono = false;
     u.onstart = () => {
       sono = true;
@@ -1151,18 +1178,36 @@ export function initPrologoAnomalia(host: HTMLElement, opts: PrologoOpciones): (
 
   /* ── reloj de reproducción ───────────────────────────────────────────────────────────────── */
 
-  let inicio: number | null = null;
+  /** Timestamp del cuadro anterior. `null` al arrancar o al reanudar: ese cuadro no suma tiempo. */
+  let anterior: number | null = null;
+  /**
+   * Generacion del loop. Cada `arrancar` invalida a los anteriores: sin esto quedaban DOS loops
+   * vivos (uno lo arranca la carga de voces al cambiar de modo, otro el init), los dos escribiendo
+   * `anterior` en el mismo cuadro, y el delta de cada uno daba casi cero. La escena se quedaba
+   * clavada en el primer segundo sin que nada pareciera roto.
+   */
+  let generacion = 0;
+  /**
+   * Velocidades para adelantar. Solo hacia arriba: el prólogo ya corre al ritmo al que se sigue, y
+   * lo que alguien necesita a la segunda vuelta es llegar antes, no mirarlo en cámara lenta.
+   */
+  const VELOCIDADES = [1, 1.5, 2, 3];
+  let velocidad = 1;
   let raf = 0;
   /** Dónde quedó el reloj: es lo que deja continuar en el mismo instante en vez de reiniciar. */
   let tAhora = 0;
   let pausado = false;
   let terminado = false;
 
-  function frame(ts: number): void {
-    if (inicio === null) inicio = ts;
-    tAhora = Math.min(ts - inicio, T.fin);
+  function frame(ts: number, gen: number): void {
+    if (gen !== generacion) return;
+    // Tope de 80 ms por cuadro: si la pestaña estuvo oculta, `rAF` vuelve con un salto enorme y la
+    // escena se saltearía medio acto de golpe.
+    const dt = anterior === null ? 0 : Math.min(80, ts - anterior);
+    anterior = ts;
+    tAhora = Math.min(tAhora + dt * velocidad, T.fin);
     dibujar(tAhora);
-    if (tAhora < T.fin) raf = requestAnimationFrame(frame);
+    if (tAhora < T.fin) raf = requestAnimationFrame((t) => frame(t, gen));
     else terminar();
   }
 
@@ -1176,7 +1221,6 @@ export function initPrologoAnomalia(host: HTMLElement, opts: PrologoOpciones): (
       return;
     }
     mostrar();
-    inicio = null;
     dichas = new Set();
     if (window.speechSynthesis) speechSynthesis.cancel();
     tAhora = desde;
@@ -1186,10 +1230,9 @@ export function initPrologoAnomalia(host: HTMLElement, opts: PrologoOpciones): (
       abrirAudio();
       if (ac && ac.state === 'suspended') void ac.resume();
     }
-    raf = requestAnimationFrame((ts) => {
-      inicio = ts - desde;
-      frame(ts);
-    });
+    anterior = null;
+    const gen = ++generacion;
+    raf = requestAnimationFrame((ts) => frame(ts, gen));
   }
 
   /** Hermanos del prólogo: el recorrido que quedó debajo del velo. */
@@ -1241,10 +1284,9 @@ export function initPrologoAnomalia(host: HTMLElement, opts: PrologoOpciones): (
       despausar();
       if (window.speechSynthesis && speechSynthesis.paused) speechSynthesis.resume();
       if (sonando && ac && ac.state === 'suspended') void ac.resume();
-      raf = requestAnimationFrame((ts) => {
-        inicio = ts - tAhora;
-        frame(ts);
-      });
+      anterior = null;
+      const gen = ++generacion;
+      raf = requestAnimationFrame((ts) => frame(ts, gen));
       return;
     }
     pausado = true;
@@ -1268,6 +1310,18 @@ export function initPrologoAnomalia(host: HTMLElement, opts: PrologoOpciones): (
 
   const alSaltar = (): void => terminar();
   const alPausar = (): void => alternarPausa();
+  const pintarVelocidad = (): void => {
+    btnVelocidad.textContent = `Velocidad ×${velocidad}`;
+  };
+
+  const alCambiarVelocidad = (): void => {
+    velocidad = VELOCIDADES[(VELOCIDADES.indexOf(velocidad) + 1) % VELOCIDADES.length];
+    pintarVelocidad();
+    // Sin cortar, la línea que está sonando sigue al ritmo viejo hasta terminar y queda pisando a
+    // la siguiente, que ya entró en pantalla.
+    if (window.speechSynthesis) speechSynthesis.cancel();
+  };
+
   const pintarPantalla = (): void => {
     const activa = document.fullscreenElement === raiz;
     btnPantalla.textContent = activa ? 'Salir de pantalla completa' : 'Pantalla completa';
@@ -1317,6 +1371,7 @@ export function initPrologoAnomalia(host: HTMLElement, opts: PrologoOpciones): (
   btnVoz.addEventListener('click', alCambiarVoz);
   btnSonido.addEventListener('click', alCambiarSonido);
   btnPantalla.addEventListener('click', alCambiarPantalla);
+  btnVelocidad.addEventListener('click', alCambiarVelocidad);
   // También cambia por Escape o por F11, que no pasan por el botón.
   document.addEventListener('fullscreenchange', pintarPantalla);
   document.addEventListener('keydown', alTeclado);
@@ -1328,6 +1383,7 @@ export function initPrologoAnomalia(host: HTMLElement, opts: PrologoOpciones): (
   pintarVoz();
   pintarSonido();
   pintarPantalla();
+  pintarVelocidad();
   arrancar(0);
 
   return () => {
@@ -1343,6 +1399,7 @@ export function initPrologoAnomalia(host: HTMLElement, opts: PrologoOpciones): (
     btnVoz.removeEventListener('click', alCambiarVoz);
     btnSonido.removeEventListener('click', alCambiarSonido);
     btnPantalla.removeEventListener('click', alCambiarPantalla);
+    btnVelocidad.removeEventListener('click', alCambiarVelocidad);
     document.removeEventListener('fullscreenchange', pintarPantalla);
     // Salir del prólogo no puede dejar la pantalla tomada.
     if (document.fullscreenElement === raiz) void document.exitFullscreen().catch(() => undefined);

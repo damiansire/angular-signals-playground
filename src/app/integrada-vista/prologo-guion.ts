@@ -86,8 +86,15 @@ export const GUION: readonly LineaGuion[] = [
   { id: 'anom-que-pasa', hueco: 300, quien: 'cap', txt: 'Esperen… ¿qué está sucediendo?' },
   { id: 'anom-sin-control', quien: 'naveA', txt: 'No tengo control de los sistemas.' },
   { id: 'anom-atraidos', quien: 'naveB', txt: 'Estamos siendo atraídos.' },
-  { id: 'anom-rxjs', quien: 'cap', txt: '¡Activen todos los operadores\nde RxJS, rápido!' },
-  { id: 'anom-pipes', quien: 'naveA', txt: 'Los pipes están recargando energía.' },
+  // `dur` acá no es drama: es que la orden tiene que seguir en pantalla mientras las naves
+  // todavía están disparando operadores. Apagarla antes deja el gesto contado por la mitad.
+  {
+    id: 'anom-rxjs',
+    dur: 6200,
+    quien: 'cap',
+    txt: '¡Activen todos los operadores\nde RxJS, rápido!',
+  },
+  { id: 'anom-pipes', dur: 4600, quien: 'naveA', txt: 'Los pipes están recargando energía.' },
   { id: 'anom-lento', quien: 'naveB', txt: 'No funcionará, es demasiado lento.' },
 
   // El capitán deja de dar órdenes y empieza a describir: tres tirones, cada uno más largo, hasta
