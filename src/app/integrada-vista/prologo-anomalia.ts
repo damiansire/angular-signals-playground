@@ -178,6 +178,9 @@ export function initPrologoAnomalia(host: HTMLElement, opts: PrologoOpciones): (
     x: ((i * 97) % 1000) / 1000,
     y: ((i * 61) % 562) / 562,
     z: 0.3 + ((i * 37) % 100) / 140,
+    // Fase propia del titileo. Sin esto las 150 laten juntas y se lee como un parpadeo de la
+    // pantalla entera en vez de como un cielo.
+    f: ((i * 173) % 628) / 100,
   }));
 
   /* ---------------------------------------------------------------------------------------
@@ -277,7 +280,11 @@ export function initPrologoAnomalia(host: HTMLElement, opts: PrologoOpciones): (
     for (const s of ESTRELLAS) {
       const x = ((s.x * W + t * 0.012 * s.z) % (W + 40)) - 20;
       const y = s.y * H;
-      g.globalAlpha = alfa * (0.18 + s.z * 0.5);
+      // TITILAN. Ya derivaban, pero son 150 puntos de 1,6 px en todo el lienzo: en cualquier zona
+      // chica no pasa ninguna en nueve segundos, asi que el fondo se lee quieto. Medido en el tramo
+      // del pacto daba 0,03 de amplitud, o sea la mascota respiraba sobre un cielo muerto.
+      const titila = 0.72 + 0.28 * Math.sin(t * 0.0021 + s.f);
+      g.globalAlpha = alfa * (0.18 + s.z * 0.5) * titila;
       if (warp > 0.01) {
         // Estelas radiales al entrar en la luz: el salto ES el zoom, no un corte de cámara.
         const dx = x - CX,
