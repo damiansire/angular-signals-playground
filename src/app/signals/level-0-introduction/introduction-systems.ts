@@ -9,29 +9,32 @@ import { ManipulableChallenge, SystemState } from '../../libs/manipulable-challe
 const K = 'perilla';
 const knob = (label: string, positions = 2) => [{ id: K, positions, label }];
 
-/** 0/1 · el HTML anidado se convierte en un árbol de padres e hijos. */
+/**
+ * 0/1 · el árbol lo arma el browser, y no siempre es el que escribiste.
+ *
+ * Un `<div>` adentro de un `<p>` es HTML inválido: el browser cierra el párrafo ANTES del div, así
+ * que los dos nodos que escribiste anidados terminan de hermanos y el `<p>` se queda sin hijos.
+ * La versión con `<span>` sí anida, porque un span puede ir adentro de un párrafo.
+ *
+ * La primera versión de este desafío movía un `<p>` adentro o afuera de una `<section>`, y estaba
+ * mal planteada: las dos posiciones eran HTML válido, así que no había nada que reparar, solo que
+ * adivinar cuál esperaba el ejercicio.
+ */
 export const HTML_TREE_SYSTEM: ManipulableChallenge = {
-  knobs: knob('sacar el párrafo de adentro de la sección o volver a meterlo'),
+  knobs: knob('cambiar qué etiqueta va adentro del párrafo'),
   gauges: [{ id: 'hijos', label: 'hijos' }],
   action: 'parsear',
   start: { hijos: 0 },
-  code: (k) =>
-    k[K] === 1
-      ? [
-          { text: '<section>' },
-          { text: '  <h2>Hola</h2>' },
-          { text: '  <p>Texto</p>', knob: K },
-          { text: '</section>' },
-        ]
-      : [
-          { text: '<section>' },
-          { text: '  <h2>Hola</h2>' },
-          { text: '</section>' },
-          { text: '<p>Texto</p>', knob: K },
-        ],
+  code: (k) => [
+    { text: '<p>' },
+    { text: '  Texto' },
+    k[K] === 1 ? { text: '  <span>Caja</span>', knob: K } : { text: '  <div>Caja</div>', knob: K },
+    { text: '</p>' },
+  ],
+  // Con el div el browser reubica: el <p> queda con un solo hijo (el texto) y la caja afuera.
   settle: (s: SystemState) => ({ hijos: s.actions === 0 ? 0 : s.knobs[K] === 1 ? 2 : 1 }),
   healthy: (s: SystemState) => s.actions > 0 && s.values['hijos'] === 2,
-  establishes: 'El HTML anidado se convierte en un árbol de nodos padre e hijo.',
+  establishes: 'El árbol lo arma el browser, y no siempre es el que escribiste.',
 };
 
 /** 0/2 · cambiar la pantalla es encontrar un nodo y mutarlo. */
