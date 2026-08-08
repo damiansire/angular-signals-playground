@@ -5,6 +5,8 @@ import {
   HtmlIdGeneratorService,
   generateLinks,
   generateNodes,
+  isNodeId,
+  walkTags,
 } from './code-parser'; // Ajusta la ruta si es necesario
 
 describe('isTag', () => {
@@ -227,21 +229,7 @@ describe('HtmlHelper', () => {
     it('returns the tag name before the first dash', () => {
       expect(HtmlHelper.getTagFromId('div-1')).toBe('div');
       expect(HtmlHelper.getTagFromId('span-closed-2')).toBe('span');
-      expect(HtmlHelper.getTagFromId('space-3')).toBe('space');
-    });
-  });
-
-  describe('isSpaceElement', () => {
-    it('matches only space-<number> ids', () => {
-      expect(HtmlHelper.isSpaceElement('space-1')).toBeTrue();
-      expect(HtmlHelper.isSpaceElement('space-42')).toBeTrue();
-    });
-
-    it('rejects non-space ids', () => {
-      expect(HtmlHelper.isSpaceElement('div-1')).toBeFalse();
-      expect(HtmlHelper.isSpaceElement('space')).toBeFalse();
-      expect(HtmlHelper.isSpaceElement('space-')).toBeFalse();
-      expect(HtmlHelper.isSpaceElement('space-1-2')).toBeFalse();
+      expect(HtmlHelper.getTagFromId('img-3')).toBe('img');
     });
   });
 
@@ -257,13 +245,6 @@ describe('HtmlHelper', () => {
       expect(HtmlHelper.getElementType('</span>')).toEqual({
         element: 'span',
         isClosingTag: true,
-      });
-    });
-
-    it('classifies an empty string as a space element', () => {
-      expect(HtmlHelper.getElementType('   ')).toEqual({
-        element: 'space',
-        isClosingTag: false,
       });
     });
 
@@ -288,6 +269,112 @@ describe('HtmlHelper', () => {
         isClosingTag: true,
       });
     });
+  });
+});
+
+/**
+ * Los casos que rompían el árbol. Un `<img>` o un `<br>` no desapilaban nunca, así que todo el
+ * subárbol que seguía quedaba un nivel más abajo y colgando del tag equivocado, en la pantalla
+ * cuyo tema es justamente ver el árbol del DOM.
+ */
+describe('etiquetas void y auto-cerradas', () => {
+  const CON_IMG = '<div><img src="x"/><p></p></div>';
+  const CON_BR = '<ul><li>a<br>b</li></ul>';
+
+  it('un img auto-cerrado no arrastra a sus hermanos un nivel abajo', () => {
+    const niveles = generateNodes(CON_IMG).map((n) => [n.id, n.level]);
+    expect(niveles).toEqual([
+      ['div-1', 1],
+      ['img-1', 2],
+      ['p-1', 2],
+    ]);
+  });
+
+  it('el hermano de un img cuelga del padre real, no del img', () => {
+    expect(generateLinks(CON_IMG)).toEqual([
+      { source: 'div-1', target: 'img-1' },
+      { source: 'div-1', target: 'p-1' },
+    ]);
+  });
+
+  it('un br sin barra tampoco desnivela lo que sigue', () => {
+    const niveles = generateNodes(CON_BR).map((n) => [n.id, n.level]);
+    expect(niveles).toEqual([
+      ['ul-1', 1],
+      ['li-1', 2],
+      ['br-1', 3],
+    ]);
+  });
+
+  it('un input sin cierre no se lleva puesto al resto del formulario', () => {
+    const niveles = generateNodes('<form><input name="a"><label></label></form>').map((n) => [
+      n.id,
+      n.level,
+    ]);
+    expect(niveles).toEqual([
+      ['form-1', 1],
+      ['input-1', 2],
+      ['label-1', 2],
+    ]);
+  });
+
+  it('un componente Angular auto-cerrado cierra igual que un void', () => {
+    expect(generateLinks('<div><app-badge /><span></span></div>')).toEqual([
+      { source: 'div-1', target: 'app-badge-1' },
+      { source: 'div-1', target: 'span-1' },
+    ]);
+  });
+});
+
+describe('nodos y aristas salen del mismo árbol', () => {
+  // generateLinks desapilaba sin verificar el tope y generateNodes sí lo verificaba: con un cierre
+  // huérfano los dos construían árboles distintos para el mismo HTML.
+  const HUERFANO = '<div><span></span></p><em></em></div>';
+
+  it('toda arista apunta a un nodo que existe, y desde un nodo que existe', () => {
+    const ids = new Set(generateNodes(HUERFANO).map((n) => n.id));
+    for (const link of generateLinks(HUERFANO)) {
+      expect(ids.has(link.source)).withContext(`source ${link.source}`).toBeTrue();
+      expect(ids.has(link.target)).withContext(`target ${link.target}`).toBeTrue();
+    }
+  });
+
+  it('cada nodo no raíz tiene exactamente una arista que lo apunta', () => {
+    const nodes = generateNodes(HUERFANO);
+    const links = generateLinks(HUERFANO);
+    expect(links.length).toBe(nodes.length - 1);
+    expect(new Set(links.map((l) => l.target)).size).toBe(links.length);
+  });
+
+  it('un cierre huérfano no desapila a un ancestro sano', () => {
+    expect(generateNodes(HUERFANO).map((n) => [n.id, n.level])).toEqual([
+      ['div-1', 1],
+      ['span-1', 2],
+      ['em-1', 2],
+    ]);
+  });
+});
+
+describe('isNodeId', () => {
+  it('acepta lo que produce nodo, incluidas las void', () => {
+    expect(isNodeId('div-1')).toBeTrue();
+    expect(isNodeId('img-2')).toBeTrue();
+    expect(isNodeId('app-badge-1')).toBeTrue();
+  });
+
+  it('rechaza cierres y texto: no revelan ningún nodo', () => {
+    expect(isNodeId('p-closed-1')).toBeFalse();
+    expect(isNodeId('div-closed-12')).toBeFalse();
+    expect(isNodeId('text-3')).toBeFalse();
+    expect(isNodeId('')).toBeFalse();
+  });
+
+  it('todo id que generateNodes produce pasa el filtro, y ninguno de los otros', () => {
+    const html = '<main><h2>Hola</h2><img src="x"/></main>';
+    const idsDeNodo = new Set(generateNodes(html).map((n) => n.id));
+    for (const tag of walkTags(html)) {
+      expect(isNodeId(tag.id)).withContext(tag.id).toBe(idsDeNodo.has(tag.id));
+    }
   });
 });
 

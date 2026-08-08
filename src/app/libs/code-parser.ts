@@ -43,10 +43,6 @@ export class HtmlHelper {
     return id.split('-')[0];
   }
 
-  static isSpaceElement(id: string) {
-    return /^space-\d+$/.test(id);
-  }
-
   static getElementType(content: string): TagType {
     content = content.trim();
     // El grupo de captura admite guiones ([\w-]) igual que isTag, para nombrar
@@ -57,12 +53,101 @@ export class HtmlHelper {
       return { element: openingTagMatch[1].toLowerCase(), isClosingTag: false };
     } else if (closingTagMatch) {
       return { element: closingTagMatch[1].toLowerCase(), isClosingTag: true };
-    } else if (content === '') {
-      return { element: 'space', isClosingTag: false };
     } else {
       return { element: 'text', isClosingTag: false };
     }
   }
+}
+
+/**
+ * Elementos void del HTML: no admiten etiqueta de cierre, así que abren y cierran en el mismo
+ * token. El parser los trataba como aperturas normales y nada los desapilaba, así que todo lo que
+ * venía después quedaba un nivel más abajo y colgando del tag equivocado. En la pantalla cuyo tema
+ * es justamente ver el árbol del DOM, un `<br>` bastaba para dibujar un árbol falso.
+ */
+const VOID_ELEMENTS = new Set([
+  'area',
+  'base',
+  'br',
+  'col',
+  'embed',
+  'hr',
+  'img',
+  'input',
+  'link',
+  'meta',
+  'source',
+  'track',
+  'wbr',
+]);
+
+/** Abre y cierra en el mismo token: void (`<br>`) o auto-cerrado explícito (`<my-x />`). */
+function closesItself(element: string, token: string): boolean {
+  return VOID_ELEMENTS.has(element) || token.trim().endsWith('/>');
+}
+
+/** Un tag ya ubicado en el árbol. `parentId` es null solo en la raíz. */
+export interface WalkedTag {
+  id: string;
+  element: string;
+  isClosing: boolean;
+  /** Abre un nodo del árbol: toda etiqueta de apertura, incluidas las void y las auto-cerradas. */
+  opensNode: boolean;
+  /** Profundidad, 1 en la raíz. Solo significa algo si `opensNode`. */
+  level: number;
+  parentId: string | null;
+}
+
+/**
+ * ÚNICO recorrido de tags del módulo. Los nodos, las aristas y los ids salen todos de acá.
+ *
+ * Antes había tres criterios de apilado escritos por separado: `generateNodes` verificaba el tope
+ * antes de desapilar, `generateLinks` desapilaba sin mirar, y ninguno contemplaba los elementos
+ * void. Resultado: los nodos y las aristas del MISMO gráfico podían salir de dos árboles
+ * distintos. Con un solo recorrido eso no se puede volver a desincronizar.
+ */
+export function walkTags(htmlCode: string): WalkedTag[] {
+  const walked: WalkedTag[] = [];
+  const openStack: { element: string; id: string }[] = [];
+  const ids = new HtmlIdGeneratorService();
+
+  for (const token of spliteInTags(htmlCode)) {
+    if (!isTag(token)) continue;
+
+    const { element, isClosingTag } = HtmlHelper.getElementType(token);
+    const id = ids.generateId(token);
+
+    if (isClosingTag) {
+      // Solo desapila si el cierre corresponde al tope: un cierre huérfano no puede llevarse
+      // por delante a un ancestro sano.
+      if (openStack.at(-1)?.element === element) openStack.pop();
+      walked.push({ id, element, isClosing: true, opensNode: false, level: 0, parentId: null });
+      continue;
+    }
+
+    walked.push({
+      id,
+      element,
+      isClosing: false,
+      opensNode: true,
+      level: openStack.length + 1,
+      parentId: openStack.at(-1)?.id ?? null,
+    });
+
+    if (!closesItself(element, token)) openStack.push({ element, id });
+  }
+
+  return walked;
+}
+
+/**
+ * Si un id corresponde a algo que produce nodo en el árbol. Lo consume el bloque de código para
+ * decidir qué token es interactivo: antes TODOS lo eran (cierres y texto incluidos), así que sobre
+ * el HTML real de la lección había ~20 paradas focusables contra 7 nodos, y más de la mitad eran
+ * "hice click y no pasó nada" en la pantalla que enseña la correspondencia código a árbol.
+ */
+export function isNodeId(id: string): boolean {
+  return Boolean(id) && !/-closed-\d+$/.test(id) && !/^text-\d+$/.test(id);
 }
 
 export class HtmlIdGeneratorService {
@@ -86,75 +171,25 @@ export class HtmlIdGeneratorService {
 }
 
 export function generateLinks(htmlCode: string): Link[] {
-  const links: Link[] = [];
-  const tagStack: string[] = [];
-  const htmlIdGenerator = new HtmlIdGeneratorService();
-
-  const tags = spliteInTags(htmlCode);
-
-  for (const tag of tags) {
-    if (!isTag(tag)) {
-      continue; // Ignorar elementos que no son etiquetas
-    }
-
-    const tagId = htmlIdGenerator.generateId(tag);
-    const isClosingTag = HtmlHelper.getElementType(tag).isClosingTag;
-    const isSpaceElement = HtmlHelper.isSpaceElement(tagId);
-
-    if (!isClosingTag && !isSpaceElement) {
-      // Etiqueta de apertura (y no es espacio)
-      tagStack.push(tagId);
-
-      if (tagStack.length > 1) {
-        // Si no es la etiqueta raíz
-        const parentTagId = tagStack[tagStack.length - 2];
-        links.push({ source: parentTagId, target: tagId });
-      }
-    } else if (isClosingTag && !isSpaceElement) {
-      // Etiqueta de cierre (y no es espacio)
-      tagStack.pop();
-    }
-  }
-
-  return links;
+  return walkTags(htmlCode)
+    .filter((tag) => tag.opensNode && tag.parentId !== null)
+    .map((tag) => ({ source: tag.parentId as string, target: tag.id }));
 }
 
 export function generateNodes(htmlCode: string): NodeTree[] {
-  const nodes: NodeTree[] = [];
-  const tagStack: TagType[] = [];
-  const htmlIdGenerator = new HtmlIdGeneratorService();
-
-  const tags = spliteInTags(htmlCode);
-
   const y = 100;
   const yOffset = 100;
   const elementForLevel: number[] = [];
 
-  for (const tag of tags) {
-    if (!isTag(tag)) {
-      //Falta contemplar el caso de texto
-      continue; // Ignorar elementos que no son etiquetas
-    }
-    const currentTagType: TagType = HtmlHelper.getElementType(tag);
-    const tagId = htmlIdGenerator.generateId(tag);
-    //Si es un tag de abierto, lo agrego a la pila
-    if (currentTagType.isClosingTag === false) {
-      tagStack.push(currentTagType);
-      const node = {
-        name: tagId,
-        x: 0,
-        y: y + tagStack.length * yOffset,
-        id: tagId,
-        level: tagStack.length,
-      };
-      nodes.push(node);
-    } else {
-      //Si es un tag de cerrado, verifico en la pila y el ultimo y lo saco
-      if (tagStack.at(-1)?.element === currentTagType.element) {
-        tagStack.pop();
-      }
-    }
-  }
+  const nodes: NodeTree[] = walkTags(htmlCode)
+    .filter((tag) => tag.opensNode)
+    .map((tag) => ({
+      name: tag.id,
+      x: 0,
+      y: y + tag.level * yOffset,
+      id: tag.id,
+      level: tag.level,
+    }));
 
   for (const node of nodes) {
     elementForLevel[node.level] = (elementForLevel[node.level] ?? 0) + 1;

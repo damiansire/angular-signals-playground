@@ -8,7 +8,7 @@ import {
 } from '@angular/core';
 import { outputFromObservable, toObservable } from '@angular/core/rxjs-interop';
 import { CodeLine, CodeLineElement } from '../component-atom.interface';
-import { isTag, spliteInTags, HtmlIdGeneratorService, HtmlHelper } from '../../libs/code-parser';
+import { isTag, spliteInTags, HtmlIdGeneratorService, isNodeId } from '../../libs/code-parser';
 import { TailwindTextSize } from '../../interfaces/tailwind-css.interface';
 import { CodeClick } from './code.interface';
 
@@ -68,12 +68,14 @@ export class CodeComponent {
   /**
    * Mismo criterio que `isInteractive`, para el modo interactivo. Sólo es focusable lo que al
    * activarse HACE algo: en modo `Line` manda la línea y los tokens son adorno; en modo `Element`
-   * manda el token, y aun así los separadores (espacios) salen porque `onElementClick` los ignora.
+   * manda el token, pero únicamente si ese token produce un nodo del árbol.
    * Antes línea y tokens eran ambos `role="button"` con `tabindex`, así que un snippet de 11 líneas
    * dejaba 31 paradas de tabulación anidadas y la línea era un blanco muerto que no hacía nada.
+   * Y el filtro que quedaba (`isSpaceElement`) no filtraba nada, porque el tokenizador nunca emite
+   * tokens vacíos: los cierres y el texto quedaban focusables sin tener nodo que revelar.
    */
   isElementInteractive(element: CodeLineElement): boolean {
-    return this.selectBy() === 'Element' && !HtmlHelper.isSpaceElement(element.id ?? '');
+    return this.selectBy() === 'Element' && isNodeId(element.id ?? '');
   }
 
   parseCode(code: string): CodeLine[] {
@@ -125,7 +127,9 @@ export class CodeComponent {
 
   onElementClick(codeLine: CodeLine, clickedItem: CodeLineElement) {
     const isSelect = !clickedItem.selected;
-    if (HtmlHelper.isSpaceElement(clickedItem.id)) {
+    // Un token que no produce nodo no tiene nada que revelar en el árbol: seleccionarlo emitía un
+    // id que ningún nodo matchea, o sea un click que no hacía nada.
+    if (!isNodeId(clickedItem.id)) {
       return;
     }
     const updatedCodeLines = this.codeLines().map((item) => {
