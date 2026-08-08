@@ -11,6 +11,8 @@
  * paso) está documentado donde ocurre.
  */
 import { SISTEMA_ESTABLECIDO } from '../libs/manipulable-challenge';
+import { createFrameScheduler } from './frame-scheduler';
+import { cambiosDeMontaje, ordenarPorUrgencia } from './mount-window';
 
 const NS = 'http://www.w3.org/2000/svg';
 
@@ -398,27 +400,11 @@ export function initMolecule(
     if (enc) r.querySelectorAll('*').forEach(stamp);
   };
 
-  // rAF con teardown: guardamos los ids pendientes para cancelarlos al destruir.
-  let destroyed = false;
-  const rafIds = new Set<number>();
-  const raf = (fn: FrameRequestCallback): void => {
-    const id = requestAnimationFrame((ts) => {
-      rafIds.delete(id);
-      fn(ts);
-    });
-    rafIds.add(id);
-  };
-
-  // Mismo teardown para los timers. Sin esto, las ondas y los pulsos del nacimiento seguian
-  // agendados despues de destruir la vista y corrian sobre nodos ya sacados del documento.
-  const timerIds = new Set<number>();
-  const later = (fn: () => void, ms: number): void => {
-    const id = window.setTimeout(() => {
-      timerIds.delete(id);
-      if (!destroyed) fn();
-    }, ms);
-    timerIds.add(id);
-  };
+  // Cuadros y timers que se cortan al destruir. La lógica vive en `frame-scheduler`, donde se
+  // puede probar en aislamiento: es el contrato del motor que no se ve mirando la pantalla.
+  const agenda = createFrameScheduler();
+  const raf = agenda.raf;
+  const later = agenda.later;
 
   // Layout de scroll (ver scrollLayout): cada concepto arranca en off[i] y ocupa len[i].
   const { off, len, total: TOTAL } = scrollLayout(C.map((c) => c.subN || null));
@@ -757,9 +743,16 @@ export function initMolecule(
    * mientras todavía estás en el actual, así que llegás con la card ya llena.
    */
   const VENTANA_MONTAJE = 1;
-  /** Conceptos esperando montaje/desmontaje fuera del frame. */
-  const pendientes = new Set<number>();
-  let drenajeId = 0;
+  let drenajeAgendado = false;
+
+  /** Los que están montados AHORA. La política (`mount-window`) decide sobre esto. */
+  const montados = (): Set<number> => {
+    const s = new Set<number>();
+    C.forEach((cc, i) => {
+      if (cc.subDispose) s.add(i);
+    });
+    return s;
+  };
 
   function desmontarSub(cc: Concept): void {
     cc.subDispose?.();
@@ -769,14 +762,6 @@ export function initMolecule(
     if (host) host.textContent = '';
   }
 
-  /** Deja el concepto `i` en el estado que le corresponde según dónde está el recorrido. */
-  function ajustarMontaje(i: number, actual: number): void {
-    const cerca = Math.abs(i - actual) <= VENTANA_MONTAJE;
-    const montado = C[i].subDispose !== undefined;
-    if (cerca && !montado) renderSubCard(C[i]);
-    else if (!cerca && montado) desmontarSub(C[i]);
-  }
-
   /**
    * Montar un sub-nivel es caro (createComponent + su primera detección de cambios + reflow) y
    * hacerlo dentro del frame de scroll es lo que produce el tirón. Solo el concepto que se está
@@ -784,21 +769,21 @@ export function initMolecule(
    * se drenan fuera del frame, donde nadie los nota.
    */
   function asegurarMontajes(actual: number): void {
-    if (!C[actual].subDispose) renderSubCard(C[actual]);
+    const { montar, desmontar } = cambiosDeMontaje(actual, N, VENTANA_MONTAJE, montados());
+    if (!montar.length && !desmontar.length) return;
 
-    for (let i = 0; i < N; i++) {
-      if (i === actual) continue;
-      const cerca = Math.abs(i - actual) <= VENTANA_MONTAJE;
-      if (cerca !== (C[i].subDispose !== undefined)) pendientes.add(i);
-    }
-    if (pendientes.size && !drenajeId) {
-      drenajeId = window.setTimeout(() => {
-        drenajeId = 0;
-        if (destroyed) return;
-        for (const i of pendientes) ajustarMontaje(i, liveConcept);
-        pendientes.clear();
-      }, 0);
-    }
+    // El que se está mirando, ya. El resto puede esperar al drenaje.
+    if (montar.includes(actual)) renderSubCard(C[actual]);
+    if (montar.length === 1 && montar[0] === actual && !desmontar.length) return;
+
+    if (drenajeAgendado) return;
+    drenajeAgendado = true;
+    later(() => {
+      drenajeAgendado = false;
+      const ahora = cambiosDeMontaje(liveConcept, N, VENTANA_MONTAJE, montados());
+      for (const i of ordenarPorUrgencia(ahora.montar, liveConcept)) renderSubCard(C[i]);
+      for (const i of ahora.desmontar) desmontarSub(C[i]);
+    }, 0);
   }
 
   function subScrollTo(cc: Concept, k: number): void {
@@ -884,7 +869,7 @@ export function initMolecule(
   // así que la geometría solo se recalcula cuando `orbitDirty` lo pide (scroll/resize/cambio de
   // sub-nivel): estando parado dentro de un concepto, el loop no fuerza reflow ni reescribe dots.
   function orbitLoop(): void {
-    if (destroyed) return;
+    if (agenda.cerrado()) return;
     const vis = orbitFor >= 0 && subDots.length > 0 && (+suborbit.style.opacity || 0) > 0.05;
     // Las paradas son focusables; mientras el índice no se ve (vista molécula, landing) salen del
     // tab-order para no dejar tabs fantasma sobre controles invisibles. `inert` no sirve acá: es un
@@ -972,7 +957,7 @@ export function initMolecule(
   // parado no hay ningún wakeup. La transición del puck entre paradas la hace el CSS, no el loop.
   let orbitRaf = 0;
   const requestOrbit = (): void => {
-    if (orbitRaf || destroyed) return;
+    if (orbitRaf || agenda.cerrado()) return;
     orbitRaf = requestAnimationFrame(() => {
       orbitRaf = 0;
       orbitLoop();
@@ -1485,7 +1470,7 @@ export function initMolecule(
     const dur = Math.min(620, 220 + Math.abs(dist) * 0.35);
     let start = -1;
     const tick = (ts: number): void => {
-      if (destroyed) return;
+      if (agenda.cerrado()) return;
       if (start < 0) start = ts;
       const p = Math.min(1, (ts - start) / dur);
       const top = from + dist * easeInOut(p);
@@ -1599,7 +1584,7 @@ export function initMolecule(
     stage.scrollTop = s * unit();
     render(s);
   };
-  const bootTimer = window.setTimeout(() => {
+  later(() => {
     track.style.height = (TOTAL + TRACK_TAIL) * unit() + 'px';
     openAt();
     raf(openAt);
@@ -1630,13 +1615,11 @@ export function initMolecule(
   requestOrbit();
 
   return () => {
-    destroyed = true;
-    window.clearTimeout(bootTimer);
+    // Todo lo agendado por `raf`/`later` (incluidos el timer de arranque y el drenaje de montajes)
+    // se corta de una: por eso pasan por la agenda y no por window.setTimeout suelto.
+    agenda.dispose();
     cancelAnimationFrame(scrollAnimId);
     cancelAnimationFrame(orbitRaf);
-    rafIds.forEach((id) => cancelAnimationFrame(id));
-    timerIds.forEach((id) => window.clearTimeout(id));
-    if (drenajeId) window.clearTimeout(drenajeId);
     stage.removeEventListener(SISTEMA_ESTABLECIDO, onEstablished);
     stage.removeEventListener('scroll', onScroll);
     window.removeEventListener('keydown', onKeyNav);
