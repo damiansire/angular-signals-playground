@@ -21,7 +21,9 @@ const NODE_SYMBOL_WIDTH = 78;
 @Component({
   selector: 'app-node-tree',
   imports: [NgxEchartsDirective],
-  providers: [provideEchartsCore({ echarts: () => import('echarts') })],
+  // Build modular: `import('echarts')` traía los ~40 tipos de gráfico para dibujar UN grafo.
+  // El porqué del módulo aparte está en `echarts-graph.ts`.
+  providers: [provideEchartsCore({ echarts: () => import('./echarts-graph') })],
   templateUrl: './node-tree.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   styleUrl: './node-tree.component.css',

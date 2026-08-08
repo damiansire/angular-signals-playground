@@ -2,9 +2,18 @@
   @if (isEmpty()) {
     <p class="tree-hint">clickeá un tag y su nodo aparece acá</p>
   }
-  <app-node-tree
-    [links]="links()"
-    [nodes]="nodes()"
-    (viewChanged)="viewChanged.emit()"
-  ></app-node-tree>
+  <!-- El árbol lo dibuja ECharts, que son 1,1 MB. La vista integrada monta los 12 sub-niveles al
+       arrancar, así que ese chunk entraba en el primer segundo para una card que todavía no se ve:
+       quien está mirando la landing paga el peso del nivel 0 sin haber llegado. Con `on idle` el
+       chunk se busca cuando el navegador está libre, que es de sobra antes de que nadie bucee.
+       El placeholder reserva los mismos 400px del canvas para no mover nada al llegar. -->
+  @defer (on idle) {
+    <app-node-tree
+      [links]="links()"
+      [nodes]="nodes()"
+      (viewChanged)="viewChanged.emit()"
+    ></app-node-tree>
+  } @placeholder {
+    <div class="tree-slot" aria-hidden="true"></div>
+  }
 </div>

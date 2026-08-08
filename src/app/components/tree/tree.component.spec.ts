@@ -1,4 +1,4 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, DeferBlockState, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 
 import { TreeComponent } from './tree.component';
@@ -51,8 +51,17 @@ describe('TreeComponent', () => {
     expect(visible[0].id).toBe(firstId);
   });
 
-  it('pasa nodes y links al app-node-tree', () => {
-    const nodeTree = fixture.nativeElement.querySelector('app-node-tree');
-    expect(nodeTree).toBeTruthy();
+  it('mientras el chunk no llegó, el placeholder reserva el alto del canvas', () => {
+    // Sin esto el `@defer` movería medio layout al resolverse.
+    expect(fixture.nativeElement.querySelector('.tree-slot')).toBeTruthy();
+    expect(fixture.nativeElement.querySelector('app-node-tree')).toBeNull();
+  });
+
+  it('pasa nodes y links al app-node-tree una vez resuelto el defer', async () => {
+    const [bloque] = await fixture.getDeferBlocks();
+    await bloque.render(DeferBlockState.Complete);
+
+    expect(fixture.nativeElement.querySelector('app-node-tree')).toBeTruthy();
+    expect(fixture.nativeElement.querySelector('.tree-slot')).toBeNull();
   });
 });

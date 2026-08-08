@@ -4,6 +4,14 @@
   background-image: radial-gradient(circle, rgba(15, 23, 42, 0.08) 1px, transparent 1px);
   background-size: 18px 18px;
 }
+/* Reserva del canvas mientras el chunk de ECharts todavía no llegó: mismo alto que `.demo-chart`,
+   así el `@defer` no mueve nada de lugar al resolverse. */
+.tree-slot {
+  display: block;
+  width: 100%;
+  height: 400px;
+}
+
 /* Estado vacío: el área del árbol ocupa media escena y, sin nodos, se lee como espacio muerto en
    vez de escenario. El hint la nombra y enseña el gesto; desaparece con el primer nodo revelado. */
 .tree-hint {
