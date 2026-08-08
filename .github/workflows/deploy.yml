@@ -23,12 +23,29 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
-    # workflow_run tambien llega cuando CI corrio sobre la rama de un PR o cuando fallo/se cancelo.
-    # Solo publica master en verde; el disparo manual queda habilitado para republicar a mano.
+    # Las cuatro condiciones del workflow_run son TODAS necesarias, y la de head_repository es la
+    # que cierra el agujero real: `ci.yml` corre tambien on:pull_request, asi que un PR desde un
+    # fork con una rama llamada como la default disparaba este deploy, que hacia checkout del
+    # commit del fork y corria `npm ci` (o sea, los lifecycle scripts de un desconocido) dentro de
+    # un job con pages:write + id-token:write. Y lo publicado comparte origen con las demas project
+    # pages del usuario, asi que ese JS leia el localStorage y las cookies de los otros proyectos.
+    # Es el patron pwn-request de manual. Exigir que el head sea de ESTE repo lo corta.
+    #
+    # `workflow_run.event == 'push'` descarta de entrada los runs de PR; el resto es cinturon y
+    # tiradores. La rama sale de `repository.default_branch` y no de la constante 'master', para
+    # que renombrar la rama no reabra el agujero en silencio.
+    #
+    # El disparo manual queda acotado a la rama default de este repo (solo alguien con permiso de
+    # escritura puede lanzarlo). Republica sin pasar por CI a proposito: es la valvula para
+    # re-desplegar un commit que YA paso CI, no una via para publicar algo sin verificar.
     if: >-
-      github.event_name == 'workflow_dispatch' ||
-      (github.event.workflow_run.conclusion == 'success' &&
-       github.event.workflow_run.head_branch == 'master')
+      (github.event_name == 'workflow_dispatch' &&
+       github.ref == format('refs/heads/{0}', github.event.repository.default_branch)) ||
+      (github.event_name == 'workflow_run' &&
+       github.event.workflow_run.event == 'push' &&
+       github.event.workflow_run.head_repository.full_name == github.repository &&
+       github.event.workflow_run.head_branch == github.event.repository.default_branch &&
+       github.event.workflow_run.conclusion == 'success')
     steps:
       - uses: actions/checkout@v4
         with:
