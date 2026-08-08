@@ -26,8 +26,11 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      # Pinneada al SHA completo, no al tag: es la unica action de tercero del repo y recibe el
+      # GITHUB_TOKEN. Un tag es mutable, asi que "v2" puede pasar a apuntar a otro codigo sin que
+      # cambie nada aca. Las actions/* se dejan por tag: las publica GitHub, el mismo que corre el runner.
       - name: Link Checker
-        uses: lycheeverse/lychee-action@v2
+        uses: lycheeverse/lychee-action@e7477775783ea5526144ba13e8db5eec57747ce8 # v2.9.0
         with:
           # Fail the build if any README/Markdown link or badge is broken.
           fail: true

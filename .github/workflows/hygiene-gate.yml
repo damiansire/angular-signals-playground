@@ -20,11 +20,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Sin .env / claude-scratch-* / temp_* / rewrite[0-9]*.py trackeados
+      - name: Sin .env* / reportes internos / descartables de sesion trackeados
         shell: bash
         run: |
           set -e
-          MATCHES=$(git ls-files | grep -E '(^|/)\.env$|(^|/)claude-scratch-[^/]*$|(^|/)temp_[^/]*$|(^|/)rewrite[0-9]+\.py$' || true)
+          # (^|/)\.env($|\.) cubre .env, .env.local y .env.production: anclar en \.env$ dejaba
+          # pasar justo los que genera el tooling por defecto. .env.example queda permitido.
+          # Los reportes de auditoria (_audit/, _audits/, AUDITORIA.md) dependian solo de
+          # .git/info/exclude, que no se clona ni lo ve CI.
+          MATCHES=$(git ls-files | grep -E '(^|/)\.env($|\.)|(^|/)_audits?/|(^|/)AUDITORIA\.md$|(^|/)claude-scratch-[^/]*$|(^|/)temp_[^/]*$|(^|/)rewrite[0-9]+\.py$' | grep -Ev '(^|/)\.env\.example$' || true)
           if [ -n "$MATCHES" ]; then
             echo "Archivos trackeados que no deberian estar en el repo:"
             echo "$MATCHES"

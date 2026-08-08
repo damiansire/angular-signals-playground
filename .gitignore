@@ -41,5 +41,15 @@ testem.log
 .DS_Store
 Thumbs.db
 
-# Auditorias locales (Fragua/roastme), no versionadas
+# Variables de entorno: ninguna versionada salvo el ejemplo sin valores reales.
+# El patron cubre .env.local / .env.production, que es lo que genera el tooling por defecto.
+.env
+.env.*
+!.env.example
+
+# Reportes de auditoria locales, no versionados. Estaban solo en .git/info/exclude, que es
+# local y no se clona: en otra maquina estos artefactos quedaban sueltos en el working tree.
 /_audits
+/_audit
+/AUDITORIA.md
+/verify.sh
