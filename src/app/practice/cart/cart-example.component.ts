@@ -192,14 +192,18 @@ export class CartExampleComponent {
 
 /**
  * `qty` cruza un boundary externo (localStorage es mutable a mano): validamos que
- * cada cantidad sea un número finito antes de confiar en ella. Sin esto, un `qty`
+ * cada cantidad sea un entero no negativo antes de confiar en ella. Sin esto, un `qty`
  * editado a strings propaga `NaN` al subtotal. No validamos las claves contra el
  * catálogo: una clave de más se ignora sola (`subtotal` recorre el catálogo).
+ *
+ * Pedir entero y >= 0, y no solo finito, es lo que hace que el estado guardado y el que se puede
+ * alcanzar tocando la UI sean el mismo conjunto: con -3 guardado a mano, la lista mostraba -3
+ * mientras la matemática lo clampeaba a 0, así que el total no se correspondía con lo que se veía.
  */
 function isValidQuantities(value: unknown): value is Quantities {
   if (typeof value !== 'object' || value === null) return false;
   return Object.values(value as Record<string, unknown>).every(
-    (n) => typeof n === 'number' && Number.isFinite(n),
+    (n) => typeof n === 'number' && Number.isInteger(n) && n >= 0,
   );
 }
 
