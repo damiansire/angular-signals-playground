@@ -41,6 +41,15 @@ export const CEILING = 8;
 const PROSE_ATTRS = /(?<![[\w-])(concept|action|observe)\s*=\s*"([^"]*)"/g;
 
 /**
+ * Markup a borrar. `<[^>]+>` cortaba en el primer `>`, incluido el que vive DENTRO de un valor de
+ * atributo: con `observe="… (value => value + 1)."` el resto de la etiqueta quedaba suelto y se
+ * contaba como prosa, arrastrando también los nombres de clase de Tailwind. Medido: una pantalla
+ * de 5 palabras marcaba 7, y un `<div class="text-red-500 font-bold">` sumaba 2 de la nada.
+ * Este patrón salta por encima de los tramos entrecomillados, así que un `>` adentro no corta.
+ */
+const MARKUP = /<\/?[a-zA-Z][^>"']*(?:(?:"[^"]*"|'[^']*')[^>"']*)*\/?>/g;
+
+/**
  * Prosa visible de un template: se sacan los bloques de código (que son el material, no la
  * explicación), el markup, y las interpolaciones (son datos que cambian, no texto que se lee).
  * Los atributos de PROSE_ATTRS se rescatan ANTES de borrar el markup, porque son texto que se lee.
@@ -59,7 +68,7 @@ export function countProse(html) {
     .replace(/<!--[\s\S]*?-->/g, ' ')
     .replace(/\{\{[\s\S]*?\}\}/g, ' ')
     .replace(/@(if|for|else|switch|case|default|empty)[^{]*\{/g, ' ')
-    .replace(/<[^>]+>/g, ' ')
+    .replace(MARKUP, ' ')
     .replace(/&[a-z]+;/g, ' ')
     .replace(/[{}]/g, ' ');
 

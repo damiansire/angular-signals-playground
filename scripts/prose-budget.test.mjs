@@ -72,6 +72,17 @@ test('la prosa del atributo no se cuenta dos veces', () => {
   assert.equal(countProse('<app-layout concept="Una dos tres." />'), 3);
 });
 
+test('un > dentro de un atributo no rompe el borrado del markup', () => {
+  // El contador cortaba la etiqueta en ese `>` y contaba el resto como prosa.
+  assert.equal(countProse('<app-l concept="una dos tres" /><p>cuatro cinco</p>'), 5);
+  assert.equal(countProse('<app-l concept="una => dos tres" /><p>cuatro cinco</p>'), 5);
+});
+
+test('los nombres de clase no son prosa', () => {
+  assert.equal(countProse('<div class="text-red-500 font-bold">x</div>'), 1);
+  assert.equal(countProse('<div title="a > b" class="text-red-500 font-bold">x</div>'), 1);
+});
+
 test('una pantalla renombrada no blanquea su deuda: estrena con el techo, no con su conteo', () => {
   const renombrada = [{ screen: 'nuevo-nombre.html', words: 60 }];
   assert.deepEqual(nextBaseline(renombrada, { 'viejo-nombre.html': 60 }), {

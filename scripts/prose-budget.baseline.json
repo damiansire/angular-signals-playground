@@ -1,5 +1,4 @@
 {
-  "src/app/signals/level-9-after-render-effect/sub-levels/2-on-cleanup/on-cleanup.component.html": 85,
   "src/app/signals/level-3-effect/sub-levels/2-interval-when-is-destroy/destroy-effect.component.html": 56,
   "src/app/signals/level-5-linked-signal/sub-levels/2-linked-signal-with-source/linked-signal-with-source.component.html": 56,
   "src/app/signals/level-7-signal-io/sub-levels/3-input-required/input-required.component.html": 56,
@@ -12,6 +11,7 @@
   "src/app/signals/level-7-signal-io/sub-levels/2-model/model-two-way.component.html": 45,
   "src/app/signals/level-3-effect/sub-levels/1-effect/effect.component.html": 44,
   "src/app/signals/level-9-after-render-effect/sub-levels/1-after-render-effect/after-render-effect.component.html": 43,
+  "src/app/signals/level-9-after-render-effect/sub-levels/2-on-cleanup/on-cleanup.component.html": 43,
   "src/app/signals/level-3-effect/sub-levels/5-effect-destroy/effect-destroy.component.html": 41,
   "src/app/signals/level-1-interaction-with-signals/sub-levels/1-writable-signals/writable-signals.component.html": 40,
   "src/app/signals/level-1-interaction-with-signals/sub-levels/types-of-signals/types-of-signals.component.html": 39,
@@ -29,7 +29,7 @@
   "src/app/signals/level-2-computed-signals/sub-levels/1-computed-signals/computed-signals.component.html": 31,
   "src/app/signals/level-1-interaction-with-signals/sub-levels/create-new-signals/create-new-signals.component.html": 30,
   "src/app/signals/level-2-computed-signals/sub-levels/2-computed-signal-dynamic-dependencies/computed-signal-dynamic-dependencies.component.html": 29,
-  "src/app/signals/level-1-interaction-with-signals/sub-levels/2-update-signal/update-signal.component.html": 23,
+  "src/app/signals/level-1-interaction-with-signals/sub-levels/2-update-signal/update-signal.component.html": 22,
   "src/app/signals/level-3-effect/sub-levels/2-interval-when-is-destroy/destroy-box/destroy-box.component.html": 18,
   "src/app/signals/level-0-introduction/sub-levels/manual-sync-pain/manual-sync-pain.component.html": 11,
   "src/app/signals/level-0-introduction/sub-levels/dom-to-pixel/dom-to-pixel.component.html": 10,
