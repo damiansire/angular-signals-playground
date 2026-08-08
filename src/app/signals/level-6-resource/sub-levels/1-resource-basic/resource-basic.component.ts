@@ -20,15 +20,23 @@ export class ResourceBasicComponent {
 
   readonly userResource = resource<DemoUser, number>({
     params: () => this.userId(),
-    loader: ({ params }) =>
+    // El abortSignal es parte de la lección: `resource` lo dispara cuando cambian los params o
+    // cuando se destruye el componente. Ignorarlo dejaba el timer de 800 ms vivo, resolviendo
+    // contra un pedido que ya nadie espera. Un ejemplo de `resource` que no cancela enseña la
+    // mitad de la API.
+    loader: ({ params, abortSignal }) =>
       new Promise<DemoUser>((resolve, reject) => {
-        setTimeout(() => {
+        const timer = setTimeout(() => {
           try {
             resolve(lookupUser(params));
           } catch (error) {
             reject(error);
           }
         }, 800);
+        abortSignal.addEventListener('abort', () => {
+          clearTimeout(timer);
+          reject(new DOMException('Pedido cancelado', 'AbortError'));
+        });
       }),
   });
 
