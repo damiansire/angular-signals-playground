@@ -82,20 +82,20 @@ que funciona; no volver a explorar alternativas ya descartadas.
 Cada área de `src/app/` mapea a un scope de commit. Usá el scope del área que
 realmente tocás; no inventes scopes nuevos.
 
-| Directorio              | Qué contiene                                              | Scope        |
-| ----------------------- | -------------------------------------------------------- | ------------ |
-| `src/app/integrada-vista/` | Vista integrada: recorrido molécula de los 12 niveles, entrada por defecto (ruta `/`) | `integrada` |
-| `src/app/practice/`     | Ejemplos aplicados para usar lo aprendido (`/practica/*`) | `practice`   |
-| `src/app/signals/`      | Los niveles de aprendizaje (0–11) y sus sub-niveles      | `signals`    |
-| `src/app/components/`   | Componentes de feature (sidebar, histories, trees…)      | `components` |
-| `src/app/components-atom/` | Bloques atómicos de UI (button, code, input, title…)  | `atom`       |
-| `src/app/components-draw/` | Componentes de dibujo/visualización                   | `draw`       |
-| `src/app/layouts/`      | Layouts de página reutilizables                          | `layouts`    |
-| `src/app/libs/`         | Helpers agnósticos del framework (p.ej. parser de HTML)  | `libs`       |
-| `src/app/interfaces/`   | Tipos TypeScript compartidos                             | `interfaces` |
-| Routing / arranque      | `app.routes.ts`, `app.config.ts`, navegación            | `routing`    |
-| Config / tooling        | tsconfig, eslint, angular.json, package.json, CI         | `config`     |
-| README / docs           | Documentación                                            | `docs`       |
+| Directorio                 | Qué contiene                                                                          | Scope        |
+| -------------------------- | ------------------------------------------------------------------------------------- | ------------ |
+| `src/app/integrada-vista/` | Vista integrada: recorrido molécula de los 12 niveles, entrada por defecto (ruta `/`) | `integrada`  |
+| `src/app/practice/`        | Ejemplos aplicados para usar lo aprendido (`/practica/*`)                             | `practice`   |
+| `src/app/signals/`         | Los niveles de aprendizaje (0–11) y sus sub-niveles                                   | `signals`    |
+| `src/app/components/`      | Componentes de feature (histories, trees, forms…)                                     | `components` |
+| `src/app/components-atom/` | Bloques atómicos de UI (button, code, input, title…)                                  | `atom`       |
+| `src/app/components-draw/` | Componentes de dibujo/visualización                                                   | `draw`       |
+| `src/app/layouts/`         | Layouts de página reutilizables                                                       | `layouts`    |
+| `src/app/libs/`            | Helpers agnósticos del framework (p.ej. parser de HTML)                               | `libs`       |
+| `src/app/interfaces/`      | Tipos TypeScript compartidos                                                          | `interfaces` |
+| Routing / arranque         | `app.routes.ts`, `app.config.ts`, navegación                                          | `routing`    |
+| Config / tooling           | tsconfig, eslint, angular.json, package.json, CI                                      | `config`     |
+| README / docs              | Documentación                                                                         | `docs`       |
 
 ## Commits
 
@@ -135,13 +135,19 @@ Todo PR pasa el mismo gate que CI: lint + format:check + tests en verde.
 
 ## Scripts
 
-| Script            | Para qué                                            |
-| ----------------- | --------------------------------------------------- |
-| `npm start`       | Dev server con HMR en `http://localhost:4200`       |
-| `npm run build`   | Build de producción a `dist/angular-examples`       |
-| `npm run watch`   | Rebuild en cada cambio (configuración development)   |
-| `npm test`        | Tests unitarios (Karma + Jasmine)                   |
-| `npm run lint`    | Lint con ESLint + `angular-eslint`                  |
+| Script                 | Para qué                                           |
+| ---------------------- | -------------------------------------------------- |
+| `npm start`            | Dev server con HMR en `http://localhost:4200`      |
+| `npm run build`        | Build de producción a `dist/angular-examples`      |
+| `npm run watch`        | Rebuild en cada cambio (configuración development) |
+| `npm test`             | Tests unitarios (Karma + Jasmine)                  |
+| `npm run lint`         | Lint con ESLint + `angular-eslint`                 |
+| `npm run gate:prosa`   | Presupuesto de prosa por pantalla (ratchet)        |
+| `npm run test:scripts` | Tests de los scripts de gate (`node --test`)       |
+
+En CI corren `lint`, `format:check`, `test:scripts`, `gate:prosa`, `test` y el
+build de producción. Si uno falla, el PR no mergea y el deploy a Pages tampoco
+ocurre: `deploy.yml` escucha el resultado de CI, no el push.
 
 ## Estándar nivel mundial
 
