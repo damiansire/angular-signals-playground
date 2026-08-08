@@ -401,6 +401,17 @@ export function initMolecule(
     rafIds.add(id);
   };
 
+  // Mismo teardown para los timers. Sin esto, las ondas y los pulsos del nacimiento seguian
+  // agendados despues de destruir la vista y corrian sobre nodos ya sacados del documento.
+  const timerIds = new Set<number>();
+  const later = (fn: () => void, ms: number): void => {
+    const id = window.setTimeout(() => {
+      timerIds.delete(id);
+      if (!destroyed) fn();
+    }, ms);
+    timerIds.add(id);
+  };
+
   // Layout de scroll (ver scrollLayout): cada concepto arranca en off[i] y ocupa len[i].
   const { off, len, total: TOTAL } = scrollLayout(C.map((c) => c.subN || null));
   // Unidad de cola de la pista. Cada concepto bucea usando parte del tramo del SIGUIENTE (su
@@ -937,7 +948,7 @@ export function initMolecule(
       stroke: COL[C[i].accent],
     });
     ripG.appendChild(r);
-    window.setTimeout(() => r.remove(), 810);
+    later(() => r.remove(), 810);
   }
   let lastBorn = 0;
   // Último (nivel, sub-nivel) reportado a la URL, para no reescribirla en cada frame.
@@ -947,10 +958,10 @@ export function initMolecule(
     ripat(idx);
     for (let j = 0; j < rev; j++) {
       const a = atomEls[j];
-      window.setTimeout(
+      later(
         () => {
           a.classList.add('pulse');
-          window.setTimeout(() => a.classList.remove('pulse'), 480);
+          later(() => a.classList.remove('pulse'), 480);
         },
         Math.abs(idx - j) * 60,
       );
@@ -1371,6 +1382,11 @@ export function initMolecule(
     window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   function goToUnit(u: number): void {
     cancelAnimationFrame(scrollAnimId);
+    // Cancelar la animación en curso deja huérfano el scrollSnapType:'none' que ella había puesto:
+    // el tick que lo iba a restituir ya no corre más. Se restituye acá, antes de decidir si esta
+    // llamada anima o no, porque las dos salidas cortas de abajo (reduced-motion, o destino a menos
+    // de 1px) hacían `return` sin tocarlo y el snap quedaba apagado para el resto de la sesión.
+    stage.style.scrollSnapType = '';
     const to = u * unit();
     const from = stage.scrollTop;
     const dist = to - from;
@@ -1470,10 +1486,11 @@ export function initMolecule(
   // El cierre del sub-nivel avisa por evento del DOM cuando el sistema queda sano. Es a propósito
   // el acoplamiento más flojo posible: el átomo no conoce al motor ni el motor al átomo, y el
   // evento solo puede venir de la card montada, así que se atribuye al concepto en pantalla.
-  stage.addEventListener('sistema-establecido', () => {
+  const onEstablished = (): void => {
     established.add(liveConcept);
     render(stage.scrollTop / unit());
-  });
+  };
+  stage.addEventListener('sistema-establecido', onEstablished);
   stage.addEventListener('scroll', onScroll, { passive: true });
   window.addEventListener('keydown', onKeyNav);
   window.addEventListener('resize', onResize);
@@ -1534,6 +1551,8 @@ export function initMolecule(
     cancelAnimationFrame(scrollAnimId);
     cancelAnimationFrame(orbitRaf);
     rafIds.forEach((id) => cancelAnimationFrame(id));
+    timerIds.forEach((id) => window.clearTimeout(id));
+    stage.removeEventListener('sistema-establecido', onEstablished);
     stage.removeEventListener('scroll', onScroll);
     window.removeEventListener('keydown', onKeyNav);
     window.removeEventListener('resize', onResize);
