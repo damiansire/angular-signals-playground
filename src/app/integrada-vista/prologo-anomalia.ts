@@ -85,6 +85,10 @@ export function initPrologoAnomalia(host: HTMLElement, opts: PrologoOpciones): (
     !pantalla ||
     !veloz
   ) {
+    // Sin prólogo hay que seguir igual: `alTerminar` es el empalme que arranca la construcción de
+    // Tusi. Devolver un no-op sin llamarlo dejaba la landing congelada para siempre, con el clima
+    // ya elegido y nada pasando, que es peor que no tener prólogo.
+    opts.alTerminar();
     return () => undefined;
   }
 
@@ -1054,9 +1058,9 @@ export function initPrologoAnomalia(host: HTMLElement, opts: PrologoOpciones): (
       // La resolución: los dos círculos apareciendo tienen su acorde.
       if (!dichas.has('final') && t >= T.orden + 2600) {
         dichas.add('final');
-        [220, 277, 330, 440].forEach((f, i) =>
-          setTimeout(() => pip(f, 2.2, 'sine', 0.07), i * 160),
-        );
+        // Por `luego`, no por setTimeout pelado: estos cuatro sobrevivían al cleanup y sonaban
+        // contra un AudioContext ya cerrado si el prólogo se salteaba justo en la resolución.
+        [220, 277, 330, 440].forEach((f, i) => luego(() => pip(f, 2.2, 'sine', 0.07), i * 160));
       }
     }
 
