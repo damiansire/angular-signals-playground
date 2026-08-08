@@ -29,8 +29,12 @@ const COL: Record<AccentKey, string> = {
 /** Handle de un sub-nivel montado: su disposer y el nombre que va al topbar. */
 export interface SubHandle {
   dispose: () => void;
-  /** Nombre del sub-nivel. Lo declara quien monta, no se adivina leyendo el DOM montado. */
-  title?: string;
+  /**
+   * Nombre del sub-nivel. Lo declara quien monta, no se adivina leyendo el DOM montado.
+   * El `| undefined` es explícito: con `exactOptionalPropertyTypes`, "ausente" y "presente pero
+   * undefined" son cosas distintas, y quien monta puede pasar un título que no tiene.
+   */
+  title?: string | undefined;
 }
 /** Monta el componente real de un sub-nivel (concepto ci, sub si) y devuelve su handle. */
 export type MountSub = (host: HTMLElement, conceptIdx: number, subIdx: number) => SubHandle;
@@ -51,7 +55,10 @@ interface Concept extends RawConcept {
   subs: unknown[]; // longitud = subN (para la órbita / conteo)
   card?: HTMLDivElement;
   subIdx: number;
-  subDispose?: () => void; // disposer del componente montado del sub actual
+  // Disposer del componente montado del sub actual. El `| undefined` explícito porque al
+  // desmontar se le asigna undefined, y con `exactOptionalPropertyTypes` eso no es lo mismo que
+  // borrar la propiedad.
+  subDispose?: (() => void) | undefined;
   exampleTitle?: string; // nombre del sub-nivel actual (declarado por el handle), para el topbar
 }
 

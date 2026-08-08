@@ -7,6 +7,9 @@
     "strict": true,
     "noImplicitOverride": true,
     "noPropertyAccessFromIndexSignature": true,
+    /* "ausente" y "presente pero undefined" dejan de ser lo mismo. En un repo que enseña
+       reactividad, esa distinción importa: un input que no se pasó no es un input en undefined. */
+    "exactOptionalPropertyTypes": true,
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
     "skipLibCheck": true,
