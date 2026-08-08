@@ -45,8 +45,6 @@ export const EFFECT_READS_SYSTEM: ManipulableChallenge = {
   // Sano no es "la perilla está en la posición correcta": es haberlo VISTO seguir al menos una vez.
   healthy: (state: SystemState) =>
     state.actions > 0 && state.values['log'] === state.values['count'],
-
-  establishes: 'Un effect solo reacciona a lo que lee adentro de su función.',
 };
 
 const LIMPIEZA = 'limpieza';
@@ -96,8 +94,6 @@ export const EFFECT_LEAK_SYSTEM: ManipulableChallenge = {
   }),
 
   healthy: (state: SystemState) => state.actions > 0 && state.values['vivos'] === 0,
-
-  establishes: 'La limpieza de un effect se registra con onCleanup, no devolviéndola.',
 };
 
 /**
@@ -152,6 +148,4 @@ export const EFFECT_CLEANUP_SYSTEM: ManipulableChallenge = {
   // Con una sola vuelta no se nota la acumulación: hay que haberlo prendido y apagado dos veces.
   healthy: (state: SystemState) =>
     state.actions >= 2 && state.values['vivos'] === state.values['esperado'],
-
-  establishes: 'onCleanup corre antes de cada re-ejecución del effect, no solo al final.',
 };

@@ -34,7 +34,6 @@ export const HTML_TREE_SYSTEM: ManipulableChallenge = {
   // Con el div el browser reubica: el <p> queda con un solo hijo (el texto) y la caja afuera.
   settle: (s: SystemState) => ({ hijos: s.actions === 0 ? 0 : s.knobs[K] === 1 ? 2 : 1 }),
   healthy: (s: SystemState) => s.actions > 0 && s.values['hijos'] === 2,
-  establishes: 'El árbol lo arma el browser, y no siempre es el que escribiste.',
 };
 
 /** 0/2 · cambiar la pantalla es encontrar un nodo y mutarlo. */
@@ -53,7 +52,6 @@ export const DOM_ALIVE_SYSTEM: ManipulableChallenge = {
   // Un selector que no matchea devuelve null: la línea corre y no toca nada.
   settle: (s: SystemState) => ({ tocados: s.knobs[K] === 1 ? s.actions : 0 }),
   healthy: (s: SystemState) => s.actions > 0 && s.values['tocados'] === s.actions,
-  establishes: 'Cambiar la pantalla es encontrar un nodo del árbol y mutarlo.',
 };
 
 /** 0/3 · no todo cambio cuesta lo mismo: el flujo saltea las etapas que no hacen falta. */
@@ -77,7 +75,6 @@ export const DOM_PIXEL_SYSTEM: ManipulableChallenge = {
     etapas: s.actions === 0 ? 0 : s.knobs[K] === 2 ? 2 : s.knobs[K] === 1 ? 4 : 5,
   }),
   healthy: (s: SystemState) => s.actions > 0 && s.values['etapas'] === 2,
-  establishes: 'Animar transform saltea layout y paint: solo compone.',
 };
 
 /** 0/4 · con la sincronización a mano, siempre te olvidás un lugar. */
@@ -97,7 +94,6 @@ export const MANUAL_SYNC_SYSTEM: ManipulableChallenge = {
   ],
   settle: (s: SystemState) => ({ viejas: s.actions === 0 || s.knobs[K] === 1 ? 0 : 1 }),
   healthy: (s: SystemState) => s.actions > 0 && s.values['viejas'] === 0,
-  establishes: 'Sincronizar a mano se rompe en cuanto te olvidás un lugar.',
 };
 
 /** 0/5 · Zone.js solo se entera de lo que parchea. */
@@ -116,7 +112,6 @@ export const ZONE_PATCH_SYSTEM: ManipulableChallenge = {
   // Sin parche, Angular nunca se entera de que pasó algo.
   settle: (s: SystemState) => ({ pantalla: s.actions > 0 && s.knobs[K] === 1 ? 1 : 0 }),
   healthy: (s: SystemState) => s.values['pantalla'] === 1,
-  establishes: 'Zone.js solo se entera de las APIs async que alcanza a parchear.',
 };
 
 /** 0/6 · el signal avisa QUIÉN lo lee, así que se re-chequea solo eso. */
@@ -137,5 +132,4 @@ export const SIGNAL_NOTIFY_SYSTEM: ManipulableChallenge = {
     revisados: s.actions === 0 ? 0 : s.knobs[K] === 1 ? 2 : 7,
   }),
   healthy: (s: SystemState) => s.actions > 0 && s.values['revisados'] === 2,
-  establishes: 'El signal avisa quién lo lee, así que se re-chequea solo eso.',
 };

@@ -31,7 +31,6 @@ export const RESOURCE_BASIC_SYSTEM: ManipulableChallenge = {
   // Sin cancelación, la respuesta de la búsqueda anterior pisa a la nueva cuando llega tarde.
   settle: (s: SystemState) => ({ viejas: s.knobs[K] === 1 ? 0 : Math.max(0, s.actions - 1) }),
   healthy: (s: SystemState) => s.actions >= 2 && s.values['viejas'] === 0,
-  establishes: 'resource ata el pedido a sus params y descarta la respuesta que quedó vieja.',
 };
 
 /** 6/2 · rxResource es lo mismo cuando el loader ya es un Observable. */
@@ -55,5 +54,4 @@ export const RX_RESOURCE_SYSTEM: ManipulableChallenge = {
         ],
   settle: (s: SystemState) => ({ vivas: s.knobs[K] === 1 ? Math.min(s.actions, 1) : s.actions }),
   healthy: (s: SystemState) => s.actions >= 2 && s.values['vivas'] === 1,
-  establishes: 'rxResource se encarga de la suscripción y de cerrarla al cambiar los params.',
 };

@@ -10,6 +10,8 @@
  * El porqué de cada mecánica (cámara, acople del electrón actual, wheel = un
  * paso) está documentado donde ocurre.
  */
+import { SISTEMA_ESTABLECIDO } from '../libs/manipulable-challenge';
+
 const NS = 'http://www.w3.org/2000/svg';
 
 type AccentKey = 'source' | 'derived' | 'effect' | 'ink' | 'capstone';
@@ -1490,7 +1492,7 @@ export function initMolecule(
     established.add(liveConcept);
     render(stage.scrollTop / unit());
   };
-  stage.addEventListener('sistema-establecido', onEstablished);
+  stage.addEventListener(SISTEMA_ESTABLECIDO, onEstablished);
   stage.addEventListener('scroll', onScroll, { passive: true });
   window.addEventListener('keydown', onKeyNav);
   window.addEventListener('resize', onResize);
@@ -1552,7 +1554,7 @@ export function initMolecule(
     cancelAnimationFrame(orbitRaf);
     rafIds.forEach((id) => cancelAnimationFrame(id));
     timerIds.forEach((id) => window.clearTimeout(id));
-    stage.removeEventListener('sistema-establecido', onEstablished);
+    stage.removeEventListener(SISTEMA_ESTABLECIDO, onEstablished);
     stage.removeEventListener('scroll', onScroll);
     window.removeEventListener('keydown', onKeyNav);
     window.removeEventListener('resize', onResize);

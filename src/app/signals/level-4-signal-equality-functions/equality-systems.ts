@@ -47,8 +47,6 @@ export const REFERENCE_EQUALITY_SYSTEM: ManipulableChallenge = {
 
   healthy: (state: SystemState) =>
     state.actions > 0 && state.values['avisos'] === state.values['cambios'],
-
-  establishes: 'Un signal compara por referencia: mutar en el lugar no avisa a nadie.',
 };
 
 /**
@@ -88,6 +86,4 @@ export const CUSTOM_EQUAL_SYSTEM: ManipulableChallenge = {
 
   // Con una sola carga no hay nada que notar: el desperdicio aparece recién al repetir.
   healthy: (state: SystemState) => state.actions >= 2 && state.values['recalculos'] === 1,
-
-  establishes: 'Con un equal propio, dos valores equivalentes dejan de contar como cambio.',
 };

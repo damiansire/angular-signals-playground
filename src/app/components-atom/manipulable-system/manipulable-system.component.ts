@@ -11,6 +11,7 @@ import {
   act,
   ManipulableChallenge,
   readings,
+  SISTEMA_ESTABLECIDO,
   startOf,
   SystemState,
   turn,
@@ -68,7 +69,7 @@ export class ManipulableSystemComponent {
     this.state.set(next());
     if (!wasHealthy && this.healthy()) {
       this.host.nativeElement.dispatchEvent(
-        new CustomEvent('sistema-establecido', { bubbles: true }),
+        new CustomEvent(SISTEMA_ESTABLECIDO, { bubbles: true }),
       );
     }
   }

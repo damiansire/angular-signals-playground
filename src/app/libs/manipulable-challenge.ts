@@ -51,9 +51,15 @@ export interface ManipulableChallenge {
    */
   readonly settle: (state: SystemState) => Readings;
   readonly healthy: (state: SystemState) => boolean;
-  /** Lo que el enlace del recorrido guarda cuando el sistema queda sano. */
-  readonly establishes: string;
 }
+
+/**
+ * Evento con el que un sub-nivel avisa que su sistema quedó sano. Es el acoplamiento más flojo
+ * posible entre el átomo y el motor del recorrido: ninguno de los dos se conoce, solo comparten
+ * este nombre. Por eso es una constante y no un literal repetido en las dos puntas, que es como
+ * estaba: un typo de un lado no rompía nada, simplemente el recorrido dejaba de marcar el avance.
+ */
+export const SISTEMA_ESTABLECIDO = 'sistema-establecido';
 
 /** El sistema arranca con todas las perillas en su primera posición, que es la avería. */
 export function startOf(challenge: ManipulableChallenge): SystemState {
@@ -149,7 +155,6 @@ export const SHAPE = {
   maxGauges: 2,
   maxGaugeWords: 2,
   maxActionWords: 4,
-  maxEstablishesWords: 14,
 } as const;
 
 const words = (text: string): number => text.trim().split(/\s+/).filter(Boolean).length;
@@ -170,7 +175,6 @@ export function malformed(challenge: ManipulableChallenge): readonly string[] {
   }
   if (challenge.gauges.length === 0) problems.push('no tiene lectura que conteste');
   if (challenge.healthy(start)) problems.push('arranca sano, así que no hay nada que notar');
-  if (challenge.establishes.trim() === '') problems.push('no deja línea establecida');
 
   // Forma: que los 37 cierres se lean como el mismo gesto.
   if (challenge.knobs.length > 1) {
@@ -182,9 +186,6 @@ export function malformed(challenge: ManipulableChallenge): readonly string[] {
   }
   if (words(challenge.action) > SHAPE.maxActionWords) {
     problems.push('el verbo de la acción es largo');
-  }
-  if (words(challenge.establishes) > SHAPE.maxEstablishesWords) {
-    problems.push('la línea establecida es un párrafo, no una línea');
   }
 
   // El bloque tiene que leerse de un vistazo, y la perilla tiene que estar a la vista en TODAS sus

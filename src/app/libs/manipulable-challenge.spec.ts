@@ -37,7 +37,6 @@ const TRES_POSICIONES: ManipulableChallenge = {
   code: (knobs) => [{ text: `p=${knobs['p']}`, knob: 'p' }],
   settle: (s) => ({ v: s.knobs['p'] }),
   healthy: (s) => s.knobs['p'] === 2,
-  establishes: 'la perilla llegó a la última posición',
 };
 
 describe('startOf', () => {

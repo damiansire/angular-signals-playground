@@ -29,7 +29,6 @@ export const DEBOUNCE_RXJS_SYSTEM: ManipulableChallenge = {
     busquedas: s.knobs[K] === 1 ? Math.min(s.actions, 1) : s.actions,
   }),
   healthy: (s: SystemState) => s.actions >= 3 && s.values['busquedas'] === 1,
-  establishes: 'debounceTime colapsa la ráfaga de teclas en un solo pedido.',
 };
 
 /** 10/2 · a mano es lo mismo: hay que cancelar el timer anterior. */
@@ -51,5 +50,4 @@ export const DEBOUNCE_MANUAL_SYSTEM: ManipulableChallenge = {
     timers: s.knobs[K] === 1 ? Math.min(s.actions, 1) : s.actions,
   }),
   healthy: (s: SystemState) => s.actions >= 3 && s.values['timers'] === 1,
-  establishes: 'El debounce a mano necesita que onCleanup cancele el timer anterior.',
 };

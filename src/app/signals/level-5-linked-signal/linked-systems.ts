@@ -25,7 +25,6 @@ export const LINKED_BASIC_SYSTEM: ManipulableChallenge = {
   // El signal suelto se inicializa una vez y queda apuntando a un item de la categoría vieja.
   settle: (s: SystemState) => ({ invalidas: s.actions > 0 && s.knobs[K] !== 1 ? s.actions : 0 }),
   healthy: (s: SystemState) => s.actions > 0 && s.values['invalidas'] === 0,
-  establishes: 'linkedSignal es estado editable que se reinicia cuando cambia su fuente.',
 };
 
 /** 5/2 · con source y computation, lo que sigue siendo válido se conserva. */
@@ -44,5 +43,4 @@ export const LINKED_SOURCE_SYSTEM: ManipulableChallenge = {
   ],
   settle: (s: SystemState) => ({ perdidas: s.knobs[K] === 1 ? 0 : s.actions }),
   healthy: (s: SystemState) => s.actions > 0 && s.values['perdidas'] === 0,
-  establishes: 'Con source y computation, la elección se conserva si sigue siendo válida.',
 };

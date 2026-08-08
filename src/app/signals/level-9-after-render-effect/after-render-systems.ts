@@ -25,7 +25,6 @@ export const AFTER_RENDER_SYSTEM: ManipulableChallenge = {
   // Antes del paint el elemento existe pero todavía no tiene caja: offsetHeight da 0.
   settle: (s: SystemState) => ({ alto: s.actions > 0 && s.knobs[K] === 1 ? 240 : 0 }),
   healthy: (s: SystemState) => s.values['alto'] > 0,
-  establishes: 'Medir el DOM va después del render: antes el elemento todavía no tiene caja.',
 };
 
 /** 9/2 · sin limpieza, cada corrida deja su listener colgado. */
@@ -50,5 +49,4 @@ export const ON_CLEANUP_SYSTEM: ManipulableChallenge = {
     esperado: 1,
   }),
   healthy: (s: SystemState) => s.actions >= 2 && s.values['vivos'] === s.values['esperado'],
-  establishes: 'Sin onCleanup, cada corrida del effect deja su listener colgado.',
 };

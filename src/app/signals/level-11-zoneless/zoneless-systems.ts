@@ -28,5 +28,4 @@ export const ZONELESS_SYSTEM: ManipulableChallenge = {
     revisados: s.actions === 0 ? 0 : s.knobs[K] === 1 ? 1 : 7,
   }),
   healthy: (s: SystemState) => s.actions > 0 && s.values['revisados'] === 1,
-  establishes: 'Sin Zone.js, cada cambio revisa solo a quien lee ese valor.',
 };

@@ -30,7 +30,6 @@ export const PLAIN_VARIABLE_SYSTEM: ManipulableChallenge = {
     avisos: s.knobs[K] === 1 ? s.actions : 0,
   }),
   healthy: (s: SystemState) => s.actions > 0 && s.values['avisos'] === s.values['cambios'],
-  establishes: 'Una variable común cambia sin avisarle a nadie.',
 };
 
 /** 1/2 · un signal es un envoltorio que avisa a sus consumidores. */
@@ -50,7 +49,6 @@ export const WHAT_IS_SIGNAL_SYSTEM: ManipulableChallenge = {
   ],
   settle: (s: SystemState) => ({ enterados: s.knobs[K] === 1 ? s.actions : 0 }),
   healthy: (s: SystemState) => s.actions > 0 && s.values['enterados'] === s.actions,
-  establishes: 'Un signal avisa a quien lo consume cuando su valor cambia.',
 };
 
 /** 1/3 · no todos los signals se pueden escribir. */
@@ -69,7 +67,6 @@ export const SIGNAL_TYPES_SYSTEM: ManipulableChallenge = {
   // Un computed no tiene `.set`: es de solo lectura por construcción.
   settle: (s: SystemState) => ({ aceptadas: s.knobs[K] === 1 ? s.actions : 0 }),
   healthy: (s: SystemState) => s.actions > 0 && s.values['aceptadas'] === s.actions,
-  establishes: 'Un computed es de solo lectura: no tiene set.',
 };
 
 /** 1/4 · un signal se lee llamándolo. */
@@ -88,7 +85,6 @@ export const READ_SIGNAL_SYSTEM: ManipulableChallenge = {
   // Multiplicar la FUNCIÓN da NaN: sin los paréntesis nunca leíste el valor.
   settle: (s: SystemState) => ({ numero: s.actions === 0 ? 0 : s.knobs[K] === 1 ? 14 : 0 }),
   healthy: (s: SystemState) => s.values['numero'] === 14,
-  establishes: 'Un signal se lee llamándolo: total(), no total.',
 };
 
 /** 1/5 · set reemplaza el valor, y el valor anterior se lee. */
@@ -106,7 +102,6 @@ export const SET_SIGNAL_SYSTEM: ManipulableChallenge = {
   ],
   settle: (s: SystemState) => ({ valor: s.knobs[K] === 1 ? s.actions : 0 }),
   healthy: (s: SystemState) => s.actions >= 2 && s.values['valor'] === s.actions,
-  establishes: 'set escribe un valor nuevo, y el anterior se lee llamando al signal.',
 };
 
 /** 1/6 · update calcula el valor nuevo a partir del anterior. */
@@ -127,7 +122,6 @@ export const UPDATE_SIGNAL_SYSTEM: ManipulableChallenge = {
     valor: s.actions === 0 ? 0 : s.knobs[K] === 1 ? s.actions : 1,
   }),
   healthy: (s: SystemState) => s.actions >= 2 && s.values['valor'] === s.actions,
-  establishes: 'update calcula el valor nuevo a partir del anterior.',
 };
 
 /** 1/7 · asReadonly cierra la escritura desde afuera. */
@@ -145,5 +139,4 @@ export const READONLY_SIGNAL_SYSTEM: ManipulableChallenge = {
   ],
   settle: (s: SystemState) => ({ ajenas: s.knobs[K] === 1 ? 0 : s.actions }),
   healthy: (s: SystemState) => s.actions > 0 && s.values['ajenas'] === 0,
-  establishes: 'asReadonly expone el valor sin dejar que lo escriban desde afuera.',
 };

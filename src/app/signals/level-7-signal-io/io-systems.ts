@@ -25,7 +25,6 @@ export const INPUT_OUTPUT_SYSTEM: ManipulableChallenge = {
   // Leído en la construcción, el input entrega su valor inicial y ahí queda.
   settle: (s: SystemState) => ({ desfasado: s.actions > 0 && s.knobs[K] !== 1 ? 1 : 0 }),
   healthy: (s: SystemState) => s.actions > 0 && s.values['desfasado'] === 0,
-  establishes: 'Un input es un signal: hay que leerlo cada vez, no guardarlo al construir.',
 };
 
 /** 7/2 · model hace el two-way sin dos piezas que mantener en sincronía. */
@@ -50,7 +49,6 @@ export const MODEL_SYSTEM: ManipulableChallenge = {
   // Emitiendo sin escribir el propio estado, el hijo muestra el valor viejo hasta que vuelve.
   settle: (s: SystemState) => ({ perdidos: s.knobs[K] === 1 ? 0 : s.actions }),
   healthy: (s: SystemState) => s.actions > 0 && s.values['perdidos'] === 0,
-  establishes: 'model junta input y output en una sola pieza de ida y vuelta.',
 };
 
 /** 7/3 · input.required avisa en build; el opcional te deja el undefined adentro. */
@@ -69,5 +67,4 @@ export const INPUT_REQUIRED_SYSTEM: ManipulableChallenge = {
   // El opcional compila y explota adentro; el requerido no deja pasar el template.
   settle: (s: SystemState) => ({ undefined: s.knobs[K] === 1 ? 0 : s.actions }),
   healthy: (s: SystemState) => s.actions > 0 && s.values['undefined'] === 0,
-  establishes: 'input.required corre el error al build, en vez de dejarlo llegar a runtime.',
 };

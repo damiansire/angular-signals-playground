@@ -25,7 +25,6 @@ export const VIEW_CHILD_SYSTEM: ManipulableChallenge = {
   // En el constructor la vista no se creó: la query devuelve undefined.
   settle: (s: SystemState) => ({ encontrado: s.actions > 0 && s.knobs[K] === 1 ? 1 : 0 }),
   healthy: (s: SystemState) => s.values['encontrado'] === 1,
-  establishes: 'Una query recién tiene elemento después de que la vista se creó.',
 };
 
 /** 8/2 · untracked lee sin quedar suscripto. */
@@ -44,7 +43,6 @@ export const RXJS_INTEROP_SYSTEM: ManipulableChallenge = {
   ],
   settle: (s: SystemState) => ({ sobrantes: s.knobs[K] === 1 ? 0 : s.actions }),
   healthy: (s: SystemState) => s.actions > 0 && s.values['sobrantes'] === 0,
-  establishes: 'untracked lee un signal sin quedar suscripto a sus cambios.',
 };
 
 /** 8/3 · viewChildren se actualiza sola cuando la lista crece. */
@@ -68,7 +66,6 @@ export const VIEW_CHILDREN_SYSTEM: ManipulableChallenge = {
     reales: 3 + s.actions,
   }),
   healthy: (s: SystemState) => s.actions > 0 && s.values['vistos'] === s.values['reales'],
-  establishes: 'viewChildren es un signal: la lista se mantiene al día sola.',
 };
 
 /** 8/4 · lo que proyecta el padre no está en la vista del hijo. */
@@ -86,5 +83,4 @@ export const CONTENT_QUERY_SYSTEM: ManipulableChallenge = {
   ],
   settle: (s: SystemState) => ({ encontrados: s.actions > 0 && s.knobs[K] === 1 ? 2 : 0 }),
   healthy: (s: SystemState) => s.values['encontrados'] === 2,
-  establishes: 'Lo que proyecta el padre se busca con content queries, no con view queries.',
 };

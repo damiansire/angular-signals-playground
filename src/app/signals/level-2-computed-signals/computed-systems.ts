@@ -25,7 +25,6 @@ export const COMPUTED_BASIC_SYSTEM: ManipulableChallenge = {
   // El derivado a mano guarda un número viejo: nadie lo vuelve a calcular.
   settle: (s: SystemState) => ({ desfasado: s.actions > 0 && s.knobs[K] !== 1 ? 1 : 0 }),
   healthy: (s: SystemState) => s.actions > 0 && s.values['desfasado'] === 0,
-  establishes: 'Un computed se recalcula solo cuando cambia algo que lee.',
 };
 
 /** 2/2 · las dependencias son las que se LEEN en cada corrida, no las que están escritas. */
@@ -45,7 +44,6 @@ export const COMPUTED_DYNAMIC_DEPS_SYSTEM: ManipulableChallenge = {
   // Leyendo las dos siempre, el computed se despierta por una rama que ni siquiera usa.
   settle: (s: SystemState) => ({ recalculos: s.knobs[K] === 1 ? 0 : s.actions }),
   healthy: (s: SystemState) => s.actions > 0 && s.values['recalculos'] === 0,
-  establishes: 'Un computed depende solo de lo que lee en cada corrida.',
 };
 
 /** 2/3 · perezoso y memoizado: no corre si nadie mira, y no repite si nada cambió. */
@@ -66,5 +64,4 @@ export const COMPUTED_MEMO_SYSTEM: ManipulableChallenge = {
     ejecuciones: s.knobs[K] === 1 ? Math.min(s.actions, 1) : s.actions,
   }),
   healthy: (s: SystemState) => s.actions >= 3 && s.values['ejecuciones'] === 1,
-  establishes: 'Un computed es perezoso y memoizado: no recalcula si nada cambió.',
 };
