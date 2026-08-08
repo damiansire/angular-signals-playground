@@ -1,4 +1,4 @@
-import {
+﻿import {
   ChangeDetectionStrategy,
   Component,
   DestroyRef,
@@ -10,7 +10,7 @@ import {
 import type { EChartsOption } from 'echarts';
 import type { ECharts } from 'echarts/core';
 import { NgxEchartsDirective, provideEchartsCore } from 'ngx-echarts';
-import { Link, NodeTree } from '../components-draw.inferface';
+import { Link, NodeTree } from '../../libs/tree-model';
 import { getLevelColor } from '../node-level-color';
 
 // Tamaño fijo (en px de pantalla) del símbolo roundRect de cada nodo — echarts no lo escala

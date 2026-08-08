@@ -1,4 +1,4 @@
-import { Link, NodeTree } from '../components-draw/components-draw.inferface';
+﻿import { Link, NodeTree } from './tree-model';
 
 interface TagType {
   element: string;

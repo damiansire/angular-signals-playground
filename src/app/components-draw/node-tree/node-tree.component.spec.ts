@@ -1,8 +1,8 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+﻿import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 
 import { NodeTreeComponent } from './node-tree.component';
-import { Link, NodeTree } from '../components-draw.inferface';
+import { Link, NodeTree } from '../../libs/tree-model';
 
 describe('NodeTreeComponent', () => {
   let component: NodeTreeComponent;
