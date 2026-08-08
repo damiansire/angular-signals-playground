@@ -537,12 +537,19 @@ export function initIntroTusi(host: HTMLElement, options: IntroTusiOptions = {})
   window.addEventListener('resize', onResize);
   window.addEventListener('wheel', onUserScroll, { passive: true });
   window.addEventListener('touchmove', onUserScroll, { passive: true });
-  resize();
   reset();
   refreshSpeedMenu();
   // sin animación no hay construcción que contar: el contador solo aportaría un parpadeo
   if (reduce) counterEl.hidden = true;
-  rafId = window.requestAnimationFrame(loop);
+  // La primera medida del canvas va en el primer cuadro, no acá. `resize` lee
+  // getBoundingClientRect, y cuando esto corre el motor acaba de construir la molécula entera:
+  // leer geometría con el layout sucio fuerza el recálculo de toda la página. Medido sobre el
+  // build de PRODUCCIÓN: 336 ms de reflow forzado, el mayor contribuyente del boot. Va antes del
+  // primer `draw`, así que el canvas nunca se pinta sin medida.
+  rafId = window.requestAnimationFrame((ts) => {
+    resize();
+    loop(ts);
+  });
 
   return {
     setVisible: aplicarVisibilidad,
