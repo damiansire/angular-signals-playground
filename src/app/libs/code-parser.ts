@@ -5,30 +5,33 @@ interface TagType {
   isClosingTag: boolean;
 }
 
-export function isTag(str: string): boolean {
-  // Normalize the string by trimming and converting to lowercase
-  str = str.trim().toLowerCase();
-
-  // Check for valid start and end characters
-  if (!str.startsWith('<') || (!str.endsWith('>') && !str.endsWith('/>'))) {
-    return false;
-  }
-
-  // Enhanced Regex (Case-insensitive, Handles attributes, and spaces correctly, plus Angular events)
-  const tagRegex =
-    /^<\/?[a-z][\w-]*(\s+[\w-]*(?:(?:\(\w+\))?=\s*(?:".*?"|'.*?'|[^'">\s]+))?)*\s*\/?>$/;
-
-  return tagRegex.test(str);
-}
-
-// Nombre de atributo: admite atributos HTML normales ([\w-]) y la sintaxis de
-// binding de Angular sobre el mismo token, sin hardcodear casos:
-//   (click)  [prop]  [(ngModel)]  *ngIf  #ref  @defer  attr-normal
-const ATTR_NAME = String.raw`[@*#]?\(?\[?[\w.-]+\)?\]?\)?`;
+// Nombre de atributo: el atributo HTML normal y cada forma de binding de Angular, como
+// alternativas EXPLÍCITAS. Antes era una tira de opcionales (`[@*#]?\(?\[?[\w.-]+\)?\]?\)?`) que
+// no distinguía la posición de los corchetes: aceptaba combinaciones que no existen (`([x])`) y
+// rechazaba `[(ngModel)]`, que sí existe. El test que decía cubrir el two-way binding no lo
+// notaba porque comparaba contra la cadena entera, y `spliteInTags` devuelve exactamente eso
+// cuando NO reconoce la etiqueta: pasaba en verde de las dos maneras.
+//   [(ngModel)]   [prop] / [class.active]   (click)   *ngIf / #ref / @defer   attr-normal
+const ATTR_NAME = String.raw`(?:\[\([\w.-]+\)\]|\[[\w.-]+\]|\([\w.-]+\)|[@*#][\w.-]+|[\w.-]+)`;
 // Valor opcional: comillas dobles, simples o sin comillas (hasta espacio o '>').
 const ATTR_VALUE = String.raw`(?:\s*=\s*(?:"[^"]*"|'[^']*'|[^'">\s]+))?`;
 // Una etiqueta de apertura/cierre/auto-cerrada con cero o más atributos.
 const TAG = String.raw`<\/?[a-zA-Z][\w-]*(?:\s+${ATTR_NAME}${ATTR_VALUE})*\s*\/?>`;
+
+/**
+ * Una MISMA gramática decide qué es una etiqueta acá y en `spliteInTags`. Antes eran dos: el
+ * tokenizador aceptaba la sintaxis de Angular (`[prop]`, `[(ngModel)]`, `*ngIf`, `#ref`) y este
+ * predicado no, con una regex propia que solo admitía `[\w-]`. La consecuencia no era que se
+ * ignorara la etiqueta y ya: `walkTags` descartaba la APERTURA `<div [hidden]="h">` pero su cierre
+ * `</div>` sí pasaba el filtro y llegaba al pop, así que desapilaba al ancestro equivocado y el
+ * hermano siguiente quedaba colgando de la raíz. Un playground de Angular tiene que poder parsear
+ * una plantilla de Angular.
+ */
+const TAG_COMPLETO = new RegExp(`^${TAG}$`, 'i');
+
+export function isTag(str: string): boolean {
+  return TAG_COMPLETO.test(str.trim());
+}
 
 export function spliteInTags(htmlString: string): string[] {
   // Separa la cadena en etiquetas y texto, consumiendo el espacio en blanco

@@ -211,6 +211,9 @@ describe('spliteInTags', () => {
     const htmlString = '<input [(ngModel)]="name" #ref *ngIf="show" />';
 
     expect(spliteInTags(htmlString)).toEqual(['<input [(ngModel)]="name" #ref *ngIf="show" />']);
+    // Sin esto el test pasa igual cuando la etiqueta NO se reconoce: `spliteInTags` devuelve la
+    // cadena entera como texto suelto, que es idéntico al caso bueno.
+    expect(isTag(htmlString)).toBeTrue();
   });
 
   it('tokeniza varios bindings de Angular en una misma etiqueta', () => {
@@ -352,6 +355,63 @@ describe('nodos y aristas salen del mismo árbol', () => {
       ['span-1', 2],
       ['em-1', 2],
     ]);
+  });
+});
+
+/**
+ * El tokenizador y el predicado tienen que compartir gramática. Cuando no la compartían, la
+ * apertura con sintaxis de Angular se descartaba pero su cierre sí llegaba al pop, y desapilaba al
+ * ancestro equivocado.
+ */
+describe('sintaxis de Angular en las etiquetas', () => {
+  const CASOS = [
+    '<div [hidden]="h">',
+    '<input [(ngModel)]="v">',
+    '<li *ngIf="ok">',
+    '<span #ref>',
+    '<button (click)="go()">',
+    '<div [class.active]="on" (click)="go()">',
+    '<app-badge [count]="n" />',
+  ];
+
+  for (const tag of CASOS) {
+    it(`isTag reconoce ${tag}`, () => {
+      expect(isTag(tag)).toBeTrue();
+    });
+  }
+
+  it('la misma gramática decide en isTag y en spliteInTags', () => {
+    for (const tag of CASOS) {
+      expect(spliteInTags(tag).every((token) => isTag(token)))
+        .withContext(tag)
+        .toBeTrue();
+    }
+  });
+
+  it('una apertura con binding no desnivela a su hermano', () => {
+    const html = '<div><div [hidden]="h"><p></p></div><span></span></div>';
+    expect(generateNodes(html).map((n) => [n.id, n.level])).toEqual([
+      ['div-1', 1],
+      ['div-2', 2],
+      ['p-1', 3],
+      ['span-1', 2],
+    ]);
+  });
+
+  it('el hermano de un bloque con binding cuelga del padre real, no de la raíz', () => {
+    const html = '<div><div [hidden]="h"><p></p></div><span></span></div>';
+    expect(generateLinks(html)).toEqual([
+      { source: 'div-1', target: 'div-2' },
+      { source: 'div-2', target: 'p-1' },
+      { source: 'div-1', target: 'span-1' },
+    ]);
+  });
+
+  it('sigue rechazando lo que no es etiqueta', () => {
+    expect(isTag('')).toBeFalse();
+    expect(isTag('Hello world')).toBeFalse();
+    expect(isTag('< div>')).toBeFalse();
+    expect(isTag('<3')).toBeFalse();
   });
 });
 
