@@ -1,3 +1,17 @@
+<!-- Toda esta vista la dibuja un motor imperativo: si su arranque tira, el DOM queda como quedó y
+     el usuario mira una pantalla muerta sin ningún indicio. Este es el único fallback declarativo
+     que hay, y por eso va primero. -->
+@if (bootFallo()) {
+  <div class="boot-fallo" role="alert">
+    <h1 class="boot-fallo__titulo">El recorrido no pudo arrancar</h1>
+    <p class="boot-fallo__texto">
+      Algo falló al montar la animación del recorrido. Recargar la página suele alcanzar. Si vuelve
+      a pasar, el detalle del error está en la consola del navegador.
+    </p>
+    <button class="boot-fallo__accion" type="button" (click)="recargar()">Recargar</button>
+  </div>
+}
+
 <div class="stage" id="stage">
   <div class="track" id="track">
     <div class="holder">

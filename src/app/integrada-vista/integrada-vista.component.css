@@ -1095,6 +1095,7 @@
   visibility: hidden;
 }
 
+
 /* Barra ÚNICA de navegación, pegada al borde IZQUIERDO. En la vista molécula muestra los 12 conceptos
    (ticks 0-11); al bucear, su cuerpo se desvanece y la barra de sub-niveles (dibujada por el motor en
    el mismo eje) se abre hacia los bordes, morpheando conceptos → sub-niveles. Una sola barra, sin

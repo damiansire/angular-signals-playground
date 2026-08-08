@@ -5,10 +5,12 @@ import {
   DestroyRef,
   ElementRef,
   EnvironmentInjector,
+  ErrorHandler,
   Type,
   afterNextRender,
   createComponent,
   inject,
+  signal,
 } from '@angular/core';
 import { Location } from '@angular/common';
 import { RouterLink } from '@angular/router';
@@ -33,7 +35,12 @@ import { buildWhereQuery, parseWhereQuery } from './url-sync';
   selector: 'app-integrada-vista',
   imports: [RouterLink],
   templateUrl: './integrada-vista.component.html',
-  styleUrls: ['./integrada-vista.component.css', './intro-tusi.css', './prologo-anomalia.css'],
+  styleUrls: [
+    './integrada-vista.component.css',
+    './intro-tusi.css',
+    './prologo-anomalia.css',
+    './boot-fallo.css',
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class IntegradaVistaComponent {
@@ -42,6 +49,7 @@ export class IntegradaVistaComponent {
   private readonly env = inject(EnvironmentInjector);
   private readonly appRef = inject(ApplicationRef);
   private readonly location = inject(Location);
+  private readonly errorHandler = inject(ErrorHandler);
 
   /** Componentes reales de cada sub-nivel, por concepto (del árbol de conceptos). Un sub-nivel
    *  siempre trae componente; el tipo admite `undefined` porque `RouteItem.component` es opcional
@@ -55,42 +63,65 @@ export class IntegradaVistaComponent {
     (lvl.subLevels ?? []).map((sl) => sl.title),
   );
 
+  /**
+   * El boot falló y no hay recorrido que mostrar. La vista es 100% imperativa: sin esto, cualquier
+   * excepción en el arranque deja al usuario mirando una pantalla muerta, sin mensaje y sin forma
+   * de saber que hay algo roto. Angular no puede renderizar un fallback que nadie declaró.
+   */
+  readonly bootFallo = signal(false);
+
   constructor() {
     afterNextRender(() => {
-      // Nombre del atributo de encapsulación que Angular pone a los elementos del template;
-      // el motor lo estampa en lo que crea a mano para que el CSS scopeado les aplique.
-      const enc =
-        this.host
-          .querySelector('#stage')
-          ?.getAttributeNames()
-          .find((a) => a.startsWith('_ngcontent')) ?? null;
-      const subCounts = this.subComponents.map((subs) => subs.length);
-      const dispose = initMolecule(
-        this.host,
-        this.mountSub,
-        subCounts,
-        enc,
-        this.onWhere,
-        this.initialFromUrl(),
-      );
-      this.destroyRef.onDestroy(dispose);
-
-      // Landing "par de Tusi" (canvas + audio + overlay Dark/Light). El motor ya fadea el `.intro`.
-      //
-      // Entre el clima y la construcción va el PRÓLOGO. El orden importa y no es arbitrario: elegir
-      // clima es el gesto que el navegador exige para dejar sonar, así que el prólogo arranca con
-      // audio ya desbloqueado y sin pedirle nada más a nadie. Y la construcción de Tusi espera de
-      // verdad: si corriera detrás durante esos minutos, llegaría terminada y se comería su propio
-      // premio, que es ver aparecer el círculo.
-      this.destroyRef.onDestroy(
-        initIntroTusi(this.host, {
-          onThemePicked: (startBuild) => {
-            const cerrarPrologo = initPrologoAnomalia(this.host, { alTerminar: startBuild });
-            this.destroyRef.onDestroy(cerrarPrologo);
-          },
-        }),
-      );
+      try {
+        this.arrancar();
+      } catch (error) {
+        // El diagnóstico va igual al ErrorHandler de la app (no se traga), pero la pantalla deja
+        // de estar muda: el usuario ve qué pasó y puede recargar.
+        this.bootFallo.set(true);
+        this.errorHandler.handleError(error);
+      }
     });
+  }
+
+  /** El boot es de una sola pasada: para reintentarlo hay que volver a montar todo. */
+  protected recargar(): void {
+    window.location.reload();
+  }
+
+  private arrancar(): void {
+    // Nombre del atributo de encapsulación que Angular pone a los elementos del template;
+    // el motor lo estampa en lo que crea a mano para que el CSS scopeado les aplique.
+    const enc =
+      this.host
+        .querySelector('#stage')
+        ?.getAttributeNames()
+        .find((a) => a.startsWith('_ngcontent')) ?? null;
+    const subCounts = this.subComponents.map((subs) => subs.length);
+    const dispose = initMolecule(
+      this.host,
+      this.mountSub,
+      subCounts,
+      enc,
+      this.onWhere,
+      this.initialFromUrl(),
+    );
+    this.destroyRef.onDestroy(dispose);
+
+    // Landing "par de Tusi" (canvas + audio + overlay Dark/Light). El motor ya fadea el `.intro`.
+    //
+    // Entre el clima y la construcción va el PRÓLOGO. El orden importa y no es arbitrario: elegir
+    // clima es el gesto que el navegador exige para dejar sonar, así que el prólogo arranca con
+    // audio ya desbloqueado y sin pedirle nada más a nadie. Y la construcción de Tusi espera de
+    // verdad: si corriera detrás durante esos minutos, llegaría terminada y se comería su propio
+    // premio, que es ver aparecer el círculo.
+    this.destroyRef.onDestroy(
+      initIntroTusi(this.host, {
+        onThemePicked: (startBuild) => {
+          const cerrarPrologo = initPrologoAnomalia(this.host, { alTerminar: startBuild });
+          this.destroyRef.onDestroy(cerrarPrologo);
+        },
+      }),
+    );
   }
 
   /**

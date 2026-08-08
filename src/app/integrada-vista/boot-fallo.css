@@ -1,0 +1,42 @@
+/* Pantalla de arranque fallido.
+   Archivo aparte por lo mismo que `intro-tusi.css` y `prologo-anomalia.css`: no es parte del
+   lenguaje visual del recorrido, es lo que se ve cuando el recorrido justamente NO existe. */
+
+.boot-fallo {
+  position: fixed;
+  inset: 0;
+  z-index: 999;
+  display: grid;
+  align-content: center;
+  justify-items: center;
+  gap: 0.9rem;
+  padding: 2rem;
+  text-align: center;
+  background: #f6f5f0;
+  color: #201d16;
+}
+
+.boot-fallo__titulo {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.boot-fallo__texto {
+  margin: 0;
+  max-width: 34rem;
+  line-height: 1.55;
+}
+
+.boot-fallo__accion {
+  padding: 0.55rem 1.4rem;
+  border: 1px solid #201d16;
+  border-radius: 999px;
+  background: #201d16;
+  color: #f6f5f0;
+  cursor: pointer;
+}
+
+.boot-fallo__accion:focus-visible {
+  outline: 2px solid #201d16;
+  outline-offset: 3px;
+}
