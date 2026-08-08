@@ -1,8 +1,12 @@
 name: Deploy to GitHub Pages
 
+# Se dispara al TERMINAR el workflow CI, no al pushear. Antes ambos arrancaban en paralelo con
+# `on: push`, asi que Pages publicaba aunque lint o los tests fallaran: el unico gate efectivo del
+# camino a produccion era "compila". Ahora el deploy solo existe si CI cerro en verde.
 on:
-  push:
-    branches: [master]
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
   workflow_dispatch:
 
 # Permisos mínimos para publicar en Pages con el source "GitHub Actions".
@@ -19,8 +23,18 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
+    # workflow_run tambien llega cuando CI corrio sobre la rama de un PR o cuando fallo/se cancelo.
+    # Solo publica master en verde; el disparo manual queda habilitado para republicar a mano.
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.workflow_run.conclusion == 'success' &&
+       github.event.workflow_run.head_branch == 'master')
     steps:
       - uses: actions/checkout@v4
+        with:
+          # Publicar EXACTAMENTE el commit que CI aprobo, no la punta de master, que para cuando
+          # termina CI puede tener commits nuevos todavia sin verificar.
+          ref: ${{ github.event.workflow_run.head_sha || github.ref }}
       - uses: actions/setup-node@v4
         with:
           node-version: 22
