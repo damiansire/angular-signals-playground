@@ -49,13 +49,23 @@ describe('initIntroTusi', () => {
   function arrancar() {
     const host = hostCompleto();
     const gatillos: (() => void)[] = [];
-    cerrar.push(initIntroTusi(host, { onThemePicked: (startBuild) => gatillos.push(startBuild) }));
+    const sonidos: boolean[] = [];
+    const handle = initIntroTusi(host, {
+      onThemePicked: (startBuild, conSonido) => {
+        gatillos.push(startBuild);
+        sonidos.push(conSonido);
+      },
+    });
+    cerrar.push(handle.dispose);
     return {
       host,
+      handle,
       overlay: host.querySelector<HTMLElement>('.tusi__overlay')!,
       dark: host.querySelector<HTMLButtonElement>('[data-role="pick-dark"]')!,
       light: host.querySelector<HTMLButtonElement>('[data-role="pick-light"]')!,
+      ovSound: host.querySelector<HTMLButtonElement>('[data-role="ov-sound"]')!,
       gatillos,
+      sonidos,
     };
   }
 
@@ -122,7 +132,7 @@ describe('initIntroTusi', () => {
 
   it('sin onThemePicked la construcción arranca sola, sin quedar esperando a nadie', () => {
     const host = hostCompleto();
-    cerrar.push(initIntroTusi(host));
+    cerrar.push(initIntroTusi(host).dispose);
 
     const overlay = host.querySelector<HTMLElement>('.tusi__overlay')!;
     host.querySelector<HTMLButtonElement>('[data-role="pick-light"]')!.click();
@@ -132,11 +142,61 @@ describe('initIntroTusi', () => {
 
   it('cerrar es idempotente y no tira', () => {
     const host = hostCompleto();
-    const dispose = initIntroTusi(host);
+    const { dispose } = initIntroTusi(host);
 
     expect(() => {
       dispose();
       dispose();
     }).not.toThrow();
+  });
+
+  describe('la preferencia de sonido cruza el boundary', () => {
+    // La elige el overlay del intro pero quien suena después es el prólogo: sin pasarla, alguien
+    // que silenciaba antes de entrar escuchaba igual la cinemática entera.
+    it('con el sonido puesto, avisa que va con sonido', () => {
+      const t = arrancar();
+      t.dark.click();
+      expect(t.sonidos).toEqual([true]);
+    });
+
+    it('si silenciaste en el overlay, el aviso viaja en silencio', () => {
+      const t = arrancar();
+      t.ovSound.click();
+      t.dark.click();
+      expect(t.sonidos).toEqual([false]);
+    });
+  });
+
+  describe('visibilidad avisada por el motor', () => {
+    // Antes se sondeaba `introEl.style.opacity` cuadro a cuadro: un módulo leyendo el detalle de
+    // implementación del fade de otro.
+    it('salir de vista saca el intro del tab-order', () => {
+      const t = arrancar();
+      const intro = t.host.querySelector<HTMLElement>('.intro')!;
+
+      t.handle.setVisible(false);
+
+      expect(intro.inert).toBeTrue();
+    });
+
+    it('volver a la vista lo devuelve al tab-order', () => {
+      const t = arrancar();
+      const intro = t.host.querySelector<HTMLElement>('.intro')!;
+
+      t.handle.setVisible(false);
+      t.handle.setVisible(true);
+
+      expect(intro.inert).toBeFalse();
+    });
+
+    it('avisar dos veces lo mismo no hace nada', () => {
+      const t = arrancar();
+      const intro = t.host.querySelector<HTMLElement>('.intro')!;
+
+      t.handle.setVisible(false);
+      t.handle.setVisible(false);
+
+      expect(intro.inert).toBeTrue();
+    });
   });
 });

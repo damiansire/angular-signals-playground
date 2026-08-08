@@ -67,11 +67,22 @@ export interface IntroTusiOptions {
    * corriera detrás durante esos minutos llegaría terminada y se comería su propio premio: el
    * círculo apareciendo. El overlay igual se cierra y el audio igual se desbloquea, que es lo único
    * que ese click tiene que hacer siempre.
+   *
+   * Recibe también si el sonido quedó activado. La preferencia se elige en ESTE overlay pero quien
+   * suena a continuación es el prólogo: sin pasarla, alguien que silenciaba antes de entrar
+   * igual escuchaba la cinemática entera, que es lo contrario de lo que acababa de pedir.
    */
-  readonly onThemePicked?: (startBuild: () => void) => void;
+  readonly onThemePicked?: (startBuild: () => void, conSonido: boolean) => void;
 }
 
-export function initIntroTusi(host: HTMLElement, options: IntroTusiOptions = {}): () => void {
+/** Lo que la landing le ofrece a quien la monta: cerrarla, y avisarle si está a la vista. */
+export interface IntroTusiHandle {
+  dispose: () => void;
+  /** Lo llama el motor del recorrido, que es el único que sabe si la landing se está viendo. */
+  setVisible: (visible: boolean) => void;
+}
+
+export function initIntroTusi(host: HTMLElement, options: IntroTusiOptions = {}): IntroTusiHandle {
   const q = <T extends HTMLElement>(sel: string): T => host.querySelector(sel) as T;
   const root = q<HTMLElement>('.tusi');
   const canvas = q<HTMLCanvasElement>('.tusi__canvas');
@@ -402,7 +413,7 @@ export function initIntroTusi(host: HTMLElement, options: IntroTusiOptions = {})
     if (started || picked) return;
     picked = true;
     applyTheme(theme);
-    if (options.onThemePicked) options.onThemePicked(startBuild);
+    if (options.onThemePicked) options.onThemePicked(startBuild, soundOn);
     else startBuild();
     soundBtn.textContent = soundOn ? '🔊' : '🔇';
     soundBtn.setAttribute('aria-label', soundOn ? 'Silenciar' : 'Activar sonido');
@@ -442,35 +453,44 @@ export function initIntroTusi(host: HTMLElement, options: IntroTusiOptions = {})
   let idleId = 0;
   const REPOSO_MS = 200;
 
+  /**
+   * Lo llama el motor cuando la landing entra o sale de vista: es el único que lo sabe, porque lo
+   * decide el scroll. Antes esto se averiguaba sondeando `introEl.style.opacity` cuadro a cuadro,
+   * o sea leyendo el detalle de implementación del fade de otro módulo.
+   */
+  function aplicarVisibilidad(ahoraVisible: boolean): void {
+    if (ahoraVisible === visible) return;
+    visible = ahoraVisible;
+    // El overlay cubre el viewport; si el intro no es la vista activa (scroll o deep-link directo al
+    // recorrido SIN elegir tema), su subárbol interceptaría los clicks de los demos que quedaron
+    // debajo (pointer-events se hereda, así que apagarlo en el overlay apaga todo el subárbol). Solo
+    // mientras no se eligió tema: tras `start()`, `.gone` ya lo maneja y no hay que reactivarlo.
+    // Va contra `picked` y no contra `started`: con prólogo en el medio hay minutos en los que el
+    // clima ya se eligió y la construcción todavía no arrancó, y ahí el overlay volvería a tapar.
+    if (!picked) {
+      overlay.classList.toggle('gone', !visible);
+      overlay.inert = !visible;
+    }
+    // El intro entero (controles de sonido/pausa/velocidad y el overlay) se desvanece con opacity,
+    // que NO lo saca del tab-order ni del árbol de a11y. Con deep-link a un sub-nivel quedaban 7
+    // controles invisibles pero tabulables, capaces de cambiar el tema sin que se vea nada.
+    if (introEl) introEl.inert = !visible;
+    if (actx) {
+      if (visible && soundOn) void actx.resume();
+      else if (!visible) void actx.suspend();
+    }
+    // Volver a la vista tiene que reanudar el dibujo aunque el latido lento esté esperando.
+    if (visible && !rafId && !idleId) rafId = window.requestAnimationFrame(loop);
+  }
+
   function loop(now: number): void {
     const t = now / 1000;
     const dt = Math.min(0.05, t - tPrev);
     tPrev = t;
-    // Visibilidad del intro (por el fade del motor): al dejar de verse, suspendemos el audio.
-    const nowVisible = !introEl || introEl.style.opacity !== '0';
-    if (nowVisible !== visible) {
-      visible = nowVisible;
-      // El overlay cubre el viewport; si el intro no es la vista activa (scroll o deep-link directo al
-      // recorrido SIN elegir tema), su subárbol interceptaría los clicks de los demos que quedaron
-      // debajo (pointer-events se hereda, así que apagarlo en el overlay apaga todo el subárbol). Solo
-      // mientras no se eligió tema: tras `start()`, `.gone` ya lo maneja y no hay que reactivarlo.
-      // Va contra `picked` y no contra `started`: con prólogo en el medio hay minutos en los que el
-      // clima ya se eligió y la construcción todavía no arrancó, y ahí el overlay volvería a tapar.
-      if (!picked) {
-        overlay.classList.toggle('gone', !visible);
-        overlay.inert = !visible;
-      }
-      // El intro entero (controles de sonido/pausa/velocidad y el overlay) se desvanece con opacity,
-      // que NO lo saca del tab-order ni del árbol de a11y. Con deep-link a un sub-nivel quedaban 7
-      // controles invisibles pero tabulables, capaces de cambiar el tema sin que se vea nada.
-      if (introEl) introEl.inert = !visible;
-      if (actx) {
-        if (visible && soundOn) void actx.resume();
-        else if (!visible) void actx.suspend();
-      }
-    }
     if (!visible) {
-      // Nada que dibujar mientras no se ve: solo hay que enterarse de cuándo vuelve.
+      // Nada que dibujar mientras no se ve. El latido lento existe igual para que volver a la vista
+      // reanude solo aunque nadie avise: `aplicarVisibilidad` acorta la espera cuando sí avisan.
+      rafId = 0;
       idleId = window.setTimeout(() => {
         idleId = 0;
         rafId = window.requestAnimationFrame(loop);
@@ -524,14 +544,17 @@ export function initIntroTusi(host: HTMLElement, options: IntroTusiOptions = {})
   if (reduce) counterEl.hidden = true;
   rafId = window.requestAnimationFrame(loop);
 
-  return (): void => {
-    window.cancelAnimationFrame(rafId);
-    if (idleId) window.clearTimeout(idleId);
-    window.removeEventListener('resize', onResize);
-    window.removeEventListener('wheel', onUserScroll);
-    window.removeEventListener('touchmove', onUserScroll);
-    document.removeEventListener('click', onDocClick);
-    document.removeEventListener('keydown', onKeyDown);
-    void actx?.close();
+  return {
+    setVisible: aplicarVisibilidad,
+    dispose: (): void => {
+      window.cancelAnimationFrame(rafId);
+      if (idleId) window.clearTimeout(idleId);
+      window.removeEventListener('resize', onResize);
+      window.removeEventListener('wheel', onUserScroll);
+      window.removeEventListener('touchmove', onUserScroll);
+      document.removeEventListener('click', onDocClick);
+      document.removeEventListener('keydown', onKeyDown);
+      void actx?.close();
+    },
   };
 }

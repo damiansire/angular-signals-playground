@@ -17,7 +17,7 @@ import { RouterLink } from '@angular/router';
 
 import { signalsRoutesTree } from '../app.routes';
 import { initMolecule, type MountSub } from './molecule-engine';
-import { initIntroTusi } from './intro-tusi';
+import { initIntroTusi, type IntroTusiHandle } from './intro-tusi';
 import { initPrologoAnomalia } from './prologo-anomalia';
 import { buildWhereQuery, parseWhereQuery } from './url-sync';
 
@@ -97,6 +97,10 @@ export class IntegradaVistaComponent {
         ?.getAttributeNames()
         .find((a) => a.startsWith('_ngcontent')) ?? null;
     const subCounts = this.subComponents.map((subs) => subs.length);
+    // El motor arranca antes que la landing, así que el aviso de visibilidad se enruta por acá:
+    // el motor es el único que sabe si la landing está a la vista (lo decide el scroll) y la
+    // landing es la única que sabe qué hacer con eso (cortar audio y dejar de dibujar).
+    let landing: IntroTusiHandle | null = null;
     const dispose = initMolecule(
       this.host,
       this.mountSub,
@@ -104,6 +108,7 @@ export class IntegradaVistaComponent {
       enc,
       this.onWhere,
       this.initialFromUrl(),
+      (visible) => landing?.setVisible(visible),
     );
     this.destroyRef.onDestroy(dispose);
 
@@ -114,14 +119,18 @@ export class IntegradaVistaComponent {
     // audio ya desbloqueado y sin pedirle nada más a nadie. Y la construcción de Tusi espera de
     // verdad: si corriera detrás durante esos minutos, llegaría terminada y se comería su propio
     // premio, que es ver aparecer el círculo.
-    this.destroyRef.onDestroy(
-      initIntroTusi(this.host, {
-        onThemePicked: (startBuild) => {
-          const cerrarPrologo = initPrologoAnomalia(this.host, { alTerminar: startBuild });
-          this.destroyRef.onDestroy(cerrarPrologo);
-        },
-      }),
-    );
+    landing = initIntroTusi(this.host, {
+      // La preferencia de sonido se elige en el overlay del intro pero quien suena después es el
+      // prólogo: viaja con el gatillo para que silenciar antes de entrar valga para los dos.
+      onThemePicked: (startBuild, conSonido) => {
+        const cerrarPrologo = initPrologoAnomalia(this.host, {
+          alTerminar: startBuild,
+          conSonido,
+        });
+        this.destroyRef.onDestroy(cerrarPrologo);
+      },
+    });
+    this.destroyRef.onDestroy(landing.dispose);
   }
 
   /**

@@ -361,6 +361,12 @@ export function initMolecule(
   // scrolleado directo a ese sub-nivel en vez de arriba con el overlay. `sub` 0/ausente = vista
   // molécula: abre encuadrando el átomo del concepto. Se clampea al rango real.
   initial: { concept: number; sub: number } | null = null,
+  // Avisa cuándo la landing entra y sale de vista. El motor es el ÚNICO que sabe esto (lo decide
+  // el scroll), y la landing necesita saberlo para cortar su audio y dejar de dibujar. Antes lo
+  // averiguaba sondeando el `style.opacity` que el motor escribe acá abajo: un módulo leyendo el
+  // detalle de implementación de otro, que se rompía en silencio con solo cambiar el fade a una
+  // clase. Se llama solo en el CAMBIO, no por frame.
+  onIntroVisible: ((visible: boolean) => void) | null = null,
 ): () => void {
   // RAW (metadata de los 12 conceptos) y `subCounts` (derivado de signalsRoutesTree) están
   // acoplados por índice: si no cuadran, un concepto se pintaría sin sub-niveles o se descartaría
@@ -952,6 +958,9 @@ export function initMolecule(
     ripG.appendChild(r);
     later(() => r.remove(), 810);
   }
+  // Arranca en null (y no en true) para que el primer render avise siempre, sin depender de
+  // adivinar en qué estado nace la landing.
+  let ultimaIntroVisible: boolean | null = null;
   let lastBorn = 0;
   // Último (nivel, sub-nivel) reportado a la URL, para no reescribirla en cada frame.
   let whereC = -2;
@@ -1337,6 +1346,10 @@ export function initMolecule(
       // El intro ahora tiene controles interactivos (Tusi): al desvanecerse no debe capturar clicks
       // sobre el recorrido que quedó debajo.
       introEl.style.pointerEvents = introVisible ? '' : 'none';
+      if (introVisible !== ultimaIntroVisible) {
+        ultimaIntroVisible = introVisible;
+        onIntroVisible?.(introVisible);
+      }
     }
     // En la landing (intro "Primera luz" + hero) el panel del recorrido queda OCULTO: es rico (nombres,
     // actos, contador) y a media opacidad competía con la entrada. Aparece al empezar a scrollear el
