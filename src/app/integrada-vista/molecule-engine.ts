@@ -739,8 +739,66 @@ export function initMolecule(
     // `host.querySelector('h1')`, y como ningún sub-nivel tiene <h1> propio, el primero que
     // encontraba era el del formulario de demo embebido: el topbar mostraba "Damian Sire!".
     cc.exampleTitle = handle.title ?? '';
-    fuse(cc);
-    replay(card.querySelector('.subbody'), 'warp');
+    // Las dos animaciones de entrada leen geometría (`getBoundingClientRect` en `fuse`, el
+    // `offsetWidth` que reinicia la transición en `replay`), y acá arriba se acaba de montar un
+    // árbol de componentes entero: leerla con el layout sucio fuerza un recálculo sincrónico de
+    // TODA la página. Medido con un trace: 630 ms de reflow forzado en el boot, casi todo acá.
+    // Corren al frame siguiente, con el layout ya resuelto. Las dos duran ~1 s: arrancar un frame
+    // más tarde no se ve, y el reflow deja de ser forzado.
+    const subbody = card.querySelector('.subbody');
+    raf(() => {
+      fuse(cc);
+      replay(subbody, 'warp');
+    });
+  }
+
+  /**
+   * Cuántos conceptos a cada lado del actual se mantienen montados. 1 alcanza: el vecino se monta
+   * mientras todavía estás en el actual, así que llegás con la card ya llena.
+   */
+  const VENTANA_MONTAJE = 1;
+  /** Conceptos esperando montaje/desmontaje fuera del frame. */
+  const pendientes = new Set<number>();
+  let drenajeId = 0;
+
+  function desmontarSub(cc: Concept): void {
+    cc.subDispose?.();
+    cc.subDispose = undefined;
+    cc.exampleTitle = '';
+    const host = cc.card?.querySelector<HTMLElement>('.subhost');
+    if (host) host.textContent = '';
+  }
+
+  /** Deja el concepto `i` en el estado que le corresponde según dónde está el recorrido. */
+  function ajustarMontaje(i: number, actual: number): void {
+    const cerca = Math.abs(i - actual) <= VENTANA_MONTAJE;
+    const montado = C[i].subDispose !== undefined;
+    if (cerca && !montado) renderSubCard(C[i]);
+    else if (!cerca && montado) desmontarSub(C[i]);
+  }
+
+  /**
+   * Montar un sub-nivel es caro (createComponent + su primera detección de cambios + reflow) y
+   * hacerlo dentro del frame de scroll es lo que produce el tirón. Solo el concepto que se está
+   * MIRANDO se monta en el acto, porque si no se ve una card vacía; los vecinos y los desmontajes
+   * se drenan fuera del frame, donde nadie los nota.
+   */
+  function asegurarMontajes(actual: number): void {
+    if (!C[actual].subDispose) renderSubCard(C[actual]);
+
+    for (let i = 0; i < N; i++) {
+      if (i === actual) continue;
+      const cerca = Math.abs(i - actual) <= VENTANA_MONTAJE;
+      if (cerca !== (C[i].subDispose !== undefined)) pendientes.add(i);
+    }
+    if (pendientes.size && !drenajeId) {
+      drenajeId = window.setTimeout(() => {
+        drenajeId = 0;
+        if (destroyed) return;
+        for (const i of pendientes) ajustarMontaje(i, liveConcept);
+        pendientes.clear();
+      }, 0);
+    }
   }
 
   function subScrollTo(cc: Concept, k: number): void {
@@ -942,8 +1000,18 @@ export function initMolecule(
     stamp(card);
     stampTree(card); // estampar ANTES de montar el componente real (para no tocar sus internals)
     cc.subIdx = 0;
-    renderSubCard(cc);
+    // El contenido NO se monta acá. Montar los 12 sub-niveles de una, antes del primer frame útil,
+    // costaba un frame de ~835ms (medido en dev): doce createComponent con su primera detección de
+    // cambios y su reflow, en bloque, para once cards que todavía no se ven. Los monta `render()`
+    // por proximidad.
   });
+
+  // Salvo el concepto donde ABRE el recorrido, que se monta ya: es el único que se ve en el primer
+  // frame, y esperar al primer `render()` deja su card vacía a la vista. Uno, no doce.
+  {
+    const abre = initial ? Math.max(0, Math.min(C.length - 1, Math.round(initial.concept))) : 0;
+    renderSubCard(C[abre]);
+  }
   contentEl.appendChild(suborbit);
 
   // ---- Onda reactiva al nacer un átomo ----
@@ -1247,6 +1315,7 @@ export function initMolecule(
     });
 
     liveConcept = c;
+    asegurarMontajes(c);
     bondEls.forEach((ln, j) => {
       if (j + 1 < c) {
         // El enlace nace al establecer, no al pasar scrolleando: la molécula se une porque
@@ -1567,6 +1636,7 @@ export function initMolecule(
     cancelAnimationFrame(orbitRaf);
     rafIds.forEach((id) => cancelAnimationFrame(id));
     timerIds.forEach((id) => window.clearTimeout(id));
+    if (drenajeId) window.clearTimeout(drenajeId);
     stage.removeEventListener(SISTEMA_ESTABLECIDO, onEstablished);
     stage.removeEventListener('scroll', onScroll);
     window.removeEventListener('keydown', onKeyNav);
