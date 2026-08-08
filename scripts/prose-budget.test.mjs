@@ -1,6 +1,6 @@
 import { strict as assert } from 'node:assert';
 import { test } from 'node:test';
-import { CEILING, countProse, offenders } from './prose-budget.mjs';
+import { CEILING, countProse, nextBaseline, offenders } from './prose-budget.mjs';
 
 test('cuenta la prosa visible', () => {
   assert.equal(countProse('<p>Elegí qué tocaste.</p>'), 3);
@@ -48,4 +48,42 @@ test('falla apenas una pantalla con deuda empeora', () => {
 test('bajar por debajo del techo no rompe nada', () => {
   const mejor = [{ screen: 'vieja.html', words: 4 }];
   assert.deepEqual(offenders(mejor, { 'vieja.html': 60 }), []);
+});
+
+test('cuenta la prosa que se pasa por atributo: es lo que el usuario lee en la tarjeta', () => {
+  const html = '<app-layout concept="El valor se preserva si sigue siendo válido." />';
+  assert.equal(countProse(html), 8);
+});
+
+test('suma los tres atributos de la tarjeta, no solo uno', () => {
+  const html = '<app-layout concept="Uno dos." action="Tres cuatro." observe="Cinco seis." />';
+  assert.equal(countProse(html), 6);
+});
+
+test('el título no es prosa: es sustantivo para navegar', () => {
+  assert.equal(countProse('<app-layout title="linkedSignal con fuente" />'), 0);
+});
+
+test('un binding no es prosa: es una expresión, no texto que se lee', () => {
+  assert.equal(countProse('<app-layout [concept]="textoDelConcepto()" />'), 0);
+});
+
+test('la prosa del atributo no se cuenta dos veces', () => {
+  assert.equal(countProse('<app-layout concept="Una dos tres." />'), 3);
+});
+
+test('una pantalla renombrada no blanquea su deuda: estrena con el techo, no con su conteo', () => {
+  const renombrada = [{ screen: 'nuevo-nombre.html', words: 60 }];
+  assert.deepEqual(nextBaseline(renombrada, { 'viejo-nombre.html': 60 }), {
+    'nuevo-nombre.html': CEILING,
+  });
+});
+
+test('una pantalla ya conocida solo puede bajar su línea base', () => {
+  assert.deepEqual(nextBaseline([{ screen: 'v.html', words: 40 }], { 'v.html': 60 }), {
+    'v.html': 40,
+  });
+  assert.deepEqual(nextBaseline([{ screen: 'v.html', words: 80 }], { 'v.html': 60 }), {
+    'v.html': 60,
+  });
 });
