@@ -11,11 +11,9 @@ import {
 } from '@angular/core';
 import { outputFromObservable, toObservable } from '@angular/core/rxjs-interop';
 import { map } from 'rxjs';
-interface ClickInButton {
-  date: Date;
-  firstName: string;
-  surname: string;
-}
+// El mismo tipo que consumen click-history, computed-tracker y event: estaba redeclarado acá
+// igual pero por separado, así que los dos podían driftear sin que nada avisara.
+import { ClickInButton } from '../component.interface';
 
 @Component({
   selector: 'app-basic-form',
