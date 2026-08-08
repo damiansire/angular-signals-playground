@@ -49,97 +49,149 @@ export const signalsRoutesTree: RouteItem[] = [
   {
     path: '0',
     subLevels: [
-      { path: '1', component: HtmlToTreeComponent },
-      { path: '2', component: DomIsAliveComponent },
-      { path: '3', component: DomToPixelComponent },
-      { path: '4', component: ManualSyncPainComponent },
-      { path: '5', component: OldChangeDetectionComponent },
-      { path: '6', component: SignalsChangeDetectionComponent },
+      { path: '1', title: 'El HTML es un árbol de nodos.', component: HtmlToTreeComponent },
+      { path: '2', title: 'El DOM está vivo.', component: DomIsAliveComponent },
+      { path: '3', title: 'No todo cambio cuesta lo mismo.', component: DomToPixelComponent },
+      { path: '4', title: 'A mano, te olvidás un lugar.', component: ManualSyncPainComponent },
+      { path: '5', title: 'Zone.js revisa todo el árbol.', component: OldChangeDetectionComponent },
+      {
+        path: '6',
+        title: 'El signal avisa quién lo lee.',
+        component: SignalsChangeDetectionComponent,
+      },
     ],
   },
   {
     path: '1',
     subLevels: [
-      { path: '1', component: VariablesComponent },
-      { path: '2', component: WhatIsSignalsComponent },
-      { path: '3', component: TypesOfSignalsComponent },
-      { path: '4', component: CreateNewSignalsComponent },
-      { path: '5', component: WritableSignalsComponent },
-      { path: '6', component: UpdateSignalComponent },
-      { path: '7', component: ReadOnlySignalsComponent },
+      { path: '1', title: 'Variables (repaso pre-signals)', component: VariablesComponent },
+      { path: '2', title: 'Qué es un signal', component: WhatIsSignalsComponent },
+      { path: '3', title: 'Tipos de signal', component: TypesOfSignalsComponent },
+      { path: '4', title: 'Leer un signal: el getter ()', component: CreateNewSignalsComponent },
+      { path: '5', title: 'Writable Signal', component: WritableSignalsComponent },
+      { path: '6', title: 'Update Signal', component: UpdateSignalComponent },
+      {
+        path: '7',
+        title: 'Read-only signals: asReadonly()',
+        component: ReadOnlySignalsComponent,
+      },
     ],
   },
   {
     path: '2',
     subLevels: [
-      { path: '1', component: ComputedSignalsComponent },
-      { path: '2', component: ComputedSignalDynamicDependenciesComponent },
-      { path: '3', component: ComputedSignalsLazilyEvaluatedMemoizedComponent },
+      { path: '1', title: 'Computed signals', component: ComputedSignalsComponent },
+      {
+        path: '2',
+        title: 'conditionalCount Recomputations',
+        component: ComputedSignalDynamicDependenciesComponent,
+      },
+      {
+        path: '3',
+        title: 'Perezoso y memoizado',
+        component: ComputedSignalsLazilyEvaluatedMemoizedComponent,
+      },
     ],
   },
   {
     path: '3',
     subLevels: [
-      { path: '1', component: EffectComponent },
-      { path: '2', component: DestroyEffectComponent },
-      { path: '3', component: EffectDestroyComponent },
+      { path: '1', title: 'Effect Execution', component: EffectComponent },
+      { path: '2', title: 'Interval Evaluation', component: DestroyEffectComponent },
+      { path: '3', title: 'Effect Evaluation', component: EffectDestroyComponent },
     ],
   },
   {
     path: '4',
     subLevels: [
-      { path: '1', component: ReferenceEqualityComponent },
-      { path: '2', component: CustomEqualComponent },
+      {
+        path: '1',
+        title: 'Igualdad por defecto (Object.is)',
+        component: ReferenceEqualityComponent,
+      },
+      { path: '2', title: 'Función equal custom', component: CustomEqualComponent },
     ],
   },
   {
     path: '5',
     subLevels: [
-      { path: '1', component: BasicLinkedSignalComponent },
-      { path: '2', component: LinkedSignalWithSourceComponent },
+      {
+        path: '1',
+        title: 'linkedSignal: reinicio con la fuente',
+        component: BasicLinkedSignalComponent,
+      },
+      {
+        path: '2',
+        title: 'linkedSignal: preservar si sigue válida',
+        component: LinkedSignalWithSourceComponent,
+      },
     ],
   },
   {
     path: '6',
     subLevels: [
-      { path: '1', component: ResourceBasicComponent },
-      { path: '2', component: RxResourceComponent },
+      { path: '1', title: 'resource(): loader con Promise', component: ResourceBasicComponent },
+      { path: '2', title: 'rxResource(): stream de RxJS', component: RxResourceComponent },
     ],
   },
   {
     path: '7',
     subLevels: [
-      { path: '1', component: InputOutputComponent },
-      { path: '2', component: ModelTwoWayComponent },
-      { path: '3', component: InputRequiredComponent },
+      {
+        path: '1',
+        title: 'input() y output() basados en signals',
+        component: InputOutputComponent,
+      },
+      {
+        path: '2',
+        title: 'model(): binding two-way con [(value)]',
+        component: ModelTwoWayComponent,
+      },
+      { path: '3', title: 'input.required() y transform', component: InputRequiredComponent },
     ],
   },
   {
     path: '8',
     subLevels: [
-      { path: '1', component: ViewChildComponent },
-      { path: '2', component: RxjsInteropComponent },
-      { path: '3', component: ViewChildrenComponent },
-      { path: '4', component: ContentQueriesComponent },
+      { path: '1', title: 'viewChild() como signal', component: ViewChildComponent },
+      {
+        path: '2',
+        title: 'toSignal() · toObservable() · untracked()',
+        component: RxjsInteropComponent,
+      },
+      { path: '3', title: 'viewChildren() como signal', component: ViewChildrenComponent },
+      {
+        path: '4',
+        title: 'contentChild() y contentChildren()',
+        component: ContentQueriesComponent,
+      },
     ],
   },
   {
     path: '9',
     subLevels: [
-      { path: '1', component: AfterRenderEffectComponent },
-      { path: '2', component: OnCleanupComponent },
+      {
+        path: '1',
+        title: 'afterRenderEffect(): medir el DOM',
+        component: AfterRenderEffectComponent,
+      },
+      { path: '2', title: 'effect((onCleanup) => …)', component: OnCleanupComponent },
     ],
   },
   {
     path: '10',
     subLevels: [
-      { path: '1', component: DebouncedRxjsComponent },
-      { path: '2', component: DebouncedManualComponent },
+      { path: '1', title: 'Debounce con RxJS', component: DebouncedRxjsComponent },
+      {
+        path: '2',
+        title: 'Debounce a mano (effect + onCleanup)',
+        component: DebouncedManualComponent,
+      },
     ],
   },
   {
     path: '11',
-    subLevels: [{ path: '1', component: ZonelessComponent }],
+    subLevels: [{ path: '1', title: 'Change detection sin Zone.js', component: ZonelessComponent }],
   },
 ];
 

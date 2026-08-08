@@ -22,9 +22,11 @@ const COL: Record<AccentKey, string> = {
   capstone: '#c98a2a',
 };
 
-/** Handle de un sub-nivel montado: su disposer. */
+/** Handle de un sub-nivel montado: su disposer y el nombre que va al topbar. */
 export interface SubHandle {
   dispose: () => void;
+  /** Nombre del sub-nivel. Lo declara quien monta, no se adivina leyendo el DOM montado. */
+  title?: string;
 }
 /** Monta el componente real de un sub-nivel (concepto ci, sub si) y devuelve su handle. */
 export type MountSub = (host: HTMLElement, conceptIdx: number, subIdx: number) => SubHandle;
@@ -46,7 +48,7 @@ interface Concept extends RawConcept {
   card?: HTMLDivElement;
   subIdx: number;
   subDispose?: () => void; // disposer del componente montado del sub actual
-  exampleTitle?: string; // título del sub-ejemplo actual (h1 del componente montado), para el topbar
+  exampleTitle?: string; // nombre del sub-nivel actual (declarado por el handle), para el topbar
 }
 
 interface SubDot {
@@ -714,9 +716,10 @@ export function initMolecule(
     // de encapsulación de integrada-vista), así que sin esto el CSS de armonización de
     // .subhost (h1/botones) nunca matchea nada.
     stampTree(host);
-    // El título del sub-ejemplo (h1 del componente) se promueve al topbar; lo guardamos acá,
-    // recién montado, y render() lo refleja. En dissolve el h1 se oculta (no se duplica).
-    cc.exampleTitle = host.querySelector('h1')?.textContent?.trim() ?? '';
+    // El nombre del sub-nivel viene del handle, no del DOM montado. Antes salía de
+    // `host.querySelector('h1')`, y como ningún sub-nivel tiene <h1> propio, el primero que
+    // encontraba era el del formulario de demo embebido: el topbar mostraba "Damian Sire!".
+    cc.exampleTitle = handle.title ?? '';
     fuse(cc);
     replay(card.querySelector('.subbody'), 'warp');
   }

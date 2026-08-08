@@ -50,6 +50,11 @@ export class IntegradaVistaComponent {
     (lvl.subLevels ?? []).map((sl) => sl.component),
   );
 
+  /** Nombre de cada sub-nivel, en el mismo orden que `subComponents`: es lo que muestra el topbar. */
+  private readonly subTitles: (string | undefined)[][] = signalsRoutesTree.map((lvl) =>
+    (lvl.subLevels ?? []).map((sl) => sl.title),
+  );
+
   constructor() {
     afterNextRender(() => {
       // Nombre del atributo de encapsulación que Angular pone a los elementos del template;
@@ -120,6 +125,7 @@ export class IntegradaVistaComponent {
     // Forzamos la detección inicial acá; las interacciones posteriores ya agendan su propio tick.
     ref.changeDetectorRef.detectChanges();
     return {
+      title: this.subTitles[ci]?.[si],
       dispose: () => {
         this.appRef.detachView(ref.hostView);
         ref.destroy();
