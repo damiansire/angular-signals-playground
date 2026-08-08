@@ -431,6 +431,13 @@ export function initIntroTusi(host: HTMLElement, options: IntroTusiOptions = {})
 
   // ── loop ──
   let rafId = 0;
+  // Latido lento de cuando el intro no se ve. La landing se cruza una vez y después queda
+  // invisible detrás del recorrido, pero el rAF seguía dibujando el canvas a 60fps por el resto de
+  // la sesión: trabajo de GPU y batería para algo que nadie mira. Fuera de vista no hay nada que
+  // dibujar, solo hay que enterarse de cuándo vuelve, y para eso alcanza con mirar cada tanto.
+  let idleId = 0;
+  const REPOSO_MS = 200;
+
   function loop(now: number): void {
     const t = now / 1000;
     const dt = Math.min(0.05, t - tPrev);
@@ -458,6 +465,15 @@ export function initIntroTusi(host: HTMLElement, options: IntroTusiOptions = {})
         else if (!visible) void actx.suspend();
       }
     }
+    if (!visible) {
+      // Nada que dibujar mientras no se ve: solo hay que enterarse de cuándo vuelve.
+      idleId = window.setTimeout(() => {
+        idleId = 0;
+        rafId = window.requestAnimationFrame(loop);
+      }, REPOSO_MS);
+      return;
+    }
+
     if (!reduce && !paused && started) step(t, dt);
     draw(t);
     const prog = started ? (reduce ? 1 : Math.min(1, (ph - phBase) / REWARD_FULL_PHASE)) : 0;
@@ -506,6 +522,7 @@ export function initIntroTusi(host: HTMLElement, options: IntroTusiOptions = {})
 
   return (): void => {
     window.cancelAnimationFrame(rafId);
+    if (idleId) window.clearTimeout(idleId);
     window.removeEventListener('resize', onResize);
     window.removeEventListener('wheel', onUserScroll);
     window.removeEventListener('touchmove', onUserScroll);
