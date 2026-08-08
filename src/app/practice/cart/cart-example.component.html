@@ -20,7 +20,9 @@
   </svg>
 
   <header class="practice__head">
-    <a class="practice__back" routerLink="/recorrido">← Volver al recorrido</a>
+    <!-- El recorrido vive en la raíz. Antes apuntaba a /recorrido, que el router no define:
+         llegaba a destino de rebote por el comodín ** que redirige a '', no por estar bien. -->
+    <a class="practice__back" routerLink="/">← Volver al recorrido</a>
     <p class="practice__kicker">Practicá · lo aprendido</p>
     <h1 class="practice__title">Carrito reactivo</h1>
     <p class="practice__lede">
