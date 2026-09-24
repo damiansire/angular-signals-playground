@@ -132,6 +132,10 @@ puede alcanzar" son dos cosas distintas y hay que chequear las dos.
       ahí. Sin elegir clima nadie liberaba el `inert` que pone la landing, y un
       link compartido abría la app entera muerta (review de animaciones,
       2026-09-24).
+- [ ] Ningún contenedor del chrome (riel, topbar) atrapa clicks con su caja: solo
+      sus controles. Hit-test con `elementFromPoint` sobre cada botón del demo en
+      pantalla, a 1440 y a 1920 de ancho: `aside.rail` (312×900, z 6) se comía el
+      botón entero de 1/6 a 1440 px.
 - [ ] Ninguna regla del recorrido apaga el foco de lo embebido. Los rings de
       Tailwind son `box-shadow`: un `box-shadow: none` genérico sobre la card
       también los borra. Tabular hasta un botón embebido y mirar el anillo.
