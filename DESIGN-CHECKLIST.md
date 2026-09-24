@@ -127,6 +127,14 @@ puede alcanzar" son dos cosas distintas y hay que chequear las dos.
       contenido ambos tabulables) que duplican las paradas de tabulación.
 - [ ] Las paradas que están ocultas (índice fuera de vista, sub-nivel no
       activo) salen del tab-order mientras no se ven.
+- [ ] Abrir por deep-link (`?nivel=X&sub-nivel=Y`) deja el recorrido operable:
+      tomar el árbol de accesibilidad y confirmar que topbar, card y riel están
+      ahí. Sin elegir clima nadie liberaba el `inert` que pone la landing, y un
+      link compartido abría la app entera muerta (review de animaciones,
+      2026-09-24).
+- [ ] Ninguna regla del recorrido apaga el foco de lo embebido. Los rings de
+      Tailwind son `box-shadow`: un `box-shadow: none` genérico sobre la card
+      también los borra. Tabular hasta un botón embebido y mirar el anillo.
 
 ## Trabajo de fondo (lo que corre cuando no lo estás mirando)
 
@@ -138,6 +146,14 @@ puede alcanzar" son dos cosas distintas y hay que chequear las dos.
       no leyendo el código.
 - [ ] Consola limpia mientras se recorre: un `console.log` didáctico solo
       aparece cuando el usuario está en el sub-nivel que lo enseña.
+- [ ] Ningún loop de dibujo (rAF de canvas) corre sin algo que mover: parado en
+      pausa, antes de elegir clima o fuera de vista, contar `requestAnimationFrame`
+      durante un segundo y esperar cero (review de animaciones, 2026-09-24).
+- [ ] Toda animación infinita sobre algo en opacidad 0 queda pausada. Verificar
+      con `getComputedStyle(el).animationPlayState`, no leyendo la regla: un
+      shorthand `animation` más específico resetea el play-state y le gana.
+- [ ] `prefers-reduced-motion` se prueba cambiándolo EN VIVO, no solo al cargar:
+      el CSS reacciona solo, el SMIL y los canvas no.
 
 ## Legibilidad del contenido embebido
 
@@ -231,6 +247,13 @@ eran de dibujo sino de que el recorrido seguía vivo por debajo del velo.
       cambia el valor.
 - [ ] Nada de `!important` en un control: le gana también a su propio `:hover` y
       lo deja sin ninguna señal al pasarle el mouse.
+- [ ] El overlay se queda con las teclas y gestos de desplazamiento (flechas,
+      AvPág, Inicio/Fin, rueda, arrastre) y el motor ignora eventos ya
+      consumidos (`defaultPrevented`). El `inert` de los hermanos no alcanza al
+      scroller que los contiene: probar con una flecha abajo REAL que la
+      cinemática siga en pantalla.
+- [ ] Con la pestaña oculta el overlay se pausa (audio incluido) y al volver se
+      reanuda solo si la pausa no la puso la persona.
 - [ ] Si el texto es el contenido de un beat, verificar que no se pise consigo
       mismo. Las etiquetas de operadores salían de a cinco y se leían
       "mergeMapetryrror": ilegible equivale a no haberlo dibujado.
