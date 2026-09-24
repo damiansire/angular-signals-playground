@@ -160,3 +160,97 @@ body {
   border: 1px solid color-mix(in srgb, var(--glow, #9a9081) 26%, #e6dfcf);
   box-shadow: var(--frame);
 }
+
+/* ============================================================================
+   Controles de los demos embebidos en /integrada-vista. Vivían en el CSS del componente; se
+   mudaron acá por la misma razón que la capa de arriba: alcanzan internals de componentes
+   descendientes. Botones con color Tailwind ESTÁTICO (bg-* fijo, no condicional: ahí el color
+   es decorativo, no estado) pasan a la pastilla del recorrido; toggles con color condicional y
+   diagramas quedan afuera, porque ahí el color puede ser semántico.
+   ============================================================================ */
+.subhost button[class*='bg-blue-'],
+.subhost button[class*='bg-green-'],
+.subhost button[class*='bg-amber-'],
+.subhost button[class*='bg-indigo-'],
+.subhost button[class*='bg-emerald-'],
+.subhost button[class*='bg-fuchsia-'],
+.subhost button[class*='bg-purple-'],
+.subhost button[class*='bg-sky-'],
+.subhost button[class*='bg-cyan-'],
+.subhost button[class*='bg-gray-'] {
+  font-family: var(--sans);
+  font-weight: 600;
+  border: none;
+  border-radius: 999px;
+  padding: 0.6rem 1.35rem;
+  transition: filter 0.15s ease;
+}
+.subhost button[class*='bg-blue-'],
+.subhost button[class*='bg-green-'],
+.subhost button[class*='bg-amber-'],
+.subhost button[class*='bg-indigo-'],
+.subhost button[class*='bg-emerald-'],
+.subhost button[class*='bg-fuchsia-'],
+.subhost button[class*='bg-purple-'],
+.subhost button[class*='bg-sky-'],
+.subhost button[class*='bg-cyan-'] {
+  background: var(--glow, #eb9b3c);
+  color: #201d16;
+}
+.subhost button[class*='bg-gray-'] {
+  background: #3a352d;
+  color: #f2ecdc;
+}
+/* Números/acentos de texto "gritones" (p.ej. el contador text-indigo-700 de Zoneless, violeta sobre
+   una escena dorada): heredan el acento del concepto en vez de traer su propio color y romper el
+   clima. Solo aplica a colores decorativos de la familia índigo/violeta/púrpura. */
+.subhost [class*='text-indigo-'],
+.subhost [class*='text-violet-'],
+.subhost [class*='text-purple-'],
+.subhost [class*='text-blue-'],
+.subhost [class*='text-sky-'],
+.subhost [class*='text-cyan-'],
+.subhost [class*='text-fuchsia-'] {
+  color: var(--glow, #eb9b3c);
+}
+.subhost button[class*='bg-blue-']:hover:not(:disabled),
+.subhost button[class*='bg-green-']:hover:not(:disabled),
+.subhost button[class*='bg-amber-']:hover:not(:disabled),
+.subhost button[class*='bg-indigo-']:hover:not(:disabled),
+.subhost button[class*='bg-emerald-']:hover:not(:disabled),
+.subhost button[class*='bg-fuchsia-']:hover:not(:disabled),
+.subhost button[class*='bg-purple-']:hover:not(:disabled),
+.subhost button[class*='bg-sky-']:hover:not(:disabled),
+.subhost button[class*='bg-cyan-']:hover:not(:disabled),
+.subhost button[class*='bg-gray-']:hover:not(:disabled) {
+  filter: brightness(1.08);
+}
+/* Botones SIN clase de color Tailwind (p.ej. el <button>Destroy</button> pelado de effect-destroy,
+   o los estilados desde el CSS del componente): sueltos sobre el campo se leen como texto plano,
+   sin afford de acción. Les damos la misma pastilla base que a los grises, así todo lo clickeable
+   se lee como control. Los bg-* ya tienen su tratamiento arriba y quedan excluidos. */
+.subhost button:not([class*='bg-']) {
+  font-family: var(--sans);
+  font-weight: 600;
+  border: none;
+  border-radius: 999px;
+  padding: 0.6rem 1.35rem;
+  /* Ancho-contenido (no estirado): dentro de un flex-col w-full el botón se estiraría a banner;
+     lo acotamos a su contenido para que se lea como los demás botones-pastilla. */
+  width: fit-content;
+  background: #3a352d;
+  color: #f2ecdc;
+  cursor: pointer;
+  transition: filter 0.15s ease;
+}
+.subhost button:not([class*='bg-']):hover:not(:disabled) {
+  filter: brightness(1.08);
+}
+/* Foco de los inputs de texto en el acento del concepto en vez del cian/teal/rosa/naranja
+   al azar que trae cada sub-nivel (mismo color de foco, no la variedad Tailwind). */
+.subhost input[type='text']:focus,
+.subhost input[type='number']:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--glow, #eb9b3c);
+  border-color: transparent;
+}
