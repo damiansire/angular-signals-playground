@@ -97,6 +97,37 @@ describe('initPrologoAnomalia', () => {
     });
   });
 
+  describe('pestaña oculta', () => {
+    function ocultarPestaña(oculta: boolean, spy: jasmine.Spy): void {
+      spy.and.returnValue(oculta);
+      document.dispatchEvent(new Event('visibilitychange'));
+    }
+
+    it('se pausa al ocultarse y se reanuda al volver', () => {
+      const p = arrancar();
+      const pausa = p.host.querySelector<HTMLButtonElement>('.prologo__pause')!;
+      const oculta = spyOnProperty(document, 'hidden', 'get');
+
+      ocultarPestaña(true, oculta);
+      expect(pausa.getAttribute('aria-pressed')).withContext('oculta').toBe('true');
+
+      ocultarPestaña(false, oculta);
+      expect(pausa.getAttribute('aria-pressed')).withContext('de vuelta').toBe('false');
+    });
+
+    it('si la pausa la puso la persona, volver a la pestaña no la saca', () => {
+      const p = arrancar();
+      const pausa = p.host.querySelector<HTMLButtonElement>('.prologo__pause')!;
+      const oculta = spyOnProperty(document, 'hidden', 'get');
+
+      pausa.click();
+      ocultarPestaña(true, oculta);
+      ocultarPestaña(false, oculta);
+
+      expect(pausa.getAttribute('aria-pressed')).toBe('true');
+    });
+  });
+
   it('saltar cede la posta exactamente una vez y oculta el prólogo', () => {
     const p = arrancar();
 

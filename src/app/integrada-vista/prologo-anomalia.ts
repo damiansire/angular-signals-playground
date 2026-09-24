@@ -52,6 +52,9 @@ interface Fusion {
 }
 
 /** Las teclas con las que el navegador (o el motor del recorrido) desplaza la página. */
+/** Lo que tarda en apagarse el último pip del final antes de poder cerrar el contexto de audio. */
+const CIERRE_AUDIO_MS = 2500;
+
 const TECLAS_DE_DESPLAZAMIENTO = new Set([
   'ArrowUp',
   'ArrowDown',
@@ -1135,9 +1138,13 @@ export function initPrologoAnomalia(host: HTMLElement, opts: PrologoOpciones): (
     // Las voces llegan DESPUÉS del primer armado, así que si acá cambia el modo hay que rearmar.
     // Sin esto la voz quedaba prendida sobre un reloj hecho para leer y tenía que correr para
     // entrar: era el "se escucha acelerada" que no se explicaba por ningún lado.
+    // Pero sin volver a cero ni sacar la pausa: las voces pueden llegar con la escena avanzada o
+    // detenida, y reiniciarla desde el principio (y reanudarla sola) era peor que el ritmo viejo.
     if (antes !== vozOn) {
+      const avance = T.fin > 0 ? tAhora / T.fin : 0;
       rearmarReloj();
-      arrancar(0);
+      if (pausado || terminado) tAhora = avance * T.fin;
+      else arrancar(avance * T.fin);
     }
   }
 
@@ -1236,7 +1243,12 @@ export function initPrologoAnomalia(host: HTMLElement, opts: PrologoOpciones): (
     }
     mostrar();
     dichas = new Set();
-    if (window.speechSynthesis) speechSynthesis.cancel();
+    if (window.speechSynthesis) {
+      speechSynthesis.cancel();
+      // `cancel()` vacía la cola pero no saca la pausa: sin esto, tocar "Voz" en pausa dejaba el
+      // motor mudo para el resto de la escena.
+      if (speechSynthesis.paused) speechSynthesis.resume();
+    }
     tAhora = desde;
     despausar();
     // El gesto que el navegador exige lo dio quien eligió el clima, así que acá ya se puede abrir.
@@ -1277,6 +1289,14 @@ export function initPrologoAnomalia(host: HTMLElement, opts: PrologoOpciones): (
     cancelAnimationFrame(raf);
     if (window.speechSynthesis) speechSynthesis.cancel();
     if (zumbidoGain) zumbidoGain.gain.value = 0;
+    // El zumbido es un oscilador continuo: con la ganancia en 0 seguía procesando en el hilo de audio
+    // el resto de la sesión. Se corta ya y el contexto se cierra cuando se apagó el último pip.
+    zumbido?.stop();
+    zumbido = null;
+    luego(() => {
+      void ac?.close();
+      ac = null;
+    }, CIERRE_AUDIO_MS);
     ocultar();
     opts.alTerminar();
   }
@@ -1332,6 +1352,23 @@ export function initPrologoAnomalia(host: HTMLElement, opts: PrologoOpciones): (
   /** Rueda y arrastre sobre el prólogo tampoco pueden scrollear el recorrido de atrás. */
   const alDesplazar = (e: Event): void => {
     if (!terminado && !raiz.hidden) e.preventDefault();
+  };
+
+  /**
+   * Con la pestaña oculta el rAF se frena solo, pero el zumbido y la voz no: seguían sonando sobre
+   * una escena congelada. Se pausa como si hubiera tocado el botón, y al volver se reanuda solo si
+   * la pausa la puso esto y no la persona.
+   */
+  let pausaDelSistema = false;
+  const alCambiarVisibilidad = (): void => {
+    if (terminado || raiz.hidden) return;
+    if (document.hidden && !pausado) {
+      pausaDelSistema = true;
+      alternarPausa();
+    } else if (!document.hidden && pausaDelSistema) {
+      pausaDelSistema = false;
+      if (pausado) alternarPausa();
+    }
   };
 
   const alSaltar = (): void => terminar();
@@ -1401,6 +1438,7 @@ export function initPrologoAnomalia(host: HTMLElement, opts: PrologoOpciones): (
   // También cambia por Escape o por F11, que no pasan por el botón.
   document.addEventListener('fullscreenchange', pintarPantalla);
   document.addEventListener('keydown', alTeclado);
+  document.addEventListener('visibilitychange', alCambiarVisibilidad);
   raiz.addEventListener('wheel', alDesplazar, { passive: false });
   raiz.addEventListener('touchmove', alDesplazar, { passive: false });
   if (window.speechSynthesis) {
@@ -1432,6 +1470,7 @@ export function initPrologoAnomalia(host: HTMLElement, opts: PrologoOpciones): (
     // Salir del prólogo no puede dejar la pantalla tomada.
     if (document.fullscreenElement === raiz) void document.exitFullscreen().catch(() => undefined);
     document.removeEventListener('keydown', alTeclado);
+    document.removeEventListener('visibilitychange', alCambiarVisibilidad);
     raiz.removeEventListener('wheel', alDesplazar);
     raiz.removeEventListener('touchmove', alDesplazar);
     void ac?.close();
