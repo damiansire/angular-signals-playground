@@ -40,7 +40,7 @@ export class HtmlToTreeComponent {
   private parseTimer: ReturnType<typeof setTimeout> | null = null;
   protected readonly parsePlaying = signal(false);
   private readonly overlay = viewChild<ElementRef<SVGSVGElement>>('overlay');
-  htmlCode = ` <main> 
+  readonly htmlCode = ` <main> 
      <section> 
        <h2>  Introduction  </h2> 
        <p>  This is a simple example 
@@ -51,17 +51,8 @@ export class HtmlToTreeComponent {
        <p> Some interesting content </p> 
      </article> 
  </main> `;
-  //nodesToShow = signal<string[]>([]);
-  //for development only:
-  /*  'main-1',
-  'article-1',
-  'section-1',
-  'h2-1',
-  'p-1',
-  'h3-1',
-  'p-2',*/
-  nodesToShow = signal<string[]>([]);
-  connectors = signal<ConnectorLine[]>([]);
+  readonly nodesToShow = signal<string[]>([]);
+  readonly connectors = signal<ConnectorLine[]>([]);
 
   constructor() {
     // Recálculo inmediato (no espera al próximo frame) más una ventana breve de
@@ -77,14 +68,11 @@ export class HtmlToTreeComponent {
       this.followTick();
 
       const deadline = performance.now() + FOLLOW_WINDOW_MS;
-      let rafId = requestAnimationFrame(
-        function loop(this: HtmlToTreeComponent) {
-          this.followTick();
-          if (performance.now() < deadline) {
-            rafId = requestAnimationFrame(loop.bind(this));
-          }
-        }.bind(this),
-      );
+      const loop = (): void => {
+        this.followTick();
+        if (performance.now() < deadline) rafId = requestAnimationFrame(loop);
+      };
+      let rafId = requestAnimationFrame(loop);
       onCleanup(() => cancelAnimationFrame(rafId));
     });
 
@@ -92,9 +80,9 @@ export class HtmlToTreeComponent {
   }
 
   codeClickHandler(event: CodeClick) {
-    if (event.action == 'Select') {
+    if (event.action === 'Select') {
       this.addNode(event.id);
-    } else if (event.action == 'Deselect') {
+    } else if (event.action === 'Deselect') {
       this.removeNode(event.id);
     }
   }
@@ -103,9 +91,6 @@ export class HtmlToTreeComponent {
   }
   removeNode(id: string) {
     this.nodesToShow.update((currentNodes) => currentNodes.filter((node) => node !== id));
-  }
-  onParsedCodeHandler() {
-    // no-op: el árbol se actualiza vía codeClickHandler; este handler queda como punto de extensión
   }
 
   /** "Leer el HTML": revela los nodos en orden de documento, como si el parser recorriera el
