@@ -1439,6 +1439,12 @@ export function initPrologoAnomalia(host: HTMLElement, opts: PrologoOpciones): (
   document.addEventListener('fullscreenchange', pintarPantalla);
   document.addEventListener('keydown', alTeclado);
   document.addEventListener('visibilitychange', alCambiarVisibilidad);
+  // Pedir menos movimiento a mitad de la cinemática la termina, igual que si lo pidiera al entrar.
+  const mqlReduce = matchMedia('(prefers-reduced-motion: reduce)');
+  const alReducirMovimiento = (e: MediaQueryListEvent): void => {
+    if (e.matches) terminar();
+  };
+  mqlReduce.addEventListener('change', alReducirMovimiento);
   raiz.addEventListener('wheel', alDesplazar, { passive: false });
   raiz.addEventListener('touchmove', alDesplazar, { passive: false });
   if (window.speechSynthesis) {
@@ -1471,6 +1477,7 @@ export function initPrologoAnomalia(host: HTMLElement, opts: PrologoOpciones): (
     if (document.fullscreenElement === raiz) void document.exitFullscreen().catch(() => undefined);
     document.removeEventListener('keydown', alTeclado);
     document.removeEventListener('visibilitychange', alCambiarVisibilidad);
+    mqlReduce.removeEventListener('change', alReducirMovimiento);
     raiz.removeEventListener('wheel', alDesplazar);
     raiz.removeEventListener('touchmove', alDesplazar);
     void ac?.close();

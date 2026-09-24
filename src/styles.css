@@ -98,6 +98,16 @@ body {
   }
 }
 
+/* Congela toda la vida ambiente CSS con la pestaña oculta (el motor del recorrido pone `anims-frozen`
+   por visibilitychange; el SMIL lo pausa `pauseAnimations()`): el navegador no frena solo ni el CSS
+   ni el SMIL en background. Es global y no del componente porque también tiene que alcanzar lo que
+   los sub-niveles crean después de montarse, que no lleva el atributo de encapsulación del host. */
+.anims-frozen *,
+.anims-frozen *::before,
+.anims-frozen *::after {
+  animation-play-state: paused !important;
+}
+
 /* ============================================================================
    Armonización material de los demos embebidos en /integrada-vista (dissolve).
    Los sub-niveles del recorrido montan componentes standalone (editor de código,

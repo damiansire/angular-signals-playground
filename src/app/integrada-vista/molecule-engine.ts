@@ -477,11 +477,15 @@ export function initMolecule(
   // —estrellas y electrones en órbita en la escena, chispa que recorre el arco de sub-niveles—.
   // El SMIL no respeta el `@media (prefers-reduced-motion)` del CSS, así que hay que gatearlo acá:
   // congelamos el timeline de la escena (los electrones tienen `begin` negativo → quedan quietos ya
-  // distribuidos, no amontonados) y omitimos la chispa. El glide ya va instantáneo (goToUnit) y el
-  // CSS apaga breath/sonar/warp/puck. El SENTIDO se mantiene: el estado avanza, sin desplazamiento.
-  const reduceMotion =
-    typeof window.matchMedia === 'function' &&
-    window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  // distribuidos, no amontonados) y ocultamos el electrón del ascensor. El glide ya va instantáneo
+  // (goToUnit) y el CSS apaga breath/sonar/warp/puck. El SENTIDO se mantiene: el estado avanza, sin
+  // desplazamiento. Se escucha el cambio: el CSS reacciona solo si la preferencia cambia en plena
+  // sesión, y sin esto el SMIL quedaba del otro lado (ver `aplicarMovimiento`).
+  const mqlReduce =
+    typeof window.matchMedia === 'function'
+      ? window.matchMedia('(prefers-reduced-motion: reduce)')
+      : null;
+  let reduceMotion = mqlReduce?.matches ?? false;
   const contentEl = q<HTMLDivElement>('#content')!;
 
   for (let s = 0; s < 30; s++) {
@@ -645,22 +649,20 @@ export function initMolecule(
   const subPuckDot = el('circle', { class: 'sub-puck-dot', r: 12 });
   const subPuckOrbit = el('ellipse', { class: 'sub-puck-orbit', rx: 17, ry: 8 });
   const subPuckE = el('circle', { class: 'sub-puck-e', r: 3.4 });
-  if (!reduceMotion) {
-    // El electrón recorre la órbita en loop (SMIL): la vida en reposo del ascensor. Con reduce no va.
-    subPuckE.appendChild(
-      el('animateMotion', {
-        dur: '1.9s',
-        repeatCount: 'indefinite',
-        path: 'M 17 0 A 17 8 0 1 1 -17 0 A 17 8 0 1 1 17 0',
-      }),
-    );
-  }
+  // El electrón recorre la órbita en loop (SMIL): la vida en reposo del ascensor. Con reduce se oculta.
+  subPuckE.appendChild(
+    el('animateMotion', {
+      dur: '1.9s',
+      repeatCount: 'indefinite',
+      path: 'M 17 0 A 17 8 0 1 1 -17 0 A 17 8 0 1 1 17 0',
+    }),
+  );
   const subPuckNum = el('text', { class: 'sub-puck-n', y: 5 });
   const subPuckG = el('g', { class: 'sub-puck' });
   subPuckG.appendChild(subSonar);
   subPuckG.appendChild(subPuckOrbit);
   subPuckG.appendChild(subPuckDot);
-  if (!reduceMotion) subPuckG.appendChild(subPuckE);
+  subPuckG.appendChild(subPuckE);
   subPuckG.appendChild(subPuckNum);
   const subEG = el('g', {});
   suborbit.appendChild(subArc);
@@ -687,6 +689,7 @@ export function initMolecule(
 
   // El orbe del sub-nivel nuevo NACE en el electrón actual y se fusiona al centro de la card.
   function fuse(cc: Concept): void {
+    if (reduceMotion) return;
     const card = cc.card;
     if (!card) return;
     const flash = card.querySelector<HTMLElement>('.subflash');
@@ -1008,6 +1011,7 @@ export function initMolecule(
 
   // ---- Onda reactiva al nacer un átomo ----
   function ripat(i: number): void {
+    if (reduceMotion) return;
     const r = el('circle', {
       class: 'ripple',
       cx: C[i].x,
@@ -1462,9 +1466,6 @@ export function initMolecule(
   let scrollAnimId = 0;
   /** Ya navegó (flecha, riel o gesto): a partir de ahí la posición de apertura no se reimpone. */
   let usuarioMovio = false;
-  const prefersReducedMotion = (): boolean =>
-    typeof window.matchMedia === 'function' &&
-    window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   function goToUnit(u: number): void {
     cancelAnimationFrame(scrollAnimId);
     usuarioMovio = true;
@@ -1477,7 +1478,7 @@ export function initMolecule(
     const to = u * unit();
     const from = stage.scrollTop;
     const dist = to - from;
-    if (prefersReducedMotion() || Math.abs(dist) < 1) {
+    if (reduceMotion || Math.abs(dist) < 1) {
       stage.scrollTop = to;
       render(u);
       return;
@@ -1634,28 +1635,33 @@ export function initMolecule(
     track.style.height = (TOTAL + TRACK_TAIL) * unit() + 'px';
     openAt();
     raf(openAt);
-    // Con reduce, congelar el timeline SMIL de la escena una vez que el clock corre: los electrones
-    // (begin negativo) quedan quietos ya distribuidos alrededor de sus núcleos, sin orbitar.
-    if (reduceMotion) sceneG.ownerSVGElement?.pauseAnimations();
+    // Con el clock del SMIL ya corriendo: congelado con reduce, los electrones (begin negativo)
+    // quedan quietos ya distribuidos alrededor de sus núcleos. También cubre abrir en una pestaña de
+    // fondo, que antes animaba hasta el primer visibilitychange.
+    aplicarMovimiento();
   }, 30);
   window.addEventListener('load', openAt, { once: true });
 
   // Ahorro de CPU/GPU cuando la pestaña NO está visible: el navegador throttlea rAF en background pero
-  // NO el SMIL (electrones/chispa/sonar) ni las animaciones CSS (estrellas/halos/intro), que siguen
-  // quemando ciclos (y el ventilador) con la vista oculta. Al ocultarse congelamos TODO; al volver se
-  // reanuda (salvo reduced-motion, que ya deja la escena quieta).
+  // NO el SMIL (electrones/sonar) ni las animaciones CSS (halos/intro), que siguen quemando ciclos
+  // (y el ventilador) con la vista oculta. Oculta o con reduce, el SMIL queda congelado; el CSS de
+  // reduce ya lo resuelve su media query y el de pestaña oculta, la clase `anims-frozen`.
   const molSvg = sceneG.ownerSVGElement;
-  const onVisibility = (): void => {
-    const hidden = document.hidden;
-    root.classList.toggle('anims-frozen', hidden);
-    if (hidden) {
-      molSvg?.pauseAnimations();
-      suborbit.pauseAnimations();
-    } else if (!reduceMotion) {
-      molSvg?.unpauseAnimations();
-      suborbit.unpauseAnimations();
+  function aplicarMovimiento(): void {
+    const oculta = document.hidden;
+    root.classList.toggle('anims-frozen', oculta);
+    subPuckE.style.display = reduceMotion ? 'none' : '';
+    for (const svg of [molSvg, suborbit]) {
+      if (oculta || reduceMotion) svg?.pauseAnimations();
+      else svg?.unpauseAnimations();
     }
+  }
+  const onVisibility = (): void => aplicarMovimiento();
+  const onReduceChange = (e: MediaQueryListEvent): void => {
+    reduceMotion = e.matches;
+    aplicarMovimiento();
   };
+  mqlReduce?.addEventListener('change', onReduceChange);
   document.addEventListener('visibilitychange', onVisibility);
 
   requestOrbit();
@@ -1674,6 +1680,7 @@ export function initMolecule(
     window.removeEventListener('resize', onResize);
     window.removeEventListener('load', openAt);
     document.removeEventListener('visibilitychange', onVisibility);
+    mqlReduce?.removeEventListener('change', onReduceChange);
     C.forEach((cc) => cc.subDispose?.());
   };
 }

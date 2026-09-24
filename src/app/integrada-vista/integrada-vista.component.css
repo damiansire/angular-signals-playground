@@ -101,11 +101,6 @@
     translate: 0 -3px;
   }
 }
-@media (prefers-reduced-motion: reduce) {
-  .rec-guide__mascot {
-    animation: none;
-  }
-}
 .rec-guide__bubble {
   position: relative;
   margin: 0;
@@ -888,26 +883,6 @@
     r 0.25s ease,
     fill 0.35s ease;
 }
-/* El electrón actual queda fijo arriba (sin el giro continuo del resto): al cambiar de
-   sub-nivel, que asiente suave en su lugar en vez de saltar de golpe. */
-.sub-e.current .sub-dot,
-.sub-e.current .sub-n {
-  transition:
-    cx 0.4s ease,
-    cy 0.4s ease,
-    r 0.25s ease,
-    fill 0.35s ease;
-}
-/* En dissolve los dots NO se reubican al cambiar de sub-nivel (cada uno vive fijo en su frac
-   del arco que enmarca el título), así que la transición cx/cy del círculo sólo produciría el
-   "barrido" del boot (vuela desde su posición inicial mientras su número ya está puesto). Se
-   apaga acá (tamaño/color siguen animando); el orbit no-dissolve la conserva, donde el actual
-   sí vuela al tope. Sólo el círculo: el número usa x/y, cx/cy nunca lo movía. */
-.suborbit.dissolve .sub-e.current .sub-dot {
-  transition:
-    r 0.25s ease,
-    fill 0.35s ease;
-}
 .sub-n {
   font-family: var(--mono);
   font-size: 13px;
@@ -922,18 +897,6 @@
 }
 .sub-e.visited .sub-n {
   fill: #e8ecf4;
-}
-.sub-e.current .sub-dot {
-  animation: subpulse 2.2s ease-in-out infinite;
-}
-@keyframes subpulse {
-  0%,
-  100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.72;
-  }
 }
 
 .subbody.warp {
@@ -1094,7 +1057,6 @@
 .tb-back {
   visibility: hidden;
 }
-
 
 /* Barra ÚNICA de navegación, pegada al borde IZQUIERDO. En la vista molécula muestra los 12 conceptos
    (ticks 0-11); al bucear, su cuerpo se desvanece y la barra de sub-niveles (dibujada por el motor en
@@ -1406,18 +1368,14 @@
   }
 }
 
-/* Congelar TODA la vida ambiente CSS cuando la pestaña no está visible (el motor pone `anims-frozen`
-   en el host por visibilitychange; el SMIL lo pausa `pauseAnimations()`). Ahorra CPU/GPU (ventilador)
-   con la vista en background, donde el navegador NO frena solo ni el CSS ni el SMIL. */
-:host(.anims-frozen) *,
-:host(.anims-frozen) *::before,
-:host(.anims-frozen) *::after {
-  animation-play-state: paused !important;
+/* Con la órbita apagada (vista molécula) el sonar seguía latiendo en opacidad 0. */
+.suborbit:not(.on) * {
+  animation-play-state: paused;
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .rec-guide__mascot,
   .bond.on,
-  .sub-e.current .sub-dot,
   .atom.current .halo,
   .atom.dived-dissolve .halo,
   .atom.dived-dissolve .ring,
@@ -1430,8 +1388,6 @@
   /* Las transiciones ambiente van directas: el estado avanza sin desplazamiento animado
      (el puck salta al dot, el electrón actual se coloca sin deslizar). El SENTIDO se mantiene. */
   .suborbit.dissolve .sub-puck,
-  .sub-e.current .sub-dot,
-  .sub-e.current .sub-n,
   .rail-stop-btn {
     transition: none;
   }

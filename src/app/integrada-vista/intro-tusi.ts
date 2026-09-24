@@ -94,7 +94,8 @@ export function initIntroTusi(host: HTMLElement, options: IntroTusiOptions = {})
   const ctx = canvas.getContext('2d');
   if (!ctx) throw new Error('intro-tusi: el canvas no dio contexto 2d');
 
-  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const mqlReduce = window.matchMedia('(prefers-reduced-motion: reduce)');
+  let reduce = mqlReduce.matches;
   let pal = PALETTES.light;
   let speedIdx = SPEED_START;
   let paused = false;
@@ -553,7 +554,16 @@ export function initIntroTusi(host: HTMLElement, options: IntroTusiOptions = {})
   reset();
   refreshSpeedMenu();
   // sin animación no hay construcción que contar: el contador solo aportaría un parpadeo
-  if (reduce) counterEl.hidden = true;
+  counterEl.hidden = reduce;
+  // Si la preferencia cambia en plena sesión el CSS reacciona solo; el canvas tiene que pasar a la
+  // figura quieta (o volver a construir) él mismo.
+  const onReduceChange = (e: MediaQueryListEvent): void => {
+    reduce = e.matches;
+    counterEl.hidden = reduce;
+    reset();
+    pedirCuadro();
+  };
+  mqlReduce.addEventListener('change', onReduceChange);
   // La primera medida del canvas va en el primer cuadro, no acá. `resize` lee
   // getBoundingClientRect, y cuando esto corre el motor acaba de construir la molécula entera:
   // leer geometría con el layout sucio fuerza el recálculo de toda la página. Medido sobre el
@@ -568,6 +578,7 @@ export function initIntroTusi(host: HTMLElement, options: IntroTusiOptions = {})
     setVisible: aplicarVisibilidad,
     dispose: (): void => {
       window.cancelAnimationFrame(rafId);
+      mqlReduce.removeEventListener('change', onReduceChange);
       window.removeEventListener('resize', onResize);
       window.removeEventListener('wheel', onUserScroll);
       window.removeEventListener('touchmove', onUserScroll);

@@ -97,6 +97,28 @@ describe('initPrologoAnomalia', () => {
     });
   });
 
+  it('pedir menos movimiento a mitad de la cinemática la termina', () => {
+    let avisar: ((e: MediaQueryListEvent) => void) | undefined;
+    const real = window.matchMedia.bind(window);
+    spyOn(window, 'matchMedia').and.callFake((q: string) =>
+      q.includes('reduced-motion')
+        ? ({
+            matches: false,
+            media: q,
+            addEventListener: (_t: string, fn: (e: MediaQueryListEvent) => void) => (avisar = fn),
+            removeEventListener: () => undefined,
+          } as unknown as MediaQueryList)
+        : real(q),
+    );
+    const p = arrancar();
+    expect(p.veces()).withContext('arrancó corriendo').toBe(0);
+
+    avisar?.({ matches: true } as MediaQueryListEvent);
+
+    expect(p.veces()).toBe(1);
+    expect(p.raiz.hidden).toBeTrue();
+  });
+
   describe('pestaña oculta', () => {
     function ocultarPestaña(oculta: boolean, spy: jasmine.Spy): void {
       spy.and.returnValue(oculta);
