@@ -993,6 +993,10 @@
   transform: translateY(-50%);
   z-index: 6;
   height: min(88%, 900px);
+  /* La caja del riel mide hasta 312×900 y va por encima de la card (z 6): sin esto se comía los
+     clicks de los demos que caen debajo (a 1440 px, el botón entero de 1/6). Solo las paradas
+     (`.rail-stop-btn`) reciben el puntero. */
+  pointer-events: none;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
