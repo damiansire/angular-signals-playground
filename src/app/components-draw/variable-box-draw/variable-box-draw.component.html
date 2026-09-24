@@ -5,7 +5,8 @@
   role="button"
   [attr.aria-pressed]="selectable() ? selected() : null"
   (click)="_onClick()"
-  (keyup.enter)="_onClick()"
+  (keydown.enter)="_onClick()"
+  (keydown.space)="$event.preventDefault(); _onClick()"
 >
   <span>{{ variableName() }}</span>
 </div>

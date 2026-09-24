@@ -41,13 +41,16 @@ describe('VariableBoxDrawComponent', () => {
     expect(payload).toEqual({ name: 'total', value: '' });
   });
 
-  it('emite clicked con keyup.enter', () => {
+  it('emite clicked con Enter y con Espacio, como un botón nativo', () => {
     let emitted = 0;
     component.clicked.subscribe(() => emitted++);
 
     const box = fixture.nativeElement.querySelector('[role="button"]') as HTMLElement;
-    box.dispatchEvent(new KeyboardEvent('keyup', { key: 'Enter' }));
+    box.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter' }));
+    const espacio = new KeyboardEvent('keydown', { key: ' ', cancelable: true });
+    box.dispatchEvent(espacio);
 
-    expect(emitted).toBe(1);
+    expect(emitted).toBe(2);
+    expect(espacio.defaultPrevented).withContext('Espacio no scrollea la página').toBeTrue();
   });
 });
