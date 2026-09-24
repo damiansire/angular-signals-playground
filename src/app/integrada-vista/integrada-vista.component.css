@@ -563,7 +563,9 @@
 .card--dissolve .subhost [class*='bg-slate-100'] {
   background-color: transparent;
 }
-.card--dissolve .subhost [class*='shadow-'] {
+/* Sin `:focus-visible`: los rings de foco de Tailwind también son box-shadow, y apagarlos dejaba
+   botones embebidos (p.ej. el formulario del nivel 2) sin ningún foco visible. */
+.card--dissolve .subhost [class*='shadow-']:not(:focus-visible) {
   box-shadow: none;
 }
 /* Densidad del embed (design-review #1/#2): sin la hoja blanca, el padding de página completa de los
