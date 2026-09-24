@@ -483,6 +483,9 @@ export function initIntroTusi(host: HTMLElement, options: IntroTusiOptions = {})
     if (!picked) {
       overlay.classList.toggle('gone', !visible);
       overlay.inert = !visible;
+      // El chrome del recorrido va tapado solo mientras el overlay tapa. Con un deep-link nadie elige
+      // clima, y sin esto el recorrido entero quedaba inerte: sin clicks, sin Tab, sin lector.
+      tapados().forEach((el) => (el.inert = visible));
     }
     // El intro entero (controles de sonido/pausa/velocidad y el overlay) se desvanece con opacity,
     // que NO lo saca del tab-order ni del árbol de a11y. Con deep-link a un sub-nivel quedaban 7

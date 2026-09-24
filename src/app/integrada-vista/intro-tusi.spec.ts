@@ -237,6 +237,19 @@ describe('initIntroTusi', () => {
       expect(intro.inert).toBeFalse();
     });
 
+    it('sin elegir clima (deep-link), salir de vista libera el chrome del recorrido', () => {
+      const t = arrancar();
+      const topbar = document.createElement('div');
+      t.host.appendChild(topbar);
+      topbar.inert = true;
+
+      t.handle.setVisible(false);
+      expect(topbar.inert).withContext('landing fuera de vista').toBeFalse();
+
+      t.handle.setVisible(true);
+      expect(topbar.inert).withContext('el overlay vuelve a tapar').toBeTrue();
+    });
+
     it('avisar dos veces lo mismo no hace nada', () => {
       const t = arrancar();
       const intro = t.host.querySelector<HTMLElement>('.intro')!;
