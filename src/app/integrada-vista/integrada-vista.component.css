@@ -818,7 +818,7 @@
 }
 
 .subbody.warp {
-  animation: warpin 0.8s cubic-bezier(0.2, 0.75, 0.2, 1);
+  animation: warpin var(--motion-enter) cubic-bezier(0.2, 0.75, 0.2, 1);
 }
 @keyframes warpin {
   0% {

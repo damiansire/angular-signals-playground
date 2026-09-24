@@ -42,6 +42,10 @@ body {
    Color = CSS custom properties (Tailwind solo para layout/espaciado).
    ─────────────────────────────────────────────────────────────────────────── */
 :root {
+  /* Entrada de un sub-nivel: la dura `warpin` (integrada) y su gemela `cc-warp-hide` (concept-card),
+     que oculta la mascota mientras dura. Si divergen, la mascota vuelve a flotar en el centro. */
+  --motion-enter: 0.8s;
+
   /* Tipografía por rol */
   --font-display: 'Archivo', system-ui, sans-serif;
   --font-mono: 'JetBrains Mono', ui-monospace, monospace;
