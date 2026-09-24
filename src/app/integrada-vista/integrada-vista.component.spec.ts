@@ -73,6 +73,20 @@ describe('IntegradaVistaComponent', () => {
 
       fixture.destroy();
     });
+
+    it('un `load` tardío no tira de vuelta al arranque a quien ya navegó', async () => {
+      const fixture = await montar();
+      const stage = fixture.nativeElement.querySelector('#stage') as HTMLElement;
+      await esperar(80);
+      flecha(false);
+      await esperar(700);
+      const navegado = stage.scrollTop;
+
+      window.dispatchEvent(new Event('load'));
+
+      expect(stage.scrollTop).toBe(navegado);
+      fixture.destroy();
+    });
   });
 
   describe('mountSub', () => {

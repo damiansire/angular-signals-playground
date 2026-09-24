@@ -1049,6 +1049,13 @@ export function initMolecule(
    */
   const established = new Set<number>();
   let liveConcept = 0;
+  /**
+   * Un deslizamiento largo del riel (del 0 al 11) atraviesa todos los conceptos del medio en 620 ms.
+   * Mientras dura, `render` no monta componentes ni cambia de sub-nivel ni escribe la URL: eran
+   * decenas de `createComponent` sincrónicos para cards que asoman un cuadro, justo el tirón que la
+   * ventana de montaje existe para evitar. El `render` del final, ya asentado, hace todo eso una vez.
+   */
+  let enTransito = false;
   const track = q<HTMLDivElement>('#track')!;
   const railFillEl = q<HTMLElement>('#railFill');
   const railLineEl = q<HTMLElement>('.rail-line');
@@ -1236,7 +1243,7 @@ export function initMolecule(
     }
 
     const dc = C[c];
-    if (dc.subN > 0) {
+    if (dc.subN > 0 && !enTransito) {
       const M = dc.subN;
       const si = w < 2 ? 0 : Math.min(M - 1, 1 + Math.floor(w - 2));
       if (dc.subIdx !== si) {
@@ -1307,7 +1314,7 @@ export function initMolecule(
     });
 
     liveConcept = c;
-    asegurarMontajes(c);
+    if (!enTransito) asegurarMontajes(c);
     bondEls.forEach((ln, j) => {
       if (j + 1 < c) {
         // El enlace nace al establecer, no al pasar scrolleando: la molécula se une porque
@@ -1425,7 +1432,7 @@ export function initMolecule(
     // En la landing (hero visible, s < 0.12) todavía no entraste al recorrido: reportamos concepto -1
     // para que la URL quede LIMPIA (`/`) en el arranque, no `?nivel=0`. Apenas empezás, ya refleja el nivel.
     const cForUrl = s < 0.12 ? -1 : c;
-    if (whereC !== cForUrl || whereSub !== subNow) {
+    if (!enTransito && (whereC !== cForUrl || whereSub !== subNow)) {
       whereC = cForUrl;
       whereSub = subNow;
       onWhere(cForUrl, subNow);
@@ -1453,11 +1460,15 @@ export function initMolecule(
   // salto nulo vamos directo, sin animar.
   const easeInOut = (p: number): number => (p < 0.5 ? 2 * p * p : 1 - Math.pow(-2 * p + 2, 2) / 2);
   let scrollAnimId = 0;
+  /** Ya navegó (flecha, riel o gesto): a partir de ahí la posición de apertura no se reimpone. */
+  let usuarioMovio = false;
   const prefersReducedMotion = (): boolean =>
     typeof window.matchMedia === 'function' &&
     window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   function goToUnit(u: number): void {
     cancelAnimationFrame(scrollAnimId);
+    usuarioMovio = true;
+    enTransito = false;
     // Cancelar la animación en curso deja huérfano el scrollSnapType:'none' que ella había puesto:
     // el tick que lo iba a restituir ya no corre más. Se restituye acá, antes de decidir si esta
     // llamada anima o no, porque las dos salidas cortas de abajo (reduced-motion, o destino a menos
@@ -1472,6 +1483,7 @@ export function initMolecule(
       return;
     }
     stage.style.scrollSnapType = 'none';
+    enTransito = true;
     // Duración proporcional a la distancia, acotada: pasos cortos (sub-niveles contiguos) no se
     // arrastran y saltos largos (cambio de concepto) no vuelan.
     const dur = Math.min(620, 220 + Math.abs(dist) * 0.35);
@@ -1487,6 +1499,7 @@ export function initMolecule(
         scrollAnimId = requestAnimationFrame(tick);
       } else {
         stage.scrollTop = to; // asentar exacto en la parada
+        enTransito = false;
         render(u);
         stage.style.scrollSnapType = '';
       }
@@ -1512,6 +1525,17 @@ export function initMolecule(
   }
   track.appendChild(snaps);
 
+  // Un gesto propio durante el deslizamiento lo corta: seguir escribiendo scrollTop 620 ms le peleaba
+  // la rueda al usuario, con el snap apagado. Se devuelve el snap y el scroll nativo sigue solo.
+  const onGesto = (): void => {
+    usuarioMovio = true;
+    if (!enTransito) return;
+    cancelAnimationFrame(scrollAnimId);
+    enTransito = false;
+    stage.style.scrollSnapType = '';
+    render(stage.scrollTop / unit());
+  };
+
   let ticking = false;
   const onScroll = (): void => {
     if (ticking) return;
@@ -1523,6 +1547,9 @@ export function initMolecule(
   };
   const onResize = (): void => {
     track.style.height = (TOTAL + TRACK_TAIL) * unit() + 'px';
+    // El snap reencaja la parada solo, pero la escena (el encuadre angosto/ancho, la cámara) quedaba
+    // dibujada con la geometría vieja hasta el próximo scroll.
+    render(stage.scrollTop / unit());
     orbitDirty = true; // cambió la geometría: que orbitLoop reubique la constelación
     requestOrbit();
   };
@@ -1565,12 +1592,18 @@ export function initMolecule(
   // El cierre del sub-nivel avisa por evento del DOM cuando el sistema queda sano. Es a propósito
   // el acoplamiento más flojo posible: el átomo no conoce al motor ni el motor al átomo, y el
   // evento solo puede venir de la card montada, así que se atribuye al concepto en pantalla.
-  const onEstablished = (): void => {
-    established.add(liveConcept);
+  const onEstablished = (e: Event): void => {
+    // Por el target y no por `liveConcept`: en el fade de salida la card del concepto anterior sigue
+    // viva (amt > 0.6) cuando `liveConcept` ya es el siguiente.
+    const card = (e.target as Element | null)?.closest('.card');
+    const i = C.findIndex((cc) => cc.card === card);
+    established.add(i >= 0 ? i : liveConcept);
     render(stage.scrollTop / unit());
   };
   stage.addEventListener(SISTEMA_ESTABLECIDO, onEstablished);
   stage.addEventListener('scroll', onScroll, { passive: true });
+  stage.addEventListener('wheel', onGesto, { passive: true });
+  stage.addEventListener('touchstart', onGesto, { passive: true });
   window.addEventListener('keydown', onKeyNav);
   window.addEventListener('resize', onResize);
 
@@ -1590,6 +1623,9 @@ export function initMolecule(
   // decide bootScroll (arriba, o el deep-link). Lo forzamos en el boot, en el próximo frame y
   // al `load` (por si la restauración del navegador llega tarde y la pisa).
   const openAt = (): void => {
+    // Si la restauración del navegador llega tarde ya no importa: pisar la posición de alguien que
+    // ya scrolleó o clickeó el riel lo tiraba de vuelta al arranque.
+    if (usuarioMovio) return;
     const s = bootScroll();
     stage.scrollTop = s * unit();
     render(s);
@@ -1602,7 +1638,7 @@ export function initMolecule(
     // (begin negativo) quedan quietos ya distribuidos alrededor de sus núcleos, sin orbitar.
     if (reduceMotion) sceneG.ownerSVGElement?.pauseAnimations();
   }, 30);
-  window.addEventListener('load', openAt);
+  window.addEventListener('load', openAt, { once: true });
 
   // Ahorro de CPU/GPU cuando la pestaña NO está visible: el navegador throttlea rAF en background pero
   // NO el SMIL (electrones/chispa/sonar) ni las animaciones CSS (estrellas/halos/intro), que siguen
@@ -1632,6 +1668,8 @@ export function initMolecule(
     cancelAnimationFrame(orbitRaf);
     stage.removeEventListener(SISTEMA_ESTABLECIDO, onEstablished);
     stage.removeEventListener('scroll', onScroll);
+    stage.removeEventListener('wheel', onGesto);
+    stage.removeEventListener('touchstart', onGesto);
     window.removeEventListener('keydown', onKeyNav);
     window.removeEventListener('resize', onResize);
     window.removeEventListener('load', openAt);
