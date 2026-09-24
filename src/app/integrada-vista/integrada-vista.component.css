@@ -1153,11 +1153,15 @@
   left: 0;
   top: 0;
   width: 100%;
-  height: 0;
+  height: 100%;
   border-radius: 2px;
   background: linear-gradient(var(--source), var(--derived) 55%, var(--effect));
   opacity: 0.9;
-  transition: height 0.18s ease;
+  /* Llena por escala y no por `height`: el motor lo escribe en cada cuadro de scroll y el alto
+     costaba un layout por cuadro. */
+  transform: scaleY(0);
+  transform-origin: top;
+  transition: transform 0.18s ease;
 }
 /* Paradas (número + nombre) + cabeceras de acto, repartidas sobre el alto del eje. */
 .rail-ticks {

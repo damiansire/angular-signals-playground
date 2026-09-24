@@ -27,6 +27,14 @@ const COL: Record<AccentKey, string> = {
 };
 
 /** Handle de un sub-nivel montado: su disposer y el nombre que va al topbar. */
+/**
+ * Reescribir `textContent` reemplaza el nodo de texto y ensucia el layout aunque el texto sea el
+ * mismo; `render` corre en cada cuadro de scroll, así que solo se escribe cuando cambia.
+ */
+function ponerTexto(el: Element, texto: string): void {
+  if (el.textContent !== texto) el.textContent = texto;
+}
+
 export interface SubHandle {
   dispose: () => void;
   /**
@@ -742,7 +750,10 @@ export function initMolecule(
     // Corren al frame siguiente, con el layout ya resuelto. Las dos duran ~1 s: arrancar un frame
     // más tarde no se ve, y el reflow deja de ser forzado.
     const subbody = card.querySelector('.subbody');
+    // Solo para la card en pantalla: los vecinos que se montan de antemano están en opacidad 0, y la
+    // entrada les costaba dos reflows y un blur que no veía nadie.
     raf(() => {
+      if (C.indexOf(cc) !== liveConcept) return;
       fuse(cc);
       replay(subbody, 'warp');
     });
@@ -988,6 +999,11 @@ export function initMolecule(
     // Todos los conceptos usan el tratamiento "disolver el marco": la card no es una ventana, el
     // nivel/sub-nivel viven en el riel, el topbar y la órbita (sin header meta dentro de la card).
     card.className = 'card live card--sub card--dissolve';
+    // La card NUNCA lleva transform: la pista de la mascota es un overlay `position: fixed` dentro de
+    // la card, y CUALQUIER transform (incluido el viejo pop de escala 0.97→1) la vuelve el bloque
+    // contenedor de ese fixed y la mascota se anclaba al centro de la card al cambiar de sub-nivel.
+    // Sin transform ancla siempre a la esquina del viewport; la card entra solo por opacidad (fade).
+    card.style.transform = 'none';
     card.style.setProperty('--glow', COL[cc.accent]);
     card.innerHTML = `<span class="subflash"></span><div class="subbody"><div class="subhost"></div></div>`;
     contentEl.appendChild(card);
@@ -1232,7 +1248,7 @@ export function initMolecule(
     // Título vertical del concepto (espina de identidad) pegado al riel: aparece al bucear, con
     // el color del concepto. Es la casa del nombre en la escena.
     if (spaceSpineEl) {
-      if (spaceSpineEl.textContent !== C[c].name) spaceSpineEl.textContent = C[c].name;
+      ponerTexto(spaceSpineEl, C[c].name);
       spaceSpineEl.style.setProperty('--glow', COL[C[c].accent]);
       spaceSpineEl.style.opacity = Math.min(1, diveDepth / 0.55).toFixed(2);
     }
@@ -1261,13 +1277,15 @@ export function initMolecule(
     // montado (si no, va un sub-nivel atrasado). Si el sub-nivel no tiene h1 propio, cae al tagline
     // del nivel (no al nombre, que ya está en la espina vertical).
     if (tbTitleEl) {
-      tbTitleEl.textContent =
-        diveDepth > 0.5 ? dc.exampleTitle || dc.tagline || dc.name : dc.tagline || dc.name;
+      ponerTexto(
+        tbTitleEl,
+        diveDepth > 0.5 ? dc.exampleTitle || dc.tagline || dc.name : dc.tagline || dc.name,
+      );
     }
     // El contador de sub-nivel vive a nivel del título (en el topbar, como prefijo), no adentro
     // de la card. Solo cuando estás en un sub-ejemplo (buceado).
     if (tbCountEl) {
-      tbCountEl.textContent = diveDepth > 0.5 && dc.subN > 1 ? `${dc.subIdx + 1} / ${dc.subN}` : '';
+      ponerTexto(tbCountEl, diveDepth > 0.5 && dc.subN > 1 ? `${dc.subIdx + 1} / ${dc.subN}` : '');
     }
     // El ascensor solo tiene sentido con una SERIE de sub-niveles; con uno solo (p.ej. Zoneless) no
     // hay "dónde vas de N", así que no se muestra (ni el contador 1/1). El componente igual se monta.
@@ -1352,15 +1370,6 @@ export function initMolecule(
       amt = Math.max(0, Math.min(1, amt));
       const card = cc.card!;
       card.style.opacity = amt.toFixed(2);
-      // Escala casi plana: un pop 0.9→1 sincronizado con el fade es la curva típica de
-      // "se abrió un diálogo". La cámara ya hizo el zoom hacia el átomo (sceneG arriba);
-      // el card solo necesita asentar, no volver a "aparecer creciendo" por su cuenta.
-      // La card NUNCA lleva transform: la pista de la mascota es un overlay `position: fixed` dentro
-      // de la card, y CUALQUIER transform (incluido el viejo pop de escala 0.97→1) la vuelve el bloque
-      // contenedor de ese fixed. Con el pop, durante la transición entre sub-niveles la mascota se
-      // anclaba al centro de la card unos instantes y "bajaba" a la esquina al asentar. Sin transform,
-      // ancla siempre a la esquina del viewport; la card entra solo por opacidad (fade).
-      card.style.transform = 'none';
       // Cada card embebe el componente real del sub-nivel: siempre interactivo cuando está visible.
       const live = amt > 0.6;
       card.style.pointerEvents = live ? 'auto' : 'none';
@@ -1377,9 +1386,9 @@ export function initMolecule(
     if (s < 0.05) lastBorn = 0;
     // El nombre del concepto ya vive en el label del átomo y en el topbar: el caption solo marca el
     // MODO (evita la triple repetición del nombre en la vista molécula).
-    capS.textContent = diveDepth > 0.5 ? 'Adentro' : 'Molécula';
+    ponerTexto(capS, diveDepth > 0.5 ? 'Adentro' : 'Molécula');
     // El llenado del eje se ancla a la posición del concepto activo (progreso del recorrido).
-    if (railFillEl) railFillEl.style.height = (railProg * 100).toFixed(1) + '%';
+    if (railFillEl) railFillEl.style.transform = `scaleY(${railProg.toFixed(3)})`;
     // Contador goal-gradient ("te faltan N") + segmentos + estado por parada: hecho / estás acá /
     // bloqueado. `done = c` (conceptos previos), `here = c`, y "te faltan" cuenta el actual + los que faltan.
     // El hilo de punta a punta: la pregunta acompaña el recorrido y en el último capítulo se
@@ -1389,7 +1398,7 @@ export function initMolecule(
       const enElCierre = c === N - 1;
       const texto =
         s < 0.12 ? '' : enElCierre ? 'Quien lee, avisa.' : '¿Quién le avisó a la pantalla?';
-      if (tbQEl.textContent !== texto) tbQEl.textContent = texto;
+      ponerTexto(tbQEl, texto);
       tbQEl.classList.toggle('tb-q--answered', enElCierre);
     }
 
@@ -1399,8 +1408,10 @@ export function initMolecule(
     // hasta dónde scrolleaste.
     if (railCountEl) {
       const pendientes = N - established.size;
-      railCountEl.textContent =
-        pendientes === 0 ? 'todo establecido' : `${pendientes} sin establecer`;
+      ponerTexto(
+        railCountEl,
+        pendientes === 0 ? 'todo establecido' : `${pendientes} sin establecer`,
+      );
     }
     for (let si = 0; si < railSegs.length; si++) railSegs[si].classList.toggle('on', si < c);
     for (let si = 0; si < railStops.length; si++) {
