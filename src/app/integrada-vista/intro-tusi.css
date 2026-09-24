@@ -427,8 +427,10 @@
 }
 /* Los loops del overlay y del cue seguían corriendo toda la sesión sobre opacidad 0, y los orbitales
    animan offset-distance, que no se compone en GPU: costo de estilo por cuadro para nadie. */
+/* `.intro.` y no solo `.intro--fuera`: el shorthand `animation` de `.tusi__mouse span` resetea el
+   play-state y, con una clase menos, le ganaba por especificidad. */
 .tusi__overlay.gone *,
-.intro--fuera * {
+.intro.intro--fuera * {
   animation-play-state: paused;
 }
 
