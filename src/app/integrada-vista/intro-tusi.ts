@@ -408,6 +408,15 @@ export function initIntroTusi(host: HTMLElement, options: IntroTusiOptions = {})
   /** Empieza a construir. Separado de `start` porque el prólogo lo dispara más tarde. */
   function startBuild(): void {
     started = true;
+    // El chrome del recorrido se libera recién acá y no al elegir clima: con el prólogo en el medio
+    // quedaba clickeable y tabulable por encima de la cinemática (topbar y riel van en z-index 6).
+    tapados().forEach((el) => (el.inert = false));
+    // El audio de Tusi también espera: abrirlo al elegir clima lo dejaba corriendo en silencio al
+    // lado del contexto del prólogo durante toda la cinemática.
+    if (soundOn) {
+      initAudio();
+      if (actx?.state === 'suspended') void actx.resume();
+    }
   }
   function start(theme: 'light' | 'dark'): void {
     if (started || picked) return;
@@ -417,12 +426,7 @@ export function initIntroTusi(host: HTMLElement, options: IntroTusiOptions = {})
     else startBuild();
     soundBtn.textContent = soundOn ? '🔊' : '🔇';
     soundBtn.setAttribute('aria-label', soundOn ? 'Silenciar' : 'Activar sonido');
-    if (soundOn) {
-      initAudio();
-      if (actx?.state === 'suspended') void actx.resume();
-    }
     reset();
-    tapados().forEach((el) => (el.inert = false));
     overlay.classList.add('gone');
     // `.gone` sólo apaga opacidad y pointer-events: sin `inert` los botones del overlay siguen en el
     // orden de tabulación y en el árbol de a11y, invisibles pero alcanzables con Tab.

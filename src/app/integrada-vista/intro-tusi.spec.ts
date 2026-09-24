@@ -120,6 +120,20 @@ describe('initIntroTusi', () => {
       expect(t.gatillos.length).toBe(1);
     });
 
+    it('el chrome del recorrido sigue inerte durante el prólogo y se libera al construir', () => {
+      const t = arrancar();
+      // El chrome del recorrido es hermano del `.intro` (topbar y riel van por encima en z-index).
+      const topbar = document.createElement('div');
+      t.host.appendChild(topbar);
+      topbar.inert = true;
+
+      t.dark.click();
+      expect(topbar.inert).withContext('prólogo corriendo: el chrome no se toca').toBeTrue();
+
+      t.gatillos[0]();
+      expect(topbar.inert).withContext('construcción arrancada').toBeFalse();
+    });
+
     it('cualquiera de los dos climas entra igual', () => {
       const t = arrancar();
 

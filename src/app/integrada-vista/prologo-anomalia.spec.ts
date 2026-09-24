@@ -62,6 +62,41 @@ describe('initPrologoAnomalia', () => {
     expect(p.raiz.hidden).toBeFalse();
   });
 
+  describe('es modal: el recorrido de atrás no se mueve mientras corre', () => {
+    const tecla = (key: string): KeyboardEvent => {
+      const e = new KeyboardEvent('keydown', { key, bubbles: true, cancelable: true });
+      document.body.dispatchEvent(e);
+      return e;
+    };
+
+    it('consume las teclas de desplazamiento, que el motor ignora ya consumidas', () => {
+      arrancar();
+
+      for (const key of ['ArrowDown', 'ArrowUp', 'PageDown', 'PageUp', 'Home', 'End']) {
+        expect(tecla(key).defaultPrevented).withContext(key).toBeTrue();
+      }
+    });
+
+    it('consume la rueda sobre la cinemática', () => {
+      const p = arrancar();
+      const rueda = new WheelEvent('wheel', { deltaY: 120, bubbles: true, cancelable: true });
+
+      p.raiz.dispatchEvent(rueda);
+
+      expect(rueda.defaultPrevented).toBeTrue();
+    });
+
+    it('al saltar devuelve las teclas y la rueda', () => {
+      const p = arrancar();
+      p.skip.click();
+      const rueda = new WheelEvent('wheel', { deltaY: 120, bubbles: true, cancelable: true });
+      p.raiz.dispatchEvent(rueda);
+
+      expect(tecla('ArrowDown').defaultPrevented).toBeFalse();
+      expect(rueda.defaultPrevented).toBeFalse();
+    });
+  });
+
   it('saltar cede la posta exactamente una vez y oculta el prólogo', () => {
     const p = arrancar();
 

@@ -49,6 +49,32 @@ describe('IntegradaVistaComponent', () => {
     fixture.destroy();
   });
 
+  describe('navegación por teclado', () => {
+    const esperar = (ms: number) => new Promise((r) => setTimeout(r, ms));
+    const flecha = (prevenida: boolean): void => {
+      const e = new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true, cancelable: true });
+      if (prevenida) e.preventDefault();
+      window.dispatchEvent(e);
+    };
+
+    it('una flecha ya consumida (un overlay modal) no mueve el recorrido; una libre sí', async () => {
+      const fixture = await montar();
+      const stage = fixture.nativeElement.querySelector('#stage') as HTMLElement;
+      await esperar(80); // el boot fija el alto del track y la posición de apertura a los 30 ms
+      const antes = stage.scrollTop;
+
+      flecha(true);
+      await esperar(700); // más que el glide más largo (620 ms)
+      expect(stage.scrollTop).withContext('flecha consumida').toBe(antes);
+
+      flecha(false);
+      await esperar(700);
+      expect(stage.scrollTop).withContext('flecha libre').toBeGreaterThan(antes);
+
+      fixture.destroy();
+    });
+  });
+
   describe('mountSub', () => {
     it('monta el componente REAL del sub-nivel dentro de la .subhost, y renderiza algo', async () => {
       const fixture = await montar();

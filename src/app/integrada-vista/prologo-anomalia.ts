@@ -51,6 +51,16 @@ interface Fusion {
   b: { x: number; y: number };
 }
 
+/** Las teclas con las que el navegador (o el motor del recorrido) desplaza la página. */
+const TECLAS_DE_DESPLAZAMIENTO = new Set([
+  'ArrowUp',
+  'ArrowDown',
+  'PageUp',
+  'PageDown',
+  'Home',
+  'End',
+]);
+
 export interface PrologoOpciones {
   /** Corre cuando el prólogo termina o se saltea: es el empalme con la intro que ya existe. */
   readonly alTerminar: () => void;
@@ -1307,9 +1317,21 @@ export function initPrologoAnomalia(host: HTMLElement, opts: PrologoOpciones): (
     // video. Va en `document`: colgado del contenedor no se disparaba nunca porque el foco jamás
     // está ahí, así que la tecla caía en el scroll del recorrido de atrás.
     if (terminado || raiz.hidden) return;
+    // El prólogo es modal, pero el recorrido de atrás escucha las flechas en `window` y el `inert`
+    // de los hermanos no alcanza al scroller que los contiene: una flecha abajo lo movía y la
+    // cinemática quedaba fuera de vista, sonando. Se consumen acá y el motor respeta lo consumido.
+    if (TECLAS_DE_DESPLAZAMIENTO.has(e.key)) {
+      e.preventDefault();
+      return;
+    }
     if (e.code !== 'Space' || (e.target as HTMLElement | null)?.closest('button')) return;
     e.preventDefault();
     alternarPausa();
+  };
+
+  /** Rueda y arrastre sobre el prólogo tampoco pueden scrollear el recorrido de atrás. */
+  const alDesplazar = (e: Event): void => {
+    if (!terminado && !raiz.hidden) e.preventDefault();
   };
 
   const alSaltar = (): void => terminar();
@@ -1379,6 +1401,8 @@ export function initPrologoAnomalia(host: HTMLElement, opts: PrologoOpciones): (
   // También cambia por Escape o por F11, que no pasan por el botón.
   document.addEventListener('fullscreenchange', pintarPantalla);
   document.addEventListener('keydown', alTeclado);
+  raiz.addEventListener('wheel', alDesplazar, { passive: false });
+  raiz.addEventListener('touchmove', alDesplazar, { passive: false });
   if (window.speechSynthesis) {
     cargarVoces();
     speechSynthesis.addEventListener('voiceschanged', cargarVoces);
@@ -1408,6 +1432,8 @@ export function initPrologoAnomalia(host: HTMLElement, opts: PrologoOpciones): (
     // Salir del prólogo no puede dejar la pantalla tomada.
     if (document.fullscreenElement === raiz) void document.exitFullscreen().catch(() => undefined);
     document.removeEventListener('keydown', alTeclado);
+    raiz.removeEventListener('wheel', alDesplazar);
+    raiz.removeEventListener('touchmove', alDesplazar);
     void ac?.close();
   };
 }

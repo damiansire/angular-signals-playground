@@ -1546,6 +1546,9 @@ export function initMolecule(
   const onNext = (): void => stepTo(1);
   // Teclado: ↑/↓ (y AvPág) navegan el recorrido paso a paso — la vía accesible además del scroll.
   const onKeyNav = (e: KeyboardEvent): void => {
+    // Un overlay modal (el prólogo) consume las teclas de desplazamiento antes de que lleguen acá, y
+    // con modificadores la flecha es de otro atajo (Alt+← del navegador, Ctrl+↓ del lector).
+    if (e.defaultPrevented || e.altKey || e.ctrlKey || e.metaKey) return;
     // No secuestramos las flechas dentro de un campo editable del demo (ni el espacio, que activa
     // botones): solo ▲/▼ y AvPág mueven el recorrido.
     const t = e.target as HTMLElement | null;
