@@ -24,7 +24,10 @@ describe('initIntroTusi', () => {
           <canvas class="tusi__canvas" width="320" height="240"></canvas>
           <p class="tusi__epigraph"></p>
           <button class="tusi__help" type="button"></button>
-          <div class="tusi__counter"><span class="tusi__counter-n"></span></div>
+          <div class="tusi__counter">
+            <span class="tusi__pips">${'<span class="tusi__pip"></span>'.repeat(8)}</span>
+            <span class="tusi__counter-n"></span>
+          </div>
           <div class="tusi__hud">
             <button data-role="sound" type="button"></button>
             <button data-role="reset" type="button"></button>
@@ -178,6 +181,37 @@ describe('initIntroTusi', () => {
       t.ovSound.click();
       t.dark.click();
       expect(t.sonidos).toEqual([false]);
+    });
+  });
+
+  describe('el loop duerme cuando no hay nada que mover', () => {
+    const esperar = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
+    it('antes de elegir clima dibuja y deja de pedir cuadros', async () => {
+      const pedidos = spyOn(window, 'requestAnimationFrame').and.callThrough();
+      arrancar();
+      await esperar(100);
+      const asentado = pedidos.calls.count();
+
+      await esperar(150);
+
+      expect(pedidos.calls.count()).toBe(asentado);
+    });
+
+    it('con la construcción andando sí pide cuadros, y fuera de vista vuelve a dormir', async () => {
+      const t = arrancar();
+      t.dark.click();
+      t.gatillos[0]();
+      const pedidos = spyOn(window, 'requestAnimationFrame').and.callThrough();
+
+      await esperar(150);
+      expect(pedidos.calls.count()).withContext('construyendo').toBeGreaterThan(2);
+
+      t.handle.setVisible(false);
+      await esperar(60);
+      const asentado = pedidos.calls.count();
+      await esperar(150);
+      expect(pedidos.calls.count()).withContext('fuera de vista').toBe(asentado);
     });
   });
 

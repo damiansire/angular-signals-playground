@@ -319,6 +319,7 @@ export function initIntroTusi(host: HTMLElement, options: IntroTusiOptions = {})
   helpBtn.addEventListener('click', () => {
     helpOn = !helpOn;
     helpBtn.textContent = helpOn ? 'Ocultar el círculo' : 'No la veo, ayudame';
+    pedirCuadro();
   });
 
   const soundBtn = q<HTMLButtonElement>('.tusi__hud [data-role="sound"]');
@@ -332,11 +333,15 @@ export function initIntroTusi(host: HTMLElement, options: IntroTusiOptions = {})
     soundBtn.setAttribute('aria-label', soundOn ? 'Silenciar' : 'Activar sonido');
   });
 
-  q<HTMLButtonElement>('.tusi__hud [data-role="reset"]').addEventListener('click', reset);
+  q<HTMLButtonElement>('.tusi__hud [data-role="reset"]').addEventListener('click', () => {
+    reset();
+    pedirCuadro();
+  });
 
   const pauseBtn = q<HTMLButtonElement>('.tusi__hud [data-role="pause"]');
   pauseBtn.addEventListener('click', () => {
     paused = !paused;
+    pedirCuadro();
     pauseBtn.textContent = paused ? '▶' : '⏸';
     pauseBtn.setAttribute('aria-label', paused ? 'Reanudar animación' : 'Pausar animación');
   });
@@ -408,6 +413,7 @@ export function initIntroTusi(host: HTMLElement, options: IntroTusiOptions = {})
   /** Empieza a construir. Separado de `start` porque el prólogo lo dispara más tarde. */
   function startBuild(): void {
     started = true;
+    pedirCuadro();
     // El chrome del recorrido se libera recién acá y no al elegir clima: con el prólogo en el medio
     // quedaba clickeable y tabulable por encima de la cinemática (topbar y riel van en z-index 6).
     tapados().forEach((el) => (el.inert = false));
@@ -427,6 +433,7 @@ export function initIntroTusi(host: HTMLElement, options: IntroTusiOptions = {})
     soundBtn.textContent = soundOn ? '🔊' : '🔇';
     soundBtn.setAttribute('aria-label', soundOn ? 'Silenciar' : 'Activar sonido');
     reset();
+    pedirCuadro();
     overlay.classList.add('gone');
     // `.gone` sólo apaga opacidad y pointer-events: sin `inert` los botones del overlay siguen en el
     // orden de tabulación y en el árbol de a11y, invisibles pero alcanzables con Tab.
@@ -449,13 +456,14 @@ export function initIntroTusi(host: HTMLElement, options: IntroTusiOptions = {})
   refreshOvSound();
 
   // ── loop ──
+  // El loop corre solo mientras algo se mueve: con la construcción andando (ni en pausa ni con
+  // movimiento reducido) o con un destello apagándose. El resto del tiempo el cuadro sería idéntico
+  // al anterior (antes de elegir clima, en pausa, durante los minutos del prólogo, fuera de vista),
+  // así que no se pide ninguno: cada cambio de estado que sí altera el dibujo llama a `pedirCuadro`.
   let rafId = 0;
-  // Latido lento de cuando el intro no se ve. La landing se cruza una vez y después queda
-  // invisible detrás del recorrido, pero el rAF seguía dibujando el canvas a 60fps por el resto de
-  // la sesión: trabajo de GPU y batería para algo que nadie mira. Fuera de vista no hay nada que
-  // dibujar, solo hay que enterarse de cuándo vuelve, y para eso alcanza con mirar cada tanto.
-  let idleId = 0;
-  const REPOSO_MS = 200;
+  function pedirCuadro(): void {
+    if (!rafId) rafId = window.requestAnimationFrame(loop);
+  }
 
   /**
    * Lo llama el motor cuando la landing entra o sale de vista: es el único que lo sabe, porque lo
@@ -478,31 +486,27 @@ export function initIntroTusi(host: HTMLElement, options: IntroTusiOptions = {})
     // El intro entero (controles de sonido/pausa/velocidad y el overlay) se desvanece con opacity,
     // que NO lo saca del tab-order ni del árbol de a11y. Con deep-link a un sub-nivel quedaban 7
     // controles invisibles pero tabulables, capaces de cambiar el tema sin que se vea nada.
-    if (introEl) introEl.inert = !visible;
+    if (introEl) {
+      introEl.inert = !visible;
+      introEl.classList.toggle('intro--fuera', !visible);
+    }
     if (actx) {
       if (visible && soundOn) void actx.resume();
       else if (!visible) void actx.suspend();
     }
-    // Volver a la vista tiene que reanudar el dibujo aunque el latido lento esté esperando.
-    if (visible && !rafId && !idleId) rafId = window.requestAnimationFrame(loop);
+    if (visible) pedirCuadro();
   }
 
   function loop(now: number): void {
+    rafId = 0;
     const t = now / 1000;
     const dt = Math.min(0.05, t - tPrev);
     tPrev = t;
-    if (!visible) {
-      // Nada que dibujar mientras no se ve. El latido lento existe igual para que volver a la vista
-      // reanude solo aunque nadie avise: `aplicarVisibilidad` acorta la espera cuando sí avisan.
-      rafId = 0;
-      idleId = window.setTimeout(() => {
-        idleId = 0;
-        rafId = window.requestAnimationFrame(loop);
-      }, REPOSO_MS);
-      return;
-    }
+    // Fuera de vista no hay nada que dibujar; `aplicarVisibilidad` pide cuadro cuando vuelve.
+    if (!visible) return;
 
-    if (!reduce && !paused && started) step(t, dt);
+    const construyendo = started && !paused && !reduce;
+    if (construyendo) step(t, dt);
     draw(t);
     const prog = started ? (reduce ? 1 : Math.min(1, (ph - phBase) / REWARD_FULL_PHASE)) : 0;
     const narration = introNarration(prog, started);
@@ -531,12 +535,17 @@ export function initIntroTusi(host: HTMLElement, options: IntroTusiOptions = {})
         helpBtn.textContent = 'No la veo, ayudame';
       }
     }
-    rafId = window.requestAnimationFrame(loop);
+    if (construyendo || flashes.length > 0) pedirCuadro();
   }
 
-  const onResize = (): void => resize();
+  const onResize = (): void => {
+    resize();
+    pedirCuadro();
+  };
   const onUserScroll = (): void => {
+    if (scrolled) return;
     scrolled = true;
+    pedirCuadro();
   };
   window.addEventListener('resize', onResize);
   window.addEventListener('wheel', onUserScroll, { passive: true });
@@ -559,7 +568,6 @@ export function initIntroTusi(host: HTMLElement, options: IntroTusiOptions = {})
     setVisible: aplicarVisibilidad,
     dispose: (): void => {
       window.cancelAnimationFrame(rafId);
-      if (idleId) window.clearTimeout(idleId);
       window.removeEventListener('resize', onResize);
       window.removeEventListener('wheel', onUserScroll);
       window.removeEventListener('touchmove', onUserScroll);

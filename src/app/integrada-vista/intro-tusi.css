@@ -243,7 +243,7 @@
 }
 /* pico del globo apuntando a la mascota (a su izquierda) */
 .tusi__bubble::before {
-  content: "";
+  content: '';
   position: absolute;
   left: -7px;
   /* apunta al torso/cabeza de la mascota (alineadas por abajo), no a su base */
@@ -424,6 +424,12 @@
 .tusi__overlay.gone {
   opacity: 0;
   pointer-events: none;
+}
+/* Los loops del overlay y del cue seguían corriendo toda la sesión sobre opacidad 0, y los orbitales
+   animan offset-distance, que no se compone en GPU: costo de estilo por cuadro para nadie. */
+.tusi__overlay.gone *,
+.intro--fuera * {
+  animation-play-state: paused;
 }
 
 .tusi__ov-half {
