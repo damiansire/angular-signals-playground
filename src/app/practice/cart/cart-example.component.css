@@ -387,6 +387,11 @@
   background: rgba(255, 255, 255, 0.12);
   outline: none;
 }
+/* El fondo al 12% sobre el carbón del editor no llega ni a 1.5:1: solo, el foco no se veía. */
+.frag:focus-visible {
+  outline: 2px solid var(--source, #eb9b3c);
+  outline-offset: 1px;
+}
 
 [data-part] {
   outline: 2.5px solid transparent;
