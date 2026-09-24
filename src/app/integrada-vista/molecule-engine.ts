@@ -60,7 +60,6 @@ interface Concept extends RawConcept {
   x: number;
   y: number;
   subN: number; // cantidad de sub-niveles reales
-  subs: unknown[]; // longitud = subN (para la órbita / conteo)
   card?: HTMLDivElement;
   subIdx: number;
   // Disposer del componente montado del sub actual. El `| undefined` explícito porque al
@@ -198,6 +197,16 @@ const PANEL_SHIFT = 128;
 const ORX = 34;
 const ORY = 11;
 const NUC = 13;
+/**
+ * Parada de encuadre del átomo dentro del tramo de un concepto (`off[c] + PARADA_ATOMO`): ahí la cámara
+ * ya encuadró el átomo y empieza el buceo, que dura hasta `PARADA_ATOMO + 0.7`. La usan el snap, la
+ * cámara, el fade de la card, el riel y el deep-link: si divergen, cada uno encuadra en otro lado.
+ */
+const PARADA_ATOMO = 1.3;
+/** Hasta dónde del scroll (`s`) la landing sigue a la vista: el recorrido arranca pasado este punto. */
+const INTRO_HASTA = 0.12;
+/** El concepto del medio (`resource`): el pico del recorrido, con su marca propia en el riel. */
+const CONCEPTO_PICO = 6;
 
 /**
  * Radio ocupado por un átomo: la órbita (ORX) más el electrón que la recorre. Dos átomos a menos
@@ -274,7 +283,7 @@ export function snapStops(subCounts: readonly (number | null)[]): number[] {
   const { off } = scrollLayout(subCounts);
   const stops: number[] = [0];
   subCounts.forEach((n, i) => {
-    stops.push(off[i] + 1.3);
+    stops.push(off[i] + PARADA_ATOMO);
     const nsub = n ?? 0;
     for (let k = 0; k < nsub; k++) stops.push(off[i] + subStopOffset(k));
   });
@@ -333,15 +342,15 @@ export function cameraAt(
     };
   }
   if (isFirst) {
-    if (w < 1.3) {
+    if (w < PARADA_ATOMO) {
       return { K: W, fx: cen.x, fy: cen.y, diveDepth: 0 };
     }
-    const t = smoothstep((w - 1.3) / 0.7);
+    const t = smoothstep((w - PARADA_ATOMO) / 0.7);
     return {
       K: lerp(W, FK, t),
       fx: lerp(cen.x, target.x, t),
       fy: lerp(cen.y, target.y, t),
-      diveDepth: Math.min(1, (w - 1.3) / 0.7),
+      diveDepth: Math.min(1, (w - PARADA_ATOMO) / 0.7),
     };
   }
   if (w < 0.7) {
@@ -353,15 +362,15 @@ export function cameraAt(
       diveDepth: 0,
     };
   }
-  if (w < 1.3) {
+  if (w < PARADA_ATOMO) {
     return { K: W, fx: cen.x, fy: cen.y, diveDepth: 0 };
   }
-  const t = smoothstep((w - 1.3) / 0.7);
+  const t = smoothstep((w - PARADA_ATOMO) / 0.7);
   return {
     K: lerp(W, FK, t),
     fx: lerp(cen.x, target.x, t),
     fy: lerp(cen.y, target.y, t),
-    diveDepth: Math.min(1, (w - 1.3) / 0.7),
+    diveDepth: Math.min(1, (w - PARADA_ATOMO) / 0.7),
   };
 }
 
@@ -399,7 +408,6 @@ export function initMolecule(
     x: 0,
     y: 0,
     subN: subCounts[i] ?? 0,
-    subs: Array.from({ length: subCounts[i] ?? 0 }, () => ({})),
     subIdx: 0,
   }));
   const N = C.length;
@@ -481,8 +489,7 @@ export function initMolecule(
   const atomsG = q<SVGGElement>('#atoms')!;
   const ripG = q<SVGGElement>('#ripples')!;
 
-  // prefers-reduced-motion (snapshot al construir): con reduce apagamos la vida ambiente SMIL
-  // —estrellas y electrones en órbita en la escena, chispa que recorre el arco de sub-niveles—.
+  // prefers-reduced-motion: con reduce apagamos la vida ambiente SMIL (los electrones en órbita).
   // El SMIL no respeta el `@media (prefers-reduced-motion)` del CSS, así que hay que gatearlo acá:
   // congelamos el timeline de la escena (los electrones tienen `begin` negativo → quedan quietos ya
   // distribuidos, no amontonados) y ocultamos el electrón del ascensor. El glide ya va instantáneo
@@ -503,8 +510,6 @@ export function initMolecule(
       cy: (Math.random() * 600).toFixed(0),
       r: (Math.random() * 1.3 + 0.4).toFixed(1),
     });
-    st.style.animationDelay = (-Math.random() * 3).toFixed(1) + 's';
-    st.style.animationDuration = (2 + Math.random() * 3).toFixed(1) + 's';
     starsG.appendChild(st);
   }
 
@@ -640,8 +645,7 @@ export function initMolecule(
   const suborbit = el('svg', { class: 'suborbit', viewBox: '0 0 900 600' });
   // Los electrones se acomodan en fila fija, uno por sub-nivel, sobre un arco angosto pegado al
   // topbar (la "constelación" del recorrido). subArc es la curva punteada que los conecta.
-  const subArcId = 'sub-arc-' + Math.random().toString(36).slice(2);
-  const subArc = el('path', { class: 'sub-arc', id: subArcId });
+  const subArc = el('path', { class: 'sub-arc' });
   // La vida del arco: un sonar respira alrededor del nodo actual (SMIL, no rAF — se mueve solo, sin
   // costo de JS). Es gratis en reposo: no depende de que el usuario interactúe para sentirse vivo.
   // Sonar chico (r10): en la barra izquierda, pegada a la espina "Signals", un sonar grande al
@@ -944,7 +948,7 @@ export function initMolecule(
           o.num.setAttribute('y', (o.ly + 4).toFixed(1));
         }
         // El riel es la línea vertical (subArc repurposeado) del primer al último electrón: el "hilo de
-        // energía" por el que sube el electrón-actual. La chispa SMIL lo recorre.
+        // energía" por el que sube el electrón-actual.
         subArc.setAttribute(
           'd',
           `M ${barX.toFixed(1)} ${subDots[0].ly.toFixed(1)} L ${barX.toFixed(1)} ${subDots[nsub - 1].ly.toFixed(1)}`,
@@ -1136,8 +1140,7 @@ export function initMolecule(
     // porque es el PICO del medio: es donde el sistema deja de ser sincrónico y el dato empieza a
     // tardar. Con 12 paradas, el medio es donde la información se muere si todas se tratan igual.
     // Reusa la clase del trofeo a propósito: es el mismo slot, y no cuesta CSS nueva.
-    const PEAK = 6;
-    const mark = i === N - 1 ? '🏆' : i === PEAK ? '◆' : '';
+    const mark = i === N - 1 ? '🏆' : i === CONCEPTO_PICO ? '◆' : '';
     const trophy = mark ? `<span class="rail-trophy" aria-hidden="true">${mark}</span>` : '';
     // Cada parada es un BOTÓN real: click (y Enter/Espacio) navega al concepto. Antes el riel era
     // decorativo (aria-hidden) y solo se navegaba por scroll/teclado ↑↓; ahora también saltás tocando
@@ -1145,7 +1148,8 @@ export function initMolecule(
     const btn = document.createElement('button');
     btn.type = 'button';
     btn.className = 'rail-stop-btn';
-    const rol = i === N - 1 ? ', el cierre' : i === PEAK ? ', donde el dato empieza a tardar' : '';
+    const rol =
+      i === N - 1 ? ', el cierre' : i === CONCEPTO_PICO ? ', donde el dato empieza a tardar' : '';
     btn.setAttribute('aria-label', `Ir al concepto ${i}: ${C[i].name}${rol}`);
     btn.innerHTML =
       `<span class="rail-mark" aria-hidden="true"><i class="rail-halo"></i><i class="rail-orb"></i><i class="rail-core"></i></span>` +
@@ -1155,7 +1159,7 @@ export function initMolecule(
       `<span class="rail-badge">estás acá</span>`;
     // Salta al ENCUADRE del átomo del concepto (misma parada que el deep-link `?nivel=i`): desde ahí
     // se bucea scrolleando. goToUnit ya sincroniza la URL y respeta reduced-motion.
-    btn.addEventListener('click', () => goToUnit(off[i] + 1.3));
+    btn.addEventListener('click', () => goToUnit(off[i] + PARADA_ATOMO));
     li.appendChild(btn);
     stamp(li);
     stampTree(li);
@@ -1223,26 +1227,26 @@ export function initMolecule(
     // CORTE), los ticks se SEPARAN alrededor del concepto activo (que queda fijo) y crecen, los lejanos
     // salen del cuadro, mientras se apagan y el track de concepto se desvanece; su lugar lo toma la barra
     // de sub-niveles. Da la sensación de "meterse" en el concepto (antes se COMPRIMÍAN hacia el activo,
-    // que se leía al revés). Las flechas ▲/▼ quedan siempre visibles (navegan ambos modos).
+    // que se leía al revés).
     // `railProg` (0..1) = avance por la escala de conceptos, anclado a la posición de los ticks (no al
     // scroll continuo, que desalineaba porque cada concepto ocupa distinto scroll según sus sub-niveles).
     const railProg = Math.min(
       1,
-      (c + Math.max(0, Math.min(1, (w - 1.3) / Math.max(0.8, len[c] - 1)))) / (N - 1),
+      (c + Math.max(0, Math.min(1, (w - PARADA_ATOMO) / Math.max(0.8, len[c] - 1)))) / (N - 1),
     );
     // Fade de los ticks ADELANTADO respecto a la aparición de los sub-niveles (suborbit, 0.35→0.75):
     // los conceptos hacen zoom y se apagan primero, y los sub-niveles entran después, para que el punto
     // medio del morph no muestre las dos escalas pisadas a la vez.
     const morphT = Math.max(0, Math.min(1, (diveDepth - 0.15) / 0.35));
     // El panel nombrado se DESVANECE al bucear (cross-fade con la barra de sub-niveles que se abre en
-    // el mismo eje); el eje y las flechas ▲/▼ quedan visibles (navegan ambos modos). Antes los ticks
+    // el mismo eje); el eje queda visible. Antes los ticks
     // hacían zoom-spread, que no encaja en filas con número + nombre.
     if (railHeadEl) railHeadEl.style.opacity = (1 - morphT).toFixed(3);
     railTicksOl.style.opacity = (1 - morphT).toFixed(3);
     // Los botones del índice sólo son interactivos con el panel de conceptos presente: no en la
     // landing (intro tapando, s<0.12) ni al bucear (morphT→1, los ticks se desvanecen). `inert` los
     // saca del foco y de los clicks cuando no se ven, así no hay tabs ni clicks fantasma sobre ellos.
-    railTicksOl.inert = s < 0.12 || morphT > 0.5;
+    railTicksOl.inert = s < INTRO_HASTA || morphT > 0.5;
     if (railLineEl) railLineEl.style.opacity = (0.5 * (1 - morphT)).toFixed(3);
     if (captionEl) captionEl.style.opacity = Math.max(0, 1 - diveDepth / 0.5).toFixed(2);
     // Título vertical del concepto (espina de identidad) pegado al riel: aparece al bucear, con
@@ -1254,12 +1258,14 @@ export function initMolecule(
     }
 
     // La mascota-guía acompaña la vista mapa: su globo da el tip del concepto actual. Se apaga al
-    // bucear (adentro mandan la card y la espina) y mientras el intro está visible (s < 0.12).
+    // bucear (adentro mandan la card y la espina) y mientras el intro está visible (s < INTRO_HASTA).
     if (recGuideEl) {
       if (recGuideBubbleEl && recGuideBubbleEl.textContent !== C[c].tip) {
         recGuideBubbleEl.textContent = C[c].tip;
       }
-      recGuideEl.style.opacity = (s < 0.12 ? 0 : Math.max(0, 1 - diveDepth / 0.5)).toFixed(2);
+      recGuideEl.style.opacity = (s < INTRO_HASTA ? 0 : Math.max(0, 1 - diveDepth / 0.5)).toFixed(
+        2,
+      );
     }
 
     const dc = C[c];
@@ -1363,8 +1369,8 @@ export function initMolecule(
       const cs = off[i];
       const ce = off[i] + len[i];
       let amt: number;
-      if (s < cs + 1.3) amt = 0;
-      else if (s < cs + 2) amt = (s - (cs + 1.3)) / 0.7;
+      if (s < cs + PARADA_ATOMO) amt = 0;
+      else if (s < cs + 2) amt = (s - (cs + PARADA_ATOMO)) / 0.7;
       else if (s < ce) amt = 1;
       else amt = 1 - (s - ce) / 0.5;
       amt = Math.max(0, Math.min(1, amt));
@@ -1397,7 +1403,7 @@ export function initMolecule(
     if (tbQEl) {
       const enElCierre = c === N - 1;
       const texto =
-        s < 0.12 ? '' : enElCierre ? 'Quien lee, avisa.' : '¿Quién le avisó a la pantalla?';
+        s < INTRO_HASTA ? '' : enElCierre ? 'Quien lee, avisa.' : '¿Quién le avisó a la pantalla?';
       ponerTexto(tbQEl, texto);
       tbQEl.classList.toggle('tb-q--answered', enElCierre);
     }
@@ -1424,7 +1430,7 @@ export function initMolecule(
       else railStopBtns[si].removeAttribute('aria-current');
     }
     if (introEl) {
-      const introVisible = s < 0.12;
+      const introVisible = s < INTRO_HASTA;
       introEl.style.opacity = introVisible ? '1' : '0';
       // El intro ahora tiene controles interactivos (Tusi): al desvanecerse no debe capturar clicks
       // sobre el recorrido que quedó debajo.
@@ -1444,9 +1450,9 @@ export function initMolecule(
     // parada de encuadre del átomo (w≈1.3) el `>` estricto flipeaba por redondeo sub-pixel y dejaba la
     // URL/caption en "sub-nivel 1 / Adentro" con la card ya disuelta. Así el estado reportado = el visual.
     const subNow = diveDepth > 0.5 && dc.subN > 0 ? dc.subIdx : -1;
-    // En la landing (hero visible, s < 0.12) todavía no entraste al recorrido: reportamos concepto -1
+    // En la landing (hero visible, s < INTRO_HASTA) todavía no entraste al recorrido: reportamos concepto -1
     // para que la URL quede LIMPIA (`/`) en el arranque, no `?nivel=0`. Apenas empezás, ya refleja el nivel.
-    const cForUrl = s < 0.12 ? -1 : c;
+    const cForUrl = s < INTRO_HASTA ? -1 : c;
     if (!enTransito && (whereC !== cForUrl || whereSub !== subNow)) {
       whereC = cForUrl;
       whereSub = subNow;
@@ -1627,7 +1633,7 @@ export function initMolecule(
     // Sin sub-nivel (deep-link `?nivel=X` en vista molécula): encuadrar el ÁTOMO del concepto
     // (parada `off[c] + 1.3`, ver snapStops), no el tope de su tramo. Así `?nivel=7` reabre
     // en el átomo 7 en vez de aterrizar arriba de todo.
-    if (C[c].subN <= 0 || initial.sub < 1) return off[c] + 1.3;
+    if (C[c].subN <= 0 || initial.sub < 1) return off[c] + PARADA_ATOMO;
     const k = Math.max(0, Math.min(C[c].subN - 1, Math.round(initial.sub) - 1));
     return stopS(c, k);
   };
