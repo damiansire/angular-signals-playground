@@ -1,5 +1,6 @@
 import { CommonModule } from '@angular/common';
-import { Component, output, effect, signal, ChangeDetectionStrategy } from '@angular/core';
+import { Component, output, effect, input, signal, ChangeDetectionStrategy } from '@angular/core';
+import { RelojesDelHijo } from '../../../relojes-del-hijo';
 
 @Component({
   selector: 'app-component-destroy',
@@ -9,24 +10,20 @@ import { Component, output, effect, signal, ChangeDetectionStrategy } from '@ang
   styleUrl: './component-destroy.component.css',
 })
 export class ComponentDestroyComponent {
+  /** Del padre, igual que en 3/2: así la única diferencia entre los dos hijos es el onCleanup. */
+  readonly relojes = input.required<RelojesDelHijo>();
   readonly autoRefreshEvent = output<boolean>();
-  readonly newIntervalOutput = output<Date>();
   currentTime = signal(new Date());
   autoRefresh = signal(false);
-  count = signal(0);
   intervalSave: ReturnType<typeof setInterval> | undefined;
   constructor() {
     effect((onCleanup) => {
       if (this.autoRefresh()) {
-        this.intervalSave = setInterval(() => {
-          const now = new Date();
-          this.currentTime.set(now);
-          this.count.update((x) => x + 1);
-          this.newIntervalOutput.emit(now);
-        }, 1000);
-        // Es la lección del onCleanup idiomático: se limpia al re-evaluar el effect
-        // (autoRefresh -> false) Y al destruirse el componente, así el intervalo no
-        // queda huérfano ni siquiera si se sale por navegación.
+        this.intervalSave = setInterval(() => this.latir(), 1000);
+        this.relojes().registrar(this.intervalSave);
+        // Es la lección del onCleanup idiomático: corre al re-evaluar el effect (apagar el
+        // intervalo) Y cuando el effect muere con el componente, que es justo el caso que la rama
+        // else de 3/2 nunca alcanza. Por eso acá destruirlo sí frena los latidos.
         onCleanup(() => clearInterval(this.intervalSave));
       }
     });
@@ -38,5 +35,11 @@ export class ComponentDestroyComponent {
   toggleAutoRefresh() {
     this.autoRefreshEvent.emit(!this.autoRefresh());
     this.autoRefresh.set(!this.autoRefresh());
+  }
+
+  private latir() {
+    const ahora = new Date();
+    this.currentTime.set(ahora);
+    this.relojes().latir(ahora);
   }
 }

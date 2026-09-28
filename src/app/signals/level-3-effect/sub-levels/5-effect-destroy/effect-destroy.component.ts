@@ -1,16 +1,24 @@
-import { Component, computed, effect, signal, ChangeDetectionStrategy } from '@angular/core';
+import {
+  Component,
+  DestroyRef,
+  computed,
+  inject,
+  signal,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import { ComponentDestroyComponent } from './component-destroy/component-destroy.component';
 import { CodeLine } from '../../../../components-atom/component-atom.interface';
-import { HistoryElement } from '../../../../components/component.interface';
 import { EventHistoryComponent } from '../../../../components/event-history/event-history.component';
+import { CodeComponent } from '../../../../components-atom/code/code.component';
 import { ConceptCardComponent } from '../../../../components-atom/concept-card/concept-card.component';
 import { ManipulableSystemComponent } from '../../../../components-atom/manipulable-system/manipulable-system.component';
 import { EFFECT_CLEANUP_SYSTEM } from '../../effect-systems';
+import { RelojesDelHijo } from '../../relojes-del-hijo';
 
-/** Tope del historial: el intervalo evalúa cada segundo, así que sin límite la lista crecería sin
- *  fin y estiraría la card bajo el fold. Con los últimos eventos alcanza para ver la actividad. */
-const MAX_HISTORY = 5;
-
+/**
+ * El mismo padre que 3/2, a propósito: destroy() solo saca al hijo. Si además apagara autoRefresh a
+ * mano, los latidos se frenarían por eso y no por el onCleanup, y el contraste con 3/2 mentiría.
+ */
 @Component({
   selector: 'app-effect-destroy',
   templateUrl: './effect-destroy.component.html',
@@ -19,75 +27,41 @@ const MAX_HISTORY = 5;
   imports: [
     ComponentDestroyComponent,
     EventHistoryComponent,
+    CodeComponent,
     ConceptCardComponent,
     ManipulableSystemComponent,
   ],
 })
 export class EffectDestroyComponent {
   readonly closingSystem = EFFECT_CLEANUP_SYSTEM;
+  /** Igual que en 3/2: los latidos del hijo se cuentan en el padre, que vive lo que dura la lección. */
+  readonly relojes = new RelojesDelHijo(inject(DestroyRef));
+  /** Espejo del estado del hijo: solo resalta qué parte del código está corriendo. */
   autoRefresh = signal(false);
-  appEventHistory = signal<HistoryElement[]>([]);
-  count = signal(0);
+  readonly showComponent = signal(true);
   lines = computed<CodeLine[]>(() => [
+    { line: '// en el hijo', active: false },
     { line: 'effect((onCleanup) => {', active: false },
     { line: '  if (this.autoRefresh()) {', active: this.autoRefresh() },
-    { line: '    this.intervalSave = setInterval(() => {', active: this.autoRefresh() },
-    { line: '      this.count.update((x) => x + 1);', active: this.autoRefresh() },
-    { line: '      this.addToHistory(this.count());', active: this.autoRefresh() },
-    { line: '    }, 1000);', active: this.autoRefresh() },
+    { line: '    this.intervalSave = setInterval(tick, 1000);', active: this.autoRefresh() },
+    { line: '    // corre al apagar Y al destruir el hijo', active: true },
     {
-      line: '    onCleanup(() => clearInterval(this.intervalSave)); // limpieza idiomatica',
+      line: '    onCleanup(() => clearInterval(this.intervalSave));',
       active: this.autoRefresh(),
     },
     { line: '  }', active: false },
     { line: '});', active: false },
+    { line: '', active: false },
+    { line: '// en el padre', active: false },
+    { line: 'destroy() {', active: false },
+    { line: '  this.showComponent.set(false);', active: false },
+    { line: '}', active: false },
   ]);
-  intervalSave: ReturnType<typeof setInterval> | undefined;
 
-  constructor() {
-    effect((onCleanup) => {
-      if (this.autoRefresh()) {
-        this.intervalSave = setInterval(() => {
-          this.count.update((x) => x + 1);
-          const event = new Date();
-          this.addConditionalCountRecomputation(this.getFormattedTime(event), this.count(), true);
-        }, 1000);
-        // onCleanup corre al re-evaluar el effect (autoRefresh -> false) Y al
-        // destruirse el componente (navegacion). Asi el setInterval nunca queda
-        // huerfano: sin leak aunque se salga por ruta.
-        onCleanup(() => clearInterval(this.intervalSave));
-      }
-    });
-  }
-  showComponent = true;
   destroy() {
-    this.showComponent = false;
-    this.autoRefresh.set(false);
+    this.showComponent.set(false);
   }
   setAutoRefresh(event: boolean) {
     this.autoRefresh.set(event);
-  }
-  addConditionalCountRecomputation(
-    trigger: string,
-    newState: number | string,
-    isCountIncrement: boolean,
-  ) {
-    this.appEventHistory.update((prevHistory) => {
-      const newHistory = prevHistory.length ? [...prevHistory] : [];
-      newHistory.push({
-        date: new Date(),
-        trigger,
-        newState,
-        isCountIncrement,
-      });
-      return newHistory.length > MAX_HISTORY ? newHistory.slice(-MAX_HISTORY) : newHistory;
-    });
-  }
-  getFormattedTime(date: Date) {
-    const hours = String(date.getHours()).padStart(2, '0');
-    const minutes = String(date.getMinutes()).padStart(2, '0');
-    const seconds = String(date.getSeconds()).padStart(2, '0');
-
-    return `${hours}:${minutes}:${seconds}`;
   }
 }

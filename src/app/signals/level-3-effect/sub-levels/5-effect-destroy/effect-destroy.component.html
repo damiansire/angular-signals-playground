@@ -1,24 +1,31 @@
 <app-concept-card
-  concept="Para evitar leaks, registramos la limpieza con onCleanup dentro del propio effect: corre al apagar Auto Refresh y también al destruirse el componente (navegación)."
-  action="Activá Auto Refresh y tocá Destroy."
-  observe="Ahora 'Effect Evaluation' deja de crecer: el onCleanup detuvo el intervalo."
+  concept="Con onCleanup, la limpieza corre al apagar el intervalo y también al destruirse el hijo."
+  action="Prendé el intervalo y después destruí al hijo."
+  observe="Los latidos se frenan: onCleanup apagó el intervalo del hijo."
 />
 
-<div class="flex flex-col w-full">
-  <button (click)="destroy()">Destroy</button>
-  <div class="flex w-full">
-    @if (showComponent) {
+<div class="flex">
+  <div>
+    <button (click)="destroy()">Destruir hijo</button>
+    @if (showComponent()) {
       <div>
-        <app-component-destroy (autoRefreshEvent)="setAutoRefresh($event)" />
+        <app-component-destroy [relojes]="relojes" (autoRefreshEvent)="setAutoRefresh($event)" />
       </div>
     }
-    <div class="w-full">
-      <app-event-history
-        title="Effect Evaluation"
-        [history]="appEventHistory()"
-        stateName="Count Number:"
-      ></app-event-history>
-    </div>
+    <p class="my-3 text-sm">
+      Latidos:
+      <b class="font-mono text-base">{{ relojes.latidos() }}</b>
+      <span class="text-gray-500"> (se frena al destruirlo: onCleanup)</span>
+    </p>
+    <app-event-history
+      title="Últimos latidos"
+      [history]="relojes.historial()"
+      stateName="Latido:"
+    ></app-event-history>
+  </div>
+
+  <div class="flex-grow">
+    <app-code [lines]="lines()" textSize="text-lg"></app-code>
   </div>
 </div>
 
