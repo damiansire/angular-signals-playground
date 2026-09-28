@@ -444,6 +444,10 @@
    full-width, con las instrucciones arriba-izquierda alineadas como el resto de los sub-niveles. */
 .card--dissolve .subhost > *:has(> app-column-and-code-layout) {
   display: block;
+  /* Estos sub-niveles arrancan en el borde de la card, y a 1280-1440 px el título vertical del
+     concepto (la espina) se metía 20 px adentro: se comía la "D" de DESAFÍO y el borde del código.
+     A 1920 no llega; el aire extra no molesta. */
+  padding-left: 1.5rem;
 }
 /* El bloque de código (app-code) trae fuente text-2xl y whitespace-pre-wrap: en su columna se
    partía a mitad de statement (rompe el sentido de "así se arma el árbol"). Lo bajamos a un
