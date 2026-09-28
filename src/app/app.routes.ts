@@ -202,6 +202,14 @@ export const routes: Routes = [
     loadComponent: () => import('./studio/studio.component').then((m) => m.StudioComponent),
     title: 'Estudio de Cinemática · Angular Signals',
   },
+  {
+    path: 'cine/:capitulo',
+    loadComponent: () =>
+      import('./integrada-vista/cinematicas/cine-preview.component').then(
+        (m) => m.CinePreviewComponent,
+      ),
+    title: 'Sala de proyección · Angular Signals',
+  },
   // La vista integrada (recorrido molécula) ES la raíz `/`: es la entrada.
   { path: '', component: IntegradaVistaComponent },
   // Cualquier URL desconocida (incluidos bookmarks viejos como /signals/level/..., /lab o /poc)
