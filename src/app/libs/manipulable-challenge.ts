@@ -200,7 +200,7 @@ export function solutionFor(
 }
 
 /**
- * Presupuesto de forma. Con los 37 sub-niveles cerrando igual, la consistencia no se sostiene con
+ * Presupuesto de forma. Con los 40 sub-niveles cerrando igual, la consistencia no se sostiene con
  * buena voluntad: si un desafío trae seis lecturas y otro dos, el cierre deja de leerse como el
  * mismo gesto. Estos números SON la forma del cierre, y por eso los verifica un test.
  */
@@ -235,7 +235,7 @@ export function malformed(challenge: ManipulableChallenge): readonly string[] {
     problems.push('arranca sano, así que no hay nada que notar');
   }
 
-  // Forma: que los 37 cierres se lean como el mismo gesto.
+  // Forma: que los 40 cierres se lean como el mismo gesto.
   if (challenge.knobs.length > 1) {
     problems.push('tiene más de una perilla: es un puzzle, no un control');
   }

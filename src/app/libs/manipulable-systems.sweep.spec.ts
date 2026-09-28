@@ -22,7 +22,7 @@ import * as nivel10 from '../signals/level-10-debounced/debounce-systems';
 import * as nivel11 from '../signals/level-11-zoneless/zoneless-systems';
 
 /**
- * Barrido de los 37 cierres contra la regla de la corrida: mover la perilla es cambiar el código, y
+ * Barrido de los 40 cierres contra la regla de la corrida: mover la perilla es cambiar el código, y
  * eso arranca una corrida nueva. El bug que esto cuida no rompía nada a la vista: accionabas con el
  * código roto, girabas al sano, y las lecturas pasaban a sanas como si las acciones viejas hubieran
  * corrido con el código nuevo. Los 37 lo tenían, porque cada settle se escribe a mano y ninguno
@@ -121,11 +121,11 @@ function alcanzables(sistema: ManipulableChallenge, pasos: number): readonly Sys
   return [...vistos.values()];
 }
 
-describe('barrido de los 37 sistemas: cambiar el código arranca otra corrida', () => {
+describe('barrido de los 40 sistemas: cambiar el código arranca otra corrida', () => {
   // Contar lo barrido: un módulo que deja de exportar, o un sistema que cambia de forma, no puede
   // achicar el barrido sin que nadie se entere.
-  it('barre los 37, sin perder ninguno en el camino', () => {
-    expect(SISTEMAS.length).toBe(37);
+  it('barre los 40, sin perder ninguno en el camino', () => {
+    expect(SISTEMAS.length).toBe(40);
   });
 
   SISTEMAS.forEach(([nombre, sistema]) => {
