@@ -16,8 +16,18 @@ describe('signalsRoutesTree', () => {
   });
 
   it('todo sub-nivel trae componente: sin esto la card se monta vacía y nadie se entera', () => {
-    const sinComponente = subLevels.filter(({ sub }) => !sub.component).map(({ id }) => id);
+    const sinComponente = subLevels
+      .filter(({ sub }) => !sub.component && !sub.loadComponent)
+      .map(({ id }) => id);
     expect(sinComponente).toEqual([]);
+  });
+
+  it('un sub-nivel diferido carga de verdad su componente', async () => {
+    const diferidos = subLevels.filter(({ sub }) => sub.loadComponent);
+    for (const { id, sub } of diferidos) {
+      const cargado = await sub.loadComponent!();
+      expect(cargado.component).withContext(id).toBeTruthy();
+    }
   });
 
   it('todo sub-nivel declara su nombre para el topbar', () => {
