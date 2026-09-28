@@ -24,7 +24,7 @@ export class AfterRenderEffectComponent {
   readonly text = signal('Escribí algo y miro su ancho');
   private readonly measured = viewChild<ElementRef<HTMLElement>>('measured');
 
-  // Ancho REAL del texto ya renderizado (solo se puede leer del DOM, tras pintar).
+  // Ancho REAL del texto ya renderizado: solo el DOM lo sabe, y un effect lo leería un render tarde.
   readonly widthPx = signal(0);
 
   constructor() {
