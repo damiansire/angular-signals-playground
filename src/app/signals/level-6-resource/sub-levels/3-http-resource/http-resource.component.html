@@ -1,0 +1,67 @@
+<app-column-and-code-layout
+  title="httpResource(): pedir por URL"
+  [codeLines]="lines"
+  concept="Sin loader ni abortSignal: solo la URL."
+>
+  <!-- Sin bajada: el 404 del #4 y los pedidos que quedan cancelados al cambiar rápido son la
+       explicación. Las lecturas son las signals mismas del resource. -->
+  <section class="htr w-80 p-5 rounded-lg shadow-md bg-white">
+    <div class="flex flex-wrap gap-2 mb-5" role="group" aria-label="Tripulante">
+      @for (candidato of candidateIds; track candidato) {
+        <button
+          type="button"
+          class="w-10 h-10 rounded-full border text-sm font-bold transition-colors"
+          [class]="
+            candidato === id()
+              ? 'bg-[#1c6b56] border-[#1c6b56] text-white'
+              : 'bg-white border-gray-300 text-gray-700 hover:border-[#62c4ad]'
+          "
+          [attr.aria-pressed]="candidato === id()"
+          (click)="elegir(candidato)"
+        >
+          {{ candidato }}
+        </button>
+      }
+    </div>
+
+    <div class="htr-ficha min-h-[6rem] rounded-md border border-gray-100 bg-gray-50 p-4 mb-4">
+      @if (tripulante.isLoading()) {
+        <div class="htr-viaja" aria-hidden="true">
+          <span class="htr-barra htr-barra--larga"></span>
+          <span class="htr-barra"></span>
+        </div>
+      } @else if (tripulante.hasValue()) {
+        <p class="text-lg font-bold text-gray-800">{{ tripulante.value().nombre }}</p>
+        <p class="text-sm text-gray-500">{{ tripulante.value().rol }}</p>
+      } @else if (tripulante.error()) {
+        <p class="htr-fallo">{{ tripulante.statusCode() }}</p>
+      }
+    </div>
+
+    <dl class="htr-lecturas">
+      <div class="htr-lectura">
+        <dt><code class="htr-expr">status()</code></dt>
+        <dd class="htr-valor">{{ tripulante.status() }}</dd>
+      </div>
+      <div class="htr-lectura">
+        <dt><code class="htr-expr">statusCode()</code></dt>
+        <dd class="htr-valor">{{ tripulante.statusCode() ?? '·' }}</dd>
+      </div>
+      <div class="htr-lectura">
+        <dt><code class="htr-expr">hasValue()</code></dt>
+        <dd class="htr-valor">{{ tripulante.hasValue() }}</dd>
+      </div>
+    </dl>
+
+    <ol class="htr-red" aria-label="Pedidos por la red">
+      @for (pedido of pedidos(); track pedido.n) {
+        <li class="htr-pedido" [attr.data-destino]="pedido.destino">
+          <code class="htr-url">GET {{ pedido.url }}</code>
+          <span class="htr-destino">{{ pedido.destino }}</span>
+        </li>
+      }
+    </ol>
+  </section>
+</app-column-and-code-layout>
+
+<app-manipulable-system [system]="closingSystem" />

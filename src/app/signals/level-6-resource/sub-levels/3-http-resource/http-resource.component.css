@@ -1,0 +1,131 @@
+/* Todo con prefijo htr-: la vista integrada embebe este componente al lado de otros, y una clase
+   genérica (.card, .track, .stage) pisa o queda pisada por la de un vecino. */
+
+/* Mientras viaja no hay texto que leer, hay una ficha que todavía no llegó. */
+.htr-viaja {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  padding-top: 0.2rem;
+}
+
+.htr-barra {
+  display: block;
+  width: 45%;
+  height: 0.75rem;
+  border-radius: 3px;
+  background: #cfe6df;
+  animation: htr-late 0.9s ease-in-out infinite alternate;
+}
+
+.htr-barra--larga {
+  width: 75%;
+  height: 1.05rem;
+}
+
+@keyframes htr-late {
+  from {
+    opacity: 0.4;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .htr-barra {
+    animation: none;
+  }
+}
+
+.htr-fallo {
+  margin: 0;
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 1.9rem;
+  font-weight: 700;
+  line-height: 1.1;
+  color: #b42318;
+}
+
+.htr-lecturas {
+  display: grid;
+  gap: 0.2rem;
+  margin: 0 0 0.9rem;
+}
+
+.htr-lectura {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.htr-lectura dt,
+.htr-lectura dd {
+  margin: 0;
+}
+
+.htr-expr,
+.htr-valor {
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 0.75rem;
+}
+
+.htr-expr {
+  color: #0f6b54;
+}
+
+.htr-valor {
+  font-weight: 700;
+  color: #3a352d;
+}
+
+/* La red: cada pedido que salió por HttpClient y cómo terminó. El más nuevo arriba. */
+.htr-red {
+  display: grid;
+  gap: 0.15rem;
+  margin: 0;
+  padding: 0.55rem 0 0;
+  list-style: none;
+  border-top: 1px dashed #ddd6c6;
+}
+
+.htr-pedido {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.6rem;
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 0.68rem;
+  line-height: 1.6;
+  color: #5c564b;
+}
+
+.htr-url {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.htr-destino {
+  flex: none;
+  font-weight: 700;
+}
+
+.htr-pedido[data-destino='viaja'] .htr-destino {
+  color: #8a5a12;
+}
+
+/* Un pedido soltado a mitad de camino: queda a la vista, tachado, porque verlo caer es la lección. */
+.htr-pedido[data-destino='cancelado'] .htr-url {
+  text-decoration: line-through;
+}
+
+.htr-pedido[data-destino^='2'] .htr-destino {
+  color: #1c6b56;
+}
+
+.htr-pedido[data-destino^='4'] .htr-destino,
+.htr-pedido[data-destino^='5'] .htr-destino {
+  color: #b42318;
+}
