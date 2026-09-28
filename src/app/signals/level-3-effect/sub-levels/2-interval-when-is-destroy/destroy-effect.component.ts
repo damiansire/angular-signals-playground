@@ -1,4 +1,12 @@
-import { Component, computed, effect, signal, ChangeDetectionStrategy } from '@angular/core';
+import {
+  Component,
+  DestroyRef,
+  computed,
+  effect,
+  inject,
+  signal,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import { DestroyBoxComponent } from './destroy-box/destroy-box.component';
 import { CodeLine } from '../../../../components-atom/component-atom.interface';
 import { HistoryElement } from '../../../../components/component.interface';
@@ -63,6 +71,13 @@ export class DestroyEffectComponent {
         clearInterval(this.intervalSave);
       }
     });
+
+    // El leak que esta pantalla ENSEÑA es el del botón "destroy": ahí el intervalo sobrevive a
+    // propósito y el contador que sigue subiendo es la prueba. Pero cuando el usuario se va del
+    // sub-nivel, este componente muere y ese intervalo quedaba corriendo para siempre, uno por
+    // visita: eso ya no es la lección, es la lección leakeando fuera de su propia pantalla. Y con
+    // el recorrido montando y desmontando sub-niveles por proximidad, pasa en cada pasada.
+    inject(DestroyRef).onDestroy(() => clearInterval(this.intervalSave));
   }
 
   destroy() {
