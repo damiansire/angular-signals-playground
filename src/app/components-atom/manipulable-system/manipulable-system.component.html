@@ -30,7 +30,11 @@
     <div role="status" aria-live="polite">
       <ul class="ms__gauges">
         @for (gauge of gauges(); track gauge.id) {
-          <li class="ms__gauge" [class.ms__gauge--ok]="healthy()">
+          <li
+            class="ms__gauge"
+            [class.ms__gauge--ok]="health() === 'healthy'"
+            [class.ms__gauge--idle]="health() === 'idle'"
+          >
             <span class="ms__gauge-label">{{ gauge.label }}</span>
             <b class="ms__gauge-value">{{ gauge.value }}</b>
           </li>

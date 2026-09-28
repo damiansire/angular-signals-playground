@@ -9,6 +9,7 @@ import {
 } from '@angular/core';
 import {
   act,
+  healthOf,
   ManipulableChallenge,
   readings,
   SISTEMA_ESTABLECIDO,
@@ -48,7 +49,12 @@ export class ManipulableSystemComponent {
       }),
   );
   readonly gauges = computed(() => readings(this.system(), this.state()));
-  readonly healthy = computed(() => this.system().healthy(this.state()));
+  /**
+   * Tres tonos y ninguna palabra: una corrida sin accionar se pintaba de averiada aunque el número
+   * a la vista fuera el sano, y acusaba de roto a un código que todavía ni corrió.
+   */
+  readonly health = computed(() => healthOf(this.system(), this.state()));
+  readonly healthy = computed(() => this.health() === 'healthy');
 
   private readonly host: ElementRef<HTMLElement> = inject(ElementRef);
 

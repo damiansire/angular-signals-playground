@@ -35,8 +35,54 @@ describe('ManipulableSystemComponent', () => {
     return fixture;
   }
 
-  it('arranca averiado: si naciera sano no habría nada que notar', () => {
-    expect(crear().componentInstance.healthy()).toBeFalse();
+  it('arranca sin correr: ni averiado ni sano hasta accionarlo', () => {
+    const c = crear().componentInstance;
+    expect(c.health()).toBe('idle');
+    expect(c.healthy()).toBeFalse();
+  });
+
+  it('girar la perilla vuelve a una corrida sin correr, aunque haya accionado antes', () => {
+    const c = crear().componentInstance;
+    c.press();
+    expect(c.health()).toBe('broken');
+
+    c.move('p');
+    c.move('p'); // el código sano, pero todavía sin accionar
+    expect(c.health()).toBe('idle');
+
+    c.press();
+    expect(c.health()).toBe('healthy');
+  });
+
+  describe('tono de la lectura', () => {
+    function clasesDeLaLectura(fixture: ReturnType<typeof crear>): string {
+      fixture.detectChanges();
+      return (fixture.nativeElement as HTMLElement).querySelector('.ms__gauge')!.className;
+    }
+
+    it('sin correr no es rojo ni verde', () => {
+      const clases = clasesDeLaLectura(crear());
+      expect(clases).toContain('ms__gauge--idle');
+      expect(clases).not.toContain('ms__gauge--ok');
+    });
+
+    it('accionado con el código roto pierde el tono neutro', () => {
+      const fixture = crear();
+      fixture.componentInstance.press();
+      const clases = clasesDeLaLectura(fixture);
+      expect(clases).not.toContain('ms__gauge--idle');
+      expect(clases).not.toContain('ms__gauge--ok');
+    });
+
+    it('accionado con el código sano se pinta de sano', () => {
+      const fixture = crear();
+      fixture.componentInstance.move('p');
+      fixture.componentInstance.move('p');
+      fixture.componentInstance.press();
+      const clases = clasesDeLaLectura(fixture);
+      expect(clases).toContain('ms__gauge--ok');
+      expect(clases).not.toContain('ms__gauge--idle');
+    });
   });
 
   it('la lectura sigue a la perilla', () => {
@@ -70,6 +116,17 @@ describe('ManipulableSystemComponent', () => {
       const vistos = contarEventos(fixture);
 
       fixture.componentInstance.move('p'); // pasa a 1: todavía no está sano
+      fixture.componentInstance.press();
+      expect(vistos.length).toBe(0);
+    });
+
+    it('no avisa solo por girar al código sano: hay que accionarlo', () => {
+      const fixture = crear();
+      const vistos = contarEventos(fixture);
+
+      fixture.componentInstance.press(); // corrida con el código roto
+      fixture.componentInstance.move('p');
+      fixture.componentInstance.move('p'); // código sano, corrida nueva sin accionar
       expect(vistos.length).toBe(0);
     });
 
@@ -78,7 +135,8 @@ describe('ManipulableSystemComponent', () => {
       const vistos = contarEventos(fixture);
 
       fixture.componentInstance.move('p');
-      fixture.componentInstance.move('p'); // pasa a 2: sano
+      fixture.componentInstance.move('p');
+      fixture.componentInstance.press(); // corre con el código sano
       expect(vistos.length).toBe(1);
     });
 
@@ -87,7 +145,8 @@ describe('ManipulableSystemComponent', () => {
       const vistos = contarEventos(fixture);
 
       fixture.componentInstance.move('p');
-      fixture.componentInstance.move('p'); // sano
+      fixture.componentInstance.move('p');
+      fixture.componentInstance.press(); // sano
       fixture.componentInstance.press(); // sigue sano, no vuelve a avisar
       expect(vistos.length).toBe(1);
     });
@@ -100,6 +159,7 @@ describe('ManipulableSystemComponent', () => {
 
       fixture.componentInstance.move('p');
       fixture.componentInstance.move('p');
+      fixture.componentInstance.press();
 
       expect(vistos.length).toBe(1);
       expect(vistos[0].bubbles).toBeTrue();

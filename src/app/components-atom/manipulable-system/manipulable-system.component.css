@@ -118,6 +118,11 @@
 .ms__gauge--ok {
   color: #2f6b4f;
 }
+/* Sin veredicto todavía: ni rojo ni verde. El tono de tinta apagada es el que la card ya usa para
+   texto secundario, así que se lee como "esperando" y no como un tercer color con significado. */
+.ms__gauge--idle {
+  color: #6a6355;
+}
 
 .ms__gauge-label {
   font-family: var(--font-mono, ui-monospace, monospace);
