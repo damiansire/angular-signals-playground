@@ -21,8 +21,14 @@ export function subtotal(catalog: readonly Product[], qty: Quantities): number {
   return catalog.reduce((sum, p) => sum + lineTotal(p.price, qty[p.id] ?? 0), 0);
 }
 
-export function itemCount(qty: Quantities): number {
-  return Object.values(qty).reduce((sum, q) => sum + Math.max(0, q), 0);
+/**
+ * Cuenta sobre el CATÁLOGO, igual que `subtotal`. Antes recorría las claves del objeto guardado,
+ * así que una clave que no existe en el catálogo sumaba unidades al contador pero no al total: la
+ * pantalla decía "3 productos" y cobraba 2. El comentario de `readSaved` ya prometía que una clave
+ * de más "se ignora sola"; ahora las dos lecturas del carrito miran lo mismo.
+ */
+export function itemCount(catalog: readonly Product[], qty: Quantities): number {
+  return catalog.reduce((sum, p) => sum + Math.max(0, qty[p.id] ?? 0), 0);
 }
 
 /** Descuento del cupón: `rate` del subtotal, redondeado, o 0 si no está aplicado. */

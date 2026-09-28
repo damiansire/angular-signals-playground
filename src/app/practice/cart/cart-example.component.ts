@@ -84,7 +84,7 @@ export class CartExampleComponent {
   readonly subtotal = computed(() => subtotal(this.catalog, this.qty()));
   readonly discount = computed(() => discountAmount(this.subtotal(), this.coupon()));
   readonly total = computed(() => total(this.subtotal(), this.discount()));
-  readonly count = computed(() => itemCount(this.qty()));
+  readonly count = computed(() => itemCount(this.catalog, this.qty()));
   readonly freeShipping = computed(() => qualifiesFreeShipping(this.subtotal(), FREE_SHIPPING));
   readonly progress = computed(() => shippingProgress(this.subtotal(), FREE_SHIPPING));
   readonly missingForFree = computed(() => Math.max(0, FREE_SHIPPING - this.subtotal()));

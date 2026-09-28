@@ -25,9 +25,28 @@ describe('cart.model', () => {
     expect(subtotal(CATALOG, {})).toBe(0);
   });
 
-  it('itemCount cuenta unidades totales ignorando negativos', () => {
-    expect(itemCount({ a: 2, b: 3 })).toBe(5);
-    expect(itemCount({ a: -1, b: 3 })).toBe(3);
+  describe('itemCount', () => {
+    const CATALOGO: Product[] = [
+      { id: 'a', name: 'A', price: 100 },
+      { id: 'b', name: 'B', price: 200 },
+    ];
+
+    it('cuenta unidades totales ignorando negativos', () => {
+      expect(itemCount(CATALOGO, { a: 2, b: 3 })).toBe(5);
+      expect(itemCount(CATALOGO, { a: -1, b: 3 })).toBe(3);
+    });
+
+    it('ignora una clave que no está en el catálogo, igual que subtotal', () => {
+      // Antes contaba 9 mientras el total cobraba solo 2 unidades: la pantalla decía una cosa y
+      // el precio decía otra.
+      const conIntrusa = { a: 1, b: 1, fantasma: 7 };
+      expect(itemCount(CATALOGO, conIntrusa)).toBe(2);
+      expect(subtotal(CATALOGO, conIntrusa)).toBe(300);
+    });
+
+    it('una clave que falta cuenta cero, no rompe', () => {
+      expect(itemCount(CATALOGO, { a: 4 })).toBe(4);
+    });
   });
 
   it('discountAmount aplica el porcentaje redondeado solo con cupón', () => {
