@@ -125,7 +125,9 @@ export const SIGNAL_NOTIFY_SYSTEM: ManipulableChallenge = {
       ? { text: 'const total = signal(0);', knob: K }
       : { text: 'let total = 0; // Zone.js avisa', knob: K },
     { text: '' },
-    { text: 'total.set(42);' },
+    // La escritura sigue a la declaración: un number no tiene .set, y un contraste que no compila
+    // deja de ser una alternativa creíble.
+    { text: k[K] === 1 ? 'total.set(42);' : 'total = 42;' },
   ],
   // Zone.js no sabe QUÉ cambió, así que barre el árbol; el signal apunta a sus lectores.
   settle: (s: SystemState) => ({

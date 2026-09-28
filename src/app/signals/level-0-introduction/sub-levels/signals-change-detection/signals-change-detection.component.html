@@ -26,7 +26,13 @@
           [class.scd-lit]="changed() && isDependent(node.id)"
           [class.scd-pruned]="changed() && !isDependent(node.id)"
         >
-          <circle [attr.cx]="node.x" [attr.cy]="node.y" r="15" />
+          <rect
+            [attr.x]="node.left"
+            [attr.y]="node.top"
+            [attr.width]="node.width"
+            [attr.height]="nodeHeight"
+            [attr.rx]="nodeHeight / 2"
+          />
           <text [attr.x]="node.x" [attr.y]="node.y + 4" text-anchor="middle">{{ node.label }}</text>
         </g>
       }

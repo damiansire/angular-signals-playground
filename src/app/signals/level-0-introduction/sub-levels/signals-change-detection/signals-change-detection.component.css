@@ -122,7 +122,7 @@
   stroke-width: 2;
 }
 
-.scd-node circle {
+.scd-node rect {
   fill: #ffffff;
   stroke: #cfc9bd;
   stroke-width: 2;
@@ -140,7 +140,7 @@
 }
 
 /* Dependiente: se re-chequea (rosa reactivo). */
-.scd-node.scd-lit circle {
+.scd-node.scd-lit rect {
   fill: #e11d48;
   stroke: #b0173a;
 }
@@ -151,7 +151,7 @@
 }
 
 /* Podado: el signal no lo toca. */
-.scd-node.scd-pruned circle,
+.scd-node.scd-pruned rect,
 .scd-node.scd-pruned text {
   opacity: 0.32;
 }
@@ -181,8 +181,11 @@
   white-space: nowrap;
 }
 
+/* Angular descarta el espacio entre los dos <span>: sin el gap se leía "Zone.js 7signal 2". */
 .scd-contrast {
   margin: 0;
+  display: flex;
+  gap: 1rem;
   font-size: 0.9rem;
   color: #5c5648;
 }
@@ -199,7 +202,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .scd-node circle,
+  .scd-node rect,
   .scd-node text {
     transition: none;
   }
