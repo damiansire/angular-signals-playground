@@ -157,3 +157,14 @@ export function variablesDeResorte(): Readonly<Record<string, string>> {
   }
   return variables;
 }
+
+/**
+ * Las variables de resorte solo si el navegador entiende `linear()`. Si no, las hojas de estilo
+ * caen en su respaldo (`var(--resorte-suave, ease-out)`): el movimiento pierde el rebote, no el
+ * destino.
+ */
+export function variablesDeResorteSiSoporta(): Readonly<Record<string, string>> {
+  const soporta =
+    typeof CSS !== 'undefined' && CSS.supports?.('transition-timing-function', 'linear(0, 1)');
+  return soporta ? variablesDeResorte() : {};
+}
