@@ -23,10 +23,9 @@ export class ZonelessComponent {
   readonly lines = computed<CodeLine[]>(() => [
     { line: 'bootstrapApplication(App, {', active: false },
     { line: '  providers: [', active: false },
-    { line: '    provideZonelessChangeDetection(),', active: true },
+    { line: '    // zoneless por defecto desde v21:', active: true },
+    { line: '    // sin zone.js ni provideZoneChangeDetection()', active: true },
     { line: '  ],', active: false },
     { line: '});', active: false },
-    { line: '', active: false },
-    { line: '// sin zone.js en los polyfills', active: false },
   ]);
 }

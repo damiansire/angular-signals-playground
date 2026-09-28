@@ -14,12 +14,14 @@ export const ZONELESS_SYSTEM: ManipulableChallenge = {
   gauges: [{ id: 'revisados', label: 'nodos revisados' }],
   action: 'cambiar un valor',
   start: { revisados: 0 },
+  // Desde v21 zoneless es el default: Zone.js solo vuelve si alguien lo pide con
+  // provideZoneChangeDetection(). Tener zone.js en los polyfills, solo, ya no lo trae de vuelta.
   code: (k) => [
     { text: 'bootstrapApplication(App, {' },
     { text: '  providers: [' },
     k[K] === 1
-      ? { text: '    provideZonelessChangeDetection(),', knob: K }
-      : { text: '    // con zone.js en los polyfills', knob: K },
+      ? { text: '    // zoneless por defecto desde v21', knob: K }
+      : { text: '    provideZoneChangeDetection(),', knob: K },
     { text: '  ],' },
     { text: '});' },
   ],
