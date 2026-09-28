@@ -9,6 +9,7 @@ import { type Type } from '@angular/core';
 const ESCENAS: Readonly<Record<number, () => Promise<Type<unknown>>>> = {
   0: () => import('./escena-00.component').then((m) => m.Escena00Component),
   1: () => import('./escena-01.component').then((m) => m.Escena01Component),
+  2: () => import('./escena-02.component').then((m) => m.Escena02Component),
 };
 
 export function cargarEscena(capitulo: number): Promise<Type<unknown>> {
