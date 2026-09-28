@@ -612,6 +612,34 @@
   }
 }
 
+/* Celular vertical: el lienzo 16:9 queda chico y sobra alto. Recortar la composición no sirve
+   (las naves viven en el 10-25 % del ancho y un recorte las corta), así que se hace lo que ya
+   conoce cualquiera que mira video horizontal en el teléfono: escena y diálogo juntos, centrados,
+   con barras oscuras parejas arriba y abajo. */
+@media (orientation: portrait) and (max-width: 820px) {
+  .cine {
+    grid-template-rows: var(--barra-arriba) 1fr auto auto 1fr;
+    background: var(--barra);
+  }
+  /* Con la fila en `auto` el contenedor ya no tiene alto propio: se mide solo por el ancho. */
+  .cine__escena {
+    grid-row: 3;
+    container-type: inline-size;
+    background: radial-gradient(120% 90% at 50% 38%, #fdfbf4 0%, #f5f0e2 58%, #e9e1cc 100%);
+  }
+  .cine__lienzo {
+    width: 100cqw;
+  }
+  .cine__barra--abajo {
+    grid-row: 4;
+    padding-top: 20px;
+    padding-bottom: 20px;
+  }
+  .cine__frase {
+    font-size: clamp(18px, 5.2vw, 26px);
+  }
+}
+
 /* ---------- View Transitions: el iris ---------- */
 
 :root.cine-vt-abre::view-transition-old(root),
