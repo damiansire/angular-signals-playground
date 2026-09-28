@@ -96,9 +96,9 @@ export const signalsRoutesTree: RouteItem[] = [
   {
     path: '3',
     subLevels: [
-      { path: '1', title: 'Effect Execution', component: EffectComponent },
-      { path: '2', title: 'Interval Evaluation', component: DestroyEffectComponent },
-      { path: '3', title: 'Effect Evaluation', component: EffectDestroyComponent },
+      { path: '1', title: 'Dependencias del effect', component: EffectComponent },
+      { path: '2', title: 'Intervalo filtrado', component: DestroyEffectComponent },
+      { path: '3', title: 'Limpieza con onCleanup', component: EffectDestroyComponent },
     ],
   },
   {
