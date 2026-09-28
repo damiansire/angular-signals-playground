@@ -261,3 +261,49 @@ eran de dibujo sino de que el recorrido seguía vivo por debajo del velo.
 - [ ] Si el texto es el contenido de un beat, verificar que no se pise consigo
       mismo. Las etiquetas de operadores salían de a cinco y se leían
       "mergeMapetryrror": ilegible equivale a no haberlo dibujado.
+
+## Cinemáticas de capítulo (que se sienta un juego, no un video)
+
+Lista escrita de lo que "que se sienta como la cinemática de un RPG" significa acá. Cada ítem es
+verificable con `/cine/<n>?cuadro=<beat>` (fotograma congelado) o `/cine/<n>` (reproducción).
+
+- [ ] Se sabe QUIÉN habla sin leer: retrato, nombre y timbre de voz por personaje. El prólogo no
+      lo mostraba y era la fricción número uno de un jugador nuevo.
+- [ ] Una línea en pantalla por vez y nunca más de ocho palabras (lo verifica
+      `cinematica-guion.spec.ts`). El texto va en la caja de diálogo, NUNCA dentro de la escena.
+- [ ] Cada beat cambia algo visible que la línea que lo dispara nombra. Un beat que no se ve es
+      un beat que no existe; uno que no se corresponde con la línea es ruido.
+- [ ] Coreografía: primero el entorno, después el héroe, después los personajes, al final el
+      texto. La tarjeta del capítulo y el héroe se turnan el centro, no lo comparten.
+- [ ] Entradas con resorte (`--resorte-*`), salidas más cortas que las entradas. Nada salta.
+- [ ] Las entradas son TRANSICIONES entre estados, así con movimiento reducido el fotograma final
+      es el mismo (mismo destino, sin viaje). `?cuadro=fin` tiene que verse completo.
+- [ ] Loops solo en el foco de la escena y pocos (dosis de un tercio). Si todo se mueve, nada
+      llama la atención.
+- [ ] Performance: cero `requestAnimationFrame` y cero JS de animación (el reloj solo cambia
+      clases con `setTimeout`); sin `filter`, `backdrop-filter` ni `mix-blend-mode`; solo se
+      animan `transform`, `opacity`, `stroke-dashoffset`, `offset-distance` y `clip-path`; lo que
+      se mueve es HTML (lo compone la GPU), lo que se dibuja es SVG.
+- [ ] Con la pestaña oculta la cinemática se congela (reloj, animaciones y voces) y al volver
+      sigue donde estaba.
+- [ ] Saltable siempre (Esc o "Saltar") y avanzable como un RPG (Enter, espacio, → o el botón).
+      Mientras corre, el recorrido de atrás no recibe teclas, rueda ni foco.
+- [ ] Se juega UNA vez por partida al llegar a la parada del capítulo; un deep-link a un
+      sub-nivel no se interrumpe; se vuelve a ver desde la bitácora.
+- [ ] Las escenas se cargan diferidas (un chunk por capítulo): el bundle inicial no paga por
+      trece escenas.
+- [ ] Ningún actor pisa a otro ni sale del lienzo: medido con `getBoundingClientRect` en
+      `?cuadro=fin` contra TODOS los `.k-actor`, no contra uno.
+- [ ] El final se personaliza con la partida: solo se encienden los capítulos establecidos
+      (clases `e-<n>`), la deuda queda punteada y visible.
+
+## Sonido (tiene que andar en cualquier PC)
+
+- [ ] Un solo `AudioContext` en toda la app (`libs/sonido.ts`), creado recién con un gesto.
+- [ ] Nada depende de que suene: sin Web Audio, con el contexto cerrado o con el almacenamiento
+      bloqueado, todo sigue en silencio y sin errores en la consola.
+- [ ] Nada de `speechSynthesis`: las voces de los personajes son blips sintetizados. El ritmo de
+      un diálogo no puede cambiar según qué voces tenga instaladas la máquina.
+- [ ] Un solo interruptor de sonido: silenciar en la intro, el prólogo o una cinemática silencia
+      en todos (preferencia `signals-sonido`).
+- [ ] Silencio al acertar: ningún sonido de "¡bien!" al establecer un sistema.
