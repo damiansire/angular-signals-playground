@@ -9,6 +9,7 @@ import {
   Type,
   afterNextRender,
   createComponent,
+  createEnvironmentInjector,
   inject,
   isDevMode,
   computed,
@@ -18,11 +19,13 @@ import { Location } from '@angular/common';
 import { RouterLink } from '@angular/router';
 
 import { signalsRoutesTree } from '../app.routes';
+import { type RouteItem, type SubNivelDiferido } from '../interfaces/route-item.interface';
 import {
   initMolecule,
   NOMBRES_DE_CONCEPTO,
   TITULOS_DE_CAPITULO,
   type MountSub,
+  type SubHandle,
 } from './molecule-engine';
 import { initIntroTusi, type IntroTusiHandle } from './intro-tusi';
 import { initPrologoAnomalia } from './prologo-anomalia';
@@ -86,8 +89,8 @@ export class IntegradaVistaComponent {
   /** Componentes reales de cada sub-nivel, por concepto (del árbol de conceptos). Un sub-nivel
    *  siempre trae componente; el tipo admite `undefined` porque `RouteItem.component` es opcional
    *  (los niveles no lo llevan) y `mountSub` ya cubre el caso faltante. */
-  private readonly subComponents: (Type<unknown> | undefined)[][] = signalsRoutesTree.map((lvl) =>
-    (lvl.subLevels ?? []).map((sl) => sl.component),
+  private readonly subComponents: RouteItem[][] = signalsRoutesTree.map(
+    (lvl) => lvl.subLevels ?? [],
   );
 
   /** Nombre de cada sub-nivel, en el mismo orden que `subComponents`: es lo que muestra el topbar. */
@@ -116,6 +119,8 @@ export class IntegradaVistaComponent {
   private donde = { concepto: -1, sub: -1 };
   private esperaCinematica: ReturnType<typeof setTimeout> | null = null;
   private cerrarPrologo: (() => void) | null = null;
+  /** Atributo de encapsulación que el motor estampa en lo que crea a mano (ver `arrancar`). */
+  private enc: string | null = null;
 
   protected readonly bitacoraAbierta = signal(false);
   /** Los capítulos como los lista la bitácora: nombre, título, ley y cuántos sub-niveles tiene. */
@@ -151,11 +156,11 @@ export class IntegradaVistaComponent {
   private arrancar(): void {
     // Nombre del atributo de encapsulación que Angular pone a los elementos del template;
     // el motor lo estampa en lo que crea a mano para que el CSS scopeado les aplique.
-    const enc =
+    const enc = (this.enc =
       this.host
         .querySelector('#stage')
         ?.getAttributeNames()
-        .find((a) => a.startsWith('_ngcontent')) ?? null;
+        .find((a) => a.startsWith('_ngcontent')) ?? null);
     const subCounts = this.subComponents.map((subs) => subs.length);
     this.partida.set(cargarPartida(this.almacen, subCounts));
     this.destroyRef.onDestroy(() => {
@@ -325,24 +330,63 @@ export class IntegradaVistaComponent {
 
   /** Monta el componente REAL del sub-nivel (concepto ci, sub si) y lo integra a la CD. */
   private readonly mountSub: MountSub = (host, ci, si) => {
-    const type = this.subComponents[ci]?.[si];
+    const sub = this.subComponents[ci]?.[si];
+    if (!sub?.component && sub?.loadComponent) {
+      return this.montarDiferido(host, sub.loadComponent, this.subTitles[ci]?.[si]);
+    }
+    const type = sub?.component;
     if (!type) return { dispose: () => undefined };
+    return { title: this.subTitles[ci]?.[si], dispose: this.montar(host, type, this.env) };
+  };
+
+  /** Crea el componente en `host`, lo integra a la CD y devuelve cómo desmontarlo. */
+  private montar(host: HTMLElement, type: Type<unknown>, env: EnvironmentInjector): () => void {
     // No pasamos `hostElement: host`: al destruir, `ref.destroy()` borraría ESE nodo, y `host`
     // es la `.subhost` persistente de la card. Creamos el componente en su propio nodo y lo
     // appendeamos adentro; así `destroy()` solo se lleva el nodo del componente, no la `.subhost`.
-    const ref = createComponent(type, { environmentInjector: this.env });
+    const ref = createComponent(type, { environmentInjector: env });
     host.appendChild(ref.location.nativeElement);
     this.appRef.attachView(ref.hostView);
     // La app es zoneless: montar desde el listener nativo de scroll no agenda ningún tick,
     // así que la vista recién adjuntada nunca correría su primera CD y quedaría en blanco.
     // Forzamos la detección inicial acá; las interacciones posteriores ya agendan su propio tick.
     ref.changeDetectorRef.detectChanges();
+    return () => {
+      this.appRef.detachView(ref.hostView);
+      ref.destroy();
+    };
+  }
+
+  /**
+   * Un sub-nivel diferido: su chunk (y sus proveedores, en un injector propio) llega recién cuando
+   * el recorrido lo va a mostrar. Si el jugador ya se fue antes de que termine de cargar, no se
+   * monta nada. El motor estampa el árbol al montar, y acá el árbol llega después: se estampa al
+   * llegar, para que la armonización del `.subhost` le aplique igual.
+   */
+  private montarDiferido(
+    host: HTMLElement,
+    cargar: () => Promise<SubNivelDiferido>,
+    title: string | undefined,
+  ): SubHandle {
+    let vivo = true;
+    let desmontar: (() => void) | null = null;
+    let injector: EnvironmentInjector | null = null;
+    cargar()
+      .then(({ component, providers }) => {
+        if (!vivo) return;
+        injector = providers?.length ? createEnvironmentInjector([...providers], this.env) : null;
+        desmontar = this.montar(host, component, injector ?? this.env);
+        const enc = this.enc;
+        if (enc) host.querySelectorAll('*').forEach((e) => e.setAttribute(enc, ''));
+      })
+      .catch((error: unknown) => this.errorHandler.handleError(error));
     return {
-      title: this.subTitles[ci]?.[si],
+      title,
       dispose: () => {
-        this.appRef.detachView(ref.hostView);
-        ref.destroy();
+        vivo = false;
+        desmontar?.();
+        injector?.destroy();
       },
     };
-  };
+  }
 }
