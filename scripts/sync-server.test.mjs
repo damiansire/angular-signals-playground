@@ -47,6 +47,13 @@ test('empalmarGuion sobre el archivo real preserva byte a byte todo lo que no es
   assert.ok(empalmado.includes("{ id: 'nueva', quien: 'cap', txt: 'Una línea agregada.' },"));
 });
 
+test('guardar el guion real sin cambios deja el archivo idéntico, comentarios de diseño incluidos', async () => {
+  const real = await fs.readFile(ARCHIVO_REAL, 'utf-8');
+
+  assert.ok(real.includes('  // ACTO 0 '), 'el guion real perdió sus comentarios de diseño');
+  assert.equal(empalmarGuion(real, GUION), real);
+});
+
 test('serializarGuion escribe lo mismo que prettier: guardar no ensucia format:check', async () => {
   const guion = [
     ...GUION,

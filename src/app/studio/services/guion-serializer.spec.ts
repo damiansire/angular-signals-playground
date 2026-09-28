@@ -52,6 +52,72 @@ describe('empalmarGuion', () => {
     expect(() => empalmarGuion(duplicado, GUION_NUEVO)).toThrowError(/aparece 2 veces/);
   });
 
+  describe('los comentarios de adentro del guion', () => {
+    const CON_NOTAS = `${ANTES}${MARCADOR_GUION}
+  // ACTO 0 · la llegada.
+  { id: 'hola', quien: 'cap', txt: 'Hola.' },
+
+  // ACTO 1 · la despedida.
+  {
+    id: 'chau',
+    // Dentro de la línea.
+    quien: 'naveA',
+    txt: 'Chau,\\nhasta luego.',
+  },
+  // Al final de todo.
+];${DESPUES}`;
+    const literalDe = (texto: string): string =>
+      texto.slice(texto.indexOf(MARCADOR_GUION), texto.indexOf('\n];') + 3);
+
+    it('guardar sin cambios no toca nada', () => {
+      const guion: LineaGuion[] = [
+        { id: 'hola', quien: 'cap', txt: 'Hola.' },
+        { id: 'chau', quien: 'naveA', txt: 'Chau,\nhasta luego.' },
+      ];
+      const una = empalmarGuion(CON_NOTAS, guion);
+      expect(literalDe(una)).toContain(
+        '  // ACTO 1 · la despedida.\n  // Dentro de la línea.\n  {',
+      );
+      expect(empalmarGuion(una, guion)).toBe(una);
+    });
+
+    it('viajan con su línea cuando el Estudio la mueve', () => {
+      const movido = empalmarGuion(CON_NOTAS, [
+        { id: 'chau', quien: 'naveA', txt: 'Chau.' },
+        { id: 'hola', quien: 'cap', txt: 'Hola.' },
+      ]);
+      expect(literalDe(movido)).toBe(
+        `${MARCADOR_GUION}\n` +
+          `  // ACTO 1 · la despedida.\n  // Dentro de la línea.\n` +
+          `  { id: 'chau', quien: 'naveA', txt: 'Chau.' },\n` +
+          `  // ACTO 0 · la llegada.\n` +
+          `  { id: 'hola', quien: 'cap', txt: 'Hola.' },\n` +
+          `  // Al final de todo.\n];`,
+      );
+    });
+
+    it('los de una línea borrada pasan a la siguiente que sobrevive', () => {
+      const sinHola = empalmarGuion(CON_NOTAS, [{ id: 'chau', quien: 'naveA', txt: 'Chau.' }]);
+      expect(literalDe(sinHola)).toBe(
+        `${MARCADOR_GUION}\n  // ACTO 0 · la llegada.\n\n  // ACTO 1 · la despedida.\n` +
+          `  // Dentro de la línea.\n  { id: 'chau', quien: 'naveA', txt: 'Chau.' },\n` +
+          `  // Al final de todo.\n];`,
+      );
+    });
+
+    it('una línea nueva entra sin comentarios y no desordena los de las otras', () => {
+      const conNueva = empalmarGuion(CON_NOTAS, [
+        { id: 'hola', quien: 'cap', txt: 'Hola.' },
+        { id: 'nueva', quien: 'cap', txt: 'Nueva.' },
+        { id: 'chau', quien: 'naveA', txt: 'Chau.' },
+      ]);
+      expect(literalDe(conNueva)).toContain(
+        "  { id: 'hola', quien: 'cap', txt: 'Hola.' },\n" +
+          "  { id: 'nueva', quien: 'cap', txt: 'Nueva.' },\n\n  // ACTO 1 · la despedida.",
+      );
+    });
+  });
+
   it('tira si GUION no cierra en un renglón propio', () => {
     const enLinea = ARCHIVO.replace(/\[\n[\s\S]*?\n\];/, '[];');
     expect(() => empalmarGuion(enLinea, GUION_NUEVO)).toThrowError(/renglón propio/);
