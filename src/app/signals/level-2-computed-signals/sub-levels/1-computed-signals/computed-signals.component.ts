@@ -6,7 +6,6 @@ import {
   signal,
   ChangeDetectionStrategy,
 } from '@angular/core';
-import { FormsModule } from '@angular/forms';
 import { CodeLine } from '../../../../components-atom/component-atom.interface';
 import { ColumnAndCodeLayoutComponent } from '../../../../layouts/column-and-code-layout/column-and-code-layout.component';
 import { ManipulableSystemComponent } from '../../../../components-atom/manipulable-system/manipulable-system.component';
@@ -23,7 +22,7 @@ function inputValue(eventTarget: EventTarget | null): string {
   templateUrl: './computed-signals.component.html',
   styleUrl: './computed-signals.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ManipulableSystemComponent, FormsModule, ColumnAndCodeLayoutComponent],
+  imports: [ManipulableSystemComponent, ColumnAndCodeLayoutComponent],
 })
 export class ComputedSignalsComponent {
   readonly closingSystem = COMPUTED_BASIC_SYSTEM;

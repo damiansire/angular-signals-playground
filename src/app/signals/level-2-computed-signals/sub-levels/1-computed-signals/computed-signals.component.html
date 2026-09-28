@@ -8,10 +8,22 @@
   <section class="profile-container">
     <div class="profile-info">
       <label for="firstName">Name:</label>
-      <input type="text" (input)="setFirstName($event.target)" placeholder="Name" />
+      <input
+        id="firstName"
+        type="text"
+        [value]="firstName()"
+        (input)="setFirstName($event.target)"
+        placeholder="Name"
+      />
       <br />
       <label for="surname">Surname:</label>
-      <input type="text" (input)="setLastName($event.target)" placeholder="Surname" />
+      <input
+        id="surname"
+        type="text"
+        [value]="surname()"
+        (input)="setLastName($event.target)"
+        placeholder="Surname"
+      />
     </div>
     <div class="profile-greeting">
       <p>Hola, {{ fullName() }}!</p>

@@ -53,6 +53,41 @@ describe('ComputedSignalsComponent', () => {
     expect(component.fullName()).toBe('Grace Hopper');
   });
 
+  it('cada rótulo está asociado a su input', () => {
+    const labels = Array.from(
+      (fixture.nativeElement as HTMLElement).querySelectorAll('label'),
+    ) as HTMLLabelElement[];
+    expect(labels.length).toBe(2);
+    for (const label of labels) {
+      expect(label.control).withContext(label.htmlFor).toBeInstanceOf(HTMLInputElement);
+    }
+  });
+
+  // Si el input arranca vacío mientras el saludo dice "Damian Sire", el primer tecleo lo pisa y
+  // el saludo salta a "D Sire": el computed parece romperse en el momento de mostrarlo.
+  it('los inputs arrancan con el valor de sus signals', () => {
+    const inputs = fixture.nativeElement.querySelectorAll('input');
+    expect((inputs[0] as HTMLInputElement).value).toBe('Damian');
+    expect((inputs[1] as HTMLInputElement).value).toBe('Sire');
+  });
+
+  it('seguir escribiendo extiende el nombre precargado', () => {
+    const first = fixture.nativeElement.querySelector('input') as HTMLInputElement;
+    first.value += 'a';
+    first.dispatchEvent(new Event('input'));
+    fixture.detectChanges();
+
+    expect(component.fullName()).toBe('Damiana Sire');
+    expect(first.value).toBe('Damiana');
+  });
+
+  it('un cambio del signal llega al input', () => {
+    component.surname.set('Lovelace');
+    fixture.detectChanges();
+    const inputs = fixture.nativeElement.querySelectorAll('input');
+    expect((inputs[1] as HTMLInputElement).value).toBe('Lovelace');
+  });
+
   it('setFirstName con target nulo deja el nombre vacio', () => {
     component.setFirstName(null);
     expect(component.fullName()).toBe(' Sire');
