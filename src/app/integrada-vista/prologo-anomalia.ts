@@ -91,6 +91,8 @@ export function initPrologoAnomalia(host: HTMLElement, opts: PrologoOpciones): (
   const lienzo = contenedor?.querySelector<HTMLCanvasElement>('.prologo__canvas');
   const ctx = lienzo?.getContext('2d');
   const mascota = contenedor?.querySelector<HTMLElement>('.prologo__mascot');
+  // Opcional: sin el rótulo el prólogo corre igual, solo sin decir quién habla.
+  const rotuloQuien = contenedor?.querySelector<HTMLElement>('.prologo__quien') ?? null;
   const saltar = contenedor?.querySelector<HTMLButtonElement>('.prologo__skip');
   const pausa = contenedor?.querySelector<HTMLButtonElement>('.prologo__pause');
   const habla = contenedor?.querySelector<HTMLButtonElement>('.prologo__voice');
@@ -160,6 +162,16 @@ export function initPrologoAnomalia(host: HTMLElement, opts: PrologoOpciones): (
   // Los momentos del acto de adentro que el dibujo acompaña, atados a la línea que los dispara.
   const BALA = { t0: linea('dentro-cuidado').t0 - 300, t1: linea('dentro-cuidado').t0 + 1300 };
   const ADENTRO = { lanza: linea('dentro-escapemos').t0, frena: linea('dentro-esquivar').t0 };
+
+  const NOMBRES: Record<Hablante, string> = {
+    cap: 'Capitán',
+    naveA: 'Nave A',
+    naveB: 'Nave B',
+    nave4: 'Exploradora',
+    todos: '',
+    voz: '',
+    mascota: 'Mascota',
+  };
 
   const ESTILO: Record<Hablante, Estilo> = {
     // Tres voces, tres alturas fijas. Que cada tripulante hable siempre desde el mismo renglón
@@ -804,6 +816,25 @@ export function initPrologoAnomalia(host: HTMLElement, opts: PrologoOpciones): (
     g.restore();
   }
 
+  /**
+   * El rótulo con el nombre de quien habla. El renglón fijo por personaje ya separa las voces,
+   * pero un jugador nuevo no sabe de quién es cada renglón: era la fricción número uno del prólogo.
+   * Va en el DOM, arriba a la izquierda del escenario, y no en el lienzo: la composición del
+   * lienzo está medida al píxel contra los cascos y la mascota, y un rótulo ahí adentro la pisaba.
+   * La voz no se nombra: todavía no se sabe que es la mascota, y ese es el giro de la escena.
+   */
+  let rotuloActual = '';
+  function nombrarA(quienes: readonly Hablante[]): void {
+    if (!rotuloQuien) return;
+    const nombres = [...new Set(quienes)].map((q) => NOMBRES[q]).filter(Boolean);
+    const rotulo = nombres.join(' · ');
+    if (rotulo === rotuloActual) return;
+    rotuloActual = rotulo;
+    rotuloQuien.textContent = rotulo;
+    rotuloQuien.style.color = quienes.length ? ESTILO[quienes[0]].color : '';
+    rotuloQuien.classList.toggle('prologo__quien--visible', rotulo !== '');
+  }
+
   function texto(
     str: string,
     y: number,
@@ -1019,8 +1050,10 @@ export function initPrologoAnomalia(host: HTMLElement, opts: PrologoOpciones): (
 
     // Cada línea con su voz y en su lugar. Las dos preguntas de las escoltas salen desde
     // costados distintos: alcanza para que se lean como dos naves y no como una sola hablando.
+    const hablando: Hablante[] = [];
     for (const d of reloj) {
       if (t < d.t0 || t >= d.t1) continue;
+      hablando.push(d.quien);
       const a = clamp01((t - d.t0) / PRESUPUESTO.entra) * clamp01((d.t1 - t) / PRESUPUESTO.sale);
       const e = ESTILO[d.quien];
       texto(d.txt, H * e.y, a, e.tam, e.color, e.x, e.fuente);
@@ -1034,6 +1067,8 @@ export function initPrologoAnomalia(host: HTMLElement, opts: PrologoOpciones): (
         if (voces) sonido().hablar(d.quien, d.txt, (d.t1 - d.t0) / velocidad);
       }
     }
+
+    nombrarA(hablando);
 
     // La mascota sale DEL choque: crece desde el punto exacto donde se juntaron los dos átomos.
     if (t >= CHOQUE && t < T.orden) {
@@ -1199,6 +1234,7 @@ export function initPrologoAnomalia(host: HTMLElement, opts: PrologoOpciones): (
     if (terminado) return;
     terminado = true;
     cancelAnimationFrame(raf);
+    nombrarA([]);
     // Las voces que quedaban agendadas no pueden seguir hablando encima del recorrido.
     sonido().callar();
     // El zumbido se apaga ya; la red se suelta recién cuando se apagó el último pip, para no

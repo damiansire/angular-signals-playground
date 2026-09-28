@@ -72,6 +72,7 @@ describe('initPrologoAnomalia', () => {
       <div class="prologo">
         <div class="prologo__stage">
           <canvas class="prologo__canvas" width="640" height="360"></canvas>
+          <p class="prologo__quien"></p>
           <div class="prologo__mascot"></div>
         </div>
         <div class="prologo__hud">
@@ -321,6 +322,17 @@ describe('initPrologoAnomalia', () => {
 
       expect(pausa.getAttribute('aria-pressed')).toBe('true');
     });
+  });
+
+  it('dice quién habla, y la voz misteriosa no se nombra', async () => {
+    const host = hostCompleto();
+    const cerrar = initPrologoAnomalia(host, { alTerminar: () => undefined });
+    const rotulo = host.querySelector<HTMLElement>('.prologo__quien')!;
+    // La primera línea del guion la dice el capitán.
+    await hasta(() => rotulo.textContent !== '');
+    expect(rotulo.textContent).toBe('Capitán');
+    expect(rotulo.classList).toContain('prologo__quien--visible');
+    cerrar();
   });
 
   it('saltar cede la posta exactamente una vez y oculta el prólogo', () => {

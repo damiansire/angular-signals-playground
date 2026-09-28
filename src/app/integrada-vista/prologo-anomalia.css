@@ -36,6 +36,31 @@
 
 /* La mascota es la REAL, un <img> encima del canvas, para que se vea igual de nítida que en la card
    de concepto y sea el mismo asset. El motor le escribe `transform` y `opacity`. */
+/* Quién habla. Arriba a la izquierda del escenario, fuera del dibujo: el lienzo está medido al
+   píxel contra los cascos y la mascota, y un rótulo adentro los pisaba. Toma el color del
+   renglón de quien habla, así nombre y frase se leen como una sola cosa. */
+.prologo__quien {
+  position: absolute;
+  left: 2.2%;
+  top: 3.2%;
+  z-index: 2;
+  margin: 0;
+  font:
+    600 clamp(10px, 1.25vw, 13px) / 1 'JetBrains Mono',
+    'Cascadia Mono',
+    Consolas,
+    monospace;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  opacity: 0;
+  transition: opacity 220ms ease-out;
+  pointer-events: none;
+}
+
+.prologo__quien--visible {
+  opacity: 0.92;
+}
+
 .prologo__mascot {
   position: absolute;
   left: 0;
