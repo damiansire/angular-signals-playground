@@ -132,6 +132,15 @@ export const signalsRoutesTree: RouteItem[] = [
     subLevels: [
       { path: '1', title: 'resource(): loader con Promise', component: ResourceBasicComponent },
       { path: '2', title: 'rxResource(): stream de RxJS', component: RxResourceComponent },
+      {
+        path: '3',
+        title: 'httpResource(): pedir por URL',
+        // Diferido con sus proveedores: HttpClient solo lo paga quien llega a este sub-nivel.
+        loadComponent: () =>
+          import('./signals/level-6-resource/sub-levels/3-http-resource/http-resource.component').then(
+            (m) => ({ component: m.HttpResourceComponent, providers: m.PROVEEDORES }),
+          ),
+      },
     ],
   },
   {
@@ -148,6 +157,15 @@ export const signalsRoutesTree: RouteItem[] = [
         component: ModelTwoWayComponent,
       },
       { path: '3', title: 'input.required() y transform', component: InputRequiredComponent },
+      {
+        path: '4',
+        title: 'Formularios con signals',
+        // Diferido: @angular/forms/signals pesa, y solo lo paga quien llega a este sub-nivel.
+        loadComponent: () =>
+          import('./signals/level-7-signal-io/sub-levels/4-signal-forms/signal-forms.component').then(
+            (m) => ({ component: m.SignalFormsComponent }),
+          ),
+      },
     ],
   },
   {
@@ -186,6 +204,14 @@ export const signalsRoutesTree: RouteItem[] = [
         path: '2',
         title: 'Debounce a mano (effect + onCleanup)',
         component: DebouncedManualComponent,
+      },
+      {
+        path: '3',
+        title: 'debounced() nativo',
+        loadComponent: () =>
+          import('./signals/level-10-debounced/sub-levels/3-debounced-nativo/debounced-nativo.component').then(
+            (m) => ({ component: m.DebouncedNativoComponent }),
+          ),
       },
     ],
   },
