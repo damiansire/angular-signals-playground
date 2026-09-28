@@ -188,6 +188,15 @@ const RAW: RawConcept[] = [
  */
 export const CONCEPT_COUNT = RAW.length;
 
+/**
+ * El título de cada capítulo tal como se ve en el recorrido (su tagline). Las cinemáticas y la
+ * bitácora lo leen de acá para que un capítulo se llame igual en todos lados.
+ */
+export const TITULOS_DE_CAPITULO: readonly string[] = RAW.map((r) => r.tagline ?? r.name);
+
+/** El nombre corto de cada concepto (el de la API), en el orden del recorrido. */
+export const NOMBRES_DE_CONCEPTO: readonly string[] = RAW.map((r) => r.name);
+
 const CX = 410;
 const CY = 290;
 // El panel del recorrido (variante B) ocupa la franja izquierda; la molécula se corre a la DERECHA
@@ -393,6 +402,13 @@ export function initMolecule(
   // detalle de implementación de otro, que se rompía en silencio con solo cambiar el fade a una
   // clase. Se llama solo en el CAMBIO, no por frame.
   onIntroVisible: ((visible: boolean) => void) | null = null,
+  // La partida guardada: lo que ya se estableció en otra visita (ids "concepto/sub", sub desde 0)
+  // entra como punto de partida, y cada establecimiento nuevo se avisa para guardarlo. El motor no
+  // sabe de `localStorage`: guardar es asunto de quien lo monta.
+  partida: {
+    readonly establecidos: ReadonlySet<string>;
+    readonly alEstablecer: (conceptIdx: number, subIdx: number) => void;
+  } | null = null,
 ): () => void {
   // RAW (metadata de los 12 conceptos) y `subCounts` (derivado de signalsRoutesTree) están
   // acoplados por índice: si no cuadran, un concepto se pintaría sin sub-niveles o se descartaría
@@ -869,7 +885,12 @@ export function initMolecule(
       const o = subDots[k];
       const cur = cc.subIdx;
       const state = k === cur ? 'current' : k < cur ? 'visited' : 'pending';
-      o.g.setAttribute('class', 'sub-e ' + state);
+      const sellado = subsEstablecidos.has(`${C.indexOf(cc)}/${k}`);
+      o.g.setAttribute('class', 'sub-e ' + state + (sellado ? ' est' : ''));
+      o.g.setAttribute(
+        'aria-label',
+        `Sub-nivel ${k + 1} de ${cc.name}${sellado ? ', establecido' : ''}`,
+      );
       // La parada actual la dibuja el puck (su `g` va a opacidad 0), así que no puede ser un destino
       // de foco: el anillo quedaría invisible. Se marca con aria-current y sale del tab-order, igual
       // que todas cuando el índice todavía no se ve.
@@ -882,7 +903,10 @@ export function initMolecule(
       // pisaría. La opacidad separa cargado de sin-cargar; el glow refuerza el "encendido".
       o.dot.setAttribute('r', String(state === 'current' ? 18 : state === 'visited' ? 8 : 6));
       o.dot.style.fill = col;
-      o.dot.style.stroke = 'none';
+      // Establecido = sellado con un anillo de tinta. Es independiente de visitado/pendiente: un
+      // sub-nivel puede estar resuelto y ser el de más adelante, y eso se tiene que ver igual.
+      o.dot.style.stroke = sellado ? '#201d16' : 'none';
+      o.dot.style.strokeWidth = sellado ? '2.5' : '0';
       if (state === 'pending') {
         o.dot.style.fillOpacity = '0.28';
         o.dot.removeAttribute('filter');
@@ -1075,6 +1099,13 @@ export function initMolecule(
    * sub-nivel del concepto: el enlace marca que entendiste el tramo, no que lo completaste entero.
    */
   const established = new Set<number>();
+  /** Sub-niveles establecidos ("concepto/sub"), para sellar su parada en la barra de sub-niveles. */
+  const subsEstablecidos = new Set<string>(partida?.establecidos ?? []);
+  for (const id of subsEstablecidos) {
+    const concepto = Number(id.split('/')[0]);
+    if (Number.isInteger(concepto) && concepto >= 0 && concepto < C.length)
+      established.add(concepto);
+  }
   // Arranca en el concepto donde ABRE el recorrido, no en 0: la entrada de la card inicial (el `raf`
   // de renderSubCard) se cancela si su card no es la del concepto vivo, y con un deep-link a otro
   // concepto no corría nunca: la pista de la mascota quedaba invisible pero clickeable.
@@ -1621,7 +1652,12 @@ export function initMolecule(
     // viva (amt > 0.6) cuando `liveConcept` ya es el siguiente.
     const card = (e.target as Element | null)?.closest('.card');
     const i = C.findIndex((cc) => cc.card === card);
-    established.add(i >= 0 ? i : liveConcept);
+    const concepto = i >= 0 ? i : liveConcept;
+    const sub = C[concepto].subIdx;
+    established.add(concepto);
+    subsEstablecidos.add(`${concepto}/${sub}`);
+    partida?.alEstablecer(concepto, sub);
+    if (orbitFor === concepto) updateOrbitFill(C[concepto]);
     render(stage.scrollTop / unit());
   };
   stage.addEventListener(SISTEMA_ESTABLECIDO, onEstablished);
