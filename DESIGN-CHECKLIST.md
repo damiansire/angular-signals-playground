@@ -214,6 +214,15 @@ posición de la perilla. Estos ítems son los defectos que YA aparecieron.
       `scrollWidth` del bloque contra su `clientWidth`, no el de cada renglón
       (son contenedores flex y siempre reportan el ancho del padre).
 
+- [ ] Una corrida sin evidencia suficiente se pinta NEUTRA, nunca roja: el umbral de acciones sale
+      de la solución de cada desafío (`accionesParaSaber`). Con el código correcto y una sola
+      vuelta, 3/3 mostraba "1 vivo, 1 esperado" en rojo.
+- [ ] Al fallar (código roto con evidencia) la mascota dice "Esa no era. Mirá la lectura." y nada
+      más; al acertar, silencio. La imagen de la pista pelea contra `.card--dissolve .subhost img`
+      (que agranda toda imagen embebida): selector de tres clases.
+- [ ] Los sub-niveles de ancho completo no quedan debajo de la espina vertical: medido a 1280,
+      1440 y 1920 px con `getBoundingClientRect` (espina contra eyebrow y bloque de código).
+
 ## Lo que la app HACE, no lo que dice
 
 - [ ] Ningún contador de pendientes que apure ("te faltan N") en un recorrido
