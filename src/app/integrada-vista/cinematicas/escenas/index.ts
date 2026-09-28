@@ -13,6 +13,7 @@ const ESCENAS: Readonly<Record<number, () => Promise<Type<unknown>>>> = {
   3: () => import('./escena-03.component').then((m) => m.Escena03Component),
   4: () => import('./escena-04.component').then((m) => m.Escena04Component),
   5: () => import('./escena-05.component').then((m) => m.Escena05Component),
+  6: () => import('./escena-06.component').then((m) => m.Escena06Component),
 };
 
 export function cargarEscena(capitulo: number): Promise<Type<unknown>> {
