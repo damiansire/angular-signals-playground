@@ -57,20 +57,20 @@ self-teaching resource and as a live demo for talks and workshops.
 
 The content is organized as progressive **levels**, each with focused sub-levels:
 
-| Level  | Topic                             | What you explore                                                                                                                 |
-| ------ | --------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
-| **0**  | Introduction                      | How Angular renders the DOM tree, classic change detection vs. signal-based change detection, HTML-to-tree visualization         |
-| **1**  | Interacting with signals          | Writable signals, `set` vs. `update`, read-only signals, the different kinds of signals                                          |
-| **2**  | Computed signals                  | Derived state, dynamic dependencies, lazy evaluation & memoization                                                               |
-| **3**  | Effects                           | `effect()`, cleanup, manual destruction, what happens when a component is destroyed                                              |
-| **4**  | Equality functions                | Custom equality and when a signal _doesn't_ notify its consumers                                                                 |
-| **5**  | `linkedSignal`                    | Writable state derived from a source: reset on change, or preserve if still valid                                                |
-| **6**  | `resource` / `rxResource`         | Async signals — `value`/`status`/`error`/`isLoading` with a Promise or an RxJS stream                                            |
-| **7**  | `input` · `model` · `output`      | Signal-based component APIs: `input()`/`output()`, two-way `model()`, `input.required()` and `transform`                         |
-| **8**  | Queries & interop                 | `viewChild()`/`viewChildren()` and `contentChild()`/`contentChildren()` as signals, `toSignal()`/`toObservable()`, `untracked()` |
-| **9**  | `afterRenderEffect` & `onCleanup` | Reading/measuring the DOM after render, and cleaning up effects without leaks                                                    |
-| **10** | Debounced signals                 | A debounced value, two ways: RxJS (`debounceTime`) and by hand (`effect` + `onCleanup`)                                          |
-| **11** | Capstone: zoneless                | Why signals + OnPush let Angular drop Zone.js (the default since v21; `provideZoneChangeDetection()` brings it back)             |
+| Level  | Topic                                      | What you explore                                                                                                                                                 |
+| ------ | ------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **0**  | Introduction                               | How Angular renders the DOM tree, classic change detection vs. signal-based change detection, HTML-to-tree visualization                                         |
+| **1**  | Interacting with signals                   | Writable signals, `set` vs. `update`, read-only signals, the different kinds of signals                                                                          |
+| **2**  | Computed signals                           | Derived state, dynamic dependencies, lazy evaluation & memoization                                                                                               |
+| **3**  | Effects                                    | `effect()`, cleanup, manual destruction, what happens when a component is destroyed                                                                              |
+| **4**  | Equality functions                         | Custom equality and when a signal _doesn't_ notify its consumers                                                                                                 |
+| **5**  | `linkedSignal`                             | Writable state derived from a source: reset on change, or preserve if still valid                                                                                |
+| **6**  | `resource` / `rxResource` / `httpResource` | Async signals: `value`/`status`/`error`/`isLoading` with a Promise, an RxJS stream, or a real HTTP request                                                       |
+| **7**  | `input` · `model` · `output` · forms       | Signal-based component APIs: `input()`/`output()`, two-way `model()`, `input.required()` and `transform`, and Signal Forms (`form()`, validators, `[formField]`) |
+| **8**  | Queries & interop                          | `viewChild()`/`viewChildren()` and `contentChild()`/`contentChildren()` as signals, `toSignal()`/`toObservable()`, `untracked()`                                 |
+| **9**  | `afterRenderEffect` & `onCleanup`          | Reading/measuring the DOM after render, and cleaning up effects without leaks                                                                                    |
+| **10** | Debounced signals                          | A debounced value, three ways: RxJS (`debounceTime`), by hand (`effect` + `onCleanup`), and the native `debounced()` (experimental in v22)                       |
+| **11** | Capstone: zoneless                         | Why signals + OnPush let Angular drop Zone.js (the default since v21; `provideZoneChangeDetection()` brings it back)                                             |
 
 ## Getting started
 
