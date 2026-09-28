@@ -1,9 +1,10 @@
 import { ManipulableChallenge, SystemState } from '../../libs/manipulable-challenge';
 
 /**
- * Sistemas del nivel 7: los bordes del componente. Los tres desafíos atacan el mismo malentendido
+ * Sistemas del nivel 7: los bordes del componente. Los tres primeros atacan el mismo malentendido
  * desde lugares distintos, que un input ahora es un signal y no un campo que alguien te rellena
- * antes de arrancar.
+ * antes de arrancar. El cuarto lo lleva al borde por donde escribe el usuario: la validez de un
+ * formulario tampoco es un dato que se calcula una vez, se deriva del modelo.
  */
 
 const K = 'perilla';
@@ -67,4 +68,37 @@ export const INPUT_REQUIRED_SYSTEM: ManipulableChallenge = {
   // El opcional compila y explota adentro; el requerido no deja pasar el template.
   settle: (s: SystemState) => ({ undefined: s.knobs[K] === 1 ? 0 : s.actions }),
   healthy: (s: SystemState) => s.actions > 0 && s.values['undefined'] === 0,
+};
+
+/**
+ * 7/4 · validar a mano en el handler congela la validez entre envío y envío; el form la deriva.
+ * La trampa es plausible porque `valido` ES un signal: parece reactivo, pero solo lo escribe
+ * `enviar()`, así que cada edición posterior queda sin validar hasta el próximo envío.
+ */
+export const SIGNAL_FORMS_SYSTEM: ManipulableChallenge = {
+  knobs: knob('validar a mano al enviar o derivar la validez del form'),
+  gauges: [{ id: 'sinValidar', label: 'sin validar' }],
+  action: 'editar el correo',
+  start: { sinValidar: 0 },
+  code: (k) =>
+    k[K] === 1
+      ? [
+          { text: 'readonly f = form(this.modelo, (t) => email(t.correo));' },
+          { text: 'readonly valido = computed(() => this.f().valid());', knob: K },
+          { text: '' },
+          { text: 'enviar() {' },
+          { text: '  if (this.valido()) guardar(this.modelo());' },
+          { text: '}' },
+        ]
+      : [
+          { text: 'readonly f = form(this.modelo);' },
+          { text: 'readonly valido = signal(false);', knob: K },
+          { text: '' },
+          { text: 'enviar() {' },
+          { text: '  this.valido.set(esCorreo(this.modelo().correo));' },
+          { text: '}' },
+        ],
+  // Nadie vuelve a validar hasta el próximo envío: cada edición queda con la validez anterior.
+  settle: (s: SystemState) => ({ sinValidar: s.knobs[K] === 1 ? 0 : s.actions }),
+  healthy: (s: SystemState) => s.actions > 0 && s.values['sinValidar'] === 0,
 };

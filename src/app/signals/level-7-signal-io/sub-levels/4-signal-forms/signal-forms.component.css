@@ -1,0 +1,112 @@
+/* Todo con prefijo sgf-: la vista integrada embebe este componente junto a otros, y un nombre
+   genérico (.campo, .error) pisaría o sería pisado por el de un vecino. */
+
+.sgf-campo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.sgf-ruta code {
+  font-size: 0.75rem;
+  color: #6b7280;
+}
+
+.sgf-input {
+  width: 100%;
+  border: 1px solid #d1d5db;
+  border-radius: 0.25rem;
+  padding: 0.5rem 0.75rem;
+  transition: border-color 150ms ease;
+}
+
+.sgf-input:focus {
+  outline: none;
+  border-color: #f59e0b;
+  box-shadow: 0 0 0 2px rgb(251 191 36 / 0.45);
+}
+
+.sgf-input--mal {
+  border-color: #f87171;
+}
+
+.sgf-flags {
+  display: flex;
+  gap: 0.35rem;
+}
+
+/* Apagada no es "false escrito": es el mismo rótulo sin luz, así el cambio se ve de reojo. */
+.sgf-flag {
+  font-size: 0.7rem;
+  line-height: 1;
+  padding: 0.25rem 0.45rem;
+  border-radius: 9999px;
+  background: #f3f4f6;
+  color: #9ca3af;
+  transition:
+    background-color 150ms ease,
+    color 150ms ease;
+}
+
+.sgf-flag--on {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.sgf-error {
+  font-size: 0.75rem;
+  color: #dc2626;
+}
+
+.sgf-modelo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  padding: 0.5rem 0.65rem;
+  border-radius: 0.375rem;
+  background: #1f2937;
+}
+
+.sgf-modelo-expr {
+  font-size: 0.7rem;
+  color: #9ca3af;
+}
+
+.sgf-modelo-val {
+  font-size: 0.75rem;
+  color: #fcd34d;
+  word-break: break-all;
+}
+
+.sgf-borde {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.sgf-sumar:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.sgf-tripulacion {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.sgf-tripulante {
+  font-size: 0.75rem;
+  padding: 0.2rem 0.6rem;
+  border-radius: 9999px;
+  background: #1f2937;
+  color: #fff;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sgf-input,
+  .sgf-flag {
+    transition: none;
+  }
+}

@@ -1,0 +1,94 @@
+<app-column-and-code-layout
+  title="Formularios con signals"
+  [codeLines]="lines()"
+  concept="El modelo manda; el form deriva."
+>
+  <!-- Sin bajada a propósito: tipear y ver prenderse valid, touched y dirty campo por campo, el
+       error que aparece al salir y el modelo que cambia letra por letra ES la explicación. -->
+  <section class="sgf w-80 p-5 rounded-lg shadow-md bg-white flex flex-col gap-4">
+    <div class="sgf-campo">
+      <label for="sgf-nombre" class="sgf-ruta"><code>tripulante.nombre</code></label>
+      <input
+        id="sgf-nombre"
+        type="text"
+        autocomplete="off"
+        placeholder="Ana"
+        class="sgf-input"
+        [class.sgf-input--mal]="tripulante.nombre().touched() && tripulante.nombre().invalid()"
+        [formField]="tripulante.nombre"
+      />
+      <div class="sgf-flags">
+        <span class="sgf-flag" [class.sgf-flag--on]="tripulante.nombre().valid()">
+          <code>valid</code><span class="sr-only">{{ tripulante.nombre().valid() }}</span>
+        </span>
+        <span class="sgf-flag" [class.sgf-flag--on]="tripulante.nombre().touched()">
+          <code>touched</code><span class="sr-only">{{ tripulante.nombre().touched() }}</span>
+        </span>
+        <span class="sgf-flag" [class.sgf-flag--on]="tripulante.nombre().dirty()">
+          <code>dirty</code><span class="sr-only">{{ tripulante.nombre().dirty() }}</span>
+        </span>
+      </div>
+      @if (tripulante.nombre().touched()) {
+        @for (error of tripulante.nombre().errors(); track error.kind) {
+          <p class="sgf-error">{{ error.message }}</p>
+        }
+      }
+    </div>
+
+    <div class="sgf-campo">
+      <label for="sgf-correo" class="sgf-ruta"><code>tripulante.correo</code></label>
+      <input
+        id="sgf-correo"
+        type="email"
+        autocomplete="off"
+        placeholder="ana@nave.io"
+        class="sgf-input"
+        [class.sgf-input--mal]="tripulante.correo().touched() && tripulante.correo().invalid()"
+        [formField]="tripulante.correo"
+      />
+      <div class="sgf-flags">
+        <span class="sgf-flag" [class.sgf-flag--on]="tripulante.correo().valid()">
+          <code>valid</code><span class="sr-only">{{ tripulante.correo().valid() }}</span>
+        </span>
+        <span class="sgf-flag" [class.sgf-flag--on]="tripulante.correo().touched()">
+          <code>touched</code><span class="sr-only">{{ tripulante.correo().touched() }}</span>
+        </span>
+        <span class="sgf-flag" [class.sgf-flag--on]="tripulante.correo().dirty()">
+          <code>dirty</code><span class="sr-only">{{ tripulante.correo().dirty() }}</span>
+        </span>
+      </div>
+      @if (tripulante.correo().touched()) {
+        @for (error of tripulante.correo().errors(); track error.kind) {
+          <p class="sgf-error">{{ error.message }}</p>
+        }
+      }
+    </div>
+
+    <!-- El signal de la fuente de verdad, en crudo: el input no guarda nada propio. -->
+    <div class="sgf-modelo">
+      <code class="sgf-modelo-expr">modelo()</code>
+      <code class="sgf-modelo-val">{{ modeloEnVivo() }}</code>
+    </div>
+
+    <div class="sgf-borde">
+      <button
+        type="button"
+        class="sgf-sumar bg-amber-500 hover:bg-amber-600 text-gray-900 text-sm font-bold py-2 px-4 rounded"
+        [disabled]="tripulante().invalid()"
+        (click)="sumar()"
+      >
+        Sumar a bordo
+      </button>
+
+      @if (tripulacion().length) {
+        <ul class="sgf-tripulacion" aria-label="Tripulación">
+          @for (nombre of tripulacion(); track $index) {
+            <li class="sgf-tripulante">{{ nombre }}</li>
+          }
+        </ul>
+      }
+    </div>
+  </section>
+</app-column-and-code-layout>
+
+<app-manipulable-system [system]="closingSystem" />
