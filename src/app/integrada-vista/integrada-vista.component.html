@@ -321,8 +321,8 @@
   @defer (on immediate) {
     <app-bitacora
       [partida]="partida()"
-      [capitulos]="capitulosBitacora"
-      [leyFinal]="leyFinal"
+      [capitulos]="capitulosBitacora()"
+      [leyFinal]="leyFinal()"
       (verCinematica)="verCinematicaDesdeBitacora($event)"
       (verPrologo)="verPrologoDesdeBitacora()"
       (borrar)="empezarDeCero()"

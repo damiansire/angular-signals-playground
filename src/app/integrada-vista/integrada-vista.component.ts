@@ -44,7 +44,6 @@ import {
 import { CinematicaComponent } from './cinematicas/cinematica.component';
 import { BitacoraComponent, type CapituloDeBitacora } from './bitacora/bitacora.component';
 import { CAPITULO_FINAL, type Cinematica } from './cinematicas/cinematica-guion';
-import { cinematicaDe } from './cinematicas/cinematicas-datos';
 
 /**
  * Cuánto tiene que quedarse el recorrido en la parada de un capítulo para que arranque su
@@ -124,16 +123,19 @@ export class IntegradaVistaComponent {
 
   protected readonly bitacoraAbierta = signal(false);
   /** Los capítulos como los lista la bitácora: nombre, título, ley y cuántos sub-niveles tiene. */
-  protected readonly capitulosBitacora: readonly CapituloDeBitacora[] = NOMBRES_DE_CONCEPTO.map(
-    (nombre, numero) => ({
-      numero,
-      nombre,
-      titulo: TITULOS_DE_CAPITULO[numero],
-      ley: cinematicaDe(numero)?.ley ?? null,
-      subs: this.subComponents[numero]?.length ?? 0,
-    }),
-  );
-  protected readonly leyFinal = cinematicaDe(CAPITULO_FINAL)?.ley ?? null;
+  protected readonly capitulosBitacora = signal<readonly CapituloDeBitacora[]>([]);
+  protected readonly leyFinal = signal<string | null>(null);
+
+  /**
+   * Los guiones de las trece cinemáticas se piden recién cuando hacen falta (al llegar a un
+   * capítulo o al abrir la bitácora): en el bundle inicial eran 12 kB de texto que casi nadie lee
+   * en el primer segundo. Se piden una sola vez.
+   */
+  private datosCinematicas: Promise<typeof import('./cinematicas/cinematicas-datos')> | null = null;
+  private cargarDatosCinematicas(): Promise<typeof import('./cinematicas/cinematicas-datos')> {
+    this.datosCinematicas ??= import('./cinematicas/cinematicas-datos');
+    return this.datosCinematicas;
+  }
 
   constructor() {
     afterNextRender(() => {
@@ -241,14 +243,18 @@ export class IntegradaVistaComponent {
     if (this.esperaCinematica) clearTimeout(this.esperaCinematica);
     this.esperaCinematica = null;
     if (concepto < 0 || sub !== -1 || this.cinematica()) return;
-    if (this.partida().cinematicas.includes(concepto) || !cinematicaDe(concepto)) return;
+    if (this.partida().cinematicas.includes(concepto) || concepto > CAPITULO_FINAL) return;
+    // Se adelanta la carga del guion mientras corre la espera: al abrir ya está.
+    void this.cargarDatosCinematicas();
     this.esperaCinematica = setTimeout(() => {
       this.esperaCinematica = null;
-      if (this.donde.concepto === concepto && this.donde.sub === -1) this.abrirCinematica(concepto);
+      if (this.donde.concepto === concepto && this.donde.sub === -1)
+        void this.abrirCinematica(concepto);
     }, ESPERA_CINEMATICA_MS);
   }
 
-  protected abrirCinematica(capitulo: number): void {
+  protected async abrirCinematica(capitulo: number): Promise<void> {
+    const { cinematicaDe } = await this.cargarDatosCinematicas();
     const cine = cinematicaDe(capitulo);
     if (!cine || this.cinematica()) return;
     // El iris se abre desde el átomo del capítulo: la cinemática sale de ESE lugar del mapa.
@@ -279,10 +285,21 @@ export class IntegradaVistaComponent {
     if (concepto !== ultimo || antes || this.partida().cinematicas.includes(CAPITULO_FINAL)) return;
     // El final entra cuando el enlace del último capítulo termina de trazarse: primero la
     // consecuencia de lo que entendiste, después la ceremonia.
-    setTimeout(() => this.abrirCinematica(CAPITULO_FINAL), ESPERA_FINAL_MS);
+    setTimeout(() => void this.abrirCinematica(CAPITULO_FINAL), ESPERA_FINAL_MS);
   }
 
-  protected abrirBitacora(): void {
+  protected async abrirBitacora(): Promise<void> {
+    const { cinematicaDe } = await this.cargarDatosCinematicas();
+    this.capitulosBitacora.set(
+      NOMBRES_DE_CONCEPTO.map((nombre, numero) => ({
+        numero,
+        nombre,
+        titulo: TITULOS_DE_CAPITULO[numero],
+        ley: cinematicaDe(numero)?.ley ?? null,
+        subs: this.subComponents[numero]?.length ?? 0,
+      })),
+    );
+    this.leyFinal.set(cinematicaDe(CAPITULO_FINAL)?.ley ?? null);
     this.escenarioInerte(true);
     this.bitacoraAbierta.set(true);
   }
@@ -296,7 +313,7 @@ export class IntegradaVistaComponent {
   protected verCinematicaDesdeBitacora(capitulo: number): void {
     this.bitacoraAbierta.set(false);
     this.escenarioInerte(false);
-    this.abrirCinematica(capitulo);
+    void this.abrirCinematica(capitulo);
   }
 
   /**
