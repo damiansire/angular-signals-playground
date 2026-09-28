@@ -3,19 +3,17 @@
 <div class="space-y-4">
   <!-- Sin esto el panel abre como un rectángulo vacío y se lee como espacio muerto o como algo
        roto. El default es lo más usado que se shippea: casi nadie toca nada antes de juzgar. -->
-  @for (item of history().reverse(); track $index) {
-    <div class="bg-gray-100 p-4 rounded-md shadow-sm flex justify-between">
-      <div class="flex justify-between items-center">
-        <div class="flex items-baseline">
-          <span class="text-gray-500 text-sm mr-2">{{ stateName() }}</span>
-          <span class="text-lg font-medium">
-            @if (item.isCountIncrement) {
-              {{ item.newState && beforeNumber(item.newState) }}
-              <span class="text-gray-500">-></span>
-            }
-            {{ item.newState }}
-          </span>
-        </div>
+  @for (item of reversedHistory(); track $index) {
+    <div class="bg-gray-100 p-4 rounded-md shadow-sm flex justify-between items-center gap-4">
+      <div class="flex items-baseline gap-2">
+        <span class="text-gray-500 text-sm whitespace-nowrap">{{ stateName() }}</span>
+        <span class="text-lg font-medium">
+          @if (item.isCountIncrement) {
+            {{ item.newState && beforeNumber(item.newState) }}
+            <span class="text-gray-500">-></span>
+          }
+          {{ item.newState }}
+        </span>
       </div>
       <!--
     <div class="mt-2">
@@ -29,7 +27,7 @@
       </div>
     </div>
     -->
-      <div class="mt-2">
+      <div>
         <h3 class="text-md font-semibold text-gray-700 mb-1">Trigger:</h3>
         <div class="flex flex-wrap gap-2">
           <span class="px-2 py-1 bg-gray-200 rounded-md text-sm">{{ item.trigger }}</span>
