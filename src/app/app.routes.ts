@@ -83,7 +83,7 @@ export const signalsRoutesTree: RouteItem[] = [
       { path: '1', title: 'Computed signals', component: ComputedSignalsComponent },
       {
         path: '2',
-        title: 'conditionalCount Recomputations',
+        title: 'Dependencias dinámicas',
         component: ComputedSignalDynamicDependenciesComponent,
       },
       {
