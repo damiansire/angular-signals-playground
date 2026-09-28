@@ -116,12 +116,35 @@ export function turn(
 }
 
 /**
- * Sano exige lecturas sanas Y haber accionado en la corrida vigente. Sin lo segundo, un código que
- * todavía no corrió pasaba por arreglado solo porque sus números arrancan en el valor bueno.
+ * Sano exige lecturas sanas Y haber accionado lo suficiente en la corrida vigente. Mientras no hay
+ * evidencia, la lectura es neutra: ni sano ni averiado. Sin esto un código que todavía no corrió
+ * pasaba por arreglado solo porque sus números arrancan en el valor bueno, y al revés, un código
+ * CORRECTO accionado una vez se pintaba de rojo en los desafíos que necesitan dos o tres vueltas
+ * para mostrar la diferencia (3/3: una vuelta da "1 vivo, 1 esperado" con cualquier código).
  */
 export function healthOf(challenge: ManipulableChallenge, state: SystemState): Health {
-  if (state.actions === 0) return 'idle';
+  if (state.actions < accionesParaSaber(challenge)) return 'idle';
   return challenge.healthy(state) ? 'healthy' : 'broken';
+}
+
+const PARA_SABER = new WeakMap<ManipulableChallenge, number>();
+
+/**
+ * Cuántas acciones de una corrida hacen falta para que la lectura diga algo: las del final de la
+ * solución más corta (girar arranca una corrida nueva, así que lo que cuenta es lo accionado
+ * después del último giro). Sale de la solución y no se declara a mano: si un desafío cambia, el
+ * umbral lo acompaña solo. Se calcula una vez por desafío.
+ */
+export function accionesParaSaber(challenge: ManipulableChallenge): number {
+  let n = PARA_SABER.get(challenge);
+  if (n === undefined) {
+    const camino = solutionFor(challenge) ?? [];
+    let alFinal = 0;
+    for (let i = camino.length - 1; i >= 0 && camino[i] === challenge.action; i--) alFinal++;
+    n = Math.max(1, alFinal);
+    PARA_SABER.set(challenge, n);
+  }
+  return n;
 }
 
 /** Los rótulos y valores que se muestran, en el orden en que el desafío los declaró. */
@@ -161,7 +184,9 @@ export function solutionFor(
         ]),
       ];
       for (const [name, candidate] of moves) {
-        if (healthOf(challenge, candidate) === 'healthy') return [...path, name];
+        // La regla cruda (sano y accionado), no `healthOf`: el umbral de evidencia de `healthOf`
+        // se calcula justamente con esta búsqueda.
+        if (candidate.actions > 0 && challenge.healthy(candidate)) return [...path, name];
         const id = key(candidate);
         if (seen.has(id)) continue;
         seen.add(id);

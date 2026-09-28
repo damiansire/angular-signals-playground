@@ -1,5 +1,6 @@
 import {
   act,
+  accionesParaSaber,
   healthOf,
   ManipulableChallenge,
   solutionFor,
@@ -149,7 +150,9 @@ describe('barrido de los 37 sistemas: cambiar el código arranca otra corrida', 
 
         for (const veces of [1, 2, 3]) {
           const roto = accionar(sistema, startOf(sistema), veces);
-          expect(healthOf(sistema, roto)).withContext(`roto tras ${veces}`).toBe('broken');
+          // Antes de tener evidencia la lectura es neutra; después, el código roto se nota.
+          const esperado = veces < accionesParaSaber(sistema) ? 'idle' : 'broken';
+          expect(healthOf(sistema, roto)).withContext(`roto tras ${veces}`).toBe(esperado);
 
           for (const posicion of sanas) {
             const contexto = `${veces} acciones rotas y giro a ${posicion}`;
@@ -164,6 +167,24 @@ describe('barrido de los 37 sistemas: cambiar el código arranca otra corrida', 
             // prueba que el daño viejo no se filtró a las lecturas, ni para curar ni para empeorar.
             expect(girado.values).withContext(contexto).toEqual(limpio.values);
             expect(accionesHastaSano(sistema, girado)).withContext(contexto).not.toBeNull();
+          }
+        }
+      });
+
+      // El caso que se vio en vivo en 3/3: con el código CORRECTO y una sola vuelta, la lectura se
+      // veía sana pero el desafío se pintaba de rojo. Sin evidencia suficiente, nunca "averiado".
+      it('con el código correcto, nunca se pinta averiado antes de poder saberlo', () => {
+        const necesarias = accionesParaSaber(sistema);
+        for (const posicion of posicionesSanas(sistema)) {
+          let state =
+            posicion === 0
+              ? startOf(sistema)
+              : girarHasta(sistema, startOf(sistema), posicion).at(-1)!;
+          for (let j = 1; j < necesarias; j++) {
+            state = act(sistema, state);
+            expect(healthOf(sistema, state))
+              .withContext(`posición ${posicion}, ${j} de ${necesarias} acciones`)
+              .toBe('idle');
           }
         }
       });
