@@ -7,6 +7,7 @@ import { type Type } from '@angular/core';
  * queda un capítulo sin cinemática por falta de dibujo.
  */
 const ESCENAS: Readonly<Record<number, () => Promise<Type<unknown>>>> = {
+  0: () => import('./escena-00.component').then((m) => m.Escena00Component),
   1: () => import('./escena-01.component').then((m) => m.Escena01Component),
 };
 
