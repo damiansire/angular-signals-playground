@@ -403,6 +403,10 @@ export function initMolecule(
         `RAW y signalsRoutesTree deben mantener la misma cantidad de conceptos.`,
     );
   }
+  /** El concepto donde abre el recorrido: el del deep-link, o el primero. */
+  const conceptoDeApertura = initial
+    ? Math.max(0, Math.min(RAW.length - 1, Math.round(initial.concept)))
+    : 0;
   const C: Concept[] = RAW.map((r, i) => ({
     ...r,
     x: 0,
@@ -1024,8 +1028,7 @@ export function initMolecule(
   // Salvo el concepto donde ABRE el recorrido, que se monta ya: es el único que se ve en el primer
   // frame, y esperar al primer `render()` deja su card vacía a la vista. Uno, no doce.
   {
-    const abre = initial ? Math.max(0, Math.min(C.length - 1, Math.round(initial.concept))) : 0;
-    renderSubCard(C[abre]);
+    renderSubCard(C[conceptoDeApertura]);
   }
   contentEl.appendChild(suborbit);
 
@@ -1072,7 +1075,10 @@ export function initMolecule(
    * sub-nivel del concepto: el enlace marca que entendiste el tramo, no que lo completaste entero.
    */
   const established = new Set<number>();
-  let liveConcept = 0;
+  // Arranca en el concepto donde ABRE el recorrido, no en 0: la entrada de la card inicial (el `raf`
+  // de renderSubCard) se cancela si su card no es la del concepto vivo, y con un deep-link a otro
+  // concepto no corría nunca: la pista de la mascota quedaba invisible pero clickeable.
+  let liveConcept = conceptoDeApertura;
   /**
    * Un deslizamiento largo del riel (del 0 al 11) atraviesa todos los conceptos del medio en 620 ms.
    * Mientras dura, `render` no monta componentes ni cambia de sub-nivel ni escribe la URL: eran
