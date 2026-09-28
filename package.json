@@ -22,7 +22,8 @@
     "format:check": "prettier --check \"src/**/*.{ts,html,scss,json}\" \"scripts/*.mjs\"",
     "gate:prosa": "node scripts/prose-budget.mjs",
     "gate:prosa:update": "node scripts/prose-budget.mjs --update",
-    "test:scripts": "node --test \"scripts/*.test.mjs\""
+    "test:scripts": "node --test \"scripts/*.test.mjs\"",
+    "sync:server": "node scripts/sync-server.mjs"
   },
   "prettier": {
     "printWidth": 100,
