@@ -7,12 +7,13 @@
   <div class="p-4">
     @if (isStatic()) {
       @for (item of lines(); track $index) {
+        <!-- Modo estático: el snippet se LEE, no se toca. Antes cada línea con texto salía con
+             role="button" y tabindex=0 sin ningún handler detrás: el lector de pantalla anunciaba
+             un botón, el teclado paraba en él, y activarlo no hacía nada. Un control que miente
+             es peor que ninguno. -->
         <div
           class="text-2xl font-mono whitespace-pre-wrap break-words py-1.5 rounded"
           [class]="staticLineClasses(item)"
-          [class.cursor-pointer]="isInteractive(item)"
-          [attr.tabindex]="isInteractive(item) ? 0 : null"
-          [attr.role]="isInteractive(item) ? 'button' : null"
         >
           {{ item.line }}
         </div>

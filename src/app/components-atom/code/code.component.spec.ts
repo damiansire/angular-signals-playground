@@ -78,7 +78,7 @@ describe('CodeComponent', () => {
       fixture.detectChanges();
 
       expect(component.isStatic()).toBeTrue();
-      const rows = fixture.nativeElement.querySelectorAll('[role="button"]');
+      const rows = fixture.nativeElement.querySelectorAll('.font-mono');
       expect(rows.length).toBe(2);
       expect(rows[0].textContent?.trim()).toBe('const x = 1;');
       expect(rows[1].textContent?.trim()).toBe('const y = 2;');
@@ -96,7 +96,7 @@ describe('CodeComponent', () => {
       expect(component.isInteractive({ active: false })).toBeFalse();
     });
 
-    it('no expone role="button" ni tabindex en las líneas en blanco (sin nombre accesible)', () => {
+    it('no expone role="button" ni tabindex en modo estático', () => {
       fixture.componentRef.setInput('lines', [
         { id: 'a', line: 'const x = 1;', active: true },
         { id: 'b', line: '', active: false },
@@ -108,8 +108,8 @@ describe('CodeComponent', () => {
       );
       const [interactiveRow, blankRow] = rows;
 
-      expect(interactiveRow.getAttribute('role')).toBe('button');
-      expect(interactiveRow.getAttribute('tabindex')).toBe('0');
+      expect(interactiveRow.getAttribute('role')).toBeNull();
+      expect(interactiveRow.getAttribute('tabindex')).toBeNull();
       expect(blankRow.getAttribute('role')).toBeNull();
       expect(blankRow.getAttribute('tabindex')).toBeNull();
     });
