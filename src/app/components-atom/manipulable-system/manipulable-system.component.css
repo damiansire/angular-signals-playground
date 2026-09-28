@@ -45,6 +45,10 @@
   /* Un renglón vacío es un separador del bloque, no un renglón que no está: sin esto el flex lo
      colapsa a cero y el mismo desafío se ve con distinto aire que el de al lado. */
   min-height: 1.33rem;
+  /* La monoespaciada tiene ligaduras: dibujaba `=>` como `⇒`, que no es sintaxis. Quien aprende
+     copia lo que ve, así que el código se muestra carácter por carácter. */
+  font-variant-ligatures: none;
+  font-feature-settings: 'liga' 0, 'calt' 0;
 }
 
 /* La línea que dejó de participar sigue a la vista: que se vea quedar afuera enseña más que
