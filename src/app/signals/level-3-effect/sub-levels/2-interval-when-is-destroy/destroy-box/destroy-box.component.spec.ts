@@ -1,11 +1,15 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideZonelessChangeDetection } from '@angular/core';
+import { DestroyRef, provideZonelessChangeDetection } from '@angular/core';
 
 import { DestroyBoxComponent } from './destroy-box.component';
+import { RelojesDelHijo } from '../../../relojes-del-hijo';
 
 describe('DestroyBoxComponent', () => {
   let component: DestroyBoxComponent;
   let fixture: ComponentFixture<DestroyBoxComponent>;
+  let relojes: RelojesDelHijo;
+  // El padre de mentira: el test decide cuándo se va y apaga lo que el hijo dejó latiendo.
+  let irsePadre: () => void;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
@@ -13,21 +17,29 @@ describe('DestroyBoxComponent', () => {
       providers: [provideZonelessChangeDetection()],
     }).compileComponents();
 
+    const padre: Pick<DestroyRef, 'onDestroy'> = {
+      onDestroy: (callback) => {
+        irsePadre = callback;
+        return () => undefined;
+      },
+    };
+    relojes = new RelojesDelHijo(padre);
     fixture = TestBed.createComponent(DestroyBoxComponent);
+    fixture.componentRef.setInput('relojes', relojes);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });
+
+  afterEach(() => irsePadre());
 
   it('should create', () => {
     expect(component).toBeTruthy();
   });
 
-  it('arranca con autoRefresh en false y muestra el modo manual', () => {
+  it('arranca con autoRefresh en false y el botón ofrece prender el intervalo', () => {
     expect(component.autoRefresh()).toBeFalse();
-    const text = (fixture.nativeElement as HTMLElement).textContent ?? '';
-    expect(text).toContain('manually');
     const toggleBtn = fixture.nativeElement.querySelectorAll('button')[1] as HTMLElement;
-    expect(toggleBtn.textContent?.trim()).toBe('Enable Auto Refresh');
+    expect(toggleBtn.textContent?.trim()).toBe('Prender intervalo');
   });
 
   it('refreshTime actualiza la hora mostrada', () => {
@@ -53,23 +65,45 @@ describe('DestroyBoxComponent', () => {
     expect(component.autoRefresh()).toBeFalse();
   });
 
-  it('con autoRefresh activo el effect emite newIntervalOutput cada segundo', () => {
+  it('con el intervalo prendido late sobre los relojes del padre, y apagarlo lo frena', () => {
     jasmine.clock().install();
     try {
-      const emissions: Date[] = [];
-      component.newIntervalOutput.subscribe((d) => emissions.push(d));
-
       component.autoRefresh.set(true);
       fixture.detectChanges(); // corre el effect -> programa el intervalo
 
       jasmine.clock().tick(1000);
-      expect(emissions.length).toBe(1);
+      expect(relojes.latidos()).toBe(1);
 
-      // limpiar el intervalo para no dejar timers vivos
       component.autoRefresh.set(false);
       fixture.detectChanges();
       jasmine.clock().tick(1000);
-      expect(emissions.length).toBe(1);
+      expect(relojes.latidos()).toBe(1);
+    } finally {
+      jasmine.clock().uninstall();
+    }
+  });
+
+  // El leak es la lección y se queda. Lo que no puede pasar es que el intervalo huérfano le hable
+  // a un output del componente muerto: eso era el NG0953 que llenaba la consola cada segundo.
+  it('destruido con el intervalo prendido, sigue latiendo (leak) sin emitir a un output muerto', () => {
+    const warn = spyOn(console, 'warn');
+    jasmine.clock().install();
+    try {
+      component.autoRefresh.set(true);
+      fixture.detectChanges();
+      jasmine.clock().tick(1000);
+
+      fixture.destroy();
+      jasmine.clock().tick(2000);
+      expect(relojes.latidos()).toBe(3);
+
+      const ng0953 = warn.calls.allArgs().filter((args) => String(args[0]).includes('NG0953'));
+      expect(ng0953).toEqual([]);
+
+      // Y cuando el padre se va, lo filtrado se apaga con él.
+      irsePadre();
+      jasmine.clock().tick(3000);
+      expect(relojes.latidos()).toBe(3);
     } finally {
       jasmine.clock().uninstall();
     }

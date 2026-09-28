@@ -1,5 +1,6 @@
-import { Component, output, effect, signal, ChangeDetectionStrategy } from '@angular/core';
+import { Component, output, effect, input, signal, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { RelojesDelHijo } from '../../../relojes-del-hijo';
 
 @Component({
   selector: 'app-destroy-box',
@@ -9,20 +10,20 @@ import { CommonModule } from '@angular/common';
   imports: [CommonModule],
 })
 export class DestroyBoxComponent {
+  /** Del padre: el intervalo late ahí y no por un output, que muere con este componente. */
+  readonly relojes = input.required<RelojesDelHijo>();
   readonly autoRefreshEvent = output<boolean>();
-  readonly newIntervalOutput = output<Date>();
   currentTime = signal(new Date());
   autoRefresh = signal(false);
   intervalSave: ReturnType<typeof setInterval> | undefined;
   constructor() {
     effect(() => {
       if (this.autoRefresh()) {
-        this.intervalSave = setInterval(() => {
-          const now = new Date();
-          this.currentTime.set(now);
-          this.newIntervalOutput.emit(now);
-        }, 1000);
+        this.intervalSave = setInterval(() => this.latir(), 1000);
+        this.relojes().registrar(this.intervalSave);
       } else {
+        // Esta rama solo corre si el effect RE-corre. Al destruirse el componente el effect muere
+        // sin volver a correr, así que el intervalo queda vivo: es el leak que enseña 3/2.
         clearInterval(this.intervalSave);
       }
     });
@@ -34,5 +35,11 @@ export class DestroyBoxComponent {
   toggleAutoRefresh() {
     this.autoRefreshEvent.emit(!this.autoRefresh());
     this.autoRefresh.set(!this.autoRefresh());
+  }
+
+  private latir() {
+    const ahora = new Date();
+    this.currentTime.set(ahora);
+    this.relojes().latir(ahora);
   }
 }

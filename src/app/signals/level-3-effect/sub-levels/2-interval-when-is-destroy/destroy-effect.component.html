@@ -1,26 +1,26 @@
 <app-concept-card
   concept="Un effect() se destruye con el componente, pero un setInterval que arrancó adentro NO se limpia solo."
-  action="Activá Auto Refresh y después tocá Destroy."
-  observe="El reloj desaparece, pero el contador de evaluaciones SIGUE subiendo: el intervalo quedó vivo (leak, a propósito para mostrar el problema)."
+  action="Prendé el intervalo y después destruí al hijo."
+  observe="El reloj desaparece, pero los latidos SIGUEN subiendo: el intervalo quedó vivo (leak, a propósito)."
 />
 
 <div class="flex">
   <div>
-    <button (click)="destroy()">Destroy</button>
-    @if (showComponent) {
+    <button (click)="destroy()">Destruir hijo</button>
+    @if (showComponent()) {
       <div>
-        <app-destroy-box (autoRefreshEvent)="setAutoRefresh($event)"></app-destroy-box>
+        <app-destroy-box [relojes]="relojes" (autoRefreshEvent)="setAutoRefresh($event)" />
       </div>
     }
     <p class="my-3 text-sm">
-      Evaluaciones del intervalo:
-      <b class="font-mono text-base">{{ intervalEvals() }}</b>
-      <span class="text-gray-500"> (sigue subiendo tras Destroy = leak, es a propósito)</span>
+      Latidos:
+      <b class="font-mono text-base">{{ relojes.latidos() }}</b>
+      <span class="text-gray-500"> (sigue subiendo tras destruirlo: leak a propósito)</span>
     </p>
     <app-event-history
-      title="Interval Evaluation"
-      [history]="appEventHistory()"
-      stateName="Count Number:"
+      title="Últimos latidos"
+      [history]="relojes.historial()"
+      stateName="Latido:"
     ></app-event-history>
   </div>
 

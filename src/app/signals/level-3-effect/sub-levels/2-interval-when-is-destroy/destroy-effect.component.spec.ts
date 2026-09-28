@@ -1,11 +1,16 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
+import { By } from '@angular/platform-browser';
 
 import { DestroyEffectComponent } from './destroy-effect.component';
+import { DestroyBoxComponent } from './destroy-box/destroy-box.component';
 
 describe('DestroyEffectComponent', () => {
   let component: DestroyEffectComponent;
   let fixture: ComponentFixture<DestroyEffectComponent>;
+
+  const hijo = (): DestroyBoxComponent =>
+    fixture.debugElement.query(By.directive(DestroyBoxComponent)).componentInstance;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
@@ -18,18 +23,11 @@ describe('DestroyEffectComponent', () => {
     fixture.detectChanges();
   });
 
-  afterEach(() => {
-    // el componente demuestra un leak: limpiamos a mano para no dejar timers vivos
-    clearInterval(component.intervalSave);
-  });
+  // Destruir el padre apaga lo que el hijo haya dejado latiendo: ningún test deja timers vivos.
+  afterEach(() => fixture.destroy());
 
   it('should create', () => {
     expect(component).toBeTruthy();
-  });
-
-  it('getFormattedTime formatea HH:mm:ss con padding', () => {
-    const date = new Date(2024, 0, 1, 9, 5, 7);
-    expect(component.getFormattedTime(date)).toBe('09:05:07');
   });
 
   it('setAutoRefresh actualiza el signal autoRefresh', () => {
@@ -37,27 +35,47 @@ describe('DestroyEffectComponent', () => {
     expect(component.autoRefresh()).toBeTrue();
   });
 
-  it('destroy oculta el componente pero NO limpia el intervalo (leak intencional)', () => {
+  it('destroy oculta al hijo pero su intervalo sigue latiendo (leak intencional)', () => {
     jasmine.clock().install();
     try {
-      component.setAutoRefresh(true);
-      fixture.detectChanges(); // corre el effect -> programa el intervalo
+      hijo().toggleAutoRefresh();
+      fixture.detectChanges(); // corre el effect del hijo -> programa el intervalo
       jasmine.clock().tick(1000);
-      const afterFirst = component.appEventHistory().length;
-      expect(afterFirst).toBeGreaterThanOrEqual(1);
+      expect(component.relojes.latidos()).toBe(1);
 
       component.destroy();
-      expect(component.showComponent).toBeFalse();
+      fixture.detectChanges();
+      expect(component.showComponent()).toBeFalse();
+      expect(fixture.debugElement.query(By.directive(DestroyBoxComponent))).toBeNull();
 
-      // el intervalo sigue vivo: el historial sigue creciendo
-      jasmine.clock().tick(1000);
-      expect(component.appEventHistory().length).toBeGreaterThan(afterFirst);
+      // el hijo ya no existe y su intervalo sigue: los latidos siguen subiendo
+      jasmine.clock().tick(2000);
+      expect(component.relojes.latidos()).toBe(3);
     } finally {
       jasmine.clock().uninstall();
     }
   });
 
-  it('lines resalta el comentario del leak (no limpiamos el intervalo)', () => {
+  it('al salir de la pantalla el padre apaga el intervalo que el hijo filtró', () => {
+    jasmine.clock().install();
+    try {
+      hijo().toggleAutoRefresh();
+      fixture.detectChanges();
+      component.destroy();
+      fixture.detectChanges();
+      jasmine.clock().tick(1000);
+      const alIrse = component.relojes.latidos();
+      expect(alIrse).toBe(1);
+
+      fixture.destroy();
+      jasmine.clock().tick(5000);
+      expect(component.relojes.latidos()).toBe(alIrse);
+    } finally {
+      jasmine.clock().uninstall();
+    }
+  });
+
+  it('lines resalta el comentario del leak (la rama else no corre al destruir)', () => {
     const leakLine = component
       .lines()
       .find((l) => typeof l.line === 'string' && l.line.includes('leak'));
