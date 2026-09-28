@@ -197,6 +197,11 @@ export const signalsRoutesTree: RouteItem[] = [
 
 export const routes: Routes = [
   { path: 'practica/carrito', component: CartExampleComponent },
+  {
+    path: 'studio',
+    loadComponent: () => import('./studio/studio.component').then((m) => m.StudioComponent),
+    title: 'Estudio de Cinemática · Angular Signals',
+  },
   // La vista integrada (recorrido molécula) ES la raíz `/`: es la entrada.
   { path: '', component: IntegradaVistaComponent },
   // Cualquier URL desconocida (incluidos bookmarks viejos como /signals/level/..., /lab o /poc)
