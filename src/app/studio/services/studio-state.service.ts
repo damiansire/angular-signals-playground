@@ -1,4 +1,6 @@
-import { Injectable, computed, signal } from '@angular/core';
+import { DestroyRef, Injectable, computed, inject, signal } from '@angular/core';
+
+import { sonido } from '../../libs/sonido';
 import {
   GUION,
   anclajesDe,
@@ -31,15 +33,19 @@ export class StudioStateService {
 
   // Estado del Guion
   readonly guion = signal<readonly LineaGuion[]>(GUION);
+  /** Solo prende o apaga las voces (blips) de la previsualización: ya no cambia el ritmo. */
   readonly conVoz = signal<boolean>(true);
-  readonly conSonido = signal<boolean>(true);
+  /** El sonido es la preferencia GLOBAL: silenciar acá silencia el juego, y al revés. */
+  readonly conSonido = signal<boolean>(sonido().activo());
 
   // Reloj y Anclajes derivados automáticamente
   readonly reloj = computed<readonly LineaEnReloj[]>(() => {
     try {
-      return armarReloj(this.guion(), this.conVoz());
+      // A ritmo de lectura, igual que el prólogo en el juego: si el Estudio midiera otro reloj,
+      // lo que se ajusta acá no sería lo que después se ve.
+      return armarReloj(this.guion());
     } catch {
-      return armarReloj(GUION, this.conVoz());
+      return armarReloj(GUION);
     }
   });
 
@@ -47,7 +53,7 @@ export class StudioStateService {
     try {
       return anclajesDe(this.reloj());
     } catch {
-      return anclajesDe(armarReloj(GUION, this.conVoz()));
+      return anclajesDe(armarReloj(GUION));
     }
   });
 
@@ -76,6 +82,8 @@ export class StudioStateService {
 
   constructor() {
     this.cargarDeLocalStorage();
+    const soltar = sonido().alCambiar((activo) => this.conSonido.set(activo));
+    inject(DestroyRef).onDestroy(soltar);
   }
 
   /* ── Control de Reproducción ────────────────────────────────────────────── */
@@ -111,7 +119,7 @@ export class StudioStateService {
   }
 
   setConSonido(v: boolean): void {
-    this.conSonido.set(v);
+    this.conSonido.set(sonido().alternar(v));
   }
 
   selectLine(id: string | null): void {

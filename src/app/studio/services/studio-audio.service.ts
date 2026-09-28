@@ -1,12 +1,24 @@
 import { Injectable, inject } from '@angular/core';
 import { StudioStateService } from './studio-state.service';
 import { Anclajes, LineaEnReloj } from '../../integrada-vista/prologo-guion';
+import { sonido } from '../../libs/sonido';
+
+/** Lo que el Estudio sintetiza por su cuenta, colgado de la salida común del director. */
+interface RedDeAudio {
+  readonly master: GainNode;
+  readonly zumbido: OscillatorNode;
+  readonly zumbidoGain: GainNode;
+  readonly filtro: BiquadFilterNode;
+}
 
 /**
- * Motor de audio y síntesis sonora para el Estudio de Cinemáticas.
- * Provee:
- * 1. Síntesis de voz (SpeechSynthesis) con detección de voces en español y modulación de tono por personaje.
- * 2. Sintetizador Web Audio en tiempo real (zumbido de la anomalía, ráfagas de ruido para saltos y choques, acordes armónicos).
+ * Motor de audio del Estudio de Cinemáticas. Suena por el mismo camino que el prólogo real, el
+ * director de sonido de la app (`libs/sonido.ts`), porque el Estudio tiene que dejar oír lo que va a
+ * oír el jugador y no lo que tenga instalado la máquina de quien edita:
+ * 1. Las voces son los blips por personaje del director, no la voz del sistema, que dependía de
+ *    que hubiera voces en español instaladas.
+ * 2. El zumbido de la anomalía, las ráfagas de ruido del salto y del choque y el acorde final se
+ *    sintetizan sobre la salida común, sin un `AudioContext` propio.
  */
 @Injectable({
   providedIn: 'root',
@@ -14,55 +26,46 @@ import { Anclajes, LineaEnReloj } from '../../integrada-vista/prologo-guion';
 export class StudioAudioService {
   private readonly state = inject(StudioStateService);
 
-  private ac: AudioContext | null = null;
-  private master: GainNode | null = null;
-  private zumbido: OscillatorNode | null = null;
-  private zumbidoGain: GainNode | null = null;
-  private filtro: BiquadFilterNode | null = null;
+  private red: RedDeAudio | null = null;
 
   private dichas = new Set<string>();
   private timers = new Set<number>();
-  private vocesEs: SpeechSynthesisVoice[] = [];
 
-  constructor() {
-    this.cargarVoces();
-    if (typeof window !== 'undefined' && window.speechSynthesis) {
-      window.speechSynthesis.onvoiceschanged = () => this.cargarVoces();
-    }
+  /** Lo llama el gesto de reproducir: destraba el audio compartido y arma la red del Estudio. */
+  asegurarAudio(): void {
+    sonido().desbloquear();
+    this.redLista();
   }
 
-  /** Inicializa el AudioContext en el primer gesto de reproducción del usuario. */
-  asegurarAudio(): void {
-    if (this.ac) {
-      if (this.ac.state === 'suspended') {
-        void this.ac.resume();
-      }
-      return;
-    }
-    const Ctor =
-      window.AudioContext ??
-      (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
-    if (!Ctor) return;
-
-    this.ac = new Ctor();
-    this.master = this.ac.createGain();
-    this.master.gain.value = 0.45;
-    this.master.connect(this.ac.destination);
+  /**
+   * La red del Estudio sobre la salida común, armada la primera vez que hay dónde sonar. `null` sin
+   * Web Audio, antes del primer gesto o con el sonido de la app apagado: el Estudio sigue andando.
+   */
+  private redLista(): RedDeAudio | null {
+    const salida = sonido().salida();
+    if (!salida) return null;
+    if (this.red) return this.red;
+    const ac = salida.ctx;
+    const master = ac.createGain();
+    master.gain.value = 0.45;
+    master.connect(salida.salida);
 
     // Zumbido grave de la anomalía
-    this.zumbido = this.ac.createOscillator();
-    this.zumbido.type = 'sawtooth';
-    this.zumbido.frequency.value = 46;
+    const zumbido = ac.createOscillator();
+    zumbido.type = 'sawtooth';
+    zumbido.frequency.value = 46;
 
-    this.filtro = this.ac.createBiquadFilter();
-    this.filtro.type = 'lowpass';
-    this.filtro.frequency.value = 120;
+    const filtro = ac.createBiquadFilter();
+    filtro.type = 'lowpass';
+    filtro.frequency.value = 120;
 
-    this.zumbidoGain = this.ac.createGain();
-    this.zumbidoGain.gain.value = 0;
+    const zumbidoGain = ac.createGain();
+    zumbidoGain.gain.value = 0;
 
-    this.zumbido.connect(this.filtro).connect(this.zumbidoGain).connect(this.master);
-    this.zumbido.start();
+    zumbido.connect(filtro).connect(zumbidoGain).connect(master);
+    zumbido.start();
+    this.red = { master, zumbido, zumbidoGain, filtro };
+    return this.red;
   }
 
   /** Resetea los hitos disparados al pausar o hacer seek */
@@ -80,9 +83,7 @@ export class StudioAudioService {
       }
     }
 
-    if (window.speechSynthesis && speechSynthesis.speaking) {
-      speechSynthesis.cancel();
-    }
+    sonido().callar();
     this.limpiarTimers();
   }
 
@@ -94,7 +95,8 @@ export class StudioAudioService {
   }
 
   private actualizarZumbido(t: number, T: Anclajes): void {
-    if (!this.ac || !this.state.conSonido() || !this.zumbidoGain || !this.filtro) return;
+    const red = this.redLista();
+    if (!red || !this.state.conSonido()) return;
 
     const clamp01 = (v: number) => Math.max(0, Math.min(1, v));
     const fondo = clamp01((t - T.orden) / 3400);
@@ -102,12 +104,13 @@ export class StudioAudioService {
     const dentro = t > T.zoom && t < T.orden ? 0.5 : 0;
 
     const ganancia = t < T.zoom ? cerca * 0.16 : dentro * 0.1 * (1 - fondo);
-    this.zumbidoGain.gain.setValueAtTime(ganancia, this.ac.currentTime);
-    this.filtro.frequency.setValueAtTime(110 + cerca * 700, this.ac.currentTime);
+    const ahora = red.master.context.currentTime;
+    red.zumbidoGain.gain.setValueAtTime(ganancia, ahora);
+    red.filtro.frequency.setValueAtTime(110 + cerca * 700, ahora);
   }
 
   private verificarEfectosSonoros(t: number, T: Anclajes): void {
-    if (!this.ac || !this.state.conSonido()) return;
+    if (!this.redLista() || !this.state.conSonido()) return;
 
     if (!this.dichas.has('salto') && t >= T.zoom) {
       this.dichas.add('salto');
@@ -130,42 +133,46 @@ export class StudioAudioService {
   }
 
   private pip(freq: number, dur: number, tipo: OscillatorType = 'sine', vol = 0.12): void {
-    if (!this.ac || !this.master || !this.state.conSonido()) return;
-    const o = this.ac.createOscillator();
-    const gg = this.ac.createGain();
+    const red = this.redLista();
+    if (!red || !this.state.conSonido()) return;
+    const ac = red.master.context;
+    const o = ac.createOscillator();
+    const gg = ac.createGain();
     o.type = tipo;
     o.frequency.value = freq;
-    const n = this.ac.currentTime;
+    const n = ac.currentTime;
     gg.gain.setValueAtTime(0, n);
     gg.gain.linearRampToValueAtTime(vol, n + 0.012);
     gg.gain.exponentialRampToValueAtTime(0.0001, n + dur);
-    o.connect(gg).connect(this.master);
+    o.connect(gg).connect(red.master);
     o.start(n);
     o.stop(n + dur + 0.05);
   }
 
   private ruido(dur: number, desde: number, hasta: number, vol: number): void {
-    if (!this.ac || !this.master || !this.state.conSonido()) return;
-    const largo = Math.floor(this.ac.sampleRate * dur);
-    const buf = this.ac.createBuffer(1, largo, this.ac.sampleRate);
+    const red = this.redLista();
+    if (!red || !this.state.conSonido()) return;
+    const ac = red.master.context;
+    const largo = Math.floor(ac.sampleRate * dur);
+    const buf = ac.createBuffer(1, largo, ac.sampleRate);
     const dat = buf.getChannelData(0);
     for (let i = 0; i < largo; i++) dat[i] = (Math.random() * 2 - 1) * (1 - i / largo);
 
-    const src = this.ac.createBufferSource();
+    const src = ac.createBufferSource();
     src.buffer = buf;
-    const bp = this.ac.createBiquadFilter();
+    const bp = ac.createBiquadFilter();
     bp.type = 'bandpass';
-    const n = this.ac.currentTime;
+    const n = ac.currentTime;
     bp.frequency.setValueAtTime(desde, n);
     bp.frequency.exponentialRampToValueAtTime(hasta, n + dur);
-    const gg = this.ac.createGain();
+    const gg = ac.createGain();
     gg.gain.value = vol;
-    src.connect(bp).connect(gg).connect(this.master);
+    src.connect(bp).connect(gg).connect(red.master);
     src.start(n);
   }
 
   private verificarVoces(t: number, reloj: readonly LineaEnReloj[]): void {
-    if (!this.state.conVoz() || !window.speechSynthesis) return;
+    if (!this.state.conVoz()) return;
 
     for (const d of reloj) {
       if (t >= d.t0 && t < d.t1 && !this.dichas.has(d.id)) {
@@ -175,36 +182,12 @@ export class StudioAudioService {
     }
   }
 
+  /**
+   * La línea con la voz de su personaje, repartida en su ventana en pantalla. Se divide por la
+   * velocidad igual que en el prólogo: a ×2 la línea dura la mitad y la voz tiene que caber igual.
+   */
   hablar(d: LineaEnReloj): void {
-    if (!window.speechSynthesis) return;
-    const textoLimpio = d.txt.replace(/\n/g, ' ');
-    const u = new SpeechSynthesisUtterance(textoLimpio);
-
-    if (this.vocesEs.length > 0) {
-      u.voice = this.vocesEs[0];
-    }
-    u.lang = 'es-ES';
-    u.rate = this.state.velocidad();
-
-    if (d.quien === 'cap') {
-      u.pitch = 0.85;
-    } else if (d.quien === 'naveA') {
-      u.pitch = 1.05;
-    } else if (d.quien === 'naveB') {
-      u.pitch = 0.95;
-    } else if (d.quien === 'nave4') {
-      u.pitch = 1.25;
-    } else if (d.quien === 'mascota') {
-      u.pitch = 1.15;
-    }
-
-    speechSynthesis.speak(u);
-  }
-
-  private cargarVoces(): void {
-    if (!window.speechSynthesis) return;
-    const todas = speechSynthesis.getVoices();
-    this.vocesEs = todas.filter((v) => /^es/i.test(v.lang));
+    sonido().hablar(d.quien, d.txt, (d.t1 - d.t0) / this.state.velocidad());
   }
 
   private luego(fn: () => void, ms: number): void {
@@ -222,25 +205,28 @@ export class StudioAudioService {
     this.timers.clear();
   }
 
+  /**
+   * El contexto es de toda la app y no se suspende: se callan las voces agendadas y el zumbido, que
+   * es continuo y seguiría sonando sobre el cuadro quieto.
+   */
   pausar(): void {
-    if (window.speechSynthesis && speechSynthesis.speaking) {
-      speechSynthesis.cancel();
-    }
-    if (this.zumbidoGain && this.ac) {
-      this.zumbidoGain.gain.setValueAtTime(0, this.ac.currentTime);
+    sonido().callar();
+    if (this.red) {
+      this.red.zumbidoGain.gain.setValueAtTime(0, this.red.master.context.currentTime);
     }
     this.limpiarTimers();
   }
 
+  /**
+   * Suelta la red del Estudio. El contexto es compartido y NO se cierra: se corta el zumbido y se
+   * desconecta todo de la salida común, así volver al Estudio arma una red nueva.
+   */
   destruir(): void {
     this.pausar();
-    if (this.ac) {
-      try {
-        void this.ac.close();
-      } catch {
-        // Ignorar si ya estaba cerrado
-      }
-      this.ac = null;
-    }
+    if (!this.red) return;
+    this.red.zumbido.stop();
+    this.red.zumbido.disconnect();
+    this.red.master.disconnect();
+    this.red = null;
   }
 }

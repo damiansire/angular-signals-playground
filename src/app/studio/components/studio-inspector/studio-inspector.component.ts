@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@a
 import { FormsModule } from '@angular/forms';
 import { StudioStateService } from '../../services/studio-state.service';
 import { Hablante, LineaEnReloj } from '../../../integrada-vista/prologo-guion';
+import { sonido } from '../../../libs/sonido';
 
 interface PersonajeOpcion {
   id: Hablante;
@@ -831,14 +832,15 @@ export class StudioInspectorComponent {
     this.state.actualizarLinea(line.id, { [campo]: isNaN(num) || num === 0 ? undefined : num });
   }
 
+  /**
+   * La línea con la misma voz que va a tener en el prólogo: los blips del personaje repartidos en su
+   * ventana. El click es el gesto que el navegador exige para abrir el audio, y lo que estuviera
+   * sonando se corta para que probar dos líneas seguidas no las encime.
+   */
   probarVoz(line: LineaEnReloj): void {
-    if (!window.speechSynthesis) return;
-    speechSynthesis.cancel();
-    const u = new SpeechSynthesisUtterance(line.txt.replace(/\n/g, ' '));
-    u.lang = 'es-ES';
-    if (line.quien === 'cap') u.pitch = 0.85;
-    else if (line.quien === 'nave4') u.pitch = 1.25;
-    else if (line.quien === 'mascota') u.pitch = 1.15;
-    speechSynthesis.speak(u);
+    const s = sonido();
+    s.desbloquear();
+    s.callar();
+    s.hablar(line.quien, line.txt, line.t1 - line.t0);
   }
 }
