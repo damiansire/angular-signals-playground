@@ -15,6 +15,35 @@ sub-levels orbit the card, each one embedding the _real_ demo component of that
 lesson. Deep-links are shareable: `?nivel=1&sub-nivel=2` reopens exactly where
 you were.
 
+## Played like a small RPG
+
+The tour has a story. A crew of RxJS ships is dragged out of "Zone.js space" into a world of
+molecules where none of their operators work, and a guide (the Angular mascot) offers to teach
+them the rules. Each concept is a chapter of that trip:
+
+- **A cinematic per chapter.** The first time you stop at a concept, a short cutscene sets up
+  the rule of that chapter as an incident of the crew (portrait and name of who speaks, one line
+  at a time). `Enter` advances, `Esc` skips. The finale lights up only the chapters you actually
+  established, so unfinished ones stay visible as debt.
+- **Challenges you solve by touching the code.** Every sub-level ends with a system whose code has
+  a movable part and a reading that answers. The reading stays neutral until there is enough
+  evidence, turns red if the system is broken and green once you fix it. No "well done" banner:
+  the numbers are the answer.
+- **Saved progress.** What you establish is stored in your browser (`localStorage`,
+  `signals-cuaderno`): reload and the molecule keeps its bonds. Returning players skip the
+  prologue.
+- **The logbook** ("Bitácora", top bar): the chapters you established, the rule of the world you
+  wrote in each one, and replays of the cinematics and the prologue.
+- **Sound that works on any machine.** Everything is synthesized with one Web Audio context
+  (characters "talk" with RPG-style blips); without audio support it simply stays silent. One
+  switch mutes everything.
+- **Screening room.** `/cine/6` plays a chapter's cinematic directly, and `/cine/6?cuadro=<beat>`
+  freezes one frame, useful to review scenes.
+
+All motion is CSS (springs solved by hand and fed to `linear()`, View Transitions for the iris,
+lazy-loaded scenes): no perpetual `requestAnimationFrame`, no expensive filters on moving things,
+and everything freezes when the tab is hidden or honors `prefers-reduced-motion`.
+
 Built with **Angular 22** (standalone components, `OnPush` everywhere, signal-first
 APIs) and styled with **Tailwind CSS**.
 
@@ -41,7 +70,7 @@ The content is organized as progressive **levels**, each with focused sub-levels
 | **8**  | Queries & interop                 | `viewChild()`/`viewChildren()` and `contentChild()`/`contentChildren()` as signals, `toSignal()`/`toObservable()`, `untracked()` |
 | **9**  | `afterRenderEffect` & `onCleanup` | Reading/measuring the DOM after render, and cleaning up effects without leaks                                                    |
 | **10** | Debounced signals                 | A debounced value, two ways: RxJS (`debounceTime`) and by hand (`effect` + `onCleanup`)                                          |
-| **11** | Capstone: zoneless                | Why signals + OnPush let Angular drop Zone.js (`provideZonelessChangeDetection()`)                                               |
+| **11** | Capstone: zoneless                | Why signals + OnPush let Angular drop Zone.js (the default since v21; `provideZoneChangeDetection()` brings it back)             |
 
 ## Getting started
 
@@ -87,13 +116,16 @@ whose CI run went green.
 ```
 src/app/
 ├── integrada-vista/  # The default entry (/): the "reactive molecule" tour of the 12 concepts
+│   ├── cinematicas/  # Chapter cinematics: player, scripts and one lazy scene per chapter
+│   └── bitacora/     # The logbook: established chapters, their rules, replays
 ├── signals/          # The learning levels (0–11) and their sub-levels
 ├── practice/         # Applied examples that use what you learned (/practica/*)
 ├── components/       # Feature components (histories, trees, forms…)
 ├── components-atom/  # Atomic UI building blocks (code block, concept card, title…)
 ├── components-draw/  # Drawing/visualization components (variable boxes, node tree)
 ├── layouts/          # Reusable page layouts (two-column, column + code)
-├── libs/             # Framework-agnostic helpers (e.g. the HTML code parser)
+├── libs/             # Framework-agnostic helpers (HTML parser, saved game, sound, springs)
+├── studio/           # Author tool to edit the prologue script (/studio, dev only link)
 ├── interfaces/       # Shared TypeScript types
 └── app.routes.ts     # Route tree that powers the leveled navigation
 ```
