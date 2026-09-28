@@ -1,0 +1,84 @@
+<div class="bita__velo" (click)="cerrar.emit()" aria-hidden="true"></div>
+
+<section class="bita">
+  <header class="bita__cabeza">
+    <p class="bita__kicker">Bitácora de a bordo</p>
+    <h2 class="bita__titulo" id="bitacora-titulo">
+      <b>{{ cuenta() }}</b> de {{ capitulos().length }} establecidos
+    </h2>
+    <button class="bita__cerrar" type="button" (click)="cerrar.emit()" aria-label="Cerrar bitácora">
+      <span aria-hidden="true">×</span>
+    </button>
+  </header>
+
+  <ol class="bita__lista">
+    @for (f of filas(); track f.numero) {
+      <li
+        class="bita__cap"
+        [class.bita__cap--hecho]="f.establecido"
+        [style.--acento]="f.acento"
+        [style.--i]="$index"
+      >
+        <span class="bita__num" aria-hidden="true">{{ f.numero }}</span>
+        <div class="bita__cuerpo">
+          <p class="bita__nombre">
+            {{ f.nombre }} <span class="bita__tag">· {{ f.titulo }}</span>
+          </p>
+          @if (f.establecido && f.ley) {
+            <p class="bita__ley">{{ f.ley }}</p>
+          } @else {
+            <p class="bita__ley bita__ley--pendiente">Sin establecer</p>
+          }
+          <p class="bita__pips" [attr.aria-label]="f.sellados + ' de ' + f.subs + ' sub-niveles'">
+            @for (p of f.pips; track $index) {
+              <i [class.on]="p" aria-hidden="true"></i>
+            }
+          </p>
+        </div>
+        <button
+          class="bita__ver"
+          type="button"
+          [disabled]="!f.vista"
+          [attr.aria-label]="'Ver la cinemática del capítulo ' + f.numero"
+          [title]="f.vista ? 'Ver de nuevo' : 'Todavía no llegaste'"
+          (click)="verCinematica.emit(f.numero)"
+        >
+          <span aria-hidden="true">▶</span>
+        </button>
+      </li>
+    }
+    @if (finalVisto()) {
+      <li class="bita__cap bita__cap--hecho bita__cap--final" [style.--i]="capitulos().length">
+        <span class="bita__num" aria-hidden="true">★</span>
+        <div class="bita__cuerpo">
+          <p class="bita__nombre">Final</p>
+          @if (leyFinal(); as ley) {
+            <p class="bita__ley">{{ ley }}</p>
+          }
+        </div>
+        <button
+          class="bita__ver"
+          type="button"
+          aria-label="Ver el final"
+          (click)="verCinematica.emit(12)"
+        >
+          <span aria-hidden="true">▶</span>
+        </button>
+      </li>
+    }
+  </ol>
+
+  <footer class="bita__pie">
+    @if (partida().prologo) {
+      <button class="bita__accion" type="button" (click)="verPrologo.emit()">▶ Prólogo</button>
+    }
+    <button
+      class="bita__accion bita__accion--borrar"
+      type="button"
+      [class.bita__accion--confirmar]="confirmando()"
+      (click)="empezarDeCero()"
+    >
+      {{ confirmando() ? '¿Seguro? Se borra todo' : 'Empezar de cero' }}
+    </button>
+  </footer>
+</section>
