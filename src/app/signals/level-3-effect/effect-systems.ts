@@ -12,8 +12,9 @@ const LECTURA = 'lectura';
  * 3/1 · un effect solo reacciona a lo que LEE adentro de su función.
  *
  * El sistema arranca con la lectura afuera: apretás `count +1` y el log no se mueve. Mover la
- * lectura adentro crea la dependencia, así que el effect corre y el log se pone al día solo. Nadie
- * avisa que funcionó: los dos números lado a lado lo dicen.
+ * lectura adentro es otro código, así que arranca otra corrida desde cero: recién ahí cada
+ * `count +1` hace correr al effect y el log lo sigue. Nadie avisa que funcionó: los dos números
+ * lado a lado lo dicen.
  */
 export const EFFECT_READS_SYSTEM: ManipulableChallenge = {
   knobs: [{ id: LECTURA, positions: 2, label: 'mover la lectura adentro o afuera del effect' }],
@@ -130,11 +131,16 @@ export const EFFECT_CLEANUP_SYSTEM: ManipulableChallenge = {
         { text: '});' },
       ];
     }
+    // El intervalo va adentro de un effect como en las otras dos posiciones: suelto a nivel
+    // componente corre una sola vez y "prender y apagar" no lo re-ejecutaría, así que la lectura
+    // que suma relojes no tendría de dónde salir. DestroyRef se inyecta afuera porque inject() solo
+    // vale en el contexto de construcción, no adentro del effect.
     return [
-      { text: 'const id = setInterval(tick, 1000);' },
-      { text: 'inject(DestroyRef).onDestroy(' },
-      { text: '  () => clearInterval(id),', knob: LIMPIEZA },
-      { text: ');' },
+      { text: 'const ref = inject(DestroyRef);' },
+      { text: 'effect(() => {' },
+      { text: '  const id = setInterval(tick, 1000);' },
+      { text: '  ref.onDestroy(() => clearInterval(id));', knob: LIMPIEZA },
+      { text: '});' },
     ];
   },
 
