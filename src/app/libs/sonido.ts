@@ -185,6 +185,18 @@ export interface EntornoSonido {
 /** Más voces a la vez que esto se vuelve barro y cuesta CPU en máquinas chicas. */
 const MAX_VIVAS = 24;
 
+/**
+ * Volumen de la salida común. Quien sintetiza lo suyo sobre `salida()` compensa con este número
+ * para sonar igual que antes de pasar por acá (la intro lo usa).
+ */
+export const VOLUMEN_COMUN = 0.7;
+
+/**
+ * Gestos con los que se destraba el audio. `pointerdown` y `keydown` alcanzan en escritorio, pero
+ * Safari en iOS solo acepta abrir el contexto dentro de un `click` o un `touchend`.
+ */
+const GESTOS = ['pointerdown', 'keydown', 'click', 'touchend'] as const;
+
 function contextoDelNavegador(): AudioContext | null {
   if (typeof window === 'undefined') return null;
   const Ctor =
@@ -266,7 +278,7 @@ export function crearSonido(entorno: EntornoSonido = {}): Sonido {
         const compresor = ctx.createDynamicsCompressor();
         compresor.connect(ctx.destination);
         salidaComun = ctx.createGain();
-        salidaComun.gain.value = encendido ? 0.7 : 0;
+        salidaComun.gain.value = encendido ? VOLUMEN_COMUN : 0;
         salidaComun.connect(compresor);
       }
       if (ctx.state === 'suspended' && documento?.visibilityState !== 'hidden') {
@@ -285,8 +297,9 @@ export function crearSonido(entorno: EntornoSonido = {}): Sonido {
       else if (encendido) void ctx.resume().catch(() => undefined);
     });
   };
-  documento?.addEventListener('pointerdown', alGesto, { capture: true, passive: true });
-  documento?.addEventListener('keydown', alGesto, { capture: true });
+  for (const gesto of GESTOS) {
+    documento?.addEventListener(gesto, alGesto, { capture: true, passive: true });
+  }
   documento?.addEventListener('visibilitychange', alCambiarVisibilidad);
 
   function callar(): void {
@@ -312,7 +325,7 @@ export function crearSonido(entorno: EntornoSonido = {}): Sonido {
         // Sin almacenamiento la preferencia dura lo que dura la pestaña, que ya es algo.
       }
       aSalvo(() => {
-        if (salidaComun) salidaComun.gain.value = encendido ? 0.7 : 0;
+        if (salidaComun) salidaComun.gain.value = encendido ? VOLUMEN_COMUN : 0;
       });
       if (!encendido) callar();
       for (const fn of oyentes) fn(encendido);
@@ -365,8 +378,7 @@ export function crearSonido(entorno: EntornoSonido = {}): Sonido {
     destruir() {
       callar();
       oyentes.clear();
-      documento?.removeEventListener('pointerdown', alGesto, { capture: true });
-      documento?.removeEventListener('keydown', alGesto, { capture: true });
+      for (const gesto of GESTOS) documento?.removeEventListener(gesto, alGesto, { capture: true });
       documento?.removeEventListener('visibilitychange', alCambiarVisibilidad);
       aSalvo(() => void ctx?.close().catch(() => undefined));
       ctx = null;
