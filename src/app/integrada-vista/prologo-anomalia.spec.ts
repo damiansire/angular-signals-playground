@@ -1,4 +1,60 @@
+import { sonido } from '../libs/sonido';
 import { initPrologoAnomalia } from './prologo-anomalia';
+import { GUION } from './prologo-guion';
+
+/** Un nodo de audio que acepta todo lo que el prólogo le hace y anota lo que importa. */
+function nodoFalso(contexto: unknown) {
+  const parametro = () => ({
+    value: 0,
+    setValueAtTime: () => undefined,
+    linearRampToValueAtTime: () => undefined,
+    exponentialRampToValueAtTime: () => undefined,
+  });
+  return {
+    context: contexto,
+    type: '',
+    gain: parametro(),
+    frequency: parametro(),
+    conectadoA: [] as unknown[],
+    connect(destino: unknown) {
+      this.conectadoA.push(destino);
+      return destino;
+    },
+    disconnect: jasmine.createSpy('disconnect'),
+    start: jasmine.createSpy('start'),
+    stop: jasmine.createSpy('stop'),
+  };
+}
+
+/** Lo justo de un AudioContext compartido para ver qué arma el prólogo encima y qué suelta. */
+class ContextoFalso {
+  currentTime = 0;
+  sampleRate = 44100;
+  osciladores: ReturnType<typeof nodoFalso>[] = [];
+  ganancias: ReturnType<typeof nodoFalso>[] = [];
+  close = jasmine.createSpy('close');
+  createGain() {
+    const n = nodoFalso(this);
+    this.ganancias.push(n);
+    return n;
+  }
+  createOscillator() {
+    const n = nodoFalso(this);
+    this.osciladores.push(n);
+    return n;
+  }
+  createBiquadFilter() {
+    return nodoFalso(this);
+  }
+}
+
+const unCuadro = (): Promise<void> => new Promise((r) => requestAnimationFrame(() => r()));
+
+/** Espera a que pase algo que depende del reloj de la escena, sin dormir de más ni de menos. */
+async function hasta(condicion: () => boolean, tope = 3000): Promise<void> {
+  const inicio = performance.now();
+  while (!condicion() && performance.now() - inicio < tope) await unCuadro();
+}
 
 /**
  * El prólogo es el paso intermedio entre elegir el clima y que arranque la construcción de Tusi.
@@ -33,28 +89,145 @@ describe('initPrologoAnomalia', () => {
 
   const cerrar: (() => void)[] = [];
   const hosts: HTMLElement[] = [];
+  /** La preferencia de sonido es global y persiste entre tests: cada uno la deja como la encontró. */
+  let sonidoAlEntrar = true;
+  let salida: jasmine.Spy;
+
+  beforeEach(() => {
+    sonidoAlEntrar = sonido().activo();
+    // Sin gesto real no hay contexto que abrir, y sin contexto no hay salida: así ningún test
+    // depende del hardware de audio. El que necesita una salida le pasa una falsa.
+    spyOn(sonido(), 'desbloquear');
+    salida = spyOn(sonido(), 'salida').and.returnValue(null);
+  });
 
   afterEach(() => {
     cerrar.splice(0).forEach((fn) => fn());
     hosts.splice(0).forEach((h) => h.remove());
+    if (sonido().activo() !== sonidoAlEntrar) sonido().alternar(sonidoAlEntrar);
   });
 
   function arrancar() {
     const host = hostCompleto();
     hosts.push(host);
     let terminado = 0;
-    const dispose = initPrologoAnomalia(host, {
-      alTerminar: () => (terminado += 1),
-      conSonido: false,
-    });
+    const dispose = initPrologoAnomalia(host, { alTerminar: () => (terminado += 1) });
     cerrar.push(dispose);
     return {
       host,
       skip: host.querySelector<HTMLButtonElement>('.prologo__skip')!,
       raiz: host.querySelector<HTMLElement>('.prologo')!,
+      voces: host.querySelector<HTMLButtonElement>('.prologo__voice')!,
+      sonido: host.querySelector<HTMLButtonElement>('.prologo__sound')!,
+      velocidad: host.querySelector<HTMLButtonElement>('.prologo__speed')!,
       veces: () => terminado,
+      cerrar: dispose,
     };
   }
+
+  describe('sonido', () => {
+    it('sin audio disponible corre igual, mudo, y termina sin tirar', () => {
+      const p = arrancar();
+
+      expect(p.raiz.hidden).toBeFalse();
+      expect(() => p.skip.click()).not.toThrow();
+      expect(p.veces()).toBe(1);
+    });
+
+    it('sintetiza sobre la salida común y nunca cierra el contexto compartido', async () => {
+      const ctx = new ContextoFalso();
+      const comun = nodoFalso(ctx);
+      salida.and.returnValue({
+        ctx: ctx as unknown as AudioContext,
+        salida: comun as unknown as AudioNode,
+      });
+      const p = arrancar();
+      await hasta(() => ctx.osciladores.length > 0);
+
+      const [zumbido] = ctx.osciladores;
+      expect(zumbido).withContext('armó el zumbido').toBeDefined();
+      expect(ctx.ganancias.some((g) => g.conectadoA.includes(comun)))
+        .withContext('cuelga de la salida del director')
+        .toBeTrue();
+
+      p.skip.click();
+      expect(ctx.close).withContext('al saltar').not.toHaveBeenCalled();
+
+      p.cerrar();
+      expect(zumbido.stop).toHaveBeenCalled();
+      expect(zumbido.disconnect).toHaveBeenCalled();
+      expect(ctx.close).withContext('al cerrar').not.toHaveBeenCalled();
+    });
+
+    it('el botón de sonido cambia la preferencia GLOBAL y se repinta si cambia desde otro lado', () => {
+      const p = arrancar();
+      const antes = sonido().activo();
+
+      p.sonido.click();
+      expect(sonido().activo()).toBe(!antes);
+      expect(p.sonido.getAttribute('aria-pressed')).toBe(String(!antes));
+
+      // Como si lo hubiera silenciado el toggle del intro.
+      sonido().alternar(false);
+      expect(p.sonido.textContent).toBe('Sonido: no');
+      sonido().alternar(true);
+      expect(p.sonido.textContent).toBe('Sonido: sí');
+    });
+
+    it('cerrado, deja de escuchar la preferencia', () => {
+      const p = arrancar();
+      sonido().alternar(true);
+      p.cerrar();
+
+      sonido().alternar(false);
+
+      expect(p.sonido.textContent).toBe('Sonido: sí');
+    });
+  });
+
+  describe('voces', () => {
+    /** A ×3 la primera línea entra en unos 300 ms en vez de 800. */
+    function aTodaVelocidad(p: ReturnType<typeof arrancar>): void {
+      p.velocidad.click();
+      p.velocidad.click();
+      p.velocidad.click();
+    }
+
+    it('arrancan prendidas y el botón habla de voces, no de si el sistema tiene una', () => {
+      const p = arrancar();
+      expect(p.voces.textContent).toBe('Voces: sí');
+      expect(p.voces.getAttribute('aria-pressed')).toBe('true');
+      expect(p.voces.disabled).toBeFalse();
+    });
+
+    it('cada línea habla con la voz de su personaje, en la ventana que dura en pantalla', async () => {
+      const habla = spyOn(sonido(), 'hablar');
+      const p = arrancar();
+      aTodaVelocidad(p);
+
+      await hasta(() => habla.calls.count() > 0);
+
+      const [quien, texto, ventana] = habla.calls.first().args;
+      expect(quien).toBe(GUION[0].quien);
+      expect(texto).toBe(GUION[0].txt);
+      expect(ventana).toBeGreaterThan(0);
+    });
+
+    it('apagarlas calla a los personajes pero no toca la preferencia global', async () => {
+      const habla = spyOn(sonido(), 'hablar');
+      const antes = sonido().activo();
+      const p = arrancar();
+
+      p.voces.click();
+      aTodaVelocidad(p);
+      await new Promise((r) => setTimeout(r, 900));
+
+      expect(p.voces.textContent).toBe('Voces: no');
+      expect(p.voces.getAttribute('aria-pressed')).toBe('false');
+      expect(habla).not.toHaveBeenCalled();
+      expect(sonido().activo()).toBe(antes);
+    });
+  });
 
   it('con su markup completo NO cede la posta de entrada: el prólogo corre', () => {
     const p = arrancar();

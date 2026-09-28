@@ -1,7 +1,7 @@
+import { sonido } from '../libs/sonido';
 import { bisectAngle } from './tusi-math';
 import {
   GUION,
-  HABLA_CPS,
   PRESUPUESTO,
   anclajesDe,
   armarReloj,
@@ -51,8 +51,16 @@ interface Fusion {
   b: { x: number; y: number };
 }
 
+/** Lo que el prólogo sintetiza por su cuenta, colgado de la salida común del director de sonido. */
+interface RedDeAudio {
+  readonly master: GainNode;
+  readonly zumbido: OscillatorNode;
+  readonly zumbidoGain: GainNode;
+  readonly filtro: BiquadFilterNode;
+}
+
 /** Las teclas con las que el navegador (o el motor del recorrido) desplaza la página. */
-/** Lo que tarda en apagarse el último pip del final antes de poder cerrar el contexto de audio. */
+/** Lo que tarda en apagarse el último pip del final antes de poder soltar la red de audio. */
 const CIERRE_AUDIO_MS = 2500;
 
 const TECLAS_DE_DESPLAZAMIENTO = new Set([
@@ -67,7 +75,11 @@ const TECLAS_DE_DESPLAZAMIENTO = new Set([
 export interface PrologoOpciones {
   /** Corre cuando el prólogo termina o se saltea: es el empalme con la intro que ya existe. */
   readonly alTerminar: () => void;
-  /** Arranca con sonido. El gesto que el navegador exige ya lo dio quien eligió el clima. */
+  /**
+   * @deprecated Ya no se usa. El sonido es una preferencia global del director (`libs/sonido.ts`)
+   * y el toggle del intro la cambia ahí mismo, así que llega resuelta. Queda para no romper a quien
+   * todavía la pasa.
+   */
   readonly conSonido?: boolean;
 }
 
@@ -125,26 +137,19 @@ export function initPrologoAnomalia(host: HTMLElement, opts: PrologoOpciones): (
   const CY = H / 2;
 
   /**
-   * Lo que se QUIERE: la voz viene prendida de fabrica y nadie tiene que ir a buscarla. Separada
-   * de `vozOn` a proposito, y esa separacion ES el arreglo de un bug feo: `getVoices()` devuelve
-   * vacio en la primera llamada casi siempre, asi que el prologo concluia "no hay voz", apagaba, y
-   * cuando las voces llegaban un instante despues ya no habia forma de volver a prenderla sola.
-   * Habia que activarla a mano en cada carga.
+   * Si los personajes hablan. Es del prólogo y va DEBAJO de la preferencia global de sonido: con el
+   * sonido apagado no suena nada, con las voces apagadas la escena sigue sonando sin diálogo.
    */
-  let vozDeseada = true;
-  /** Lo que EFECTIVAMENTE pasa: la quiere y ademas hay con que hablar. */
-  let vozOn = true;
-  let sonando = opts.conSonido !== false;
+  let voces = true;
 
   /**
-   * El reloj y los anclajes se GUARDAN en variables reasignables, no en constantes: prender la voz
-   * los rearma (hablar es más lento que leer), y capturados una sola vez quedaban en el valor del
-   * otro modo. Ese bug hacía que las naves entraran en la luz veinte segundos después del grito.
+   * El reloj va SIEMPRE a ritmo de lectura. Con la voz del sistema dependía de que la máquina tuviera
+   * voces en español: la misma escena duraba distinto según dónde se abriera, y cuando las voces
+   * llegaban tarde había que rearmarla con la escena ya andando. Los blips del director caben en
+   * cualquier ventana, así que el ritmo ya no tiene por qué depender del audio.
    */
-  let reloj: readonly LineaEnReloj[] = armarReloj(GUION, vozOn);
-  let T: Anclajes = anclajesDe(reloj);
-  let BALA = { t0: 0, t1: 0 };
-  let ADENTRO = { lanza: 0, frena: 0 };
+  const reloj: readonly LineaEnReloj[] = armarReloj(GUION, false);
+  const T: Anclajes = anclajesDe(reloj);
 
   const linea = (id: string): LineaEnReloj => {
     const encontrada = reloj.find((l) => l.id === id);
@@ -152,14 +157,9 @@ export function initPrologoAnomalia(host: HTMLElement, opts: PrologoOpciones): (
     return encontrada;
   };
 
-  function rearmarReloj(): void {
-    reloj = armarReloj(GUION, vozOn);
-    T = anclajesDe(reloj);
-    // Los momentos del acto de adentro que el dibujo acompaña, atados a la línea que los dispara.
-    BALA = { t0: linea('dentro-cuidado').t0 - 300, t1: linea('dentro-cuidado').t0 + 1300 };
-    ADENTRO = { lanza: linea('dentro-escapemos').t0, frena: linea('dentro-esquivar').t0 };
-  }
-  rearmarReloj();
+  // Los momentos del acto de adentro que el dibujo acompaña, atados a la línea que los dispara.
+  const BALA = { t0: linea('dentro-cuidado').t0 - 300, t1: linea('dentro-cuidado').t0 + 1300 };
+  const ADENTRO = { lanza: linea('dentro-escapemos').t0, frena: linea('dentro-esquivar').t0 };
 
   const ESTILO: Record<Hablante, Estilo> = {
     // Tres voces, tres alturas fijas. Que cada tripulante hable siempre desde el mismo renglón
@@ -219,48 +219,64 @@ export function initPrologoAnomalia(host: HTMLElement, opts: PrologoOpciones): (
   }));
 
   /* ---------------------------------------------------------------------------------------
-   * SONIDO. Sintetizado, sin un solo archivo: es lo mismo que ya hace `intro-tusi.ts` con sus
-   * osciladores. El navegador no deja sonar hasta que hay un gesto del usuario, así que el
-   * contexto se crea recién al tocar el botón.
+   * SONIDO. Sintetizado, sin un solo archivo, y sobre la salida común del director de sonido
+   * (`libs/sonido.ts`) en vez de un contexto propio: uno solo para toda la app, abierto con el
+   * primer gesto, que ya sabe quedarse callado si no hay Web Audio o si el sonido está apagado.
+   * Mientras no haya salida el prólogo corre igual, mudo: nada de lo que se ve depende de que suene.
    * ------------------------------------------------------------------------------------ */
-  let ac: AudioContext | null = null;
-  let master: GainNode | null = null;
-  let zumbido: OscillatorNode | null = null;
-  let zumbidoGain: GainNode | null = null;
-  let filtro: BiquadFilterNode | null = null;
-  // Arranca PRENDIDO. El navegador igual no deja sonar sin un gesto, así que el contexto se abre
-  // en el mismo click de Reproducir: el default es "con sonido", no "buscá el botón".
+  let red: RedDeAudio | null = null;
   /** Lo que ya sonó o se dijo una sola vez, por id de línea o por hito. */
   let dichas = new Set<string>();
 
-  // Un tono por hablante: se distingue quién habla incluso sin leer.
-
-  function abrirAudio() {
-    if (ac) return;
-    const Ctor =
-      window.AudioContext ??
-      (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
-    if (!Ctor) return;
-    ac = new Ctor();
-    master = ac.createGain();
+  /**
+   * La red del prólogo sobre la salida común, armada la primera vez que hay dónde sonar. Se pide en
+   * cada cuadro a propósito: si el audio se destraba o se prende con la escena ya andando, el
+   * zumbido entra solo en vez de quedar mudo hasta la próxima visita. Terminado, no se rearma: un
+   * pip tardío levantaba un zumbido nuevo sobre el recorrido.
+   */
+  function abrirAudio(): RedDeAudio | null {
+    if (terminado) return null;
+    const salida = sonido().salida();
+    if (!salida) return null;
+    if (red) return red;
+    const ac = salida.ctx;
+    const master = ac.createGain();
     master.gain.value = 0.5;
-    master.connect(ac.destination);
+    master.connect(salida.salida);
 
     // El zumbido de la anomalía: grave, y se abre el filtro a medida que se acercan.
-    zumbido = ac.createOscillator();
+    const zumbido = ac.createOscillator();
     zumbido.type = 'sawtooth';
     zumbido.frequency.value = 46;
-    filtro = ac.createBiquadFilter();
+    const filtro = ac.createBiquadFilter();
     filtro.type = 'lowpass';
     filtro.frequency.value = 120;
-    zumbidoGain = ac.createGain();
+    const zumbidoGain = ac.createGain();
     zumbidoGain.gain.value = 0;
     zumbido.connect(filtro).connect(zumbidoGain).connect(master);
     zumbido.start();
+    red = { master, zumbido, zumbidoGain, filtro };
+    return red;
+  }
+
+  /**
+   * El contexto es de toda la app y NO se cierra: se corta el zumbido (un oscilador continuo que con
+   * la ganancia en 0 igual seguía procesando en el hilo de audio el resto de la sesión) y la red se
+   * desconecta de la salida común.
+   */
+  function soltarAudio(): void {
+    if (!red) return;
+    red.zumbido.stop();
+    red.zumbido.disconnect();
+    red.master.disconnect();
+    red = null;
   }
 
   function pip(freq: number, dur: number, tipo: OscillatorType, vol: number): void {
-    if (!ac || !master || !sonando) return;
+    const r = abrirAudio();
+    if (!r) return;
+    const ac = r.master.context;
+    const master = r.master;
     const o = ac.createOscillator();
     const gg = ac.createGain();
     o.type = tipo || 'sine';
@@ -276,7 +292,10 @@ export function initPrologoAnomalia(host: HTMLElement, opts: PrologoOpciones): (
 
   /** Ráfaga de ruido: sirve para el salto y para el impacto. */
   function ruido(dur: number, desde: number, hasta: number, vol: number): void {
-    if (!ac || !master || !sonando) return;
+    const r = abrirAudio();
+    if (!r) return;
+    const ac = r.master.context;
+    const master = r.master;
     const largo = Math.floor(ac.sampleRate * dur);
     const buf = ac.createBuffer(1, largo, ac.sampleRate);
     const dat = buf.getChannelData(0);
@@ -535,9 +554,6 @@ export function initPrologoAnomalia(host: HTMLElement, opts: PrologoOpciones): (
   }
 
   function naves(t: number): void {
-    // Se leen ACÁ y no una vez al arrancar: rearmar el reloj (prender la voz) mueve T.zoom, y
-    // capturados en un const quedaban en el valor del otro modo. Las naves entraban en la luz
-    // veinticuatro segundos después del grito.
     const REAPARECE = T.zoom + 900;
     const salida = clamp01((t - T.orden) / 3200);
     let x,
@@ -1009,16 +1025,13 @@ export function initPrologoAnomalia(host: HTMLElement, opts: PrologoOpciones): (
       const e = ESTILO[d.quien];
       texto(d.txt, H * e.y, a, e.tam, e.color, e.x, e.fuente);
 
-      // Al entrar la línea, una sola vez: la voz, si está activada. Sin pip por línea: ese bip de
-      // chat le pone un sonido de interfaz a algo que es gente hablando por radio.
+      // Al entrar la línea, una sola vez, habla quien la dice. Sin pip por línea: ese bip de chat
+      // le pone un sonido de interfaz a algo que es gente hablando por radio. Las encimadas
+      // (`junto`, `pisa`) suenan a la vez, igual que se ven: el director mezcla voces, no las
+      // encola como el motor de voz del sistema, que dejaba el par un segundo detrás del dibujo.
       if (!dichas.has(d.id)) {
         dichas.add(d.id);
-        // Las encimadas se ENCOLAN en vez de cortar a la anterior. El motor de voz del navegador
-        // es uno solo y no puede sonar dos veces a la vez, así que la alternativa era cortar (se
-        // oía un tajo a mitad de palabra) o callar una (quedaba en pantalla sin voz). Encoladas
-        // se oyen las dos, uma después de la otra, y el precio es que el audio de ese par queda
-        // un segundo detrás del dibujo.
-        hablar(d.txt, d.quien, (d.t1 - d.t0) / velocidad, !!(d.junto || d.pisa));
+        if (voces) sonido().hablar(d.quien, d.txt, (d.t1 - d.t0) / velocidad);
       }
     }
 
@@ -1051,30 +1064,31 @@ export function initPrologoAnomalia(host: HTMLElement, opts: PrologoOpciones): (
     }
 
     /* Sonido atado a lo que se ve: el zumbido crece con el arrastre, el salto suena al entrar en
-       la luz, el impacto en el choque, y al final un acorde que resuelve. */
-    if (ac && sonando && zumbidoGain && filtro) {
+       la luz, el impacto en el choque, y al final un acorde que resuelve. Los hitos se marcan
+       aunque no suene nada: prender el sonido más tarde no puede disparar un salto que ya pasó. */
+    const audio = abrirAudio();
+    if (audio) {
       const cerca = clamp01((t - T.temblor) / (T.zoom - T.temblor));
       const dentro = t > T.zoom && t < T.orden ? 0.5 : 0;
-      zumbidoGain.gain.value = t < T.zoom ? cerca * 0.16 : dentro * 0.1 * (1 - fondo);
-      filtro.frequency.value = 110 + cerca * 700;
-
-      if (!dichas.has('salto') && t >= T.zoom) {
-        dichas.add('salto');
-        ruido(1.1, 220, 4200, 0.28);
-        pip(70, 1.4, 'sine', 0.2);
-      }
-      if (!dichas.has('choque') && t >= CHOQUE) {
-        dichas.add('choque');
-        ruido(0.5, 1800, 160, 0.22);
-        pip(58, 0.9, 'sine', 0.26);
-      }
-      // La resolución: los dos círculos apareciendo tienen su acorde.
-      if (!dichas.has('final') && t >= T.orden + 2600) {
-        dichas.add('final');
-        // Por `luego`, no por setTimeout pelado: estos cuatro sobrevivían al cleanup y sonaban
-        // contra un AudioContext ya cerrado si el prólogo se salteaba justo en la resolución.
-        [220, 277, 330, 440].forEach((f, i) => luego(() => pip(f, 2.2, 'sine', 0.07), i * 160));
-      }
+      audio.zumbidoGain.gain.value = t < T.zoom ? cerca * 0.16 : dentro * 0.1 * (1 - fondo);
+      audio.filtro.frequency.value = 110 + cerca * 700;
+    }
+    if (!dichas.has('salto') && t >= T.zoom) {
+      dichas.add('salto');
+      ruido(1.1, 220, 4200, 0.28);
+      pip(70, 1.4, 'sine', 0.2);
+    }
+    if (!dichas.has('choque') && t >= CHOQUE) {
+      dichas.add('choque');
+      ruido(0.5, 1800, 160, 0.22);
+      pip(58, 0.9, 'sine', 0.26);
+    }
+    // La resolución: los dos círculos apareciendo tienen su acorde.
+    if (!dichas.has('final') && t >= T.orden + 2600) {
+      dichas.add('final');
+      // Por `luego`, no por setTimeout pelado: estos cuatro sobrevivían al cleanup y sonaban
+      // sobre el recorrido si el prólogo se salteaba justo en la resolución.
+      [220, 277, 330, 440].forEach((f, i) => luego(() => pip(f, 2.2, 'sine', 0.07), i * 160));
     }
 
     // El skip se invierte junto con el fondo y desaparece al llegar: ya no hay nada que saltar.
@@ -1082,13 +1096,12 @@ export function initPrologoAnomalia(host: HTMLElement, opts: PrologoOpciones): (
     raiz.classList.toggle('prologo--saliendo', t >= T.fin - 200);
   }
 
-  /* ── voz del navegador ───────────────────────────────────────────────────────────────────────
-     No es una voz producida: es la del sistema, y sirve para escuchar el ritmo. Si algún día hay
-     clips reales, se reemplaza esto y las ventanas se recronometran contra su duración de verdad. */
+  /* ── voces ───────────────────────────────────────────────────────────────────────────────────
+     Blips sintetizados por el director, un timbre por personaje, al estilo de los RPG de texto. No
+     dependen de qué voces tenga instaladas el sistema, así que suenan igual en cualquier máquina. */
 
-  let vocesEs: SpeechSynthesisVoice[] = [];
-  let vozMuda = false;
-  /** Timers de chequeo de la voz. Se limpian en el cleanup: son el único async del motor. */
+  /** Timers del acorde final y de soltar la red de audio. Se limpian en el cleanup: son el único
+   *  async del motor. */
   const timers = new Set<number>();
 
   const luego = (fn: () => void, ms: number): void => {
@@ -1099,102 +1112,9 @@ export function initPrologoAnomalia(host: HTMLElement, opts: PrologoOpciones): (
     timers.add(id);
   };
 
-  /**
-   * `getVoices()` devuelve vacío en la primera llamada hasta que el motor termina de cargar, así que
-   * hay que escuchar `voiceschanged`. Sin esto la voz no anda en la primera reproducción y sí en la
-   * segunda, que es el peor síntoma posible: parece intermitente.
-   */
-  function cargarVoces(): void {
-    if (!window.speechSynthesis) return;
-    const puntaje = (v: SpeechSynthesisVoice): number =>
-      /es[-_]AR/i.test(v.lang)
-        ? 4
-        : /es[-_](MX|419|US)/i.test(v.lang)
-          ? 3
-          : /^es/i.test(v.lang)
-            ? 2
-            : 0;
-    vocesEs = speechSynthesis
-      .getVoices()
-      .filter((v) => puntaje(v) > 0)
-      .sort((a, b) => puntaje(b) - puntaje(a));
-
-    const antes = vozOn;
-    if (!vocesEs.length) {
-      btnVoz.disabled = true;
-      btnVoz.setAttribute('aria-pressed', 'false');
-      btnVoz.textContent = 'Sin voz en español';
-      btnVoz.title = 'El sistema no tiene ninguna voz en español instalada.';
-      // Sin nadie que la hable, el reloj vuelve al ritmo de lectura: si no, la escena dura lo que
-      // dura hablarla y no habla nadie. La preferencia queda intacta, esperando que aparezcan.
-      vozOn = false;
-    } else {
-      btnVoz.disabled = false;
-      btnVoz.title = '';
-      // Las voces llegaron: se respeta lo que se quería, sin pedirle nada a nadie.
-      vozOn = vozDeseada;
-      pintarVoz();
-    }
-    // Las voces llegan DESPUÉS del primer armado, así que si acá cambia el modo hay que rearmar.
-    // Sin esto la voz quedaba prendida sobre un reloj hecho para leer y tenía que correr para
-    // entrar: era el "se escucha acelerada" que no se explicaba por ningún lado.
-    // Pero sin volver a cero ni sacar la pausa: las voces pueden llegar con la escena avanzada o
-    // detenida, y reiniciarla desde el principio (y reanudarla sola) era peor que el ritmo viejo.
-    if (antes !== vozOn) {
-      const avance = T.fin > 0 ? tAhora / T.fin : 0;
-      rearmarReloj();
-      if (pausado || terminado) tAhora = avance * T.fin;
-      else arrancar(avance * T.fin);
-    }
-  }
-
-  function pintarVoz(): void {
-    btnVoz.textContent = vozOn ? 'Voz: sí' : 'Voz: no';
-    btnVoz.setAttribute('aria-pressed', String(vozOn));
-  }
-
-  /** Un botón que dice "sí" mientras el navegador no deja sonar es peor que uno apagado. */
-  function avisarVozMuda(motivo: string): void {
-    if (vozMuda) return;
-    vozMuda = true;
-    btnVoz.textContent = 'Voz bloqueada';
-    btnVoz.title = `La voz está activada pero el navegador no la deja sonar (${motivo}).`;
-    btnVoz.setAttribute('aria-pressed', 'false');
-  }
-
-  const hash = (s: string): number => [...s].reduce((a, ch) => (a * 31 + ch.charCodeAt(0)) | 0, 7);
-
-  function hablar(txt: string, quien: Hablante, ventana: number, encolar: boolean): void {
-    if (!vozOn || !window.speechSynthesis || !vocesEs.length) return;
-    // Por defecto corta lo anterior: encolando TODO, cada línea larga corre a la siguiente y el
-    // audio se va separando del dibujo hasta narrar otra escena. La excepción son las encimadas,
-    // que se encolan a propósito porque el motor no puede hablar dos veces a la vez: cortar dejaba
-    // un tajo a mitad de palabra y callar una la dejaba en pantalla sin voz.
-    if (!encolar) speechSynthesis.cancel();
-
-    const limpio = txt.replace(/\n/g, ' ');
-    const u = new SpeechSynthesisUtterance(limpio);
-    u.voice = vocesEs[Math.abs(hash(quien)) % vocesEs.length];
-    u.lang = u.voice.lang;
-    // Tono por personaje: con las pocas voces del sistema, es lo único que los separa.
-    u.pitch = quien === 'voz' || quien === 'mascota' ? 0.75 : quien === 'nave4' ? 1.35 : 1;
-    // Contra el ritmo REAL del motor, no contra un número supuesto. Las ventanas del modo voz ya
-    // están hechas a su medida, así que esto queda cerca de 1 y el rango es una red, no un ajuste.
-    const seg = Math.max(0.8, (ventana - 350) / 1000);
-    // El tope sube con la velocidad: a ×2 la frase tiene la mitad de tiempo, y dejarlo en 1,05
-    // haría que cada línea siguiera sonando cuando en pantalla ya entró la siguiente.
-    u.rate = Math.min(1.05 * velocidad, Math.max(0.95, limpio.length / HABLA_CPS / seg));
-    let sono = false;
-    u.onstart = () => {
-      sono = true;
-    };
-    u.onerror = (e) => {
-      if (e.error !== 'interrupted' && e.error !== 'canceled') avisarVozMuda(e.error);
-    };
-    luego(() => {
-      if (!sono && vozOn) avisarVozMuda('sin arrancar');
-    }, 1600);
-    speechSynthesis.speak(u);
+  function pintarVoces(): void {
+    btnVoz.textContent = voces ? 'Voces: sí' : 'Voces: no';
+    btnVoz.setAttribute('aria-pressed', String(voces));
   }
 
   /* ── reloj de reproducción ───────────────────────────────────────────────────────────────── */
@@ -1202,10 +1122,9 @@ export function initPrologoAnomalia(host: HTMLElement, opts: PrologoOpciones): (
   /** Timestamp del cuadro anterior. `null` al arrancar o al reanudar: ese cuadro no suma tiempo. */
   let anterior: number | null = null;
   /**
-   * Generacion del loop. Cada `arrancar` invalida a los anteriores: sin esto quedaban DOS loops
-   * vivos (uno lo arranca la carga de voces al cambiar de modo, otro el init), los dos escribiendo
-   * `anterior` en el mismo cuadro, y el delta de cada uno daba casi cero. La escena se quedaba
-   * clavada en el primer segundo sin que nada pareciera roto.
+   * Generacion del loop. Cada `arrancar` o reanudación invalida a los anteriores: con DOS loops
+   * vivos, los dos escribiendo `anterior` en el mismo cuadro, el delta de cada uno daba casi cero.
+   * La escena se quedaba clavada en el primer segundo sin que nada pareciera roto.
    */
   let generacion = 0;
   /**
@@ -1243,19 +1162,12 @@ export function initPrologoAnomalia(host: HTMLElement, opts: PrologoOpciones): (
     }
     mostrar();
     dichas = new Set();
-    if (window.speechSynthesis) {
-      speechSynthesis.cancel();
-      // `cancel()` vacía la cola pero no saca la pausa: sin esto, tocar "Voz" en pausa dejaba el
-      // motor mudo para el resto de la escena.
-      if (speechSynthesis.paused) speechSynthesis.resume();
-    }
     tAhora = desde;
     despausar();
     // El gesto que el navegador exige lo dio quien eligió el clima, así que acá ya se puede abrir.
-    if (sonando) {
-      abrirAudio();
-      if (ac && ac.state === 'suspended') void ac.resume();
-    }
+    // El director también lo abre solo con el primer gesto; pedirlo acá cubre a los navegadores que
+    // solo aceptan destrabarlo adentro del click, no en el `pointerdown` que escucha él.
+    if (sonido().activo()) sonido().desbloquear();
     anterior = null;
     const gen = ++generacion;
     raf = requestAnimationFrame((ts) => frame(ts, gen));
@@ -1287,24 +1199,21 @@ export function initPrologoAnomalia(host: HTMLElement, opts: PrologoOpciones): (
     if (terminado) return;
     terminado = true;
     cancelAnimationFrame(raf);
-    if (window.speechSynthesis) speechSynthesis.cancel();
-    if (zumbidoGain) zumbidoGain.gain.value = 0;
-    // El zumbido es un oscilador continuo: con la ganancia en 0 seguía procesando en el hilo de audio
-    // el resto de la sesión. Se corta ya y el contexto se cierra cuando se apagó el último pip.
-    zumbido?.stop();
-    zumbido = null;
-    luego(() => {
-      void ac?.close();
-      ac = null;
-    }, CIERRE_AUDIO_MS);
+    // Las voces que quedaban agendadas no pueden seguir hablando encima del recorrido.
+    sonido().callar();
+    // El zumbido se apaga ya; la red se suelta recién cuando se apagó el último pip, para no
+    // cortarlo en seco.
+    if (red) red.zumbidoGain.gain.value = 0;
+    luego(soltarAudio, CIERRE_AUDIO_MS);
     ocultar();
     opts.alTerminar();
   }
 
   /* ── controles ──────────────────────────────────────────────────────────────────────────────
      Solo dos, y los dos hacen falta: saltar (son minutos, y a la segunda visita es lo primero que
-     va a buscar cualquiera) y pausar (una cinemática sin pausa es hostil). El sonido lo hereda de
-     la elección de clima, que es el gesto que ya desbloqueó el audio. */
+     va a buscar cualquiera) y pausar (una cinemática sin pausa es hostil). El sonido es la
+     preferencia global del director, la misma del toggle del intro: silenciar en un lado silencia
+     en todos. */
 
   function despausar(): void {
     pausado = false;
@@ -1316,8 +1225,6 @@ export function initPrologoAnomalia(host: HTMLElement, opts: PrologoOpciones): (
     if (terminado) return;
     if (pausado) {
       despausar();
-      if (window.speechSynthesis && speechSynthesis.paused) speechSynthesis.resume();
-      if (sonando && ac && ac.state === 'suspended') void ac.resume();
       anterior = null;
       const gen = ++generacion;
       raf = requestAnimationFrame((ts) => frame(ts, gen));
@@ -1327,9 +1234,11 @@ export function initPrologoAnomalia(host: HTMLElement, opts: PrologoOpciones): (
     btnPausa.textContent = 'Continuar';
     btnPausa.setAttribute('aria-pressed', 'true');
     cancelAnimationFrame(raf);
-    // Pausar sin nada hablando deja el motor de voz trabado: el próximo `speak()` no suena.
-    if (window.speechSynthesis && speechSynthesis.speaking) speechSynthesis.pause();
-    if (ac && ac.state === 'running') void ac.suspend();
+    // El contexto es de toda la app y no se suspende: se callan las voces agendadas y el zumbido,
+    // que es continuo y seguiría sonando sobre la escena quieta. Al reanudar, el primer cuadro lo
+    // vuelve a escribir.
+    sonido().callar();
+    if (red) red.zumbidoGain.gain.value = 0;
   }
 
   const alTeclado = (e: KeyboardEvent): void => {
@@ -1380,9 +1289,9 @@ export function initPrologoAnomalia(host: HTMLElement, opts: PrologoOpciones): (
   const alCambiarVelocidad = (): void => {
     velocidad = VELOCIDADES[(VELOCIDADES.indexOf(velocidad) + 1) % VELOCIDADES.length];
     pintarVelocidad();
-    // Sin cortar, la línea que está sonando sigue al ritmo viejo hasta terminar y queda pisando a
-    // la siguiente, que ya entró en pantalla.
-    if (window.speechSynthesis) speechSynthesis.cancel();
+    // La línea que está sonando se agendó para la ventana a la velocidad vieja: sin cortarla,
+    // seguiría hablando cuando en pantalla ya entró la siguiente.
+    sonido().callar();
   };
 
   const pintarPantalla = (): void => {
@@ -1402,36 +1311,32 @@ export function initPrologoAnomalia(host: HTMLElement, opts: PrologoOpciones): (
   };
 
   const pintarSonido = (): void => {
-    btnSonido.textContent = sonando ? 'Sonido: sí' : 'Sonido: no';
-    btnSonido.setAttribute('aria-pressed', String(sonando));
+    const activo = sonido().activo();
+    btnSonido.textContent = activo ? 'Sonido: sí' : 'Sonido: no';
+    btnSonido.setAttribute('aria-pressed', String(activo));
   };
 
+  /**
+   * Cambia la preferencia GLOBAL. Apagado, el director baja su salida a cero y con eso se calla
+   * también el zumbido, que cuelga de ella. El botón se repinta por `alCambiar`, igual que si la
+   * cambiara el toggle del intro.
+   */
   const alCambiarSonido = (): void => {
-    sonando = !sonando;
-    pintarSonido();
-    if (sonando) {
-      abrirAudio();
-      if (ac && ac.state === 'suspended') void ac.resume();
-    } else if (zumbidoGain) {
-      // El zumbido es continuo: sin esto seguiría sonando hasta el próximo cuadro que lo escriba.
-      zumbidoGain.gain.value = 0;
-    }
+    // El click es el gesto que el navegador exige: si lo prende, se aprovecha para destrabarlo.
+    if (sonido().alternar()) sonido().desbloquear();
   };
+  const dejarDeOirSonido = sonido().alCambiar(pintarSonido);
 
-  const alCambiarVoz = (): void => {
-    vozDeseada = !vozDeseada;
-    vozOn = vozDeseada && vocesEs.length > 0;
-    if (!vozOn && window.speechSynthesis) speechSynthesis.cancel();
-    pintarVoz();
-    // Prender la voz rearma el reloj: las ventanas pasan a durar lo que tarda el habla. Sin esto la
-    // voz tiene que correr para entrar, y corriendo no se entiende.
-    rearmarReloj();
-    arrancar(0);
+  /** Solo calla a los personajes; la escena sigue sonando y el reloj no cambia. */
+  const alCambiarVoces = (): void => {
+    voces = !voces;
+    pintarVoces();
+    if (!voces) sonido().callar();
   };
 
   skipEl.addEventListener('click', alSaltar);
   btnPausa.addEventListener('click', alPausar);
-  btnVoz.addEventListener('click', alCambiarVoz);
+  btnVoz.addEventListener('click', alCambiarVoces);
   btnSonido.addEventListener('click', alCambiarSonido);
   btnPantalla.addEventListener('click', alCambiarPantalla);
   btnVelocidad.addEventListener('click', alCambiarVelocidad);
@@ -1447,12 +1352,8 @@ export function initPrologoAnomalia(host: HTMLElement, opts: PrologoOpciones): (
   mqlReduce.addEventListener('change', alReducirMovimiento);
   raiz.addEventListener('wheel', alDesplazar, { passive: false });
   raiz.addEventListener('touchmove', alDesplazar, { passive: false });
-  if (window.speechSynthesis) {
-    cargarVoces();
-    speechSynthesis.addEventListener('voiceschanged', cargarVoces);
-  }
 
-  pintarVoz();
+  pintarVoces();
   pintarSonido();
   pintarPantalla();
   pintarVelocidad();
@@ -1462,13 +1363,15 @@ export function initPrologoAnomalia(host: HTMLElement, opts: PrologoOpciones): (
     cancelAnimationFrame(raf);
     timers.forEach((id) => clearTimeout(id));
     timers.clear();
-    if (window.speechSynthesis) {
-      speechSynthesis.cancel();
-      speechSynthesis.removeEventListener('voiceschanged', cargarVoces);
-    }
+    // Terminado, ya se calló al terminar: callar de nuevo cortaría lo que suene después, como las
+    // voces de las cinemáticas del recorrido.
+    if (!terminado) sonido().callar();
+    // Si quedaba pendiente soltar la red (el timer recién limpiado), se suelta ya.
+    soltarAudio();
+    dejarDeOirSonido();
     skipEl.removeEventListener('click', alSaltar);
     btnPausa.removeEventListener('click', alPausar);
-    btnVoz.removeEventListener('click', alCambiarVoz);
+    btnVoz.removeEventListener('click', alCambiarVoces);
     btnSonido.removeEventListener('click', alCambiarSonido);
     btnPantalla.removeEventListener('click', alCambiarPantalla);
     btnVelocidad.removeEventListener('click', alCambiarVelocidad);
@@ -1480,6 +1383,5 @@ export function initPrologoAnomalia(host: HTMLElement, opts: PrologoOpciones): (
     mqlReduce.removeEventListener('change', alReducirMovimiento);
     raiz.removeEventListener('wheel', alDesplazar);
     raiz.removeEventListener('touchmove', alDesplazar);
-    void ac?.close();
   };
 }
