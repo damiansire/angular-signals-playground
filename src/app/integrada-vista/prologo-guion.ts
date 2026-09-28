@@ -64,9 +64,12 @@ const ARRANQUE = 800;
 const MAX_RENGLONES = 3;
 
 export const GUION: readonly LineaGuion[] = [
+  // ACTO 0 · vuelven a casa. Charla de nada, a propósito: sin esto no hay a quién perder después.
   { id: 'casa-volver', quien: 'cap', txt: 'Al fin es hora de volver a casa.' },
   { id: 'casa-familia', quien: 'naveA', txt: 'Extraño a mi familia.' },
   { id: 'casa-helado', quien: 'naveB', txt: 'Yo quiero comer helado de chocolate.' },
+  // Estas dos se PISAN, y es la única superposición del guion: la exploradora entra mientras el
+  // otro todavía está hablando, que es lo que hace que se lea como una interrupción y no un turno.
   { id: 'casa-unas', quien: 'naveA', txt: 'Y yo quiero unas…' },
   {
     id: 'casa-apuren',
@@ -75,6 +78,9 @@ export const GUION: readonly LineaGuion[] = [
     txt: '¡Oigan! Dejen de desear y apúrense,\nvan muy lento.',
   },
   { id: 'linea-msxheigk', quien: 'naveA', txt: 'Siempre tan aguafiestas.' },
+
+  // ACTO 1 · la anomalía. Lo que falla son los operadores: perseguir el cambio no alcanza cuando el
+  // cambio es más rápido que vos. Es el argumento del nivel 0 contado como accidente.
   {
     id: 'anom-que-pasa',
     hueco: 300,
@@ -83,6 +89,8 @@ export const GUION: readonly LineaGuion[] = [
   },
   { id: 'anom-sin-control', quien: 'naveA', txt: 'No tengo control de los sistemas.' },
   { id: 'anom-atraidos', quien: 'naveB', txt: 'Estamos siendo atraídos.' },
+  // `dur` acá no es drama: es que la orden tiene que seguir en pantalla mientras las naves
+  // todavía están disparando operadores. Apagarla antes deja el gesto contado por la mitad.
   {
     id: 'anom-rxjs',
     dur: 6200,
@@ -96,6 +104,9 @@ export const GUION: readonly LineaGuion[] = [
     txt: 'Los pipes están recargando energía.',
   },
   { id: 'anom-lento', quien: 'naveB', txt: 'No funcionará, es demasiado lento.' },
+
+  // El capitán deja de dar órdenes y empieza a describir: tres tirones, cada uno más largo, hasta
+  // nombrar lo que se rompe. Ahí el problema deja de ser operativo y pasa a ser de física.
   { id: 'anom-fuerza', quien: 'cap', txt: '¿Qué es esta fuerza…?' },
   { id: 'anom-velocidad', quien: 'cap', txt: 'Esta velocidad…' },
   {
@@ -103,9 +114,14 @@ export const GUION: readonly LineaGuion[] = [
     quien: 'cap',
     txt: 'Debería ser imposible.\nEsto contradice todas las leyes\ndel espacio Zone.js.',
   },
+
+  // La exploradora quedó AFUERA y ve cómo se los llevan. Sus cuatro líneas son el último intento de
+  // que el sistema conocido alcance: volver a donde las herramientas funcionan.
   { id: 'expl-que-pasa', quien: 'nave4', txt: '¿Qué les pasa?' },
   { id: 'expl-no-responden', quien: 'nave4', txt: '¿Por qué no responden?' },
   { id: 'expl-hacia-ahi', quien: 'nave4', txt: '¿Por qué van hacia ahí?' },
+  // El ESPACIO es Zone.js; RxJS son las herramientas que ahí adentro funcionan. Nombrarlos igual
+  // hacía que se leyeran como dos lugares distintos.
   {
     id: 'expl-vuelvan',
     quien: 'nave4',
@@ -122,12 +138,17 @@ export const GUION: readonly LineaGuion[] = [
     quien: 'todos',
     txt: '¡Ahhhh!',
   },
+
+  // ACTO 2 · del otro lado. La orden de escapar choca contra que acá esquivar YA es todo lo que se
+  // puede hacer: el sistema está saturado sosteniendo el presente.
   {
     id: 'dentro-vivos',
     hueco: 1000,
     quien: 'naveA',
     txt: 'Estamos vivos…',
   },
+  // Las dos gritan A LA VEZ, cada una desde su costado: no se turnan para avisar de algo que les
+  // está cayendo encima. La bola que dispara el grito es la misma que después esquivan.
   { id: 'dentro-cuidado', quien: 'naveB', txt: '¡Cuidado!' },
   {
     id: 'dentro-esquiva-ya',
@@ -141,6 +162,8 @@ export const GUION: readonly LineaGuion[] = [
     quien: 'naveA',
     txt: 'No lo sé, nunca había visto\nnada como esto.',
   },
+  // Acá se lanzan hacia adelante y frenan de golpe sobre la línea de abajo: el intento de escapar y
+  // el "apenas puedo esquivar" son el mismo gesto visto de afuera y de adentro.
   {
     id: 'dentro-escapemos',
     quien: 'cap',
@@ -151,6 +174,8 @@ export const GUION: readonly LineaGuion[] = [
     quien: 'naveA',
     txt: 'Apenas puedo esquivar las partículas.\nNo me pidas escapar.',
   },
+  // El diagnóstico va de lo concreto a lo general: primero la herramienta que no responde, después
+  // la categoría entera.
   {
     id: 'dentro-switchmap',
     quien: 'naveB',
@@ -166,7 +191,10 @@ export const GUION: readonly LineaGuion[] = [
     quien: 'cap',
     txt: 'Aunque intentemos escapar,\ncon tantas moléculas será imposible.',
   },
+  // Cierra con la palabra que ella va a repetir: el corte deja de ser un corte porque lo escuchó.
   { id: 'dentro-caotico', quien: 'cap', txt: 'Esto es demasiado caótico.' },
+
+  // ACTO 3 · la voz. Todavía no tiene cuerpo, y por eso "¿quién ha hablado?" se entiende solo.
   {
     id: 'voz-asi-que',
     dur: 3200,
@@ -190,16 +218,23 @@ export const GUION: readonly LineaGuion[] = [
     quien: 'voz',
     txt: 'Supongo que desde su perspectiva,\nse puede interpretar como caos…',
   },
+  // "Armonía" no es una metáfora: los puntos hacen movimiento armónico simple, y así está escrito
+  // en `tusi-math`. La frase describe literalmente lo que la pantalla va a hacer.
   {
     id: 'voz-armonia',
     quien: 'voz',
     txt: 'Pero desde la mía…\ntodo está en armonía.',
   },
+  // Describe lo que ve, y lo que ve ES el final de la intro que sigue: dos círculos, movimiento
+  // uniforme. Nadie más puede verlo todavía, y esa distancia es lo que el reclamo pone en palabras.
   {
     id: 'voz-circulos',
     quien: 'voz',
     txt: 'Dos hermosos círculos de movimiento uniforme,\ny una melodía espléndida.',
   },
+
+  // ACTO 4 · el reclamo. Primera vez que le CONTESTAN: hasta acá solo preguntaban al aire. Es lo
+  // que vuelve creíble al personaje, porque alguien dice en voz alta lo que el público piensa.
   { id: 'reclamo-melodia', quien: 'naveA', txt: '¿Melodía?' },
   {
     id: 'reclamo-circulos',
@@ -208,6 +243,8 @@ export const GUION: readonly LineaGuion[] = [
     txt: '¿Círculos?',
   },
   { id: 'reclamo-loco', quien: 'cap', txt: '¿Estás loco?' },
+  // La pregunta que el CHOQUE contesta: la mascota nace acá, ni un segundo antes. Apareciendo sin
+  // que nadie la llame es un efecto; apareciendo acá, es una respuesta.
   { id: 'reclamo-quien-eres', quien: 'cap', txt: '¿Quién eres?' },
   { id: 'reclamo-casi-matan', quien: 'naveA', txt: 'Esas moléculas casi nos matan.' },
   {
@@ -215,6 +252,8 @@ export const GUION: readonly LineaGuion[] = [
     quien: 'cap',
     txt: 'Es lo más caótico que vivimos en nuestras vidas,\ny tú, tan tranquilo, lo llamas armonioso.',
   },
+
+  // ACTO 5 · la tesis, en tres golpes cada vez más largos. Ya tiene cuerpo: deja de ser "la voz".
   { id: 'orden-caos-es-orden', quien: 'mascota', txt: 'El caos es orden.' },
   { id: 'orden-no-comprenden', quien: 'mascota', txt: 'Un orden que no comprenden…' },
   {
@@ -222,6 +261,10 @@ export const GUION: readonly LineaGuion[] = [
     quien: 'mascota',
     txt: 'Lo que ustedes ven como caos\nes un orden malinterpretado.',
   },
+
+  // ACTO 6 · el pacto, que es el puente al recorrido. Lo que lo hace un pacto y no un favor es que
+  // él se NIEGA primero: no los saca, los enseña. Salir queda del lado de ellos, que es exactamente
+  // el trato que la app le propone a quien la abre.
   { id: 'leccion-entiendes', quien: 'cap', txt: '¿Tú entiendes este mundo?' },
   { id: 'leccion-sacanos', quien: 'naveB', txt: 'Sácanos de aquí.' },
   { id: 'leccion-no-intervengo', quien: 'mascota', txt: 'No puedo intervenir con ustedes.' },
@@ -245,6 +288,8 @@ export const GUION: readonly LineaGuion[] = [
     quien: 'mascota',
     txt: 'Lo más importante es entender\nque este mundo sigue reglas.',
   },
+  // Cierra el arco de la palabra: "caos" entró como queja en `dentro-caotico` y sale acá como
+  // diagnóstico equivocado.
   {
     id: 'leccion-armonia',
     quien: 'mascota',
