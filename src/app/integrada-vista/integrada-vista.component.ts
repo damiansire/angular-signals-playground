@@ -10,16 +10,48 @@ import {
   afterNextRender,
   createComponent,
   inject,
+  isDevMode,
+  computed,
   signal,
 } from '@angular/core';
 import { Location } from '@angular/common';
 import { RouterLink } from '@angular/router';
 
 import { signalsRoutesTree } from '../app.routes';
-import { initMolecule, type MountSub } from './molecule-engine';
+import {
+  initMolecule,
+  NOMBRES_DE_CONCEPTO,
+  TITULOS_DE_CAPITULO,
+  type MountSub,
+} from './molecule-engine';
 import { initIntroTusi, type IntroTusiHandle } from './intro-tusi';
 import { initPrologoAnomalia } from './prologo-anomalia';
 import { buildWhereQuery, parseWhereQuery } from './url-sync';
+import {
+  almacenDelNavegador,
+  cargarPartida,
+  conCinematica,
+  conEstablecido,
+  conPrologo,
+  conceptosEstablecidos,
+  guardarPartida,
+  PARTIDA_VACIA,
+  type Partida,
+} from '../libs/partida';
+import { CinematicaComponent } from './cinematicas/cinematica.component';
+import { BitacoraComponent, type CapituloDeBitacora } from './bitacora/bitacora.component';
+import { CAPITULO_FINAL, type Cinematica } from './cinematicas/cinematica-guion';
+import { cinematicaDe } from './cinematicas/cinematicas-datos';
+
+/**
+ * Cuánto tiene que quedarse el recorrido en la parada de un capítulo para que arranque su
+ * cinemática. Con scroll-snap, pasar de largo también reporta cada parada: sin esta espera, un
+ * gesto largo de trackpad disparaba la cinemática de un capítulo que el jugador solo cruzó.
+ */
+const ESPERA_CINEMATICA_MS = 650;
+
+/** El final entra después de que el enlace del capítulo 11 terminó de trazarse. */
+const ESPERA_FINAL_MS = 1600;
 
 /**
  * Vista integrada: el recorrido de los 12 conceptos como una MOLÉCULA reactiva.
@@ -33,7 +65,7 @@ import { buildWhereQuery, parseWhereQuery } from './url-sync';
  */
 @Component({
   selector: 'app-integrada-vista',
-  imports: [RouterLink],
+  imports: [RouterLink, CinematicaComponent, BitacoraComponent],
   templateUrl: './integrada-vista.component.html',
   styleUrls: [
     './integrada-vista.component.css',
@@ -70,6 +102,34 @@ export class IntegradaVistaComponent {
    */
   readonly bootFallo = signal(false);
 
+  /** El Estudio es una herramienta de autor: su enlace solo aparece mientras se desarrolla. */
+  protected readonly modoDesarrollo = isDevMode();
+
+  /** La cinemática en pantalla, si hay una. */
+  protected readonly cinematica = signal<Cinematica | null>(null);
+  protected readonly cinematicaCompleta = signal(false);
+  protected readonly conceptosHechos = computed(() => [...conceptosEstablecidos(this.partida())]);
+  protected readonly origenIris = signal<{ x: number; y: number } | null>(null);
+
+  protected readonly partida = signal<Partida>(PARTIDA_VACIA);
+  private readonly almacen = almacenDelNavegador();
+  private donde = { concepto: -1, sub: -1 };
+  private esperaCinematica: ReturnType<typeof setTimeout> | null = null;
+  private cerrarPrologo: (() => void) | null = null;
+
+  protected readonly bitacoraAbierta = signal(false);
+  /** Los capítulos como los lista la bitácora: nombre, título, ley y cuántos sub-niveles tiene. */
+  protected readonly capitulosBitacora: readonly CapituloDeBitacora[] = NOMBRES_DE_CONCEPTO.map(
+    (nombre, numero) => ({
+      numero,
+      nombre,
+      titulo: TITULOS_DE_CAPITULO[numero],
+      ley: cinematicaDe(numero)?.ley ?? null,
+      subs: this.subComponents[numero]?.length ?? 0,
+    }),
+  );
+  protected readonly leyFinal = cinematicaDe(CAPITULO_FINAL)?.ley ?? null;
+
   constructor() {
     afterNextRender(() => {
       try {
@@ -97,6 +157,10 @@ export class IntegradaVistaComponent {
         ?.getAttributeNames()
         .find((a) => a.startsWith('_ngcontent')) ?? null;
     const subCounts = this.subComponents.map((subs) => subs.length);
+    this.partida.set(cargarPartida(this.almacen, subCounts));
+    this.destroyRef.onDestroy(() => {
+      if (this.esperaCinematica) clearTimeout(this.esperaCinematica);
+    });
     // El motor arranca antes que la landing, así que el aviso de visibilidad se enruta por acá:
     // el motor es el único que sabe si la landing está a la vista (lo decide el scroll) y la
     // landing es la única que sabe qué hacer con eso (cortar audio y dejar de dibujar).
@@ -109,6 +173,10 @@ export class IntegradaVistaComponent {
       this.onWhere,
       this.initialFromUrl(),
       (visible) => landing?.setVisible(visible),
+      {
+        establecidos: new Set(this.partida().establecidos),
+        alEstablecer: (concepto, sub) => this.alEstablecer(concepto, sub),
+      },
     );
     this.destroyRef.onDestroy(dispose);
 
@@ -122,15 +190,23 @@ export class IntegradaVistaComponent {
     landing = initIntroTusi(this.host, {
       // La preferencia de sonido se elige en el overlay del intro pero quien suena después es el
       // prólogo: viaja con el gatillo para que silenciar antes de entrar valga para los dos.
-      onThemePicked: (startBuild, conSonido) => {
-        const cerrarPrologo = initPrologoAnomalia(this.host, {
-          alTerminar: startBuild,
-          conSonido,
+      onThemePicked: (startBuild) => {
+        // Quien ya pasó por el prólogo no lo vuelve a ver impuesto: en un juego, volver es
+        // "continuar partida", no repetir la intro.
+        if (this.partida().prologo) {
+          startBuild();
+          return;
+        }
+        this.cerrarPrologo = initPrologoAnomalia(this.host, {
+          alTerminar: () => {
+            this.guardar(conPrologo(this.partida()));
+            startBuild();
+          },
         });
-        this.destroyRef.onDestroy(cerrarPrologo);
       },
     });
     this.destroyRef.onDestroy(landing.dispose);
+    this.destroyRef.onDestroy(() => this.cerrarPrologo?.());
   }
 
   /**
@@ -148,7 +224,104 @@ export class IntegradaVistaComponent {
    */
   private readonly onWhere = (conceptIdx: number, subIdx: number): void => {
     this.location.replaceState('/', buildWhereQuery(conceptIdx, subIdx));
+    this.donde = { concepto: conceptIdx, sub: subIdx };
+    this.programarCinematica(conceptIdx, subIdx);
   };
+
+  /**
+   * La cinemática de un capítulo se juega la primera vez que el jugador se detiene en su parada de
+   * la molécula (no adentro de un sub-nivel: un deep-link a un ejercicio no se interrumpe).
+   */
+  private programarCinematica(concepto: number, sub: number): void {
+    if (this.esperaCinematica) clearTimeout(this.esperaCinematica);
+    this.esperaCinematica = null;
+    if (concepto < 0 || sub !== -1 || this.cinematica()) return;
+    if (this.partida().cinematicas.includes(concepto) || !cinematicaDe(concepto)) return;
+    this.esperaCinematica = setTimeout(() => {
+      this.esperaCinematica = null;
+      if (this.donde.concepto === concepto && this.donde.sub === -1) this.abrirCinematica(concepto);
+    }, ESPERA_CINEMATICA_MS);
+  }
+
+  protected abrirCinematica(capitulo: number): void {
+    const cine = cinematicaDe(capitulo);
+    if (!cine || this.cinematica()) return;
+    // El iris se abre desde el átomo del capítulo: la cinemática sale de ESE lugar del mapa.
+    const atomo = this.host.querySelector('#atoms .atom.current')?.getBoundingClientRect();
+    this.origenIris.set(
+      atomo && atomo.width > 0
+        ? { x: atomo.left + atomo.width / 2, y: atomo.top + atomo.height / 2 }
+        : null,
+    );
+    this.cinematicaCompleta.set(
+      conceptosEstablecidos(this.partida()).size >= this.subComponents.length,
+    );
+    this.escenarioInerte(true);
+    this.cinematica.set(cine);
+  }
+
+  protected alTerminarCinematica(): void {
+    const cine = this.cinematica();
+    if (cine) this.guardar(conCinematica(this.partida(), cine.capitulo));
+    this.cinematica.set(null);
+    this.escenarioInerte(false);
+  }
+
+  private alEstablecer(concepto: number, sub: number): void {
+    const antes = conceptosEstablecidos(this.partida()).has(concepto);
+    this.guardar(conEstablecido(this.partida(), concepto, sub));
+    const ultimo = this.subComponents.length - 1;
+    if (concepto !== ultimo || antes || this.partida().cinematicas.includes(CAPITULO_FINAL)) return;
+    // El final entra cuando el enlace del último capítulo termina de trazarse: primero la
+    // consecuencia de lo que entendiste, después la ceremonia.
+    setTimeout(() => this.abrirCinematica(CAPITULO_FINAL), ESPERA_FINAL_MS);
+  }
+
+  protected abrirBitacora(): void {
+    this.escenarioInerte(true);
+    this.bitacoraAbierta.set(true);
+  }
+
+  protected cerrarBitacora(): void {
+    this.bitacoraAbierta.set(false);
+    this.escenarioInerte(false);
+    this.host.querySelector<HTMLElement>('.tb-bitacora')?.focus({ preventScroll: true });
+  }
+
+  protected verCinematicaDesdeBitacora(capitulo: number): void {
+    this.bitacoraAbierta.set(false);
+    this.escenarioInerte(false);
+    this.abrirCinematica(capitulo);
+  }
+
+  /**
+   * El prólogo vive en la landing, así que para verlo de nuevo se vuelve arriba. Al terminar no
+   * arranca nada: la construcción de Tusi ya está hecha y el recorrido sigue donde estaba guardado.
+   */
+  protected verPrologoDesdeBitacora(): void {
+    this.cerrarBitacora();
+    const stage = this.host.querySelector<HTMLElement>('#stage');
+    if (stage) stage.scrollTop = 0;
+    this.cerrarPrologo?.();
+    this.cerrarPrologo = initPrologoAnomalia(this.host, { alTerminar: () => undefined });
+  }
+
+  /** Borrar la partida y recargar: el motor arma la molécula desde lo guardado, y ya no hay nada. */
+  protected empezarDeCero(): void {
+    this.guardar(PARTIDA_VACIA);
+    window.location.reload();
+  }
+
+  /** Lo de atrás no recibe foco, clicks ni teclas mientras corre una cinemática. */
+  private escenarioInerte(inerte: boolean): void {
+    const stage = this.host.querySelector<HTMLElement>('#stage');
+    if (stage) stage.inert = inerte;
+  }
+
+  private guardar(partida: Partida): void {
+    this.partida.set(partida);
+    guardarPartida(this.almacen, partida);
+  }
 
   /** Monta el componente REAL del sub-nivel (concepto ci, sub si) y lo integra a la CD. */
   private readonly mountSub: MountSub = (host, ci, si) => {

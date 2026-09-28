@@ -44,6 +44,10 @@
              respuesta en el 11. Es el único texto permanente del recorrido, y son seis palabras. -->
         <span class="tb-links">
           <span class="tb-q" id="tbQ"></span>
+          @if (modoDesarrollo) {
+            <a routerLink="/studio" title="Abrir el Estudio de Cinemáticas y Diálogos">Estudio</a>
+          }
+          <button class="tb-bitacora" type="button" (click)="abrirBitacora()">Bitácora</button>
           <a routerLink="/practica/carrito">Practicá</a>
         </span>
       </div>
@@ -294,7 +298,7 @@
           </div>
           <div class="prologo__hud">
             <button class="prologo__pause" type="button" aria-pressed="false">Pausa</button>
-            <button class="prologo__voice" type="button" aria-pressed="true">Voz: sí</button>
+            <button class="prologo__voice" type="button" aria-pressed="true">Voces: sí</button>
             <button class="prologo__sound" type="button" aria-pressed="true">Sonido: sí</button>
             <button class="prologo__speed" type="button">Velocidad ×1</button>
             <button class="prologo__full" type="button" aria-pressed="false">
@@ -308,3 +312,32 @@
     </div>
   </div>
 </div>
+
+<!-- La cinemática del capítulo va AFUERA del escenario: mientras corre, el escenario queda `inert`
+     entero, y ella no puede quedar adentro de lo que se apaga. -->
+@if (bitacoraAbierta()) {
+  <!-- Diferidos: la bitácora y el reproductor solo pesan cuando se abren. -->
+  @defer (on immediate) {
+    <app-bitacora
+      [partida]="partida()"
+      [capitulos]="capitulosBitacora"
+      [leyFinal]="leyFinal"
+      (verCinematica)="verCinematicaDesdeBitacora($event)"
+      (verPrologo)="verPrologoDesdeBitacora()"
+      (borrar)="empezarDeCero()"
+      (cerrar)="cerrarBitacora()"
+    />
+  }
+}
+
+@if (cinematica(); as cine) {
+  @defer (on immediate) {
+    <app-cinematica
+      [cinematica]="cine"
+      [completo]="cinematicaCompleta()"
+      [establecidos]="conceptosHechos()"
+      [origen]="origenIris()"
+      (termino)="alTerminarCinematica()"
+    />
+  }
+}

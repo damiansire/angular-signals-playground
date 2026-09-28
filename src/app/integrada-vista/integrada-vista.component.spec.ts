@@ -213,4 +213,63 @@ describe('IntegradaVistaComponent', () => {
       }
     });
   });
+  describe('partida guardada', () => {
+    const CLAVE = 'signals-cuaderno';
+    const esperar = (ms: number) => new Promise((r) => setTimeout(r, ms));
+    let urlOriginal = '';
+
+    beforeEach(() => {
+      urlOriginal = location.pathname + location.search + location.hash;
+      localStorage.removeItem(CLAVE);
+    });
+    afterEach(() => {
+      history.replaceState(null, '', urlOriginal);
+      localStorage.removeItem(CLAVE);
+    });
+
+    it('al volver, lo establecido en otra visita vuelve a soldar sus enlaces', async () => {
+      localStorage.setItem(
+        CLAVE,
+        JSON.stringify({ v: 1, establecidos: ['1/0', '3/2'], cinematicas: [], prologo: true }),
+      );
+      // Abrir en el último capítulo deja detrás todos los enlaces, que es donde se ve la deuda.
+      history.replaceState(null, '', `${location.pathname}?nivel=11`);
+      const fixture = await montar();
+      await esperar(120);
+
+      const enlaces = [...fixture.nativeElement.querySelectorAll('#bonds .bond')] as Element[];
+      const soldados = enlaces
+        .map((e, j) => (e.classList.contains('on') ? j : -1))
+        .filter((j) => j >= 0 && j < 10);
+      expect(soldados).toEqual([1, 3]);
+
+      fixture.destroy();
+    });
+
+    it('establecer un sistema escribe la partida con su concepto y su sub-nivel', async () => {
+      const fixture = await montar();
+      await esperar(80);
+      const cards = fixture.nativeElement.querySelectorAll('.card--sub');
+      const adentro = (cards[2] as HTMLElement).querySelector('.subhost') ?? cards[2];
+      adentro.dispatchEvent(new CustomEvent('sistema-establecido', { bubbles: true }));
+
+      const guardado = JSON.parse(localStorage.getItem(CLAVE) ?? '{}');
+      expect(guardado.establecidos).toEqual(['2/0']);
+
+      fixture.destroy();
+    });
+
+    it('con una partida rota arranca igual, sin enlaces soldados', async () => {
+      localStorage.setItem(CLAVE, '{esto no es json');
+      history.replaceState(null, '', `${location.pathname}?nivel=11`);
+      const fixture = await montar();
+      await esperar(120);
+
+      const soldados = fixture.nativeElement.querySelectorAll('#bonds .bond.on').length;
+      // Solo puede estar encendido el enlace que está naciendo hacia el concepto actual.
+      expect(soldados).toBeLessThanOrEqual(1);
+
+      fixture.destroy();
+    });
+  });
 });
