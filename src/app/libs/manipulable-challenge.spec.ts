@@ -1,5 +1,6 @@
 import {
   act,
+  healthOf,
   malformed,
   solutionFor,
   ManipulableChallenge,
@@ -70,6 +71,33 @@ describe('turn', () => {
     const state = startOf(TRES_POSICIONES);
     expect(turn(TRES_POSICIONES, state, 'no-existe')).toBe(state);
   });
+
+  it('arranca una corrida nueva: lo accionado con el código anterior se descarta', () => {
+    const accionado = act(
+      EFFECT_READS_SYSTEM,
+      act(EFFECT_READS_SYSTEM, startOf(EFFECT_READS_SYSTEM)),
+    );
+    const girado = turn(EFFECT_READS_SYSTEM, accionado, 'lectura');
+    expect(girado.actions).toBe(0);
+    expect(girado.values).toEqual(
+      turn(EFFECT_READS_SYSTEM, startOf(EFFECT_READS_SYSTEM), 'lectura').values,
+    );
+  });
+});
+
+describe('healthOf', () => {
+  const siempreSano: ManipulableChallenge = { ...TRES_POSICIONES, healthy: () => true };
+
+  it('una corrida sin accionar no está sana aunque sus lecturas lo digan', () => {
+    expect(healthOf(siempreSano, startOf(siempreSano))).toBe('idle');
+  });
+
+  it('accionada, se lee como averiada o sana según las lecturas', () => {
+    expect(healthOf(TRES_POSICIONES, act(TRES_POSICIONES, startOf(TRES_POSICIONES)))).toBe(
+      'broken',
+    );
+    expect(healthOf(siempreSano, act(siempreSano, startOf(siempreSano)))).toBe('healthy');
+  });
 });
 
 describe('readings', () => {
@@ -100,11 +128,12 @@ describe('effect 3/1 · la lectura tiene que ocurrir adentro', () => {
     expect(sistema.healthy(accionar(3, startOf(sistema)))).toBe(false);
   });
 
-  it('mover la lectura adentro hace correr el effect: el log se pone al día solo', () => {
+  it('mover la lectura adentro no cura el log atrasado: arranca otra corrida', () => {
     const atrasado = accionar(3, startOf(sistema));
-    const alDia = turn(sistema, atrasado, 'lectura');
-    expect(alDia.values['log']).toBe(3);
-    expect(sistema.healthy(alDia)).toBe(true);
+    const nuevo = turn(sistema, atrasado, 'lectura');
+    expect(nuevo.values).toEqual({ count: 0, log: 0 });
+    expect(healthOf(sistema, nuevo)).toBe('idle');
+    expect(healthOf(sistema, accionar(1, nuevo))).toBe('healthy');
   });
 
   it('con la lectura adentro, el log sigue accionando', () => {
@@ -113,16 +142,17 @@ describe('effect 3/1 · la lectura tiene que ocurrir adentro', () => {
     expect(state.values['log']).toBe(2);
   });
 
-  it('volver a sacar la lectura congela el log donde estaba', () => {
+  it('volver a sacar la lectura rompe la corrida nueva: el log no se mueve', () => {
     let state = accionar(2, turn(sistema, startOf(sistema), 'lectura'));
     state = turn(sistema, state, 'lectura');
     state = accionar(3, state);
-    expect(state.values['count']).toBe(5);
-    expect(state.values['log']).toBe(2);
+    expect(state.values['count']).toBe(3);
+    expect(state.values['log']).toBe(0);
+    expect(healthOf(sistema, state)).toBe('broken');
   });
 
   it('no está sano sin haberlo accionado, aunque la perilla esté bien puesta', () => {
-    expect(sistema.healthy(turn(sistema, startOf(sistema), 'lectura'))).toBe(false);
+    expect(healthOf(sistema, turn(sistema, startOf(sistema), 'lectura'))).toBe('idle');
   });
 
   it('apaga la declaración de afuera cuando deja de participar', () => {

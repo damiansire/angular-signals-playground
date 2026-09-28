@@ -32,7 +32,10 @@ export type Readings = Readonly<Record<string, number>>;
 
 export interface SystemState {
   readonly knobs: KnobPositions;
-  /** Cuántas veces se accionó el sistema. */
+  /**
+   * Cuántas veces se accionó en la corrida vigente, no en total: mover una perilla cambia el
+   * código y arranca otra corrida desde cero (ver `turn`).
+   */
   readonly actions: number;
   readonly values: Readings;
 }
@@ -42,16 +45,30 @@ export interface ManipulableChallenge {
   readonly gauges: readonly Gauge[];
   /** Verbo del botón que hace avanzar al sistema. */
   readonly action: string;
-  /** Valores de arranque. El sistema empieza averiado: por eso hay algo que mirar. */
+  /**
+   * Valores de una corrida antes de accionarla. Vale para TODAS las corridas, no solo la primera:
+   * cada giro de la perilla vuelve a partir de acá.
+   */
   readonly start: Readings;
   readonly code: (knobs: KnobPositions) => readonly CodeLine[];
   /**
-   * Corre después de CADA cambio, sea accionar o mover una perilla. Acá vive la regla que el
-   * sub-nivel enseña, y por eso es lo único que cada desafío escribe a mano.
+   * Corre al accionar y al arrancar cada corrida nueva. Acá vive la regla que el sub-nivel enseña,
+   * y por eso es lo único que cada desafío escribe a mano. Solo ve la corrida vigente, así que no
+   * tiene forma de reescribir lo que pasó con el código anterior.
    */
   readonly settle: (state: SystemState) => Readings;
+  /**
+   * Si las lecturas son las sanas. No hace falta que pida haber accionado: `healthOf` ya no da por
+   * sana una corrida que nunca corrió.
+   */
   readonly healthy: (state: SystemState) => boolean;
 }
+
+/**
+ * Cómo se lee el sistema. `idle` es una corrida sin accionar: sus números no dicen nada del código
+ * todavía, así que no cuentan ni como avería ni como arreglo.
+ */
+export type Health = 'idle' | 'broken' | 'healthy';
 
 /**
  * Evento con el que un sub-nivel avisa que su sistema quedó sano. Es el acoplamiento más flojo
@@ -75,8 +92,12 @@ export function act(challenge: ManipulableChallenge, state: SystemState): System
 }
 
 /**
- * Mueve una perilla a su posición siguiente y deja que el sistema se acomode. Cicla en vez de
- * frenar en la última: probar y volver atrás tiene que costar lo mismo que probar.
+ * Mueve una perilla a su posición siguiente. Mover la perilla es cambiar el código, y eso arranca
+ * una corrida nueva: lo que se accionó con el código anterior se descarta con su corrida. Recalcular
+ * con esas mismas acciones hacía que el código nuevo sanara hacia atrás lo que pasó con el roto, y
+ * alcanzaba con accionar primero y girar después para ganar sin entender nada.
+ *
+ * Cicla en vez de frenar en la última: probar y volver atrás tiene que costar lo mismo que probar.
  */
 export function turn(
   challenge: ManipulableChallenge,
@@ -86,11 +107,21 @@ export function turn(
   const knob = challenge.knobs.find((k) => k.id === knobId);
   if (!knob) return state;
 
-  const next: SystemState = {
-    ...state,
+  const fresh: SystemState = {
     knobs: { ...state.knobs, [knobId]: (state.knobs[knobId] + 1) % knob.positions },
+    actions: 0,
+    values: challenge.start,
   };
-  return { ...next, values: challenge.settle(next) };
+  return { ...fresh, values: challenge.settle(fresh) };
+}
+
+/**
+ * Sano exige lecturas sanas Y haber accionado en la corrida vigente. Sin lo segundo, un código que
+ * todavía no corrió pasaba por arreglado solo porque sus números arrancan en el valor bueno.
+ */
+export function healthOf(challenge: ManipulableChallenge, state: SystemState): Health {
+  if (state.actions === 0) return 'idle';
+  return challenge.healthy(state) ? 'healthy' : 'broken';
 }
 
 /** Los rótulos y valores que se muestran, en el orden en que el desafío los declaró. */
@@ -130,7 +161,7 @@ export function solutionFor(
         ]),
       ];
       for (const [name, candidate] of moves) {
-        if (challenge.healthy(candidate)) return [...path, name];
+        if (healthOf(challenge, candidate) === 'healthy') return [...path, name];
         const id = key(candidate);
         if (seen.has(id)) continue;
         seen.add(id);
@@ -174,7 +205,10 @@ export function malformed(challenge: ManipulableChallenge): readonly string[] {
     problems.push('tiene una perilla de una sola posición');
   }
   if (challenge.gauges.length === 0) problems.push('no tiene lectura que conteste');
-  if (challenge.healthy(start)) problems.push('arranca sano, así que no hay nada que notar');
+  // Sin accionar nunca está sano, así que la pregunta útil es si el código de arranque ya anda.
+  if (healthOf(challenge, act(challenge, start)) === 'healthy') {
+    problems.push('arranca sano, así que no hay nada que notar');
+  }
 
   // Forma: que los 37 cierres se lean como el mismo gesto.
   if (challenge.knobs.length > 1) {
