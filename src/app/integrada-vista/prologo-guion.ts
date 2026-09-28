@@ -43,10 +43,10 @@ export const PRESUPUESTO = {
   /** Caracteres por segundo leyendo. Por debajo del techo cómodo de subtitulado, que es 17. */
   cps: 16,
   /**
-   * Con voz manda el habla, que es más lenta. `HABLA_CPS` es lo que dice el motor a velocidad 1;
-   * acá va menos a propósito, y ese ~15% de diferencia es MARGEN: clavado en el número medido, una
-   * voz apenas más lenta no termina la frase antes de que entre la siguiente y se come la última
-   * palabra.
+   * Ritmo del modo voz, que hoy solo ofrece el Estudio como ensayo. El prólogo del juego ya NO lo
+   * usa: desde que los personajes hablan con los blips del director de sonido (`libs/sonido.ts`),
+   * que se reparten en la ventana que les toque, corre siempre a ritmo de lectura y dura lo mismo
+   * en cualquier máquina. Nació midiendo la voz del sistema, que hablaba más lento que la lectura.
    */
   cpsVoz: 8.8,
   /** Una línea de dos palabras igual necesita registrarse antes de irse. */
@@ -56,9 +56,6 @@ export const PRESUPUESTO = {
   /** Aire entre turnos: pegadas suenan a lista leída, no a gente hablando. */
   respiro: 220,
 } as const;
-
-/** Caracteres por segundo que dice `speechSynthesis` a velocidad 1. Cronometrado, no supuesto. */
-export const HABLA_CPS = 10.1;
 
 /** Cuándo entra la primera línea. Un respiro antes de que alguien hable. */
 const ARRANQUE = 800;
@@ -267,8 +264,8 @@ export function largoDe(linea: LineaGuion): number {
 }
 
 /**
- * Cuánto tiene que estar en pantalla una línea para poder seguirse sin apuro. Con voz manda el
- * habla, que es más lenta que la lectura, así que la misma escena dura distinto según el modo.
+ * Cuánto tiene que estar en pantalla una línea para poder seguirse sin apuro. `conVoz` es el modo
+ * de ensayo del Estudio (ver `PRESUPUESTO.cpsVoz`); en el juego la voz ya no cambia el ritmo.
  */
 export function ventanaDe(linea: LineaGuion, conVoz: boolean): number {
   const cps = conVoz ? PRESUPUESTO.cpsVoz : PRESUPUESTO.cps;
@@ -276,7 +273,10 @@ export function ventanaDe(linea: LineaGuion, conVoz: boolean): number {
   return Math.max(linea.dur ?? 0, seguir + PRESUPUESTO.entra + PRESUPUESTO.sale);
 }
 
-/** Encadena el guion en una sola pasada y devuelve cada línea con su ventana ya resuelta. */
+/**
+ * Encadena el guion en una sola pasada y devuelve cada línea con su ventana ya resuelta. Sin
+ * `conVoz` va a ritmo de lectura, que es el único que usa el juego.
+ */
 export function armarReloj(
   guion: readonly LineaGuion[] = GUION,
   conVoz = false,

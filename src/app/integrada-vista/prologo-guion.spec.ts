@@ -1,6 +1,6 @@
+import { PERFILES, planDeBlips } from '../libs/sonido';
 import {
   GUION,
-  HABLA_CPS,
   PRESUPUESTO,
   anclajesDe,
   armarReloj,
@@ -179,12 +179,6 @@ describe('el guion publicado', () => {
     expect(largoDe(larguisima) / (legible / 1000)).toBeLessThanOrEqual(PRESUPUESTO.cps + 0.5);
   });
 
-  // Si alguien sube `cpsVoz` hasta el ritmo real del motor, las frases dejan de entrar y la última
-  // palabra se corta. No se ve: se escucha, y es carísimo de diagnosticar después.
-  it('el presupuesto con voz deja margen sobre el ritmo real del habla', () => {
-    expect(PRESUPUESTO.cpsVoz).toBeLessThan(HABLA_CPS);
-  });
-
   it('ningún renglón declarado se pasa del techo de columnas', () => {
     expect(renglonesLargos(GUION)).toEqual([]);
   });
@@ -216,14 +210,15 @@ describe('el guion publicado', () => {
     }
   });
 
-  // La voz tiene que TERMINAR la frase antes de que entre la siguiente. Sin margen, la última
-  // palabra se corta, y eso no se ve: se escucha.
-  it('con voz, a cada línea le sobra tiempo para decirla completa', () => {
-    const reloj = armarReloj(GUION, true);
-    for (const linea of reloj) {
-      const disponible = (linea.t1 - linea.t0 - 350) / 1000;
-      const hablar = largoDe(linea) / 10.1;
-      expect(disponible).withContext(linea.id).toBeGreaterThan(hablar);
+  // El prólogo va a ritmo de lectura y cada personaje habla con blips que se reparten en la ventana
+  // de su línea. Si la ventana queda corta, el director aprieta el paso hasta un mínimo y ahí empieza
+  // a tirar las últimas sílabas: la frase se corta, y eso no se ve, se escucha.
+  it('a ritmo de lectura, cada personaje dice su línea entera, sin perder sílabas', () => {
+    for (const linea of armarReloj(GUION, false)) {
+      const perfil = PERFILES[linea.quien];
+      const entera = planDeBlips(linea.txt, Number.MAX_SAFE_INTEGER, perfil).length;
+      const dicha = planDeBlips(linea.txt, linea.t1 - linea.t0, perfil).length;
+      expect(dicha).withContext(linea.id).toBe(entera);
     }
   });
 });
