@@ -1,6 +1,9 @@
 <div class="body-container">
   <a href="#main-content" class="skip-link">Saltar al contenido</a>
-  <div id="main-content">
+  <!-- `tabindex="-1"` es lo que hace que el salto FUNCIONE: un div no es focusable, así que sin
+       esto el enlace movía el hash y el foco se quedaba donde estaba, que es justo lo contrario
+       de lo que un skip-link promete. -->
+  <div id="main-content" tabindex="-1">
     <router-outlet></router-outlet>
   </div>
 </div>
