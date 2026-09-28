@@ -1,3 +1,4 @@
+import { sonido, VOLUMEN_COMUN } from '../libs/sonido';
 import {
   bisectAngle,
   dotOffset,
@@ -68,9 +69,9 @@ export interface IntroTusiOptions {
    * círculo apareciendo. El overlay igual se cierra y el audio igual se desbloquea, que es lo único
    * que ese click tiene que hacer siempre.
    *
-   * Recibe también si el sonido quedó activado. La preferencia se elige en ESTE overlay pero quien
-   * suena a continuación es el prólogo: sin pasarla, alguien que silenciaba antes de entrar
-   * igual escuchaba la cinemática entera, que es lo contrario de lo que acababa de pedir.
+   * Recibe también si el sonido quedó activado, pero es solo informativo: la preferencia es global
+   * (`libs/sonido.ts`) y el toggle de este overlay la cambia ahí mismo, así que el prólogo y todo lo
+   * que suene después ya la encuentran resuelta.
    */
   readonly onThemePicked?: (startBuild: () => void, conSonido: boolean) => void;
 }
@@ -99,7 +100,6 @@ export function initIntroTusi(host: HTMLElement, options: IntroTusiOptions = {})
   let pal = PALETTES.light;
   let speedIdx = SPEED_START;
   let paused = false;
-  let soundOn = true;
   let started = false;
   /** El clima ya se eligió. Separado de `started` porque con prólogo hay un rato entre las dos. */
   let picked = false;
@@ -109,28 +109,37 @@ export function initIntroTusi(host: HTMLElement, options: IntroTusiOptions = {})
   let visible = true;
 
   // ── audio (timbre del video: fundamental + 2º armónico ~0.39 + 3º ~0.15, decay exp ~0.36 s) ──
-  let actx: AudioContext | null = null;
+  // Sale por el director de sonido (`libs/sonido.ts`), no por un contexto propio: uno solo para toda
+  // la app, que se abre con el primer gesto y se queda callado si no hay Web Audio o si el sonido
+  // está apagado. Sin salida, la construcción sigue igual, en silencio.
   let master: GainNode | null = null;
-  function initAudio(): void {
-    if (actx) return;
-    const Ctor =
-      window.AudioContext ??
-      (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
-    actx = new Ctor();
-    master = actx.createGain();
-    master.gain.value = 0.22;
-    const comp = actx.createDynamicsCompressor();
-    master.connect(comp);
-    comp.connect(actx.destination);
+  /**
+   * La salida común ya pasa por su propio volumen (0,7) y por un compresor igual al que tenía la
+   * intro. Se compensa acá para que cada nota llegue a ese compresor con la misma amplitud de antes:
+   * la intro tiene que sonar igual, solo cambió por dónde sale.
+   */
+  const VOLUMEN_INTRO = 0.22 / VOLUMEN_COMUN;
+  /** Se arma la primera vez que hay dónde sonar: el audio puede destrabarse con la intro andando. */
+  function initAudio(): GainNode | null {
+    const salida = sonido().salida();
+    if (!salida) return null;
+    if (!master) {
+      master = salida.ctx.createGain();
+      master.gain.value = VOLUMEN_INTRO;
+      master.connect(salida.salida);
+    }
+    return master;
   }
   function playNote(freq: number, vel: number): void {
-    if (!actx || !master) return;
+    const out = initAudio();
+    if (!out) return;
+    const actx = out.context;
     const now = actx.currentTime;
     const g = actx.createGain();
     g.gain.setValueAtTime(0, now);
     g.gain.linearRampToValueAtTime(vel, now + 0.004);
     g.gain.exponentialRampToValueAtTime(0.0008, now + 0.36);
-    g.connect(master);
+    g.connect(out);
     for (const [mul, amp] of [
       [1, 1.0],
       [2, 0.39],
@@ -208,7 +217,7 @@ export function initIntroTusi(host: HTMLElement, options: IntroTusiOptions = {})
       if (L.phFloor === undefined) L.phFloor = f;
       else if (f > L.phFloor) {
         L.phFloor = f;
-        if (soundOn && visible) {
+        if (visible) {
           const base = lineFreq(k);
           // hasta 7 líneas queda igual que antes; en la 8ª bajamos apenas el volumen por nota
           const soft = 0.4 + 0.6 * Math.min(1, 7 / sounding);
@@ -324,15 +333,21 @@ export function initIntroTusi(host: HTMLElement, options: IntroTusiOptions = {})
   });
 
   const soundBtn = q<HTMLButtonElement>('.tusi__hud [data-role="sound"]');
-  soundBtn.addEventListener('click', () => {
-    soundOn = !soundOn;
-    if (soundOn) {
-      initAudio();
-      if (actx?.state === 'suspended') void actx.resume();
-    }
-    soundBtn.textContent = soundOn ? '🔊' : '🔇';
-    soundBtn.setAttribute('aria-label', soundOn ? 'Silenciar' : 'Activar sonido');
-  });
+  function refreshSound(): void {
+    const on = sonido().activo();
+    soundBtn.textContent = on ? '🔊' : '🔇';
+    soundBtn.setAttribute('aria-label', on ? 'Silenciar' : 'Activar sonido');
+  }
+  /**
+   * Los dos toggles (este del HUD y el del overlay) cambian la preferencia GLOBAL, la misma del botón
+   * de sonido del prólogo: silenciar en uno silencia en todos, y cada botón se repinta por
+   * `alCambiar` venga de donde venga el cambio. El click es el gesto que el navegador exige, así que
+   * si lo prende se aprovecha para destrabar el audio.
+   */
+  function toggleSound(): void {
+    if (sonido().alternar()) sonido().desbloquear();
+  }
+  soundBtn.addEventListener('click', toggleSound);
 
   q<HTMLButtonElement>('.tusi__hud [data-role="reset"]').addEventListener('click', () => {
     reset();
@@ -394,6 +409,7 @@ export function initIntroTusi(host: HTMLElement, options: IntroTusiOptions = {})
   const ovSoundBtn = q<HTMLButtonElement>('[data-role="ov-sound"]');
   const ovSoundTxt = q<HTMLElement>('.tusi__ov-sound-txt');
   function refreshOvSound(): void {
+    const soundOn = sonido().activo();
     ovSoundBtn.setAttribute('aria-pressed', String(soundOn));
     ovSoundBtn.setAttribute(
       'aria-label',
@@ -403,8 +419,9 @@ export function initIntroTusi(host: HTMLElement, options: IntroTusiOptions = {})
       ? 'Sonido activado · tocá para silenciar'
       : 'Sonido silenciado · tocá para activar';
   }
-  ovSoundBtn.addEventListener('click', () => {
-    soundOn = !soundOn;
+  ovSoundBtn.addEventListener('click', toggleSound);
+  const dejarDeOirSonido = sonido().alCambiar(() => {
+    refreshSound();
     refreshOvSound();
   });
   function applyTheme(t: 'light' | 'dark'): void {
@@ -418,21 +435,17 @@ export function initIntroTusi(host: HTMLElement, options: IntroTusiOptions = {})
     // El chrome del recorrido se libera recién acá y no al elegir clima: con el prólogo en el medio
     // quedaba clickeable y tabulable por encima de la cinemática (topbar y riel van en z-index 6).
     tapados().forEach((el) => (el.inert = false));
-    // El audio de Tusi también espera: abrirlo al elegir clima lo dejaba corriendo en silencio al
-    // lado del contexto del prólogo durante toda la cinemática.
-    if (soundOn) {
-      initAudio();
-      if (actx?.state === 'suspended') void actx.resume();
-    }
   }
   function start(theme: 'light' | 'dark'): void {
     if (started || picked) return;
     picked = true;
     applyTheme(theme);
-    if (options.onThemePicked) options.onThemePicked(startBuild, soundOn);
+    // Este click es el gesto que el navegador exige para dejar sonar: se destraba acá, antes de que
+    // el prólogo o la construcción lo necesiten. El director también lo hace solo con el primer
+    // `pointerdown`, pero hay navegadores que solo lo aceptan adentro del click.
+    if (sonido().activo()) sonido().desbloquear();
+    if (options.onThemePicked) options.onThemePicked(startBuild, sonido().activo());
     else startBuild();
-    soundBtn.textContent = soundOn ? '🔊' : '🔇';
-    soundBtn.setAttribute('aria-label', soundOn ? 'Silenciar' : 'Activar sonido');
     reset();
     pedirCuadro();
     overlay.classList.add('gone');
@@ -454,6 +467,9 @@ export function initIntroTusi(host: HTMLElement, options: IntroTusiOptions = {})
   tapados().forEach((el) => (el.inert = true));
   q<HTMLButtonElement>('[data-role="pick-dark"]').addEventListener('click', () => start('dark'));
   q<HTMLButtonElement>('[data-role="pick-light"]').addEventListener('click', () => start('light'));
+  // Desde el arranque y no recién al entrar: la preferencia se guarda entre visitas, así que puede
+  // venir apagada de antes.
+  refreshSound();
   refreshOvSound();
 
   // ── loop ──
@@ -494,10 +510,8 @@ export function initIntroTusi(host: HTMLElement, options: IntroTusiOptions = {})
       introEl.inert = !visible;
       introEl.classList.toggle('intro--fuera', !visible);
     }
-    if (actx) {
-      if (visible && soundOn) void actx.resume();
-      else if (!visible) void actx.suspend();
-    }
+    // El audio no se suspende al salir de vista: el contexto es de toda la app y suspenderlo callaría
+    // también lo demás. Alcanza con no disparar notas nuevas (ver `step`), que duran medio segundo.
     if (visible) pedirCuadro();
   }
 
@@ -587,7 +601,10 @@ export function initIntroTusi(host: HTMLElement, options: IntroTusiOptions = {})
       window.removeEventListener('touchmove', onUserScroll);
       document.removeEventListener('click', onDocClick);
       document.removeEventListener('keydown', onKeyDown);
-      void actx?.close();
+      dejarDeOirSonido();
+      // El contexto es compartido y no se cierra: solo se desconecta lo de la intro.
+      master?.disconnect();
+      master = null;
     },
   };
 }

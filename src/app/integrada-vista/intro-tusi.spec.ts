@@ -1,3 +1,4 @@
+import { sonido } from '../libs/sonido';
 import { initIntroTusi } from './intro-tusi';
 
 /**
@@ -9,10 +10,21 @@ import { initIntroTusi } from './intro-tusi';
 describe('initIntroTusi', () => {
   const cerrar: (() => void)[] = [];
   const hosts: HTMLElement[] = [];
+  /** La preferencia de sonido es global y persiste entre tests: cada uno la deja como la encontró. */
+  let sonidoAlEntrar = true;
+
+  beforeEach(() => {
+    sonidoAlEntrar = sonido().activo();
+    // Sin gesto real no hay contexto que abrir, y sin contexto no hay salida: así ningún test
+    // depende del hardware de audio.
+    spyOn(sonido(), 'desbloquear');
+    spyOn(sonido(), 'salida').and.returnValue(null);
+  });
 
   afterEach(() => {
     cerrar.splice(0).forEach((fn) => fn());
     hosts.splice(0).forEach((h) => h.remove());
+    if (sonido().activo() !== sonidoAlEntrar) sonido().alternar(sonidoAlEntrar);
   });
 
   /** Markup mínimo que el intro exige. */
@@ -67,6 +79,8 @@ describe('initIntroTusi', () => {
       dark: host.querySelector<HTMLButtonElement>('[data-role="pick-dark"]')!,
       light: host.querySelector<HTMLButtonElement>('[data-role="pick-light"]')!,
       ovSound: host.querySelector<HTMLButtonElement>('[data-role="ov-sound"]')!,
+      ovSoundTxt: host.querySelector<HTMLElement>('.tusi__ov-sound-txt')!,
+      hudSound: host.querySelector<HTMLButtonElement>('.tusi__hud [data-role="sound"]')!,
       gatillos,
       sonidos,
     };
@@ -167,20 +181,54 @@ describe('initIntroTusi', () => {
     }).not.toThrow();
   });
 
-  describe('la preferencia de sonido cruza el boundary', () => {
-    // La elige el overlay del intro pero quien suena después es el prólogo: sin pasarla, alguien
-    // que silenciaba antes de entrar escuchaba igual la cinemática entera.
+  describe('la preferencia de sonido es una sola para toda la app', () => {
+    // La elige el overlay del intro pero después suenan el prólogo y el recorrido: silenciar antes
+    // de entrar tiene que valer para todo, no solo para la intro.
     it('con el sonido puesto, avisa que va con sonido', () => {
+      sonido().alternar(true);
       const t = arrancar();
       t.dark.click();
       expect(t.sonidos).toEqual([true]);
     });
 
-    it('si silenciaste en el overlay, el aviso viaja en silencio', () => {
+    it('si silenciaste en el overlay, queda silenciado para todos y el aviso lo dice', () => {
+      sonido().alternar(true);
       const t = arrancar();
       t.ovSound.click();
       t.dark.click();
+      expect(sonido().activo()).toBeFalse();
       expect(t.sonidos).toEqual([false]);
+    });
+
+    it('arranca mostrando la preferencia guardada, aunque venga apagada de otra visita', () => {
+      sonido().alternar(false);
+      const t = arrancar();
+      expect(t.hudSound.textContent).toBe('🔇');
+      expect(t.ovSound.getAttribute('aria-pressed')).toBe('false');
+    });
+
+    it('los dos toggles muestran lo mismo, venga de donde venga el cambio', () => {
+      sonido().alternar(true);
+      const t = arrancar();
+
+      t.hudSound.click();
+      expect(t.ovSoundTxt.textContent).toBe('Sonido silenciado · tocá para activar');
+      expect(t.hudSound.getAttribute('aria-label')).toBe('Activar sonido');
+
+      // Como si lo hubiera prendido el botón del prólogo.
+      sonido().alternar(true);
+      expect(t.hudSound.textContent).toBe('🔊');
+      expect(t.ovSound.getAttribute('aria-pressed')).toBe('true');
+    });
+
+    it('cerrada, deja de escuchar la preferencia', () => {
+      sonido().alternar(true);
+      const t = arrancar();
+      t.handle.dispose();
+
+      sonido().alternar(false);
+
+      expect(t.hudSound.textContent).toBe('🔊');
     });
   });
 
