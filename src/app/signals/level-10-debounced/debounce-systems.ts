@@ -51,3 +51,29 @@ export const DEBOUNCE_MANUAL_SYSTEM: ManipulableChallenge = {
   }),
   healthy: (s: SystemState) => s.actions >= 3 && s.values['timers'] === 1,
 };
+
+/**
+ * 10/3 · con `debounced()` la espera ya está hecha, pero solo la ve quien lee `.value()`: crear el
+ * debounced y seguir leyendo la fuente cruda busca en cada tecla igual que antes.
+ */
+export const DEBOUNCED_NATIVE_SYSTEM: ManipulableChallenge = {
+  knobs: knob('leer la consulta cruda o la debounced'),
+  gauges: [{ id: 'busquedas', label: 'búsquedas' }],
+  action: 'tipear una letra',
+  start: { busquedas: 0 },
+  code: (k) => [
+    { text: 'const q = debounced(consulta, 300);' },
+    { text: 'const resultados = resource({' },
+    k[K] === 1
+      ? { text: '  params: () => q.value(),', knob: K }
+      : { text: '  params: () => consulta(),', knob: K },
+    { text: '  loader: ({ params }) => buscar(params),' },
+    { text: '});' },
+  ],
+  // Mientras espera, `q.value()` sostiene el último valor estable: los params no cambian hasta que
+  // la ráfaga termina, y ahí sale un solo pedido.
+  settle: (s: SystemState) => ({
+    busquedas: s.knobs[K] === 1 ? Math.min(s.actions, 1) : s.actions,
+  }),
+  healthy: (s: SystemState) => s.actions >= 3 && s.values['busquedas'] === 1,
+};

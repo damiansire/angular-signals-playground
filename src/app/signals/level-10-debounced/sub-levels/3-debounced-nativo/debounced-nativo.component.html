@@ -1,0 +1,66 @@
+<app-column-and-code-layout
+  title="debounced() nativo"
+  [codeLines]="lines()"
+  concept="Experimental en v22. Sin RxJS ni timers."
+>
+  <!-- Sin bajada: los rótulos son las lecturas mismas. Tipear y ver que query() busca en cada
+       tecla mientras .value() se queda quieto y .status() dice loading es la explicación. -->
+  <section class="dbn w-80 p-5 rounded-lg shadow-md bg-white">
+    <input
+      type="text"
+      aria-label="Consulta"
+      class="w-full border border-gray-300 rounded px-3 py-2 mb-5 focus:outline-none focus:ring-2 focus:ring-rose-400"
+      [value]="query()"
+      (input)="setQuery($any($event.target).value)"
+      placeholder="Escribí rápido…"
+    />
+
+    <dl class="dbn-reads">
+      <div class="dbn-read">
+        <dt class="dbn-expr"><code>query()</code></dt>
+        <dd class="dbn-searches" [attr.aria-label]="rawSearches() + ' búsquedas'">
+          <svg class="dbn-lupa" viewBox="0 0 16 16" aria-hidden="true">
+            <circle cx="7" cy="7" r="4.5" />
+            <path d="M10.5 10.5 14 14" />
+          </svg>
+          ×{{ rawSearches() }}
+        </dd>
+        <dd class="dbn-val">"{{ query() }}"</dd>
+      </div>
+
+      <div class="dbn-read">
+        <dt class="dbn-expr"><code>debouncedQuery.value()</code></dt>
+        <dd class="dbn-searches" [attr.aria-label]="debouncedSearches() + ' búsquedas'">
+          <svg class="dbn-lupa" viewBox="0 0 16 16" aria-hidden="true">
+            <circle cx="7" cy="7" r="4.5" />
+            <path d="M10.5 10.5 14 14" />
+          </svg>
+          ×{{ debouncedSearches() }}
+        </dd>
+        <dd class="dbn-val dbn-val--settled">"{{ debouncedQuery.value() }}"</dd>
+      </div>
+
+      <div class="dbn-read">
+        <dt class="dbn-expr"><code>debouncedQuery.status()</code></dt>
+        <dd class="dbn-val">
+          <code class="dbn-status" [class.dbn-status--loading]="debouncedQuery.isLoading()">{{
+            debouncedQuery.status()
+          }}</code>
+        </dd>
+        <!-- La espera se ve: una barra que se llena en la ventana y vuelve a cero con cada tecla.
+             Alternar entre dos animaciones iguales la reinicia sin recrear el elemento. -->
+        <dd class="dbn-wait" aria-hidden="true">
+          @if (debouncedQuery.isLoading()) {
+            <span
+              class="dbn-wait-fill"
+              [class.dbn-wait-fill--odd]="rawSearches() % 2 === 1"
+              [style.animation-duration.ms]="waitMs"
+            ></span>
+          }
+        </dd>
+      </div>
+    </dl>
+  </section>
+</app-column-and-code-layout>
+
+<app-manipulable-system [system]="closingSystem" />

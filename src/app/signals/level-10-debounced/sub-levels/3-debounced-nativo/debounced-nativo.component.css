@@ -1,0 +1,137 @@
+/* Clases con prefijo `dbn-`: este componente se embebe en la vista integrada, que estampa
+   su propio atributo de encapsulación; sin prefijo, clases del motor de la molécula pisan
+   las nuestras. */
+
+.dbn-reads {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+  margin: 0;
+}
+
+/* Cada lectura: la expresión arriba con sus búsquedas a la derecha, el valor abajo. */
+.dbn-read {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  column-gap: 0.75rem;
+  row-gap: 0.15rem;
+}
+
+.dbn-expr {
+  grid-column: 1;
+  grid-row: 1;
+  margin: 0;
+  font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+  font-size: 0.72rem;
+  color: #8a8172;
+}
+
+.dbn-searches {
+  grid-column: 2;
+  grid-row: 1;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
+  margin: 0;
+  font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+  font-size: 0.75rem;
+  font-variant-numeric: tabular-nums;
+  color: #5c5648;
+}
+
+.dbn-lupa {
+  width: 0.8rem;
+  height: 0.8rem;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+}
+
+.dbn-val {
+  grid-column: 1 / -1;
+  min-width: 0;
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #1c1e24;
+}
+
+/* El acento del concepto (effect) marca el valor que espera, como en 10/1 y 10/2. */
+.dbn-val--settled {
+  color: #be123c;
+}
+
+.dbn-status {
+  display: inline-block;
+  padding: 0.1rem 0.55rem;
+  border-radius: 999px;
+  font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+  font-size: 0.75rem;
+  font-weight: 500;
+  background: #f1eee8;
+  color: #5c5648;
+  transition:
+    background-color 120ms ease-out,
+    color 120ms ease-out;
+}
+
+.dbn-status--loading {
+  background: #ffe4e6;
+  color: #be123c;
+}
+
+.dbn-wait {
+  grid-column: 1 / -1;
+  height: 3px;
+  margin: 0.35rem 0 0;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #f1eee8;
+}
+
+/* transform y no width: se anima en el compositor, sin relayout por tecla. */
+.dbn-wait-fill {
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: #fb7185;
+  transform-origin: left center;
+  animation-name: dbn-fill;
+  animation-timing-function: linear;
+  animation-fill-mode: both;
+}
+
+/* Cambiar `animation-name` reinicia la animación: cada tecla salta a la otra copia. */
+.dbn-wait-fill--odd {
+  animation-name: dbn-fill-odd;
+}
+
+@keyframes dbn-fill {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+@keyframes dbn-fill-odd {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dbn-wait-fill {
+    animation: none;
+    opacity: 0.5;
+  }
+}
