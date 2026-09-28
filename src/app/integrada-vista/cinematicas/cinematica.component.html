@@ -1,0 +1,106 @@
+<div
+  class="cine {{ clasesDeBeats() }}"
+  role="dialog"
+  aria-modal="true"
+  [attr.aria-label]="'Cinemática. ' + etiqueta() + ': ' + cinematica().titulo"
+  [class.cine--quieta]="quieta()"
+  [class.cine--congelada]="congelada()"
+>
+  <!-- Las piezas que todas las escenas comparten: las naves y el átomo se dibujan una sola vez acá
+       y cada escena las usa con <use>. Van en un SVG sin tamaño para que no ocupen lugar. -->
+  <svg class="cine__defs" width="0" height="0" aria-hidden="true" focusable="false">
+    <defs>
+      <radialGradient id="cine-motor" cx="50%" cy="50%" r="50%">
+        <stop offset="0" stop-color="#fff1d0" />
+        <stop offset="0.45" stop-color="#f2ab41" />
+        <stop offset="1" stop-color="#f2ab41" stop-opacity="0" />
+      </radialGradient>
+      <radialGradient id="cine-brillo" cx="50%" cy="50%" r="50%">
+        <stop offset="0" stop-color="currentColor" stop-opacity="0.55" />
+        <stop offset="1" stop-color="currentColor" stop-opacity="0" />
+      </radialGradient>
+      <!-- La nave del prólogo (flecha con motor atrás), al cuádruple. -->
+      <symbol id="cine-nave" viewBox="-70 -40 140 80" overflow="visible">
+        <circle class="k-motor" cx="-44" cy="0" r="18" fill="url(#cine-motor)" />
+        <path
+          d="M56 0 L-40 -28 L-20 0 L-40 28 Z"
+          fill="#fbf8ef"
+          stroke="currentColor"
+          stroke-width="5"
+          stroke-linejoin="round"
+        />
+        <path d="M18 0 L-6 -7 L-6 7 Z" fill="currentColor" opacity="0.28" />
+      </symbol>
+      <symbol id="cine-nave-cap" viewBox="-70 -40 140 80" overflow="visible">
+        <use href="#cine-nave" x="-70" y="-40" width="140" height="80" />
+        <path d="M-26 -18 L10 -6" stroke="#eb9b3c" stroke-width="5" stroke-linecap="round" />
+      </symbol>
+    </defs>
+  </svg>
+
+  <div class="cine__barra cine__barra--arriba">
+    <span class="cine__rotulo" aria-hidden="true"
+      >{{ etiqueta() }} <b>· {{ cinematica().titulo }}</b></span
+    >
+    <button class="cine__saltar" type="button" (click)="saltar()">
+      Saltar <kbd aria-hidden="true">Esc</kbd>
+    </button>
+  </div>
+
+  <div class="cine__escena">
+    <div class="cine__lienzo">
+      @if (escena(); as tipo) {
+        <ng-container *ngComponentOutlet="tipo" />
+      }
+
+      <!-- La tarjeta del capítulo: se lee en el centro y después se va, y el tagline queda en la
+           barra de arriba. Es el mismo que el capítulo tiene en el recorrido: se lo reconoce. -->
+      <div class="cine__titulo" aria-hidden="true">
+        <span class="cine__titulo-k">{{ etiqueta() }}</span>
+        <span class="cine__titulo-h">{{ cinematica().titulo }}</span>
+        <svg class="cine__titulo-trazo" viewBox="0 0 200 10" preserveAspectRatio="none">
+          <path d="M2 6 Q 60 1 100 5 T 198 4" pathLength="1" />
+        </svg>
+      </div>
+    </div>
+  </div>
+
+  <div class="cine__barra cine__barra--abajo">
+    <div class="cine__dialogo" aria-live="polite">
+      @for (l of linea() ? [linea()!] : []; track l.id) {
+        <div class="cine__linea" [attr.data-quien]="l.quien">
+          <span class="cine__retrato" aria-hidden="true">
+            @if (l.quien === 'mascota') {
+              <img src="angular-mascot-idea.svg" alt="" width="240" height="300" />
+            } @else {
+              <svg viewBox="-70 -40 140 80">
+                <use
+                  [attr.href]="l.quien === 'cap' ? '#cine-nave-cap' : '#cine-nave'"
+                  x="-70"
+                  y="-40"
+                  width="140"
+                  height="80"
+                />
+              </svg>
+            }
+          </span>
+          <p class="cine__texto">
+            <span class="cine__nombre">{{ nombreDe(l.quien) }}</span>
+            <span class="cine__frase">
+              @for (p of palabrasDe(l); track $index) {
+                @if (p.corte) {
+                  <br />
+                }
+                <span class="cine__palabra" [style.--i]="$index">{{ p.txt }}</span>
+                {{ ' ' }}
+              }
+            </span>
+          </p>
+        </div>
+      }
+    </div>
+    <button class="cine__seguir" type="button" (click)="avanzar()" aria-label="Siguiente línea">
+      <span aria-hidden="true">▸</span>
+    </button>
+  </div>
+</div>

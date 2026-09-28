@@ -1,0 +1,718 @@
+/* Cinemáticas de capítulo. Sin encapsular (ver el componente): todo lleva prefijo `cine` o `k-`.
+
+   Reglas de movimiento que ordenan esta hoja, en este orden de prioridad:
+   1. Las entradas son TRANSICIONES entre dos estados (sin beat / con beat). Con movimiento reducido
+      se apagan las transiciones y el estado final se aplica igual: mismo destino, sin viaje.
+   2. Solo lo que respira usa keyframes en loop, y solo mientras la cinemática está abierta. Con la
+      pestaña oculta se pausan (`cine--congelada`).
+   3. Nada de `filter` en lo que se mueve: los brillos son degradados radiales, que se pintan una vez.
+   4. Jerarquía: primero el entorno (barras, fondo), después el héroe, después los personajes, al
+      final el texto. Salir cuesta menos que entrar: resorte firme y más corto. */
+
+.cine-host {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  display: block;
+  opacity: 1;
+  transition: opacity 280ms ease-out;
+}
+
+/* Antes de la View Transition de apertura la capa existe pero no se ve: así la foto "de antes" es
+   el recorrido solo, y el iris se abre sobre él. */
+.cine-host--antes {
+  visibility: hidden;
+}
+
+.cine-host--fuera {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.cine {
+  --tinta: #201d16;
+  --tinta-suave: #6b6252;
+  --papel: #fbf8ef;
+  --barra: #1b1813;
+  --c-cap: #f2c27a;
+  --c-naveA: #9fc3e6;
+  --c-naveB: #c9b6ea;
+  --c-nave4: #7fd6bd;
+  --c-mascota: #f4ece0;
+  --c-todos: #f6d9c0;
+  --barra-arriba: clamp(40px, 7vh, 60px);
+  --barra-abajo: clamp(108px, 21vh, 176px);
+
+  position: absolute;
+  inset: 0;
+  display: grid;
+  grid-template-rows: var(--barra-arriba) 1fr var(--barra-abajo);
+  overflow: hidden;
+  color: var(--tinta);
+  /* El mismo clima claro del recorrido: la cinemática pasa ADENTRO del mundo de las moléculas. */
+  background: radial-gradient(120% 90% at 50% 38%, #fdfbf4 0%, #f5f0e2 58%, #e9e1cc 100%);
+  view-transition-name: cine;
+}
+
+.cine__defs {
+  position: absolute;
+  width: 0;
+  height: 0;
+  overflow: hidden;
+}
+
+/* ---------- Barras de cine ---------- */
+
+.cine__barra {
+  position: relative;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 0 clamp(12px, 3vw, 36px);
+  background: var(--barra);
+  color: #efe6d6;
+  transition: transform var(--resorte-firme-ms, 360ms) var(--resorte-firme, ease-out);
+}
+
+.cine__barra--arriba {
+  justify-content: space-between;
+  transform: translateY(-100%);
+}
+
+.cine__barra--abajo {
+  justify-content: center;
+  transform: translateY(100%);
+}
+
+.cine.b-abre .cine__barra {
+  transform: none;
+}
+
+.cine__rotulo {
+  font:
+    600 12px/1 ui-monospace,
+    'SFMono-Regular',
+    Menlo,
+    Consolas,
+    monospace;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #bfb29b;
+}
+
+/* El tagline aparece en la barra cuando la tarjeta del centro se va: el título no desaparece,
+   cambia de lugar. */
+.cine__rotulo b {
+  font-weight: 600;
+  color: #efe6d6;
+  opacity: 0;
+  transition: opacity 400ms ease-out;
+}
+
+.cine.b-titulo-rincon .cine__rotulo b {
+  opacity: 1;
+}
+
+.cine__saltar,
+.cine__seguir {
+  font: inherit;
+  color: #efe6d6;
+  background: transparent;
+  border: 1px solid rgba(239, 230, 214, 0.28);
+  border-radius: 999px;
+  cursor: pointer;
+  transition:
+    background-color 160ms ease-out,
+    border-color 160ms ease-out;
+}
+
+.cine__saltar {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  font-size: 13px;
+}
+
+.cine__saltar kbd {
+  font:
+    11px/1 ui-monospace,
+    Menlo,
+    Consolas,
+    monospace;
+  padding: 2px 5px;
+  border-radius: 4px;
+  background: rgba(239, 230, 214, 0.12);
+}
+
+.cine__saltar:hover,
+.cine__seguir:hover {
+  background: rgba(239, 230, 214, 0.1);
+  border-color: rgba(239, 230, 214, 0.55);
+}
+
+.cine__saltar:focus-visible,
+.cine__seguir:focus-visible {
+  outline: 2px solid #f2c27a;
+  outline-offset: 3px;
+}
+
+/* ---------- Escena ---------- */
+
+.cine__escena {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  container-type: size;
+}
+
+/* El lienzo guarda 16:9 y SIEMPRE cabe: por alto en pantallas anchas, por ancho en las angostas.
+   Adentro las escenas ubican todo en porcentaje del lienzo, así la composición no se desarma. */
+.cine__lienzo {
+  position: relative;
+  width: min(100cqw, 177.78cqh);
+  aspect-ratio: 16 / 9;
+  container-type: size;
+}
+
+.cine__lienzo > svg,
+.cine__lienzo .k-mundo {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+/* ---------- Tarjeta del capítulo ---------- */
+
+.cine__titulo {
+  position: absolute;
+  z-index: 4;
+  left: 50%;
+  top: 44%;
+  display: grid;
+  justify-items: center;
+  gap: 6px;
+  width: min(90%, 760px);
+  text-align: center;
+  translate: -50% -50%;
+  opacity: 0;
+  transform: scale(0.97);
+  transition:
+    opacity 420ms ease-out,
+    transform var(--resorte-suave-ms, 520ms) var(--resorte-suave, ease-out);
+  pointer-events: none;
+}
+
+.cine.b-titulo .cine__titulo {
+  opacity: 1;
+  transform: none;
+}
+
+/* Se va más rápido de lo que llegó, hacia arriba: el héroe de la escena toma el centro. */
+.cine.b-titulo-rincon .cine__titulo {
+  opacity: 0;
+  transform: translateY(-8cqh) scale(0.92);
+  transition:
+    opacity 260ms ease-in,
+    transform var(--resorte-firme-ms, 360ms) var(--resorte-firme, ease-in);
+}
+
+.cine__titulo-k {
+  font:
+    600 clamp(11px, 1.4cqw, 14px) / 1 ui-monospace,
+    Menlo,
+    Consolas,
+    monospace;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: var(--tinta-suave);
+}
+
+.cine__titulo-h {
+  font:
+    500 clamp(26px, 5.2cqw, 64px) / 1.05 'Iowan Old Style',
+    'Palatino Linotype',
+    Palatino,
+    Georgia,
+    serif;
+  color: var(--tinta);
+  letter-spacing: 0.12em;
+  transition: letter-spacing 900ms var(--resorte-suave, ease-out);
+}
+
+.cine.b-titulo .cine__titulo-h {
+  letter-spacing: 0.005em;
+}
+
+.cine__titulo-trazo {
+  width: min(60%, 380px);
+  height: 10px;
+  overflow: visible;
+}
+
+.cine__titulo-trazo path {
+  fill: none;
+  stroke: var(--acento, #eb9b3c);
+  stroke-width: 2.4;
+  stroke-linecap: round;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  transition: stroke-dashoffset 900ms var(--resorte-suave, ease-out) 260ms;
+}
+
+.cine.b-titulo .cine__titulo-trazo path {
+  stroke-dashoffset: 0;
+}
+
+/* ---------- Diálogo ---------- */
+
+.cine__barra--abajo {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+}
+
+.cine__dialogo {
+  justify-self: center;
+  width: min(100%, 980px);
+  min-height: 72px;
+}
+
+.cine__linea {
+  --c: var(--c-cap);
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  gap: clamp(10px, 1.6vw, 18px);
+}
+
+.cine__linea[data-quien='naveA'] {
+  --c: var(--c-naveA);
+}
+.cine__linea[data-quien='naveB'] {
+  --c: var(--c-naveB);
+}
+.cine__linea[data-quien='nave4'] {
+  --c: var(--c-nave4);
+}
+.cine__linea[data-quien='mascota'] {
+  --c: var(--c-mascota);
+}
+.cine__linea[data-quien='todos'] {
+  --c: var(--c-todos);
+}
+
+.cine__retrato {
+  display: grid;
+  place-items: center;
+  width: clamp(44px, 5.4vw, 60px);
+  aspect-ratio: 1 / 1;
+  border-radius: 50%;
+  border: 2px solid var(--c);
+  background: radial-gradient(circle at 50% 40%, #3a342a 0%, #221e17 100%);
+  color: var(--c);
+  overflow: hidden;
+  animation: cine-retrato var(--resorte-rebote-ms, 620ms) var(--resorte-rebote, ease-out) both;
+}
+
+.cine__retrato svg {
+  width: 72%;
+  overflow: visible;
+}
+
+.cine__retrato img {
+  width: 82%;
+  height: auto;
+  translate: 0 12%;
+}
+
+.cine__texto {
+  margin: 0;
+  display: grid;
+  gap: 4px;
+}
+
+.cine__nombre {
+  font:
+    600 12px/1 ui-monospace,
+    Menlo,
+    Consolas,
+    monospace;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--c);
+}
+
+.cine__frase {
+  font:
+    500 clamp(17px, 2.3vw, 27px) / 1.28 system-ui,
+    -apple-system,
+    'Segoe UI',
+    sans-serif;
+  color: #f6efe2;
+  text-wrap: balance;
+}
+
+/* La mascota habla en serif, como en el prólogo: se reconoce su voz antes de leer el nombre. */
+.cine__linea[data-quien='mascota'] .cine__frase {
+  font-family: 'Iowan Old Style', 'Palatino Linotype', Palatino, Georgia, serif;
+  font-style: italic;
+}
+
+.cine__palabra {
+  display: inline-block;
+  animation: cine-palabra var(--resorte-suave-ms, 520ms) var(--resorte-suave, ease-out) both;
+  animation-delay: calc(var(--i, 0) * 42ms);
+}
+
+.cine__seguir {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  font-size: 18px;
+}
+
+/* ---------- Kit de actores ----------
+   Un actor es HTML posicionado en porcentaje del lienzo: sus transforms los compone la GPU, cosa
+   que no pasa con un <g> adentro de un SVG (eso se repinta entero en cada cuadro). `translate`
+   centra; `transform` queda libre para animar. */
+
+.k-actor {
+  position: absolute;
+  left: calc(var(--x, 50) * 1%);
+  top: calc(var(--y, 50) * 1%);
+  width: calc(var(--w, 8) * 1%);
+  translate: -50% -50%;
+}
+
+.k-actor > .k-cuerpo {
+  display: block;
+  width: 100%;
+}
+
+.k-actor svg,
+.k-actor img {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+/* Naves: entran de la izquierda en formación, una detrás de otra. */
+.k-nave {
+  color: var(--c, #3a342a);
+}
+
+.k-nave > .k-cuerpo {
+  opacity: 0;
+  transform: translateX(-32cqw) rotate(-6deg);
+  transition:
+    opacity 260ms linear calc(var(--i, 0) * 120ms),
+    transform var(--resorte-suave-ms, 520ms) var(--resorte-suave, ease-out)
+      calc(var(--i, 0) * 120ms);
+}
+
+.cine.b-naves .k-nave > .k-cuerpo {
+  opacity: 1;
+  transform: none;
+}
+
+/* Cada nave respira aparte: en formación rígida se leen como un solo objeto (lo aprendió el
+   prólogo). Solo mientras están en escena. */
+.cine.b-naves .k-nave .k-flota {
+  animation: cine-flota 3.4s ease-in-out infinite alternate;
+  animation-delay: calc(var(--i, 0) * -1.1s);
+}
+
+.k-nave .k-flota {
+  display: block;
+}
+
+.k-nave--cap {
+  color: var(--tinta);
+}
+
+.k-nave--4 {
+  color: #2f9e7f;
+}
+
+/* Mascota: sube con rebote, que es su forma de estar. */
+.k-mascota > .k-cuerpo {
+  opacity: 0;
+  transform: translateY(10cqh) scale(0.9);
+  transform-origin: 50% 100%;
+  transition:
+    opacity 300ms ease-out,
+    transform var(--resorte-rebote-ms, 620ms) var(--resorte-rebote, ease-out);
+}
+
+.cine.b-mascota .k-mascota > .k-cuerpo {
+  opacity: 1;
+  transform: none;
+}
+
+.cine.b-mascota .k-mascota img {
+  transform-origin: 50% 100%;
+  animation: cine-respira 3.6s ease-in-out infinite alternate;
+}
+
+/* Átomo en CSS puro, el mismo dibujo que la entrada del recorrido: núcleo, halo, tres órbitas. */
+.k-atomo {
+  --acento: #eb9b3c;
+  aspect-ratio: 1 / 1;
+}
+
+.k-atomo > .k-cuerpo {
+  position: relative;
+  aspect-ratio: 1 / 1;
+}
+
+.k-atomo__halo,
+.k-atomo__nucleo,
+.k-atomo__orbita,
+.k-atomo__anillo,
+.k-atomo__e {
+  position: absolute;
+  border-radius: 50%;
+}
+
+.k-atomo__halo {
+  left: 50%;
+  top: 50%;
+  width: 70%;
+  aspect-ratio: 1 / 1;
+  translate: -50% -50%;
+  background: radial-gradient(
+    circle,
+    color-mix(in srgb, var(--acento) 45%, transparent),
+    transparent 68%
+  );
+}
+
+.k-atomo__orbita {
+  inset: 0;
+  transform: rotate(var(--rot, 0deg));
+}
+
+.k-atomo__anillo {
+  left: 50%;
+  top: 50%;
+  width: 94%;
+  height: 34%;
+  translate: -50% -50%;
+  border: 2px solid color-mix(in srgb, var(--acento) 70%, #3a342a);
+  opacity: 0.8;
+}
+
+.k-atomo__e {
+  top: 0;
+  left: 0;
+  width: 7%;
+  aspect-ratio: 1 / 1;
+  background: var(--acento);
+  offset-path: ellipse(47% 17% at 50% 50%);
+  offset-rotate: 0deg;
+  animation: cine-orbita var(--dur, 6s) linear infinite;
+  animation-delay: var(--dly, 0s);
+}
+
+/* Un átomo secundario no gira: si todo se mueve, nada llama la atención. */
+.k-atomo.k-quieto .k-atomo__e {
+  animation: none;
+  offset-distance: var(--quieto, 20%);
+}
+
+.k-atomo__nucleo {
+  left: 50%;
+  top: 50%;
+  width: 26%;
+  aspect-ratio: 1 / 1;
+  translate: -50% -50%;
+  background: radial-gradient(
+    circle at 40% 36%,
+    color-mix(in srgb, var(--acento) 25%, #fff6e2) 0%,
+    var(--acento) 58%,
+    color-mix(in srgb, var(--acento) 70%, #3a2a10) 100%
+  );
+  box-shadow: inset 0 -3px 8px rgba(60, 40, 10, 0.35);
+}
+
+/* Onda: tres anillos que salen de un punto. La escena decide con qué beat se dispara, poniendo
+   `animation-name: cine-onda` en sus `span`. */
+.k-onda {
+  aspect-ratio: 1 / 1;
+}
+
+.k-onda > span {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 2px solid var(--acento, #eb9b3c);
+  opacity: 0;
+  animation: none 1.5s cubic-bezier(0.2, 0.7, 0.3, 1) both;
+  animation-delay: calc(var(--i, 0) * 0.24s);
+}
+
+/* Transmisión de la exploradora: el kit la dispara solo con el beat común. */
+.k-transmision > span {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 2px dashed #2f9e7f;
+  opacity: 0;
+}
+
+.cine.b-transmision .k-transmision > span {
+  animation: cine-onda 1.8s cubic-bezier(0.2, 0.7, 0.3, 1) 3 both;
+  animation-delay: calc(var(--i, 0) * 0.3s);
+}
+
+/* Trazo genérico: un path con pathLength="1" se dibuja cuando la escena enciende su beat. */
+.k-trazo {
+  fill: none;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  transition: stroke-dashoffset var(--trazo-ms, 900ms) var(--resorte-suave, ease-out)
+    var(--trazo-delay, 0ms);
+}
+
+/* ---------- Estados globales ---------- */
+
+/* Pestaña oculta: todo lo que respira se congela donde está. */
+.cine--congelada *,
+.cine--congelada *::before,
+.cine--congelada *::after {
+  animation-play-state: paused !important;
+}
+
+/* Movimiento reducido: sin viaje, pero al MISMO destino. Los estados finales siguen aplicando. */
+.cine--quieta *,
+.cine--quieta *::before,
+.cine--quieta *::after {
+  animation: none !important;
+  transition: none !important;
+}
+
+/* Pantallas angostas: menos texto de chrome y la caja de diálogo más compacta. */
+@media (max-width: 640px) {
+  .cine {
+    --barra-abajo: clamp(128px, 26vh, 200px);
+  }
+  .cine__saltar kbd {
+    display: none;
+  }
+  .cine__barra--abajo {
+    padding-right: 8px;
+  }
+}
+
+/* ---------- View Transitions: el iris ---------- */
+
+:root.cine-vt-abre::view-transition-old(root),
+:root.cine-vt-abre::view-transition-new(root),
+:root.cine-vt-cierra::view-transition-old(root),
+:root.cine-vt-cierra::view-transition-new(root) {
+  animation: none;
+}
+
+:root.cine-vt-abre::view-transition-old(cine) {
+  display: none;
+}
+
+:root.cine-vt-abre::view-transition-new(cine) {
+  animation: cine-iris-abre 680ms cubic-bezier(0.22, 0.9, 0.24, 1) both;
+}
+
+:root.cine-vt-cierra::view-transition-new(cine) {
+  display: none;
+}
+
+:root.cine-vt-cierra::view-transition-old(cine) {
+  animation: cine-iris-cierra 460ms cubic-bezier(0.55, 0, 0.8, 0.2) both;
+}
+
+/* ---------- Keyframes ---------- */
+
+@keyframes cine-iris-abre {
+  from {
+    clip-path: circle(0 at var(--cine-iris-x, 50%) var(--cine-iris-y, 50%));
+  }
+  to {
+    clip-path: circle(150vmax at var(--cine-iris-x, 50%) var(--cine-iris-y, 50%));
+  }
+}
+
+@keyframes cine-iris-cierra {
+  from {
+    clip-path: circle(150vmax at var(--cine-iris-x, 50%) var(--cine-iris-y, 50%));
+  }
+  to {
+    clip-path: circle(0 at var(--cine-iris-x, 50%) var(--cine-iris-y, 50%));
+  }
+}
+
+@keyframes cine-palabra {
+  from {
+    opacity: 0;
+    transform: translateY(0.42em);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes cine-retrato {
+  from {
+    opacity: 0;
+    transform: scale(0.6);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes cine-flota {
+  from {
+    transform: translateY(-4%) rotate(-1.5deg);
+  }
+  to {
+    transform: translateY(4%) rotate(1.5deg);
+  }
+}
+
+@keyframes cine-respira {
+  from {
+    transform: scale(1);
+  }
+  to {
+    transform: scale(1.025) translateY(-1%);
+  }
+}
+
+@keyframes cine-orbita {
+  from {
+    offset-distance: 0%;
+  }
+  to {
+    offset-distance: 100%;
+  }
+}
+
+@keyframes cine-onda {
+  0% {
+    opacity: 0.85;
+    transform: scale(0.15);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.6);
+  }
+}
