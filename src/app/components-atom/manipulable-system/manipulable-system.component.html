@@ -44,4 +44,22 @@
 
     <button type="button" class="ms__act" (click)="press()">{{ system().action }}</button>
   </div>
+
+  <!-- La ayuda al fallar, decidida el 26/07: orienta hacia dónde mirar sin decir qué tocar. Al
+       acertar no hay nada: la lectura sana es la única respuesta. Tiene su propia región viva para
+       que quien usa lector de pantalla también la escuche, una vez. -->
+  <div class="ms__pista-zona" aria-live="polite">
+    @if (health() === 'broken') {
+      <p class="ms__pista">
+        <img
+          class="ms__pista-mascota"
+          src="angular-mascot-idea.svg"
+          alt=""
+          width="240"
+          height="300"
+        />
+        Esa no era. Mirá la lectura.
+      </p>
+    }
+  </div>
 </section>

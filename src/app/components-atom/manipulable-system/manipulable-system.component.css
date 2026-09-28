@@ -124,6 +124,43 @@
   color: #6a6355;
 }
 
+/* La mascota al fallar: chica, al costado, en el tono de texto secundario. Es una ayuda, no un
+   veredicto en rojo: el rojo ya lo dice la lectura. */
+.ms__pista {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  margin: 0;
+  font-size: 0.78rem;
+  font-style: italic;
+  color: #6a6355;
+  animation: ms-pista 360ms ease-out both;
+}
+
+/* Tres clases a propósito: adentro del recorrido corre la regla global
+   `.card--dissolve .subhost img`, que monta toda imagen como pantalla con bisel y la agranda. */
+.ms .ms__pista .ms__pista-mascota {
+  width: 1.35rem;
+  height: auto;
+  max-height: none;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+@keyframes ms-pista {
+  from {
+    opacity: 0;
+    transform: translateY(0.3rem);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ms__pista {
+    animation: none;
+  }
+}
+
 .ms__gauge-label {
   font-family: var(--font-mono, ui-monospace, monospace);
   font-size: 0.62rem;

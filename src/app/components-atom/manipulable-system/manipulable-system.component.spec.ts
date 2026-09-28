@@ -85,6 +85,31 @@ describe('ManipulableSystemComponent', () => {
     });
   });
 
+  describe('la mascota al fallar', () => {
+    const pista = (fixture: ReturnType<typeof crear>): HTMLElement | null => {
+      fixture.detectChanges();
+      return (fixture.nativeElement as HTMLElement).querySelector('.ms__pista');
+    };
+
+    it('sin correr no dice nada: todavía no hay nada que mirar', () => {
+      expect(pista(crear())).toBeNull();
+    });
+
+    it('con el código roto accionado, orienta hacia la lectura sin decir qué tocar', () => {
+      const fixture = crear();
+      fixture.componentInstance.press();
+      expect(pista(fixture)?.textContent?.trim()).toBe('Esa no era. Mirá la lectura.');
+    });
+
+    it('al acertar hace silencio: nada de "muy bien"', () => {
+      const fixture = crear();
+      fixture.componentInstance.move('p');
+      fixture.componentInstance.move('p');
+      fixture.componentInstance.press();
+      expect(pista(fixture)).toBeNull();
+    });
+  });
+
   it('la lectura sigue a la perilla', () => {
     const c = crear().componentInstance;
     expect(c.gauges().map((g) => g.value)).toEqual([0]);
