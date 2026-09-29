@@ -89,6 +89,10 @@ el 0, ~87% en el 8), así que verificar solo el concepto 0 no alcanza.
       con `scrollHeight` de la card en los 35 sub-niveles, no a ojo. Ojo con
       demos de lista que crecen por timer (cap explícito) y con demos de varios
       bloques que se apilan en el grid dissolve (agruparlos en un contenedor).
+- [ ] El topbar entra en UN renglón, con el título entero, a 768, 820, 1001 y 1440 px. Medirlo sin
+      el link "Estudio" (solo existe en desarrollo y además empuja el margen del siguiente link):
+      con él la medición da un topbar partido que en producción no pasa. Un control nuevo, angosto,
+      pasa a ícono con un blanco de 24px y su etiqueta queda como nombre accesible.
 
 ## Color y afordancia (que el clima no tape, que el vacío no confunda)
 
@@ -139,6 +143,12 @@ puede alcanzar" son dos cosas distintas y hay que chequear las dos.
 - [ ] Ninguna regla del recorrido apaga el foco de lo embebido. Los rings de
       Tailwind son `box-shadow`: un `box-shadow: none` genérico sobre la card
       también los borra. Tabular hasta un botón embebido y mirar el anillo.
+- [ ] En la landing el topbar está en opacidad 0 y, elegido el clima, ya no es inerte: sus links
+      (bitácora, práctica, pausa) van `inert` mientras no se ven, con el mismo umbral que el
+      índice. Tabular después de elegir clima: el foco no cae en el topbar.
+- [ ] Todo anillo de foco llega a 3:1 contra lo que tiene alrededor. Los acentos claros (ámbar,
+      verde) sobre el crema no llegan: el anillo va doble, `var(--focus-ink)` en el `outline` (el
+      contraste) y el acento en un `box-shadow` por dentro (la identidad).
 
 ## Trabajo de fondo (lo que corre cuando no lo estás mirando)
 
@@ -158,6 +168,18 @@ puede alcanzar" son dos cosas distintas y hay que chequear las dos.
       shorthand `animation` más específico resetea el play-state y le gana.
 - [ ] `prefers-reduced-motion` se prueba cambiándolo EN VIVO, no solo al cargar:
       el CSS reacciona solo, el SMIL y los canvas no.
+- [ ] La vida de fondo se pausa desde el topbar (WCAG 2.2.2) y la pausa se recuerda
+      (`signals-pausa`). Pausar NO es congelar: `animation-play-state: paused` deja una entrada que
+      todavía no arrancó en su primer cuadro, invisible (con la pausa puesta la bitácora quedaba
+      afuera de la pantalla y el recorrido, inerte detrás). Los loops se frenan con velocidad 0 y lo
+      que tiene fin salta a su estado final, también lo que arranca después; prólogo, cinemáticas y
+      bitácora no son fondo. Nunca `pause()`/`play()` de la API: le sacan al CSS el control de
+      `animation-play-state` (la pestaña oculta deja de congelar) y `play()` revive como animación
+      suelta un loop que el CSS ya canceló. Con la pausa puesta: abrir la bitácora, ver una
+      cinemática, entrar a un sub-nivel y contar las `getAnimations()` infinitas que siguen
+      corriendo (cero). Después: pausar en el nivel 0, bajar al 3, reanudar y contar halos latiendo
+      fuera de la parada actual (cero). La vida por timer de un demo (el latido de 3/1) también
+      para: lo que apaga reduced-motion lo apaga la pausa.
 
 ## Legibilidad del contenido embebido
 
