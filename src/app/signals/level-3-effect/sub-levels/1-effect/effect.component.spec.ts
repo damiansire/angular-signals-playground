@@ -116,4 +116,20 @@ describe('EffectComponent', () => {
 
     expect(component.count()).toBe(0);
   });
+
+  it('con la pausa del recorrido el latido se detiene, y vuelve al sacarla', () => {
+    create();
+    const recorrido = document.body.appendChild(document.createElement('div'));
+    recorrido.className = 'fondo-en-pausa';
+    recorrido.appendChild(fixture.nativeElement);
+    fixture.detectChanges();
+
+    jasmine.clock().tick(5000);
+    expect(component.count()).toBe(0);
+
+    recorrido.classList.remove('fondo-en-pausa');
+    jasmine.clock().tick(1400);
+    expect(component.count()).toBe(1);
+    recorrido.remove();
+  });
 });

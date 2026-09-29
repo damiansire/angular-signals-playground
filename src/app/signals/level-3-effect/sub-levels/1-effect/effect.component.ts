@@ -71,6 +71,8 @@ export class EffectComponent {
     // las destruye: marca `inert` la que no se está viendo (ver molecule-engine, `card.inert = !live`).
     // Sin este guard el intervalo late desde que carga la página, aunque estés en otro nivel, y sus
     // effects ensucian la consola con "The current count is: N" a lo largo de todo el recorrido.
+    // Con la pausa de la vida de fondo del recorrido (`.fondo-en-pausa`) tampoco late: es vida, igual
+    // que lo que apaga reduced-motion.
     const host = inject(ElementRef).nativeElement as HTMLElement;
     const prefersReducedMotion =
       typeof window !== 'undefined' &&
@@ -78,7 +80,7 @@ export class EffectComponent {
       window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     if (!prefersReducedMotion) {
       const beatId = setInterval(() => {
-        if (host.closest('[inert]')) return;
+        if (host.closest('[inert], .fondo-en-pausa')) return;
         this.count.update((c) => c + 1);
       }, 1300);
       inject(DestroyRef).onDestroy(() => clearInterval(beatId));
