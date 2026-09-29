@@ -4,6 +4,7 @@ import { provideRouter } from '@angular/router';
 
 import { IntegradaVistaComponent } from './integrada-vista.component';
 import { signalsRoutesTree } from '../app.routes';
+import { cuadrosFalsos, hasta } from './testing/cuadros';
 
 /**
  * La vista de la ruta `/` es el producto entero, y su boot son ~3.900 líneas imperativas que
@@ -19,6 +20,13 @@ describe('IntegradaVistaComponent', () => {
     await fixture.whenStable();
     return fixture;
   }
+
+  /**
+   * El motor termina de arrancar en un timer de 30 ms: alto del track, posición de apertura y
+   * pausa guardada. Se espera a que pase, no un tiempo fijo que con la CPU tomada no alcanza.
+   */
+  const hastaElArranque = (host: HTMLElement): Promise<void> =>
+    hasta(() => host.querySelector<HTMLElement>('#track')!.style.height !== '');
 
   beforeEach(() =>
     TestBed.configureTestingModule({
@@ -178,15 +186,15 @@ describe('IntegradaVistaComponent', () => {
     it('una flecha ya consumida (un overlay modal) no mueve el recorrido; una libre sí', async () => {
       const fixture = await montar();
       const stage = fixture.nativeElement.querySelector('#stage') as HTMLElement;
-      await esperar(80); // el boot fija el alto del track y la posición de apertura a los 30 ms
+      await hastaElArranque(fixture.nativeElement);
       const antes = stage.scrollTop;
 
       flecha(true);
-      await esperar(700); // más que el glide más largo (620 ms)
+      await esperar(700); // más que el glide más largo (620 ms): que no pase nada lleva tiempo
       expect(stage.scrollTop).withContext('flecha consumida').toBe(antes);
 
       flecha(false);
-      await esperar(700);
+      await hasta(() => stage.scrollTop > antes);
       expect(stage.scrollTop).withContext('flecha libre').toBeGreaterThan(antes);
 
       fixture.destroy();
@@ -195,10 +203,12 @@ describe('IntegradaVistaComponent', () => {
     it('un `load` tardío no tira de vuelta al arranque a quien ya navegó', async () => {
       const fixture = await montar();
       const stage = fixture.nativeElement.querySelector('#stage') as HTMLElement;
-      await esperar(80);
+      await hastaElArranque(fixture.nativeElement);
+      const antes = stage.scrollTop;
       flecha(false);
-      await esperar(700);
+      await hasta(() => stage.scrollTop > antes);
       const navegado = stage.scrollTop;
+      expect(navegado).withContext('la flecha movió el recorrido').toBeGreaterThan(antes);
 
       window.dispatchEvent(new Event('load'));
 
@@ -265,29 +275,23 @@ describe('IntegradaVistaComponent', () => {
 
   describe('contrato de teardown', () => {
     it('después de destruir no queda ningún rAF pidiendo cuadros', async () => {
-      const rafOriginal = window.requestAnimationFrame;
-      let pedidosDespuesDeDestruir = 0;
-      let destruido = false;
+      // Los cuadros los da el test y se mira lo que queda pedido. Antes se contaban pedidos durante
+      // 250 ms de reloj real: se le anotaban al motor los de cualquier otro código de la página de
+      // Karma, y un cuadro que el cierre olvidaba cancelar no se veía, porque no pide otro.
+      const cuadros = cuadrosFalsos();
+      const fixture = await montar();
+      expect(cuadros.pendientes())
+        .withContext('el motor arranca con cuadros pedidos: sin eso no hay nada que cortar')
+        .toBeGreaterThan(0);
 
-      window.requestAnimationFrame = function (cb: FrameRequestCallback): number {
-        if (destruido) pedidosDespuesDeDestruir++;
-        return rafOriginal.call(window, cb);
-      };
+      fixture.destroy();
+      // Destruir le avisa al scheduler zoneless de Angular, que pide un cuadro y lo cancela en su
+      // propio setTimeout(0), agendado antes que este: al volver, lo pendiente es solo del motor.
+      await new Promise((r) => setTimeout(r));
 
-      try {
-        const fixture = await montar();
-        fixture.destroy();
-        destruido = true;
-
-        // Varios cuadros de margen: un loop vivo se delata en el primero.
-        await new Promise((resolve) => setTimeout(resolve, 250));
-
-        expect(pedidosDespuesDeDestruir)
-          .withContext('el motor sigue animando sobre una vista que ya no existe')
-          .toBe(0);
-      } finally {
-        window.requestAnimationFrame = rafOriginal;
-      }
+      expect(cuadros.pendientes())
+        .withContext('el motor sigue animando sobre una vista que ya no existe')
+        .toBe(0);
     });
 
     it('devuelve todos los listeners globales que tomó', async () => {
@@ -333,7 +337,6 @@ describe('IntegradaVistaComponent', () => {
   });
   describe('partida guardada', () => {
     const CLAVE = 'signals-cuaderno';
-    const esperar = (ms: number) => new Promise((r) => setTimeout(r, ms));
     let urlOriginal = '';
 
     beforeEach(() => {
@@ -353,7 +356,7 @@ describe('IntegradaVistaComponent', () => {
       // Abrir en el último capítulo deja detrás todos los enlaces, que es donde se ve la deuda.
       history.replaceState(null, '', `${location.pathname}?nivel=11`);
       const fixture = await montar();
-      await esperar(120);
+      await hastaElArranque(fixture.nativeElement);
 
       const enlaces = [...fixture.nativeElement.querySelectorAll('#bonds .bond')] as Element[];
       const soldados = enlaces
@@ -366,7 +369,7 @@ describe('IntegradaVistaComponent', () => {
 
     it('establecer un sistema escribe la partida con su concepto y su sub-nivel', async () => {
       const fixture = await montar();
-      await esperar(80);
+      await hastaElArranque(fixture.nativeElement);
       const cards = fixture.nativeElement.querySelectorAll('.card--sub');
       const adentro = (cards[2] as HTMLElement).querySelector('.subhost') ?? cards[2];
       adentro.dispatchEvent(new CustomEvent('sistema-establecido', { bubbles: true }));
@@ -381,7 +384,7 @@ describe('IntegradaVistaComponent', () => {
       localStorage.setItem(CLAVE, '{esto no es json');
       history.replaceState(null, '', `${location.pathname}?nivel=11`);
       const fixture = await montar();
-      await esperar(120);
+      await hastaElArranque(fixture.nativeElement);
 
       const soldados = fixture.nativeElement.querySelectorAll('#bonds .bond.on').length;
       // Solo puede estar encendido el enlace que está naciendo hacia el concepto actual.
