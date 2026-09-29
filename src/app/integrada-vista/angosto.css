@@ -136,18 +136,6 @@
   }
 }
 
-/* Por debajo de 1200 px la grilla instrucciones|demo va en una sola columna. La de instrucciones
-   quedó vacía desde que la pista de la mascota flota fija en la esquina: seguía reservando 14rem más
-   el hueco (un tercio del ancho a 820 px), apretaba el código y sacaba sub-niveles de la pantalla. */
-@media (max-width: 1199px) {
-  .card--dissolve .subhost > * {
-    grid-template-columns: minmax(0, 1fr);
-  }
-  .card--dissolve .subhost > * > app-concept-card,
-  .card--dissolve .subhost > * > :not(app-concept-card) {
-    grid-column: 1;
-  }
-}
 /* Entre 601 y 1199 px la espina vertical queda a 60px del borde y la card arranca antes: el
    contenido le quedaba debajo. La espina se achica y los sub-niveles se corren solo lo que falte
    (casi siempre el 1.5rem de escritorio alcanza), todos igual, así el contenido arranca en la misma
@@ -158,8 +146,7 @@
   :host {
     --spine-size: clamp(2rem, 4.2vh, 2.6rem);
   }
-  .card--dissolve .subhost > *,
-  .card--dissolve .subhost > *:has(> app-column-and-code-layout) {
+  .card--dissolve .subhost > * {
     padding-left: max(
       1.5rem,
       calc(
@@ -182,8 +169,6 @@
   }
   .card--dissolve .subhost > * {
     gap: 1.1rem;
-  }
-  .card--dissolve .subhost > *:has(> app-column-and-code-layout) {
     padding-left: 0;
   }
   .card--dissolve .subhost app-code div {

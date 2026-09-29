@@ -423,45 +423,39 @@
 }
 /* En dissolve el nombre del concepto vive como TÍTULO VERTICAL pegado al riel (.space-spine) y el
    sub-nivel como contador en el topbar (.tb-count), a nivel del título. La card no lleva header. */
-/* D2 · dos zonas. La card se alinea a la izquierda y el título promovido la encabeza; el
-   componente embebido se reparte en INSTRUCCIONES (app-concept-card, siempre el primer hijo en
-   los 4 sub-niveles) a la izquierda y el DEMO (el resto: two-column, divs, img…) a la derecha.
-   Baja la altura (antes concept + demo apilados) y usa el ancho. Robusto por estructura, sin
-   tocar los internals de los 35 componentes. */
+/* D2 · la card se alinea a la izquierda y el título promovido la encabeza. El componente
+   embebido se repartía en INSTRUCCIONES (app-concept-card) a la izquierda y DEMO a la derecha;
+   desde que la pista de la mascota flota fija en la esquina, esa columna quedó vacía y seguía
+   reservando 14rem más el hueco: le quitaba ~250 px al demo y hacía saltar la x del contenido
+   entre sub-niveles (130 px contra 357 a 381 a 1440). Una sola columna: el demo usa todo el ancho
+   y arranca en la misma x en todos. */
 .card--dissolve {
   text-align: left;
 }
 .card--dissolve .subhost > * {
   display: grid;
-  /* Instrucciones angostas a la izquierda; el DEMO se lleva el resto del ancho (1fr) y estira
-     para que el árbol y el código respiren. */
-  grid-template-columns: minmax(0, 14rem) minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1fr);
   gap: 1.7rem;
   align-items: center;
   /* Densidad del embed: en una laptop (~860px de alto) los sub-niveles más largos se pasaban del
      viewport y quedaban bajo el fold (design-review). El zoom bajó de 1.2 a 1.0 para que entren sin
      depender del scroll interno de la card; sigue legible porque la card es ancha. */
   zoom: 1;
-}
-.card--dissolve .subhost > * > app-concept-card {
-  grid-column: 1;
-}
-.card--dissolve .subhost > * > :not(app-concept-card) {
-  grid-column: 2;
-  width: 100%;
-}
-/* Demos que se auto-contienen en app-column-and-code-layout (traen título + concept-card + la fila
-   demo|código ADENTRO): al ser un ÚNICO hijo `:not(app-concept-card)`, la regla de arriba los mandaba
-   a la col2 y dejaba la col1 (instrucciones) vacía, corriendo las instrucciones ~245px a la derecha y
-   rompiendo la estabilidad de la composición al navegar (design-review B3: la x de las instrucciones
-   saltaba entre sub-niveles). Como ya traen su propio layout, salen del grid instrucciones|demo y van
-   full-width, con las instrucciones arriba-izquierda alineadas como el resto de los sub-niveles. */
-.card--dissolve .subhost > *:has(> app-column-and-code-layout) {
-  display: block;
-  /* Estos sub-niveles arrancan en el borde de la card, y a 1280-1440 px el título vertical del
+  /* Todo sub-nivel arranca en el borde de la card, y a 1280-1440 px el título vertical del
      concepto (la espina) se metía 20 px adentro: se comía la "D" de DESAFÍO y el borde del código.
      A 1920 no llega; el aire extra no molesta. */
   padding-left: 1.5rem;
+}
+.card--dissolve .subhost > * > :not(app-concept-card) {
+  width: 100%;
+  /* Tope cerca del ancho que tenía la columna del demo: lo que escala con el ancho (el diagrama
+     del pipeline de 0/3) no crece en alto y saca el desafío de la pantalla. */
+  max-width: 64rem;
+}
+/* Los que traen su propio layout (app-column-and-code-layout: título, pista y fila demo|código
+   adentro) salen del grid. */
+.card--dissolve .subhost > *:has(> app-column-and-code-layout) {
+  display: block;
 }
 /* El bloque de código (app-code) trae fuente text-2xl y whitespace-pre-wrap: en su columna se
    partía a mitad de statement (rompe el sentido de "así se arma el árbol"). Lo bajamos a un
