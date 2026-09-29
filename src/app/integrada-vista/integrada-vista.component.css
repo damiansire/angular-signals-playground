@@ -571,11 +571,13 @@
    (el hallazgo #1 del diagnóstico). Le sacamos el fondo y la sombra, así los controles internos
    (chips con borde de acento, botones, contadores, terminales oscuros) flotan sobre la misma
    superficie que el resto — como ya lo hacen las instrucciones, el código y el árbol. Alcance:
-   solo fondos CLAROS; los oscuros intencionales (app-code, chips carbón) no matchean y quedan. */
+   solo fondos CLAROS; los oscuros intencionales (app-code, chips carbón) no matchean y quedan. Los
+   -50 van por palabra entera (~=): por substring, bg-gray-500 también matcheaba y un botón gris
+   quedaba con texto blanco sobre transparente ("multiplier + 1" en 8/2). */
 .card--dissolve .subhost [class*='bg-white'],
-.card--dissolve .subhost [class*='bg-gray-50'],
+.card--dissolve .subhost [class~='bg-gray-50'],
 .card--dissolve .subhost [class*='bg-gray-100'],
-.card--dissolve .subhost [class*='bg-slate-50'],
+.card--dissolve .subhost [class~='bg-slate-50'],
 .card--dissolve .subhost [class*='bg-slate-100'] {
   background-color: transparent;
 }
@@ -589,8 +591,8 @@
    laptop sin depender del scroll interno. Y los márgenes de apilado (mb-5/mt-4/mt-5) se comprimen un
    toque. No toca los 35 templates; el scroll único de la card se mantiene. */
 .card--dissolve .subhost section[class*='bg-'],
-.card--dissolve .subhost [class*='bg-gray-50'],
-.card--dissolve .subhost [class*='bg-slate-50'] {
+.card--dissolve .subhost [class~='bg-gray-50'],
+.card--dissolve .subhost [class~='bg-slate-50'] {
   padding: 0.15rem 0;
 }
 .card--dissolve .subhost [class*='mb-5'] {
