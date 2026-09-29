@@ -15,13 +15,14 @@
   text-align: left;
 }
 
+/* Es la única instrucción del desafío: #9a9284 daba 2.3:1 sobre el anillo del átomo. */
 .ms__eyebrow {
   margin: 0;
   font-family: var(--font-mono, ui-monospace, monospace);
   font-size: 0.62rem;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: #9a9284;
+  color: #756d5e;
 }
 
 /* El bloque es UNO solo, el real: no es una lista de opciones. Acotado al ancho del código para
@@ -48,7 +49,9 @@
   /* La monoespaciada tiene ligaduras: dibujaba `=>` como `⇒`, que no es sintaxis. Quien aprende
      copia lo que ve, así que el código se muestra carácter por carácter. */
   font-variant-ligatures: none;
-  font-feature-settings: 'liga' 0, 'calt' 0;
+  font-feature-settings:
+    'liga' 0,
+    'calt' 0;
 }
 
 /* La línea que dejó de participar sigue a la vista: que se vea quedar afuera enseña más que
