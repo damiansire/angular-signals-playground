@@ -8,6 +8,10 @@
   --serif: var(--font-editorial, 'Fraunces', Georgia, serif);
   --sans: var(--font-display, 'Archivo', system-ui, sans-serif);
   --mono: var(--font-mono, 'JetBrains Mono', ui-monospace, monospace);
+  /* Geometría de la espina vertical: la usa la espina y también la card en tablet, que le deja
+     lugar para que no pise el contenido. */
+  --spine-left: clamp(60px, calc(60px + (100vw - 1440px) * 0.08), 108px);
+  --spine-size: clamp(2.6rem, 6.4vh, 4.8rem);
 
   display: block;
   height: 100vh;
@@ -885,7 +889,7 @@
   position: absolute;
   /* Se corre a la derecha en pantallas anchas para dejarle lugar al átomo del riel (que ganó órbita
      visible); pegada (60px) en angostas, donde comparte poco espacio con las instrucciones. */
-  left: clamp(60px, calc(60px + (100vw - 1440px) * 0.08), 108px);
+  left: var(--spine-left);
   top: 50%;
   transform: translateY(-50%) rotate(180deg);
   writing-mode: vertical-rl;
@@ -893,7 +897,7 @@
   pointer-events: none;
   font-family: var(--serif);
   font-weight: 600;
-  font-size: clamp(2.6rem, 6.4vh, 4.8rem);
+  font-size: var(--spine-size);
   line-height: 1;
   letter-spacing: 0.01em;
   white-space: nowrap;
