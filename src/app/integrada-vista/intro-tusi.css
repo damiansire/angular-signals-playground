@@ -545,8 +545,10 @@
   bottom: 0;
   z-index: 6;
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: center;
+  gap: 0.6em 0.8em;
   padding: 2.4% 4%;
 }
 .tusi__ov-sound {
@@ -557,8 +559,9 @@
   font-size: clamp(0.68rem, 1.2vw, 0.82rem);
   letter-spacing: 0.02em;
   color: #d7dae0;
-  background: rgba(20, 22, 26, 0.5);
-  backdrop-filter: blur(4px);
+  /* Casi opaco y sin blur: la barra cruza las dos mitades y sobre la clara el texto, con el fondo al
+     50%, quedaba gris sobre gris (~2:1). Así llega a ~6.7:1 en los dos lados, sin un filtro caro. */
+  background: rgba(20, 22, 26, 0.8);
   border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 999px;
   padding: 0.5em 1em;
@@ -593,10 +596,12 @@
   background: #fff;
   transition: transform 0.18s;
 }
-.tusi__ov-sound[aria-pressed='false'] .tusi__ov-swi {
+.tusi__ov-sound[aria-pressed='false'] .tusi__ov-swi,
+.tusi__ov-pausa--activa .tusi__ov-swi {
   background: rgba(255, 255, 255, 0.28);
 }
-.tusi__ov-sound[aria-pressed='false'] .tusi__ov-swi::after {
+.tusi__ov-sound[aria-pressed='false'] .tusi__ov-swi::after,
+.tusi__ov-pausa--activa .tusi__ov-swi::after {
   transform: translateX(-1.1em);
 }
 

@@ -83,6 +83,30 @@ describe('IntegradaVistaComponent', () => {
       return el.getAnimations()[0];
     }
 
+    /**
+     * Espera a que se cumpla la condición en vez de dormir un tiempo fijo: bajo carga el boot del
+     * motor (a los 30 ms) puede llegar mucho más tarde, y un `esperar(120)` fallaba 2 de 6 corridas.
+     */
+    async function hasta(cumple: () => boolean, que: string): Promise<void> {
+      for (let t = 0; t < 3000; t += 10) {
+        if (cumple()) return;
+        await esperar(10);
+      }
+      fail(`no pasó: ${que}`);
+    }
+
+    /** `animationstart` visto desde `document`: burbujea después del handler del motor en la raíz. */
+    const arranco = (animacion: Animation): Promise<void> =>
+      new Promise((listo) => {
+        const el = (animacion.effect as KeyframeEffect).target;
+        const alArrancar = (e: Event): void => {
+          if (e.target !== el) return;
+          document.removeEventListener('animationstart', alArrancar);
+          listo();
+        };
+        document.addEventListener('animationstart', alArrancar);
+      });
+
     it('detiene los loops, termina las entradas y no toca lo que el jugador abrió encima', async () => {
       const fixture = await montar();
       const host: HTMLElement = fixture.nativeElement;
@@ -114,9 +138,27 @@ describe('IntegradaVistaComponent', () => {
     it('en la landing, con el topbar invisible, sus controles no se pueden enfocar', async () => {
       const fixture = await montar();
       const host: HTMLElement = fixture.nativeElement;
-      await esperar(60); // primer render del motor
+      const links = host.querySelector<HTMLElement>('.tb-links')!;
 
-      expect(host.querySelector<HTMLElement>('.tb-links')!.inert).toBeTrue();
+      await hasta(() => links.inert, 'el primer render deja los links inertes');
+      expect(links.inert).toBeTrue();
+      fixture.destroy();
+    });
+
+    it('la landing trae la misma pausa junto al sonido, con el estado compartido', async () => {
+      const fixture = await montar();
+      const host: HTMLElement = fixture.nativeElement;
+      const landing = host.querySelector<HTMLButtonElement>('.tusi__ov-capbar .tusi__ov-pausa')!;
+      const topbar = host.querySelector<HTMLButtonElement>('.tb-pausa')!;
+
+      expect(landing.textContent).toContain('tocá para pausar');
+      landing.click();
+      expect(landing.textContent).toContain('tocá para reanudar');
+      expect(topbar.textContent).withContext('el topbar se entera').toBe('Reanudar animaciones');
+      expect(localStorage.getItem(CLAVE)).toBe('1');
+
+      topbar.click();
+      expect(landing.textContent).withContext('y al revés').toContain('tocá para pausar');
       fixture.destroy();
     });
 
@@ -154,10 +196,12 @@ describe('IntegradaVistaComponent', () => {
       const host: HTMLElement = fixture.nativeElement;
       // Antes del primer render: después, en la landing, los links quedan inertes y el click no llega.
       host.querySelector<HTMLButtonElement>('.tb-pausa')!.click();
-      await esperar(60); // pasado el barrido del boot: la entrada solo la atrapa `animationstart`
+      // El render que los vuelve inertes corre en el boot, justo antes del barrido de la pausa:
+      // pasado eso, a la entrada nueva solo la puede atrapar `animationstart`.
+      await hasta(() => host.querySelector<HTMLElement>('.tb-links')!.inert, 'el boot del motor');
 
       const entrada = animado(host, 'prueba-entrada 10s both');
-      await esperar(120); // `animationstart` llega en el cuadro siguiente
+      await arranco(entrada);
       expect(entrada.playState).toBe('finished');
       fixture.destroy();
     });
@@ -167,7 +211,7 @@ describe('IntegradaVistaComponent', () => {
       const fixture = await montar();
       const host: HTMLElement = fixture.nativeElement;
       const loop = animado(host, 'prueba-loop 1s linear infinite');
-      await esperar(120); // el boot aplica la pausa a los 30 ms
+      await hasta(() => loop.playbackRate === 0, 'la pausa guardada frena el loop');
 
       expect(host.querySelector('.tb-pausa')!.textContent).toBe('Reanudar animaciones');
       expect(loop.playbackRate).toBe(0);

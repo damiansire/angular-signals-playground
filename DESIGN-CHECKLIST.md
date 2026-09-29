@@ -1,11 +1,10 @@
 # DESIGN-CHECKLIST — vista integrada / journey
 
 Checklist ACUMULADO de diseño. Regla: cada defecto visual que se detecta y
-resuelve se agrega acá como ítem permanente (patrón `postmortem-guardrail`).
-El `design-reviewer` verifica TODOS los ítems en cada ronda, no solo el
-síntoma más reciente. Origen: autopsia de las sesiones del 09 al 16 de julio
-2026, donde la misma familia de defectos ("parece un modal") sobrevivió a 8
-rondas de review porque cada ronda auditaba solo lo último reportado.
+resuelve se agrega acá como ítem permanente, y cada revisión verifica TODOS los
+ítems, no solo el síntoma más reciente. El porqué: la misma familia de defectos
+("parece un modal") sobrevivió a 8 rondas de revisión porque cada ronda
+auditaba solo lo último reportado.
 
 ## Gramática de modal (la card debe sentirse parte de la escena, no una ventana)
 
@@ -110,6 +109,9 @@ el 0, ~87% en el 8), así que verificar solo el concepto 0 no alcanza.
       salieron como manchones oscuros con el código ilegible. Ganarle con
       especificidad desde el CSS del propio átomo (tres clases, p.ej.
       `.rc .rc__pieces .rc__piece`), no con `!important`.
+- [ ] Los controles de la barra del selector de clima (sonido, pausa) se leen sobre las DOS
+      mitades: fondo casi opaco y sin `backdrop-filter`. Con el fondo al 50% la pastilla que cae
+      sobre la mitad clara quedaba gris sobre gris (~2:1). Mirarla en captura a 1440, 820 y 500.
 
 ## Operable sin mouse y sin trampas de foco
 
@@ -262,6 +264,13 @@ posición de la perilla. Estos ítems son los defectos que YA aparecieron.
 - [ ] Presupuesto de prosa por pantalla (`npm run gate:prosa`): lo que hoy es
       párrafo tiene que poder verse en la demo. Si el texto explica lo que el
       dibujo ya muestra, sobra el texto.
+- [ ] La rueda cruza de un concepto al siguiente, en los dos sentidos. El tramo de cámara
+      entre conceptos mide 1.8 pantallas, y con snap obligatorio un gesto corto terminaba más
+      cerca de la parada de partida: el navegador lo devolvía y con el mouse no se podía pasar de
+      capítulo. El motor rescata ese caso (`rueda-rescate.ts`) sin secuestrar la rueda. Probar
+      con rueda real por CDP: un golpe de 500 px y muescas de 100 px separadas, del átomo 9 hacia
+      arriba y de 8/4 hacia abajo (una parada por muesca), y una rueda girada a ritmo parejo
+      (avanza siempre, sin temblar).
 
 ## Overlays que tapan el recorrido (prólogo, modales a pantalla completa)
 
@@ -328,6 +337,9 @@ verificable con `/cine/<n>?cuadro=<beat>` (fotograma congelado) o `/cine/<n>` (r
       Mientras corre, el recorrido de atrás no recibe teclas, rueda ni foco.
 - [ ] Se juega UNA vez por partida al llegar a la parada del capítulo; un deep-link a un
       sub-nivel no se interrumpe; se vuelve a ver desde la bitácora.
+- [ ] Como se abre sola, la pausa de la vida de fondo también la alcanza: con la pausa puesta
+      se cuenta en modo quieto (el de reduced-motion), el diálogo sigue y hay cero animaciones
+      corriendo en la escena.
 - [ ] Las escenas se cargan diferidas (un chunk por capítulo): el bundle inicial no paga por
       trece escenas.
 - [ ] Ningún actor pisa a otro ni sale del lienzo: medido con `getBoundingClientRect` en

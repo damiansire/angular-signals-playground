@@ -89,6 +89,25 @@ describe('CinematicaComponent', () => {
     fixture.destroy();
   });
 
+  it('con la pausa de la vida de fondo del recorrido se cuenta en su modo quieto', async () => {
+    const recorrido = document.body.appendChild(document.createElement('div'));
+    recorrido.className = 'fondo-en-pausa';
+    const fixture = TestBed.createComponent(CinematicaComponent);
+    recorrido.appendChild(fixture.nativeElement);
+    fixture.componentRef.setInput('cinematica', cinematicaDe(1)!);
+    fixture.detectChanges();
+
+    // Se abre cuando carga el chunk de la escena: se espera por el estado, no por un tiempo fijo.
+    const raiz = (): HTMLElement | null => fixture.nativeElement.querySelector('.cine');
+    for (let t = 0; t < 3000 && !raiz()?.classList.contains('cine--quieta'); t += 10) {
+      await esperar(10);
+      fixture.detectChanges();
+    }
+    expect(raiz()?.classList).toContain('cine--quieta');
+    fixture.destroy();
+    recorrido.remove();
+  });
+
   it('mientras está abierta, las teclas de desplazamiento no llegan al recorrido', async () => {
     const { fixture } = await montar(1);
     const e = new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true, cancelable: true });

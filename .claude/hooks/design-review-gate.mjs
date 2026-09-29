@@ -1,9 +1,9 @@
-// Gate de design-review (defensa en profundidad, ver AGENTS.md).
+// Gate de revision de diseno (defensa en profundidad, ver AGENTS.md).
 // PostToolUse sobre Write|Edit: si el cambio toca el motor visual
 // (integrada-vista/ o molecule-engine), recuerda que el cambio no se cierra
-// sin pasada de design-reviewer contra DESIGN-CHECKLIST.md.
-// Origen: autopsia 2026-07-16 (la regla escrita del CLAUDE.md global
-// no se invoco en la sesion que peor termino).
+// sin captura real y una pasada completa contra DESIGN-CHECKLIST.md.
+// Existe porque la regla escrita sola no alcanzaba: el recordatorio tiene que
+// llegar en el momento del cambio, no quedar en un documento.
 import { readFileSync, writeFileSync, existsSync } from "node:fs";
 import { join } from "node:path";
 import { tmpdir } from "node:os";
@@ -31,12 +31,11 @@ try {
 if (n % 10 !== 0) process.exit(0);
 
 const msg =
-  "[gate design-review] Tocaste el motor visual (integrada-vista/molecule-engine). " +
-  "Este cambio NO se declara bueno sin: (1) captura real MIRADA via " +
-  "chrome-devtools o claude-in-chrome (el Browser pane cuelga con esta app, " +
-  "no lo uses) y (2) pasada de design-reviewer contra DESIGN-CHECKLIST.md " +
-  "verificando TODOS los items, no solo el sintoma nuevo. Mediciones de DOM " +
-  "solas no cierran un cambio visual.";
+  "[gate de diseno] Tocaste el motor visual (integrada-vista/molecule-engine). " +
+  "Este cambio NO se declara bueno sin: (1) una captura real MIRADA, con la " +
+  "pestana visible (oculta, el navegador pausa el rAF y la captura se cuelga), " +
+  "y (2) una pasada contra DESIGN-CHECKLIST.md verificando TODOS los items, no " +
+  "solo el sintoma nuevo. Mediciones de DOM solas no cierran un cambio visual.";
 
 console.log(
   JSON.stringify({

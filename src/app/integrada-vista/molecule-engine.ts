@@ -13,6 +13,7 @@
 import { SISTEMA_ESTABLECIDO } from '../libs/manipulable-challenge';
 import { createFrameScheduler } from './frame-scheduler';
 import { cambiosDeMontaje, ordenarPorUrgencia } from './mount-window';
+import { laRuedaEsDeAdentro, paradaMasCercana, pasoDeRescate } from './rueda-rescate';
 
 const NS = 'http://www.w3.org/2000/svg';
 
@@ -1549,6 +1550,7 @@ export function initMolecule(
     cancelAnimationFrame(scrollAnimId);
     usuarioMovio = true;
     enTransito = false;
+    rescate = null; // otra navegación: la rueda ya no continúa el paso de rescate anterior
     // Cancelar la animación en curso deja huérfano el scrollSnapType:'none' que ella había puesto:
     // el tick que lo iba a restituir ya no corre más. Se restituye acá, antes de decidir si esta
     // llamada anima o no, porque las dos salidas cortas de abajo (reduced-motion, o destino a menos
@@ -1618,6 +1620,7 @@ export function initMolecule(
 
   let ticking = false;
   const onScroll = (): void => {
+    ultimoScroll = performance.now();
     if (ticking) return;
     ticking = true;
     raf(() => {
@@ -1640,17 +1643,59 @@ export function initMolecule(
   const stopUnits = snapStops(C.map((c) => c.subN || null))
     .slice()
     .sort((a, b) => a - b);
-  const stepTo = (dir: 1 | -1): void => {
-    const cur = stage.scrollTop / unit();
+  const destinoDelPaso = (cur: number, dir: 1 | -1): number => {
     const eps = 0.05;
-    const target =
-      dir > 0
-        ? (stopUnits.find((s) => s > cur + eps) ?? stopUnits[stopUnits.length - 1])
-        : ([...stopUnits].reverse().find((s) => s < cur - eps) ?? stopUnits[0]);
-    goToUnit(target);
+    return dir > 0
+      ? (stopUnits.find((s) => s > cur + eps) ?? stopUnits[stopUnits.length - 1])
+      : ([...stopUnits].reverse().find((s) => s < cur - eps) ?? stopUnits[0]);
   };
+  const stepTo = (dir: 1 | -1): void => goToUnit(destinoDelPaso(stage.scrollTop / unit(), dir));
   const onPrev = (): void => stepTo(-1);
   const onNext = (): void => stepTo(1);
+
+  // Rescate de la rueda (ver `rueda-rescate`): el scroll sigue siendo nativo, pero si un gesto empujó
+  // y el snap lo devolvió a la misma parada, se da el paso que pidió. El gesto se lee UNA vez, cuando
+  // la rueda se calla y el scroll dejó de moverse: leerlo antes (con cada `scrollend` de un
+  // trackpad) arrancaba el paso a mitad de gesto, el evento siguiente lo cortaba, y según dónde
+  // quedara no avanzaba o avanzaba dos.
+  let ruedaDesde: number | null = null;
+  let ruedaEmpuje = 0;
+  let ruedaGesto = 0;
+  let ultimoScroll = 0;
+  /** El paso de rescate en curso: otra muesca en el mismo sentido lo continúa en vez de cortarlo. */
+  let rescate: { destino: number; dir: 1 | -1 } | null = null;
+  const cerrarGestoDeRueda = (gesto: number): void => {
+    if (gesto !== ruedaGesto || ruedaDesde === null) return;
+    if (performance.now() - ultimoScroll < 120) {
+      later(() => cerrarGestoDeRueda(gesto), 120);
+      return;
+    }
+    const hasta = paradaMasCercana(stage.scrollTop / unit(), stopUnits);
+    const paso = pasoDeRescate(ruedaDesde, hasta, ruedaEmpuje);
+    ruedaDesde = null;
+    ruedaEmpuje = 0;
+    if (!paso) return;
+    const destino = destinoDelPaso(hasta, paso);
+    goToUnit(destino);
+    rescate = { destino, dir: paso };
+  };
+  const onRueda = (e: WheelEvent): void => {
+    // Una rueda girada a ritmo parejo manda una muesca cada ~250 ms: si cada una cortara el paso de
+    // la anterior, el recorrido se quedaba temblando en el lugar. En el mismo sentido, se encola.
+    const enCurso = enTransito && rescate?.dir === Math.sign(e.deltaY) ? rescate : null;
+    if (!enCurso) {
+      rescate = null;
+      onGesto();
+    }
+    if (e.ctrlKey || Math.abs(e.deltaX) > Math.abs(e.deltaY)) return;
+    if (laRuedaEsDeAdentro(e.target, stage, e.deltaY)) return;
+    ruedaDesde ??= enCurso
+      ? enCurso.destino
+      : paradaMasCercana(stage.scrollTop / unit(), stopUnits);
+    ruedaEmpuje += e.deltaY * (e.deltaMode === 1 ? 16 : e.deltaMode === 2 ? unit() : 1);
+    const gesto = ++ruedaGesto;
+    later(() => cerrarGestoDeRueda(gesto), 200);
+  };
   // Teclado: ↑/↓ (y AvPág) navegan el recorrido paso a paso — la vía accesible además del scroll.
   const onKeyNav = (e: KeyboardEvent): void => {
     // Un overlay modal (el prólogo) consume las teclas de desplazamiento antes de que lleguen acá, y
@@ -1687,7 +1732,7 @@ export function initMolecule(
   };
   stage.addEventListener(SISTEMA_ESTABLECIDO, onEstablished);
   stage.addEventListener('scroll', onScroll, { passive: true });
-  stage.addEventListener('wheel', onGesto, { passive: true });
+  stage.addEventListener('wheel', onRueda, { passive: true });
   stage.addEventListener('touchstart', onGesto, { passive: true });
   window.addEventListener('keydown', onKeyNav);
   window.addEventListener('resize', onResize);
@@ -1791,11 +1836,18 @@ export function initMolecule(
   q('.tb-links')?.appendChild(btnPausa);
   // La etiqueta dice lo que hace el botón, así que cambia con el estado (y por eso no lleva
   // aria-pressed): una etiqueta fija con el ícono de play pegado a "Pausar" se contradecía.
+  // En la landing el topbar no se ve: la misma pausa vive también junto al sonido de la elección.
+  const pausaLanding = q<HTMLButtonElement>('.tusi__ov-pausa');
   const pintarPausa = (): void => {
     const etiqueta = pausaFondo ? 'Reanudar animaciones' : 'Pausar animaciones';
     btnPausa.querySelector('.tb-pausa__texto')!.textContent = etiqueta;
     btnPausa.title = etiqueta;
     btnPausa.classList.toggle('tb-pausa--activa', pausaFondo);
+    if (!pausaLanding) return;
+    pausaLanding.querySelector('.tusi__ov-pausa-txt')!.textContent = pausaFondo
+      ? 'Animaciones en pausa · tocá para reanudar'
+      : 'Animaciones activas · tocá para pausar';
+    pausaLanding.classList.toggle('tusi__ov-pausa--activa', pausaFondo);
   };
   pintarPausa();
   const onPausaFondo = (): void => {
@@ -1805,6 +1857,7 @@ export function initMolecule(
     aplicarPausa();
   };
   btnPausa.addEventListener('click', onPausaFondo);
+  pausaLanding?.addEventListener('click', onPausaFondo);
   root.addEventListener('animationstart', onAnimacionNueva);
   const onVisibility = (): void => aplicarMovimiento();
   const onReduceChange = (e: MediaQueryListEvent): void => {
@@ -1824,7 +1877,7 @@ export function initMolecule(
     cancelAnimationFrame(orbitRaf);
     stage.removeEventListener(SISTEMA_ESTABLECIDO, onEstablished);
     stage.removeEventListener('scroll', onScroll);
-    stage.removeEventListener('wheel', onGesto);
+    stage.removeEventListener('wheel', onRueda);
     stage.removeEventListener('touchstart', onGesto);
     window.removeEventListener('keydown', onKeyNav);
     window.removeEventListener('resize', onResize);
@@ -1832,6 +1885,7 @@ export function initMolecule(
     document.removeEventListener('visibilitychange', onVisibility);
     mqlReduce?.removeEventListener('change', onReduceChange);
     btnPausa.removeEventListener('click', onPausaFondo);
+    pausaLanding?.removeEventListener('click', onPausaFondo);
     btnPausa.remove();
     root.removeEventListener('animationstart', onAnimacionNueva);
     frenadas.clear();
