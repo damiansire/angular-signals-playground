@@ -57,6 +57,16 @@ export class CodeComponent {
   }
 
   /**
+   * Cuántos espacios abren el renglón. Quien lo muestra angosto sangra la continuación de un renglón
+   * largo desde ahí (variable `--sangria`); con una sangría fija, la segunda mitad de un renglón
+   * sangrado arrancaba a la izquierda de su principio y se leía como un cierre.
+   */
+  sangria(item: CodeLine): number {
+    if (typeof item.line !== 'string') return 0;
+    return item.line.length - item.line.trimStart().length;
+  }
+
+  /**
    * Las líneas en blanco de un snippet son separadores visuales, no código: no deben quedar
    * como `role="button"` sin nombre accesible (violación de "ARIA commands must have an
    * accessible name" detectada por axe-core). Solo las líneas con texto son focusables.

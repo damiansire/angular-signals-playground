@@ -84,6 +84,19 @@ describe('CodeComponent', () => {
       expect(rows[1].textContent?.trim()).toBe('const y = 2;');
     });
 
+    it('pasa la sangría propia de cada renglón para que la continuación arranque desde ahí', () => {
+      expect(component.sangria({ id: 'a', line: '    return x;' })).toBe(4);
+      expect(component.sangria({ id: 'b', line: 'const y = 2;' })).toBe(0);
+      expect(component.sangria({ id: 'c' })).toBe(0);
+
+      fixture.componentRef.setInput('lines', [
+        { id: 'a', line: '  seconds = toSignal(interval(1000));' },
+      ] satisfies CodeLine[]);
+      fixture.detectChanges();
+      const row: HTMLElement = fixture.nativeElement.querySelector('.font-mono');
+      expect(row.style.getPropertyValue('--sangria')).toBe('2');
+    });
+
     it('staticLineClasses resalta en verde cuando la linea esta active', () => {
       expect(component.staticLineClasses({ id: 'a', active: true })).toContain('bg-green-700');
       expect(component.staticLineClasses({ id: 'b', active: false })).toContain('bg-gray-800');
