@@ -967,18 +967,20 @@
   white-space: nowrap;
 }
 /* La pregunta del capítulo 0 acompaña los doce y se vuelve respuesta en el 11. Va tenue a
-   propósito: es un hilo, no un cartel. Al contestarse toma el dorado del capstone. */
+   propósito: es un hilo, no un cartel, pero se lee: los grises de antes (#9a9284, 2.7:1) y el dorado
+   del capstone (#b8791f, 3.3:1) no llegaban a 4.5:1 sobre el crema. Contestada toma un dorado más
+   hondo. */
 .tb-q {
   margin-right: 1.1rem;
   font-family: var(--serif);
   font-style: italic;
   font-size: 0.92rem;
-  color: #9a9284;
+  color: #756d5e;
   transition: color 0.28s ease;
 }
 .tb-q--answered {
   font-style: normal;
-  color: #b8791f;
+  color: #8a5a12;
 }
 .topbar a {
   color: #6a6355;
