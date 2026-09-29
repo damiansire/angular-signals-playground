@@ -3,6 +3,7 @@ import {
   snapStops,
   initMolecule,
   cameraAt,
+  opacidadDeVecinos,
   CONCEPT_COUNT,
   conceptPos,
   wideZoom,
@@ -98,16 +99,20 @@ describe('cameraAt — matemática de cámara del recorrido (pura, sin DOM)', ()
   };
   const FK = 2.7;
 
-  it('en la zona de sub-niveles (w>=2): zoom máximo y buceo total, con la cámara inclinada un toque hacia el concepto anterior', () => {
-    const cam = cameraAt(2.5, false, geom);
-    expect(cam.K).toBe(FK);
-    expect(cam.diveDepth).toBe(1);
-    // lean 0.2 desde el átomo actual (200,200) hacia el anterior (0,0): el vecino asoma en el frame.
-    expect(cam.fx).toBeCloseTo(160, 5);
-    expect(cam.fy).toBeCloseTo(160, 5);
+  it('en la zona de sub-niveles (w>=2): zoom máximo y buceo total, mirando el átomo actual de frente', () => {
+    // Sin inclinarse hacia el anterior: ese vecino se retira al asentar (ver opacidadDeVecinos), y
+    // la inclinación solo corría el átomo actual y metía un salto al entrar al primer sub-nivel.
+    expect(cameraAt(2.5, false, geom)).toEqual({ K: FK, fx: 200, fy: 200, diveDepth: 1 });
   });
 
-  it('primer concepto en sub-niveles (w>=2, isFirst): sin lean porque no tiene anterior', () => {
+  it('sin salto al terminar el buceo: justo antes y justo después de w=2 miran al mismo punto', () => {
+    const antes = cameraAt(1.9999, false, geom);
+    const despues = cameraAt(2, false, geom);
+    expect(despues.fx).toBeCloseTo(antes.fx, 2);
+    expect(despues.fy).toBeCloseTo(antes.fy, 2);
+  });
+
+  it('primer concepto en sub-niveles (w>=2, isFirst): igual que el resto', () => {
     expect(cameraAt(2.5, true, geom)).toEqual({ K: FK, fx: 200, fy: 200, diveDepth: 1 });
   });
 
@@ -134,6 +139,30 @@ describe('cameraAt — matemática de cámara del recorrido (pura, sin DOM)', ()
     expect(cam.K).toBeCloseTo(1.85, 5);
     expect(cam.fx).toBeCloseTo(150, 5);
     expect(cam.diveDepth).toBeCloseTo(0.5, 5);
+  });
+});
+
+describe('opacidadDeVecinos — los átomos que no son el actual se retiran al asentar', () => {
+  it('en la vista molécula y en la primera mitad del buceo se ven enteros', () => {
+    expect(opacidadDeVecinos(0)).toBe(1);
+    expect(opacidadDeVecinos(0.45)).toBe(1);
+  });
+
+  it('con el sub-nivel asentado no queda nada dibujado detrás del contenido', () => {
+    expect(opacidadDeVecinos(1)).toBe(0);
+    // La parada no asienta en 1 exacto (en 7/1 queda cerca de 0.93 por el redondeo del scroll):
+    // tiene que dar 0 exacto igual, porque el motor oculta los vecinos recién en 0.
+    expect(opacidadDeVecinos(0.99998)).toBe(0);
+    expect(opacidadDeVecinos(0.9)).toBe(0);
+  });
+
+  it('se apagan de a poco y sin volver a encenderse mientras el buceo avanza', () => {
+    const muestras = Array.from({ length: 41 }, (_, i) => opacidadDeVecinos(0.45 + (0.4 * i) / 40));
+    for (let i = 1; i < muestras.length; i++) {
+      expect(muestras[i]).toBeLessThanOrEqual(muestras[i - 1]);
+    }
+    expect(opacidadDeVecinos(0.65)).toBeGreaterThan(0);
+    expect(opacidadDeVecinos(0.65)).toBeLessThan(1);
   });
 });
 

@@ -169,6 +169,14 @@
     stroke-dashoffset: -12;
   }
 }
+/* Con el sub-nivel asentado el motor apaga los átomos anteriores y los enlaces (la espiral los dejaba
+   encima de inputs y botones del demo). Del todo apagados se ocultan y los enlaces dejan de fluir. */
+.vecinos-fuera .atom:not(.current) {
+  visibility: hidden;
+}
+.vecinos-fuera .bond.on {
+  animation: none;
+}
 
 .ring {
   fill: none;
@@ -185,9 +193,9 @@
      anterior (.peek-prev, pocos electrones y solo al bucear) sí conserva su drop-shadow abajo. */
   transition: opacity 0.45s ease;
 }
-/* El concepto anterior inmediato al bucear: sus anillos punteados a 0.45 se leían como un fantasma.
-   Acá gana presencia (anillos más nítidos + electrones con más glow) para leerse como el "de dónde
-   venís" que asoma desde el borde, sin necesidad de etiqueta. */
+/* El concepto anterior inmediato mientras buceás: sus anillos punteados a 0.45 se leían como un
+   fantasma. Acá gana presencia (anillos más nítidos + electrones con más glow) para leerse como el
+   "de dónde venís", sin necesidad de etiqueta. Al asentar el sub-nivel se retira con los demás. */
 .atom.peek-prev .ring {
   opacity: 0.7;
   transition: opacity 0.5s ease;
