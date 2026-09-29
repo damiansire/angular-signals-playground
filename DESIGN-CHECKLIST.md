@@ -18,6 +18,11 @@ auditaba solo lo último reportado.
       aparece. No va con máscara de fundido: una máscara en la card borra la mascota de la pista,
       que es su hija `position: fixed`. Y la pausa de la vida de fondo no lo termina (no se mueve
       solo). Medir el `::after` de `.subbody`: visible con la card arriba si scrollea, apagado si no.
+      Y medir DÓNDE cae: el sticky se ancla dentro del padding de la card, así que con `bottom`
+      positivo flotaba 50 a 110 px por encima del corte, tapando código, botones y lecturas en 15 de
+      27 capturas. Va en el borde real (descuenta `--pad-abajo`), sobre el renglón que igual ya
+      está cortado, y su rango de scroll no cuenta el padding, así no anuncia "más abajo" cuando
+      abajo solo queda aire. Medirlo con una sonda real que copie su sticky: a ~9 px del borde.
 - [ ] Sin backdrop/vignette que oscurezca el fondo detrás de la card.
 - [ ] Sin bordes duros de recuadro flotante: continuidad de fondo y color con
       la escena.
@@ -107,9 +112,11 @@ el 0, ~87% en el 8), así que verificar solo el concepto 0 no alcanza.
 - [ ] Nada del topbar se parte por dentro (el contador nunca queda "1 /" arriba y "3" abajo) y el
       título va entero: en un renglón desde 1200 px, y por debajo en dos pisos (arriba contador y
       título, abajo la pregunta del recorrido y los controles, a la DERECHA: a la izquierda quedaba
-      encima de la primera parada del riel y se leía como su viñeta). Por debajo de 400 px título y
-      pregunta pasan a dos renglones en vez de abreviarse. Medido con el título más largo (8/2,
-      "toSignal() · toObservable() · untracked()") a 375, 500, 600, 768, 820, 1001, 1440 y 1920 px,
+      encima de la primera parada del riel y se leía como su viñeta). Por debajo de 400 px cada piso
+      sigue en un renglón: el título escala con el ancho y Bitácora y Practicá pasan a íconos
+      (pasarlos a dos renglones subía el topbar a 100 px y tapaba la card y el riel). Medido con el
+      título más largo (8/2, "toSignal() · toObservable() · untracked()") a 360, 375, 500, 600, 768,
+      820, 1001, 1440 y 1920 px,
       y la primera parada del riel contra el TEXTO del topbar que le queda encima. Medirlo sin el
       link "Estudio" (solo existe en desarrollo y además empuja el margen del siguiente link): con
       él la medición da un topbar partido que en producción no pasa. Un control nuevo, angosto,
@@ -133,6 +140,10 @@ el 0, ~87% en el 8), así que verificar solo el concepto 0 no alcanza.
       `.rc .rc__pieces .rc__piece`), no con `!important`. Segundo caso: las
       estrellas de `app-rating` (7/2) salían como cinco pastillas oscuras iguales,
       sin leerse el puntaje, y la fila desbordaba su caja hasta pisar la espina.
+- [ ] Las reglas que remapean clases de Tailwind por substring (`[class*='bg-gray-50']`) no
+      atrapan a sus vecinas de nombre: `bg-gray-500` contiene `bg-gray-50`, y el botón gris
+      "multiplier + 1" de 8/2 quedaba con texto blanco sobre transparente. Para un tono exacto,
+      palabra entera (`[class~='bg-gray-50']`).
 - [ ] Los controles de la barra del selector de clima (sonido, pausa) se leen sobre las DOS
       mitades: fondo casi opaco y sin `backdrop-filter`. Con el fondo al 50% la pastilla que cae
       sobre la mitad clara quedaba gris sobre gris (~2:1). Mirarla en captura a 1440, 820 y 500.
@@ -253,7 +264,15 @@ puede alcanzar" son dos cosas distintas y hay que chequear las dos.
       Cortando por palabra, el ancho mínimo del código es su token más largo: por debajo de 600 px
       va con `min-width: 0` o se sale de la card. `overflow-wrap: anywhere` en un flex-item colapsa su ancho mínimo
       a un carácter: en angosto el código corta por palabra. La continuación de un renglón largo se
-      sangra desde la sangría propia del renglón (`--sangria`, que pone app-code), no desde una fija.
+      sangra desde la sangría propia del renglón (`--sangria`, que pone app-code), no desde una fija,
+      y la sangría va en espacios duros: con espacios comunes el navegador corta justo después de
+      ellos y deja un renglón vacío arriba del código. Todo código embebido con `overflow-x: auto`
+      (el `<pre>` de 0/4, el `<code>` de los botones de 0/2) envuelve en vez de scrollear: su scroll
+      horizontal es invisible (el recorrido oculta las barras) y la línea clave se cortaba sin que
+      nada lo avisara. El código con renglones INTERACTIVOS (cada token es un blanco, el árbol de
+      0/1) no envuelve a propósito: su ancho mínimo es el renglón entero y la fila lo baja entero.
+      Medir `scrollWidth > clientWidth` de todo lo que tenga overflow dentro de la card, no solo
+      contra la card (los `sr-only` son falsos positivos).
       Medir el ancho del renglón de código en los 40 sub-niveles a 1001, 820, 600, 500 y 375 px, y
       el `scrollHeight` de la card antes y después (un arreglo de ancho no puede empujar
       sub-niveles fuera de la pantalla: correr el contenido para despejar la espina sacaba el
@@ -263,6 +282,11 @@ puede alcanzar" son dos cosas distintas y hay que chequear las dos.
       Cajas de ancho fijo de Tailwind (`w-80` es 320 px) y filas flex que no envolvían. Medir el
       `getBoundingClientRect` de cada elemento contra el de la card (la mascota de la pista flota
       fija a propósito y no cuenta).
+- [ ] Ninguna columna de la grilla queda reservada para algo que ya no vive ahí. La de
+      instrucciones (14rem más el hueco) quedó vacía cuando la pista de la mascota pasó a flotar
+      fija, y seguía ocupando un tercio del ancho a 820 px: por debajo de 1200 px la grilla va en
+      una sola columna. En escritorio sigue reservada y hace saltar la x del contenido entre
+      sub-niveles (130 px contra 357 a 381 a 1440): decisión de diseño pendiente.
 
 ## Cierre del sub-nivel (el desafío manipulable, los 37)
 
