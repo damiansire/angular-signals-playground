@@ -15,14 +15,16 @@
   text-align: left;
 }
 
-/* Es la única instrucción del desafío: #9a9284 daba 2.3:1 sobre el anillo del átomo. */
+/* Es la única instrucción del desafío. La card está disuelta, así que el contraste se mide contra
+   la escena real de atrás (#c3bdb1 en el peor caso), no contra el papel: #9a9284 daba 2.3:1 y
+   #756d5e no llegaba a 4.5. */
 .ms__eyebrow {
   margin: 0;
   font-family: var(--font-mono, ui-monospace, monospace);
   font-size: 0.62rem;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: #756d5e;
+  color: #4d463b;
 }
 
 /* El bloque es UNO solo, el real: no es una lista de opciones. Acotado al ancho del código para
@@ -170,12 +172,14 @@
   }
 }
 
+/* Nombra qué mide la lectura ("desfasado", "vistas viejas"): mismo tono que el rótulo de arriba,
+   que llega a 4.5:1 contra la escena (en #9a9284 quedaba en 2:1). */
 .ms__gauge-label {
   font-family: var(--font-mono, ui-monospace, monospace);
   font-size: 0.62rem;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: #9a9284;
+  color: #4d463b;
 }
 
 .ms__gauge-value {
@@ -187,11 +191,12 @@
   color: inherit;
 }
 
-/* Misma pelea de especificidad que la perilla. Verbo, no sustantivo: hace algo. */
+/* Misma pelea de especificidad que la perilla. Verbo, no sustantivo: hace algo. El borde llega a
+   3:1 contra la escena (#ddd6c6 daba 1.1:1 y el verbo se leía como texto suelto). */
 .ms .ms__bar .ms__act {
   width: fit-content;
   padding: 0.4rem 0.9rem;
-  border: 1px solid #ddd6c6;
+  border: 1px solid #6a6355;
   border-radius: 3px;
   background: transparent;
   font-family: var(--font-mono, ui-monospace, monospace);
