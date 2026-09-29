@@ -149,7 +149,8 @@ describe('IntegradaVistaComponent', () => {
       expect(topbar.textContent).withContext('el topbar se entera').toBe('Reanudar animaciones');
       expect(localStorage.getItem(CLAVE)).toBe('1');
 
-      expect(host.querySelector<HTMLElement>('.tb-links')!.inert).toBeTrue();
+      topbar.click();
+      expect(landing.textContent).withContext('y al revés').toContain('tocá para pausar');
       fixture.destroy();
     });
 
@@ -187,10 +188,12 @@ describe('IntegradaVistaComponent', () => {
       const host: HTMLElement = fixture.nativeElement;
       // Antes del primer render: después, en la landing, los links quedan inertes y el click no llega.
       host.querySelector<HTMLButtonElement>('.tb-pausa')!.click();
-      await esperar(60); // pasado el barrido del boot: la entrada solo la atrapa `animationstart`
+      // El render que los vuelve inertes corre en el boot, justo antes del barrido de la pausa:
+      // pasado eso, a la entrada nueva solo la puede atrapar `animationstart`.
+      await hasta(() => host.querySelector<HTMLElement>('.tb-links')!.inert, 'el boot del motor');
 
       const entrada = animado(host, 'prueba-entrada 10s both');
-      await esperar(120); // `animationstart` llega en el cuadro siguiente
+      await arranco(entrada);
       expect(entrada.playState).toBe('finished');
       fixture.destroy();
     });
@@ -200,7 +203,7 @@ describe('IntegradaVistaComponent', () => {
       const fixture = await montar();
       const host: HTMLElement = fixture.nativeElement;
       const loop = animado(host, 'prueba-loop 1s linear infinite');
-      await esperar(120); // el boot aplica la pausa a los 30 ms
+      await hasta(() => loop.playbackRate === 0, 'la pausa guardada frena el loop');
 
       expect(host.querySelector('.tb-pausa')!.textContent).toBe('Reanudar animaciones');
       expect(loop.playbackRate).toBe(0);
