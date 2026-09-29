@@ -49,6 +49,124 @@ describe('IntegradaVistaComponent', () => {
     fixture.destroy();
   });
 
+  describe('pausa de la vida de fondo (WCAG 2.2.2)', () => {
+    const CLAVE = 'signals-pausa';
+    const esperar = (ms: number) => new Promise((r) => setTimeout(r, ms));
+    let estilo: HTMLStyleElement;
+
+    beforeEach(() => {
+      localStorage.removeItem(CLAVE);
+      estilo = document.createElement('style');
+      estilo.textContent =
+        '@keyframes prueba-loop { to { transform: rotate(1turn); } }' +
+        '@keyframes prueba-entrada { from { opacity: 0; } }';
+      document.head.appendChild(estilo);
+    });
+    afterEach(() => {
+      localStorage.removeItem(CLAVE);
+      estilo.remove();
+    });
+
+    /** Un elemento con una animación CSS, colgado dentro del recorrido. */
+    function animado(padre: Element, animacion: string): Animation {
+      const el = document.createElement('div');
+      el.style.animation = animacion;
+      padre.appendChild(el);
+      return el.getAnimations()[0];
+    }
+
+    it('detiene los loops, termina las entradas y no toca lo que el jugador abrió encima', async () => {
+      const fixture = await montar();
+      const host: HTMLElement = fixture.nativeElement;
+      const btn = host.querySelector<HTMLButtonElement>('.tb-links .tb-pausa')!;
+      const loop = animado(host, 'prueba-loop 1s linear infinite');
+      // Una entrada que arranca invisible: congelada en su primer cuadro no se vería nunca.
+      const entrada = animado(host, 'prueba-entrada 10s both');
+      const bitacora = host.appendChild(document.createElement('app-bitacora'));
+      const encima = animado(bitacora, 'prueba-entrada 10s both');
+
+      expect(btn.textContent).toBe('Pausar animaciones');
+      btn.click();
+      expect(btn.textContent)
+        .withContext('la etiqueta dice lo que hace')
+        .toBe('Reanudar animaciones');
+      expect(host.classList).toContain('fondo-en-pausa');
+      const quieto = loop.currentTime;
+      await esperar(120);
+      expect(loop.currentTime).withContext('loop').toBe(quieto);
+      expect(entrada.playState).withContext('entrada').toBe('finished');
+      expect(encima.playState).withContext('bitácora').toBe('running');
+
+      btn.click();
+      expect(host.classList).not.toContain('fondo-en-pausa');
+      expect(loop.playbackRate).withContext('loop reanudado').toBe(1);
+      fixture.destroy();
+    });
+
+    it('en la landing, con el topbar invisible, sus controles no se pueden enfocar', async () => {
+      const fixture = await montar();
+      const host: HTMLElement = fixture.nativeElement;
+      await esperar(60); // primer render del motor
+
+      expect(host.querySelector<HTMLElement>('.tb-links')!.inert).toBeTrue();
+      fixture.destroy();
+    });
+
+    it('reanudar no revive un loop que el CSS canceló mientras duraba la pausa', async () => {
+      const fixture = await montar();
+      const host: HTMLElement = fixture.nativeElement;
+      const btn = host.querySelector<HTMLButtonElement>('.tb-pausa')!;
+      const loop = animado(host, 'prueba-loop 1s linear infinite');
+
+      btn.click();
+      // Como el halo de una parada que deja de ser la actual: el CSS le saca la animación.
+      (loop.effect as KeyframeEffect).target!.setAttribute('style', 'animation: none');
+      expect(loop.playState).toBe('idle');
+      btn.click();
+      expect(loop.playState).withContext('sigue cancelado').toBe('idle');
+      fixture.destroy();
+    });
+
+    it('después de una pausa, la pestaña oculta sigue congelando por CSS', async () => {
+      const fixture = await montar();
+      const host: HTMLElement = fixture.nativeElement;
+      const btn = host.querySelector<HTMLButtonElement>('.tb-pausa')!;
+      const loop = animado(host, 'prueba-loop 1s linear infinite');
+
+      btn.click();
+      btn.click();
+      host.classList.add('anims-frozen'); // lo que pone el motor con `document.hidden`
+      expect(loop.playState).toBe('paused');
+      host.classList.remove('anims-frozen');
+      fixture.destroy();
+    });
+
+    it('lo que arranca con la pausa puesta ya nace quieto', async () => {
+      const fixture = await montar();
+      const host: HTMLElement = fixture.nativeElement;
+      // Antes del primer render: después, en la landing, los links quedan inertes y el click no llega.
+      host.querySelector<HTMLButtonElement>('.tb-pausa')!.click();
+      await esperar(60); // pasado el barrido del boot: la entrada solo la atrapa `animationstart`
+
+      const entrada = animado(host, 'prueba-entrada 10s both');
+      await esperar(120); // `animationstart` llega en el cuadro siguiente
+      expect(entrada.playState).toBe('finished');
+      fixture.destroy();
+    });
+
+    it('se recuerda entre visitas', async () => {
+      localStorage.setItem(CLAVE, '1');
+      const fixture = await montar();
+      const host: HTMLElement = fixture.nativeElement;
+      const loop = animado(host, 'prueba-loop 1s linear infinite');
+      await esperar(120); // el boot aplica la pausa a los 30 ms
+
+      expect(host.querySelector('.tb-pausa')!.textContent).toBe('Reanudar animaciones');
+      expect(loop.playbackRate).toBe(0);
+      fixture.destroy();
+    });
+  });
+
   describe('navegación por teclado', () => {
     const esperar = (ms: number) => new Promise((r) => setTimeout(r, ms));
     const flecha = (prevenida: boolean): void => {

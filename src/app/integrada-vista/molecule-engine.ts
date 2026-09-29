@@ -26,6 +26,25 @@ const COL: Record<AccentKey, string> = {
   capstone: '#c98a2a',
 };
 
+const CLAVE_PAUSA_FONDO = 'signals-pausa';
+/** Lo que el jugador abrió encima del recorrido: la pausa de la vida de fondo no lo toca. */
+const PRIMER_PLANO = '.prologo, app-cinematica, app-bitacora';
+function leerPausaFondo(): boolean {
+  try {
+    return localStorage.getItem(CLAVE_PAUSA_FONDO) === '1';
+  } catch {
+    return false;
+  }
+}
+function guardarPausaFondo(pausa: boolean): void {
+  try {
+    if (pausa) localStorage.setItem(CLAVE_PAUSA_FONDO, '1');
+    else localStorage.removeItem(CLAVE_PAUSA_FONDO);
+  } catch {
+    // Sin storage (modo privado, bloqueado) la pausa dura la visita: no es motivo para romper.
+  }
+}
+
 /** Handle de un sub-nivel montado: su disposer y el nombre que va al topbar. */
 /**
  * Reescribir `textContent` reemplaza el nodo de texto y ensucia el layout aunque el texto sea el
@@ -1123,6 +1142,7 @@ export function initMolecule(
   const railEl = q<HTMLElement>('.rail');
   const introEl = q<HTMLElement>('.intro');
   const topbarEl = q<HTMLElement>('.topbar');
+  const tbLinksEl = q<HTMLElement>('.tb-links');
   const tbTitleEl = q<HTMLElement>('.tb-title');
   const tbCenterEl = q<HTMLElement>('.tb-center');
   const tbCountEl = q<HTMLElement>('.tb-count');
@@ -1255,6 +1275,11 @@ export function initMolecule(
       // scrollear y, al bucear (s alto), queda en 1.
       topbarEl.style.opacity = Math.max(0, Math.min(1, (s - 0.03) / 0.09)).toFixed(2);
     }
+    // Como el índice: invisibles en la landing, sus controles (bitácora, práctica, pausa) no pueden
+    // quedar en el tab-order ni recibir clicks. Va sobre los links y no sobre el topbar, cuyo `inert`
+    // maneja la intro mientras no se elige clima.
+    const linksApagados = s < INTRO_HASTA;
+    if (tbLinksEl && tbLinksEl.inert !== linksApagados) tbLinksEl.inert = linksApagados;
     // En la pantalla inicial (overlay de bienvenida, s≈0) el título del topbar (el tagline del concepto
     // 0, "Cómo la pantalla sabe qué cambió") competía con el "Angular Signals" del intro. Se oculta
     // hasta que empezás a scrollear, desvaneciéndose a la par que el intro.
@@ -1696,8 +1721,8 @@ export function initMolecule(
     raf(openAt);
     // Con el clock del SMIL ya corriendo: congelado con reduce, los electrones (begin negativo)
     // quedan quietos ya distribuidos alrededor de sus núcleos. También cubre abrir en una pestaña de
-    // fondo, que antes animaba hasta el primer visibilitychange.
-    aplicarMovimiento();
+    // fondo, que antes animaba hasta el primer visibilitychange, y volver con la pausa guardada.
+    aplicarPausa();
   }, 30);
   window.addEventListener('load', openAt, { once: true });
 
@@ -1711,10 +1736,76 @@ export function initMolecule(
     root.classList.toggle('anims-frozen', oculta);
     subPuckE.style.display = reduceMotion ? 'none' : '';
     for (const svg of [molSvg, suborbit]) {
-      if (oculta || reduceMotion) svg?.pauseAnimations();
+      if (oculta || reduceMotion || pausaFondo) svg?.pauseAnimations();
       else svg?.unpauseAnimations();
     }
   }
+
+  // Pausa de la vida de fondo (WCAG 2.2.2): halos, sonar, electrones y los loops de los demos se
+  // mueven sin fin al lado del contenido, y la preferencia del sistema no puede ser el único freno.
+  // No reusa el congelado de la pestaña oculta: `animation-play-state` deja cada animación en el
+  // cuadro en que está, y una entrada que todavía no arrancó queda en su primer cuadro, invisible
+  // (la bitácora quedaba afuera de la pantalla y el recorrido, inerte detrás). Acá los loops se
+  // detienen y lo que tiene fin salta a su estado final, también lo que arranca con la pausa puesta.
+  // Lo que el jugador abrió encima no es fondo. Se recuerda por visitante; el storage puede no estar.
+  // Los loops se frenan con velocidad 0 y no con pause()/play(): esos le sacan al CSS el control de
+  // `animation-play-state` para siempre (la pestaña oculta dejaba de congelarlos), y play() revive
+  // como animación suelta un loop que el CSS ya canceló (halos latiendo en paradas que dejaron de
+  // ser la actual). A un loop cancelado, devolverle la velocidad no lo arranca.
+  let pausaFondo = leerPausaFondo();
+  const frenadas = new Set<Animation>();
+  const aquietar = (a: Animation): void => {
+    const efecto = a.effect;
+    if (!(a instanceof CSSAnimation) || !(efecto instanceof KeyframeEffect)) return;
+    if (efecto.target?.closest(PRIMER_PLANO)) return;
+    if (efecto.getComputedTiming().iterations === Infinity) {
+      a.playbackRate = 0;
+      frenadas.add(a);
+    } else {
+      a.finish();
+    }
+  };
+  const aplicarPausa = (): void => {
+    root.classList.toggle('fondo-en-pausa', pausaFondo);
+    if (pausaFondo) {
+      root.getAnimations({ subtree: true }).forEach(aquietar);
+    } else {
+      for (const a of frenadas) a.playbackRate = 1;
+      frenadas.clear();
+    }
+    aplicarMovimiento();
+  };
+  const onAnimacionNueva = (e: AnimationEvent): void => {
+    if (!pausaFondo || !(e.target instanceof Element)) return;
+    // Lo que el CSS canceló durante la pausa (un sub-nivel que se fue) no se retiene hasta reanudar.
+    for (const a of frenadas) if (a.playState === 'idle') frenadas.delete(a);
+    e.target.getAnimations({ subtree: true }).forEach(aquietar);
+  };
+  const btnPausa = document.createElement('button');
+  btnPausa.type = 'button';
+  btnPausa.className = 'tb-pausa';
+  btnPausa.innerHTML =
+    '<span class="tb-pausa__icono" aria-hidden="true"></span><span class="tb-pausa__texto"></span>';
+  stamp(btnPausa);
+  stampTree(btnPausa);
+  q('.tb-links')?.appendChild(btnPausa);
+  // La etiqueta dice lo que hace el botón, así que cambia con el estado (y por eso no lleva
+  // aria-pressed): una etiqueta fija con el ícono de play pegado a "Pausar" se contradecía.
+  const pintarPausa = (): void => {
+    const etiqueta = pausaFondo ? 'Reanudar animaciones' : 'Pausar animaciones';
+    btnPausa.querySelector('.tb-pausa__texto')!.textContent = etiqueta;
+    btnPausa.title = etiqueta;
+    btnPausa.classList.toggle('tb-pausa--activa', pausaFondo);
+  };
+  pintarPausa();
+  const onPausaFondo = (): void => {
+    pausaFondo = !pausaFondo;
+    pintarPausa();
+    guardarPausaFondo(pausaFondo);
+    aplicarPausa();
+  };
+  btnPausa.addEventListener('click', onPausaFondo);
+  root.addEventListener('animationstart', onAnimacionNueva);
   const onVisibility = (): void => aplicarMovimiento();
   const onReduceChange = (e: MediaQueryListEvent): void => {
     reduceMotion = e.matches;
@@ -1740,6 +1831,10 @@ export function initMolecule(
     window.removeEventListener('load', openAt);
     document.removeEventListener('visibilitychange', onVisibility);
     mqlReduce?.removeEventListener('change', onReduceChange);
+    btnPausa.removeEventListener('click', onPausaFondo);
+    btnPausa.remove();
+    root.removeEventListener('animationstart', onAnimacionNueva);
+    frenadas.clear();
     C.forEach((cc) => cc.subDispose?.());
   };
 }

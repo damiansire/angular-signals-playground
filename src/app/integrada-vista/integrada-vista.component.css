@@ -976,14 +976,59 @@
 .tb-links > :is(a, button) + :is(a, button) {
   margin-left: 1.1rem;
 }
-/* La bitácora abre un panel, así que es un botón; se viste igual que los enlaces del topbar. */
-.tb-bitacora {
+/* La bitácora y la pausa son botones (abren un panel, cambian un estado), pero se visten igual que
+   los enlaces del topbar. */
+.tb-bitacora,
+.tb-pausa {
   padding: 0;
   border: 0;
   background: none;
   font: inherit;
   color: #6a6355;
   cursor: pointer;
+}
+/* En pausa, la etiqueta pasa a "Reanudar" y el ícono a play (el estado no depende solo del color),
+   con un dorado que llega a 4.5:1 sobre el crema y sobre el clima. */
+.tb-pausa--activa {
+  color: #8a5a12;
+}
+.tb-bitacora:focus-visible,
+.tb-pausa:focus-visible {
+  outline: 2px solid var(--focus-ink);
+  outline-offset: 2px;
+}
+.tb-pausa__icono {
+  display: inline-block;
+  width: 10px;
+  height: 12px;
+  margin-right: 6px;
+  border-inline: 3px solid currentColor;
+}
+.tb-pausa--activa .tb-pausa__icono {
+  width: 0;
+  height: 0;
+  border-block: 6px solid transparent;
+  border-inline: 10px solid currentColor;
+  border-inline-end-width: 0;
+}
+/* Angosto, la etiqueta entera empujaba el topbar a dos renglones y truncaba el título. Queda el
+   ícono con un blanco de 24px, y la etiqueta sigue siendo el nombre accesible del botón. */
+@media (max-width: 1000px) {
+  .tb-pausa {
+    padding: 6px 7px;
+    line-height: 0;
+  }
+  .tb-pausa__icono {
+    margin-right: 0;
+  }
+  .tb-pausa__texto {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
 }
 /* El botón "← Recorrido" se oculta hasta que tenga un destino real, pero se mantiene en el DOM
    ocupando su slot: el topbar es flex space-between de 3 zonas y sin ese ancho el título dejaría
@@ -1152,8 +1197,10 @@
   background: color-mix(in srgb, var(--nc) 14%, transparent);
 }
 .rail-stop-btn:focus-visible {
-  outline: 2px solid var(--nc);
-  outline-offset: 1px;
+  /* Doble anillo: la tinta da el contraste sobre el crema y el acento queda por dentro. */
+  outline: 2px solid var(--focus-ink);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 2px var(--nc);
 }
 .rail-mark {
   position: relative;
