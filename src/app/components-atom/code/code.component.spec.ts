@@ -97,6 +97,14 @@ describe('CodeComponent', () => {
       expect(row.style.getPropertyValue('--sangria')).toBe('2');
     });
 
+    it('muestra la sangría con espacios duros: al envolver no deja un renglón vacío', () => {
+      expect(component.renglon({ id: 'a', line: '  (countChange)="on($event)" />' })).toBe(
+        '\u00a0\u00a0(countChange)="on($event)" />',
+      );
+      expect(component.renglon({ id: 'b', line: 'sin sangría' })).toBe('sin sangría');
+      expect(component.renglon({ id: 'c' })).toBe('');
+    });
+
     it('staticLineClasses resalta en verde cuando la linea esta active', () => {
       expect(component.staticLineClasses({ id: 'a', active: true })).toContain('bg-green-700');
       expect(component.staticLineClasses({ id: 'b', active: false })).toContain('bg-gray-800');

@@ -67,6 +67,16 @@ export class CodeComponent {
   }
 
   /**
+   * El renglón con su sangría en espacios duros. Con espacios comunes, al envolver angosto el
+   * navegador cortaba justo después de la sangría y dejaba un renglón vacío arriba del código.
+   */
+  renglon(item: CodeLine): string {
+    if (typeof item.line !== 'string') return String(item.line ?? '');
+    const n = this.sangria(item);
+    return '\u00a0'.repeat(n) + item.line.slice(n);
+  }
+
+  /**
    * Las líneas en blanco de un snippet son separadores visuales, no código: no deben quedar
    * como `role="button"` sin nombre accesible (violación de "ARIA commands must have an
    * accessible name" detectada por axe-core). Solo las líneas con texto son focusables.
