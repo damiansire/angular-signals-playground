@@ -211,6 +211,14 @@
   stroke: rgba(255, 255, 255, 0.5);
   stroke-width: 1.4;
   filter: url(#glow);
+  transition: opacity 0.45s ease;
+}
+/* Con el sub-nivel asentado el núcleo del átomo actual queda detrás del contenido, y su disco
+   sólido se veía a través de las cajas vacías (el "Todavía no corrió nada" de 3/3): pasa a
+   fantasma. Mientras buceás sigue entero, y la card sigue parada sobre el átomo (anillos y halo
+   respiran igual). */
+.vecinos-fuera .atom.current .nucleus {
+  opacity: 0.3;
 }
 .orb {
   transform-box: fill-box;
