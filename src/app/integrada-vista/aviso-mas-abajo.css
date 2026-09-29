@@ -1,0 +1,37 @@
+/* Una card que scrollea por dentro avisa que hay más abajo; si no, el corte seco a mitad de renglón
+   se lee como roto. El aviso sigue el scroll de la propia card: si no scrollea, la línea de tiempo
+   queda inactiva y no aparece; al llegar al final se apaga. No es un fundido con máscara porque una
+   máscara en la card borra la mascota de la pista, que es su hija `position: fixed`. El margen
+   negativo lo saca del flujo, así no agrega alto. Archivo aparte por lo mismo que `angosto.css`:
+   el presupuesto de estilo se mide por archivo. */
+.subbody::after {
+  content: 'más abajo ↓' / '';
+  position: sticky;
+  bottom: 0.5rem;
+  display: block;
+  width: fit-content;
+  margin: -1.6rem auto 0;
+  padding: 0.15rem 0.7rem;
+  border: 1px solid #e2dccb;
+  border-radius: 999px;
+  background: rgba(252, 251, 245, 0.94);
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+  color: #6a6355;
+  pointer-events: none;
+  opacity: 0;
+  animation: aviso-mas-abajo linear both;
+  animation-timeline: scroll(nearest block);
+  /* Se apaga a lo largo de los últimos 2.5rem de scroll: una card que desborda un píxel por
+     redondeo no anuncia "más abajo" con nada abajo. */
+  animation-range: calc(100% - 2.5rem) 100%;
+}
+@keyframes aviso-mas-abajo {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
