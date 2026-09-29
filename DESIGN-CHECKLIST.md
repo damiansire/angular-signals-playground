@@ -153,11 +153,16 @@ puede alcanzar" son dos cosas distintas y hay que chequear las dos.
 ## Trabajo de fondo (lo que corre cuando no lo estás mirando)
 
 - [ ] Ningún timer, effect ni fetch de un sub-nivel corre mientras su capítulo
-      no está activo. La vista integrada NO desmonta las cards: marca `inert`
-      la que no se ve, así que el cleanup por `DestroyRef`/`ngOnDestroy` nunca
-      se dispara y un `setInterval` late desde que carga la página. Verificar
-      midiendo (contar logs o ticks durante N segundos parado en otro nivel),
-      no leyendo el código.
+      no está activo. La vista integrada no desmonta el concepto vecino
+      (ventana de montaje de ±1): marca `inert` la card que no se ve, así que
+      el cleanup por `DestroyRef`/`ngOnDestroy` no se dispara y un
+      `setInterval` sigue latiendo. Lo reproduce un salto de rueda desde un
+      sub-nivel al concepto vecino: ese sub-nivel queda montado e inerte. El
+      guard es `host.closest('[inert]')`, y un contador frenado cuenta los
+      ticks que pasaron el guard (`filter` + `scan`), no el índice del
+      `interval`: al volver sigue desde donde quedó en vez de cobrar de golpe
+      el tiempo inerte (8/2, 2026-09-29). Verificar midiendo (contar logs o
+      ticks durante N segundos parado en otro nivel), no leyendo el código.
 - [ ] Consola limpia mientras se recorre: un `console.log` didáctico solo
       aparece cuando el usuario está en el sub-nivel que lo enseña.
 - [ ] Ningún loop de dibujo (rAF de canvas) corre sin algo que mover: parado en
@@ -179,7 +184,9 @@ puede alcanzar" son dos cosas distintas y hay que chequear las dos.
       cinemática, entrar a un sub-nivel y contar las `getAnimations()` infinitas que siguen
       corriendo (cero). Después: pausar en el nivel 0, bajar al 3, reanudar y contar halos latiendo
       fuera de la parada actual (cero). La vida por timer de un demo (el latido de 3/1) también
-      para: lo que apaga reduced-motion lo apaga la pausa.
+      para: lo que apaga reduced-motion lo apaga la pausa. Lo que ES la lección no es vida y sigue
+      con la pausa puesta (el cronómetro de 8/2 es el stream convertido a signal): solo se frena
+      fuera de vista.
 
 ## Legibilidad del contenido embebido
 
