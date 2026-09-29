@@ -233,33 +233,71 @@ describe('initIntroTusi', () => {
   });
 
   describe('el loop duerme cuando no hay nada que mover', () => {
-    const esperar = (ms: number) => new Promise((r) => setTimeout(r, ms));
+    /**
+     * Los cuadros los da el test, no el navegador. Contar `requestAnimationFrame` en ventanas de
+     * reloj real medía también la carga de la máquina: con la CPU tomada entraban dos cuadros en
+     * 150 ms. Y el espía era global: los cuadros de más que llegó a contar fuera de vista no son de
+     * la intro, que corta el loop antes de pedir otro, sino de otro código de la página de Karma
+     * que corría durante las esperas. Con el rAF falso el test es síncrono: entre `arrancar` y el
+     * último `expect` no corre nada ajeno ni pasa tiempo real.
+     */
+    function cuadrosFalsos() {
+      const pedidos = new Map<number, FrameRequestCallback>();
+      let ultimoId = 0;
+      let ahora = 0;
+      spyOn(window, 'requestAnimationFrame').and.callFake((cb: FrameRequestCallback) => {
+        pedidos.set(++ultimoId, cb);
+        return ultimoId;
+      });
+      spyOn(window, 'cancelAnimationFrame').and.callFake((id: number) => {
+        pedidos.delete(id);
+      });
+      return {
+        /** Cuadros pedidos que todavía no corrieron. Cero es un loop dormido. */
+        pendientes: () => pedidos.size,
+        /** Lo que se pide durante un cuadro corre en el siguiente, como en el navegador. */
+        avanzar(n: number): void {
+          for (let i = 0; i < n; i++) {
+            ahora += 16;
+            const tanda = [...pedidos.values()];
+            pedidos.clear();
+            tanda.forEach((cb) => cb(ahora));
+          }
+        },
+      };
+    }
 
-    it('antes de elegir clima dibuja y deja de pedir cuadros', async () => {
-      const pedidos = spyOn(window, 'requestAnimationFrame').and.callThrough();
-      arrancar();
-      await esperar(100);
-      const asentado = pedidos.calls.count();
+    it('antes de elegir clima dibuja y deja de pedir cuadros', () => {
+      const cuadros = cuadrosFalsos();
+      const t = arrancar();
+      expect(cuadros.pendientes()).withContext('el primer cuadro, que mide y dibuja').toBe(1);
 
-      await esperar(150);
+      cuadros.avanzar(10);
 
-      expect(pedidos.calls.count()).toBe(asentado);
+      expect(t.host.querySelector('.tusi__epigraph')!.textContent)
+        .withContext('dibujó')
+        .not.toBe('');
+      expect(cuadros.pendientes()).withContext('sin nada que mover').toBe(0);
     });
 
-    it('con la construcción andando sí pide cuadros, y fuera de vista vuelve a dormir', async () => {
+    it('con la construcción andando sí pide cuadros, y fuera de vista vuelve a dormir', () => {
+      const cuadros = cuadrosFalsos();
       const t = arrancar();
       t.dark.click();
       t.gatillos[0]();
-      const pedidos = spyOn(window, 'requestAnimationFrame').and.callThrough();
 
-      await esperar(150);
-      expect(pedidos.calls.count()).withContext('construyendo').toBeGreaterThan(2);
+      cuadros.avanzar(10);
+      expect(cuadros.pendientes())
+        .withContext('construyendo: cada cuadro pide el siguiente')
+        .toBe(1);
 
       t.handle.setVisible(false);
-      await esperar(60);
-      const asentado = pedidos.calls.count();
-      await esperar(150);
-      expect(pedidos.calls.count()).withContext('fuera de vista').toBe(asentado);
+      // El cuadro que ya estaba pedido corre igual: tiene que notar que no se ve y no pedir otro.
+      cuadros.avanzar(10);
+      expect(cuadros.pendientes()).withContext('fuera de vista').toBe(0);
+
+      t.handle.setVisible(true);
+      expect(cuadros.pendientes()).withContext('de vuelta a la vista retoma').toBe(1);
     });
   });
 
