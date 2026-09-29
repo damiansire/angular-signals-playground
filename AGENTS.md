@@ -17,52 +17,43 @@ todos lados, estilada con Tailwind. No es una librería ni un monorepo.
   APIs de signals (`signal`/`computed`/`effect`/`input`/`output`/`model`),
   componentes standalone. Nada de `NgModule`.
 
-## Verificación visual (receta de esta máquina, no re-tantear)
+## Verificación visual
 
-Destilado de la autopsia de sesiones del 09 al 16 de julio 2026: el entorno de
-verificación se redescubrió desde cero en 5 sesiones distintas. Esta es la vía
-que funciona; no volver a explorar alternativas ya descartadas.
+La vista integrada anima sin parar (rAF y SMIL), y eso cuelga a algunas
+herramientas de captura. Esto es lo que funciona:
 
-- **NO uses el Browser pane (`mcp__Claude_Browser__computer` screenshot) con
-  esta app.** La animación rAF continua + pestaña oculta lo cuelga (timeout de
-  30s, reproducido en 5 sesiones). Máximo 1 intento; si falla, cambiá de vía
-  sin insistir y sin devolverle la prueba al usuario.
-- **Vía que funciona:** `chrome-devtools` o `claude-in-chrome` (extensión
-  conectada). Si `claude-in-chrome` da "not connected", pedile a Damian una
-  sola vez que conecte la extensión y seguí por ahí.
-- **Dev server:** config `signals-play-dev` en `.claude/launch.json` (ya
-  existe, no crear otra). Antes de afirmar que corre, chequeá salud
-  (`preview_logs` o curl a `localhost:4200`). Se cae silencioso. Y ojo: un
-  error de compilación transitorio corta el HMR de la pestaña del usuario
-  aunque el server se recupere; si dice "no veo cambios", primero verificá
-  server + bundle, no el código.
-- **Falso bug conocido:** la pestaña oculta del pane pausa `rAF` y
-  `scroll-behavior: smooth`. Un "bug de navegación/scroll" que solo pasa en el
-  pane NO es un bug real: verificá en browser real antes de gastar debugging.
+- **Capturá con la pestaña visible.** Con la pestaña oculta el navegador pausa
+  el rAF, y un screenshot que espera un cuadro nuevo se queda esperando.
+  Cualquier navegador real manejado por CDP sirve (Puppeteer o Playwright,
+  incluso en headless).
+- **Dev server:** `npm start`, en `http://localhost:4200`. Antes de afirmar que
+  corre, chequeá que responda: se cae sin avisar. Y un error de compilación
+  transitorio corta el HMR de la pestaña aunque el server se recupere: si "no
+  se ven los cambios", primero verificá server y bundle, no el código.
+- **Falso bug conocido:** una pestaña en segundo plano pausa `rAF` y
+  `scroll-behavior: smooth`. Un "bug de navegación o de scroll" que solo pasa
+  con la pestaña oculta no es un bug: verificá con la pestaña visible antes de
+  depurar.
 - **Cierre de cambio visual = dos chequeos separados y obligatorios:**
-  (1) ¿renderiza sin error? y (2) ¿se ve bien compuesto? El segundo exige
-  captura real MIRADA (o el agente `design-reviewer`), nunca solo mediciones
-  de DOM. Para colisiones/superposición, además de mirar: medí overlap
-  numérico con `getBoundingClientRect()` contra TODOS los vecinos (título,
-  contador, dots, órbita), no contra uno solo.
+  (1) ¿renderiza sin error? y (2) ¿se ve bien compuesto? El segundo exige una
+  captura real MIRADA, nunca solo mediciones de DOM. Para colisiones o
+  superposición, además de mirar: medí el overlap con
+  `getBoundingClientRect()` contra TODOS los vecinos (título, contador, dots,
+  órbita), no contra uno solo.
 - **Gate de diseño:** todo cambio que toque el motor visual (`molecule-engine`,
-  CSS de `integrada-vista/`) cierra con una pasada de `design-reviewer` contra
-  `DESIGN-CHECKLIST.md` ANTES de declararlo bueno. La palabra del propio
-  agente ("quedó hermoso") no es veredicto.
-- **NO verifiques la navegación con eventos SINTÉTICOS** (2026-07-24, costó ~15
-  round-trips). `btn.click()` y `dispatchEvent(new MouseEvent/KeyboardEvent)`
-  disparan el handler pero `goToUnit` no avanza, y las mediciones carrean con
-  las animaciones de scroll: dan FALSOS NEGATIVOS ("el índice no navega") y
-  dejan la instancia en un estado inconsistente. Con **input REAL** (click de
-  puntero de chrome-devtools/claude-in-chrome, o rueda real) anda a la primera.
-  Ojo también con las coordenadas: el screenshot fluctúa (1456/1512/1520 px)
-  mientras el viewport real es 1920 → clickeá por `uid`/`ref`, o escalá por
-  `screenshotW / innerWidth`, si no le errás al elemento.
-- **Al terminar una review, actualizá el `DESIGN-CHECKLIST.md`** con cada defecto
-  detectado Y resuelto (es la regla del propio archivo, y es lo que evita que la
-  familia de defectos vuelva). Si la review se entregó como artefacto, ese
-  artefacto también se actualiza al aplicar los fixes: un reporte que quedó en
-  "roto" cuando ya está arreglado desinforma.
+  CSS de `integrada-vista/`) cierra con una pasada completa contra
+  `DESIGN-CHECKLIST.md`, todos los ítems, ANTES de declararlo bueno. Que quien
+  lo hizo diga "quedó bien" no es veredicto.
+- **NO verifiques la navegación con eventos SINTÉTICOS.** `btn.click()` y
+  `dispatchEvent(new MouseEvent/KeyboardEvent)` disparan el handler pero
+  `goToUnit` no avanza, y las mediciones carrean con las animaciones de scroll:
+  dan falsos negativos ("el índice no navega") y dejan la instancia en un
+  estado inconsistente. Con **input real** (un click de puntero o una rueda por
+  CDP) anda a la primera. Clickeá por selector y no por coordenadas de un
+  screenshot escalado.
+- **Al terminar una revisión, actualizá `DESIGN-CHECKLIST.md`** con cada defecto
+  detectado Y resuelto: es la regla del propio archivo, y es lo que evita que
+  la familia de defectos vuelva.
 
 ## Antes de construir features visuales grandes
 
@@ -71,7 +62,7 @@ que funciona; no volver a explorar alternativas ya descartadas.
   alcance en una frase ANTES de programar el primer caso. Un ejemplo-muestra no
   define el alcance.
 - **Referencia visual externa** (neal.fun, ncase.me, etc.): desambiguá elemento
-  por elemento qué se traslada, con `AskUserQuestion` si hace falta.
+  por elemento qué se traslada, y confirmalo en el issue o el PR.
 - **"Que se sienta X" se traduce a lista escrita de anti-patrones** antes de
   implementar (ver la sección de gramática de modal en `DESIGN-CHECKLIST.md`).
 - **Syncs bidireccionales** (URL↔estado, navegación↔UI): especificá y testeá
@@ -133,6 +124,17 @@ Todo PR pasa el mismo gate que CI: lint + format:check + tests en verde.
   archivos o código.
 - Antes de implementar algo, buscá un ejemplo equivalente ya presente en el
   codebase y seguí su estilo.
+- **Nombres por dominio, no por mecanismo:** un componente o un signal se
+  nombra por lo que significa en el playground (`signalLevel`, `benchFrame`),
+  no por su tipo interno.
+- **Los comentarios explican el PORQUÉ, nunca el QUÉ:** si un comentario
+  parafrasea la línea de abajo, se borra o se renombra la variable.
+- **Fail-fast en los pocos bordes async:** si se agrega un fetch de datos o un
+  timer (p.ej. en `signals/level-6-resource/` o `level-10-debounced/`), va con
+  timeout o cleanup explícito (`effect` con `onCleanup`, no un `setTimeout`
+  suelto).
+- `public/preview.jpeg` es la captura real que abre el README y también la
+  `og:image`: si cambia la vista integrada, hay que regenerarla.
 
 ## Scripts
 
@@ -149,30 +151,3 @@ Todo PR pasa el mismo gate que CI: lint + format:check + tests en verde.
 En CI corren `lint`, `format:check`, `test:scripts`, `gate:prosa`, `test` y el
 build de producción. Si uno falla, el PR no mergea y el deploy a Pages tampoco
 ocurre: `deploy.yml` escucha el resultado de CI, no el push.
-
-## Estándar nivel mundial
-
-Piso transversal de `/fragua` (`fellow-standard.md` del corpus) + reglas del
-stack Angular (`~/.claude/tools/_audit-tools/refs/angular/`). Este repo ya
-cumple la mayoría por construcción (signals-first, OnPush, standalone, tests
-antes que UI, anti-over-engineering explícito arriba) — lo que sigue es lo que
-falta o hay que sostener:
-
-- **Nombres por dominio, no por mecanismo** (ítem a): un componente/signal se
-  nombra por lo que significa en el playground (`signalLevel`, `benchFrame`),
-  no por su tipo interno.
-- **Comentarios explican el PORQUÉ, nunca el QUÉ** (ítem b): si un comentario
-  parafrasea la línea de abajo, se borra o se renombra la variable en su lugar.
-- **README con prueba visible** (ítem k) — **RESUELTO (2026-07-17)**: el README
-  lidera con una captura real de la vista integrada (`public/preview.jpeg`), que
-  también sirve de `og:image`. Captura tomada vía `chrome-devtools` (el Browser
-  pane cuelga con esta app, ver la receta de verificación arriba).
-- **Fail-fast en los pocos boundaries async** (ítem i): si se agrega fetch de
-  datos o timers (p.ej. en `signals/level-6-resource/` o `level-10-debounced/`),
-  van con timeout/cleanup explícito (`effect` con `onCleanup`, no un `setTimeout`
-  suelto).
-
-Gap de corpus: ninguno para este stack — `refs/angular/` tiene notas
-distiladas (`from-ngrx-platform`, `from-angular-components`,
-`signals-templates-cd`, `di-and-signals-internals`) que ya informan las
-convenciones de arriba.

@@ -1,11 +1,10 @@
 # DESIGN-CHECKLIST — vista integrada / journey
 
 Checklist ACUMULADO de diseño. Regla: cada defecto visual que se detecta y
-resuelve se agrega acá como ítem permanente (patrón `postmortem-guardrail`).
-El `design-reviewer` verifica TODOS los ítems en cada ronda, no solo el
-síntoma más reciente. Origen: autopsia de las sesiones del 09 al 16 de julio
-2026, donde la misma familia de defectos ("parece un modal") sobrevivió a 8
-rondas de review porque cada ronda auditaba solo lo último reportado.
+resuelve se agrega acá como ítem permanente, y cada revisión verifica TODOS los
+ítems, no solo el síntoma más reciente. El porqué: la misma familia de defectos
+("parece un modal") sobrevivió a 8 rondas de revisión porque cada ronda
+auditaba solo lo último reportado.
 
 ## Gramática de modal (la card debe sentirse parte de la escena, no una ventana)
 
