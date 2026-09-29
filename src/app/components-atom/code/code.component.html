@@ -10,14 +10,15 @@
         <!-- Modo estático: el snippet se LEE, no se toca. Antes cada línea con texto salía con
              role="button" y tabindex=0 sin ningún handler detrás: el lector de pantalla anunciaba
              un botón, el teclado paraba en él, y activarlo no hacía nada. Un control que miente
-             es peor que ninguno. -->
+             es peor que ninguno. El texto va por binding y no interpolado entre etiquetas: los
+             espacios del template se volvían un espacio común delante de la sangría, y al envolver
+             el navegador cortaba ahí y dejaba un renglón vacío. -->
         <div
           class="text-2xl font-mono whitespace-pre-wrap break-words py-1.5 rounded"
           [class]="staticLineClasses(item)"
           [style.--sangria]="sangria(item)"
-        >
-          {{ renglon(item) }}
-        </div>
+          [innerHTML]="renglonHtml(item)"
+        ></div>
       }
     } @else {
       @for (item of codeLines(); track $index) {

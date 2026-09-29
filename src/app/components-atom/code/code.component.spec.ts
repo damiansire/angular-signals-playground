@@ -105,6 +105,21 @@ describe('CodeComponent', () => {
       expect(component.renglon({ id: 'c' })).toBe('');
     });
 
+    it('el renglón arranca con su sangría, sin un espacio común delante, y ofrece cortes', () => {
+      fixture.componentRef.setInput('lines', [
+        { id: 'a', line: '  querySelector("#count").textContent = count' },
+        { id: 'b', line: '' },
+      ] satisfies CodeLine[]);
+      fixture.detectChanges();
+      const [sangrado, vacio]: HTMLElement[] = Array.from(
+        fixture.nativeElement.querySelectorAll('.font-mono'),
+      );
+      expect(sangrado.textContent!.startsWith('  querySelector(')).toBeTrue();
+      expect(sangrado.querySelectorAll('wbr').length).toBeGreaterThan(0);
+      // Un renglón vacío conserva su alto: lleva un espacio, no queda sin texto.
+      expect(vacio.textContent).toBe(' ');
+    });
+
     it('staticLineClasses resalta en verde cuando la linea esta active', () => {
       expect(component.staticLineClasses({ id: 'a', active: true })).toContain('bg-green-700');
       expect(component.staticLineClasses({ id: 'b', active: false })).toContain('bg-gray-800');

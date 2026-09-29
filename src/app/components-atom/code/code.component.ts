@@ -9,6 +9,7 @@ import {
 import { outputFromObservable, toObservable } from '@angular/core/rxjs-interop';
 import { CodeLine, CodeLineElement } from '../component-atom.interface';
 import { isTag, spliteInTags, HtmlIdGeneratorService, isNodeId } from '../../libs/code-parser';
+import { conCortes } from '../../libs/cortes-de-codigo';
 import { TailwindTextSize } from '../../interfaces/tailwind-css.interface';
 import { CodeClick } from './code.interface';
 
@@ -74,6 +75,16 @@ export class CodeComponent {
     if (typeof item.line !== 'string') return String(item.line ?? '');
     const n = this.sangria(item);
     return '\u00a0'.repeat(n) + item.line.slice(n);
+  }
+
+  /**
+   * El rengl\u00f3n listo para `[innerHTML]`: escapado y con puntos de corte despu\u00e9s de `.`, `(` y `=`,
+   * as\u00ed angosto se parte donde se lee bien y no a mitad de un identificador. Un rengl\u00f3n vac\u00edo
+   * lleva un espacio para conservar su alto (vac\u00edo, el div colapsaba a cero).
+   */
+  renglonHtml(item: CodeLine): string {
+    const texto = this.renglon(item);
+    return texto === '' ? ' ' : conCortes(texto);
   }
 
   /**
