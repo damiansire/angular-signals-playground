@@ -142,7 +142,8 @@ export class CinematicaComponent {
     const destroyRef = inject(DestroyRef);
     const reducido = matchMedia('(prefers-reduced-motion: reduce)');
     this.quieta.set(reducido.matches);
-    const alCambiarMovimiento = (e: MediaQueryListEvent): void => this.quieta.set(e.matches);
+    const alCambiarMovimiento = (e: MediaQueryListEvent): void =>
+      this.quieta.set(e.matches || this.fondoEnPausa());
     reducido.addEventListener('change', alCambiarMovimiento);
 
     const alCambiarVisibilidad = (): void => {
@@ -212,6 +213,10 @@ export class CinematicaComponent {
     this.cerrar('salteada');
   }
 
+  private fondoEnPausa(): boolean {
+    return this.host.closest('.fondo-en-pausa') !== null;
+  }
+
   private readonly lineaEventos = new WeakSet<Evento>();
 
   private esLinea(e: Evento): boolean {
@@ -254,6 +259,10 @@ export class CinematicaComponent {
       this.host.classList.remove('cine-host--antes');
       this.host.querySelector<HTMLElement>('.cine__seguir')?.focus({ preventScroll: true });
     };
+    // Se abre sola al llegar a un capítulo, así que la pausa de la vida de fondo del recorrido
+    // también la alcanza: se cuenta en su modo quieto (el de reduced-motion), el diálogo sigue y el
+    // movimiento no. Se mira acá y no en el constructor, cuando el host todavía no tiene ancestros.
+    if (this.fondoEnPausa()) this.quieta.set(true);
     const vt = this.quieta() ? null : iniciarTransicion(raiz, 'cine-vt-abre', mostrar);
     if (!vt) mostrar();
 
