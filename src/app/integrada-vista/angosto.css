@@ -25,6 +25,12 @@
   .card--dissolve .subhost .flex:has(app-code) > :not(app-code, :has(app-code)) {
     flex: 1 1 12rem;
   }
+  /* El código con renglones interactivos (cada token es un blanco, como el árbol de 0/1) no
+     envuelve a propósito: su ancho mínimo es el renglón entero, así la fila lo baja a un renglón
+     propio en vez de cortarlo contra el borde del panel ("This is a simple examp"). */
+  .card--dissolve .subhost .flex:has(app-code) > :is(app-code, :has(app-code)):has(.p-4 > .flex) {
+    min-width: max-content;
+  }
   /* Angosto el código envuelve seguido: la continuación se sangra desde la sangría PROPIA del
      renglón (`--sangria`, los espacios con que abre, la pone app-code). Con el 1.8em fijo, la
      segunda mitad de un renglón sangrado arrancaba a la izquierda de su principio y se leía como un
@@ -53,7 +59,7 @@
     flex-wrap: wrap;
     row-gap: 0.1rem;
     padding-block: 0.55rem 0.4rem;
-    background: linear-gradient(180deg, #f7f5ed 72%, transparent);
+    background: linear-gradient(180deg, #f7f5ed 88%, transparent);
   }
   .tb-back {
     display: none;
@@ -98,9 +104,9 @@
     font-size: min(0.98rem, 3.85vw);
   }
   /* Los renglones interactivos del árbol de 0/1 no envuelven a propósito (cada token es un blanco):
-     a 360 px se pasaban 12 px de la card. Un escalón más de densidad los deja entrar. */
+     a 360 px se pasaban de la card. La densidad escala con el ancho y los deja entrar. */
   .card--dissolve .subhost app-two-column-layout app-code div {
-    font-size: 0.66rem;
+    font-size: min(0.66rem, 2.7vw);
   }
   .tb-links > :is(a, button) + :is(a, button) {
     margin-left: 0.3rem;
@@ -126,20 +132,33 @@
     --icono: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2z'/%3E%3Cpath d='M4 21V5M9 8h6M9 12h5'/%3E%3C/svg%3E");
   }
   .tb-links > a[href*='practica'] {
-    --icono: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='9' cy='20' r='1.4'/%3E%3Ccircle cx='18' cy='20' r='1.4'/%3E%3Cpath d='M2.5 3.5h3l2.6 12h11l2-8.5H7'/%3E%3C/svg%3E");
+    --icono: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 20h4L19 9l-4-4L4 16z'/%3E%3Cpath d='M14 6l4 4'/%3E%3C/svg%3E");
   }
 }
 
-/* Por debajo de 1200 px la espina vertical queda a 60px del borde y la card arranca antes: los
-   sub-niveles de ancho completo (los que traen su propio layout, con el desafío abajo) le quedaban
-   debajo. La espina se achica y esos bloques se corren solo lo que falte (casi siempre el 1.5rem de
-   escritorio alcanza). Correr el contenido lo que ocupa la espina entera apretaba los demos y sacaba
-   de la pantalla el desafío de 8/2. El borde de la card sale de su ancho (92% del contenido, que
-   tiene 0.6rem de padding) y su 2.4rem de padding. */
+/* Por debajo de 1200 px la grilla instrucciones|demo va en una sola columna. La de instrucciones
+   quedó vacía desde que la pista de la mascota flota fija en la esquina: seguía reservando 14rem más
+   el hueco (un tercio del ancho a 820 px), apretaba el código y sacaba sub-niveles de la pantalla. */
+@media (max-width: 1199px) {
+  .card--dissolve .subhost > * {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .card--dissolve .subhost > * > app-concept-card,
+  .card--dissolve .subhost > * > :not(app-concept-card) {
+    grid-column: 1;
+  }
+}
+/* Entre 601 y 1199 px la espina vertical queda a 60px del borde y la card arranca antes: el
+   contenido le quedaba debajo. La espina se achica y los sub-niveles se corren solo lo que falte
+   (casi siempre el 1.5rem de escritorio alcanza), todos igual, así el contenido arranca en la misma
+   x en cualquier sub-nivel. Correrlo lo que ocupa la espina entera apretaba los demos y sacaba de la
+   pantalla el desafío de 8/2. El borde de la card sale de su ancho (92% del contenido, que tiene
+   0.6rem de padding) y su 2.4rem de padding. */
 @media (min-width: 601px) and (max-width: 1199px) {
   :host {
     --spine-size: clamp(2rem, 4.2vh, 2.6rem);
   }
+  .card--dissolve .subhost > *,
   .card--dissolve .subhost > *:has(> app-column-and-code-layout) {
     padding-left: max(
       1.5rem,
@@ -158,15 +177,11 @@
    scroll anidado" del checklist. */
 @media (max-width: 600px) {
   .card {
-    padding: 1.2rem 1rem 5.5rem;
+    --pad-abajo: 5.5rem;
+    padding: 1.2rem 1rem var(--pad-abajo);
   }
   .card--dissolve .subhost > * {
-    grid-template-columns: minmax(0, 1fr);
     gap: 1.1rem;
-  }
-  .card--dissolve .subhost > * > app-concept-card,
-  .card--dissolve .subhost > * > :not(app-concept-card) {
-    grid-column: 1;
   }
   .card--dissolve .subhost > *:has(> app-column-and-code-layout) {
     padding-left: 0;

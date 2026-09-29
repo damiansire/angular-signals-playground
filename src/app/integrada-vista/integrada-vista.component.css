@@ -390,7 +390,9 @@
   color: #201d16;
   border: 1px solid color-mix(in srgb, var(--glow, #eb9b3c) 26%, #e6dfcf);
   border-radius: 22px;
-  padding: 1.9rem 2.4rem 2.3rem;
+  /* El padding de abajo va en variable: el aviso "más abajo" lo descuenta (aviso-mas-abajo.css). */
+  --pad-abajo: 2.3rem;
+  padding: 1.9rem 2.4rem var(--pad-abajo);
   /* Hoja de papel del MISMO clima que la página (no una cámara oscura sobre un fondo claro,
      que siempre se lee como "ventana aparte"). El color del concepto entra como acento tenue
      abajo + glow, no como fondo: la card es una sección más de la página, no un panel sobre ella. */

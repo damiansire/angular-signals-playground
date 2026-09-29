@@ -3,11 +3,14 @@
    queda inactiva y no aparece; al llegar al final se apaga. No es un fundido con máscara porque una
    máscara en la card borra la mascota de la pista, que es su hija `position: fixed`. El margen
    negativo lo saca del flujo, así no agrega alto. Archivo aparte por lo mismo que `angosto.css`:
-   el presupuesto de estilo se mide por archivo. */
+   el presupuesto de estilo se mide por archivo.
+   El sticky se ancla dentro del padding de la card: con `bottom` positivo flotaba entre 50 y 110 px
+   por encima del corte, encima de lo que hubiera ahí. Descontando el padding (`--pad-abajo`) cae
+   en el borde real, sobre el renglón que igual ya está cortado. */
 .subbody::after {
   content: 'más abajo ↓' / '';
   position: sticky;
-  bottom: 0.5rem;
+  bottom: calc(0.5rem - var(--pad-abajo, 0px));
   display: block;
   width: fit-content;
   margin: -1.6rem auto 0;
@@ -23,9 +26,9 @@
   opacity: 0;
   animation: aviso-mas-abajo linear both;
   animation-timeline: scroll(nearest block);
-  /* Se apaga a lo largo de los últimos 2.5rem de scroll: una card que desborda un píxel por
-     redondeo no anuncia "más abajo" con nada abajo. */
-  animation-range: calc(100% - 2.5rem) 100%;
+  /* Se apaga a lo largo de los 2.5rem de scroll previos al padding: cuando abajo solo queda aire,
+     o una card desborda un píxel por redondeo, no anuncia "más abajo" con nada abajo. */
+  animation-range: calc(100% - var(--pad-abajo, 0px) - 2.5rem) calc(100% - var(--pad-abajo, 0px));
 }
 @keyframes aviso-mas-abajo {
   from {
