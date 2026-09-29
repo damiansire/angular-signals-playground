@@ -1,8 +1,7 @@
 name: Hygiene Gate
 
-# Gate preventivo global (roastme 2026-07-17, items 1.3d + 3.3e): falla si queda
-# trackeado un .env, o un descartable de sesion tipo claude-scratch-*/temp_*/
-# rewrite<N>.py. Higiene dependiente del gate, no del habito (Netflix/Instagram).
+# Falla si queda trackeado un .env o un temporal de tooling (claude-scratch-*,
+# temp_*, rewrite<N>.py): la higiene depende del gate, no del habito.
 on:
   push:
     branches: ["**"]
