@@ -8,6 +8,7 @@ import {
 } from './manual-sync-pain.data';
 import { ManipulableSystemComponent } from '../../../../components-atom/manipulable-system/manipulable-system.component';
 import { MANUAL_SYNC_SYSTEM } from '../../introduction-systems';
+import { conCortes } from '../../../../libs/cortes-de-codigo';
 
 @Component({
   selector: 'app-manual-sync-pain',
@@ -29,6 +30,25 @@ export class ManualSyncPainComponent {
   protected readonly handlerBase = `function increment() {\n\u00a0\u00a0count++\n\u00a0\u00a0querySelector('#count').textContent = count`;
   protected readonly handlerAdded = `\n\u00a0\u00a0querySelector('#mult2').textContent = count % 2 ? 'No' : 'Sí'\n\u00a0\u00a0querySelector('#mult3').textContent = count % 3 ? 'No' : 'Sí'`;
   protected readonly handlerClose = `\n}`;
+
+  // El handler renglón por renglón, con su clase y con puntos de corte: angosto, cada renglón
+  // envuelve con sangría colgante (ver `.msp-linea`) en vez de seguir en la columna 0, donde la
+  // continuación de "querySelector('#count').textContent" se leía como otra sentencia.
+  protected readonly renglones = computed(() =>
+    [
+      { texto: this.handlerBase, clase: 'msp-hl' },
+      {
+        texto: this.handlerAdded,
+        clase: this.handlerComplete() ? 'msp-added' : 'msp-added msp-hidden',
+      },
+      { texto: this.handlerClose, clase: 'msp-cmt' },
+    ].flatMap(({ texto, clase }) =>
+      texto
+        .split('\n')
+        .filter((renglon, i) => i > 0 || renglon !== '')
+        .map((renglon) => ({ clase, html: conCortes(renglon) })),
+    ),
+  );
 
   private readonly synced = computed<ReadonlySet<SpotId>>(() =>
     this.handlerComplete()

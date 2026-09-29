@@ -123,6 +123,14 @@
   overflow-wrap: break-word;
 }
 
+/* Un renglón por bloque con sangría colgante: la continuación de un renglón largo arranca
+   corrida, no en la columna 0 como si fuera otra sentencia. */
+.msp-linea {
+  display: block;
+  padding-left: 4ch;
+  text-indent: -4ch;
+}
+
 .msp-cmt {
   color: #7d7660;
 }

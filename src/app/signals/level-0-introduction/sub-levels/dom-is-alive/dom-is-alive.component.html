@@ -9,7 +9,7 @@
     @for (m of mutations; track m.id) {
       <button class="dia-run" (click)="run(m)">
         <span class="dia-run-icon" aria-hidden="true">▸</span>
-        <code>{{ m.code }}</code>
+        <code [innerHTML]="cortes(m.code)"></code>
       </button>
     }
   </div>

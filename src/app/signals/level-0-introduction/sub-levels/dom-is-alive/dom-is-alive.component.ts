@@ -8,6 +8,7 @@ import {
 } from './dom-is-alive.data';
 import { ManipulableSystemComponent } from '../../../../components-atom/manipulable-system/manipulable-system.component';
 import { DOM_ALIVE_SYSTEM } from '../../introduction-systems';
+import { conCortes } from '../../../../libs/cortes-de-codigo';
 
 @Component({
   selector: 'app-dom-is-alive',
@@ -19,6 +20,8 @@ import { DOM_ALIVE_SYSTEM } from '../../introduction-systems';
 export class DomIsAliveComponent {
   readonly closingSystem = DOM_ALIVE_SYSTEM;
   protected readonly mutations: readonly DomMutation[] = MUTATIONS;
+  // El código del botón con puntos de corte: angosto se parte en "." y "(", no a mitad de un nombre.
+  protected readonly cortes = conCortes;
   protected readonly dom = signal<DomNodeState[]>(INITIAL_DOM.map((node) => ({ ...node })));
   protected readonly lastTouched = signal<string | null>(null);
   // Se incrementa en cada corrida para re-disparar el "ping" del nodo aunque toques el mismo.

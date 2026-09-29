@@ -18,7 +18,7 @@
     <div class="msp-left">
       <pre
         class="msp-code"
-      ><span class="msp-hl">{{ handlerBase }}</span><span class="msp-added" [class.msp-hidden]="!handlerComplete()">{{ handlerAdded }}</span><span class="msp-cmt">{{ handlerClose }}</span></pre>
+      >@for (r of renglones(); track $index) {<span class="msp-linea" [class]="r.clase" [innerHTML]="r.html"></span>}</pre>
 
       <div class="msp-actions">
         <button class="msp-inc" (click)="increment()">increment()</button>
