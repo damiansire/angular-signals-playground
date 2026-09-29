@@ -99,10 +99,10 @@ describe('CinematicaComponent', () => {
 
     // Se abre cuando carga el chunk de la escena: se espera por el estado, no por un tiempo fijo.
     const raiz = (): HTMLElement | null => fixture.nativeElement.querySelector('.cine');
-    for (let t = 0; t < 3000 && !raiz()?.classList.contains('cine--quieta'); t += 10) {
-      await esperar(10);
+    await hasta(() => {
       fixture.detectChanges();
-    }
+      return raiz()?.classList.contains('cine--quieta') ?? false;
+    });
     expect(raiz()?.classList).toContain('cine--quieta');
     fixture.destroy();
     recorrido.remove();
