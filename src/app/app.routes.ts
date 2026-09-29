@@ -37,7 +37,6 @@ import { OnCleanupComponent } from './signals/level-9-after-render-effect/sub-le
 import { DebouncedRxjsComponent } from './signals/level-10-debounced/sub-levels/1-debounced-rxjs/debounced-rxjs.component';
 import { DebouncedManualComponent } from './signals/level-10-debounced/sub-levels/2-debounced-manual/debounced-manual.component';
 import { ZonelessComponent } from './signals/level-11-zoneless/sub-levels/1-zoneless/zoneless.component';
-import { CartExampleComponent } from './practice/cart/cart-example.component';
 import { IntegradaVistaComponent } from './integrada-vista/integrada-vista.component';
 
 /**
@@ -222,7 +221,13 @@ export const signalsRoutesTree: RouteItem[] = [
 ];
 
 export const routes: Routes = [
-  { path: 'practica/carrito', component: CartExampleComponent },
+  {
+    // Diferida: es otra página y se abre desde el topbar. Eager sumaba ~20 kB al bundle inicial, que
+    // se pasaba del presupuesto de 700 kB.
+    path: 'practica/carrito',
+    loadComponent: () =>
+      import('./practice/cart/cart-example.component').then((m) => m.CartExampleComponent),
+  },
   {
     path: 'studio',
     loadComponent: () => import('./studio/studio.component').then((m) => m.StudioComponent),
