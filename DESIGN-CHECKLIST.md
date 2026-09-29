@@ -13,6 +13,12 @@ rondas de review porque cada ronda auditaba solo lo último reportado.
       escena, no de una ventana interna. Excepción escrita: por debajo de 600 px, a una columna, un
       sub-nivel no entra en la altura de un celular y la card scrollea por dentro. Por encima de
       600 px la regla sigue entera.
+- [ ] Toda card que scrollea por dentro (la excepción de arriba, o un sub-nivel que todavía no
+      entra) avisa "más abajo" mientras queda contenido por ver: el corte seco a mitad de renglón se
+      lee como roto. El aviso sigue el scroll de la card (scroll-driven), así que sin scroll no
+      aparece. No va con máscara de fundido: una máscara en la card borra la mascota de la pista,
+      que es su hija `position: fixed`. Y la pausa de la vida de fondo no lo termina (no se mueve
+      solo). Medir el `::after` de `.subbody`: visible con la card arriba si scrollea, apagado si no.
 - [ ] Sin backdrop/vignette que oscurezca el fondo detrás de la card.
 - [ ] Sin bordes duros de recuadro flotante: continuidad de fondo y color con
       la escena.
@@ -101,12 +107,14 @@ el 0, ~87% en el 8), así que verificar solo el concepto 0 no alcanza.
       bloques que se apilan en el grid dissolve (agruparlos en un contenedor).
 - [ ] Nada del topbar se parte por dentro (el contador nunca queda "1 /" arriba y "3" abajo) y el
       título va entero: en un renglón desde 1200 px, y por debajo en dos pisos (arriba contador y
-      título, abajo la pregunta del recorrido y los controles). Medido con el título más largo
-      (8/2, "toSignal() · toObservable() · untracked()") a 375, 500, 600, 768, 820, 1001, 1440 y
-      1920 px. Medirlo sin el link "Estudio" (solo existe en desarrollo y además empuja el margen
-      del siguiente link): con él la medición da un topbar partido que en producción no pasa. Un
-      control nuevo, angosto, pasa a ícono con un blanco de 24px y su etiqueta queda como nombre
-      accesible.
+      título, abajo la pregunta del recorrido y los controles, a la DERECHA: a la izquierda quedaba
+      encima de la primera parada del riel y se leía como su viñeta). Por debajo de 400 px título y
+      pregunta pasan a dos renglones en vez de abreviarse. Medido con el título más largo (8/2,
+      "toSignal() · toObservable() · untracked()") a 375, 500, 600, 768, 820, 1001, 1440 y 1920 px,
+      y la primera parada del riel contra el TEXTO del topbar que le queda encima. Medirlo sin el
+      link "Estudio" (solo existe en desarrollo y además empuja el margen del siguiente link): con
+      él la medición da un topbar partido que en producción no pasa. Un control nuevo, angosto,
+      pasa a ícono con un blanco de 24px y su etiqueta queda como nombre accesible.
 
 ## Color y afordancia (que el clima no tape, que el vacío no confunda)
 
@@ -203,7 +211,9 @@ puede alcanzar" son dos cosas distintas y hay que chequear las dos.
       contraste AA sobre el wash del nivel: 4.5:1 normal, 3:1 para ≥24px.
       Ojo con el remapeo de `[class*="text-blue-"]`/`text-indigo-` al acento del
       nivel en `.subhost`: una clase que en aislado contrasta bien puede quedar
-      en ámbar sobre crema una vez embebida. Medir, no mirar.
+      en ámbar sobre crema una vez embebida. Medir, no mirar. Vale también para el chrome
+      "tenue a propósito": la pregunta del topbar estaba en 2.7:1 (y contestada, en 3.3:1).
+      Tenue es relativo al título, no por debajo de AA.
 - [ ] Grupos de opciones con estado elegido visible Y anunciado
       (`aria-pressed`), no solo un cambio que hay que adivinar.
 - [ ] Errores de entrada avisados: si el demo descarta lo que escribiste, lo
@@ -229,10 +239,21 @@ puede alcanzar" son dos cosas distintas y hay que chequear las dos.
       demo|código envuelve si al código no le quedan 15rem, y por debajo de 600 px todo va en una
       columna. La base del código es 15rem y no `auto`: con `auto` la fila envuelve apenas un
       renglón largo no entra y baja el código en sub-niveles que andaban bien (a 820 px la card
-      pasaba a scrollear en 33/40). `overflow-wrap: anywhere` en un flex-item colapsa su ancho mínimo
-      a un carácter: en angosto el código corta por palabra. Medir el ancho del renglón de código en
-      los 40 sub-niveles a 1001, 820, 600, 500 y 375 px, y el `scrollHeight` de la card antes y
-      después (un arreglo de ancho no puede empujar sub-niveles fuera de la pantalla).
+      pasaba a scrollear en 33/40). El demo entra al cálculo con 12rem o su mínimo real: con base 0,
+      un demo `min-w-0` (el árbol de 0/1) contaba como nada y quedaba en 60 px al lado del código.
+      Cortando por palabra, el ancho mínimo del código es su token más largo: por debajo de 600 px
+      va con `min-width: 0` o se sale de la card. `overflow-wrap: anywhere` en un flex-item colapsa su ancho mínimo
+      a un carácter: en angosto el código corta por palabra. La continuación de un renglón largo se
+      sangra desde la sangría propia del renglón (`--sangria`, que pone app-code), no desde una fija.
+      Medir el ancho del renglón de código en los 40 sub-niveles a 1001, 820, 600, 500 y 375 px, y
+      el `scrollHeight` de la card antes y después (un arreglo de ancho no puede empujar
+      sub-niveles fuera de la pantalla: correr el contenido para despejar la espina sacaba el
+      desafío de 8/2 de la vista a 820 px).
+- [ ] Por debajo de 600 px nada embebido es más ancho que la card: la card recorta, así que lo que
+      se sale queda cortado ("multiplie", "(TOOBSERVABL") y ni el documento ni `overflowX` lo ven.
+      Cajas de ancho fijo de Tailwind (`w-80` es 320 px) y filas flex que no envolvían. Medir el
+      `getBoundingClientRect` de cada elemento contra el de la card (la mascota de la pista flota
+      fija a propósito y no cuenta).
 
 ## Cierre del sub-nivel (el desafío manipulable, los 37)
 
@@ -268,9 +289,11 @@ posición de la perilla. Estos ítems son los defectos que YA aparecieron.
       (que agranda toda imagen embebida): selector de tres clases.
 - [ ] Los sub-niveles de ancho completo no quedan debajo de la espina vertical: medido a 1280,
       1440 y 1920 px con `getBoundingClientRect` (espina contra eyebrow y bloque de código). Entre
-      601 y 1199 px el 1.5rem de escritorio no alcanza y se corren lo que ocupa la espina; por
-      debajo de 600 la espina se guarda. Correr solo esos bloques, no la card entera: correrla
-      apretaba todos los demos. Medido contra controles Y texto a 1001, 820 y 768 px.
+      601 y 1199 px la espina se achica y esos bloques se corren solo lo que falte; por debajo de
+      600 la espina se guarda. Despejarla angostando el contenido es la solución cara: correr la
+      card entera apretaba todos los demos, y correr los bloques lo que ocupaba la espina grande
+      sacó de la vista el desafío de 8/2 a 820 px. Medido contra controles Y texto a 1001, 820 y
+      768 px, con el `scrollHeight` de la card antes y después.
 
 ## Lo que la app HACE, no lo que dice
 
