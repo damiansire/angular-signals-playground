@@ -93,6 +93,10 @@ el 0, ~87% en el 8), así que verificar solo el concepto 0 no alcanza.
       contra TODOS los controles, en los 40 sub-niveles a 1920, 1440, 820 y 500 px, y confirmar que
       `#scene` tiene `vecinos-fuera` también en un concepto lejano: la parada no asienta con el
       buceo en 1 exacto (en 7/1 queda cerca de 0.93).
+- [ ] Y el átomo actual, con el sub-nivel asentado, queda de fondo: su núcleo pasa a fantasma
+      (0.3) porque el disco sólido se veía a través de las cajas vacías del demo ("Todavía no
+      corrió nada" en 3/3). Mientras buceás sigue entero, y anillos y halo siguen respirando: la
+      card sigue parada sobre el átomo.
 
 ## Composición y chrome
 
@@ -143,7 +147,9 @@ el 0, ~87% en el 8), así que verificar solo el concepto 0 no alcanza.
 - [ ] Las reglas que remapean clases de Tailwind por substring (`[class*='bg-gray-50']`) no
       atrapan a sus vecinas de nombre: `bg-gray-500` contiene `bg-gray-50`, y el botón gris
       "multiplier + 1" de 8/2 quedaba con texto blanco sobre transparente. Para un tono exacto,
-      palabra entera (`[class~='bg-gray-50']`).
+      palabra entera (`[class~='bg-gray-50']`). Y un remapeo pensado para fondo claro no aplica
+      adentro de una caja oscura: el ink de los grises dejaba "CLICKS" de 7/1 a 1.5:1 sobre
+      `bg-gray-800` (ahí vuelve el gris de Tailwind con `revert-layer`).
 - [ ] Los controles de la barra del selector de clima (sonido, pausa) se leen sobre las DOS
       mitades: fondo casi opaco y sin `backdrop-filter`. Con el fondo al 50% la pastilla que cae
       sobre la mitad clara quedaba gris sobre gris (~2:1). Mirarla en captura a 1440, 820 y 500.
@@ -233,7 +239,10 @@ puede alcanzar" son dos cosas distintas y hay que chequear las dos.
       nivel en `.subhost`: una clase que en aislado contrasta bien puede quedar
       en ámbar sobre crema una vez embebida. Medir, no mirar. Vale también para el chrome
       "tenue a propósito": la pregunta del topbar estaba en 2.7:1 (y contestada, en 3.3:1).
-      Tenue es relativo al título, no por debajo de AA.
+      Tenue es relativo al título, no por debajo de AA. Con la card disuelta el fondo es la
+      ESCENA, no el papel: medir contra el píxel real (#c3bdb1 en el peor caso). Los rótulos del
+      desafío ("Desafío · tocá el código", "desfasado") daban 4.7:1 contra el token y 2 a 3.9:1
+      contra la escena; el borde del verbo del desafío, 1.1:1.
 - [ ] Grupos de opciones con estado elegido visible Y anunciado
       (`aria-pressed`), no solo un cambio que hay que adivinar.
 - [ ] Errores de entrada avisados: si el demo descarta lo que escribiste, lo
@@ -266,7 +275,11 @@ puede alcanzar" son dos cosas distintas y hay que chequear las dos.
       a un carácter: en angosto el código corta por palabra. La continuación de un renglón largo se
       sangra desde la sangría propia del renglón (`--sangria`, que pone app-code), no desde una fija,
       y la sangría va en espacios duros: con espacios comunes el navegador corta justo después de
-      ellos y deja un renglón vacío arriba del código. Todo código embebido con `overflow-x: auto`
+      ellos y deja un renglón vacío arriba del código. El texto del renglón va por binding, nunca
+      interpolado entre etiquetas (el espacio del template se volvía un espacio común delante de
+      la sangría), y con puntos de corte (`<wbr>` después de `.`, `(` y `=`, `libs/cortes-de-
+    codigo.ts`): sin ellos se partía a mitad de un identificador ("textCont|ent", "'#|count'").
+      Todo código embebido con `overflow-x: auto`
       (el `<pre>` de 0/4, el `<code>` de los botones de 0/2) envuelve en vez de scrollear: su scroll
       horizontal es invisible (el recorrido oculta las barras) y la línea clave se cortaba sin que
       nada lo avisara. El código con renglones INTERACTIVOS (cada token es un blanco, el árbol de
@@ -281,12 +294,14 @@ puede alcanzar" son dos cosas distintas y hay que chequear las dos.
       se sale queda cortado ("multiplie", "(TOOBSERVABL") y ni el documento ni `overflowX` lo ven.
       Cajas de ancho fijo de Tailwind (`w-80` es 320 px) y filas flex que no envolvían. Medir el
       `getBoundingClientRect` de cada elemento contra el de la card (la mascota de la pista flota
-      fija a propósito y no cuenta).
+      fija a propósito y no cuenta). Una fila que envuelve separa con `gap`, no con `space-x-*`:
+      el margen del segundo botón lo dejaba corrido 16 px en su renglón nuevo (3/2 y 3/3).
 - [ ] Ninguna columna de la grilla queda reservada para algo que ya no vive ahí. La de
       instrucciones (14rem más el hueco) quedó vacía cuando la pista de la mascota pasó a flotar
-      fija, y seguía ocupando un tercio del ancho a 820 px: por debajo de 1200 px la grilla va en
-      una sola columna. En escritorio sigue reservada y hace saltar la x del contenido entre
-      sub-niveles (130 px contra 357 a 381 a 1440): decisión de diseño pendiente.
+      fija, y seguía ocupando un tercio del ancho a 820 px y haciendo saltar la x del contenido
+      entre sub-niveles en escritorio (130 px contra 357 a 381 a 1440). La grilla va en una sola
+      columna en todos los anchos y todos los sub-niveles despejan la espina igual. Medir la x donde
+      arranca el contenido en los 40: tiene que ser la misma.
 
 ## Cierre del sub-nivel (el desafío manipulable, los 37)
 
