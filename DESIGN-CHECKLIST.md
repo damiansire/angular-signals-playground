@@ -9,7 +9,9 @@ auditaba solo lo último reportado.
 ## Gramática de modal (la card debe sentirse parte de la escena, no una ventana)
 
 - [ ] Sin scroll anidado dentro de la card/sub-nivel: el scroll es de la
-      escena, no de una ventana interna.
+      escena, no de una ventana interna. Excepción escrita: por debajo de 600 px, a una columna, un
+      sub-nivel no entra en la altura de un celular y la card scrollea por dentro. Por encima de
+      600 px la regla sigue entera.
 - [ ] Sin backdrop/vignette que oscurezca el fondo detrás de la card.
 - [ ] Sin bordes duros de recuadro flotante: continuidad de fondo y color con
       la escena.
@@ -72,6 +74,14 @@ el 0, ~87% en el 8), así que verificar solo el concepto 0 no alcanza.
 - [ ] Cero colisiones entre la barra de sub-niveles y sus vecinos (card,
       instrucciones, topbar/título, link "Practicá"): overlap medido con
       `getBoundingClientRect()` contra TODOS los vecinos, no a ojo.
+- [ ] Con el sub-nivel asentado no queda nada de la molécula detrás de los controles salvo el átomo
+      actual: los átomos anteriores y los enlaces se retiran (`opacidadDeVecinos`) y, del todo
+      apagados, se ocultan y los enlaces dejan de fluir. La espiral los deja donde cae sin mirar el
+      contenido: el vecino pisaba inputs y botones en 13 sub-niveles y el enlace en 18. Medir cada
+      átomo no actual (caja de anillos y núcleo) y cada enlace (la curva muestreada en pantalla)
+      contra TODOS los controles, en los 40 sub-niveles a 1920, 1440, 820 y 500 px, y confirmar que
+      `#scene` tiene `vecinos-fuera` también en un concepto lejano: la parada no asienta con el
+      buceo en 1 exacto (en 7/1 queda cerca de 0.93).
 
 ## Composición y chrome
 
@@ -88,10 +98,14 @@ el 0, ~87% en el 8), así que verificar solo el concepto 0 no alcanza.
       con `scrollHeight` de la card en los 35 sub-niveles, no a ojo. Ojo con
       demos de lista que crecen por timer (cap explícito) y con demos de varios
       bloques que se apilan en el grid dissolve (agruparlos en un contenedor).
-- [ ] El topbar entra en UN renglón, con el título entero, a 768, 820, 1001 y 1440 px. Medirlo sin
-      el link "Estudio" (solo existe en desarrollo y además empuja el margen del siguiente link):
-      con él la medición da un topbar partido que en producción no pasa. Un control nuevo, angosto,
-      pasa a ícono con un blanco de 24px y su etiqueta queda como nombre accesible.
+- [ ] Nada del topbar se parte por dentro (el contador nunca queda "1 /" arriba y "3" abajo) y el
+      título va entero: en un renglón desde 1200 px, y por debajo en dos pisos (arriba contador y
+      título, abajo la pregunta del recorrido y los controles). Medido con el título más largo
+      (8/2, "toSignal() · toObservable() · untracked()") a 375, 500, 600, 768, 820, 1001, 1440 y
+      1920 px. Medirlo sin el link "Estudio" (solo existe en desarrollo y además empuja el margen
+      del siguiente link): con él la medición da un topbar partido que en producción no pasa. Un
+      control nuevo, angosto, pasa a ícono con un blanco de 24px y su etiqueta queda como nombre
+      accesible.
 
 ## Color y afordancia (que el clima no tape, que el vacío no confunda)
 
@@ -108,7 +122,9 @@ el 0, ~87% en el 8), así que verificar solo el concepto 0 no alcanza.
       sin clase Tailwind. Caso: las piezas de código de `repair-challenge`
       salieron como manchones oscuros con el código ilegible. Ganarle con
       especificidad desde el CSS del propio átomo (tres clases, p.ej.
-      `.rc .rc__pieces .rc__piece`), no con `!important`.
+      `.rc .rc__pieces .rc__piece`), no con `!important`. Segundo caso: las
+      estrellas de `app-rating` (7/2) salían como cinco pastillas oscuras iguales,
+      sin leerse el puntaje, y la fila desbordaba su caja hasta pisar la espina.
 - [ ] Los controles de la barra del selector de clima (sonido, pausa) se leen sobre las DOS
       mitades: fondo casi opaco y sin `backdrop-filter`. Con el fondo al 50% la pastilla que cae
       sobre la mitad clara quedaba gris sobre gris (~2:1). Mirarla en captura a 1440, 820 y 500.
@@ -218,6 +234,14 @@ puede alcanzar" son dos cosas distintas y hay que chequear las dos.
       restaura el estado (nivel y sub-nivel). Testear ambas direcciones.
 - [ ] Probar en la ruta ancha Y en el embed angosto: un fix de layout
       (`whitespace-nowrap`, etc.) debe verificarse en los dos contextos.
+- [ ] Ningún bloque de código se aprieta por debajo de ~27 columnas: por debajo de 1200 px la fila
+      demo|código envuelve si al código no le quedan 15rem, y por debajo de 600 px todo va en una
+      columna. La base del código es 15rem y no `auto`: con `auto` la fila envuelve apenas un
+      renglón largo no entra y baja el código en sub-niveles que andaban bien (a 820 px la card
+      pasaba a scrollear en 33/40). `overflow-wrap: anywhere` en un flex-item colapsa su ancho mínimo
+      a un carácter: en angosto el código corta por palabra. Medir el ancho del renglón de código en
+      los 40 sub-niveles a 1001, 820, 600, 500 y 375 px, y el `scrollHeight` de la card antes y
+      después (un arreglo de ancho no puede empujar sub-niveles fuera de la pantalla).
 
 ## Cierre del sub-nivel (el desafío manipulable, los 37)
 
@@ -252,7 +276,10 @@ posición de la perilla. Estos ítems son los defectos que YA aparecieron.
       más; al acertar, silencio. La imagen de la pista pelea contra `.card--dissolve .subhost img`
       (que agranda toda imagen embebida): selector de tres clases.
 - [ ] Los sub-niveles de ancho completo no quedan debajo de la espina vertical: medido a 1280,
-      1440 y 1920 px con `getBoundingClientRect` (espina contra eyebrow y bloque de código).
+      1440 y 1920 px con `getBoundingClientRect` (espina contra eyebrow y bloque de código). Entre
+      601 y 1199 px el 1.5rem de escritorio no alcanza y se corren lo que ocupa la espina; por
+      debajo de 600 la espina se guarda. Correr solo esos bloques, no la card entera: correrla
+      apretaba todos los demos. Medido contra controles Y texto a 1001, 820 y 768 px.
 
 ## Lo que la app HACE, no lo que dice
 

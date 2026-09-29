@@ -340,9 +340,18 @@ export interface CameraGeom {
   parent: { x: number; y: number };
 }
 
-/** Cuánto se inclina la cámara hacia el concepto anterior al bucear (0 = nada, 1 = encima del vecino).
- *  Chico a propósito: revela el peek del anterior sin desacomodar el átomo actual detrás de la card. */
-const DIVE_LEAN = 0.2;
+/**
+ * Opacidad de los átomos que no son el actual (y de los enlaces) según la profundidad del buceo.
+ * Mientras bajás se ven, y ahí cuentan de dónde venís; con el sub-nivel asentado se retiran, porque
+ * la espiral los deja donde cae, sin mirar el contenido: en varios sub-niveles el vecino quedaba
+ * encima de inputs y botones del demo. Adentro queda solo el átomo actual, detrás de la card.
+ */
+export function opacidadDeVecinos(diveDepth: number): number {
+  // Termina de apagarse antes del buceo total: la parada del sub-nivel no asienta en 1 exacto (en los
+  // conceptos lejanos queda cerca de 0.93 por el redondeo del scroll), y ahí tiene que dar 0 exacto
+  // para que el motor los oculte.
+  return 1 - smoothstep((diveDepth - 0.45) / 0.4);
+}
 
 /**
  * Estado de cámara (zoom `K`, punto de foco `fx`/`fy`, profundidad de buceo `diveDepth`) en la
@@ -358,17 +367,10 @@ export function cameraAt(
   const { W, cen, target, parent } = geom;
   const FK = 2.7;
   if (w >= 2) {
-    // Al bucear en los sub-niveles, la cámara se inclina un toque hacia el concepto ANTERIOR para
-    // que ese vecino (de donde venís) asome dentro del frame, como en Size of Life. La card sticky
-    // tapa el centro, así que el átomo actual sigue detrás y solo se revela más del anterior. El
-    // primer concepto no tiene anterior al que inclinarse.
-    const lean = isFirst ? 0 : DIVE_LEAN;
-    return {
-      K: FK,
-      fx: lerp(target.x, parent.x, lean),
-      fy: lerp(target.y, parent.y, lean),
-      diveDepth: 1,
-    };
+    // En los sub-niveles la cámara mira el átomo actual de frente, el mismo punto donde terminó el
+    // buceo. Inclinarse hacia el anterior para que asomara no sirve con el vecino retirado (ver
+    // opacidadDeVecinos) y metía un salto al entrar al primer sub-nivel.
+    return { K: FK, fx: target.x, fy: target.y, diveDepth: 1 };
   }
   if (isFirst) {
     if (w < PARADA_ATOMO) {
@@ -1376,20 +1378,26 @@ export function initMolecule(
 
     // Al bucear se apagan TODOS los nombres de átomo (el título vive en la card); ver el CSS #atoms.diving.
     atomsG.classList.toggle('diving', diveDepth > 0.4);
+    // Los átomos anteriores y los enlaces se retiran al asentar el sub-nivel. Del todo apagados, además
+    // se ocultan y los enlaces dejan de fluir: una animación infinita en opacidad 0 es trabajo que
+    // nadie ve.
+    const vecinos = opacidadDeVecinos(diveDepth);
+    bondsG.style.opacity = vecinos.toFixed(3);
+    sceneG.classList.toggle('vecinos-fuera', vecinos === 0);
     atomEls.forEach((g, i) => {
       const orb = orbEls[i];
       // El nombre del átomo se desvanece al bucear: su rol de etiqueta lo toma el título promovido
       // dentro de la card, no debe repetirse en la escena. Solo el actual.
       g.classList.toggle('dived-dissolve', i === c && diveDepth > 0.4);
-      // El concepto anterior INMEDIATO se realza al bucear: es el "de dónde venís" que asoma desde el
-      // borde, y con sus anillos punteados a 0.45 se leía como un fantasma. Con peek-prev gana presencia.
+      // El concepto anterior INMEDIATO se realza mientras buceás: es el "de dónde venís", y con sus
+      // anillos punteados a 0.45 se leía como un fantasma. Al asentar se retira con los demás.
       g.classList.toggle('peek-prev', i === c - 1 && diveDepth > 0.4);
       if (i < c) {
         g.classList.add('on');
         g.classList.remove('current');
         g.setAttribute('transform', `translate(${C[i].x},${C[i].y})`);
         orb.style.transform = 'scale(1)';
-        g.style.opacity = '1';
+        g.style.opacity = vecinos.toFixed(3);
       } else if (i === c) {
         g.classList.add('on');
         g.classList.toggle('current', w > 0.45);

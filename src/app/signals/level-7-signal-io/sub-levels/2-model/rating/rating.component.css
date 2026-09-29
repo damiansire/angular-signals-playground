@@ -1,0 +1,17 @@
+/* Embebidas en el recorrido, la regla global de botones sin color (`.card.card--dissolve .subhost
+   button:not([class*='bg-'])`, 0-4-1) volvía cada estrella una pastilla oscura con el glifo claro:
+   las cinco se veían iguales, no se leía el puntaje y la fila (5 × 68px) desbordaba su caja de
+   20rem. Tres clases con el atributo de encapsulación le ganan sin `!important`. La forma (★/☆)
+   lleva el estado; el color lo acompaña, con un ámbar que llega a 3:1 sobre el crema. */
+.rating .rating__star.rating__star {
+  width: auto;
+  padding: 0 0.1rem;
+  border-radius: 4px;
+  background: none;
+  font-family: inherit;
+  font-weight: 400;
+  color: #8a8272;
+}
+.rating .rating__star.rating__star--on {
+  color: #b8791f;
+}

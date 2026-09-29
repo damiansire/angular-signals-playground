@@ -1,0 +1,115 @@
+/* Cómo se acomoda el recorrido por debajo de 1200 px: el topbar en dos pisos, la fila demo|código
+   que envuelve, el lugar para la espina en tablet y la columna única del celular. Archivo aparte
+   por lo mismo que `intro-tusi.css` y `boot-fallo.css`: el presupuesto de estilo se mide por
+   archivo. Va último en `styleUrls` porque varias reglas pisan a las de
+   `integrada-vista.component.css` con la misma especificidad y ganan por orden. */
+
+/* Por debajo de 1200 px la fila demo|código (`.flex:has(app-code)`) se apretaba hasta dejarle al
+   código cuatro columnas, partido letra por letra. El código no baja de 15rem (unas 27 columnas): si al lado del demo no quedan 15rem, la
+   fila envuelve y el código baja entero. La base es 15rem y no su ancho natural, porque con `auto`
+   la fila envolvía apenas un renglón largo no entraba, aunque el código se pudiera achicar. Crece
+   hasta su contenido y no más: así no se estira a banner, y un bloque corto (tres renglones de
+   `var value = 1`) mide lo que mide y no fuerza el salto. El demo entra al cálculo por su ancho
+   mínimo (base 0): la fila baja el código solo si los dos de verdad no caben juntos. */
+@media (max-width: 1199px) {
+  .card--dissolve .subhost .flex:has(app-code) {
+    flex-wrap: wrap;
+  }
+  .card--dissolve .subhost .flex:has(app-code) > :is(app-code, :has(app-code)) {
+    flex: 1 0 15rem;
+    max-width: max-content;
+  }
+  .card--dissolve .subhost .flex:has(app-code) > :not(app-code, :has(app-code)) {
+    flex: 1 1 0;
+  }
+}
+
+/* Nada del topbar se parte por dentro: con poco lugar el contador quedaba "1 /" arriba y "3" abajo, y
+   los links en otro renglón. El contador y los controles son de un renglón; si falta lugar, cede el
+   título (elipsis). */
+.tb-count,
+.tb-links {
+  white-space: nowrap;
+}
+/* Por debajo de 1200 px el topbar va en dos pisos: arriba el contador y el título entero; abajo la
+   pregunta del recorrido y los controles. En uno solo no entraban los tres: el título más largo
+   ("toSignal() · toObservable() · untracked()") se abreviaba hasta 1199, o había que sacar la
+   pregunta, que es el único texto permanente del recorrido. */
+@media (max-width: 1199px) {
+  .topbar {
+    flex-wrap: wrap;
+    row-gap: 0.1rem;
+    padding-block: 0.55rem 0.4rem;
+  }
+  .tb-back {
+    display: none;
+  }
+  .tb-center {
+    flex: 1 1 100%;
+  }
+  .topbar.contextual .tb-title {
+    max-width: none;
+  }
+  .tb-links {
+    display: flex;
+    flex: 1 1 100%;
+    align-items: center;
+    min-width: 0;
+    font-size: 0.8rem;
+  }
+  .tb-q {
+    min-width: 0;
+    margin-right: auto;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: 0.8rem;
+  }
+}
+@media (max-width: 600px) {
+  .topbar {
+    padding-inline: 1rem;
+  }
+  .topbar.contextual .tb-title {
+    font-size: 1.1rem;
+  }
+}
+
+/* Por debajo de 1200 px la espina vertical queda a 60px del borde y la card arranca antes: los
+   sub-niveles de ancho completo (los que traen su propio layout, con el desafío abajo) le quedaban
+   debajo. El 1.5rem de escritorio no alcanza: se corren lo que ocupa la espina más aire. Solo ellos,
+   porque correr la card entera apretaba todos los demos y los sacaba de la altura de la pantalla.
+   El borde de la card sale de su ancho (92% del contenido, que tiene 0.6rem de padding) y su 2.4rem
+   de padding. */
+@media (min-width: 601px) and (max-width: 1199px) {
+  .card--dissolve .subhost > *:has(> app-column-and-code-layout) {
+    padding-left: calc(
+      var(--spine-left) + var(--spine-size) + 0.9rem - (0.6rem + (100vw - 1.2rem) * 0.04) - 2.4rem
+    );
+  }
+}
+/* Celular: instrucciones, demo y código van en una columna, y el código corta por palabra, nunca por
+   carácter. La espina se guarda: a una columna no hay dónde ponerla sin pisar el contenido. A este
+   ancho el sub-nivel no entra en la card y ella scrollea por dentro: es la excepción al "sin
+   scroll anidado" del checklist. */
+@media (max-width: 600px) {
+  .card {
+    padding: 1.2rem 1rem 1.6rem;
+  }
+  .card--dissolve .subhost > * {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 1.1rem;
+  }
+  .card--dissolve .subhost > * > app-concept-card,
+  .card--dissolve .subhost > * > :not(app-concept-card) {
+    grid-column: 1;
+  }
+  .card--dissolve .subhost > *:has(> app-column-and-code-layout) {
+    padding-left: 0;
+  }
+  .card--dissolve .subhost app-code div {
+    overflow-wrap: break-word;
+  }
+  .space-spine {
+    display: none;
+  }
+}
