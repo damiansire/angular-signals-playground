@@ -1836,11 +1836,18 @@ export function initMolecule(
   q('.tb-links')?.appendChild(btnPausa);
   // La etiqueta dice lo que hace el botón, así que cambia con el estado (y por eso no lleva
   // aria-pressed): una etiqueta fija con el ícono de play pegado a "Pausar" se contradecía.
+  // En la landing el topbar no se ve: la misma pausa vive también junto al sonido de la elección.
+  const pausaLanding = q<HTMLButtonElement>('.tusi__ov-pausa');
   const pintarPausa = (): void => {
     const etiqueta = pausaFondo ? 'Reanudar animaciones' : 'Pausar animaciones';
     btnPausa.querySelector('.tb-pausa__texto')!.textContent = etiqueta;
     btnPausa.title = etiqueta;
     btnPausa.classList.toggle('tb-pausa--activa', pausaFondo);
+    if (!pausaLanding) return;
+    pausaLanding.querySelector('.tusi__ov-pausa-txt')!.textContent = pausaFondo
+      ? 'Animaciones en pausa · tocá para reanudar'
+      : 'Animaciones activas · tocá para pausar';
+    pausaLanding.classList.toggle('tusi__ov-pausa--activa', pausaFondo);
   };
   pintarPausa();
   const onPausaFondo = (): void => {
@@ -1850,6 +1857,7 @@ export function initMolecule(
     aplicarPausa();
   };
   btnPausa.addEventListener('click', onPausaFondo);
+  pausaLanding?.addEventListener('click', onPausaFondo);
   root.addEventListener('animationstart', onAnimacionNueva);
   const onVisibility = (): void => aplicarMovimiento();
   const onReduceChange = (e: MediaQueryListEvent): void => {
@@ -1877,6 +1885,7 @@ export function initMolecule(
     document.removeEventListener('visibilitychange', onVisibility);
     mqlReduce?.removeEventListener('change', onReduceChange);
     btnPausa.removeEventListener('click', onPausaFondo);
+    pausaLanding?.removeEventListener('click', onPausaFondo);
     btnPausa.remove();
     root.removeEventListener('animationstart', onAnimacionNueva);
     frenadas.clear();
