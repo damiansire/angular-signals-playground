@@ -4,6 +4,7 @@ import { provideRouter } from '@angular/router';
 
 import { IntegradaVistaComponent } from './integrada-vista.component';
 import { signalsRoutesTree } from '../app.routes';
+import { cuadrosFalsos } from './testing/cuadros';
 
 /**
  * La vista de la ruta `/` es el producto entero, y su boot son ~3.900 líneas imperativas que
@@ -265,29 +266,23 @@ describe('IntegradaVistaComponent', () => {
 
   describe('contrato de teardown', () => {
     it('después de destruir no queda ningún rAF pidiendo cuadros', async () => {
-      const rafOriginal = window.requestAnimationFrame;
-      let pedidosDespuesDeDestruir = 0;
-      let destruido = false;
+      // Los cuadros los da el test y se mira lo que queda pedido. Antes se contaban pedidos durante
+      // 250 ms de reloj real: se le anotaban al motor los de cualquier otro código de la página de
+      // Karma, y un cuadro que el cierre olvidaba cancelar no se veía, porque no pide otro.
+      const cuadros = cuadrosFalsos();
+      const fixture = await montar();
+      expect(cuadros.pendientes())
+        .withContext('el motor arranca con cuadros pedidos: sin eso no hay nada que cortar')
+        .toBeGreaterThan(0);
 
-      window.requestAnimationFrame = function (cb: FrameRequestCallback): number {
-        if (destruido) pedidosDespuesDeDestruir++;
-        return rafOriginal.call(window, cb);
-      };
+      fixture.destroy();
+      // Destruir le avisa al scheduler zoneless de Angular, que pide un cuadro y lo cancela en su
+      // propio setTimeout(0), agendado antes que este: al volver, lo pendiente es solo del motor.
+      await new Promise((r) => setTimeout(r));
 
-      try {
-        const fixture = await montar();
-        fixture.destroy();
-        destruido = true;
-
-        // Varios cuadros de margen: un loop vivo se delata en el primero.
-        await new Promise((resolve) => setTimeout(resolve, 250));
-
-        expect(pedidosDespuesDeDestruir)
-          .withContext('el motor sigue animando sobre una vista que ya no existe')
-          .toBe(0);
-      } finally {
-        window.requestAnimationFrame = rafOriginal;
-      }
+      expect(cuadros.pendientes())
+        .withContext('el motor sigue animando sobre una vista que ya no existe')
+        .toBe(0);
     });
 
     it('devuelve todos los listeners globales que tomó', async () => {
