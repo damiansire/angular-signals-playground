@@ -52,7 +52,7 @@ jobs:
           # Publicar EXACTAMENTE el commit que CI aprobo, no la punta de master, que para cuando
           # termina CI puede tener commits nuevos todavia sin verificar.
           ref: ${{ github.event.workflow_run.head_sha || github.ref }}
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
           node-version: 22
           cache: npm
