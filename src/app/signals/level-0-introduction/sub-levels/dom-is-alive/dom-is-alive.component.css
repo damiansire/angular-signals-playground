@@ -88,8 +88,10 @@
 }
 
 .dia-run:focus-visible {
-  outline: 2px solid #6ac48f;
+  /* Doble anillo: la tinta da el contraste sobre el crema y el acento queda por dentro. */
+  outline: 2px solid var(--focus-ink);
   outline-offset: 2px;
+  box-shadow: 0 0 0 2px #6ac48f;
 }
 
 .dia-run-icon {

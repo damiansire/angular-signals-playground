@@ -90,6 +90,8 @@
 }
 
 .htt-play:focus-visible {
-  outline: 2px solid #e0a13a;
+  /* Doble anillo: la tinta da el contraste sobre el crema y el acento queda por dentro. */
+  outline: 2px solid var(--focus-ink);
   outline-offset: 2px;
+  box-shadow: 0 0 0 2px #e0a13a;
 }
