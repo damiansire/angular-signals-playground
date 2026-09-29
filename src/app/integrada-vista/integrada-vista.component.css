@@ -647,6 +647,14 @@
 .card--dissolve .subhost [class*='text-gray-600'] {
   color: #4a4436;
 }
+/* Salvo adentro de una caja oscura, donde ese ink queda a 1.5:1 ("CLICKS" de 7/1): ahí vuelve el
+   gris de Tailwind, que es claro. */
+.card--dissolve
+  .subhost
+  :is([class*='bg-gray-7'], [class*='bg-gray-8'], [class*='bg-gray-9'])
+  :is([class*='text-gray-400'], [class*='text-gray-500'], [class*='text-gray-600']) {
+  color: revert-layer;
+}
 /* Los inputs traen fill blanco propio: translúcido para que no lean como cajas blancas sobre
    el campo, con el ink del campo como texto. El foco ya lo tiñe el acento (regla de más abajo). */
 .card--dissolve .subhost input[type='text'],
