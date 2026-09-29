@@ -99,10 +99,13 @@
   font-size: 0.8rem;
 }
 
+/* Envuelve en vez de scrollear: embebido en el recorrido la barra queda oculta, y en angosto
+   "document.querySelector('#count').textContent" se cortaba en "('#c" sin que nada lo avisara. */
 .dia-run code {
+  min-width: 0;
   font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
   font-size: 0.8rem;
-  overflow-x: auto;
+  overflow-wrap: anywhere;
 }
 
 /* El "DOM" vivo: los nodos y su valor actual. */

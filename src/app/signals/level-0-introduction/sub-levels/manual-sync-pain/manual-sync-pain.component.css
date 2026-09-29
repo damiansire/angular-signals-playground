@@ -116,7 +116,11 @@
   color: #cfc7b6;
   padding: 1rem 1.1rem;
   border-radius: 0.6rem;
-  overflow-x: auto;
+  /* Envuelve por palabra en cualquier ancho: embebido en el recorrido, su scroll horizontal queda
+     invisible (el recorrido oculta las barras) y a 820 y 1001 px la línea clave se cortaba en
+     "('#count'". */
+  white-space: pre-wrap;
+  overflow-wrap: break-word;
 }
 
 .msp-cmt {
@@ -233,15 +237,10 @@
 }
 
 /* A una columna, `1fr` a secas crecía hasta el renglón más largo del <pre> y la escena se salía de
-   la card (y embebida, la card recorta). El código envuelve por palabra: su scroll horizontal
-   quedaría invisible, porque el recorrido oculta las barras de lo embebido. */
+   la card (y embebida, la card recorta). */
 @media (max-width: 720px) {
   .msp-stage {
     grid-template-columns: minmax(0, 1fr);
-  }
-  .msp-code {
-    white-space: pre-wrap;
-    overflow-wrap: break-word;
   }
 }
 

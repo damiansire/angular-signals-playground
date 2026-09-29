@@ -24,8 +24,10 @@ export class ManualSyncPainComponent {
 
   // El handler como texto (las llaves van dentro de interpolación, así no chocan con el
   // control-flow del template). `added` son las dos líneas que el handler incompleto olvida.
-  protected readonly handlerBase = `function increment() {\n  count++\n  querySelector('#count').textContent = count`;
-  protected readonly handlerAdded = `\n  querySelector('#mult2').textContent = count % 2 ? 'No' : 'Sí'\n  querySelector('#mult3').textContent = count % 3 ? 'No' : 'Sí'`;
+  // La sangría va con espacios duros (U+00A0): con espacios comunes, al envolver en angosto el
+  // renglón se cortaba justo después de ellos y quedaba uno vacío arriba del código.
+  protected readonly handlerBase = `function increment() {\n\u00a0\u00a0count++\n\u00a0\u00a0querySelector('#count').textContent = count`;
+  protected readonly handlerAdded = `\n\u00a0\u00a0querySelector('#mult2').textContent = count % 2 ? 'No' : 'Sí'\n\u00a0\u00a0querySelector('#mult3').textContent = count % 3 ? 'No' : 'Sí'`;
   protected readonly handlerClose = `\n}`;
 
   private readonly synced = computed<ReadonlySet<SpotId>>(() =>
