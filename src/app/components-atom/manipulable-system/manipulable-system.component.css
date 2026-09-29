@@ -88,8 +88,10 @@
   background: #fbf1dd;
 }
 .ms .ms__code .ms__knob:focus-visible {
-  outline: 2px solid #eb9b3c;
+  /* Doble anillo: la tinta da el contraste sobre el crema y el acento queda por dentro. */
+  outline: 2px solid var(--focus-ink);
   outline-offset: 2px;
+  box-shadow: 0 0 0 2px #eb9b3c;
 }
 
 /* La acción va pegada a las lecturas, no flotando lejos: el botón y los números son una sola
@@ -200,8 +202,10 @@
   color: #201d16;
 }
 .ms .ms__bar .ms__act:focus-visible {
-  outline: 2px solid #eb9b3c;
+  /* Doble anillo: la tinta da el contraste sobre el crema y el acento queda por dentro. */
+  outline: 2px solid var(--focus-ink);
   outline-offset: 2px;
+  box-shadow: 0 0 0 2px #eb9b3c;
 }
 
 @media (prefers-reduced-motion: reduce) {

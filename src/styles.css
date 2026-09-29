@@ -45,6 +45,9 @@ body {
   /* Entrada de un sub-nivel: la dura `warpin` (integrada) y su gemela `cc-warp-hide` (concept-card),
      que oculta la mascota mientras dura. Si divergen, la mascota vuelve a flotar en el centro. */
   --motion-enter: 0.8s;
+  /* Tinta de los anillos de foco. Los acentos claros (ámbar, verde) sobre el crema no llegan a 3:1:
+     el anillo va doble, esta tinta por fuera (el contraste) y el acento por dentro (la identidad). */
+  --focus-ink: #211e1a;
 
   /* Tipografía por rol */
   --font-display: 'Archivo', system-ui, sans-serif;

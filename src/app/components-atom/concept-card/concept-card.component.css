@@ -56,8 +56,10 @@
   cursor: pointer;
 }
 .cc__mascot:focus-visible {
-  outline: 2px solid #eb9b3c;
-  outline-offset: 3px;
+  /* Doble anillo: la tinta da el contraste sobre el crema y el acento queda por dentro. */
+  outline: 2px solid var(--focus-ink);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 2px #eb9b3c;
 }
 /* `.cc` en el selector para ganarle a la regla global del dive `.card--dissolve .subhost img`
    (le pone width:auto + borde y colapsaba la mascota a 2px). */
