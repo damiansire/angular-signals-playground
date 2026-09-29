@@ -47,7 +47,7 @@ jobs:
        github.event.workflow_run.head_branch == github.event.repository.default_branch &&
        github.event.workflow_run.conclusion == 'success')
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           # Publicar EXACTAMENTE el commit que CI aprobo, no la punta de master, que para cuando
           # termina CI puede tener commits nuevos todavia sin verificar.
