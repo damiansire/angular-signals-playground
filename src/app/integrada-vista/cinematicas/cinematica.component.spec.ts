@@ -1,11 +1,11 @@
 import { TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 
+import { hasta } from '../testing/cuadros';
 import { CinematicaComponent, type FinDeCinematica } from './cinematica.component';
 import { cinematicaDe } from './cinematicas-datos';
 
 describe('CinematicaComponent', () => {
-  const esperar = (ms: number) => new Promise((r) => setTimeout(r, ms));
   let vtOriginal: unknown;
 
   beforeEach(() => {
@@ -36,10 +36,13 @@ describe('CinematicaComponent', () => {
     fixture.componentInstance.termino.subscribe((f) => fines.push(f));
     fixture.detectChanges();
     await fixture.whenStable();
-    // La escena es un chunk aparte: se espera a que cargue y al render que abre la cinemática.
-    await esperar(250);
+    // La escena es un chunk aparte y la cinemática se abre recién cuando cargó: se espera a eso (el
+    // host suelta `cine-host--antes`), no un tiempo fijo que con la CPU tomada no alcanza.
+    const host: HTMLElement = fixture.nativeElement;
+    await hasta(() => !host.classList.contains('cine-host--antes'));
+    expect(host.classList).withContext('la escena cargó y abrió').not.toContain('cine-host--antes');
     fixture.detectChanges();
-    return { fixture, raiz: fixture.nativeElement.querySelector('.cine') as HTMLElement, fines };
+    return { fixture, raiz: host.querySelector('.cine') as HTMLElement, fines };
   }
 
   it('un fotograma aplica todos los beats hasta el pedido y muestra su línea', async () => {
@@ -81,7 +84,7 @@ describe('CinematicaComponent', () => {
   it('Escape la saltea y avisa que fue salteada', async () => {
     const { fixture, fines } = await montar(1);
     document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
-    await esperar(350);
+    await hasta(() => fines.length > 0); // el aviso llega al terminar el fundido de cierre
     expect(fines).toEqual(['salteada']);
     fixture.destroy();
   });
