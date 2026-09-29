@@ -232,9 +232,16 @@
   white-space: nowrap;
 }
 
+/* A una columna, `1fr` a secas crecía hasta el renglón más largo del <pre> y la escena se salía de
+   la card (y embebida, la card recorta). El código envuelve por palabra: su scroll horizontal
+   quedaría invisible, porque el recorrido oculta las barras de lo embebido. */
 @media (max-width: 720px) {
   .msp-stage {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .msp-code {
+    white-space: pre-wrap;
+    overflow-wrap: break-word;
   }
 }
 

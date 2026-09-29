@@ -123,6 +123,23 @@ describe('IntegradaVistaComponent', () => {
       fixture.destroy();
     });
 
+    it('no termina lo que sigue al scroll: el aviso de "más abajo" no es vida de fondo', async () => {
+      const fixture = await montar();
+      const host: HTMLElement = fixture.nativeElement;
+      const btn = host.querySelector<HTMLButtonElement>('.tb-pausa')!;
+      const card = host.appendChild(document.createElement('div'));
+      card.style.cssText = 'overflow-y: auto; height: 40px';
+      const aviso = card.appendChild(document.createElement('div'));
+      aviso.style.cssText =
+        'height: 400px; animation: prueba-entrada linear both; animation-timeline: scroll(nearest block)';
+      const animacion = aviso.getAnimations()[0];
+
+      btn.click();
+      expect(animacion.playState).withContext('sigue al scroll').not.toBe('finished');
+      btn.click();
+      fixture.destroy();
+    });
+
     it('en la landing, con el topbar invisible, sus controles no se pueden enfocar', async () => {
       const fixture = await montar();
       const host: HTMLElement = fixture.nativeElement;

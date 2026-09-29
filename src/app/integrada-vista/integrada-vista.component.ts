@@ -74,6 +74,7 @@ const ESPERA_FINAL_MS = 1600;
     './intro-tusi.css',
     './prologo-anomalia.css',
     './boot-fallo.css',
+    './aviso-mas-abajo.css',
     './angosto.css',
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,

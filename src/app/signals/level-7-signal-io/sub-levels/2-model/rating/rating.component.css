@@ -15,3 +15,8 @@
 .rating .rating__star.rating__star--on {
   color: #b8791f;
 }
+/* El anillo de foco del recorrido: tinta en el outline para llegar a 3:1 sobre el crema. */
+.rating .rating__star.rating__star:focus-visible {
+  outline: 2px solid var(--focus-ink);
+  outline-offset: 2px;
+}

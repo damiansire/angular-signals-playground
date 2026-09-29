@@ -1811,6 +1811,9 @@ export function initMolecule(
     const efecto = a.effect;
     if (!(a instanceof CSSAnimation) || !(efecto instanceof KeyframeEffect)) return;
     if (efecto.target?.closest(PRIMER_PLANO)) return;
+    // Lo que sigue al scroll (el aviso de "más abajo" de la card) no es vida de fondo: no se mueve
+    // solo. Terminarlo lo dejaría apagado aunque falte contenido por ver.
+    if (!(a.timeline instanceof DocumentTimeline)) return;
     if (efecto.getComputedTiming().iterations === Infinity) {
       a.playbackRate = 0;
       frenadas.add(a);
