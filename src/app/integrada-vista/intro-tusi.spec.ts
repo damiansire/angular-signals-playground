@@ -1,5 +1,6 @@
 import { sonido } from '../libs/sonido';
 import { initIntroTusi } from './intro-tusi';
+import { cuadrosFalsos } from './testing/cuadros';
 
 /**
  * La landing es lo primero que ve cualquiera y son 533 líneas que no tenían ningún test.
@@ -241,32 +242,6 @@ describe('initIntroTusi', () => {
      * que corría durante las esperas. Con el rAF falso el test es síncrono: entre `arrancar` y el
      * último `expect` no corre nada ajeno ni pasa tiempo real.
      */
-    function cuadrosFalsos() {
-      const pedidos = new Map<number, FrameRequestCallback>();
-      let ultimoId = 0;
-      let ahora = 0;
-      spyOn(window, 'requestAnimationFrame').and.callFake((cb: FrameRequestCallback) => {
-        pedidos.set(++ultimoId, cb);
-        return ultimoId;
-      });
-      spyOn(window, 'cancelAnimationFrame').and.callFake((id: number) => {
-        pedidos.delete(id);
-      });
-      return {
-        /** Cuadros pedidos que todavía no corrieron. Cero es un loop dormido. */
-        pendientes: () => pedidos.size,
-        /** Lo que se pide durante un cuadro corre en el siguiente, como en el navegador. */
-        avanzar(n: number): void {
-          for (let i = 0; i < n; i++) {
-            ahora += 16;
-            const tanda = [...pedidos.values()];
-            pedidos.clear();
-            tanda.forEach((cb) => cb(ahora));
-          }
-        },
-      };
-    }
-
     it('antes de elegir clima dibuja y deja de pedir cuadros', () => {
       const cuadros = cuadrosFalsos();
       const t = arrancar();

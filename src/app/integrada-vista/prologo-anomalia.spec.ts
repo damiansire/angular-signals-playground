@@ -1,6 +1,7 @@
 import { sonido } from '../libs/sonido';
 import { initPrologoAnomalia } from './prologo-anomalia';
 import { GUION } from './prologo-guion';
+import { hasta } from './testing/cuadros';
 
 /** Un nodo de audio que acepta todo lo que el prólogo le hace y anota lo que importa. */
 function nodoFalso(contexto: unknown) {
@@ -46,14 +47,6 @@ class ContextoFalso {
   createBiquadFilter() {
     return nodoFalso(this);
   }
-}
-
-const unCuadro = (): Promise<void> => new Promise((r) => requestAnimationFrame(() => r()));
-
-/** Espera a que pase algo que depende del reloj de la escena, sin dormir de más ni de menos. */
-async function hasta(condicion: () => boolean, tope = 3000): Promise<void> {
-  const inicio = performance.now();
-  while (!condicion() && performance.now() - inicio < tope) await unCuadro();
 }
 
 /**
