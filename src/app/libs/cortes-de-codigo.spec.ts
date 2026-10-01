@@ -26,6 +26,11 @@ describe('conCortes: puntos de corte para mostrar código angosto', () => {
     expect(conCortes('[...lista]')).toBe('[...<wbr>lista]');
   });
 
+  it('no corta después del "(" de un paréntesis de prosa, que lleva un espacio antes', () => {
+    expect(conCortes('// nunca llega acá (leak)')).toBe('// nunca llega acá (leak)');
+    expect(conCortes('effect((onCleanup) =>')).toBe('effect(<wbr>(<wbr>onCleanup) =&gt;<wbr>');
+  });
+
   it('corta en el camelCase solo los identificadores que no entran en la columna angosta', () => {
     expect(conCortes('// sin provideZoneChangeDetection()')).toBe(
       '// sin provide<wbr>Zone<wbr>Change<wbr>Detection()',

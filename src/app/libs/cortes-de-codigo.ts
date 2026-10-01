@@ -16,7 +16,9 @@ export function conCortes(codigo: string): string {
   // Los cortes se marcan sobre el texto crudo y recién después se escapa: al revés, `=>` ya era
   // `=&gt;` y el corte caía entre `=` y `>`.
   const conMarcas = codigo
-    .replace(/\.(?!\.)|\((?!\))|=+>?(?![=>])/g, (m) => m + MARCA)
+    // El "(" solo corta pegado a un nombre (`querySelector(`): con un espacio antes es prosa de un
+    // comentario y dejaba "acá (" en un renglón y "leak)" en el siguiente (3/2 a 1001).
+    .replace(/\.(?!\.)|(?<!\s)\((?!\))|=+>?(?![=>])/g, (m) => m + MARCA)
     // Un identificador de 24 letras o más no entra entero en la columna angosta (11/1 a 820:
     // "provideZoneChangeDetecti|on()"): ahí también se ofrece cortar en las jorobas del camelCase.
     // Uno más corto sigue sin cortes y, si no entra, baja entero al renglón siguiente.
