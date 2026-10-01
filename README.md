@@ -7,7 +7,7 @@ signals, `computed`, `effect` and change detection actually behave.
 
 **[▶ Open the live playground](https://damiansire.github.io/angular-signals-playground/)** — no install, runs in the browser.
 
-![The integrated "reactive molecule" tour: each of the 12 concepts is an atom you dive into, with its numbered sub-levels orbiting the card and the real demo embedded inside](public/preview.jpeg)
+![The integrated "reactive molecule" tour, inside the Inputs & Outputs concept: the real demo, its code and a challenge to touch, with the numbered sub-levels on the left rail](public/preview.jpeg)
 
 The default entry (`/`) is the **integrated view**: a "reactive molecule" tour
 where each of the 12 concepts is an atom. Scroll to dive into an atom and its
