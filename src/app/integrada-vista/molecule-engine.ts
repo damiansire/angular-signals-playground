@@ -32,12 +32,14 @@ const COL: Record<AccentKey, string> = {
  * La tinta de cada acento: el mismo tono oscurecido para TEXTO. Los valores que muestran los demos
  * (contadores, lecturas, el valor elegido) se pintaban con el acento claro, y sobre una escena del
  * mismo tono quedaban a 1.4-2:1 ("Ground" de 5/1, el "264px" de 9/1). Cada tinta llega a 4.5:1
- * contra el fondo más oscuro medido detrás de texto en las escenas de su acento.
+ * contra el fondo más oscuro medido detrás de texto en las escenas de su acento. La de effect va
+ * hacia ladrillo y con menos croma: el rojo oscuro del acento era casi el del error (#991b1b) y un
+ * "(vacío)" neutro se leía como un mensaje de error.
  */
 export const TINTA: Record<AccentKey, string> = {
   source: '#743e00',
   derived: '#0c5d4e',
-  effect: '#850504',
+  effect: '#6a2f19',
   ink: '#443e34',
   capstone: '#734300',
 };
