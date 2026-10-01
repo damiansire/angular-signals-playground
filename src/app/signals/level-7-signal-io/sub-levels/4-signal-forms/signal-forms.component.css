@@ -42,7 +42,8 @@
   padding: 0.25rem 0.45rem;
   border-radius: 9999px;
   background: #f3f4f6;
-  color: #9ca3af;
+  /* Apagada pero legible: #9ca3af daba 2.3:1 sobre su propio fondo. */
+  color: #636a76;
   transition:
     background-color 150ms ease,
     color 150ms ease;
@@ -85,8 +86,9 @@
   gap: 0.5rem;
 }
 
+/* Deshabilitado se ve deshabilitado, pero se lee (con 0.4 quedaba a 2:1). */
 .sgf-sumar:disabled {
-  opacity: 0.4;
+  opacity: 0.65;
   cursor: not-allowed;
 }
 

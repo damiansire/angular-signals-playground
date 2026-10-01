@@ -2,7 +2,8 @@
    button:not([class*='bg-'])`, 0-4-1) volvía cada estrella una pastilla oscura con el glifo claro:
    las cinco se veían iguales, no se leía el puntaje y la fila (5 × 68px) desbordaba su caja de
    20rem. Tres clases con el atributo de encapsulación le ganan sin `!important`. La forma (★/☆)
-   lleva el estado; el color lo acompaña, con un ámbar que llega a 3:1 sobre el crema. */
+   lleva el estado; el color lo acompaña. Los dos tonos llegan a 3:1 contra la escena real de 7/2
+   (#b8791f y #8a8272 daban 2.4-2.6:1: sobre el crema llegaban, sobre la escena no). */
 .rating .rating__star.rating__star {
   width: auto;
   padding: 0 0.1rem;
@@ -10,10 +11,10 @@
   background: none;
   font-family: inherit;
   font-weight: 400;
-  color: #8a8272;
+  color: #6a6355;
 }
 .rating .rating__star.rating__star--on {
-  color: #b8791f;
+  color: #8a5a12;
 }
 /* El anillo de foco del recorrido: tinta en el outline para llegar a 3:1 sobre el crema. */
 .rating .rating__star.rating__star:focus-visible {

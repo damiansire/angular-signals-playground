@@ -166,10 +166,11 @@
   flex-wrap: wrap;
 }
 
+/* Ámbar hondo: #c07a12 quedaba a 1.9:1 sobre la escena gris (texto grande, pide 3). */
 .ocd-count strong {
   font-family: Georgia, 'Times New Roman', serif;
   font-size: 1.6rem;
-  color: #c07a12;
+  color: #7a4a0a;
   white-space: nowrap;
 }
 

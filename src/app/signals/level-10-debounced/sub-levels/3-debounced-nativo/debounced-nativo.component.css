@@ -24,7 +24,8 @@
   margin: 0;
   font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
   font-size: 0.72rem;
-  color: #8a8172;
+  /* La tinta del campo: #8a8172 quedaba a 2.2:1 sobre la escena roja. */
+  color: #4a4436;
 }
 
 .dbn-searches {

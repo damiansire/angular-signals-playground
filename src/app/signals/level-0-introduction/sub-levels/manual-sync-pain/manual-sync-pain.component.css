@@ -77,7 +77,8 @@
 /* En la molécula el card impone fondo oscuro a los botones; marcamos el activo con
    propiedades que esa regla no toca: `outline` + `opacity` (mismo recurso que dom-to-pixel). */
 .msp-tab:not(.msp-on) {
-  opacity: 0.5;
+  /* 0.5 dejaba el rótulo a 2.8:1 contra la escena; 0.75 sigue apagado y se lee. */
+  opacity: 0.75;
 }
 
 .msp-tab.msp-on {

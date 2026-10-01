@@ -74,9 +74,10 @@
 }
 
 /* En la molécula, el card impone su propio fondo oscuro a los botones (mayor especificidad).
-   Diferenciamos el activo con propiedades que ESA regla no toca: `outline` y `opacity`. */
+   Diferenciamos el activo con propiedades que ESA regla no toca: `outline` y `opacity`. Con 0.5 el
+   rótulo del no elegido quedaba a 2.8:1 contra la escena; con 0.75 se sigue viendo apagado y llega. */
 .dtp-btn:not(.dtp-active) {
-  opacity: 0.5;
+  opacity: 0.75;
 }
 
 .dtp-btn.dtp-active {
@@ -168,8 +169,9 @@
   stroke-dasharray: 4 5;
 }
 
+/* Ladrillo oscuro: #b5544a quedaba a 1.5-2.5:1 sobre la escena gris del concepto. */
 .dtp-zone-label {
-  fill: #b5544a;
+  fill: #7f2219;
   font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
   font-size: 13px;
   letter-spacing: 0.04em;
@@ -192,8 +194,9 @@
   stroke-width: 2.5;
 }
 
+/* El rótulo va un azul más hondo que el aro (#2563eb daba 2.4:1 como texto). */
 .dtp-station.dtp-source .dtp-station-label {
-  fill: #2563eb;
+  fill: #1e40af;
   font-weight: 700;
 }
 

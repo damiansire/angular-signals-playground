@@ -174,10 +174,11 @@
   hyphens: none;
 }
 
+/* Rosa hondo: #e11d48 quedaba a 2.5:1 sobre la escena gris (texto grande, pide 3). */
 .scd-count strong {
   font-family: Georgia, 'Times New Roman', serif;
   font-size: 1.6rem;
-  color: #e11d48;
+  color: #9f1239;
   white-space: nowrap;
 }
 
