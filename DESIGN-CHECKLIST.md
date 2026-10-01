@@ -150,6 +150,11 @@ el 0, ~87% en el 8), así que verificar solo el concepto 0 no alcanza.
       palabra entera (`[class~='bg-gray-50']`). Y un remapeo pensado para fondo claro no aplica
       adentro de una caja oscura: el ink de los grises dejaba "CLICKS" de 7/1 a 1.5:1 sobre
       `bg-gray-800` (ahí vuelve el gris de Tailwind con `revert-layer`).
+- [ ] La armonización de `.subhost` también alcanza a lo que el sub-nivel crea DESPUÉS de montado
+      (un `@if` que abre un click, una fila nueva): el motor lo estampa con un vigía
+      (`estampado-tardio.ts`). Sin eso el tercer "Valor:" de 3/1 salía con el gris crudo de
+      Tailwind y "Pionera…" de 6/1 a 3:1. Medir clickeando los botones de cada demo y contando
+      los elementos de la card sin el atributo de encapsulación: cero.
 - [ ] Los controles de la barra del selector de clima (sonido, pausa) se leen sobre las DOS
       mitades: fondo casi opaco y sin `backdrop-filter`. Con el fondo al 50% la pastilla que cae
       sobre la mitad clara quedaba gris sobre gris (~2:1). Mirarla en captura a 1440, 820 y 500.
@@ -243,6 +248,21 @@ puede alcanzar" son dos cosas distintas y hay que chequear las dos.
       ESCENA, no el papel: medir contra el píxel real (#c3bdb1 en el peor caso). Los rótulos del
       desafío ("Desafío · tocá el código", "desfasado") daban 4.7:1 contra el token y 2 a 3.9:1
       contra la escena; el borde del verbo del desafío, 1.1:1.
+- [ ] Gate de contraste sobre el píxel compuesto: en los 40 sub-niveles a 1440 y 375, cada texto
+      de la card activa contra la escena real, capturando con el texto y sin él (texto
+      transparente, animaciones pausadas): fondo = mediana sin texto, texto = el píxel que más se
+      separa (p97). Pasa con 0 textos por debajo de 3:1; lo que queda entre 3 y 4.5 es deuda de
+      AA anotada. Un rectángulo sin tinta (el espacio del corte de renglón) no se mide, y nada se
+      captura con el overlay de error del dev server a la vista: un error de compilación a mitad
+      de un barrido tapó 2/1 y 2/2 con un panel negro. Las lecturas teñidas (contadores, el valor
+      elegido, "sí"/"no") van con la TINTA del acento (`--tinta`, el mismo tono oscurecido), no
+      con el acento: el acento claro sobre una escena de su mismo tono daba 1.4-2:1 ("Ground" de
+      5/1). Un chip con fondo propio (`bg-*-100`) se queda con su color, y adentro de una caja
+      oscura va el acento claro. Lo apagado a propósito (pestaña no elegida, botón deshabilitado,
+      bandera apagada) se apaga sin bajar de 3:1: `opacity` 0.75 y 0.65, no 0.5 y 0.4.
+- [ ] Texto de un SVG que escala con el ancho: medir su tamaño renderizado, no solo su color.
+      El diagrama de 0/3 (viewBox de 1000) a 375 px deja sus rótulos en 4 px, y ningún color los
+      hace legibles.
 - [ ] Grupos de opciones con estado elegido visible Y anunciado
       (`aria-pressed`), no solo un cambio que hay que adivinar.
 - [ ] Errores de entrada avisados: si el demo descarta lo que escribiste, lo
@@ -306,7 +326,11 @@ puede alcanzar" son dos cosas distintas y hay que chequear las dos.
       fija, y seguía ocupando un tercio del ancho a 820 px y haciendo saltar la x del contenido
       entre sub-niveles en escritorio (130 px contra 357 a 381 a 1440). La grilla va en una sola
       columna en todos los anchos y todos los sub-niveles despejan la espina igual. Medir la x donde
-      arranca el contenido en los 40: tiene que ser la misma.
+      arranca el contenido en los 40: tiene que ser la misma. Y no alcanza con el contenedor: se
+      mide lo VISIBLE. El `justify-around` de la fila demo|código repartía el sobrante y el demo
+      arrancaba 100-170 px a la derecha del desafío en 29 de 40 (dos ejes en una columna). La
+      primera cosa visible del demo arranca en el eje del desafío; solo se aparta lo que va
+      centrado adentro de su propio widget (hasta ~50 px, el texto centrado de 7/1).
 
 ## Cierre del sub-nivel (el desafío manipulable, los 37)
 
