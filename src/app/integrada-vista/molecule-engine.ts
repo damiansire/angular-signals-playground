@@ -11,6 +11,7 @@
  * paso) está documentado donde ocurre.
  */
 import { SISTEMA_ESTABLECIDO } from '../libs/manipulable-challenge';
+import { vigilarEstampado } from './estampado-tardio';
 import { createFrameScheduler } from './frame-scheduler';
 import { cambiosDeMontaje, ordenarPorUrgencia } from './mount-window';
 import { laRuedaEsDeAdentro, paradaMasCercana, pasoDeRescate } from './rueda-rescate';
@@ -464,6 +465,8 @@ export function initMolecule(
   const stampTree = (r: Element): void => {
     if (enc) r.querySelectorAll('*').forEach(stamp);
   };
+  /** Un vigía por card: estampa lo que el sub-nivel crea después de montado (ver estampado-tardio). */
+  const vigias: (() => void)[] = [];
 
   // Cuadros y timers que se cortan al destruir. La lógica vive en `frame-scheduler`, donde se
   // puede probar en aislamiento: es el contrato del motor que no se ve mirando la pantalla.
@@ -1064,6 +1067,7 @@ export function initMolecule(
     cc.card = card;
     stamp(card);
     stampTree(card); // estampar ANTES de montar el componente real (para no tocar sus internals)
+    if (enc) vigias.push(vigilarEstampado(card.querySelector('.subhost')!, enc));
     cc.subIdx = 0;
     // El contenido NO se monta acá. Montar los 12 sub-niveles de una, antes del primer frame útil,
     // costaba un frame de ~835ms (medido en dev): doce createComponent con su primera detección de
@@ -1900,6 +1904,7 @@ export function initMolecule(
     btnPausa.remove();
     root.removeEventListener('animationstart', onAnimacionNueva);
     frenadas.clear();
+    vigias.forEach((soltar) => soltar());
     C.forEach((cc) => cc.subDispose?.());
   };
 }
