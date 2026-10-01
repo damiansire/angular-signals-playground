@@ -31,10 +31,13 @@ const FLOW_PATHS: Record<RenderCost, string> = {
   barato: 'M60,150 L280,150 C 480,20 740,20 940,150',
 };
 
+/** Pintan el flujo y la palabra del costo, que tiene que llegar a 3:1 (texto grande) aun sobre la
+ *  parte más oscura de la escena, el centro del átomo, donde cae en angosto: #15905a, #b5730f y
+ *  #d92626 quedaban a 2.5-2.9:1. */
 const COST_COLOR: Record<RenderCost, string> = {
-  barato: '#15905a',
-  medio: '#b5730f',
-  caro: '#d92626',
+  barato: '#0b6a40',
+  medio: '#7a4a0a',
+  caro: '#b91c1c',
 };
 
 @Component({

@@ -218,8 +218,11 @@
   stroke-dasharray: 3 3;
 }
 
+/* Salteada se ve salteada (tachada, sin negrita) y se lee: #a99f8e quedaba a 1.6:1 sobre la
+   escena, justo en el caso que el sub-nivel enseña (transform saltea layout y paint); sobre el
+   tinte de la zona cara hace falta este tono para pasar 3:1. */
 .dtp-station.dtp-skip .dtp-station-label {
-  fill: #a99f8e;
+  fill: #4f493d;
   text-decoration: line-through;
 }
 
