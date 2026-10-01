@@ -25,11 +25,10 @@
     role="img"
     aria-label="Pipeline de render: el flujo salta las etapas que el cambio no dispara"
   >
-    <!-- Zona cara: layout + paint, la que las animaciones baratas sobrevuelan. -->
+    <!-- Zona cara: layout + paint, la que las animaciones baratas sobrevuelan. El rótulo no
+         repite sus nombres: las dos estaciones están adentro, justo debajo. -->
     <rect class="dtp-zone" x="420" y="52" width="360" height="150" rx="16" />
-    <text class="dtp-zone-label" x="600" y="40" text-anchor="middle">
-      capas caras · layout + paint
-    </text>
+    <text class="dtp-zone-label" x="600" y="40" text-anchor="middle">capas caras</text>
 
     <!-- Riel base tenue: todo el recorrido posible. -->
     <path class="dtp-rail" d="M60,150 L940,150" pathLength="100" />
@@ -62,6 +61,47 @@
       </g>
     }
   </svg>
+
+  <!-- Angosto: el mismo pipeline en vertical, con los rótulos en HTML. El SVG escala con el ancho
+       (viewBox de 1000) y en un teléfono dejaba los rótulos en 4 px. -->
+  <div
+    class="dtp-vpipe"
+    role="group"
+    aria-label="Pipeline de render: el flujo salta las etapas que el cambio no dispara"
+    [style.--flujo]="costColor()"
+  >
+    <span class="dtp-vzone" aria-hidden="true"><span>capas caras</span></span>
+    <!-- Se rearma al cambiar el costo, como el flujo del SVG: así el recorrido se vuelve a dibujar. -->
+    @for (c of [cost()]; track c) {
+      @if (filasDelSalto(); as filas) {
+        <span
+          class="dtp-vhop"
+          aria-hidden="true"
+          [style.grid-row]="filas"
+          [style.--d]="(retrasos().arco ?? 0) + 's'"
+        ></span>
+      }
+      @for (s of stations; track s.id; let i = $index) {
+        <span
+          class="dtp-vst"
+          aria-hidden="true"
+          [style.grid-row]="i + 1"
+          [style.--d]="(retrasos().tramos[i] ?? 0) + 's'"
+          [class.dtp-source]="s.id === 'DOM'"
+          [class.dtp-on]="stageOn(s.id)"
+          [class.dtp-skip]="s.id !== 'DOM' && !stageOn(s.id)"
+          [class.dtp-vst--directo]="tramoDirecto(i)"
+          [class.dtp-vst--ultima]="i === stations.length - 1"
+        >
+          <span class="dtp-vdot"></span>
+          <span class="dtp-vlabel">{{ s.id }}</span>
+        </span>
+      }
+    }
+    <!-- La respuesta va al lado de DOM/style y no abajo: en un teléfono bajo, abajo quedaba fuera
+         de la vista. -->
+    <p class="dtp-vcosto" [style.color]="costColor()">{{ cost() }}</p>
+  </div>
 
   <!-- La palabra del costo sola: qué etapas se saltearon ya lo dicen las estaciones apagadas. -->
   <p class="dtp-cost">

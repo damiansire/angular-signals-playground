@@ -14,6 +14,9 @@
   display: flex;
   flex-direction: column;
   gap: 1.6rem;
+  /* El diagrama se elige por el ancho que le toca, no por el de la pantalla: embebido, la card
+     y la espina se comen un pedazo distinto en cada ancho. */
+  container-type: inline-size;
 }
 
 /* Encabezado con carácter (reemplaza el concepto/qué-hacer/qué-observar). */
@@ -173,7 +176,8 @@
 .dtp-zone-label {
   fill: #7f2219;
   font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
-  font-size: 13px;
+  /* 16 unidades: en el corte (720 px) queda en ~11.5 px reales; con 13 quedaba en 9.4. */
+  font-size: 16px;
   letter-spacing: 0.04em;
 }
 
@@ -185,7 +189,7 @@
 
 .dtp-station-label {
   font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
-  font-size: 15px;
+  font-size: 16px;
 }
 
 .dtp-station.dtp-source circle {
@@ -226,6 +230,178 @@
   text-decoration: line-through;
 }
 
+/* Pipeline vertical, para cuando el SVG no entra: por debajo de 720 px de ancho sus rótulos
+   bajan de 11 px (a 375 quedaban en 4). Mismas estaciones y estados, en una grilla de cinco
+   filas: el punto en la primera columna y el rótulo al lado. La primera columna deja un carril a
+   la izquierda para el arco del salto, afuera de la zona cara: pegado a su borde se leía como un
+   corchete que agrupa y no como un desvío. Alto de fila: con 2.6rem, a 768 px la card pasaba a
+   scrollear. Ancho tope: estirado a 600-700 px, la banda de la zona quedaba lejos de lo que
+   nombra. */
+.dtp-vpipe {
+  --fila: 2.3rem;
+  --carril: 3.2rem;
+  display: none;
+  /* width y no max-width: en angosto la vista integrada fija max-width: 100% a todo con más peso. */
+  width: min(100%, 22rem);
+}
+
+@container (max-width: 719px) {
+  /* `.dtp` adelante: `.dtp-cost` se declara más abajo con display: flex y ganaba por orden. */
+  .dtp .dtp-pipe,
+  .dtp .dtp-cost {
+    display: none;
+  }
+  .dtp-vpipe {
+    display: grid;
+    grid-template-columns: var(--carril) minmax(0, 1fr);
+    grid-template-rows: repeat(5, var(--fila));
+  }
+}
+
+/* La zona cara, detrás de layout y paint, desde un poco antes de los puntos. */
+.dtp-vzone {
+  grid-column: 1 / -1;
+  grid-row: 3 / 5;
+  margin-left: 0.85rem;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding-right: 0.8rem;
+  border: 1.5px dashed rgba(217, 38, 38, 0.3);
+  border-radius: 0.8rem;
+  background: rgba(217, 38, 38, 0.055);
+}
+
+.dtp-vzone > span {
+  font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+  font-size: 0.78rem;
+  letter-spacing: 0.04em;
+  color: #7f2219;
+}
+
+/* El salto: el arco por el carril, del centro del punto de partida al de llegada (media fila
+   adentro arriba y abajo). Se revela de arriba hacia abajo en su turno del dibujo. */
+.dtp-vhop {
+  grid-column: 1;
+  justify-self: start;
+  width: calc(var(--carril) / 2 - 0.15rem);
+  margin: calc(var(--fila) / 2) 0 calc(var(--fila) / 2) 0.15rem;
+  border: 3px solid var(--flujo);
+  border-right: none;
+  border-radius: 1rem 0 0 1rem;
+  animation: dtp-vsalto 0.4s cubic-bezier(0.4, 0, 0.2, 1) var(--d, 0s) both;
+}
+
+/* El `to` explícito no es redundante: sin él termina en `none`, que no interpola con `inset()`, y
+   el arco aparecía de golpe a mitad de la animación. */
+@keyframes dtp-vsalto {
+  from {
+    clip-path: inset(0 0 100% 0);
+  }
+  to {
+    clip-path: inset(0 0 0 0);
+  }
+}
+
+.dtp-vst {
+  grid-column: 1 / -1;
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.dtp-vdot {
+  position: relative;
+  z-index: 1;
+  flex: none;
+  width: 1.05rem;
+  height: 1.05rem;
+  margin-inline: calc((var(--carril) - 1.05rem) / 2);
+  border: 2px solid #cfc9bd;
+  border-radius: 50%;
+  background: #ffffff;
+  transition:
+    background-color 0.3s,
+    border-color 0.3s;
+}
+
+.dtp-vlabel {
+  font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+  font-size: 0.95rem;
+  color: #17140f;
+}
+
+/* El tramo hasta la siguiente estación: lleno con el color del costo si el flujo lo recorre,
+   punteado si queda debajo del salto. */
+.dtp-vst:not(.dtp-vst--ultima)::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: calc(var(--carril) / 2 - 1.5px);
+  width: 3px;
+  height: var(--fila);
+  background: repeating-linear-gradient(to bottom, #cfc9bd 0 4px, transparent 4px 8px);
+}
+
+/* Dos clases: con una sola le ganaba la regla de arriba (el `:not()` suma especificidad). El
+   tramo crece de arriba hacia abajo en su turno: el flujo se dibuja, como en el SVG. */
+.dtp-vst.dtp-vst--directo::after {
+  background: var(--flujo);
+  transform-origin: top;
+  animation: dtp-vtramo 0.14s linear var(--d, 0s) both;
+}
+
+@keyframes dtp-vtramo {
+  from {
+    transform: scaleY(0);
+  }
+}
+
+.dtp-vst.dtp-source .dtp-vdot {
+  border: 2.5px solid #2563eb;
+  background: #eef3ff;
+}
+
+.dtp-vst.dtp-source .dtp-vlabel {
+  color: #1e40af;
+  font-weight: 700;
+}
+
+.dtp-vst.dtp-on .dtp-vdot {
+  border-color: #17140f;
+  background: #17140f;
+}
+
+.dtp-vst.dtp-on .dtp-vlabel {
+  font-weight: 700;
+}
+
+/* Salteada: aro hueco y claro. Punteado, a este tamaño el borde se dibujaba como una estrellita. */
+.dtp-vst.dtp-skip .dtp-vdot {
+  border-color: #b8b0a2;
+  background: #ffffff;
+}
+
+.dtp-vst.dtp-skip .dtp-vlabel {
+  color: #4f493d;
+  text-decoration: line-through;
+}
+
+/* La respuesta, al lado de DOM y style: abajo del vertical, en un teléfono bajo quedaba fuera de
+   la vista. */
+.dtp-vcosto {
+  grid-column: 2;
+  grid-row: 1 / 3;
+  justify-self: end;
+  align-self: center;
+  margin: 0;
+  font-family: Georgia, 'Times New Roman', serif;
+  font-weight: 700;
+  font-style: italic;
+  font-size: 1.7rem;
+  line-height: 1;
+}
+
 /* Lectura del costo. */
 .dtp-cost {
   margin: 0;
@@ -250,8 +426,13 @@
     animation: none;
     stroke-dashoffset: 0;
   }
-  .dtp-station circle {
+  .dtp-station circle,
+  .dtp-vdot {
     transition: none;
+  }
+  .dtp-vhop,
+  .dtp-vst.dtp-vst--directo::after {
+    animation: none;
   }
   .dtp-pulse {
     animation: none;

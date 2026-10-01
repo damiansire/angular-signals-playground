@@ -5,6 +5,7 @@ import {
   RenderCost,
   stagesTriggered,
   renderCost,
+  saltoDelFlujo,
 } from '../../../../libs/render-pipeline';
 import { ManipulableSystemComponent } from '../../../../components-atom/manipulable-system/manipulable-system.component';
 import { DOM_PIXEL_SYSTEM } from '../../introduction-systems';
@@ -30,6 +31,10 @@ const FLOW_PATHS: Record<RenderCost, string> = {
   // transform/opacity sí dispara, y se saltea layout y paint, que es lo que dice el texto de abajo.
   barato: 'M60,150 L280,150 C 480,20 740,20 940,150',
 };
+
+/** Duraciones del dibujo del flujo vertical (s): las de `dtp-vtramo` y `dtp-vsalto` en el CSS. */
+const DIBUJO_TRAMO = 0.14;
+const DIBUJO_ARCO = 0.4;
 
 /** Pintan el flujo y la palabra del costo, que tiene que llegar a 3:1 (texto grande) aun sobre la
  *  parte más oscura de la escena, el centro del átomo, donde cae en angosto: #15905a, #b5730f y
@@ -76,6 +81,13 @@ export class DomToPixelComponent {
   protected readonly flowPath = computed(() => FLOW_PATHS[this.cost()]);
   protected readonly pulsePath = computed(() => `path("${this.flowPath()}")`);
   protected readonly costColor = computed(() => COST_COLOR[this.cost()]);
+  /** En el pipeline vertical, las filas que abarca el arco del salto (`grid-row`), o `null`. */
+  protected readonly filasDelSalto = computed(() => {
+    const salto = saltoDelFlujo(this.selected().kind);
+    if (!salto) return null;
+    const fila = (id: Station['id']): number => this.stations.findIndex((s) => s.id === id) + 1;
+    return `${fila(salto.desde)} / ${fila(salto.hasta) + 1}`;
+  });
 
   protected pick(demo: MutationDemo): void {
     this.selected.set(demo);
@@ -84,4 +96,35 @@ export class DomToPixelComponent {
   protected stageOn(id: Station['id']): boolean {
     return id !== 'DOM' && this.triggered().has(id);
   }
+
+  /** El tramo de la estación `i` a la siguiente lo recorre el flujo (no queda bajo el salto). */
+  protected tramoDirecto(i: number): boolean {
+    const siguiente = this.stations[i + 1];
+    if (!siguiente) return false;
+    return (i === 0 || this.stageOn(this.stations[i].id)) && this.stageOn(siguiente.id);
+  }
+
+  /**
+   * Cuándo arranca cada pieza del flujo vertical (en segundos): se dibuja como el SVG, de arriba
+   * hacia abajo, una pieza detrás de otra, y el arco del salto ocupa su turno entre los tramos.
+   */
+  protected readonly retrasos = computed(() => {
+    const salto = saltoDelFlujo(this.selected().kind);
+    const tramos: (number | null)[] = [];
+    let arco: number | null = null;
+    let t = 0;
+    for (let i = 0; i < this.stations.length - 1; i++) {
+      if (this.tramoDirecto(i)) {
+        tramos.push(t);
+        t += DIBUJO_TRAMO;
+      } else {
+        tramos.push(null);
+        if (salto && arco === null && this.stations[i].id === salto.desde) {
+          arco = t;
+          t += DIBUJO_ARCO;
+        }
+      }
+    }
+    return { tramos, arco };
+  });
 }
