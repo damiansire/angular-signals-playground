@@ -51,6 +51,11 @@ herramientas de captura. Esto es lo que funciona:
   estado inconsistente. Con **input real** (un click de puntero o una rueda por
   CDP) anda a la primera. Clickeá por selector y no por coordenadas de un
   screenshot escalado.
+- **Capturá la pantalla entera y recortá después.** Una captura con `clip`
+  justo después de un click hace saltar el recorrido al sub-nivel siguiente
+  (el `captureBeyondViewport` agranda la página un instante). Y no edites el
+  código mientras un barrido mide contra el dev server: un error de compilación
+  a mitad de camino pone su overlay oscuro encima y contamina las capturas.
 - **Al terminar una revisión, actualizá `DESIGN-CHECKLIST.md`** con cada defecto
   detectado Y resuelto: es la regla del propio archivo, y es lo que evita que
   la familia de defectos vuelva.

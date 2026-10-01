@@ -260,6 +260,11 @@ puede alcanzar" son dos cosas distintas y hay que chequear las dos.
       5/1). Un chip con fondo propio (`bg-*-100`) se queda con su color, y adentro de una caja
       oscura va el acento claro. Lo apagado a propósito (pestaña no elegida, botón deshabilitado,
       bandera apagada) se apaga sin bajar de 3:1: `opacity` 0.75 y 0.65, no 0.5 y 0.4.
+      Se mide también DESPUÉS de manejar cada demo (clickear sus botones y los del desafío): en
+      reposo no aparecen el resaltado de 7/3 (blanco sobre ámbar, 2.2:1), la línea vieja del
+      desafío (opacity 0.36, 1.8:1) ni el "Leyendo…" de 0/1. No cuenta lo que la card scrolleó
+      debajo del topbar. Y una tinta no se confunde con un significado: la de effect iba casi del
+      rojo del error y un "(vacío)" neutro se leía como error; va hacia ladrillo, con menos croma.
 - [ ] Texto de un SVG que escala con el ancho: medir su tamaño renderizado, no solo su color.
       El diagrama de 0/3 (viewBox de 1000) a 375 px deja sus rótulos en 4 px, y ningún color los
       hace legibles.
@@ -330,7 +335,9 @@ puede alcanzar" son dos cosas distintas y hay que chequear las dos.
       mide lo VISIBLE. El `justify-around` de la fila demo|código repartía el sobrante y el demo
       arrancaba 100-170 px a la derecha del desafío en 29 de 40 (dos ejes en una columna). La
       primera cosa visible del demo arranca en el eje del desafío; solo se aparta lo que va
-      centrado adentro de su propio widget (hasta ~50 px, el texto centrado de 7/1).
+      centrado adentro de su propio widget (hasta ~50 px, el texto centrado de 7/1). Un contenedor
+      desvanecido (borde transparente) no cuenta como visible al medir, y su padding tampoco corre
+      el contenido: `.profile-container` de 2/1 lo metía 20-40 px adentro.
 
 ## Cierre del sub-nivel (el desafío manipulable, los 37)
 
