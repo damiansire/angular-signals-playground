@@ -615,10 +615,12 @@
 }
 /* Algunos demos dibujan el borde del contenedor desde su PROPIO CSS scopeado (border: 1px solid
    #ccc en .counter-container / .profile-container), no con clases Tailwind, así que la regla de
-   arriba no los alcanza. Los desvanecemos por nombre para que la card no quede contorneada. */
+   arriba no los alcanza. Los desvanecemos por nombre para que la card no quede contorneada. Sin
+   borde, su padding corría el contenido 20-40 px fuera del eje del desafío (2/1, 1/5). */
 .card--dissolve .subhost .counter-container,
 .card--dissolve .subhost .profile-container {
   border-color: transparent;
+  padding-inline: 0;
 }
 /* Chips de tags en fucsia-100: sobre el campo (sin la hoja blanca detrás) el relleno pálido casi
    desaparece. Un fill un toque más presente para que se lean como etiquetas, y el texto un tono
