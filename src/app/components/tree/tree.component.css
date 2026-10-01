@@ -27,5 +27,6 @@
   font-family: var(--font-mono, ui-monospace, monospace);
   font-size: 0.82rem;
   letter-spacing: 0.08em;
-  color: #8a8272;
+  /* La tinta del texto: #8a8272 quedaba a 2:1 sobre la escena del recorrido. */
+  color: #4a4436;
 }
