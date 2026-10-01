@@ -634,9 +634,11 @@
    dissolve esa fila se aprieta y el código (líneas largas, pre) se corta contra el borde. Los
    apilamos (demo arriba, código full-width abajo) para que el código recupere el ancho y se lea.
    `:has(app-code)` apunta SOLO a las filas demo+código, no a las filas de chips (que no tienen
-   código adentro y deben seguir en horizontal). */
+   código adentro y deben seguir en horizontal). Arranca en el borde: con el `justify-around` del
+   layout el demo quedaba 100-170 px a la derecha del desafío (29/40 a 1440). */
 .card--dissolve .subhost .flex:has(app-code) {
   flex-direction: row;
+  justify-content: flex-start;
   align-items: flex-start;
   gap: 1.4rem;
 }

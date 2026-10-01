@@ -16,7 +16,6 @@
 @media (max-width: 1199px) {
   .card--dissolve .subhost .flex:has(app-code) {
     flex-wrap: wrap;
-    justify-content: flex-start;
   }
   .card--dissolve .subhost .flex:has(app-code) > :is(app-code, :has(app-code)) {
     flex: 1 0 15rem;
