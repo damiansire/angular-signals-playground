@@ -1,4 +1,10 @@
-import { stagesTriggered, renderCost, RENDER_STAGES, MutationKind } from './render-pipeline';
+import {
+  stagesTriggered,
+  renderCost,
+  saltoDelFlujo,
+  RENDER_STAGES,
+  MutationKind,
+} from './render-pipeline';
 
 describe('render-pipeline (dominio de "de la mutación al pixel")', () => {
   it('transform y opacity recalculan estilo pero se saltean layout y paint', () => {
@@ -44,5 +50,21 @@ describe('render-pipeline (dominio de "de la mutación al pixel")', () => {
         expect(stages).toContain('composite');
       }
     }
+  });
+});
+
+describe('saltoDelFlujo: el tramo que el flujo pasa por arriba', () => {
+  it('transform y opacity saltan de style a composite, por encima de layout y paint', () => {
+    expect(saltoDelFlujo('transform')).toEqual({ desde: 'style', hasta: 'composite' });
+    expect(saltoDelFlujo('opacity')).toEqual({ desde: 'style', hasta: 'composite' });
+  });
+
+  it('color salta solo layout: de style a paint', () => {
+    expect(saltoDelFlujo('color')).toEqual({ desde: 'style', hasta: 'paint' });
+  });
+
+  it('texto y geometría recorren la cadena entera, sin salto', () => {
+    expect(saltoDelFlujo('textContent')).toBeNull();
+    expect(saltoDelFlujo('geometry')).toBeNull();
   });
 });

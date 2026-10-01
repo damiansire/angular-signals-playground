@@ -39,3 +39,21 @@ export function renderCost(kind: MutationKind): RenderCost {
   if (stages.includes('paint')) return 'medio';
   return 'barato';
 }
+
+/** El tramo que el flujo salta: de la última etapa que corre antes del hueco a la primera después. */
+export interface SaltoDelFlujo {
+  desde: RenderStage;
+  hasta: RenderStage;
+}
+
+/**
+ * Dónde salta el flujo para `kind`, o `null` si recorre la cadena entera. Dibujado, es el arco que
+ * pasa por encima de las etapas que el cambio no dispara (transform: de style a composite).
+ */
+export function saltoDelFlujo(kind: MutationKind): SaltoDelFlujo | null {
+  const corre = new Set(stagesTriggered(kind));
+  const hueco = RENDER_STAGES.findIndex((stage) => !corre.has(stage));
+  if (hueco < 1) return null;
+  const despues = RENDER_STAGES.slice(hueco).find((stage) => corre.has(stage));
+  return despues ? { desde: RENDER_STAGES[hueco - 1], hasta: despues } : null;
+}
