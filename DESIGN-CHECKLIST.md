@@ -277,8 +277,13 @@ puede alcanzar" son dos cosas distintas y hay que chequear las dos.
       y la sangría va en espacios duros: con espacios comunes el navegador corta justo después de
       ellos y deja un renglón vacío arriba del código. El texto del renglón va por binding, nunca
       interpolado entre etiquetas (el espacio del template se volvía un espacio común delante de
-      la sangría), y con puntos de corte (`<wbr>` después de `.`, `(` y `=`, `libs/cortes-de-
-    codigo.ts`): sin ellos se partía a mitad de un identificador ("textCont|ent", "'#|count'").
+      la sangría), y con puntos de corte (`<wbr>` después de `.`, `(` y `=`, en
+      `libs/cortes-de-codigo.ts`): sin ellos se partía a mitad de un identificador
+      ("textCont|ent", "'#|count'").
+      Un identificador de 24 letras o más (el `provideZoneChangeDetection()` de 11/1) no entra
+      entero en la columna angosta y se partía igual: ese se corta en las jorobas del camelCase.
+      Medirlo con un `Range` carácter por carácter en los 40 sub-niveles: ningún salto de renglón
+      cae entre dos caracteres de un mismo token, salvo en una joroba.
       Todo código embebido con `overflow-x: auto`
       (el `<pre>` de 0/4, el `<code>` de los botones de 0/2) envuelve en vez de scrollear: su scroll
       horizontal es invisible (el recorrido oculta las barras) y la línea clave se cortaba sin que
