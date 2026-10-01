@@ -211,17 +211,52 @@ body {
   background: #3a352d;
   color: #f2ecdc;
 }
-/* Números/acentos de texto "gritones" (p.ej. el contador text-indigo-700 de Zoneless, violeta sobre
-   una escena dorada): heredan el acento del concepto en vez de traer su propio color y romper el
-   clima. Solo aplica a colores decorativos de la familia índigo/violeta/púrpura. */
-.card.card--dissolve .subhost [class*='text-indigo-'],
-.card.card--dissolve .subhost [class*='text-violet-'],
-.card.card--dissolve .subhost [class*='text-purple-'],
-.card.card--dissolve .subhost [class*='text-blue-'],
-.card.card--dissolve .subhost [class*='text-sky-'],
-.card.card--dissolve .subhost [class*='text-cyan-'],
-.card.card--dissolve .subhost [class*='text-fuchsia-'] {
+/* Las lecturas teñidas (el contador text-indigo-700 de Zoneless, "Paso (input): 1" en ámbar, el
+   "sí" en teal): heredan el tono del concepto en vez de traer su propio color y romper el clima. Van
+   con la TINTA del acento (el mismo tono, oscuro) y no con el acento: el acento claro sobre una
+   escena de su mismo tono quedaba a 1.4-2:1 ("Ground" de 5/1, el "264px" de 9/1). Un chip con fondo
+   propio (bg-emerald-100) ya se lee sobre ese fondo y queda como está. */
+.card.card--dissolve
+  .subhost
+  :is(
+    [class*='text-indigo-'],
+    [class*='text-violet-'],
+    [class*='text-purple-'],
+    [class*='text-blue-'],
+    [class*='text-sky-'],
+    [class*='text-cyan-'],
+    [class*='text-fuchsia-'],
+    [class*='text-amber-'],
+    [class*='text-orange-'],
+    [class*='text-teal-'],
+    [class*='text-emerald-'],
+    [class*='text-rose-']
+  ):not([class*='bg-']) {
+  color: var(--tinta, #4a4436);
+}
+/* Adentro de una caja oscura la tinta se apagaría: ahí va el acento claro. */
+.card.card--dissolve
+  .subhost
+  :is([class*='bg-gray-7'], [class*='bg-gray-8'], [class*='bg-gray-9'])
+  :is(
+    [class*='text-indigo-'],
+    [class*='text-violet-'],
+    [class*='text-purple-'],
+    [class*='text-blue-'],
+    [class*='text-sky-'],
+    [class*='text-cyan-'],
+    [class*='text-fuchsia-'],
+    [class*='text-amber-'],
+    [class*='text-orange-'],
+    [class*='text-teal-'],
+    [class*='text-emerald-'],
+    [class*='text-rose-']
+  ):not([class*='bg-']) {
   color: var(--glow, #eb9b3c);
+}
+/* El error es el único rojo con significado: queda rojo, pero oscuro (red-600 daba 3:1 sobre la escena). */
+.card.card--dissolve .subhost [class*='text-red-6'] {
+  color: #991b1b;
 }
 .card.card--dissolve .subhost button[class*='bg-blue-']:hover:not(:disabled),
 .card.card--dissolve .subhost button[class*='bg-green-']:hover:not(:disabled),

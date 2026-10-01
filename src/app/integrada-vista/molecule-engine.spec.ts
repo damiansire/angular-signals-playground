@@ -10,6 +10,7 @@ import {
   ATOM_CLOUD_R,
   SPIRAL_RSTEP,
   WIDE_ZOOM_FLOOR,
+  TINTA,
 } from './molecule-engine';
 import { signalsRoutesTree } from '../app.routes';
 
@@ -180,4 +181,34 @@ describe('CONCEPT_COUNT — RAW ↔ signalsRoutesTree acoplados por índice', ()
       initMolecule(root, mountStub, [1, 2, 3], null, () => undefined, null),
     ).toThrowError(/subCounts tiene 3 conceptos pero RAW tiene 12/);
   });
+});
+
+describe('TINTA — el texto teñido con el acento se lee sobre su propia escena', () => {
+  /** Contraste WCAG entre dos colores `#rrggbb`. */
+  const contraste = (a: string, b: string): number => {
+    const lum = (hex: string): number => {
+      const [r, g, b] = [1, 3, 5].map((i) => {
+        const v = parseInt(hex.slice(i, i + 2), 16) / 255;
+        return v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4;
+      });
+      return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+    };
+    const [x, y] = [lum(a), lum(b)].sort((p, q) => q - p);
+    return (x + 0.05) / (y + 0.05);
+  };
+  // El fondo claro más oscuro medido detrás de texto en las escenas de cada acento (píxel compuesto,
+  // 40 sub-niveles a 1440 y 375 px): cerca del halo del átomo la escena se oscurece.
+  const ESCENA_MAS_OSCURA = {
+    source: '#efba77',
+    derived: '#a0d9c9',
+    effect: '#fb9a8e',
+    ink: '#beaea3',
+    capstone: '#e1c493',
+  };
+
+  for (const [acento, escena] of Object.entries(ESCENA_MAS_OSCURA)) {
+    it(`${acento}: la tinta llega a 4.5:1 sobre ${escena}`, () => {
+      expect(contraste(TINTA[acento as keyof typeof TINTA], escena)).toBeGreaterThanOrEqual(4.5);
+    });
+  }
 });

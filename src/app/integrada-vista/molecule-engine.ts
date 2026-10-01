@@ -28,6 +28,20 @@ const COL: Record<AccentKey, string> = {
   capstone: '#c98a2a',
 };
 
+/**
+ * La tinta de cada acento: el mismo tono oscurecido para TEXTO. Los valores que muestran los demos
+ * (contadores, lecturas, el valor elegido) se pintaban con el acento claro, y sobre una escena del
+ * mismo tono quedaban a 1.4-2:1 ("Ground" de 5/1, el "264px" de 9/1). Cada tinta llega a 4.5:1
+ * contra el fondo más oscuro medido detrás de texto en las escenas de su acento.
+ */
+export const TINTA: Record<AccentKey, string> = {
+  source: '#743e00',
+  derived: '#0c5d4e',
+  effect: '#850504',
+  ink: '#443e34',
+  capstone: '#734300',
+};
+
 const CLAVE_PAUSA_FONDO = 'signals-pausa';
 /** Lo que el jugador abrió encima del recorrido: la pausa de la vida de fondo no lo toca. */
 const PRIMER_PLANO = '.prologo, app-cinematica, app-bitacora';
@@ -1062,6 +1076,7 @@ export function initMolecule(
     // Sin transform ancla siempre a la esquina del viewport; la card entra solo por opacidad (fade).
     card.style.transform = 'none';
     card.style.setProperty('--glow', COL[cc.accent]);
+    card.style.setProperty('--tinta', TINTA[cc.accent]);
     card.innerHTML = `<span class="subflash"></span><div class="subbody"><div class="subhost"></div></div>`;
     contentEl.appendChild(card);
     cc.card = card;
