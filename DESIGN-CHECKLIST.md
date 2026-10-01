@@ -266,8 +266,22 @@ puede alcanzar" son dos cosas distintas y hay que chequear las dos.
       debajo del topbar. Y una tinta no se confunde con un significado: la de effect iba casi del
       rojo del error y un "(vacío)" neutro se leía como error; va hacia ladrillo, con menos croma.
 - [ ] Texto de un SVG que escala con el ancho: medir su tamaño renderizado, no solo su color.
-      El diagrama de 0/3 (viewBox de 1000) a 375 px deja sus rótulos en 4 px, y ningún color los
-      hace legibles.
+      El diagrama de 0/3 (viewBox de 1000) a 375 px dejaba sus rótulos en 4 px, y ningún color
+      los hacía legibles. Si el SVG no entra, se cambia de forma, no de tamaño: por debajo de 720
+      px de CONTENEDOR (container query, no media query: embebido, cada ancho de pantalla le deja
+      otro ancho) 0/3 muestra el mismo pipeline en vertical, con los rótulos en HTML. Medir el
+      tamaño REAL del rótulo más chico en los dos lados del corte (11 px o más): en el SVG es
+      `font-size` × ancho renderizado / viewBox, no el alto de su caja (que da de más). Y el alto
+      que suma la versión vertical: con filas de 2.6rem, a 768 px la card pasaba a scrollear. La
+      respuesta del demo (la palabra del costo) va al lado del vertical y no abajo, donde en un
+      teléfono bajo quedaba fuera de la vista; y el vertical se vuelve a dibujar al cambiar, como
+      el SVG: si el angosto pierde el movimiento, perdió lo que enseña. Que la animación exista
+      (`getAnimations()`) no prueba que interpole: pausarla, adelantarla a mano y leer el valor a
+      mitad de camino. El arco declaraba solo `from { clip-path: inset(…) }`, terminaba en `none`
+      (que no interpola con `inset()`) y aparecía de golpe.
+- [ ] Cada ESTADO de un demo se mide, no solo el de arranque: 0/3 arranca en "caro", y las
+      palabras "barato" y "medio" (2.6-2.9:1) y los rótulos salteados (1.6:1) solo aparecen al
+      elegir otro cambio.
 - [ ] Grupos de opciones con estado elegido visible Y anunciado
       (`aria-pressed`), no solo un cambio que hay que adivinar.
 - [ ] Errores de entrada avisados: si el demo descarta lo que escribiste, lo
