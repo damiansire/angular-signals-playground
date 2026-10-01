@@ -84,8 +84,9 @@
   transform: translateY(1px);
 }
 
+/* Ocupado se ve ocupado y se lee: con 0.55 el "Leyendo…" quedaba a 2.8:1 sobre la escena. */
 .htt-play:disabled {
-  opacity: 0.55;
+  opacity: 0.7;
   cursor: default;
 }
 
