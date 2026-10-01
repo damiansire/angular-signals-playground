@@ -25,4 +25,11 @@ describe('conCortes: puntos de corte para mostrar código angosto', () => {
     expect(conCortes('() => x')).toBe('() =&gt;<wbr> x');
     expect(conCortes('[...lista]')).toBe('[...<wbr>lista]');
   });
+
+  it('corta en el camelCase solo los identificadores que no entran en la columna angosta', () => {
+    expect(conCortes('// sin provideZoneChangeDetection()')).toBe(
+      '// sin provide<wbr>Zone<wbr>Change<wbr>Detection()',
+    );
+    expect(conCortes('bootstrapApplication(App')).toBe('bootstrapApplication(<wbr>App');
+  });
 });

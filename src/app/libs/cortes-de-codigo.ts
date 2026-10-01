@@ -15,7 +15,12 @@ const ESCAPES: Record<string, string> = {
 export function conCortes(codigo: string): string {
   // Los cortes se marcan sobre el texto crudo y recién después se escapa: al revés, `=>` ya era
   // `=&gt;` y el corte caía entre `=` y `>`.
-  const conMarcas = codigo.replace(/\.(?!\.)|\((?!\))|=+>?(?![=>])/g, (m) => m + MARCA);
+  const conMarcas = codigo
+    .replace(/\.(?!\.)|\((?!\))|=+>?(?![=>])/g, (m) => m + MARCA)
+    // Un identificador de 24 letras o más no entra entero en la columna angosta (11/1 a 820:
+    // "provideZoneChangeDetecti|on()"): ahí también se ofrece cortar en las jorobas del camelCase.
+    // Uno más corto sigue sin cortes y, si no entra, baja entero al renglón siguiente.
+    .replace(/[A-Za-z_$][\w$]{23,}/g, (id) => id.replace(/([a-z\d])(?=[A-Z])/g, `$1${MARCA}`));
   return conMarcas
     .replace(/[&<>"]/g, (c) => ESCAPES[c])
     .split(MARCA)
