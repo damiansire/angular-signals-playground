@@ -7,9 +7,9 @@
     [attr.aria-label]="
       open() ? 'Ocultar la pista de la mascota' : 'La mascota te da una pista de este ejemplo'
     "
-    (click)="toggle()"
+    (click)="alActivar($event)"
   >
-    <img class="cc__mascot-img" src="angular-mascot-idea.svg" alt="" width="240" height="300" />
+    <app-mascota-viva class="cc__mascot-viva" />
     @if (!open()) {
       <span class="cc__hint">tocame</span>
     }

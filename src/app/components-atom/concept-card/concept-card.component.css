@@ -61,36 +61,9 @@
   outline-offset: 2px;
   box-shadow: 0 0 0 2px #eb9b3c;
 }
-/* `.cc` en el selector para ganarle a la regla global del dive `.card--dissolve .subhost img`
-   (le pone width:auto + borde y colapsaba la mascota a 2px). */
-.cc .cc__mascot-img {
-  width: 74px;
-  height: auto;
-  border: 0;
-  filter: drop-shadow(0 6px 14px rgba(120, 10, 70, 0.3));
-  /* respiro idle: usa `translate` (no `transform`) para componer con el hover sin pisarlo */
-  animation: cc-breathe 3.6s ease-in-out infinite;
-  transition:
-    transform 0.18s ease,
-    filter 0.18s ease;
-}
-@keyframes cc-breathe {
-  0%,
-  100% {
-    translate: 0 0;
-  }
-  50% {
-    translate: 0 -3px;
-  }
-}
-/* con el globo abierto la mascota queda quieta: el pico del globo es fijo y no debe derivar contra él */
-.cc--open .cc__mascot-img {
-  animation: none;
-  translate: 0;
-}
-.cc__mascot:hover .cc__mascot-img {
-  transform: translateY(-2px) rotate(-2deg);
-  filter: drop-shadow(0 9px 18px rgba(120, 10, 70, 0.36));
+.cc .cc__mascot-viva {
+  display: block;
+  width: 96px;
 }
 /* Pista de que se puede tocar; desaparece al abrir. */
 .cc__hint {
@@ -183,8 +156,8 @@
   .cc__brief {
     max-width: 74vw;
   }
-  .cc .cc__mascot-img {
-    width: 56px;
+  .cc .cc__mascot-viva {
+    width: 68px;
   }
 }
 
@@ -198,14 +171,5 @@
   }
   .cc__brief {
     animation: none;
-  }
-  .cc .cc__mascot-img {
-    animation: none;
-    translate: none;
-  }
-  .cc__mascot-img,
-  .cc__mascot:hover .cc__mascot-img {
-    transition: none;
-    transform: none;
   }
 }
