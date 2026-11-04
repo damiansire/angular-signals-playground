@@ -40,9 +40,11 @@ them the rules. Each concept is a chapter of that trip:
 - **Screening room.** `/cine/6` plays a chapter's cinematic directly, and `/cine/6?cuadro=<beat>`
   freezes one frame, useful to review scenes.
 
-All motion is CSS (springs solved by hand and fed to `linear()`, View Transitions for the iris,
-lazy-loaded scenes): no perpetual `requestAnimationFrame`, no expensive filters on moving things,
-and everything freezes when the tab is hidden or honors `prefers-reduced-motion`.
+Scripted motion is CSS (springs solved by hand and fed to `linear()`, View Transitions for the iris,
+lazy-loaded scenes). What answers the pointer (the mascot you can grab and stretch, the signal graphs
+you can poke) runs on hand-rolled springs sharing one clock that sleeps when nothing moves: no
+perpetual `requestAnimationFrame`, no expensive filters on moving things, and everything freezes when
+the tab is hidden or honors `prefers-reduced-motion`.
 
 Built with **Angular 22** (standalone components, `OnPush` everywhere, signal-first
 APIs) and styled with **Tailwind CSS**.

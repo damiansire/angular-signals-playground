@@ -353,6 +353,46 @@ puede alcanzar" son dos cosas distintas y hay que chequear las dos.
       desvanecido (borde transparente) no cuenta como visible al medir, y su padding tampoco corre
       el contenido: `.profile-container` de 2/1 lo metía 20-40 px adentro.
 
+## Lo que se toca: resortes, circuito y golpes
+
+- [ ] Lo que responde al puntero son muelles de `libs/muelle.ts` en UN reloj compartido. Con todo
+      quieto, cero `requestAnimationFrame`: se cuenta en reposo y otra vez después de asentarse.
+- [ ] Un toque suma velocidad, no fija una pose: doce clics seguidos terminan en
+      `translate(0, 0) rotate(0) scale(1, 1)`, nada queda a medio camino.
+- [ ] Apretar y arrastrar estira y no selecciona texto (`user-select: none` y `getSelection()` vacío);
+      soltar no dispara el click del botón que se arrastró.
+- [ ] Todo golpe pasa por el evento `impacto-vivo`: el del fondo, el de un nodo y el aterrizaje de la
+      mascota sacuden lo mismo. La cámara del motor sigue siendo la única dueña del `transform` de la
+      escena: la sacudida es un grupo propio.
+- [ ] `app-circuito` cuenta la verdad del grafo: sus valores salen de signals reales del demo. Un pulso
+      viaja solo por un enlace vivo y el consumidor reacciona cuando llega; un enlace `vivo: false` se
+      ve suelto y no lleva nada. Escribir el mismo valor no manda pulso; leer tampoco.
+- [ ] Un nodo con `accion` es un `<button>` con nombre accesible, y anda con Enter. Sin `accion` no es
+      focusable.
+- [ ] Un nodo se mide con `offset*`, no con `getBoundingClientRect`: el warp del sub-nivel lo distorsiona.
+- [ ] Un computed de demo no se lee para mostrarlo si el sub-nivel enseña que es perezoso: la pantalla
+      toma la cuenta de corridas recién al leer.
+- [ ] La card de `.card` no scrollea a 860 px con el demo USADO, no solo al abrirlo: los historiales
+      tienen tope, y dos paneles van en un renglón.
+- [ ] Una regla de la armonización pesa más de lo que parece: las de `integrada-vista` llevan el
+      atributo de encapsulación en cada parte. Para ganarle se mira la lista real de reglas que
+      aplican, no se adivina.
+- [ ] El click en el fondo se prueba con input real y contando `impacto-vivo`. `closest()` sube hasta
+      la raíz: un `[tabindex]` en la lista de "lo interactivo" atrapaba a `#main-content`
+      (`tabindex="-1"`) y el fondo entero quedó muerto, sin que nada fallara.
+- [ ] Nada que el motor apague por `inert` puede vivir en un elemento que la intro o el prólogo también
+      liberan: esos destapan a todos los hermanos. Va un nivel adentro. Se comprueba con Tab a 375 px,
+      con el prólogo corriendo.
+- [ ] Un identificador en un nodo no se parte (`WritableSi|gnal`): la columna mide lo que mide su nodo.
+      Y el demo no baja de 19rem al lado del código: se barre de 640 a 1001 px, no solo en los extremos.
+- [ ] Un nodo que no es redondo no gira su órbita: como elipse rígida le pisa el texto y al vecino.
+- [ ] Un rebote no cambia ningún estado, así que su palabra es la información: tiene región viva para el
+      lector de pantalla y, con movimiento reducido, aparece sin moverse.
+- [ ] Lo vivo de una card pre-montada o apagada (`[inert]`) queda en pausa: órbitas y respiración de la
+      mascota no suman animaciones infinitas sobre lo que no se ve.
+- [ ] Agrandar la mascota del mapa corre el globo a la izquierda, contra el nombre de los átomos de
+      abajo. Se mide texto contra texto en las 12 paradas, a 1440×860 y 1280×720.
+
 ## Cierre del sub-nivel (el desafío manipulable, los 37)
 
 Los 37 sub-niveles terminan con el mismo gesto: un bloque de código con una
