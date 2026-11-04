@@ -16,7 +16,9 @@ try {
 }
 
 const fp = String(data?.tool_input?.file_path ?? "").replace(/\\/g, "/");
-const esVisual = /src\/app\/integrada-vista\//.test(fp) || /molecule-engine/.test(fp);
+// Un .spec.ts no cambia nada en pantalla: no justifica una pasada completa por el checklist.
+const esVisual =
+  (/src\/app\/integrada-vista\//.test(fp) || /molecule-engine/.test(fp)) && !/\.spec\.ts$/.test(fp);
 if (!esVisual) process.exit(0);
 
 // No repetir el recordatorio en cada edicion: 1 vez cada 10 toques por sesion.
