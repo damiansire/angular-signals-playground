@@ -11,16 +11,27 @@ todos lados, estilada con Tailwind. No es una librería ni un monorepo.
   de datos en `libs/`) se valida como **función pura sobre fixtures**, sin
   `TestBed` ni navegador. La pantalla se prueba aparte.
 - Si tocás lógica de dominio, dejá un test que la cubra.
-- Antes de dar por terminado un cambio de código, dejá el build/lint en verde:
-  `npm run build`, `npm run lint` y `npm test` sin errores ni warnings nuevos.
+- Antes de dar por terminado un cambio de código, corré lo mismo que CI, sin
+  errores ni warnings nuevos (`npm test` a secas queda esperando en modo watch):
+
+  ```bash
+  npm run lint && npm run format:check && npm run gate:prosa && npm run test:scripts && npm test -- --watch=false --browsers=ChromeHeadless && npm run build
+  ```
+
+  Si un paso falla en CI, el PR no mergea y el deploy a Pages tampoco ocurre:
+  `deploy.yml` escucha el resultado de CI, no el push.
+- **`gate:prosa` es un ratchet de palabras por pantalla:** explica la demo, no el
+  párrafo. Una pantalla puede quedar más corta, nunca más larga: si el gate falla
+  porque sumaste texto, recortá. `--update` solo baja la línea base, y
+  `--rebaseline` es únicamente para cuando cambia la definición de la métrica.
 - Usá siempre sintaxis Angular moderna: `inject()`, control flow (`@if`/`@for`),
   APIs de signals (`signal`/`computed`/`effect`/`input`/`output`/`model`),
   componentes standalone. Nada de `NgModule`.
 
 ## Verificación visual
 
-La vista integrada anima sin parar (rAF y SMIL), y eso cuelga a algunas
-herramientas de captura. Esto es lo que funciona:
+La vista integrada anima con rAF, y eso cuelga a algunas herramientas de captura.
+Esto es lo que funciona:
 
 - **Capturá con la pestaña visible.** Con la pestaña oculta el navegador pausa
   el rAF, y un screenshot que espera un cuadro nuevo se queda esperando.
@@ -62,16 +73,13 @@ herramientas de captura. Esto es lo que funciona:
 
 ## Antes de construir features visuales grandes
 
-- **Alcance completo primero:** si el pedido es "integrar/migrar X", inventariá
-  el universo real (p.ej. `app.routes.ts` para los sub-niveles) y confirmá el
-  alcance en una frase ANTES de programar el primer caso. Un ejemplo-muestra no
-  define el alcance.
-- **Referencia visual externa** (neal.fun, ncase.me, etc.): desambiguá elemento
-  por elemento qué se traslada, y confirmalo en el issue o el PR.
-- **"Que se sienta X" se traduce a lista escrita de anti-patrones** antes de
-  implementar (ver la sección de gramática de modal en `DESIGN-CHECKLIST.md`).
-- **Syncs bidireccionales** (URL↔estado, navegación↔UI): especificá y testeá
-  AMBAS direcciones antes de declarar cerrado; un test mínimo por dirección.
+- **Alcance primero:** ante "integrar/migrar X", inventariá el universo real
+  (p.ej. `app.routes.ts`) y confirmalo en una frase antes del primer caso.
+- **Referencia visual externa:** confirmá elemento por elemento qué se traslada.
+- **"Que se sienta X"** se traduce a una lista escrita de anti-patrones (ver la
+  gramática de modal en `DESIGN-CHECKLIST.md`).
+- **Syncs bidireccionales** (URL↔estado, navegación↔UI): al menos un test por
+  dirección.
 
 ## Mapa del repo → scope de commit
 
@@ -89,46 +97,32 @@ realmente tocás; no inventes scopes nuevos.
 | `src/app/layouts/`         | Layouts de página reutilizables                                                       | `layouts`    |
 | `src/app/libs/`            | Helpers agnósticos del framework (p.ej. parser de HTML)                               | `libs`       |
 | `src/app/interfaces/`      | Tipos TypeScript compartidos                                                          | `interfaces` |
-| `src/app/studio/`          | Estudio de cinemáticas: editor de autor del guion del prólogo (`/studio`, solo dev)   | `studio`     |
+| `src/app/studio/`          | Estudio: editor del guion del prólogo (`/studio`; enlace y sync a disco solo en dev)  | `studio`     |
 | Routing / arranque         | `app.routes.ts`, `app.config.ts`, navegación                                          | `routing`    |
 | Config / tooling           | tsconfig, eslint, angular.json, package.json, CI                                      | `config`     |
-| README / docs              | Documentación                                                                         | `docs`       |
+| README / docs              | Documentación                                                                         | sin scope    |
 
 ## Commits
 
 - **Conventional commits, en español.** Formato: `type(scope): resumen`.
 - Tipos válidos: `feat`, `fix`, `refactor`, `perf`, `test`, `docs`, `chore`.
 - `scope` debe ser uno de la columna **Scope** de la tabla de arriba (lista
-  cerrada). Si un cambio cruza varias áreas, partilo en commits atómicos.
+  cerrada); la documentación va sin scope (`docs: …`). Si un cambio cruza varias
+  áreas, partilo en commits atómicos.
+- No mezcles refactor y feature en el mismo commit.
 - El mensaje describe **solo el cambio**. Header ≤ 100 caracteres.
 - Sin atribución a herramientas ni `Co-Authored-By`.
 
 ## Contribuciones
 
-Repo educativo personal. Se aceptan PRs de: **bugfixes**, **nuevas lecciones o
-sub-niveles** de la API de signals, y **mejoras de documentación**. NO se aceptan
-reescrituras masivas ni cambios de stack (Angular signals-first es deliberado).
-Todo PR pasa el mismo gate que CI: lint + format:check + tests en verde.
-
-## Do NOT (anti-over-engineering)
-
-- No agregues abstracciones para operaciones de una sola vez.
-- No comentes ni anotes código que no tocaste en este cambio.
-- No agregues manejo de errores para escenarios imposibles.
-- No diseñes para requisitos hipotéticos: resolvé lo que hay.
-- No mezcles refactor + feature en el mismo commit.
+Qué PRs se aceptan y cuáles no está en [CONTRIBUTING.md](./CONTRIBUTING.md). En
+corto: nada de reescrituras masivas ni cambios de stack.
 
 ## Convenciones de código
 
-- **Change detection:** todos los componentes usan
-  `ChangeDetectionStrategy.OnPush`. El estado que alimenta la vista vive en
-  **signals**; los pocos casos que no (p.ej. estado del menú dirigido por eventos
-  del router) llaman `markForCheck()` explícitamente.
-- **Standalone components** con `imports` explícito.
-- Preferí parsing AST/estructurado sobre regex para manipulación compleja de
-  archivos o código.
-- Antes de implementar algo, buscá un ejemplo equivalente ya presente en el
-  codebase y seguí su estilo.
+- **Change detection:** `OnPush` en todos los componentes (lo exige ESLint). El
+  estado de la vista vive en **signals**; los pocos casos que no (p.ej. el menú
+  dirigido por eventos del router) llaman `markForCheck()`.
 - **Nombres por dominio, no por mecanismo:** un componente o un signal se
   nombra por lo que significa en el playground (`signalLevel`, `benchFrame`),
   no por su tipo interno.
@@ -140,19 +134,3 @@ Todo PR pasa el mismo gate que CI: lint + format:check + tests en verde.
   suelto).
 - `public/preview.jpeg` es la captura real que abre el README y también la
   `og:image`: si cambia la vista integrada, hay que regenerarla.
-
-## Scripts
-
-| Script                 | Para qué                                           |
-| ---------------------- | -------------------------------------------------- |
-| `npm start`            | Dev server con HMR en `http://localhost:4200`      |
-| `npm run build`        | Build de producción a `dist/angular-examples`      |
-| `npm run watch`        | Rebuild en cada cambio (configuración development) |
-| `npm test`             | Tests unitarios (Karma + Jasmine)                  |
-| `npm run lint`         | Lint con ESLint + `angular-eslint`                 |
-| `npm run gate:prosa`   | Presupuesto de prosa por pantalla (ratchet)        |
-| `npm run test:scripts` | Tests de los scripts de gate (`node --test`)       |
-
-En CI corren `lint`, `format:check`, `test:scripts`, `gate:prosa`, `test` y el
-build de producción. Si uno falla, el PR no mergea y el deploy a Pages tampoco
-ocurre: `deploy.yml` escucha el resultado de CI, no el push.
