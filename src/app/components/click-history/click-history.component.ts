@@ -1,4 +1,4 @@
-import { Component, input, ChangeDetectionStrategy } from '@angular/core';
+import { Component, computed, input, ChangeDetectionStrategy } from '@angular/core';
 import { ClickInButton } from '../component.interface';
 
 import { EventComponent } from '../event/event.component';
@@ -12,4 +12,6 @@ import { EventComponent } from '../event/event.component';
 })
 export class ClickHistoryComponent {
   readonly clickHistory = input<ClickInButton[]>([]);
+  /** Una copia: `reverse()` da vuelta el array en el lugar, y ese array es del padre. */
+  protected readonly recientes = computed(() => [...this.clickHistory()].reverse());
 }

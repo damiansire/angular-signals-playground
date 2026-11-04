@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, input, ChangeDetectionStrategy } from '@angular/core';
+import { Component, computed, input, ChangeDetectionStrategy } from '@angular/core';
 import { ClickInButton } from '../component.interface';
 
 @Component({
@@ -12,4 +12,6 @@ import { ClickInButton } from '../component.interface';
 export class ComputedTrackerComponent {
   readonly title = input('Calculated Signals');
   readonly computedTracker = input<ClickInButton[]>([]);
+  /** Una copia: `reverse()` da vuelta el array en el lugar, y ese array es del padre. */
+  protected readonly recientes = computed(() => [...this.computedTracker()].reverse());
 }

@@ -8,7 +8,7 @@
     <div class="box-container">
       <!-- Un computed perezoso no corrió todavía, y eso es EL punto del sub-nivel: el panel vacío
            tiene que decir que no corrió, no parecer que se rompió. -->
-      @for (element of computedTracker().reverse(); track element) {
+      @for (element of recientes(); track element) {
         <div class="box">
           <div class="date-box">{{ element.date | date: 'HH:mm:ss' }}</div>
           <div class="data-box">
