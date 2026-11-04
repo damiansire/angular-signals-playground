@@ -1,26 +1,16 @@
 import { Routes } from '@angular/router';
 import { RouteItem } from './interfaces/route-item.interface';
-import { WritableSignalsComponent } from './signals/level-1-interaction-with-signals/sub-levels/1-writable-signals/writable-signals.component';
-import { UpdateSignalComponent } from './signals/level-1-interaction-with-signals/sub-levels/2-update-signal/update-signal.component';
-import { ComputedSignalDynamicDependenciesComponent } from './signals/level-2-computed-signals/sub-levels/2-computed-signal-dynamic-dependencies/computed-signal-dynamic-dependencies.component';
-import { ComputedSignalsLazilyEvaluatedMemoizedComponent } from './signals/level-2-computed-signals/sub-levels/3-computed-signals-lazily-evaluated-memoized/computed-signals-lazily-evaluated-memoized.component';
-import { ComputedSignalsComponent } from './signals/level-2-computed-signals/sub-levels/1-computed-signals/computed-signals.component';
 import { EffectComponent } from './signals/level-3-effect/sub-levels/1-effect/effect.component';
 import { DestroyEffectComponent } from './signals/level-3-effect/sub-levels/2-interval-when-is-destroy/destroy-effect.component';
 import { EffectDestroyComponent } from './signals/level-3-effect/sub-levels/5-effect-destroy/effect-destroy.component';
 import { ReferenceEqualityComponent } from './signals/level-4-signal-equality-functions/sub-levels/1-reference-equality/reference-equality.component';
 import { CustomEqualComponent } from './signals/level-4-signal-equality-functions/sub-levels/2-custom-equal/custom-equal.component';
-import { WhatIsSignalsComponent } from './signals/level-1-interaction-with-signals/sub-levels/what-is-signals/what-is-signals.component';
-import { CreateNewSignalsComponent } from './signals/level-1-interaction-with-signals/sub-levels/create-new-signals/create-new-signals.component';
-import { TypesOfSignalsComponent } from './signals/level-1-interaction-with-signals/sub-levels/types-of-signals/types-of-signals.component';
-import { ReadOnlySignalsComponent } from './signals/level-1-interaction-with-signals/sub-levels/read-only-signals/read-only-signals.component';
 import { HtmlToTreeComponent } from './signals/level-0-introduction/sub-levels/html-to-tree/html-to-tree.component';
 import { OldChangeDetectionComponent } from './signals/level-0-introduction/sub-levels/old-change-detection/old-change-detection.component';
 import { SignalsChangeDetectionComponent } from './signals/level-0-introduction/sub-levels/signals-change-detection/signals-change-detection.component';
 import { ManualSyncPainComponent } from './signals/level-0-introduction/sub-levels/manual-sync-pain/manual-sync-pain.component';
 import { DomToPixelComponent } from './signals/level-0-introduction/sub-levels/dom-to-pixel/dom-to-pixel.component';
 import { DomIsAliveComponent } from './signals/level-0-introduction/sub-levels/dom-is-alive/dom-is-alive.component';
-import { VariablesComponent } from './signals/level-1-interaction-with-signals/sub-levels/variables/variables.component';
 import { BasicLinkedSignalComponent } from './signals/level-5-linked-signal/sub-levels/1-basic-linked-signal/basic-linked-signal.component';
 import { LinkedSignalWithSourceComponent } from './signals/level-5-linked-signal/sub-levels/2-linked-signal-with-source/linked-signal-with-source.component';
 import { ResourceBasicComponent } from './signals/level-6-resource/sub-levels/1-resource-basic/resource-basic.component';
@@ -60,35 +50,94 @@ export const signalsRoutesTree: RouteItem[] = [
       },
     ],
   },
+  // Capítulos 1 y 2 diferidos: el circuito que comparten solo lo paga quien llega a verlos.
   {
     path: '1',
     subLevels: [
-      { path: '1', title: 'Variables (repaso pre-signals)', component: VariablesComponent },
-      { path: '2', title: 'Qué es un signal', component: WhatIsSignalsComponent },
-      { path: '3', title: 'Tipos de signal', component: TypesOfSignalsComponent },
-      { path: '4', title: 'Leer un signal: el getter ()', component: CreateNewSignalsComponent },
-      { path: '5', title: 'Writable Signal', component: WritableSignalsComponent },
-      { path: '6', title: 'Update Signal', component: UpdateSignalComponent },
+      {
+        path: '1',
+        title: 'Variables (repaso pre-signals)',
+        loadComponent: () =>
+          import('./signals/level-1-interaction-with-signals/sub-levels/variables/variables.component').then(
+            (m) => ({ component: m.VariablesComponent }),
+          ),
+      },
+      {
+        path: '2',
+        title: 'Qué es un signal',
+        loadComponent: () =>
+          import('./signals/level-1-interaction-with-signals/sub-levels/what-is-signals/what-is-signals.component').then(
+            (m) => ({ component: m.WhatIsSignalsComponent }),
+          ),
+      },
+      {
+        path: '3',
+        title: 'Tipos de signal',
+        loadComponent: () =>
+          import('./signals/level-1-interaction-with-signals/sub-levels/types-of-signals/types-of-signals.component').then(
+            (m) => ({ component: m.TypesOfSignalsComponent }),
+          ),
+      },
+      {
+        path: '4',
+        title: 'Leer un signal: el getter ()',
+        loadComponent: () =>
+          import('./signals/level-1-interaction-with-signals/sub-levels/create-new-signals/create-new-signals.component').then(
+            (m) => ({ component: m.CreateNewSignalsComponent }),
+          ),
+      },
+      {
+        path: '5',
+        title: 'Writable Signal',
+        loadComponent: () =>
+          import('./signals/level-1-interaction-with-signals/sub-levels/1-writable-signals/writable-signals.component').then(
+            (m) => ({ component: m.WritableSignalsComponent }),
+          ),
+      },
+      {
+        path: '6',
+        title: 'Update Signal',
+        loadComponent: () =>
+          import('./signals/level-1-interaction-with-signals/sub-levels/2-update-signal/update-signal.component').then(
+            (m) => ({ component: m.UpdateSignalComponent }),
+          ),
+      },
       {
         path: '7',
         title: 'Read-only signals: asReadonly()',
-        component: ReadOnlySignalsComponent,
+        loadComponent: () =>
+          import('./signals/level-1-interaction-with-signals/sub-levels/read-only-signals/read-only-signals.component').then(
+            (m) => ({ component: m.ReadOnlySignalsComponent }),
+          ),
       },
     ],
   },
   {
     path: '2',
     subLevels: [
-      { path: '1', title: 'Computed signals', component: ComputedSignalsComponent },
+      {
+        path: '1',
+        title: 'Computed signals',
+        loadComponent: () =>
+          import('./signals/level-2-computed-signals/sub-levels/1-computed-signals/computed-signals.component').then(
+            (m) => ({ component: m.ComputedSignalsComponent }),
+          ),
+      },
       {
         path: '2',
         title: 'Dependencias dinámicas',
-        component: ComputedSignalDynamicDependenciesComponent,
+        loadComponent: () =>
+          import('./signals/level-2-computed-signals/sub-levels/2-computed-signal-dynamic-dependencies/computed-signal-dynamic-dependencies.component').then(
+            (m) => ({ component: m.ComputedSignalDynamicDependenciesComponent }),
+          ),
       },
       {
         path: '3',
         title: 'Perezoso y memoizado',
-        component: ComputedSignalsLazilyEvaluatedMemoizedComponent,
+        loadComponent: () =>
+          import('./signals/level-2-computed-signals/sub-levels/3-computed-signals-lazily-evaluated-memoized/computed-signals-lazily-evaluated-memoized.component').then(
+            (m) => ({ component: m.ComputedSignalsLazilyEvaluatedMemoizedComponent }),
+          ),
       },
     ],
   },
