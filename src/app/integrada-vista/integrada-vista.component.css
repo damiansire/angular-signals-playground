@@ -83,27 +83,25 @@
   flex-direction: row-reverse;
   align-items: flex-end;
   gap: clamp(6px, 1vw, 12px);
-  max-width: min(48%, 470px);
+  max-width: min(60%, 520px);
   opacity: 0;
+  /* La caja del conjunto no se come clicks: solo la mascota responde al toque. */
   pointer-events: none;
   transition: opacity 0.3s;
 }
-.rec-guide__mascot {
+.rec-guide__toque {
   flex: none;
-  width: clamp(58px, 8vw, 104px);
-  height: auto;
-  filter: drop-shadow(0 8px 16px rgba(60, 40, 20, 0.22));
-  /* respiro idle: un compañero vivo, no una estampa congelada (usa `translate`, no `transform`) */
-  animation: rec-guide-breathe 3.6s ease-in-out infinite;
+  display: block;
+  width: clamp(84px, 7.3vw, 110px);
+  padding: 0;
+  border: 0;
+  background: none;
+  pointer-events: auto;
+  border-radius: 24px;
 }
-@keyframes rec-guide-breathe {
-  0%,
-  100% {
-    translate: 0 0;
-  }
-  50% {
-    translate: 0 -3px;
-  }
+.rec-guide__toque:focus-visible {
+  outline: 2px solid var(--focus-ink);
+  outline-offset: 4px;
 }
 .rec-guide__bubble {
   position: relative;
@@ -137,8 +135,8 @@
   .rec-guide {
     max-width: 76%;
   }
-  .rec-guide__mascot {
-    width: clamp(44px, 13vw, 62px);
+  .rec-guide__toque {
+    width: clamp(64px, 19vw, 92px);
   }
   .rec-guide__bubble {
     font-size: 0.78rem;
@@ -217,6 +215,10 @@
    sólido se veía a través de las cajas vacías (el "Todavía no corrió nada" de 3/3): pasa a
    fantasma. Mientras buceás sigue entero, y la card sigue parada sobre el átomo (anillos y halo
    respiran igual). */
+.nucleus {
+  transform-box: fill-box;
+  transform-origin: center;
+}
 .vecinos-fuera .atom.current .nucleus {
   opacity: 0.3;
 }
@@ -293,6 +295,13 @@
 }
 .atom.current .asub {
   opacity: 0.9;
+}
+/* La entrada se ve con mucho zoom en una pantalla ancha: con el cuerpo de móvil, el aviso le gritaba
+   al nombre del átomo. */
+@media (min-width: 900px) {
+  .asub {
+    font-size: 6.4px;
+  }
 }
 #atoms.diving .asub,
 .atom.dived-dissolve .asub {
@@ -1378,7 +1387,6 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .rec-guide__mascot,
   .bond.on,
   .atom.current .halo,
   .atom.dived-dissolve .halo,

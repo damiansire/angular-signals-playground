@@ -14,9 +14,14 @@ import {
   isDevMode,
   computed,
   signal,
+  viewChild,
 } from '@angular/core';
 import { Location } from '@angular/common';
 import { RouterLink } from '@angular/router';
+
+import { MascotaVivaComponent } from '../components-draw/mascota-viva/mascota-viva.component';
+import { sinMovimiento } from '../libs/muelle';
+import { initMundoQueResponde } from './mundo-que-responde';
 
 import { signalsRoutesTree } from '../app.routes';
 import { type RouteItem, type SubNivelDiferido } from '../interfaces/route-item.interface';
@@ -67,7 +72,7 @@ const ESPERA_FINAL_MS = 1600;
  */
 @Component({
   selector: 'app-integrada-vista',
-  imports: [RouterLink, CinematicaComponent, BitacoraComponent],
+  imports: [RouterLink, CinematicaComponent, BitacoraComponent, MascotaVivaComponent],
   templateUrl: './integrada-vista.component.html',
   styleUrls: [
     './integrada-vista.component.css',
@@ -86,6 +91,7 @@ export class IntegradaVistaComponent {
   private readonly appRef = inject(ApplicationRef);
   private readonly location = inject(Location);
   private readonly errorHandler = inject(ErrorHandler);
+  private readonly guia = viewChild(MascotaVivaComponent);
 
   /** Componentes reales de cada sub-nivel, por concepto (del árbol de conceptos). Un sub-nivel
    *  siempre trae componente; el tipo admite `undefined` porque `RouteItem.component` es opcional
@@ -188,6 +194,7 @@ export class IntegradaVistaComponent {
       },
     );
     this.destroyRef.onDestroy(dispose);
+    this.destroyRef.onDestroy(initMundoQueResponde(this.host));
 
     // Landing "par de Tusi" (canvas + audio + overlay Dark/Light). El motor ya fadea el `.intro`.
     //
@@ -233,9 +240,34 @@ export class IntegradaVistaComponent {
    */
   private readonly onWhere = (conceptIdx: number, subIdx: number): void => {
     this.location.replaceState('/', buildWhereQuery(conceptIdx, subIdx));
+    // Llegar a otro átomo es lo único que cambia lo que dice el globo: la mascota lo anuncia.
+    if (subIdx === -1 && conceptIdx >= 0 && conceptIdx !== this.donde.concepto) {
+      this.guia()?.saltar(0.8);
+      this.sacudirGlobo();
+    }
     this.donde = { concepto: conceptIdx, sub: subIdx };
     this.programarCinematica(conceptIdx, subIdx);
   };
+
+  /** Teclado o lector de pantalla: el puntero ya lo resuelve la mascota con su física. */
+  protected alTocarGuia(e: MouseEvent): void {
+    if (e.detail === 0) this.guia()?.saludar();
+    this.sacudirGlobo();
+  }
+
+  /** El globo es de quien habla: si la mascota salta o la tocan, él también se entera. */
+  protected sacudirGlobo(): void {
+    if (sinMovimiento()) return;
+    this.host.querySelector('.rec-guide__bubble')?.animate(
+      [
+        { transform: 'scale(.86) rotate(-1.5deg)', transformOrigin: '100% 80%' },
+        { transform: 'scale(1.05) rotate(.8deg)', transformOrigin: '100% 80%', offset: 0.45 },
+        { transform: 'scale(.99) rotate(-.3deg)', transformOrigin: '100% 80%', offset: 0.75 },
+        { transform: 'scale(1) rotate(0)', transformOrigin: '100% 80%' },
+      ],
+      { duration: 380, easing: 'ease-out' },
+    );
+  }
 
   /**
    * La cinemática de un capítulo se juega la primera vez que el jugador se detiene en su parada de

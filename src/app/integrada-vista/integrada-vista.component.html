@@ -26,10 +26,14 @@
           </filter>
         </defs>
         <g id="stars"></g>
-        <g id="scene">
-          <g id="bonds"></g>
-          <g id="atoms"></g>
-          <g id="ripples"></g>
+        <!-- El motor escribe la cámara en #scene; la sacudida de un golpe va en su propio grupo para
+             que los dos no se pisen. -->
+        <g id="sacudida">
+          <g id="scene">
+            <g id="bonds"></g>
+            <g id="atoms"></g>
+            <g id="ripples"></g>
+          </g>
         </g>
       </svg>
       <div class="content" id="content"></div>
@@ -79,17 +83,20 @@
 
       <!-- La mascota-guía acompaña la vista mapa del recorrido: el motor le pone el tip del concepto
            actual (campo `tip` en RAW de molecule-engine) y su opacidad (se apaga al bucear y mientras
-           el intro está visible). Va abajo-derecha porque el riel ocupa la izquierda. Decorativa
-           (aria-hidden): el nombre del concepto ya vive en el topbar y en la espina vertical. -->
-      <div class="rec-guide" aria-hidden="true">
-        <img
-          class="rec-guide__mascot"
-          src="angular-mascot-idea.svg"
-          alt=""
-          width="240"
-          height="300"
-        />
-        <p class="rec-guide__bubble"></p>
+           el intro está visible). Va abajo-derecha porque el riel ocupa la izquierda. El globo es
+           decorativo (el nombre del concepto ya vive en el topbar y en la espina vertical); la mascota
+           responde al toque, así que es un botón de verdad y también se la puede saludar con teclado. -->
+      <div class="rec-guide">
+        <button
+          class="rec-guide__toque"
+          type="button"
+          inert
+          aria-label="Saludar a la mascota"
+          (click)="alTocarGuia($event)"
+        >
+          <app-mascota-viva class="rec-guide__mascot" (aterrizo)="sacudirGlobo()" />
+        </button>
+        <p class="rec-guide__bubble" aria-hidden="true"></p>
       </div>
 
       <!-- Landing "par de Tusi": se construye sola por choques (ver intro-tusi.ts). El motor fadea el

@@ -243,6 +243,9 @@ const PANEL_SHIFT = 128;
 const ORX = 34;
 const ORY = 11;
 const NUC = 13;
+/** La entrada es la misma molécula del logo de la portada: núcleo ámbar, electrones de los tres roles. */
+const NUCLEO_ENTRADA = '#eb9b3c';
+const ELECTRONES_ENTRADA = ['#d9503f', '#3fae8f', '#eb9b3c'];
 /**
  * Parada de encuadre del átomo dentro del tramo de un concepto (`off[c] + PARADA_ATOMO`): ahí la cámara
  * ya encuadró el átomo y empieza el buceo, que dura hasta `PARADA_ATOMO + 0.7`. La usan el snap, la
@@ -282,6 +285,12 @@ export const WIDE_ZOOM_FLOOR = 0.6;
 export function wideZoom(outerRadius: number): number {
   return Math.max(WIDE_ZOOM_FLOOR, Math.min(1.5, 310 / (outerRadius + 62)));
 }
+
+/**
+ * La entrada no tiene otros átomos que encuadrar: con el zoom de la espiral quedaba un átomo chico en
+ * medio del vacío. Acá es lo único que hay en pantalla, así que manda.
+ */
+const ZOOM_ENTRADA = 1.85;
 
 /** Posición del átomo `i`. El concepto 0 vive en el centro; el resto sale por la espiral. */
 export function conceptPos(i: number): { x: number; y: number } {
@@ -647,7 +656,8 @@ export function initMolecule(
       backG.appendChild(backOg);
       const frontOg = el('g', { transform: `rotate(${tilt})` });
       frontOg.appendChild(el('path', { class: 'ring', d: arc(1), stroke: accent }));
-      const e = el('circle', { class: 'electron', r: 4, fill: accent, style: 'color:' + accent });
+      const tono = i === 0 ? ELECTRONES_ENTRADA[o % ELECTRONES_ENTRADA.length] : accent;
+      const e = el('circle', { class: 'electron', r: 4, fill: tono, style: 'color:' + tono });
       e.appendChild(
         el('animateMotion', {
           dur: dur + 's',
@@ -668,12 +678,12 @@ export function initMolecule(
         cx: 0,
         cy: 0,
         r: NUC,
-        fill: accent,
+        fill: i === 0 ? NUCLEO_ENTRADA : accent,
         // Los conceptos "derived" (dotted) se dibujan más livianos a propósito, pero a 0.4 el núcleo
         // teal casi desaparecía sobre el fondo claro (flower invisible). 0.62 los hace presentes sin
         // perder que lean más tenues que los sólidos (0.95).
         'fill-opacity': cc.dotted ? 0.62 : 0.95,
-        style: 'color:' + accent,
+        style: 'color:' + (i === 0 ? NUCLEO_ENTRADA : accent),
       }),
     );
     orb.appendChild(frontG);
@@ -684,7 +694,8 @@ export function initMolecule(
     const nm = el('text', {
       class: 'aname',
       x: (i === 0 ? 0 : (ddx / ddl) * (NUC + 32)).toFixed(0),
-      y: (i === 0 ? NUC + 44 : (ddy / ddl) * (NUC + 32) + 5).toFixed(0),
+      // En la entrada va debajo del anillo: con el átomo grande, pisarlo se nota.
+      y: (i === 0 ? NUC + 58 : (ddy / ddl) * (NUC + 32) + 5).toFixed(0),
     });
     nm.textContent = cc.name;
     g.appendChild(nm);
@@ -692,7 +703,7 @@ export function initMolecule(
     // nombre (cuántos capítulos + cue de scroll) para llenarlo e invitar a bucear, SIN sacar el
     // átomo ni el nombre. Solo lo muestra el átomo actual (la entrada); se apaga al bucear.
     if (i === 0) {
-      const sub = el('text', { class: 'asub', x: '0', y: (NUC + 66).toFixed(0) });
+      const sub = el('text', { class: 'asub', x: '0', y: (NUC + 74).toFixed(0) });
       sub.textContent = `${cc.subN} capítulos · scrolleá para bucear ↓`;
       g.appendChild(sub);
     }
@@ -1175,6 +1186,7 @@ export function initMolecule(
   const railHeadEl = q<HTMLElement>('.rail-head');
   const recGuideEl = q<HTMLElement>('.rec-guide');
   const recGuideBubbleEl = q<HTMLElement>('.rec-guide__bubble');
+  const recGuideToqueEl = q<HTMLElement>('.rec-guide__toque');
   const railCountEl = q<HTMLElement>('#railCount');
   const tbQEl = q<HTMLElement>('#tbQ');
   const railSegEl = q<HTMLElement>('#railSeg');
@@ -1261,7 +1273,7 @@ export function initMolecule(
     // Cámara: nace → wide → bucea al átomo; en la zona de sub-niveles (w>=2) se queda adentro.
     // La matemática vive en `cameraAt` (pura, testeada); acá solo se aplica al DOM.
     const { K, fx, fy, diveDepth } = cameraAt(w, c === 0, {
-      W: wideK(c),
+      W: c === 0 ? Math.max(wideK(0), ZOOM_ENTRADA) : wideK(c),
       cen: frameCenter(c),
       target: C[c],
       parent,
@@ -1349,9 +1361,12 @@ export function initMolecule(
       if (recGuideBubbleEl && recGuideBubbleEl.textContent !== C[c].tip) {
         recGuideBubbleEl.textContent = C[c].tip;
       }
-      recGuideEl.style.opacity = (s < INTRO_HASTA ? 0 : Math.max(0, 1 - diveDepth / 0.5)).toFixed(
-        2,
-      );
+      const opacidadGuia = s < INTRO_HASTA ? 0 : Math.max(0, 1 - diveDepth / 0.5);
+      recGuideEl.style.opacity = opacidadGuia.toFixed(2);
+      // Se puede tocar, así que apagada no puede quedar en el tab-order ni recibir clicks. Va sobre el
+      // botón y no sobre la guía, cuyo `inert` lo manejan la intro y el prólogo: al destaparla le
+      // sacaban el nuestro, y a 375 quedaba un botón invisible en el orden de Tab.
+      if (recGuideToqueEl) recGuideToqueEl.inert = opacidadGuia < 0.05;
     }
 
     const dc = C[c];
