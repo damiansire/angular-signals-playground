@@ -1,0 +1,112 @@
+:host {
+  position: relative;
+  display: block;
+  width: 100%;
+  aspect-ratio: 1;
+  /* Sin esto, apretar y arrastrar selecciona texto de la página y se siente como un agarre roto. */
+  user-select: none;
+  -webkit-user-select: none;
+  line-height: 0;
+}
+
+.mv {
+  display: block;
+  width: 100%;
+  height: 100%;
+  /* Estirada se sale de su caja a propósito. */
+  overflow: visible;
+  cursor: grab;
+  /* El dedo puede agarrarla; el gesto no puede volverse scroll a mitad de camino. */
+  touch-action: none;
+}
+:host(.mv--agarrada) .mv {
+  cursor: grabbing;
+}
+
+.mv__sombra {
+  fill: rgba(60, 22, 50, 0.22);
+}
+
+/* Vida: respirar y parpadear son CSS y no timers ni rAF. Así el motor de resortes se duerme en
+   reposo y la pausa de la vida de fondo los alcanza como a cualquier otro loop. */
+.mv__respira {
+  transform-box: view-box;
+  transform-origin: 560px 920px;
+  animation: mv-respira 3.4s ease-in-out infinite;
+}
+@keyframes mv-respira {
+  0%,
+  100% {
+    transform: scale(1, 1);
+  }
+  50% {
+    transform: scale(0.985, 1.022);
+  }
+}
+
+.mv__parpado {
+  transform-box: fill-box;
+  transform-origin: center;
+  /* Duración larga y dos cierres seguidos cerca del final: un parpadeo a intervalo fijo parece un
+     reloj, no un bicho. */
+  animation: mv-parpadea 6.7s linear infinite;
+}
+@keyframes mv-parpadea {
+  0%,
+  41%,
+  43.4%,
+  88%,
+  90%,
+  92.2%,
+  94%,
+  100% {
+    transform: scaleY(1);
+  }
+  42.2%,
+  91%,
+  93% {
+    transform: scaleY(0.08);
+  }
+}
+
+.mv__rayos {
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+  animation: mv-rayos 2.2s ease-in-out infinite;
+}
+@keyframes mv-rayos {
+  0%,
+  100% {
+    opacity: 0.55;
+    transform: scale(0.92);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.08);
+  }
+}
+
+.mv__espirales {
+  display: none;
+}
+:host(.mv--mareada) .mv__espirales {
+  display: block;
+}
+:host(.mv--mareada) .mv__parpado {
+  display: none;
+}
+
+/* Una mascota de una card pre-montada o apagada no gasta en lo que nadie ve. */
+:host-context([inert]) .mv__respira,
+:host-context([inert]) .mv__parpado,
+:host-context([inert]) .mv__rayos {
+  animation-play-state: paused;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mv__respira,
+  .mv__parpado,
+  .mv__rayos {
+    animation: none;
+  }
+}
