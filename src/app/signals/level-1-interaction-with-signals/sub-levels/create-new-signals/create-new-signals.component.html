@@ -3,14 +3,25 @@
   observe="El paréntesis no es opcional: count es la función-getter, count() es el valor."
 />
 
-<app-title title="Leer un signal: el getter ()"></app-title>
-<div class="flex justify-around mt-5">
-  <section>
-    <app-code [lines]="htmlLines()" />
-  </section>
-  <section>
-    <app-code [lines]="lines()" />
-  </section>
+<div class="lab">
+  <app-title title="Leer un signal: el getter ()"></app-title>
+  <div class="lab__fila">
+    <div class="lab__demo">
+      <app-circuito #circuito [nodos]="nodos()" [enlaces]="enlaces" />
+      <div class="lab__acciones">
+        <button type="button" (click)="leerSinLlamar()"><code>count</code></button>
+        <button type="button" (click)="leer()"><code>count()</code></button>
+        <button type="button" (click)="sumar()"><code>count.update()</code></button>
+      </div>
+      <div role="status">
+        <code class="lab__lectura">{{ lectura().expresion }} → {{ lectura().resultado }}</code>
+      </div>
+    </div>
+    <div class="lab__codigos">
+      <app-code [lines]="htmlLines()" />
+      <app-code [lines]="lines()" />
+    </div>
+  </div>
 </div>
 
 <app-manipulable-system [system]="closingSystem" />

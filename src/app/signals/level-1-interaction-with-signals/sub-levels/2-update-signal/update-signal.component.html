@@ -5,9 +5,18 @@
   action="Tocá Incrementar varias veces."
   observe="Cada click deriva del valor previo (value => value + 1)."
 >
-  <div class="counter-container">
-    <div class="counter-display">Valor: {{ count() }}</div>
-    <button class="counter-button" (click)="update()">Incrementar</button>
+  <div class="lab lab__demo">
+    <app-circuito [nodos]="nodos()" [enlaces]="enlaces" />
+    <div class="lab__acciones">
+      <button type="button" (click)="update()">Incrementar</button>
+      <span class="lab__lectura">Valor: {{ count() }}</span>
+    </div>
+    <!-- La cadena es la lección: cada eslabón salió del anterior. -->
+    <div class="lab__chips" aria-hidden="true">
+      @for (valor of cadena(); track valor) {
+        <code class="lab__dato">{{ valor - 1 }} → {{ valor }}</code>
+      }
+    </div>
   </div>
 </app-column-and-code-layout>
 

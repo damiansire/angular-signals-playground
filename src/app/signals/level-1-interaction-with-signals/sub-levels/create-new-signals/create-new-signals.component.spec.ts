@@ -22,6 +22,14 @@ describe('CreateNewSignalsComponent', () => {
     expect(component).toBeTruthy();
   });
 
+  it('sin paréntesis lee la función; con paréntesis, el valor', () => {
+    component.leerSinLlamar();
+    expect(component.lectura()).toEqual({ expresion: 'count', resultado: 'function' });
+    component.sumar();
+    component.leer();
+    expect(component.lectura()).toEqual({ expresion: 'count()', resultado: '1' });
+  });
+
   it('muestra el titulo sobre leer un signal', () => {
     const title = fixture.nativeElement.querySelector('app-title h1') as HTMLElement;
     // Sin "!" pegado: el título ya cierra con paréntesis (ver TitleComponent.displayTitle).

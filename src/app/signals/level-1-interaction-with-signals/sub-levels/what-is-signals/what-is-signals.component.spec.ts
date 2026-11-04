@@ -18,6 +18,9 @@ describe('WhatIsSignalsComponent', () => {
     fixture.detectChanges();
   });
 
+  const nodo = (id: string) =>
+    fixture.nativeElement.querySelector(`[data-nodo="${id}"]`) as HTMLElement;
+
   it('should create', () => {
     expect(component).toBeTruthy();
   });
@@ -29,41 +32,49 @@ describe('WhatIsSignalsComponent', () => {
   });
 
   it('convertToContainer marca el tipo como contenedor e incrementa clickCount', () => {
-    expect(component.clickCount).toBe(0);
+    expect(component.clickCount()).toBe(0);
     component.convertToContainer({ name: 'Number', value: '' });
 
-    const numberType = component.dataTypes.find((t) => t.text === 'Number')!;
+    const numberType = component.dataTypes().find((t) => t.text === 'Number')!;
     expect(numberType.isContainer).toBeTrue();
-    expect(component.clickCount).toBe(1);
+    expect(component.clickCount()).toBe(1);
   });
 
   it('convertToContainer ignora un tipo inexistente', () => {
     component.convertToContainer({ name: 'NoExiste', value: '' });
-    expect(component.clickCount).toBe(0);
+    expect(component.clickCount()).toBe(0);
   });
 
-  it('al clickear una cajita se la convierte en app-container-variable-box-draw', () => {
-    expect(fixture.nativeElement.querySelectorAll('app-container-variable-box-draw').length).toBe(
-      0,
-    );
+  it('al clickear una cajita se la convierte en un signal enchufado al consumidor', () => {
+    expect(fixture.nativeElement.querySelectorAll('.ci__nodo--fuente').length).toBe(0);
+    expect(component.enlaces().filter((e) => e.vivo).length).toBe(0);
 
-    const firstBox = fixture.nativeElement.querySelector(
-      'app-variable-box-draw [role="button"]',
-    ) as HTMLElement;
-    firstBox.click();
+    nodo('Number').click();
     fixture.detectChanges();
 
-    const containers = fixture.nativeElement.querySelectorAll('app-container-variable-box-draw');
-    expect(containers.length).toBe(1);
+    expect(fixture.nativeElement.querySelectorAll('.ci__nodo--fuente').length).toBe(1);
+    expect(component.enlaces().filter((e) => e.vivo)).toEqual([
+      { de: 'Number', a: 'pantalla', vivo: true },
+    ]);
+  });
+
+  it('solo le llega al consumidor lo que está envuelto, y sin envolver el clic no le avisa', () => {
+    const consumidor = () => component.nodos().find((n) => n.id === 'pantalla')?.valor;
+    const antes = consumidor();
+
+    nodo('Number').click();
+    fixture.detectChanges();
+    expect(consumidor()).toBe(antes);
+
+    nodo('Number').click();
+    fixture.detectChanges();
+    expect(consumidor()).toBe('6');
   });
 
   it('no muestra el bloque de código del wrapper hasta el primer click', () => {
     expect(fixture.nativeElement.querySelector('app-code')).toBeNull();
 
-    const firstBox = fixture.nativeElement.querySelector(
-      'app-variable-box-draw [role="button"]',
-    ) as HTMLElement;
-    firstBox.click();
+    nodo('Number').click();
     fixture.detectChanges();
 
     expect(fixture.nativeElement.querySelector('app-code')).toBeTruthy();

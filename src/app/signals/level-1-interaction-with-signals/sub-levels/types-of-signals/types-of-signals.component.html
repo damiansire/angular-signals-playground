@@ -5,51 +5,39 @@
   action="Tocá cada tipo para ver cómo se crea."
   observe="Solo el WritableSignal se puede escribir; los otros dos son de solo lectura."
 >
-  <section class="w-80 p-5 rounded-lg shadow-md bg-white">
-    <div class="flex flex-col gap-2 mb-5">
-      @for (kind of kinds; track kind.id) {
-        <button
-          type="button"
-          [attr.aria-pressed]="kind.id === selectedId()"
-          class="px-4 py-2 rounded-lg border text-left text-sm font-semibold transition-colors"
-          [class]="
-            kind.id === selectedId()
-              ? 'bg-blue-600 border-blue-600 text-white'
-              : 'bg-white border-gray-300 text-gray-700 hover:border-blue-400'
-          "
-          (click)="select(kind.id)"
-        >
-          {{ kind.label }}
-        </button>
-      }
-    </div>
+  <div class="lab lab__demo">
+    <!-- Más chico que en el resto: dos filas de nodos, y es la pantalla más alta del capítulo. -->
+    <app-circuito
+      #circuito
+      style="--ci-lado: 4.6rem"
+      [nodos]="nodos()"
+      [enlaces]="enlaces"
+      (tocado)="select($event)"
+    />
 
-    <div class="rounded-md border border-gray-100 bg-gray-50 p-4">
+    <div class="lab__acciones">
+      <button type="button" (click)="probarSet()">Probar <code>.set()</code></button>
       <span
-        class="inline-block text-xs font-bold px-2 py-0.5 rounded-full mb-2"
+        class="inline-block text-xs font-bold px-2 py-0.5 rounded-full"
         [class]="
           selected().writable ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'
         "
       >
         {{ selected().writable ? 'escribible' : 'solo lectura' }}
       </span>
-      <p class="text-sm text-gray-700">{{ selected().description }}</p>
     </div>
+    <p class="lab__nota">{{ selected().description }}</p>
 
-    <!-- El resultado de la introspección es el dato que el sub-nivel enseña, así que se lee en tinta:
-         en `text-blue-*` la vista integrada lo remapea al ámbar del nivel y a 12px quedaba en 1.94:1. -->
-    <div
-      class="mt-4 rounded-md border border-gray-100 bg-white p-3 text-xs font-mono text-gray-700"
-    >
-      <p>
-        isSignal() → <strong class="text-slate-900">{{ introspection().isSignal }}</strong>
-      </p>
-      <p>
-        isWritableSignal() →
-        <strong class="text-slate-900">{{ introspection().isWritableSignal }}</strong>
-      </p>
+    <!-- El resultado de la introspección es el dato que el sub-nivel enseña, así que se lee en tinta. -->
+    <div class="lab__chips">
+      <code class="lab__dato">
+        isSignal() → <strong>{{ introspection().isSignal }}</strong>
+      </code>
+      <code class="lab__dato">
+        isWritableSignal() → <strong>{{ introspection().isWritableSignal }}</strong>
+      </code>
     </div>
-  </section>
+  </div>
 </app-column-and-code-layout>
 
 <app-manipulable-system [system]="closingSystem" />

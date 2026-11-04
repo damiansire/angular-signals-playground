@@ -5,20 +5,10 @@
   action="Incrementá (interno) y reseteá."
   observe="count() refleja los cambios; quien lo recibe no puede llamar .set()."
 >
-  <section class="w-80 p-5 rounded-lg shadow-md bg-white text-center">
-    <p class="text-sm text-gray-500 mb-4">
-      El componente expone un signal de <strong>solo lectura</strong>: se puede leer (<code
-        class="font-mono"
-        >count()</code
-      >) pero quien lo recibe no puede escribirlo. Solo el dueño, vía el signal privado, lo
-      modifica.
-    </p>
+  <div class="lab lab__demo">
+    <app-circuito #circuito [nodos]="nodos()" [enlaces]="enlaces" />
 
-    <!-- El número es el foco del demo: va en tinta, no en el ámbar del fondo (sobre el degradado del
-         nivel el ámbar quedaba en 1.88:1, por debajo del 3:1 que pide texto grande). -->
-    <p class="text-5xl font-bold tabular-nums text-slate-900 mb-5">{{ count() }}</p>
-
-    <div class="flex gap-2 justify-center">
+    <div class="lab__acciones">
       <button
         type="button"
         class="bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold py-2 px-4 rounded"
@@ -33,13 +23,14 @@
       >
         Reiniciar
       </button>
+      <button type="button" (click)="escribirDesdeAfuera()"><code>count.set(5)</code></button>
     </div>
 
-    <p class="text-xs text-gray-400 mt-4">
-      <code class="font-mono">count.set(…)</code> ni siquiera compila: el tipo
-      <code class="font-mono">Signal&lt;T&gt;</code> no tiene <code class="font-mono">set</code>.
+    <p class="lab__nota">
+      Solo el dueño lo modifica, vía el signal privado. <code>count.set(…)</code> ni siquiera
+      compila: <code>Signal&lt;T&gt;</code> no tiene <code>set</code>.
     </p>
-  </section>
+  </div>
 </app-column-and-code-layout>
 
 <app-manipulable-system [system]="closingSystem" />

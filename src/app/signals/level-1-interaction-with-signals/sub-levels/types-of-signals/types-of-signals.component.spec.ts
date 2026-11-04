@@ -27,6 +27,20 @@ describe('TypesOfSignalsComponent', () => {
     expect(component.selected().writable).toBe(true);
   });
 
+  it('probar set() escribe de verdad solo en el writable, y los otros dos lo reflejan', () => {
+    const valor = (id: string) => component.nodos().find((n) => n.id === id)?.valor;
+
+    component.select('readonly');
+    component.probarSet();
+    expect(valor('writable')).toBe('0');
+
+    component.select('writable');
+    component.probarSet();
+    expect(valor('writable')).toBe('1');
+    expect(valor('readonly')).toBe('1');
+    expect(valor('computed')).toBe('2');
+  });
+
   it('al elegir computed muestra un tipo de solo lectura', () => {
     component.select('computed');
     expect(component.selected().writable).toBe(false);

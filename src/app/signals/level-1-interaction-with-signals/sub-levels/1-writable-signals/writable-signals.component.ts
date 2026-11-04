@@ -9,6 +9,8 @@ import {
 import { CodeLine } from '../../../../components-atom/component-atom.interface';
 import { ColumnAndCodeLayoutComponent } from '../../../../layouts/column-and-code-layout/column-and-code-layout.component';
 import { ManipulableSystemComponent } from '../../../../components-atom/manipulable-system/manipulable-system.component';
+import { CircuitoComponent } from '../../../../components-draw/circuito/circuito.component';
+import { EnlaceCircuito, NodoCircuito } from '../../../../components-draw/circuito/circuito.modelo';
 import { SET_SIGNAL_SYSTEM } from '../../signals-systems';
 
 @Component({
@@ -16,7 +18,7 @@ import { SET_SIGNAL_SYSTEM } from '../../signals-systems';
   templateUrl: './writable-signals.component.html',
   styleUrl: './writable-signals.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ManipulableSystemComponent, ColumnAndCodeLayoutComponent],
+  imports: [ManipulableSystemComponent, ColumnAndCodeLayoutComponent, CircuitoComponent],
 })
 export class WritableSignalsComponent {
   readonly closingSystem = SET_SIGNAL_SYSTEM;
@@ -26,6 +28,21 @@ export class WritableSignalsComponent {
   readonly signalSetInput = viewChild.required<ElementRef<HTMLInputElement>>('signalSetInput');
   /** Se escribió algo que no es un número. Antes el valor inválido se descartaba en silencio. */
   readonly rejected = signal(false);
+
+  private readonly circuito = viewChild<CircuitoComponent>('circuito');
+
+  readonly enlaces: EnlaceCircuito[] = [{ de: 'count', a: 'vista' }];
+  readonly nodos = computed<NodoCircuito[]>(() => [
+    { id: 'count', nombre: 'count', valor: String(this.count()), tono: 'fuente', col: 1, fila: 1 },
+    {
+      id: 'vista',
+      nombre: 'count()',
+      valor: String(this.count()),
+      tono: 'consumidor',
+      col: 2,
+      fila: 1,
+    },
+  ]);
 
   lines = computed<CodeLine[]>(() => [
     { line: 'count = signal(0);', active: true },
@@ -42,6 +59,8 @@ export class WritableSignalsComponent {
       return;
     }
     this.rejected.set(false);
+    // `set` reemplaza: el valor anterior no se suma ni se guarda, sale despedido.
+    if (inputValue !== this.count()) this.circuito()?.despedirValor('count', String(this.count()));
     this.count.set(inputValue);
   }
 

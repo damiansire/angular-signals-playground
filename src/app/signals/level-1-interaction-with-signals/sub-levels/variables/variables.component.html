@@ -4,43 +4,40 @@
   observe="El valor elegido aparece en las tres declaraciones (var/const/let difieren en alcance y reasignación)."
 />
 
-<!-- Demo agrupado en UN contenedor: en la vista integrada la card "disuelve" el marco y reparte el
-     contenido en un grid (instrucciones | demo). Sin este wrapper, los tres bloques (título, tipos,
-     valores+código) caían en filas separadas del grid y se apilaban a lo alto (se pasaba del fold en
-     laptop). Agrupados, entran como una sola columna al lado de las instrucciones. -->
-<div>
-  <div class="mb-6">
-    <app-title title="Variables (repaso pre-signals)"></app-title>
-  </div>
-  <section class="flex flex-wrap justify-around mb-6">
-    @for (type of dataTypes; track $index) {
-      <app-variable-box-draw
-        [variableName]="type"
-        [selectable]="true"
-        [selected]="type === selectedType().name"
-        (clicked)="selectType($event)"
-      ></app-variable-box-draw>
-    }
-  </section>
-  <section class="flex flex-col justify-around">
-    <div class="flex justify-around">
-      <div class="grid grid-cols-2 gap-x-4 content-center">
-        @for (item of selectedType().examples; track $index) {
-          <div class="mb-4">
-            <app-variable-box-draw
-              [variableName]="item"
-              [selectable]="true"
-              [selected]="item === selectedExampleValue()"
-              (clicked)="selectExample($event)"
-            ></app-variable-box-draw>
-          </div>
+<!-- Demo agrupado en UN contenedor: en la vista integrada la card reparte el contenido en un grid, y
+     sin este wrapper los bloques caían en filas separadas y se pasaban del fold en laptop. -->
+<div class="lab">
+  <app-title title="Variables (repaso pre-signals)"></app-title>
+  <div class="lab__fila">
+    <div class="lab__demo">
+      <div class="lab__chips" role="group" aria-label="Tipo de dato">
+        @for (type of dataTypes; track type) {
+          <button
+            type="button"
+            class="lab__chip"
+            [attr.aria-pressed]="type === selectedType().name"
+            (click)="selectType({ name: type, value: '' })"
+          >
+            {{ type }}
+          </button>
         }
       </div>
-      <div class="content-center">
-        <app-code [lines]="lines()"></app-code>
+      <div class="lab__chips" role="group" aria-label="Valor de ejemplo">
+        @for (item of selectedType().examples; track $index) {
+          <button
+            type="button"
+            class="lab__chip"
+            [attr.aria-pressed]="item === selectedExampleValue()"
+            (click)="selectExample({ name: item, value: '' })"
+          >
+            {{ item }}
+          </button>
+        }
       </div>
+      <app-circuito [nodos]="cajas()" />
     </div>
-  </section>
+    <app-code [lines]="lines()"></app-code>
+  </div>
 </div>
 
 <app-manipulable-system [system]="closingSystem" />

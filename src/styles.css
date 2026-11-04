@@ -299,3 +299,402 @@ body {
   box-shadow: 0 0 0 2px var(--glow, #eb9b3c);
   border-color: transparent;
 }
+
+/* ───────────────────────────────────────────────────────────────────────────
+   BANCO DE LOS CAPÍTULOS VIVOS — lo que comparten los demos armados con `app-circuito`.
+   Va acá y no en cada componente por la misma razón que el resto de la armonización: son diez
+   pantallas que tienen que verse de una sola mano, y la regla de `.subhost button` es global.
+   ─────────────────────────────────────────────────────────────────────────── */
+.lab {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  min-width: 0;
+}
+.lab__fila {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 1rem 1.6rem;
+}
+.lab__demo {
+  flex: 1 1 24rem;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+/* Por debajo de 1200 px el demo no baja de lo que pide el circuito: con menos, los nodos se pisaban
+   al lado del código. Si no entran los dos, el código baja entero. Dos clases más que la regla de
+   `angosto.css`, que le da 12rem a cualquier demo. */
+@media (max-width: 1199px) {
+  .lab__demo {
+    flex-basis: 19rem;
+  }
+  .card.card--dissolve.card--sub
+    .subhost
+    .flex:has(> section > .lab__demo)
+    > section:first-child:has(.lab__demo) {
+    flex: 1 1 19rem;
+  }
+}
+.lab__fila > app-code,
+.lab__codigos {
+  flex: 1 1 15rem;
+  min-width: 0;
+}
+.lab__codigos {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+/* El layout de columna y código no es hijo directo del sub-nivel: el tope de ancho no le llega solo,
+   y sin él la misma pantalla arrancaba el código en otra x que sus vecinas. */
+.flex:has(> section > .lab__demo) {
+  max-width: 64rem;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: flex-start;
+  gap: 1rem 1.6rem;
+  margin-top: 0;
+}
+/* Es lo que manda en el alto de la fila: 2/2 tiene nueve renglones y el desafío tiene que entrar. */
+.lab app-code .font-mono,
+.flex:has(> section > .lab__demo) app-code .font-mono {
+  padding-block: 0.12rem;
+}
+.lab app-text-description p {
+  margin: 0;
+  font-size: 1rem;
+  line-height: 1.4;
+  text-align: left;
+}
+.flex:has(> section > .lab__demo) > section:first-child {
+  flex: 1 1 24rem;
+  min-width: 0;
+}
+.flex:has(> section > .lab__demo) > section:last-child {
+  flex: 1 1 15rem;
+  min-width: 0;
+}
+.lab__acciones,
+.lab__chips {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+/* Son controles de un banco, no la llamada principal de la página: la pastilla global es enorme acá. */
+.card.card--dissolve.card--sub .subhost .lab .lab__acciones button:not([class*='bg-']) {
+  padding: 0.42rem 0.95rem;
+  font-size: 0.88rem;
+}
+.lab__acciones code,
+.lab__chip code {
+  font-family: var(--font-mono);
+}
+/* Dos clases de la raíz más tres propias: le gana a `.subhost button:not([class*='bg-'])`. */
+.card.card--dissolve .subhost .lab .lab__chip,
+.lab .lab__chip {
+  padding: 0.28rem 0.8rem;
+  font-family: var(--font-mono);
+  font-size: 0.86rem;
+  font-weight: 600;
+  color: #201d16;
+  background: #fffdf7;
+  border: 1.5px solid #8a8069;
+  border-radius: 999px;
+  cursor: pointer;
+  transition:
+    background-color 0.15s,
+    transform 0.15s;
+}
+.card.card--dissolve .subhost .lab .lab__chip:hover,
+.lab .lab__chip:hover {
+  transform: translateY(-1px);
+}
+.card.card--dissolve .subhost .lab .lab__chip[aria-pressed='true'],
+.lab .lab__chip[aria-pressed='true'] {
+  color: #201d16;
+  background: var(--glow, var(--accent-source));
+  border-color: #201d16;
+}
+/* Un chip que no se toca: un dato (una dependencia, un valor anterior). */
+.lab .lab__dato {
+  padding: 0.16rem 0.62rem;
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  color: #201d16;
+  background: rgba(255, 253, 247, 0.72);
+  border: 1.5px solid #8a8069;
+  border-radius: 999px;
+}
+/* La dependencia que existe en el código pero no en esta corrida: se ve, pero no está enchufada. */
+.lab .lab__dato--ausente {
+  color: #3d3729;
+  background: transparent;
+  border-style: dashed;
+}
+.lab .lab__rotulo {
+  font-family: var(--font-mono);
+  font-size: 0.74rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: #3d3729;
+}
+.lab .lab__lectura {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 1.08rem;
+  font-weight: 700;
+  color: #201d16;
+}
+.lab .lab__lectura code {
+  font-family: var(--font-mono);
+  font-size: 0.92em;
+}
+.lab .lab__nota {
+  margin: 0;
+  font-size: 0.86rem;
+  line-height: 1.4;
+  color: #3d3729;
+}
+.lab .lab__nota code {
+  font-family: var(--font-mono);
+}
+.lab .lab__campo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  flex: 1 1 9rem;
+  min-width: 0;
+}
+.lab .lab__campo input {
+  width: 100%;
+  padding: 0.42rem 0.65rem;
+  border: 1.5px solid #8a8069;
+  border-radius: 0.6rem;
+}
+/* El gris de Tailwind da 2:1 sobre el blanco del campo. */
+.lab input::placeholder {
+  color: #6f6753;
+  opacity: 1;
+}
+.lab .lab__error {
+  margin: 0;
+  font-size: 0.86rem;
+  color: #7f1d10;
+}
+/* Los paneles de historial se comparten con el capítulo de effect, que sigue con su diseño: el
+   compactado vale solo adentro del banco. Sin esto, dos paneles se comen el alto de la card. */
+.lab__fila > app-event-history,
+.lab__fila > app-click-history,
+.lab__fila > app-computed-tracker {
+  flex: 1 1 15rem;
+  min-width: 0;
+}
+.lab app-event-history h2,
+.card.card--dissolve.card--sub .subhost .lab app-click-history h1,
+.card.card--dissolve.card--sub .subhost .lab app-computed-tracker h1 {
+  display: block;
+  margin: 0 0 0.2rem;
+  font-family: var(--font-mono);
+  font-size: 0.74rem;
+  font-weight: 600;
+  line-height: 1.3;
+  letter-spacing: 0.04em;
+  text-align: left;
+  color: #4a4436;
+}
+/* En fila: los últimos disparos ocupan un renglón y la card no crece con el uso. */
+.lab app-event-history .space-y-4 {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 0.25rem;
+}
+.lab app-event-history .space-y-4 > div > div:first-child > span:first-child {
+  display: none;
+}
+/* Del primer panel importa quién lo disparó: el valor ya está en el nodo, y con él no entran dos en
+   un renglón. */
+.lab app-event-history:first-child .space-y-4 > div > div:first-child {
+  display: none;
+}
+/* Dos veces `.lab`: el `space-y-4` de Tailwind pesa tres clases y empujaba cada chip hacia abajo. */
+.lab.lab app-event-history .space-y-4 > * {
+  margin: 0;
+}
+.lab app-event-history .space-y-4 > p {
+  flex: 1 1 100%;
+}
+.lab app-event-history .space-y-4 > div {
+  padding: 0.14rem 0.6rem;
+  background: rgba(255, 253, 247, 0.72);
+  box-shadow: none;
+  border: 1.5px solid #8a8069;
+  font-family: var(--font-mono);
+}
+.lab app-event-history .space-y-4 h3 {
+  display: none;
+}
+.lab app-event-history .space-y-4 span {
+  padding: 0;
+  font-size: 0.8rem;
+  color: #201d16;
+  background: transparent;
+}
+.lab app-event-history p,
+.lab app-click-history p,
+.lab app-computed-tracker p {
+  margin: 0;
+  padding: 0.3rem 0.6rem;
+  font-size: 0.82rem;
+  color: #4a4436;
+  border-color: #8a8069;
+}
+.lab app-dependencies-status > div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem 1.2rem;
+  padding: 0;
+  box-shadow: none;
+}
+.lab app-dependencies-status > div > .absolute {
+  display: none;
+}
+.lab app-dependencies-status > div > .mt-4 {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem;
+  margin: 0;
+  padding: 0;
+  background: transparent;
+}
+.card.card--dissolve.card--sub .subhost .lab.lab app-dependencies-status h2 {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: 0.74rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: #4a4436;
+}
+.lab app-dependencies-status .text-white {
+  color: #201d16;
+}
+.lab app-dependencies-status span {
+  padding: 0.1rem 0.55rem;
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  color: #201d16;
+  background: rgba(255, 253, 247, 0.72);
+  border: 1.5px solid #8a8069;
+  border-radius: 999px;
+}
+.lab app-basic-form > div {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 0.5rem;
+  padding: 0;
+}
+.card.card--dissolve.card--sub .subhost .lab app-basic-form h1 {
+  display: block;
+  flex: 1 1 100%;
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 1.08rem;
+  font-weight: 700;
+  text-align: left;
+  color: #201d16;
+}
+.lab app-basic-form > div > .w-full {
+  flex: 1 1 8rem;
+  width: auto;
+  min-width: 0;
+}
+.card.card--dissolve.card--sub .subhost .lab app-basic-form .mb-5 {
+  margin: 0;
+}
+.lab app-basic-form label {
+  margin: 0 0 0.15rem;
+  font-family: var(--font-mono);
+  font-size: 0.74rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: #4a4436;
+}
+.lab app-basic-form input {
+  padding: 0.42rem 0.65rem;
+  color: #201d16;
+  border: 1.5px solid #8a8069;
+  border-radius: 0.6rem;
+}
+.lab app-basic-form button {
+  flex: 0 0 auto;
+  width: auto;
+  height: auto;
+  margin: 0;
+  padding: 0.5rem 1.1rem;
+}
+.lab app-click-history .mt-5 {
+  margin: 0;
+  gap: 0.25rem;
+}
+.lab app-event > div {
+  justify-content: flex-start;
+  margin: 0;
+  padding: 0.14rem 0.6rem;
+  background: rgba(255, 253, 247, 0.72);
+  border: 1.5px solid #8a8069;
+  border-radius: 0.4rem;
+}
+.lab app-event .w-16 {
+  display: none;
+}
+.lab app-event .ml-2 {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 0.6rem;
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  color: #201d16;
+}
+.lab app-event .text-2xl {
+  font-size: inherit;
+  line-height: inherit;
+  text-transform: none;
+}
+.lab app-computed-tracker .box-container {
+  padding: 0;
+  gap: 0.25rem;
+  border: 0;
+}
+.lab app-computed-tracker .box {
+  flex-wrap: wrap;
+  gap: 0 0.6rem;
+  padding: 0.14rem 0.6rem;
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  color: #201d16;
+  background: rgba(255, 253, 247, 0.72);
+  border: 1.5px solid #8a8069;
+  border-radius: 0.4rem;
+}
+.lab app-computed-tracker .date-box,
+.lab app-computed-tracker .data-box {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 0.6rem;
+  padding: 0;
+  border: 0;
+}
+@media (max-width: 600px) {
+  .lab__fila > app-code,
+  .lab__codigos,
+  .lab__demo {
+    flex-basis: 100%;
+  }
+}

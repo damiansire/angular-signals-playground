@@ -1,5 +1,6 @@
 import { Component, computed, signal, ChangeDetectionStrategy, OnInit } from '@angular/core';
-import { VariableBoxDrawComponent } from '../../../../components-draw/variable-box-draw/variable-box-draw.component';
+import { CircuitoComponent } from '../../../../components-draw/circuito/circuito.component';
+import { NodoCircuito } from '../../../../components-draw/circuito/circuito.modelo';
 import { CodeLine } from '../../../../components-atom/component-atom.interface';
 import { TitleComponent } from '../../../../components-atom/title/title.component';
 import { CodeComponent } from '../../../../components-atom/code/code.component';
@@ -16,7 +17,7 @@ interface DataTypeExample {
   selector: 'app-variables',
   imports: [
     ManipulableSystemComponent,
-    VariableBoxDrawComponent,
+    CircuitoComponent,
     TitleComponent,
     CodeComponent,
     ConceptCardComponent,
@@ -60,6 +61,18 @@ export class VariablesComponent implements OnInit {
     },
     { line: `let value = ${this.selectedExampleValue()}`, active: false },
   ]);
+
+  /** Tres cajas y ningún enlace: una variable guarda el valor y no le avisa a nadie. */
+  readonly cajas = computed<NodoCircuito[]>(() =>
+    ['var', 'const', 'let'].map((nombre, i) => ({
+      id: nombre,
+      nombre,
+      valor: this.selectedExampleValue(),
+      tono: 'caja',
+      col: i + 1,
+      fila: 1,
+    })),
+  );
 
   ngOnInit() {
     this.dataTypes = Object.keys(this.typesExamples);

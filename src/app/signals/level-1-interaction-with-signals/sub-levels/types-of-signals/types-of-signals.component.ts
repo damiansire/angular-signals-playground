@@ -4,12 +4,15 @@ import {
   isSignal,
   isWritableSignal,
   signal,
+  viewChild,
   ChangeDetectionStrategy,
   Signal,
 } from '@angular/core';
 import { CodeLine } from '../../../../components-atom/component-atom.interface';
 import { ColumnAndCodeLayoutComponent } from '../../../../layouts/column-and-code-layout/column-and-code-layout.component';
 import { ManipulableSystemComponent } from '../../../../components-atom/manipulable-system/manipulable-system.component';
+import { CircuitoComponent } from '../../../../components-draw/circuito/circuito.component';
+import { EnlaceCircuito, NodoCircuito } from '../../../../components-draw/circuito/circuito.modelo';
 import { SIGNAL_TYPES_SYSTEM } from '../../signals-systems';
 
 interface SignalKind {
@@ -22,7 +25,7 @@ interface SignalKind {
 
 @Component({
   selector: 'app-types-of-signals',
-  imports: [ManipulableSystemComponent, ColumnAndCodeLayoutComponent],
+  imports: [ManipulableSystemComponent, ColumnAndCodeLayoutComponent, CircuitoComponent],
   templateUrl: './types-of-signals.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   styleUrl: './types-of-signals.component.css',
@@ -68,6 +71,8 @@ export class TypesOfSignalsComponent {
     computed: computed(() => this.writableSample() * 2),
   };
 
+  private readonly circuito = viewChild<CircuitoComponent>('circuito');
+
   readonly selectedId = signal('writable');
   readonly selected = computed(
     () => this.kinds.find((k) => k.id === this.selectedId()) ?? this.kinds[0],
@@ -83,7 +88,37 @@ export class TypesOfSignalsComponent {
     };
   });
 
+  /** Son instancias reales de una sola fuente: escribir el writable mueve a las tres. */
+  readonly enlaces: EnlaceCircuito[] = [
+    { de: 'writable', a: 'readonly' },
+    { de: 'writable', a: 'computed' },
+  ];
+
+  readonly nodos = computed<NodoCircuito[]>(() => [
+    { ...this.nodoDe('writable', 'WritableSignal', 'fuente'), col: 1, fila: 1, alto: 2 },
+    { ...this.nodoDe('readonly', 'Signal', 'fuente'), col: 2, fila: 1, cerrado: true },
+    { ...this.nodoDe('computed', 'Computed', 'derivado'), col: 2, fila: 2, cerrado: true },
+  ]);
+
+  private nodoDe(id: string, nombre: string, tono: NodoCircuito['tono']) {
+    return {
+      id,
+      nombre,
+      tono,
+      valor: String(this.samples[id]()),
+      accion: `Ver cómo se crea ${nombre}`,
+      elegido: id === this.selectedId(),
+    };
+  }
+
   select(id: string) {
     this.selectedId.set(id);
+  }
+
+  /** Se lo pregunta a la instancia real, no a un booleano nuestro: `set` existe o no existe. */
+  probarSet() {
+    const id = this.selectedId();
+    if (isWritableSignal(this.samples[id])) this.writableSample.update((n) => n + 1);
+    else this.circuito()?.rebotar(id, 'no tiene .set()');
   }
 }
