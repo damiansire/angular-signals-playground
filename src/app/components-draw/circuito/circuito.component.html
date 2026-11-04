@@ -1,0 +1,69 @@
+<div
+  class="ci"
+  [style.--ci-columnas]="columnas()"
+  (pointerdown)="alApretar($event)"
+  (pointermove)="alMover($event)"
+  (pointerup)="alSoltar($event)"
+  (pointercancel)="alSoltar($event)"
+>
+  <svg class="ci__cables" aria-hidden="true">
+    @for (enlace of enlaces(); track claveDeEnlace(enlace)) {
+      <path class="ci__cable" [attr.data-enlace]="claveDeEnlace(enlace)" />
+    }
+  </svg>
+
+  @for (nodo of nodos(); track nodo.id) {
+    <div
+      class="ci__celda"
+      [style.grid-column]="nodo.col"
+      [style.grid-row]="nodo.fila + ' / span ' + (nodo.alto ?? 1)"
+    >
+      @if (nodo.accion) {
+        <button
+          type="button"
+          class="ci__nodo ci__nodo--boton"
+          [class]="'ci__nodo--' + nodo.tono"
+          [class.ci__nodo--elegido]="nodo.elegido"
+          [class.ci__nodo--largo]="esLargo(nodo)"
+          [attr.data-nodo]="nodo.id"
+          [attr.aria-label]="nodo.accion"
+          [attr.aria-pressed]="nodo.elegido === undefined ? null : nodo.elegido"
+          (click)="tocado.emit(nodo.id)"
+        >
+          <ng-container *ngTemplateOutlet="adentro; context: { $implicit: nodo }" />
+        </button>
+      } @else {
+        <div
+          class="ci__nodo"
+          [class]="'ci__nodo--' + nodo.tono"
+          [class.ci__nodo--largo]="esLargo(nodo)"
+          [attr.data-nodo]="nodo.id"
+        >
+          <ng-container *ngTemplateOutlet="adentro; context: { $implicit: nodo }" />
+        </div>
+      }
+    </div>
+  }
+</div>
+
+<!-- El rebote se ve en una palabra que se va: quien no ve la pantalla se entera por acá. -->
+<span class="sr-only" role="status">{{ aviso() }}</span>
+
+<ng-template #adentro let-nodo>
+  <span class="ci__brillo" aria-hidden="true"></span>
+  @if (nodo.tono === 'fuente') {
+    <span class="ci__orbita" aria-hidden="true"><i class="ci__electron"></i></span>
+  }
+  <span class="ci__nombre">{{ nodo.nombre }}</span>
+  @if (nodo.valor !== undefined) {
+    <b class="ci__valor" [class.ci__valor--largo]="(nodo.valor?.length ?? 0) > 7">{{
+      nodo.valor
+    }}</b>
+  }
+  @if (nodo.cerrado) {
+    <svg class="ci__candado" viewBox="0 0 16 18" aria-hidden="true">
+      <path d="M4.5 8V5.5a3.5 3.5 0 0 1 7 0V8" fill="none" stroke="currentColor" stroke-width="2" />
+      <rect x="2" y="8" width="12" height="9" rx="2.4" fill="currentColor" />
+    </svg>
+  }
+</ng-template>

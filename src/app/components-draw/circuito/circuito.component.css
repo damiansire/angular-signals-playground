@@ -1,0 +1,223 @@
+:host {
+  display: block;
+  position: relative;
+  /* Apretar y arrastrar estira el nodo; sin esto seleccionaría el texto de la página. */
+  user-select: none;
+  -webkit-user-select: none;
+  --ci-pulso: var(--glow, var(--accent-source));
+  --ci-tinta: #201d16;
+  --ci-lado: clamp(5rem, 6.6vw, 6.2rem);
+}
+
+.ci {
+  position: relative;
+  display: grid;
+  /* Las columnas miden lo que mide su nodo: arranca en el eje de la pantalla, como el código y el
+     desafío, y un identificador nunca se parte para que entre. */
+  grid-template-columns: repeat(var(--ci-columnas, 3), auto);
+  justify-content: space-between;
+  max-width: 32rem;
+  gap: clamp(0.5rem, 1.6vw, 1rem) clamp(0.5rem, 1.6vw, 1.4rem);
+  align-items: center;
+  padding-block: 0.6rem;
+}
+
+.ci__cables {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
+}
+.ci__cable {
+  fill: none;
+  stroke: color-mix(in srgb, var(--ci-pulso) 62%, #4a4436);
+  stroke-width: 3.5;
+  stroke-linecap: round;
+  transition: stroke 0.2s;
+}
+/* Un cable que no lleva nada: punteado y más apagado, pero visible. Es la dependencia que falta. */
+.ci__cable--suelto {
+  stroke: #8a8069;
+  stroke-width: 2.5;
+  stroke-dasharray: 3 7;
+}
+
+.ci__celda {
+  display: grid;
+  place-items: center;
+}
+
+/* Tres clases más el atributo de encapsulación: la regla de `.subhost button` (fondo oscuro y
+   pastilla) le gana a cualquier cosa más liviana. */
+.ci .ci__celda .ci__nodo {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.1rem;
+  width: auto;
+  min-width: var(--ci-lado);
+  min-height: var(--ci-lado);
+  padding: 0.5rem 0.9rem;
+  color: var(--ci-tinta);
+  font-family: var(--font-display, system-ui);
+  text-align: center;
+  border: 2.5px solid color-mix(in srgb, var(--ci-tono) 72%, #4a4436);
+  border-radius: 50%;
+  background: radial-gradient(
+    circle at 34% 28%,
+    #fffdf7 0 18%,
+    color-mix(in srgb, var(--ci-tono) 30%, #fff9ec) 78%
+  );
+  box-shadow:
+    inset -6px -8px 14px color-mix(in srgb, var(--ci-tono) 24%, transparent),
+    0 7px 0 -2px color-mix(in srgb, var(--ci-tono) 34%, rgba(40, 30, 20, 0.2));
+  /* El arrastre vertical con el dedo sigue siendo scroll: la card scrollea en los celulares. */
+  touch-action: pan-y;
+  cursor: grab;
+  transform-origin: 50% 88%;
+  will-change: transform;
+}
+.ci .ci__celda .ci__nodo--largo {
+  border-radius: 2.6rem;
+  padding-inline: 1.15rem;
+}
+.ci .ci__celda .ci__nodo--boton {
+  cursor: pointer;
+}
+.ci .ci__celda .ci__nodo--boton:hover {
+  filter: brightness(1.04);
+}
+.ci .ci__celda .ci__nodo--boton:focus-visible {
+  outline: 3px solid var(--focus-ink);
+  outline-offset: 3px;
+  box-shadow: 0 0 0 3px var(--ci-tono);
+}
+.ci .ci__celda .ci__nodo--elegido {
+  border-width: 4px;
+  border-color: var(--ci-tinta);
+}
+
+.ci__nodo--fuente {
+  --ci-tono: var(--accent-source);
+}
+.ci__nodo--derivado {
+  --ci-tono: var(--accent-derived);
+}
+.ci__nodo--consumidor {
+  --ci-tono: #8d7ad8;
+}
+.ci__nodo--caja {
+  --ci-tono: #b3a78d;
+}
+/* Lo que lee es una pantallita y lo que guarda sin avisar es una caja: la forma ya dice el rol. */
+.ci .ci__celda .ci__nodo--consumidor {
+  border-radius: 1.1rem;
+  min-height: calc(var(--ci-lado) * 0.82);
+  background: linear-gradient(170deg, #fffefb, color-mix(in srgb, var(--ci-tono) 24%, #fbf7ef));
+}
+.ci .ci__celda .ci__nodo--caja {
+  border-radius: 0.8rem;
+  border-style: solid;
+  min-height: calc(var(--ci-lado) * 0.82);
+  background: linear-gradient(170deg, #fffefb, #f1eadb);
+}
+
+.ci__brillo {
+  position: absolute;
+  inset: -7px;
+  border-radius: inherit;
+  background: radial-gradient(
+    circle,
+    color-mix(in srgb, var(--ci-tono) 70%, #fff) 40%,
+    transparent 74%
+  );
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Un signal es un átomo: la misma órbita de la molécula del recorrido. */
+.ci__orbita {
+  position: absolute;
+  inset: -9px;
+  border-radius: 50%;
+  border: 1.5px dashed color-mix(in srgb, var(--ci-tono) 72%, #4a4436);
+  pointer-events: none;
+  animation: ci-orbita 7s linear infinite;
+}
+.ci__electron {
+  position: absolute;
+  top: -5px;
+  left: calc(50% - 4.5px);
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--ci-tono);
+  box-shadow: 0 0 0 2px #fffdf7;
+}
+@keyframes ci-orbita {
+  to {
+    transform: rotate(360deg);
+  }
+}
+.ci .ci__celda .ci__nodo--largo .ci__orbita {
+  border-radius: 3.2rem;
+  animation: none;
+}
+
+.ci__nombre {
+  position: relative;
+  font-family: var(--font-mono, monospace);
+  font-size: 0.78rem;
+  font-weight: 600;
+  line-height: 1.15;
+}
+.ci__valor {
+  position: relative;
+  font-weight: 800;
+  font-size: clamp(1.25rem, 2.1vw, 1.75rem);
+  line-height: 1.12;
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+}
+.ci__valor--largo {
+  font-size: 1.02rem;
+  font-weight: 700;
+}
+.ci__candado {
+  position: absolute;
+  top: -4px;
+  right: 2px;
+  width: 1.1rem;
+  height: 1.25rem;
+  color: #4a4436;
+}
+
+@media (max-width: 600px) {
+  :host {
+    --ci-lado: clamp(4.6rem, 22vw, 5.6rem);
+  }
+  .ci {
+    gap: 0.4rem;
+  }
+  .ci .ci__celda .ci__nodo {
+    padding: 0.35rem 0.5rem;
+  }
+  .ci__nombre {
+    font-size: 0.72rem;
+  }
+}
+
+/* Una card pre-montada o apagada no gasta en lo que nadie ve. */
+:host-context([inert]) .ci__orbita {
+  animation-play-state: paused;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ci__orbita {
+    animation: none;
+  }
+}
