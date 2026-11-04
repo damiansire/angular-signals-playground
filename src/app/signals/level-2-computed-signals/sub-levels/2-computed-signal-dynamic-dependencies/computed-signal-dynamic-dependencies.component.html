@@ -3,49 +3,33 @@
   action="Cambiá ShowCount e incrementá Count."
   observe="Con ShowCount en false, subir Count NO recomputa conditionalCount."
 />
-<div class="flex justify-around">
-  <div>
-    <div class="flex flex-col gap-4">
-      <app-variable-box
-        variableName="ShowCount"
-        [variableValue]="showCount().toString()"
-        (click)="onShowCountChange()"
-      >
-      </app-variable-box>
-
-      <app-variable-box
-        variableName="Count"
-        [variableValue]="count().toString()"
-        (click)="upCount()"
-      >
-      </app-variable-box>
-
-      <app-variable-box
-        variableName="conditionalCount"
-        [variableValue]="conditionalCount().toString()"
-      >
-      </app-variable-box>
-
-      <br />
+<div class="lab">
+  <div class="lab__fila">
+    <div class="lab__demo">
+      <!-- Más chico que en el resto: acá el código tiene nueve renglones y el desafío tiene que entrar. -->
+      <app-circuito
+        style="--ci-lado: 4.6rem"
+        [nodos]="nodos()"
+        [enlaces]="enlaces()"
+        (tocado)="alTocar($event)"
+      />
       <app-dependencies-status
         [dependencies]="dependencies()"
         [signalsInside]="signalsInside()"
         computedName="conditionalCount"
       ></app-dependencies-status>
+      <div class="lab__fila">
+        <app-event-history
+          title="conditionalCount Recomputations"
+          [history]="conditionalCountHistory()"
+        ></app-event-history>
+        <app-event-history
+          title="All Signals Recomputations"
+          [history]="appEventHistory()"
+        ></app-event-history>
+      </div>
     </div>
-  </div>
-  <div>
-    <app-event-history
-      title="conditionalCount Recomputations"
-      [history]="conditionalCountHistory()"
-    ></app-event-history>
-    <app-event-history
-      title="All Signals Recomputations"
-      [history]="appEventHistory()"
-    ></app-event-history>
-  </div>
-  <div>
-    <app-code textSize="text-lg" [lines]="lines()"></app-code>
+    <app-code [lines]="lines()"></app-code>
   </div>
 </div>
 

@@ -58,6 +58,26 @@ describe('ComputedSignalsLazilyEvaluatedMemoizedComponent', () => {
     expect(child.clickHistory()).toEqual([ev]);
   });
 
+  it('perezoso: cambiar lo que lee no lo hace correr, recién leerlo', () => {
+    expect(component.corridas()).toBe(0);
+    component.cambiarNombre();
+    expect(component.corridas()).toBe(0);
+    component.leer();
+    expect(component.corridas()).toBe(1);
+  });
+
+  it('memoizado: leerlo de nuevo, o escribir el mismo valor, no lo vuelve a correr', () => {
+    component.leer();
+    component.leer();
+    component.repetirNombre();
+    component.leer();
+    expect(component.corridas()).toBe(1);
+
+    component.cambiarNombre();
+    component.leer();
+    expect(component.corridas()).toBe(2);
+  });
+
   it('renderiza el formulario y los dos paneles de historial', () => {
     expect(fixture.nativeElement.querySelector('app-basic-form')).toBeTruthy();
     expect(fixture.nativeElement.querySelector('app-click-history')).toBeTruthy();

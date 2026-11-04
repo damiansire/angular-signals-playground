@@ -5,30 +5,32 @@
   action="Escribí en Name y Surname."
   observe="El saludo se actualiza solo; nunca escribís fullName a mano."
 >
-  <section class="profile-container">
-    <div class="profile-info">
-      <label for="firstName">Name:</label>
-      <input
-        id="firstName"
-        type="text"
-        [value]="firstName()"
-        (input)="setFirstName($event.target)"
-        placeholder="Name"
-      />
-      <br />
-      <label for="surname">Surname:</label>
-      <input
-        id="surname"
-        type="text"
-        [value]="surname()"
-        (input)="setLastName($event.target)"
-        placeholder="Surname"
-      />
+  <div class="lab lab__demo">
+    <div class="lab__acciones">
+      <div class="lab__campo">
+        <label class="lab__rotulo" for="firstName">Name:</label>
+        <input
+          id="firstName"
+          type="text"
+          [value]="firstName()"
+          (input)="setFirstName($event.target)"
+          placeholder="Name"
+        />
+      </div>
+      <div class="lab__campo">
+        <label class="lab__rotulo" for="surname">Surname:</label>
+        <input
+          id="surname"
+          type="text"
+          [value]="surname()"
+          (input)="setLastName($event.target)"
+          placeholder="Surname"
+        />
+      </div>
     </div>
-    <div class="profile-greeting">
-      <p>Hola, {{ fullName() }}!</p>
-    </div>
-  </section>
+    <app-circuito #circuito [nodos]="nodos()" [enlaces]="enlaces" (tocado)="escribirDerivado()" />
+    <p class="lab__lectura">Hola, {{ fullName() }}!</p>
+  </div>
 </app-column-and-code-layout>
 
 <app-manipulable-system [system]="closingSystem" />

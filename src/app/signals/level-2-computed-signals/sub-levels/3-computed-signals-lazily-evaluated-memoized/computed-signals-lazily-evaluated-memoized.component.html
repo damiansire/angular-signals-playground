@@ -3,17 +3,26 @@
   action="Editá los campos del formulario."
   observe="Solo recalcula cuando cambia algo de lo que realmente depende."
 />
-<div class="flex justify-between">
-  <div>
-    <app-basic-form
-      (signalComputed)="addComputedSignal($event)"
-      (buttonClicked)="addClickToHistory($event)"
-    ></app-basic-form>
+<div class="lab">
+  <div class="lab__fila">
+    <div class="lab__demo">
+      <app-circuito #circuito [nodos]="nodos()" [enlaces]="enlaces" />
+      <div class="lab__acciones">
+        <button type="button" (click)="leer()"><code>saludo()</code></button>
+        <button type="button" (click)="cambiarNombre()"><code>nombre.set(otro)</code></button>
+        <button type="button" (click)="repetirNombre()"><code>nombre.set(igual)</code></button>
+      </div>
+      <code class="lab__lectura" role="status">corridas = {{ corridas() }}</code>
+    </div>
+    <div class="lab__demo">
+      <app-basic-form
+        (signalComputed)="addComputedSignal($event)"
+        (buttonClicked)="addClickToHistory($event)"
+      ></app-basic-form>
+    </div>
   </div>
-  <div>
+  <div class="lab__fila">
     <app-click-history [clickHistory]="clickHistory()" />
-  </div>
-  <div>
     <app-computed-tracker [computedTracker]="computedTracker()" />
   </div>
 </div>
