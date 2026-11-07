@@ -509,7 +509,8 @@ entrar desarma a Angie en luz y se hace noche, la costura con el prólogo.
 - [ ] El título es el de la historia ("Las aventuras de Angie por el SignalVerso") y la bajada dice
       qué es. Medir título, bajada, sol y fichas sin solapes en los mismos seis anchos, y el
       título en dos renglones.
-- [ ] Angie tiene vida propia mientras espera (`vidaPropia`): se balancea, los brazos y la lamparita
+- [ ] Angie tiene vida propia mientras espera (`vidaPropia`; parada, porque sentada hace solo lo
+      tranquilo, ver el paseo más abajo): se balancea, los brazos y la lamparita
       se mecen a destiempo, y cada 1.6-4.2 s se le ocurre algo (saluda, mira la idea, mira al sol,
       cambia el peso, saltito, se estira), sin repetir. Solo respirar y parpadear se leía como un
       dibujo quieto. Comprobar con una hoja de cuadros (cada 110-250 ms): el saludo va al costado de
@@ -520,12 +521,28 @@ entrar desarma a Angie en luz y se hace noche, la costura con el prólogo.
 - [ ] Esperando, Angie sonríe y se sonroja: la boquita en "o" sola es asombro y se leía seria. La
       sonrisa vive en el grupo de la boca, así el muelle la abre (ríe al saludar, bosteza al
       estirarse). Solo con vida propia: las mascotas del mapa y de las cards no cambian.
-- [ ] Con el mouse, Angie se asoma hacia el puntero, no camina: se corre como mucho 60 unidades,
-      se inclina hasta 3° y la cara y el cuerpo giran hacia ese lado. Caminando 300 unidades, sin
-      piernas que den pasos, se deslizaba y no se veía natural. Baja lo que baja la colina
-      (`caidaDeLaColina`), así sigue pisando el pasto. Va con `translate`/`rotate` sueltos, porque
-      la despedida anima el `transform` del mismo elemento. Con un botón apretado es un agarre; con
-      el dedo no se asoma. Comprobar con mouse real por CDP a los dos lados.
+- [ ] Al llegar, Angie gira la cabeza hacia la derecha, camina despacio hasta el borde de la meseta
+      (`ASIENTO`, donde la colina empieza a caer, ~18° de pendiente) y se sienta a mirar a lo
+      lejos. Antes se asomaba hacia el mouse sin caminar: corriéndose 300 unidades sin dar pasos se
+      deslizaba. Ahora da pasos de verdad, y lo que la arruinaría es:
+      patinar (la fase del paso sale de lo que avanzó; cada pierna barre según su largo, porque la
+      derecha nace 20 unidades más abajo y con la misma apertura patinaba; el pie apoyado barre a
+      ritmo parejo en x, no en ángulo); paso de robot (el cuerpo sube con las piernas juntas, se
+      inclina hacia adelante y cada brazo va a contratiempo de su pierna); ir de costado mirando
+      al público (caminando mira hacia donde va y no sigue al mouse); arrancar o frenar en seco
+      (acelera y frena en el primer y el último 20%, con pasos enteros: empieza y termina con las
+      piernas juntas, se queda un instante y recién ahí se sienta); sentarse de golpe (baja con un
+      muelle de un solo rebote); sentada flotando (el escudo apoya en el pasto, las piernas en
+      escorzo y abiertas); pensativa muerta (respira, mira lejos, balancea los pies, sigue al mouse
+      con la cara; nada de saltito, estirarse, saludar ni cambiar el peso). Medir con rAF dentro de
+      la página la velocidad de cada pie a velocidad de crucero: el apoyado igual en los dos
+      (~12 px/s de efecto de medir el centro del pie, no el apoyo) y el otro al doble del cuerpo.
+      En un ancho donde no entra un paso se sienta donde está. Con movimiento reducido, con la
+      pausa de fondo o al cambiar el tamaño queda sentada en su lugar, sin viaje. Si la tocan en
+      camino, se frena parada y piensa ahí. La nube del pensamiento baja con ella sentada y se
+      desinclina (`--inclina`): torcida se leía como error. Va con `translate`/`rotate` sueltos,
+      porque la despedida anima el `transform` del mismo elemento. Medir a Angie sentada contra
+      sol, fichas, título y llamado en los seis anchos: cero solapes y nada afuera.
 - [ ] Antes de desarmarse, Angie lo piensa: "Es la hora…" en una nube sobre la cabeza, con el
       atardecer ya empezando. Primero salen las burbujas del rastro, de la más chica a la más
       grande, y después la nube, así se lee que el pensamiento sale de ella. Los puntos aparecen de
