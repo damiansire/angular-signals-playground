@@ -9,7 +9,9 @@
     />
     <base href="/" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <link rel="icon" type="image/x-icon" href="favicon.ico" />
+    <!-- sizes en el .ico hace que los navegadores con soporte prefieran el SVG nítido. -->
+    <link rel="icon" href="favicon.ico" sizes="32x32" />
+    <link rel="icon" href="favicon.svg" type="image/svg+xml" />
     <!-- Tarjetas sociales: la app se comparte por link para talks/workshops. -->
     <meta property="og:type" content="website" />
     <meta property="og:title" content="Angular Signals: introducción interactiva" />
