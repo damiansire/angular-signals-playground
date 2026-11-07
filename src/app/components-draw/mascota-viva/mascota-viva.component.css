@@ -44,6 +44,74 @@
   }
 }
 
+/* Con vida propia, además de respirar se balancea sobre los pies y los brazos cuelgan y se mecen,
+   cada uno con su período: tres ritmos que no coinciden nunca se leen como un loop. Usan `rotate`
+   suelto, que se suma al `transform` de la respiración en vez de pisarlo. */
+.mv__alza,
+.mv__bambolea,
+.mv__cuelga {
+  transform-box: view-box;
+}
+.mv__alza {
+  transform-origin: 286.7px 557.42px;
+}
+/* La lamparita pivota en la mano y va a destiempo del brazo: es el retraso de lo que cuelga. */
+.mv__bambolea {
+  transform-origin: 184px 470px;
+}
+.mv__cuelga {
+  transform-origin: 828.71px 623.84px;
+}
+:host(.mv--viva) .mv__respira {
+  animation:
+    mv-respira 3.4s ease-in-out infinite,
+    mv-balancea 5.3s ease-in-out infinite alternate;
+}
+:host(.mv--viva) .mv__alza {
+  animation: mv-alza 2.9s ease-in-out infinite;
+}
+:host(.mv--viva) .mv__bambolea {
+  animation: mv-bambolea 2.9s ease-in-out -0.6s infinite;
+}
+:host(.mv--viva) .mv__cuelga {
+  animation: mv-cuelga 3.7s ease-in-out -1.1s infinite;
+}
+@keyframes mv-balancea {
+  from {
+    rotate: -1.4deg;
+  }
+  to {
+    rotate: 1.4deg;
+  }
+}
+@keyframes mv-alza {
+  0%,
+  100% {
+    rotate: 0deg;
+  }
+  50% {
+    rotate: 4deg;
+  }
+}
+@keyframes mv-bambolea {
+  0%,
+  100% {
+    rotate: 4deg;
+  }
+  50% {
+    rotate: -5deg;
+  }
+}
+@keyframes mv-cuelga {
+  0%,
+  100% {
+    rotate: 3deg;
+  }
+  50% {
+    rotate: -5deg;
+  }
+}
+
 .mv__parpado {
   transform-box: fill-box;
   transform-origin: center;
@@ -86,6 +154,18 @@
   }
 }
 
+.mv__sonrisa,
+.mv__rubor {
+  display: none;
+}
+:host(.mv--viva) .mv__sonrisa,
+:host(.mv--viva) .mv__rubor {
+  display: inline;
+}
+:host(.mv--viva) .mv__boca-o {
+  display: none;
+}
+
 .mv__espirales {
   display: none;
 }
@@ -99,14 +179,21 @@
 /* Una mascota de una card pre-montada o apagada no gasta en lo que nadie ve. */
 :host-context([inert]) .mv__respira,
 :host-context([inert]) .mv__parpado,
-:host-context([inert]) .mv__rayos {
+:host-context([inert]) .mv__rayos,
+:host-context([inert]) .mv__alza,
+:host-context([inert]) .mv__bambolea,
+:host-context([inert]) .mv__cuelga {
   animation-play-state: paused;
 }
 
 @media (prefers-reduced-motion: reduce) {
   .mv__respira,
+  :host(.mv--viva) .mv__respira,
   .mv__parpado,
-  .mv__rayos {
+  .mv__rayos,
+  :host(.mv--viva) .mv__alza,
+  :host(.mv--viva) .mv__bambolea,
+  :host(.mv--viva) .mv__cuelga {
     animation: none;
   }
 }

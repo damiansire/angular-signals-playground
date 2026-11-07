@@ -4,8 +4,11 @@ import {
   DestroyRef,
   ElementRef,
   afterNextRender,
+  effect,
   inject,
+  input,
   output,
+  untracked,
   viewChild,
 } from '@angular/core';
 import {
@@ -23,6 +26,7 @@ import {
   type DetalleDeImpacto,
 } from '../../libs/muelle';
 import { chispas, palabra } from '../../libs/rastros';
+import { elegirOcurrencia, esperaHastaLaProxima, type Ocurrencia } from './ocurrencias';
 
 /** Tamaño del dibujo: `viewBox` del SVG, y el punto de los pies, de donde se aplasta y estira. */
 const LADO = 1080;
@@ -33,6 +37,11 @@ const PIES_Y = 920;
 const UMBRAL_AGARRE = 6;
 
 const GRAVEDAD = 5200;
+
+/** La primera ocurrencia llega enseguida: es el saludo a quien acaba de llegar a la pantalla. */
+const PRIMERA_OCURRENCIA_MS = 900;
+/** Si la acaban de tocar, espera: un gesto suyo encima del rebote se lee como un tic. */
+const RESPIRO_TRAS_TOQUE_MS = 2500;
 
 /** Lo que dice según dónde la tocan. Un toque en la lamparita no es lo mismo que uno en la panza. */
 const PALABRAS = {
@@ -59,8 +68,14 @@ let instancias = 0;
   templateUrl: './mascota-viva.component.html',
   styleUrl: './mascota-viva.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  host: { '[class.mv--viva]': 'vidaPropia()' },
 })
 export class MascotaVivaComponent {
+  /**
+   * Que se mueva sola: se balancea, mira alrededor, se acuerda de su idea, saluda. Es para cuando
+   * ella es la escena (la pantalla de inicio); en una card o en el mapa competiría con el contenido.
+   */
+  readonly vidaPropia = input(false);
   /** Un toque sin arrastre: quien la envuelve puede responder (abrir la pista, por ejemplo). */
   readonly tocada = output<void>();
   /** Cayó después de un agarre, con la fuerza del golpe. */
@@ -116,11 +131,19 @@ export class MascotaVivaComponent {
   private paciencia = 0;
   private ultimoToque = 0;
   private temporizadores = new Set<ReturnType<typeof setTimeout>>();
+  private ocurrencia: Ocurrencia | null = null;
+  private ladoDelPeso: 1 | -1 = 1;
+  /** Los pasos del gesto en curso: dejar de tener vida propia los corta sin tocar los del toque. */
+  private pasosDelGesto = new Set<ReturnType<typeof setTimeout>>();
 
   private readonly destroyRef = inject(DestroyRef);
 
   constructor() {
     afterNextRender(() => this.arrancar());
+    effect(() => {
+      const viva = this.vidaPropia();
+      untracked(() => (viva ? this.programarOcurrencia(PRIMERA_OCURRENCIA_MS) : this.aquietarse()));
+    });
   }
 
   private arrancar(): void {
@@ -150,6 +173,8 @@ export class MascotaVivaComponent {
       window.removeEventListener('pointermove', alMover);
       this.temporizadores.forEach(clearTimeout);
       this.temporizadores.clear();
+      this.pasosDelGesto.forEach(clearTimeout);
+      this.pasosDelGesto.clear();
     });
     this.pintar();
   }
@@ -360,6 +385,147 @@ export class MascotaVivaComponent {
     const alcance = Math.min(d / 90, 1);
     this.m.mirarX.destino = (dx / d) * 14 * alcance;
     this.m.mirarY.destino = (dy / d) * 11 * alcance;
+  }
+
+  // ─── Vida propia ─────────────────────────────────────────────────────────────────────────────
+
+  /** No borra los pasos pendientes: son los del gesto que la agenda, y sin ellos queda a medias. */
+  private programarOcurrencia(ms: number): void {
+    this.paso(ms, () => this.ocurrirse(), true);
+  }
+
+  /** Un paso de un gesto. Si la agarraron en el medio, el paso se saltea: la mano manda. */
+  private paso(ms: number, fn: () => void, siempre = false): void {
+    const id = setTimeout(() => {
+      this.pasosDelGesto.delete(id);
+      if (siempre || !this.agarre) fn();
+      this.despertar();
+    }, ms);
+    this.pasosDelGesto.add(id);
+  }
+
+  /** Si nadie la ve o pidieron quietud, no hace nada: vuelve a fijarse en un rato. */
+  private puedeOcurrirse(): boolean {
+    return (
+      !sinMovimiento() &&
+      !document.hidden &&
+      !this.agarre &&
+      !this.cayendo &&
+      performance.now() - this.ultimoToque > RESPIRO_TRAS_TOQUE_MS &&
+      // La pausa de la vida de fondo (WCAG 2.2.2) y la pestaña oculta las marca el recorrido.
+      !this.host.closest('.fondo-en-pausa, .anims-frozen') &&
+      this.rectVisible() !== null
+    );
+  }
+
+  private ocurrirse(): void {
+    if (!this.vidaPropia()) return;
+    if (!this.puedeOcurrirse()) {
+      this.programarOcurrencia(1500);
+      return;
+    }
+    // La primera es siempre el saludo: acaba de llegar alguien.
+    const o =
+      this.ocurrencia === null ? 'saludo' : elegirOcurrencia(this.ocurrencia, Math.random());
+    this.ocurrencia = o;
+    const dura = this.gestos[o]();
+    this.programarOcurrencia(dura + esperaHastaLaProxima(Math.random()));
+  }
+
+  /** Cada gesto mueve destinos de muelles (no poses) y devuelve cuánto dura, en ms. */
+  private readonly gestos: Record<Ocurrencia, () => number> = {
+    saludo: () => {
+      const m = this.m;
+      // La mano al costado de la cabeza y no encima: arriba quedaba rosa sobre rosa, contra el cuerpo.
+      m.brazoR.destino = -112;
+      m.cejas.destino = -12;
+      m.boca.destino = 0.5;
+      m.cara.destino = 6;
+      m.aplastar.v += 2;
+      for (let i = 0; i < 5; i++) {
+        this.paso(260 + i * 170, () => (m.brazoR.destino = i % 2 ? -130 : -95));
+      }
+      this.paso(1150, () => this.calmar(), true);
+      return 1300;
+    },
+    // Se acuerda de su idea: la mira, se le levantan las cejas y la sacude un poco.
+    mirarIdea: () => {
+      const m = this.m;
+      m.mirarX.destino = -14;
+      m.mirarY.destino = -11;
+      m.cara.destino = -10;
+      m.cejas.destino = -10;
+      this.paso(650, () => {
+        m.cejas.destino = -20;
+        m.boca.destino = 0.7;
+        m.foco.v += 200;
+        m.aplastar.v += 2.5;
+      });
+      this.paso(1500, () => this.calmar(), true);
+      return 1700;
+    },
+    // Mira a un lado y después al sol: la cabeza acompaña a los ojos, y eso es lo que da el giro.
+    mirarAlrededor: () => {
+      const m = this.m;
+      m.mirarX.destino = -14;
+      m.mirarY.destino = 3;
+      m.cara.destino = -14;
+      this.paso(850, () => {
+        m.mirarX.destino = 14;
+        m.mirarY.destino = -9;
+        m.cara.destino = 14;
+        m.cejas.destino = -6;
+      });
+      this.paso(1800, () => this.calmar(), true);
+      return 2000;
+    },
+    cambiarPeso: () => {
+      const m = this.m;
+      const s = (this.ladoDelPeso = this.ladoDelPeso === 1 ? -1 : 1);
+      m.giro.destino = 3.5 * s;
+      m.torcer.destino = -2 * s;
+      m.piernas.destino = -6 * s;
+      m.x.destino = 12 * s;
+      m.cara.destino = 7 * s;
+      m.brazoL.v += 60 * s;
+      m.brazoR.v += 60 * s;
+      this.paso(1700, () => this.calmar(), true);
+      return 1900;
+    },
+    saltito: () => {
+      this.saltar(0.5);
+      this.m.cejas.v -= 160;
+      this.m.boca.v += 10;
+      return 900;
+    },
+    // Se estira con los brazos arriba y bosteza; al soltar, se aplasta y rebota.
+    estirarse: () => {
+      const m = this.m;
+      m.aplastar.destino = -0.14;
+      m.brazoR.destino = -70;
+      m.brazoL.destino = 12;
+      m.boca.destino = 1.1;
+      m.cejas.destino = 8;
+      m.mirarY.destino = -6;
+      this.paso(1150, () => {
+        this.calmar();
+        m.aplastar.v += 3;
+      });
+      return 1600;
+    },
+  };
+
+  /** Vuelve todo a su lugar, menos el alto: ese lo resuelve la caída. */
+  private calmar(): void {
+    for (const k of this.muelles) if (k !== this.m.y) k.destino = 0;
+  }
+
+  private aquietarse(): void {
+    this.pasosDelGesto.forEach(clearTimeout);
+    this.pasosDelGesto.clear();
+    if (this.agarre) return;
+    this.calmar();
+    this.despertar();
   }
 
   // ─── Cuadro ──────────────────────────────────────────────────────────────────────────────────
