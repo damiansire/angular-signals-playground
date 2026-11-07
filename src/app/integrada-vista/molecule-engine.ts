@@ -1317,6 +1317,8 @@ export function initMolecule(
       // fundido que arrancaba antes de que se fuera dejaba "Bitácora" y "El recorrido" flotando sobre
       // la colina al primer toque de la rueda. Gana presencia pasada la landing y al bucear queda en 1.
       topbarEl.style.opacity = chromeVisible(s).toFixed(2);
+      // Invisible igual tapa: su caja se comía los toques a los chips de sonido y pausa de la landing.
+      topbarEl.style.visibility = chromeVisible(s) > 0 ? 'visible' : 'hidden';
     }
     // Como el índice: invisibles en la landing, sus controles (bitácora, práctica, pausa) no pueden
     // quedar en el tab-order ni recibir clicks. Va sobre los links y no sobre el topbar, cuyo `inert`
@@ -1556,7 +1558,11 @@ export function initMolecule(
     // En la landing (intro "Primera luz" + hero) el panel del recorrido queda OCULTO: es rico (nombres,
     // actos, contador) y a media opacidad competía con la entrada. Aparece al empezar a scrollear el
     // recorrido. Fade propio del `.rail` entero (independiente del morph interno).
-    if (railEl) railEl.style.opacity = chromeVisible(s).toFixed(2);
+    if (railEl) {
+      railEl.style.opacity = chromeVisible(s).toFixed(2);
+      // Sus paradas reciben el puntero aunque el riel no: invisibles, tapaban el chip de pausa.
+      railEl.style.visibility = chromeVisible(s) > 0 ? 'visible' : 'hidden';
+    }
 
     // Reflejar en la URL el nivel actual y, si estás adentro, el sub-nivel. -1 = vista molécula. Se
     // keyea por `diveDepth > 0.5` (el mismo umbral que el título del topbar), NO por `w > 1.3`: en la
