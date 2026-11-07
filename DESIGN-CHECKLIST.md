@@ -526,6 +526,15 @@ entrar desarma a Angie en luz y se hace noche, la costura con el prólogo.
       (`caidaDeLaColina`), así sigue pisando el pasto. Va con `translate`/`rotate` sueltos, porque
       la despedida anima el `transform` del mismo elemento. Con un botón apretado es un agarre; con
       el dedo no se asoma. Comprobar con mouse real por CDP a los dos lados.
+- [ ] Antes de desarmarse, Angie lo piensa: "Es la hora…" en una nube sobre la cabeza, con el
+      atardecer ya empezando. Primero salen las burbujas del rastro, de la más chica a la más
+      grande, y después la nube, así se lee que el pensamiento sale de ella. Los puntos aparecen de
+      a uno y la nube se va antes de que tome impulso: nunca se desarma con el globo encima. Va
+      dentro de `.ini__angie` (sigue su asomo) y arriba de la cabeza, donde ya no está el título.
+      Las burbujas del rastro tienen un mínimo en px: con el porcentaje solo, a 1024 px medían 8 y
+      12 px y no se leían como rastro. Medir nube y burbujas contra sol, fichas, lamparita y
+      llamado en los seis anchos (cero solapes, a 8 px o más del borde), con cuadros encadenados
+      tras un click real. Con movimiento reducido no aparece.
 
 ## Overlays que tapan el recorrido (prólogo, modales a pantalla completa)
 
