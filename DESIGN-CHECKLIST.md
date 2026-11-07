@@ -474,8 +474,7 @@ entrar desarma a Angie en luz y se hace noche, la costura con el prólogo.
       sin él el CSS no lo alcanza.
 - [ ] Con movimiento reducido Entrar pasa directo, sin desarme ni luces, y en la escena no queda
       ninguna animación infinita.
-- [ ] El chrome del recorrido (topbar, riel) no asoma sobre la landing: va por encima (z 6 contra
-      5) y su fundido arrancaba en s = 0.03, así que un toque de rueda dejaba "Bitácora" y "Tu
+- [ ] El chrome del recorrido (topbar, riel) no asoma sobre la landing: va por encima (z 6 contra 5) y su fundido arrancaba en s = 0.03, así que un toque de rueda dejaba "Bitácora" y "Tu
       recorrido" flotando sobre la colina. Rueda real de una muesca: topbar y riel en 0 con la
       intro en 1 (`chromeVisible`).
 - [ ] La despedida es el foco: las piezas se separan lejos (al menos 0.3 del ancho de Angie) y
@@ -499,6 +498,24 @@ entrar desarma a Angie en luz y se hace noche, la costura con el prólogo.
 - [ ] El título es el de la historia ("Las aventuras de Angie por el SignalVerso") y la bajada dice
       qué es. Medir título, bajada, sol y fichas sin solapes en los mismos seis anchos, y el
       título en dos renglones.
+- [ ] Angie tiene vida propia mientras espera (`vidaPropia`): se balancea, los brazos y la lamparita
+      se mecen a destiempo, y cada 1.6-4.2 s se le ocurre algo (saluda, mira la idea, mira al sol,
+      cambia el peso, saltito, se estira), sin repetir. Solo respirar y parpadear se leía como un
+      dibujo quieto. Comprobar con una hoja de cuadros (cada 110-250 ms): el saludo va al costado de
+      la cabeza, contra el cielo (encima quedaba rosa sobre rosa), y la lamparita no se le viene
+      encima de la cara. Con la pausa de fondo, con movimiento reducido o al entrar, no hace nada:
+      cero animaciones infinitas y el brazo en `rotate(0)`. Agendar el próximo gesto no puede
+      borrar los pasos del que corre: el brazo del saludo quedaba trabado arriba.
+- [ ] Esperando, Angie sonríe y se sonroja: la boquita en "o" sola es asombro y se leía seria. La
+      sonrisa vive en el grupo de la boca, así el muelle la abre (ríe al saludar, bosteza al
+      estirarse). Solo con vida propia: las mascotas del mapa y de las cards no cambian.
+- [ ] Con el mouse, Angie camina por la cresta hacia el puntero (no lo persigue: 0.45 de la
+      distancia, tope de 300 unidades y lo que deje el borde) y baja con la ladera
+      (`caidaDeLaColina`): los pies siguen sobre el pasto en los dos extremos. Se inclina hacia
+      donde va y rebota en cada paso. Va con `translate`/`rotate` sueltos, porque la despedida anima
+      el `transform` del mismo elemento. Con un botón apretado es un agarre, no un paseo; con el
+      dedo no camina. Comprobar con mouse real por CDP, a la derecha y a la izquierda, mirando los
+      pies en los extremos.
 
 ## Overlays que tapan el recorrido (prólogo, modales a pantalla completa)
 
