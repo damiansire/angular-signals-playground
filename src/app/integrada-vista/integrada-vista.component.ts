@@ -102,6 +102,8 @@ export class IntegradaVistaComponent {
   private readonly errorHandler = inject(ErrorHandler);
   // Por nombre: la pantalla de inicio tiene su propia Angie, y la primera del template no es esta.
   private readonly guia = viewChild('guia', { read: MascotaVivaComponent });
+  /** La de la colina: la escena la lleva hasta el borde, y el paso y la pose los pone ella. */
+  private readonly angieInicio = viewChild('angieInicio', { read: MascotaVivaComponent });
 
   /** Angie en la colina se mueve sola hasta que la despedida la desarma: ahí manda la salida. */
   protected readonly angieEsperando = signal(true);
@@ -226,7 +228,11 @@ export class IntegradaVistaComponent {
     // audio ya desbloqueado y sin pedirle nada más a nadie. Y la construcción de Tusi espera de
     // verdad: si corriera detrás durante esos minutos, llegaría terminada y se comería su propio
     // premio, que es ver aparecer el círculo.
-    const inicio = initInicioAngie(this.host);
+    const inicio = initInicioAngie(this.host, {
+      caminar: (fase, apertura) => this.angieInicio()?.caminar(fase, apertura),
+      sentarse: () => this.angieInicio()?.sentarse(),
+      pararse: () => this.angieInicio()?.pararse(),
+    });
     this.destroyRef.onDestroy(inicio.dispose);
     landing = initIntroTusi(this.host, {
       despedida: () => {

@@ -1,16 +1,10 @@
-import {
-  avanzarMuelle,
-  crearMuelle,
-  emitirImpacto,
-  enReposo,
-  limitar,
-  motorDeMuelles,
-  sinMovimiento,
-} from '../libs/muelle';
+import { aperturaPara, zancada } from '../components-draw/mascota-viva/caminar';
+import { emitirImpacto, limitar, motorDeMuelles, sinMovimiento } from '../libs/muelle';
 import { chispas, onda } from '../libs/rastros';
 
 /**
- * Pantalla de inicio: una mañana en la colina, con Angie esperando. Al entrar se desarma en sus
+ * Pantalla de inicio: una mañana en la colina. Angie camina hasta el borde y se sienta a mirar a lo
+ * lejos, y espera ahí. Al entrar se desarma en sus
  * piezas, cada pieza se vuelve una estela de luz que sube, y el cielo se apaga en el universo donde
  * empieza el prólogo. Es la costura entre la landing clara y el prólogo oscuro: sin ella, el corte
  * de día a noche era un fundido sin motivo.
@@ -133,27 +127,51 @@ export function juncos(semilla: number, cantidad: number, lado: 1 | -1): Junco[]
 }
 
 /**
- * Cuánto se asoma Angie hacia el puntero, en unidades del dibujo. Es para mirar hacia el costado, no
- * para ir: caminando 300 unidades, sin piernas que den pasos, se deslizaba y no se veía natural.
+ * Dónde se sienta Angie, en unidades del dibujo a la derecha del centro: el borde de la meseta,
+ * justo donde la colina empieza a caer. Más afuera la ladera pasa de 20° y sentada se resbalaría.
  */
-export const PASEO_MAX = 60;
-/** Qué fracción de la distancia al puntero se corre: con el mouse en el borde llega al tope. */
-const PASEO_ALCANCE = 0.12;
-/** La inclinación con la que se asoma, en grados, cuando llega al tope. */
-const ASOMO_GRADOS = 3;
+export const ASIENTO = 380;
 
 /**
- * Adónde se asoma Angie con el puntero a `hacia` unidades del centro. `libre` es lo que deja el
- * borde de la pantalla: en una angosta, donde ella ocupa casi todo el ancho, casi no se mueve.
+ * Adónde llega de verdad. `libre` es lo que deja el borde de la pantalla: en una angosta, donde ella
+ * ocupa casi todo el ancho, se sienta casi donde está.
  */
-export function destinoDelPaseo(hacia: number, libre: number): number {
-  const tope = Math.max(0, Math.min(PASEO_MAX, libre));
-  return limitar(hacia * PASEO_ALCANCE, -tope, tope);
+export function asientoEnLaColina(libre: number): number {
+  return limitar(libre, 0, ASIENTO);
 }
 
 /** Cuánto baja el piso a `dx` del centro: lo que hay que bajarla para que siga pisando la colina. */
 export function caidaDeLaColina(dx: number, alto = alturaDeColina): number {
   return alto(ANCHO / 2 + dx) - alto(ANCHO / 2);
+}
+
+/** La pendiente del piso a `dx` del centro, en grados (positivo: baja hacia la derecha). */
+export function pendienteDeLaColina(dx: number, alto = alturaDeColina): number {
+  const x = ANCHO / 2 + dx;
+  return (Math.atan((alto(x + 4) - alto(x - 4)) / 8) * 180) / Math.PI;
+}
+
+/** Fracción del paseo que se va en arrancar, y otra igual en frenar. */
+const RAMPA = 0.2;
+
+/**
+ * Cuánto del camino lleva hecho en la fracción `p` del tiempo: acelera, va parejo y frena. Con
+ * velocidad pareja de punta a punta arrancaba y frenaba en seco, como un muñeco sobre un riel.
+ */
+export function avanceDelPaseo(p: number): number {
+  const t = limitar(p, 0, 1);
+  const escala = 1 - RAMPA;
+  if (t < RAMPA) return (0.5 * t * t) / RAMPA / escala;
+  if (t > 1 - RAMPA) return 1 - (0.5 * (1 - t) * (1 - t)) / RAMPA / escala;
+  return (t - RAMPA / 2) / escala;
+}
+
+/**
+ * Cuántos pasos da para recorrer `distancia` con una zancada de `largo` (las dos en la misma unidad).
+ * Siempre un número entero: arranca y termina con las piernas juntas, nunca a mitad de un paso.
+ */
+export function pasosDelPaseo(distancia: number, largo: number): number {
+  return Math.max(1, Math.round(distancia / Math.max(largo, 1e-6)));
 }
 
 export interface Estrella {
@@ -243,6 +261,9 @@ function n(valor: number): string {
  * volverse luz, que caiga la noche) es lento a propósito: es la transición y tiene que verse.
  */
 const T = {
+  antesDeMirar: 700,
+  antesDeCaminar: 1200,
+  antesDeSentarse: 380,
   idea: 240,
   pensar: 1900,
   decidir: 220,
@@ -258,6 +279,12 @@ const T = {
   destello: 800,
 };
 
+/** Pasos por segundo a velocidad de crucero: un paseo, no un trámite. */
+const CADENCIA = 1.6;
+/** Cuánto de la pendiente acompaña su cuerpo: caminando apenas, sentada se acomoda a la ladera. */
+const INCLINA_CAMINANDO = 0.25;
+const INCLINA_SENTADA = 0.45;
+
 const COLORES_DE_LUZ = ['#ff5fa8', '#ffc65c', '#ffffff', '#ff8ac9'];
 
 export interface InicioAngie {
@@ -266,11 +293,19 @@ export interface InicioAngie {
   dispose(): void;
 }
 
+/** Lo que la escena le pide al cuerpo de Angie. La escena la lleva; el paso y la pose son de ella. */
+export interface AngieDeLaColina {
+  caminar(fase: number, apertura?: number): void;
+  sentarse(): void;
+  pararse(): void;
+}
+
 /**
- * Le da vida a la escena ya pintada: tocar el cielo o la colina deja su rastro y sacude a Angie
- * (vía `emitirImpacto`, el mismo golpe que usa todo el recorrido), y `despedir` corre la salida.
+ * Le da vida a la escena ya pintada: Angie camina hasta el borde y se sienta, tocar el cielo o la
+ * colina deja su rastro y la sacude (vía `emitirImpacto`, el mismo golpe que usa todo el recorrido),
+ * y `despedir` corre la salida.
  */
-export function initInicioAngie(host: HTMLElement): InicioAngie {
+export function initInicioAngie(host: HTMLElement, cuerpo?: AngieDeLaColina): InicioAngie {
   const encontrada = host.querySelector<HTMLElement>('.tusi__overlay');
   // Igual que la landing: sin escena, que se note acá y no como un Entrar que no hace nada.
   if (!encontrada) throw new Error('inicio-angie: falta .tusi__overlay en el host');
@@ -323,39 +358,99 @@ export function initInicioAngie(host: HTMLElement): InicioAngie {
   };
   escena.addEventListener('click', alClic);
 
-  // Con el mouse, se asoma hacia donde está: se corre un poco y se inclina, sin ir. La cara y el
-  // cuerpo que giran hacia el puntero los pone la mascota. Va con `translate`/`rotate` sueltos
-  // porque la despedida anima el `transform` de este mismo elemento. Muelle lento y casi sin
-  // rebote: es un gesto de curiosidad, no un resorte.
-  const paseo = crearMuelle(0, 14, 7);
+  // Al llegar, Angie mira hacia el borde y camina despacio hasta sentarse donde la colina empieza a
+  // caer. Va con `translate`/`rotate` sueltos porque la despedida anima el `transform` de este mismo
+  // elemento.
   const motor = motorDeMuelles();
+  const temporizadores = new Set<ReturnType<typeof setTimeout>>();
+  const luego = (ms: number, fn: () => void): void => {
+    const id = setTimeout(() => {
+      temporizadores.delete(id);
+      fn();
+    }, ms);
+    temporizadores.add(id);
+  };
   const unidad = (): number =>
     Math.max(escena.clientWidth / ANCHO, escena.clientHeight / ALTO) || 1;
-  const asomarse = (dt: number): boolean => {
-    if (!angie) return false;
-    avanzarMuelle(paseo, dt);
+  /** Una unidad del dibujo de Angie (1080 de lado), en unidades del paisaje. */
+  const deAngie = (): number => (angie ? angie.offsetWidth / 1080 / unidad() : 1);
+  const asiento = (): number =>
+    angie ? asientoEnLaColina(((escena.clientWidth - angie.offsetWidth) / 2 - 24) / unidad()) : 0;
+  const ubicar = (x: number, inclinar: number): void => {
+    if (!angie) return;
     const u = unidad();
-    const y = caidaDeLaColina(paseo.x);
-    angie.style.translate = `${(paseo.x * u).toFixed(1)}px ${(y * u).toFixed(1)}px`;
-    angie.style.rotate = `${((paseo.x / PASEO_MAX) * ASOMO_GRADOS).toFixed(2)}deg`;
-    return !enReposo(paseo);
+    angie.style.translate = `${(x * u).toFixed(1)}px ${(caidaDeLaColina(x) * u).toFixed(1)}px`;
+    const inclina = `${(pendienteDeLaColina(x) * inclinar).toFixed(2)}deg`;
+    angie.style.rotate = inclina;
+    // La nube del pensamiento la desinclina: un texto torcido se leía como un error.
+    angie.style.setProperty('--inclina', inclina);
   };
-  const sacarPaseo = motor.agregar(asomarse);
-  const alMoverMouse = (e: PointerEvent): void => {
-    // Con un botón apretado es un agarre de Angie, no un asomarse.
-    if (e.pointerType !== 'mouse' || e.buttons || !angie || sinMovimiento()) return;
-    if (escena.classList.contains('ini--saliendo')) return;
-    const r = escena.getBoundingClientRect();
-    const u = unidad();
-    const libre = ((r.width - angie.offsetWidth) / 2 - 24) / u;
-    paseo.destino = destinoDelPaseo((e.clientX - r.left - r.width / 2) / u, libre);
+
+  let paseo: { t: number; dura: number; hasta: number; pasos: number; apertura: number } | null =
+    null;
+  let sentada = false;
+  const sentarse = (x: number): void => {
+    paseo = null;
+    sentada = true;
+    ubicar(x, INCLINA_SENTADA);
+    escena.classList.add('ini--sentada');
+    cuerpo?.sentarse();
+  };
+  const pasear = (dt: number): boolean => {
+    if (!paseo) return false;
+    // Con la pausa de la vida de fondo, lo que tiene fin salta a su final.
+    if (escena.closest('.fondo-en-pausa')) {
+      sentarse(paseo.hasta);
+      return false;
+    }
+    // Una pestaña que vuelve trae un cuadro de segundos: el paseo no puede saltar de golpe.
+    paseo.t += Math.min(dt, 0.05);
+    const p = paseo.t / paseo.dura;
+    const x = paseo.hasta * avanceDelPaseo(p);
+    ubicar(x, INCLINA_CAMINANDO);
+    cuerpo?.caminar(0.5 + paseo.pasos * (x / paseo.hasta), paseo.apertura);
+    if (p < 1) return true;
+    // Llega con las piernas juntas, se queda un instante y recién ahí se sienta.
+    const hasta = paseo.hasta;
+    paseo = null;
+    luego(T.antesDeSentarse, () => sentarse(hasta));
+    return false;
+  };
+  const sacarPaseo = motor.agregar(pasear);
+  const arrancar = (): void => {
+    if (!angie || cerrado || escena.classList.contains('ini--saliendo')) return;
+    const hasta = asiento();
+    // La zancada del dibujo, pasada al paisaje: el pie apoyado barre justo lo que avanza el cuerpo.
+    const largo = zancada() * deAngie();
+    // Sin movimiento, en pausa, sin la landing a la vista o sin lugar para un paso: ya sentada.
+    const quieta =
+      sinMovimiento() ||
+      escena.closest('.fondo-en-pausa') !== null ||
+      escena.classList.contains('gone') ||
+      hasta < largo;
+    if (quieta) {
+      sentarse(hasta);
+      return;
+    }
+    const pasos = pasosDelPaseo(hasta, largo);
+    paseo = {
+      t: 0,
+      dura: pasos / CADENCIA / (1 - RAMPA),
+      hasta,
+      pasos,
+      apertura: aperturaPara(hasta / pasos / deAngie()),
+    };
     motor.despertar();
   };
-  escena.addEventListener('pointermove', alMoverMouse);
-  // Al cambiar el tamaño, el lugar en píxeles ya no corresponde: vuelve al centro, que siempre entra.
+  // Primero gira la cabeza hacia el borde y después arranca: decide adónde va antes de ir.
+  luego(T.antesDeMirar, () => {
+    if (!cerrado && !escena.classList.contains('ini--saliendo')) cuerpo?.caminar(0.5);
+  });
+  luego(T.antesDeCaminar, arrancar);
+  // Al cambiar el tamaño, el asiento en píxeles ya no corresponde: queda sentada en el nuevo.
   const alRedimensionar = (): void => {
-    paseo.destino = 0;
-    motor.despertar();
+    if (escena.classList.contains('ini--saliendo') || (!paseo && !sentada)) return;
+    sentarse(asiento());
   };
   window.addEventListener('resize', alRedimensionar);
 
@@ -375,6 +470,13 @@ export function initInicioAngie(host: HTMLElement): InicioAngie {
 
   async function despedir(): Promise<void> {
     escena.classList.add('ini--saliendo');
+    // Si la tocan en camino, se queda donde está, parada: la idea le llega ahí.
+    temporizadores.forEach(clearTimeout);
+    temporizadores.clear();
+    if (!sentada) {
+      paseo = null;
+      cuerpo?.pararse();
+    }
     if (sinMovimiento() || !angie || !luces) return;
 
     // Primero se ve la idea prenderse (el CSS la enciende con `ini--saliendo`): es la causa, toque
@@ -586,8 +688,9 @@ export function initInicioAngie(host: HTMLElement): InicioAngie {
       cerrado = true;
       escena.removeEventListener('pointerdown', alTocar);
       escena.removeEventListener('click', alClic);
-      escena.removeEventListener('pointermove', alMoverMouse);
       window.removeEventListener('resize', alRedimensionar);
+      temporizadores.forEach(clearTimeout);
+      temporizadores.clear();
       sacarPaseo();
       animaciones.forEach((a) => a.cancel());
       animaciones.clear();

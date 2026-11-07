@@ -1,12 +1,13 @@
 import { IMPACTO } from '../libs/muelle';
 import {
   ANCHO,
-  PASEO_MAX,
+  ASIENTO,
   alturaDeColina,
+  asientoEnLaColina,
+  avanceDelPaseo,
   azar,
   caidaDeLaColina,
   caminoDeColina,
-  destinoDelPaseo,
   dispersion,
   estela,
   estrellas,
@@ -14,6 +15,8 @@ import {
   initInicioAngie,
   juncos,
   matasDePasto,
+  pasosDelPaseo,
+  pendienteDeLaColina,
 } from './inicio-angie';
 
 /**
@@ -59,32 +62,49 @@ describe('inicio-angie', () => {
     });
   });
 
-  describe('asomarse hacia el mouse', () => {
-    it('se asoma sin ir: se corre mucho menos que la distancia al puntero', () => {
-      expect(destinoDelPaseo(200, 1000)).toBeGreaterThan(0);
-      expect(destinoDelPaseo(200, 1000)).toBeLessThan(200);
-      expect(destinoDelPaseo(-200, 1000)).toBeLessThan(0);
+  describe('el paseo hasta el borde', () => {
+    it('se sienta donde la meseta empieza a caer, no en la ladera empinada', () => {
+      expect(caidaDeLaColina(ASIENTO)).toBeGreaterThan(20);
+      expect(caidaDeLaColina(ASIENTO)).toBeLessThan(60);
+      expect(pendienteDeLaColina(ASIENTO)).toBeGreaterThan(5);
+      expect(pendienteDeLaColina(ASIENTO)).toBeLessThan(22);
     });
 
-    it('no pasa del tope ni de lo que deja el borde de la pantalla', () => {
-      expect(destinoDelPaseo(5000, 1000)).toBe(PASEO_MAX);
-      expect(destinoDelPaseo(-5000, 1000)).toBe(-PASEO_MAX);
-      expect(destinoDelPaseo(5000, 40)).toBe(40);
-      expect(destinoDelPaseo(5000, -10)).toBe(0);
+    it('no pasa del borde de la meseta ni de lo que deja la pantalla', () => {
+      expect(asientoEnLaColina(5000)).toBe(ASIENTO);
+      expect(asientoEnLaColina(120)).toBe(120);
+      expect(asientoEnLaColina(-30)).toBe(0);
     });
 
-    it('sigue pisando la colina: en el centro no baja y en el tope baja con la ladera', () => {
+    it('sigue pisando la colina: en el centro no baja y en el asiento baja con la ladera', () => {
       expect(caidaDeLaColina(0)).toBe(0);
-      for (const dx of [-PASEO_MAX, PASEO_MAX]) {
-        expect(caidaDeLaColina(dx))
-          .withContext(`dx = ${dx}`)
-          .toBeCloseTo(alturaDeColina(ANCHO / 2 + dx) - alturaDeColina(ANCHO / 2), 6);
-      }
+      expect(caidaDeLaColina(ASIENTO)).toBeCloseTo(
+        alturaDeColina(ANCHO / 2 + ASIENTO) - alturaDeColina(ANCHO / 2),
+        6,
+      );
     });
 
-    it('en todo el recorrido queda arriba de la colina, lejos de donde empieza la bajada fuerte', () => {
-      for (let dx = -PASEO_MAX; dx <= PASEO_MAX; dx += 20) {
-        expect(caidaDeLaColina(dx)).withContext(`dx = ${dx}`).toBeLessThan(60);
+    it('arranca y frena suave, sin volver atrás', () => {
+      expect(avanceDelPaseo(0)).toBe(0);
+      expect(avanceDelPaseo(1)).toBeCloseTo(1, 9);
+      let antes = 0;
+      for (let p = 0.01; p <= 1; p += 0.01) {
+        expect(avanceDelPaseo(p)).withContext(`p = ${p}`).toBeGreaterThanOrEqual(antes);
+        antes = avanceDelPaseo(p);
+      }
+      // Lo que avanza en el primer y el último 5% es mucho menos que en un 5% del medio.
+      const medio = avanceDelPaseo(0.525) - avanceDelPaseo(0.475);
+      expect(avanceDelPaseo(0.05)).toBeLessThan(medio * 0.3);
+      expect(1 - avanceDelPaseo(0.95)).toBeLessThan(medio * 0.3);
+    });
+
+    it('da pasos enteros, al menos uno, con zancadas parecidas a las suyas', () => {
+      expect(pasosDelPaseo(380, 37)).toBe(10);
+      expect(pasosDelPaseo(10, 37)).toBe(1);
+      for (const distancia of [100, 237, 380]) {
+        const pasos = pasosDelPaseo(distancia, 37);
+        expect(Number.isInteger(pasos)).toBeTrue();
+        expect(Math.abs(distancia / pasos - 37)).toBeLessThan(37 / 2);
       }
     });
   });

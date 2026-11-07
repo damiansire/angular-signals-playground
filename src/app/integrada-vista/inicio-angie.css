@@ -395,6 +395,10 @@
   margin: 0;
   pointer-events: none;
 }
+/* Sentada, la cabeza queda más abajo (lo que baja el cuerpo: 78 de los 1080 del dibujo). */
+.ini--sentada .ini__piensa {
+  translate: 0 7.2%;
+}
 .ini__rastro,
 .ini__burbuja {
   position: absolute;
@@ -435,6 +439,7 @@
   line-height: 1;
   color: #22302a;
   transform-origin: 60% 100%;
+  rotate: calc(var(--inclina, 0deg) * -1);
 }
 /* Al irse, los puntos esperan a que la nube se encoja: si se apagaban antes, quedaba "Es la hora"
    pelado un instante. */
