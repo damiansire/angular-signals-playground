@@ -26,6 +26,7 @@ import {
   type DetalleDeImpacto,
 } from '../../libs/muelle';
 import { chispas, palabra } from '../../libs/rastros';
+import { posturaDePaso, type PosturaDePaso } from './caminar';
 import { elegirOcurrencia, esperaHastaLaProxima, type Ocurrencia } from './ocurrencias';
 
 /** Tamaño del dibujo: `viewBox` del SVG, y el punto de los pies, de donde se aplasta y estira. */
@@ -51,6 +52,36 @@ const PALABRAS = {
   pies: ['¡mis pies!', '¡hop!', '¡ojo!'],
   harta: ['¡basta!', '¡ya va!', '¡uf!'],
   mareada: ['me mareo…', 'uuuh…'],
+};
+
+/**
+ * Sentada en el piso, de frente: las piernas vienen hacia quien mira, así que se ven cortas (escorzo)
+ * y con los pies abiertos, y el cuerpo baja hasta que el escudo apoya en el pasto.
+ */
+const SENTADA_BAJA = 78;
+const SENTADA_ABRE = 36;
+const SENTADA_ESCORZO = 0.52;
+
+type Postura = 'parada' | 'caminando' | 'sentada';
+
+/**
+ * Adónde vuelve cada parte cuando no hace nada. Parada, de frente. Caminando, mira hacia donde va
+ * (de costado y mirando al público se leía como un cangrejo). Sentada mira a lo lejos, un poco hacia
+ * arriba: es lo que la hace pensativa sin que tenga que hacer nada.
+ */
+const REPOSO: Record<Postura, Readonly<Record<string, number>>> = {
+  parada: {},
+  caminando: { cara: 12, mirarX: 12, mirarY: 1 },
+  sentada: { cara: 13, mirarX: 13, mirarY: -7, giro: -1, brazoR: -14, cejas: -3 },
+};
+
+const QUIETA: PosturaDePaso = {
+  piernaL: 0,
+  piernaR: 0,
+  alzar: 0,
+  giro: 0,
+  brazoL: 0,
+  brazoR: 0,
 };
 
 let instancias = 0;
@@ -100,7 +131,10 @@ export class MascotaVivaComponent {
   private readonly elPiernaR = viewChild.required<ElementRef<SVGGElement>>('piernaR');
 
   // Poca amortiguación en el cuerpo: que oscile varias veces antes de quedarse es la gelatina.
+  // Sentarse no es gelatina: baja y rebota una sola vez, como quien se deja caer despacio.
   private readonly m = {
+    sentar: crearMuelle(0, 90, 11),
+    vaiven: crearMuelle(0, 60, 6),
     aplastar: crearMuelle(0, 260, 11),
     giro: crearMuelle(0, 130, 10),
     torcer: crearMuelle(0, 200, 10),
@@ -135,6 +169,9 @@ export class MascotaVivaComponent {
   private ladoDelPeso: 1 | -1 = 1;
   /** Los pasos del gesto en curso: dejar de tener vida propia los corta sin tocar los del toque. */
   private pasosDelGesto = new Set<ReturnType<typeof setTimeout>>();
+  private postura: Postura = 'parada';
+  /** El paso no es un muelle: lo dicta quien la mueve, cuadro a cuadro, según lo que avanzó. */
+  private pisada: PosturaDePaso = QUIETA;
 
   private readonly destroyRef = inject(DestroyRef);
 
@@ -194,6 +231,41 @@ export class MascotaVivaComponent {
     this.m.aplastar.v = Math.min(this.m.aplastar.v + 3.2 * fuerza, 6.5);
     this.m.y.v -= 900 * fuerza;
     this.cayendo = true;
+    this.despertar();
+  }
+
+  // ─── Caminar y sentarse ──────────────────────────────────────────────────────────────────────
+
+  /**
+   * Da el paso que corresponde a `fase` (en pasos desde que arrancó). Quien la lleva por la pantalla
+   * calcula la fase con lo que avanzó: así el pie apoyado no patina.
+   */
+  caminar(fase: number, apertura?: number): void {
+    if (this.postura !== 'caminando') this.cambiarPostura('caminando');
+    this.pisada = posturaDePaso(fase, apertura);
+    this.pintar();
+  }
+
+  /** Se sienta donde está y se queda mirando a lo lejos. */
+  sentarse(): void {
+    this.cambiarPostura('sentada');
+  }
+
+  /** Se queda parada con las piernas juntas: termina el paso o se levanta. */
+  pararse(): void {
+    this.cambiarPostura('parada');
+  }
+
+  private cambiarPostura(postura: Postura): void {
+    this.postura = postura;
+    this.pisada = QUIETA;
+    this.m.sentar.destino = postura === 'sentada' ? 1 : 0;
+    this.calmar();
+    if (sinMovimiento()) {
+      this.muelles.forEach(asentar);
+      this.pintar();
+      return;
+    }
     this.despertar();
   }
 
@@ -370,7 +442,9 @@ export class MascotaVivaComponent {
   }
 
   private seguirConLaMirada(e: PointerEvent): void {
+    // Caminando mira hacia donde va: seguir el mouse la hacía ir de costado.
     if (e.pointerType !== 'mouse' || this.agarre || sinMovimiento()) return;
+    if (this.postura === 'caminando') return;
     const r = this.rectVisible();
     if (!r) return;
     this.mirarHacia(e.clientX, e.clientY, r);
@@ -426,13 +500,16 @@ export class MascotaVivaComponent {
 
   private ocurrirse(): void {
     if (!this.vidaPropia()) return;
-    if (!this.puedeOcurrirse()) {
+    if (!this.puedeOcurrirse() || this.postura === 'caminando') {
       this.programarOcurrencia(1500);
       return;
     }
-    // La primera es siempre el saludo: acaba de llegar alguien.
+    const sentada = this.postura === 'sentada';
+    // Parada, la primera es siempre el saludo: acaba de llegar alguien. Sentada está en lo suyo.
     const o =
-      this.ocurrencia === null ? 'saludo' : elegirOcurrencia(this.ocurrencia, Math.random());
+      this.ocurrencia === null && !sentada
+        ? 'saludo'
+        : elegirOcurrencia(this.ocurrencia, Math.random(), sentada);
     this.ocurrencia = o;
     const dura = this.gestos[o]();
     this.programarOcurrencia(dura + esperaHastaLaProxima(Math.random()));
@@ -519,11 +596,38 @@ export class MascotaVivaComponent {
       });
       return 1600;
     },
+    // Sentada: mira más lejos todavía, como si algo allá le llamara la atención, y vuelve.
+    mirarLejos: () => {
+      const m = this.m;
+      m.mirarX.destino = 14;
+      m.mirarY.destino = -11;
+      m.cara.destino = 16;
+      m.cejas.destino = -8;
+      this.paso(1500, () => (m.cejas.destino = 1));
+      this.paso(2600, () => this.calmar(), true);
+      return 2800;
+    },
+    // Sentada en el borde, los pies van y vienen a destiempo.
+    balancearPies: () => {
+      const m = this.m;
+      for (let i = 0; i < 6; i++) {
+        this.paso(i * 430, () => (m.vaiven.destino = i % 2 ? -9 : 9));
+      }
+      this.paso(2600, () => this.calmar(), true);
+      return 2800;
+    },
   };
 
-  /** Vuelve todo a su lugar, menos el alto: ese lo resuelve la caída. */
+  /**
+   * Vuelve todo al reposo de su postura, menos el alto (lo resuelve la caída) y el sentarse (lo
+   * decide la postura, no un gesto).
+   */
   private calmar(): void {
-    for (const k of this.muelles) if (k !== this.m.y) k.destino = 0;
+    const reposo = REPOSO[this.postura];
+    for (const [nombre, k] of Object.entries(this.m)) {
+      if (k === this.m.y || k === this.m.sentar) continue;
+      k.destino = reposo[nombre] ?? 0;
+    }
   }
 
   private aquietarse(): void {
@@ -581,10 +685,13 @@ export class MascotaVivaComponent {
 
   private pintar(): void {
     const m = this.m;
+    const p = this.pisada;
+    const sentada = m.sentar.x;
     const aplastar = limitar(m.aplastar.x, -0.4, 0.4);
+    const bajar = m.y.x + sentada * SENTADA_BAJA + p.alzar;
     set(
       this.elCuerpo(),
-      `translate(${n(m.x.x)} ${n(m.y.x)}) translate(${PIES_X} ${PIES_Y}) rotate(${n(m.giro.x)}) ` +
+      `translate(${n(m.x.x)} ${n(bajar)}) translate(${PIES_X} ${PIES_Y}) rotate(${n(m.giro.x + p.giro)}) ` +
         `skewX(${n(m.torcer.x)}) scale(${n(1 + aplastar * 0.82)} ${n(1 - aplastar)}) ` +
         `translate(${-PIES_X} ${-PIES_Y})`,
     );
@@ -595,8 +702,8 @@ export class MascotaVivaComponent {
       `translate(${PIES_X + m.x.x} 930) scale(${n(1 - altura + aplastar * 0.5)} ${n(1 - altura * 0.6)}) translate(${-PIES_X} -930)`,
     );
     this.elSombra().nativeElement.style.opacity = n(1 - altura * 0.7);
-    set(this.elBrazoL(), `rotate(${n(m.brazoL.x)} 286.7 557.42)`);
-    set(this.elBrazoR(), `rotate(${n(m.brazoR.x)} 828.71 623.84)`);
+    set(this.elBrazoL(), `rotate(${n(m.brazoL.x + p.brazoL)} 286.7 557.42)`);
+    set(this.elBrazoR(), `rotate(${n(m.brazoR.x + p.brazoR)} 828.71 623.84)`);
     set(this.elFoco(), `rotate(${n(m.foco.x)} 184 470)`);
     set(this.elCara(), `translate(${n(m.cara.x * 0.5)} 0)`);
     set(this.elRostro(), `translate(${n(m.cara.x)} ${n(m.aplastar.x * 18)})`);
@@ -608,8 +715,19 @@ export class MascotaVivaComponent {
       this.elBoca(),
       `translate(526.58 650) scale(${n(1 + m.boca.x * 0.2)} ${n(boca)}) translate(-526.58 -650)`,
     );
-    set(this.elPiernaL(), `rotate(${n(m.piernas.x)} 465 770)`);
-    set(this.elPiernaR(), `rotate(${n(m.piernas.x)} 650 790)`);
+    // Cada pierna por su lado: caminando se cruzan, y sentada se abren y se acortan (escorzo).
+    const escorzo = n(1 - SENTADA_ESCORZO * sentada);
+    const abre = sentada * SENTADA_ABRE;
+    set(
+      this.elPiernaL(),
+      `rotate(${n(m.piernas.x + p.piernaL + m.vaiven.x + abre)} 465 770) ` +
+        `translate(465 770) scale(1 ${escorzo}) translate(-465 -770)`,
+    );
+    set(
+      this.elPiernaR(),
+      `rotate(${n(m.piernas.x + p.piernaR - m.vaiven.x - abre)} 650 790) ` +
+        `translate(650 790) scale(1 ${escorzo}) translate(-650 -790)`,
+    );
   }
 }
 

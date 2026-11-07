@@ -16,9 +16,33 @@ describe('ocurrencias de la mascota', () => {
     }
   });
 
-  it('con tiradas parejas aparecen todas', () => {
+  it('nunca repite la anterior, tampoco sentada', () => {
+    for (const anterior of OCURRENCIAS) {
+      for (const t of tiradas) expect(elegirOcurrencia(anterior, t, true)).not.toBe(anterior);
+    }
+  });
+
+  it('parada aparecen todas las suyas, y ninguna de sentada', () => {
     const vistas = new Set<Ocurrencia>(tiradas.map((t) => elegirOcurrencia(null, t)));
-    expect([...vistas].sort()).toEqual([...OCURRENCIAS].sort());
+    expect([...vistas].sort()).toEqual(
+      (
+        [
+          'cambiarPeso',
+          'estirarse',
+          'mirarAlrededor',
+          'mirarIdea',
+          'saludo',
+          'saltito',
+        ] as Ocurrencia[]
+      ).sort(),
+    );
+  });
+
+  it('sentada, pensativa, solo hace lo tranquilo: nada que la levante', () => {
+    const vistas = new Set<Ocurrencia>(tiradas.map((t) => elegirOcurrencia(null, t, true)));
+    expect([...vistas].sort()).toEqual(
+      (['balancearPies', 'mirarAlrededor', 'mirarIdea', 'mirarLejos'] as Ocurrencia[]).sort(),
+    );
   });
 
   it('lo chico pasa más seguido que saludar', () => {
