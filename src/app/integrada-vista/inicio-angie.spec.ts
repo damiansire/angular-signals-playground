@@ -1,9 +1,12 @@
 import { IMPACTO } from '../libs/muelle';
 import {
   ANCHO,
+  PASEO_MAX,
   alturaDeColina,
   azar,
+  caidaDeLaColina,
   caminoDeColina,
+  destinoDelPaseo,
   dispersion,
   estela,
   estrellas,
@@ -53,6 +56,36 @@ describe('inicio-angie', () => {
       expect(d.startsWith('M-40 ')).toBeTrue();
       expect(d.endsWith('Z')).toBeTrue();
       expect(d).toContain(`L${ANCHO + 40} 1080`);
+    });
+  });
+
+  describe('el paseo hacia el mouse', () => {
+    it('se acerca sin perseguir: camina menos que la distancia al puntero', () => {
+      expect(destinoDelPaseo(200, 1000)).toBeGreaterThan(0);
+      expect(destinoDelPaseo(200, 1000)).toBeLessThan(200);
+      expect(destinoDelPaseo(-200, 1000)).toBeLessThan(0);
+    });
+
+    it('no pasa del tope ni de lo que deja el borde de la pantalla', () => {
+      expect(destinoDelPaseo(5000, 1000)).toBe(PASEO_MAX);
+      expect(destinoDelPaseo(-5000, 1000)).toBe(-PASEO_MAX);
+      expect(destinoDelPaseo(5000, 40)).toBe(40);
+      expect(destinoDelPaseo(5000, -10)).toBe(0);
+    });
+
+    it('sigue pisando la colina: en el centro no baja y en el tope baja con la ladera', () => {
+      expect(caidaDeLaColina(0)).toBe(0);
+      for (const dx of [-PASEO_MAX, PASEO_MAX]) {
+        expect(caidaDeLaColina(dx))
+          .withContext(`dx = ${dx}`)
+          .toBeCloseTo(alturaDeColina(ANCHO / 2 + dx) - alturaDeColina(ANCHO / 2), 6);
+      }
+    });
+
+    it('en todo el recorrido queda arriba de la colina, lejos de donde empieza la bajada fuerte', () => {
+      for (let dx = -PASEO_MAX; dx <= PASEO_MAX; dx += 20) {
+        expect(caidaDeLaColina(dx)).withContext(`dx = ${dx}`).toBeLessThan(60);
+      }
     });
   });
 

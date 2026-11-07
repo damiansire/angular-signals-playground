@@ -103,6 +103,9 @@ export class IntegradaVistaComponent {
   // Por nombre: la pantalla de inicio tiene su propia Angie, y la primera del template no es esta.
   private readonly guia = viewChild('guia', { read: MascotaVivaComponent });
 
+  /** Angie en la colina se mueve sola hasta que la despedida la desarma: ahí manda la salida. */
+  protected readonly angieEsperando = signal(true);
+
   /** El paisaje de la pantalla de inicio. Con semilla: la misma mañana en cada visita. */
   protected readonly paisaje = {
     colina: caminoDeColina(),
@@ -226,7 +229,10 @@ export class IntegradaVistaComponent {
     const inicio = initInicioAngie(this.host);
     this.destroyRef.onDestroy(inicio.dispose);
     landing = initIntroTusi(this.host, {
-      despedida: inicio.despedir,
+      despedida: () => {
+        this.angieEsperando.set(false);
+        return inicio.despedir();
+      },
       // La preferencia de sonido se elige en el overlay del intro pero quien suena después es el
       // prólogo: viaja con el gatillo para que silenciar antes de entrar valga para los dos.
       alEntrar: (startBuild) => {
