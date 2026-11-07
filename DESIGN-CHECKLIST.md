@@ -509,13 +509,12 @@ entrar desarma a Angie en luz y se hace noche, la costura con el prólogo.
 - [ ] Esperando, Angie sonríe y se sonroja: la boquita en "o" sola es asombro y se leía seria. La
       sonrisa vive en el grupo de la boca, así el muelle la abre (ríe al saludar, bosteza al
       estirarse). Solo con vida propia: las mascotas del mapa y de las cards no cambian.
-- [ ] Con el mouse, Angie camina por la cresta hacia el puntero (no lo persigue: 0.45 de la
-      distancia, tope de 300 unidades y lo que deje el borde) y baja con la ladera
-      (`caidaDeLaColina`): los pies siguen sobre el pasto en los dos extremos. Se inclina hacia
-      donde va y rebota en cada paso. Va con `translate`/`rotate` sueltos, porque la despedida anima
-      el `transform` del mismo elemento. Con un botón apretado es un agarre, no un paseo; con el
-      dedo no camina. Comprobar con mouse real por CDP, a la derecha y a la izquierda, mirando los
-      pies en los extremos.
+- [ ] Con el mouse, Angie se asoma hacia el puntero, no camina: se corre como mucho 60 unidades,
+      se inclina hasta 3° y la cara y el cuerpo giran hacia ese lado. Caminando 300 unidades, sin
+      piernas que den pasos, se deslizaba y no se veía natural. Baja lo que baja la colina
+      (`caidaDeLaColina`), así sigue pisando el pasto. Va con `translate`/`rotate` sueltos, porque
+      la despedida anima el `transform` del mismo elemento. Con un botón apretado es un agarre; con
+      el dedo no se asoma. Comprobar con mouse real por CDP a los dos lados.
 
 ## Overlays que tapan el recorrido (prólogo, modales a pantalla completa)
 
