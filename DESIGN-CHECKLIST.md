@@ -474,6 +474,20 @@ entrar desarma a Angie en luz y se hace noche, la costura con el prólogo.
       sin él el CSS no lo alcanza.
 - [ ] Con movimiento reducido Entrar pasa directo, sin desarme ni luces, y en la escena no queda
       ninguna animación infinita.
+- [ ] El chrome del recorrido (topbar, riel) no asoma sobre la landing: va por encima (z 6 contra
+      5) y su fundido arrancaba en s = 0.03, así que un toque de rueda dejaba "Bitácora" y "Tu
+      recorrido" flotando sobre la colina. Rueda real de una muesca: topbar y riel en 0 con la
+      intro en 1 (`chromeVisible`).
+- [ ] La despedida es el foco: las piezas se separan lejos (al menos 0.3 del ancho de Angie) y
+      quedan suspendidas un momento; la noche tarda ~3 s y las luces viajan al sol, que late con
+      cada una y se apaga con el destello. Con un segundo de noche y saltos cortos se veía todo
+      pegado y apurado. Se revisa con capturas encadenadas tras un click real.
+- [ ] Entrar es un objeto de la escena, no un botón encima: la lamparita de Angie (un `<button>`
+      transparente sobre el dibujo, con nombre "Entrar") y abajo solo el llamado "✦ Tocá la idea
+      para entrar ✦", que es su `<label>`. Una píldora oscura bajo el título se leía como un hueco
+      y una magenta seguía siendo una caja. El halo de la idea va DETRÁS del dibujo: delante, en
+      `screen` sobre el cielo claro, no se notaba. Medir el llamado en un renglón a 375 px y sin
+      tocar los pies de Angie ni los interruptores.
 
 ## Overlays que tapan el recorrido (prólogo, modales a pantalla completa)
 
