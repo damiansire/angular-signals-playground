@@ -247,7 +247,9 @@ const T = {
   anticipar: 380,
   dispersar: 900,
   flotar: 650,
-  aLuz: 320,
+  cargar: 260,
+  condensar: 200,
+  nacer: 340,
   escalon: 95,
   subir: 1500,
   absorber: 280,
@@ -386,6 +388,9 @@ export function initInicioAngie(host: HTMLElement): InicioAngie {
     }
     await esperar(T.idea);
     if (cerrado) return;
+    // La luz se vuelve dorada antes de que caiga la noche: un día que se apaga de golpe no es un
+    // atardecer, es un corte.
+    escena.classList.add('ini--atardecer');
     // Anticipación: se agacha y se estira, como quien toma impulso.
     await animar(
       angie,
@@ -407,6 +412,11 @@ export function initInicioAngie(host: HTMLElement): InicioAngie {
     const cy = centro.y - origen.top;
     onda(escena, cx, cy, 'rgba(255, 255, 255, 0.8)', caja.width * 1.6);
     chispas(escena, cx, cy, '#ffffff', 12);
+    // La sombra de contacto no es una pieza: sin apagarla, quedaba en el pasto como una mancha
+    // cuando ella ya era luz.
+    const sombra = angie.querySelector('.mv__sombra');
+    if (sombra)
+      animar(sombra, [{ opacity: 1 }, { opacity: 0 }], { duration: 420, easing: 'ease-out' });
     // Cada pieza se mueve en las unidades de su dibujo (1080 de lado), no en píxeles de pantalla.
     const escala = 1080 / Math.max(caja.width, 1);
     const margen = 24;
@@ -458,13 +468,26 @@ export function initInicioAngie(host: HTMLElement): InicioAngie {
       const b = p.getBoundingClientRect();
       const desde = { x: b.left + b.width / 2 - origen.left, y: b.top + b.height / 2 - origen.top };
       const retraso = i * T.escalon;
-      animar(p, [{ opacity: 1 }, { opacity: 0, scale: '0.4' }], {
-        duration: T.aLuz,
-        delay: retraso,
-        easing: 'ease-in',
-      });
       const color = COLORES_DE_LUZ[i % COLORES_DE_LUZ.length];
-      return subirLuz(desde, destino, color, retraso).then(() => {
+      // La pieza se carga de luz y se condensa en un punto, y de ese punto nace la luz. Antes se
+      // apagaba y al lado aparecía una estela ya hecha: se leían como dos cosas distintas.
+      const brillo = `brightness(1.9) drop-shadow(0 0 30px ${color})`;
+      animar(
+        p,
+        [
+          { opacity: 1, scale: '1', filter: 'brightness(1)', easing: 'ease-out' },
+          {
+            opacity: 1,
+            scale: '1.12',
+            filter: brillo,
+            offset: T.cargar / (T.cargar + T.condensar),
+            easing: 'ease-in',
+          },
+          { opacity: 0, scale: '0.08', filter: brillo },
+        ],
+        { duration: T.cargar + T.condensar, delay: retraso, fill: 'both' },
+      );
+      return subirLuz(desde, destino, color, retraso + T.cargar).then(() => {
         // Cada luz que llega lo hace latir: se ve que la recibe.
         if (sol && !cerrado)
           animar(sol, [{ scale: '1' }, { scale: '1.14' }, { scale: '1' }], {
@@ -477,6 +500,8 @@ export function initInicioAngie(host: HTMLElement): InicioAngie {
     await Promise.all(subidas);
     if (cerrado) return;
 
+    // El negro final del prólogo entra detrás del destello: así no se ve un fundido, se ve la luz.
+    escena.classList.add('ini--oscuro');
     const destello = crear('ini__destello');
     destello.style.left = `${destino.x}px`;
     destello.style.top = `${destino.y}px`;
@@ -493,28 +518,58 @@ export function initInicioAngie(host: HTMLElement): InicioAngie {
     );
   }
 
-  /** Una pieza hecha luz: una cabeza brillante con su estela, que arranca lenta y se mete en el sol. */
+  /**
+   * Una pieza hecha luz. Nace como un núcleo que se enciende donde se condensó la pieza, respira un
+   * instante y recién ahí arranca: la estela crece con la velocidad, así que no existe antes del
+   * viaje. Núcleo y estela van separados para que estirar la estela no aplaste el núcleo.
+   */
   function subirLuz(desde: Punto, hasta: Punto, color: string, retraso: number): Promise<void> {
     const luz = crear('ini__luz');
+    const cola = crear('ini__cola');
+    const nucleo = crear('ini__nucleo');
+    luz.append(cola, nucleo);
     luz.style.setProperty('--luz', color);
     const e = estela(desde, hasta);
     luz.style.left = `${desde.x}px`;
     luz.style.top = `${desde.y}px`;
     luces!.appendChild(luz);
     const giro = `rotate(${e.angulo}deg)`;
+    const total = T.nacer + T.subir;
+    const nace = T.nacer / total;
+    const acelera = 'cubic-bezier(0.5, 0, 0.7, 0.4)';
+    // `both`: mientras espera su turno ya está en el primer cuadro (apagada). Con `forwards` se veía
+    // entera, sin girar, como una raya colgando de la pieza antes de que la pieza se convirtiera.
+    const tiempo: KeyframeAnimationOptions = { duration: total, delay: retraso, fill: 'both' };
+    animar(
+      nucleo,
+      [
+        { scale: '0', easing: 'ease-out' },
+        { scale: '1.7', offset: nace * 0.45, easing: 'ease-in-out' },
+        { scale: '1', offset: nace },
+        { scale: '1' },
+      ],
+      tiempo,
+    );
+    animar(
+      cola,
+      [
+        { scale: '1 0' },
+        { scale: '1 0', offset: nace, easing: acelera },
+        { scale: '1 1.3', offset: 0.92 },
+        { scale: '1 0.3' },
+      ],
+      tiempo,
+    );
     return animar(
       luz,
       [
-        { opacity: 0, transform: `${giro} translateY(0) scaleY(0.2)` },
-        { opacity: 1, transform: `${giro} translateY(-10px) scaleY(0.5)`, offset: 0.18 },
-        {
-          opacity: 1,
-          transform: `${giro} translateY(${-e.largo * 0.92}px) scaleY(1.3)`,
-          offset: 0.9,
-        },
-        { opacity: 0, transform: `${giro} translateY(${-e.largo}px) scaleY(0.3)` },
+        { opacity: 0, transform: `${giro} translateY(0)`, easing: 'ease-out' },
+        { opacity: 1, transform: `${giro} translateY(0)`, offset: nace * 0.3 },
+        { opacity: 1, transform: `${giro} translateY(-6px)`, offset: nace, easing: acelera },
+        { opacity: 1, transform: `${giro} translateY(${-e.largo * 0.92}px)`, offset: 0.92 },
+        { opacity: 0, transform: `${giro} translateY(${-e.largo}px)` },
       ],
-      { duration: T.subir, delay: retraso, easing: 'cubic-bezier(0.5, 0, 0.7, 0.4)' },
+      tiempo,
     );
   }
 

@@ -107,33 +107,62 @@
   pointer-events: none;
 }
 
+/* La noche cae en dos tiempos, como cae de verdad: primero la luz se vuelve dorada y después todo
+   se apaga hacia el azul, con la colina como silueta. Multiplicar oscurece sin lavar: una cortina
+   negra que bajaba pasaba por una franja gris, como niebla, y la colina desaparecía de golpe. */
+.ini__ocaso,
+.ini__penumbra {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  mix-blend-mode: multiply;
+  opacity: 0;
+  pointer-events: none;
+}
+.ini__ocaso {
+  background: linear-gradient(to bottom, #b8a3d8 0, #f1b0bb 38%, #ffcd96 62%, #f2c49c 100%);
+  transition: opacity 1.2s ease-out;
+}
+.ini--atardecer .ini__ocaso {
+  opacity: 1;
+}
+/* Lenta: en un segundo el día se iba de golpe y la noche le robaba la atención al desarme. El
+   cenit oscurece más que el horizonte, que es lo último que conserva luz. */
+.ini__penumbra {
+  background: linear-gradient(to bottom, #07091a 0, #10163a 45%, #1c2350 72%, #262d55 100%);
+  transition: opacity 3s cubic-bezier(0.4, 0, 0.3, 1);
+}
+.ini--noche .ini__penumbra {
+  opacity: 1;
+}
+
 .ini__noche {
   position: absolute;
-  left: 0;
-  right: 0;
-  top: 0;
-  height: 150%;
+  inset: 0;
   z-index: 2;
-  /* Casi negro, el mismo del prólogo: cuando el prólogo se destapa encima, no hay costura. Baja
-     desde arriba como una cortina con borde suave: un fundido parejo pasaba por un gris sucio. */
-  background: linear-gradient(to bottom, #07080c 0, #0d1124 66.7%, rgba(13, 17, 36, 0) 100%);
-  transform: translateY(-100%);
   pointer-events: none;
-  /* Lenta: en un segundo el día se iba de golpe y la noche le robaba la atención al desarme. */
-  transition: transform 2.8s cubic-bezier(0.45, 0, 0.3, 1);
+}
+/* Casi negro, el mismo del prólogo: cuando el prólogo se destapa encima, no hay costura. Entra
+   detrás del destello final, que lo tapa. */
+.ini__noche::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: #07080c;
+  opacity: 0;
+  transition: opacity 0.6s ease-in;
+}
+.ini--oscuro .ini__noche::before {
+  opacity: 1;
 }
 /* Mientras cae la noche el sol queda encima: es la única luz que le queda al cielo y adonde van
    las piezas hechas luz. Se apaga con el destello final. */
 .ini--saliendo .ini__sol {
   z-index: 3;
 }
-.ini--noche .ini__noche {
-  transform: translateY(0);
-}
-/* Las estrellas ocupan la pantalla, no el alto entero de la cortina. */
 .ini__cielo-noche {
   position: absolute;
-  inset: 0 0 33.3% 0;
+  inset: 0;
 }
 .ini__estrella {
   position: absolute;
@@ -141,10 +170,22 @@
   background: #fff;
   box-shadow: 0 0 5px rgba(255, 255, 255, 0.8);
   opacity: 0.75;
+  scale: 0;
 }
-/* Titilan solo cuando hay noche: antes estarían gastando cuadros a opacidad 0. */
+/* Se prenden de a una mientras oscurece (`--d` las desfasa), con un destello al nacer, y recién
+   ahí titilan: todas juntas de entrada parecían un fondo pegado, no un cielo que aparece. */
 .ini--noche .ini__estrella {
-  animation: ini-titila 1.6s ease-in-out infinite alternate;
+  animation:
+    ini-asoma 0.7s ease-out calc(var(--d, 0ms) + 1s) both,
+    ini-titila 1.6s ease-in-out calc(var(--d, 0ms) + 1.7s) infinite alternate;
+}
+@keyframes ini-asoma {
+  60% {
+    scale: 1.8;
+  }
+  to {
+    scale: 1;
+  }
 }
 @keyframes ini-titila {
   from {
@@ -364,17 +405,36 @@
   z-index: 5;
   pointer-events: none;
 }
-/* Cada pieza hecha luz: la cabeza arriba y la estela colgando, girada hacia donde viaja. */
+/* Cada pieza hecha luz: un punto girado hacia donde viaja, con el núcleo encima y la estela
+   colgando detrás. */
 .ini__luz {
   position: absolute;
+  width: 0;
+  height: 0;
+  will-change: transform, opacity;
+}
+.ini__nucleo {
+  position: absolute;
+  left: -8px;
+  top: -8px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #fff 0 38%, var(--luz) 75%);
+  box-shadow:
+    0 0 12px 4px var(--luz),
+    0 0 34px 10px color-mix(in srgb, var(--luz) 45%, transparent);
+}
+.ini__cola {
+  position: absolute;
+  left: -3.5px;
+  top: 0;
   width: 7px;
   height: 130px;
-  margin: -6px 0 0 -3.5px;
-  transform-origin: 50% 6px;
+  transform-origin: 50% 0;
   border-radius: 999px;
-  background: linear-gradient(to bottom, #fff 0, var(--luz) 9%, transparent 100%);
-  box-shadow: 0 0 14px 3px var(--luz);
-  will-change: transform, opacity;
+  background: linear-gradient(to bottom, var(--luz), transparent);
+  box-shadow: 0 0 12px 2px var(--luz);
 }
 .ini__destello {
   position: absolute;

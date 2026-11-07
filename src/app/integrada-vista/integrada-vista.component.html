@@ -331,6 +331,11 @@
               />
             </svg>
 
+            <!-- Atardecer y penumbra tiñen lo de abajo (multiplicar): la colina queda como silueta
+                 en vez de borrarse bajo una cortina. Van antes del sol, que sigue siendo la luz. -->
+            <div class="ini__ocaso" aria-hidden="true"></div>
+            <div class="ini__penumbra" aria-hidden="true"></div>
+
             <!-- El sol es el átomo de signals: la luz de la escena sale de ahí. -->
             <div
               class="tusi__ov-mol ini__sol"
@@ -360,7 +365,7 @@
                     [style.top.%]="e.y"
                     [style.width.px]="e.tam"
                     [style.height.px]="e.tam"
-                    [style.animation-delay.ms]="e.retraso"
+                    [style.--d]="e.retraso + 'ms'"
                   ></span>
                 }
               </div>
