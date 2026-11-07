@@ -374,6 +374,12 @@ export class MascotaVivaComponent {
     const r = this.rectVisible();
     if (!r) return;
     this.mirarHacia(e.clientX, e.clientY, r);
+    // Con vida propia no gira solo los ojos: la cara y el cuerpo se vuelven hacia quien la mira.
+    if (this.vidaPropia()) {
+      const lado = limitar((e.clientX - (r.left + r.width / 2)) / (r.width * 1.5), -1, 1);
+      this.m.cara.destino = lado * 14;
+      this.m.giro.destino = lado * 2;
+    }
     this.despertar();
   }
 
