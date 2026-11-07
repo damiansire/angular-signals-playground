@@ -118,6 +118,18 @@ describe('initIntroTusi', () => {
       expect(t.overlay.inert).toBeTrue();
     });
 
+    it('los controles de la construcción no se alcanzan con Tab detrás del velo', () => {
+      const t = arrancar();
+      const hud = t.host.querySelector<HTMLElement>('.tusi__hud')!;
+      expect(hud.inert).withContext('con la pantalla de inicio puesta').toBeTrue();
+
+      t.entrar.click();
+      expect(hud.inert).withContext('entrando, con el prólogo por delante').toBeTrue();
+
+      t.gatillos[0]();
+      expect(hud.inert).withContext('construcción arrancada').toBeFalse();
+    });
+
     it('cede el gatillo de la construcción exactamente una vez', () => {
       const t = arrancar();
 

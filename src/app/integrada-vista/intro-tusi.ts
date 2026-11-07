@@ -427,6 +427,7 @@ export function initIntroTusi(host: HTMLElement, options: IntroTusiOptions = {})
     // El chrome del recorrido se libera recién acá y no al entrar: con el prólogo en el medio
     // quedaba clickeable y tabulable por encima de la cinemática (topbar y riel van en z-index 6).
     tapados().forEach((el) => (el.inert = false));
+    bajoElVelo().forEach((el) => (el.inert = false));
   }
   function start(): void {
     if (started || picked) return;
@@ -467,6 +468,15 @@ export function initIntroTusi(host: HTMLElement, options: IntroTusiOptions = {})
     );
   };
   tapados().forEach((el) => (el.inert = true));
+  /**
+   * Los controles de la construcción (sonido, pausa, velocidad, la ayuda) viven debajo de la pantalla
+   * de inicio, en el mismo `.tusi`: tapados no se ven, pero seguían en el orden de Tab.
+   */
+  const bajoElVelo = (): HTMLElement[] =>
+    [...root.children].filter(
+      (el): el is HTMLElement => el instanceof HTMLElement && el !== overlay,
+    );
+  bajoElVelo().forEach((el) => (el.inert = true));
   q<HTMLButtonElement>('[data-role="entrar"]').addEventListener('click', start);
   // Desde el arranque y no recién al entrar: la preferencia se guarda entre visitas, así que puede
   // venir apagada de antes.
