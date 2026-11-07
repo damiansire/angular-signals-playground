@@ -4,7 +4,7 @@ import { cuadrosFalsos } from './testing/cuadros';
 
 /**
  * La landing es lo primero que ve cualquiera y son 533 líneas que no tenían ningún test.
- * Lo que se cubre acá es su contrato con el resto: que elegir el clima cierre el overlay y ceda el
+ * Lo que se cubre acá es su contrato con el resto: que entrar cierre el overlay y ceda el
  * gatillo de la construcción UNA vez, y que un markup incompleto se note en vez de dejar la app
  * trabada detrás de un overlay que ya nadie puede cerrar.
  */
@@ -52,8 +52,7 @@ describe('initIntroTusi', () => {
           <div class="tusi__overlay">
             <button data-role="ov-sound" type="button"></button>
             <span class="tusi__ov-sound-txt"></span>
-            <button data-role="pick-dark" type="button"></button>
-            <button data-role="pick-light" type="button"></button>
+            <button data-role="entrar" type="button"></button>
           </div>
         </div>
       </div>`;
@@ -62,23 +61,23 @@ describe('initIntroTusi', () => {
     return host;
   }
 
-  function arrancar() {
+  function arrancar(despedida?: () => Promise<void>) {
     const host = hostCompleto();
     const gatillos: (() => void)[] = [];
     const sonidos: boolean[] = [];
     const handle = initIntroTusi(host, {
-      onThemePicked: (startBuild, conSonido) => {
+      alEntrar: (startBuild, conSonido) => {
         gatillos.push(startBuild);
         sonidos.push(conSonido);
       },
+      ...(despedida ? { despedida } : {}),
     });
     cerrar.push(handle.dispose);
     return {
       host,
       handle,
       overlay: host.querySelector<HTMLElement>('.tusi__overlay')!,
-      dark: host.querySelector<HTMLButtonElement>('[data-role="pick-dark"]')!,
-      light: host.querySelector<HTMLButtonElement>('[data-role="pick-light"]')!,
+      entrar: host.querySelector<HTMLButtonElement>('[data-role="entrar"]')!,
       ovSound: host.querySelector<HTMLButtonElement>('[data-role="ov-sound"]')!,
       ovSoundTxt: host.querySelector<HTMLElement>('.tusi__ov-sound-txt')!,
       hudSound: host.querySelector<HTMLButtonElement>('.tusi__hud [data-role="sound"]')!,
@@ -102,8 +101,8 @@ describe('initIntroTusi', () => {
     });
   });
 
-  describe('elegir el clima', () => {
-    it('arranca con el overlay puesto: hay que elegir para entrar', () => {
+  describe('entrar', () => {
+    it('arranca con el overlay puesto: hay que tocar Entrar', () => {
       const t = arrancar();
       expect(t.overlay.classList.contains('gone')).toBeFalse();
       expect(t.gatillos.length).toBe(0);
@@ -112,7 +111,7 @@ describe('initIntroTusi', () => {
     it('cierra el overlay y lo saca del tab-order', () => {
       const t = arrancar();
 
-      t.dark.click();
+      t.entrar.click();
 
       expect(t.overlay.classList.contains('gone')).toBeTrue();
       // `.gone` solo apaga opacidad y pointer-events: sin inert los botones siguen tabulables.
@@ -122,18 +121,18 @@ describe('initIntroTusi', () => {
     it('cede el gatillo de la construcción exactamente una vez', () => {
       const t = arrancar();
 
-      t.dark.click();
+      t.entrar.click();
 
       expect(t.gatillos.length).toBe(1);
       expect(typeof t.gatillos[0]).toBe('function');
     });
 
-    it('elegir de nuevo no vuelve a ceder el gatillo', () => {
+    it('entrar de nuevo no vuelve a ceder el gatillo', () => {
       const t = arrancar();
 
-      t.dark.click();
-      t.light.click();
-      t.dark.click();
+      t.entrar.click();
+      t.entrar.click();
+      t.entrar.click();
 
       expect(t.gatillos.length).toBe(1);
     });
@@ -145,29 +144,67 @@ describe('initIntroTusi', () => {
       t.host.appendChild(topbar);
       topbar.inert = true;
 
-      t.dark.click();
+      t.entrar.click();
       expect(topbar.inert).withContext('prólogo corriendo: el chrome no se toca').toBeTrue();
 
       t.gatillos[0]();
       expect(topbar.inert).withContext('construcción arrancada').toBeFalse();
     });
+  });
 
-    it('cualquiera de los dos climas entra igual', () => {
-      const t = arrancar();
+  describe('con despedida', () => {
+    it('desbloquea el audio en el click, antes de que termine la salida', () => {
+      sonido().alternar(true);
+      const t = arrancar(() => new Promise<void>(() => undefined));
 
-      t.light.click();
+      t.entrar.click();
 
-      expect(t.overlay.classList.contains('gone')).toBeTrue();
+      expect(sonido().desbloquear).toHaveBeenCalled();
+    });
+
+    it('el overlay espera a la salida, pero ya no se puede volver a tocar', () => {
+      const t = arrancar(() => new Promise<void>(() => undefined));
+
+      t.entrar.click();
+
+      expect(t.overlay.classList.contains('gone')).toBeFalse();
+      expect(t.overlay.inert).toBeTrue();
+      expect(t.gatillos.length).toBe(0);
+    });
+
+    it('al terminar la salida cede el gatillo y cierra el overlay', async () => {
+      let terminar: () => void = () => undefined;
+      const t = arrancar(() => new Promise<void>((ok) => (terminar = ok)));
+
+      t.entrar.click();
+      terminar();
+      await Promise.resolve();
+      await Promise.resolve();
+
       expect(t.gatillos.length).toBe(1);
+      expect(t.overlay.classList.contains('gone')).toBeTrue();
+    });
+
+    it('si se desmonta en el medio, la salida que termina después no arranca nada', async () => {
+      let terminar: () => void = () => undefined;
+      const t = arrancar(() => new Promise<void>((ok) => (terminar = ok)));
+
+      t.entrar.click();
+      t.handle.dispose();
+      terminar();
+      await Promise.resolve();
+      await Promise.resolve();
+
+      expect(t.gatillos.length).toBe(0);
     });
   });
 
-  it('sin onThemePicked la construcción arranca sola, sin quedar esperando a nadie', () => {
+  it('sin alEntrar la construcción arranca sola, sin quedar esperando a nadie', () => {
     const host = hostCompleto();
     cerrar.push(initIntroTusi(host).dispose);
 
     const overlay = host.querySelector<HTMLElement>('.tusi__overlay')!;
-    host.querySelector<HTMLButtonElement>('[data-role="pick-light"]')!.click();
+    host.querySelector<HTMLButtonElement>('[data-role="entrar"]')!.click();
 
     expect(overlay.classList.contains('gone')).toBeTrue();
   });
@@ -188,7 +225,7 @@ describe('initIntroTusi', () => {
     it('con el sonido puesto, avisa que va con sonido', () => {
       sonido().alternar(true);
       const t = arrancar();
-      t.dark.click();
+      t.entrar.click();
       expect(t.sonidos).toEqual([true]);
     });
 
@@ -196,7 +233,7 @@ describe('initIntroTusi', () => {
       sonido().alternar(true);
       const t = arrancar();
       t.ovSound.click();
-      t.dark.click();
+      t.entrar.click();
       expect(sonido().activo()).toBeFalse();
       expect(t.sonidos).toEqual([false]);
     });
@@ -242,7 +279,7 @@ describe('initIntroTusi', () => {
      * que corría durante las esperas. Con el rAF falso el test es síncrono: entre `arrancar` y el
      * último `expect` no corre nada ajeno ni pasa tiempo real.
      */
-    it('antes de elegir clima dibuja y deja de pedir cuadros', () => {
+    it('antes de entrar dibuja y deja de pedir cuadros', () => {
       const cuadros = cuadrosFalsos();
       const t = arrancar();
       expect(cuadros.pendientes()).withContext('el primer cuadro, que mide y dibuja').toBe(1);
@@ -258,7 +295,7 @@ describe('initIntroTusi', () => {
     it('con la construcción andando sí pide cuadros, y fuera de vista vuelve a dormir', () => {
       const cuadros = cuadrosFalsos();
       const t = arrancar();
-      t.dark.click();
+      t.entrar.click();
       t.gatillos[0]();
 
       cuadros.avanzar(10);
@@ -298,7 +335,7 @@ describe('initIntroTusi', () => {
       expect(intro.inert).toBeFalse();
     });
 
-    it('sin elegir clima (deep-link), salir de vista libera el chrome del recorrido', () => {
+    it('sin entrar (deep-link), salir de vista libera el chrome del recorrido', () => {
       const t = arrancar();
       const topbar = document.createElement('div');
       t.host.appendChild(topbar);

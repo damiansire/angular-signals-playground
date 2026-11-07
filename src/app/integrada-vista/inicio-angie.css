@@ -1,0 +1,284 @@
+/* Pantalla de inicio: la mañana en la colina con Angie (ver inicio-angie.ts). Planos de atrás hacia
+   adelante: paisaje (SVG), átomo-sol, noche (aparece al salir), Angie, texto, luces, barra de abajo. */
+
+.ini {
+  /* El paisaje se ancla abajo y llena recortando (`xMidYMax slice`): una unidad del dibujo mide lo
+     que diga el lado que manda. Con esto, lo que va en HTML encima (Angie) pisa la colina en
+     cualquier pantalla. Las unidades `cq*` se resuelven en los hijos, contra este contenedor. */
+  container-type: size;
+  --u: max(100cqw / 1920, 100cqh / 1080);
+  overflow: hidden;
+  background: #e9f3e6;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.ini__paisaje {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/* Ambiente lento: nubes que derivan y juncos con viento. Se nota solo si falta. */
+.ini__nubes {
+  animation: ini-deriva 16s ease-in-out infinite alternate;
+}
+@keyframes ini-deriva {
+  to {
+    transform: translateX(60px);
+  }
+}
+.ini__juncos {
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+  animation: ini-viento 3.4s ease-in-out infinite alternate;
+}
+.ini__juncos--der {
+  animation-duration: 3.9s;
+  animation-delay: -1.3s;
+}
+@keyframes ini-viento {
+  from {
+    transform: rotate(-1.4deg);
+  }
+  to {
+    transform: rotate(1.6deg);
+  }
+}
+
+/* El átomo de signals hace de sol: la luz de la escena sale de ahí. Se acerca al borde sin salirse
+   en pantallas angostas, donde el recorte del paisaje lo dejaría afuera. */
+.ini__sol {
+  --sol: clamp(84px, 16cqh, 190px);
+  position: absolute;
+  width: var(--sol);
+  left: min(calc(50% + 600 * var(--u)), calc(100% - var(--sol) * 0.62));
+  top: max(calc(var(--sol) * 0.62), calc(100% - 860 * var(--u)));
+  transform: translate(-50%, -50%);
+  z-index: 1;
+}
+.ini__sol::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 520%;
+  aspect-ratio: 1;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    rgba(255, 226, 166, 0.85),
+    rgba(255, 211, 138, 0.3) 32%,
+    rgba(255, 211, 138, 0) 68%
+  );
+  pointer-events: none;
+}
+
+.ini__noche {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 150%;
+  z-index: 2;
+  /* Casi negro, el mismo del prólogo: cuando el prólogo se destapa encima, no hay costura. Baja
+     desde arriba como una cortina con borde suave: un fundido parejo pasaba por un gris sucio. */
+  background: linear-gradient(to bottom, #07080c 0, #0d1124 66.7%, rgba(13, 17, 36, 0) 100%);
+  transform: translateY(-100%);
+  pointer-events: none;
+  transition: transform 1s cubic-bezier(0.5, 0, 0.3, 1);
+}
+.ini--noche .ini__noche {
+  transform: translateY(0);
+}
+/* Las estrellas ocupan la pantalla, no el alto entero de la cortina. */
+.ini__cielo-noche {
+  position: absolute;
+  inset: 0 0 33.3% 0;
+}
+.ini__estrella {
+  position: absolute;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 0 5px rgba(255, 255, 255, 0.8);
+  opacity: 0.75;
+}
+/* Titilan solo cuando hay noche: antes estarían gastando cuadros a opacidad 0. */
+.ini--noche .ini__estrella {
+  animation: ini-titila 1.6s ease-in-out infinite alternate;
+}
+@keyframes ini-titila {
+  from {
+    opacity: 0.25;
+  }
+  to {
+    opacity: 0.95;
+  }
+}
+
+/* Angie pisa la cima de la colina (y = 790 del dibujo, más su ondulación). Sus pies están en
+   (560, 920) de su propio dibujo de 1080: de ahí salen el 0.5185 y el 0.148. */
+.ini__angie {
+  --w: min(calc(430 * var(--u)), 64cqw, 44cqh);
+  position: absolute;
+  z-index: 3;
+  width: var(--w);
+  left: calc(50% - var(--w) * 0.5185);
+  bottom: calc(282 * var(--u) - var(--w) * 0.148);
+  transform-origin: 50% 85%;
+}
+
+.ini__texto {
+  position: absolute;
+  z-index: 4;
+  left: 50%;
+  top: clamp(1.5rem, 8cqh, 6rem);
+  transform: translateX(-50%);
+  width: max-content;
+  max-width: calc(100% - 2rem);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: clamp(0.4rem, 1.4cqh, 0.9rem);
+  text-align: center;
+  transition:
+    opacity 0.28s ease-in,
+    transform 0.28s ease-in;
+}
+.ini__kicker {
+  margin: 0;
+  font-family: var(--mono, ui-monospace, monospace);
+  font-size: clamp(0.66rem, 1.6cqh, 0.82rem);
+  font-weight: 600;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: #2f5a4c;
+}
+/* Peso alto y sombra dura tintada: con menos, el texto se ve fino al lado del dibujo. */
+.ini__titulo {
+  margin: 0;
+  font-family: var(--font-display, system-ui, sans-serif);
+  font-weight: 900;
+  font-size: clamp(2rem, min(8.5cqw, 9cqh), 5rem);
+  line-height: 1;
+  letter-spacing: -0.02em;
+  color: #22302a;
+  text-shadow:
+    0 4px 0 rgba(255, 250, 236, 0.9),
+    0 12px 30px rgba(30, 60, 50, 0.25);
+}
+.ini__acento {
+  color: #d1035c;
+}
+.ini__entrar {
+  margin-top: clamp(0.2rem, 1cqh, 0.6rem);
+  font-family: var(--font-display, system-ui, sans-serif);
+  font-weight: 800;
+  font-size: clamp(0.95rem, 2.2cqh, 1.15rem);
+  color: #fff8ec;
+  background: #22302a;
+  border: 0;
+  border-radius: 999px;
+  padding: 0.8em 2.1em;
+  cursor: pointer;
+  box-shadow:
+    0 5px 0 #0f1814,
+    0 14px 28px rgba(20, 40, 32, 0.3);
+  transition:
+    transform 0.14s,
+    box-shadow 0.14s;
+}
+.ini__entrar:hover {
+  transform: translateY(-2px);
+  box-shadow:
+    0 7px 0 #0f1814,
+    0 18px 32px rgba(20, 40, 32, 0.32);
+}
+.ini__entrar:active {
+  transform: translateY(4px);
+  box-shadow:
+    0 1px 0 #0f1814,
+    0 8px 18px rgba(20, 40, 32, 0.28);
+}
+/* Anillo doble: el ámbar solo sobre el cielo claro no llega a 3:1; la tinta da el contraste. */
+.ini__entrar:focus-visible {
+  outline: 3px solid var(--focus-ink);
+  outline-offset: 4px;
+  box-shadow:
+    0 5px 0 #0f1814,
+    0 0 0 3px var(--tusi-amber);
+}
+
+/* La salida: lo que no es Angie se corre para que el gag sea de ella. */
+.ini--saliendo .ini__texto {
+  opacity: 0;
+  transform: translate(-50%, -14px);
+}
+.ini--saliendo .tusi__ov-capbar {
+  opacity: 0;
+  transition: opacity 0.28s ease-in;
+}
+
+.ini__luces {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  pointer-events: none;
+}
+/* Cada pieza hecha luz: la cabeza arriba y la estela colgando, girada hacia donde viaja. */
+.ini__luz {
+  position: absolute;
+  width: 7px;
+  height: 130px;
+  margin: -6px 0 0 -3.5px;
+  transform-origin: 50% 6px;
+  border-radius: 999px;
+  background: linear-gradient(to bottom, #fff 0, var(--luz) 9%, transparent 100%);
+  box-shadow: 0 0 14px 3px var(--luz);
+  will-change: transform, opacity;
+}
+.ini__destello {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  width: max(70cqw, 70cqh);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    rgba(255, 244, 226, 0.95),
+    rgba(255, 140, 200, 0.35) 30%,
+    rgba(255, 140, 200, 0) 64%
+  );
+}
+
+/* Vertical: no hay ancho para el título y el sol en la misma franja. El sol va a la esquina, más
+   chico, y el texto baja para no quedar debajo de él. */
+@container (max-aspect-ratio: 1 / 1) {
+  .ini__sol {
+    --sol: clamp(64px, 11cqh, 110px);
+    left: calc(100% - var(--sol) * 0.62);
+    top: calc(var(--sol) * 0.62 + 0.5rem);
+  }
+  .ini__texto {
+    top: calc(clamp(64px, 11cqh, 110px) * 1.3 + 3cqh);
+  }
+  /* El recorte deja ver solo el centro del paisaje: Angie ocupa más de ese ancho. */
+  .ini__angie {
+    --w: min(calc(430 * var(--u)), 84cqw, 44cqh);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ini__nubes,
+  .ini__juncos,
+  .ini--noche .ini__estrella {
+    animation: none;
+  }
+  .ini__texto {
+    transition: none;
+  }
+}

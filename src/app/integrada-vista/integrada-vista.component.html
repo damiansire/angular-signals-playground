@@ -94,7 +94,7 @@
           aria-label="Saludar a la mascota"
           (click)="alTocarGuia($event)"
         >
-          <app-mascota-viva class="rec-guide__mascot" (aterrizo)="sacudirGlobo()" />
+          <app-mascota-viva #guia class="rec-guide__mascot" (aterrizo)="sacudirGlobo()" />
         </button>
         <p class="rec-guide__bubble" aria-hidden="true"></p>
       </div>
@@ -214,61 +214,169 @@
             </div>
           </div>
 
-          <!-- 01 "Primera luz": split-screen, cada mitad es una preview VIVA del tema (molécula real
-               orbitando) y el sonido es un toggle amable. El click elige tema + arranca todo (intro-tusi.ts). -->
-          <div class="tusi__overlay">
-            <span class="tusi__ov-divider" aria-hidden="true"></span>
-            <p class="tusi__ov-prompt">Elegí el clima del recorrido</p>
+          <!-- Pantalla de inicio: una mañana en la colina con Angie esperando. "Entrar" la desarma en
+               luz que sube al cielo, el cielo se hace noche y ahí empieza el prólogo (inicio-angie.ts).
+               El click además desbloquea el audio (intro-tusi.ts). -->
+          <div class="tusi__overlay ini">
+            <svg
+              class="ini__paisaje"
+              viewBox="0 0 1920 1080"
+              preserveAspectRatio="xMidYMax slice"
+              aria-hidden="true"
+            >
+              <defs>
+                <linearGradient id="ini-cielo" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0" stop-color="#bfe3df" />
+                  <stop offset=".55" stop-color="#e9f3e6" />
+                  <stop offset="1" stop-color="#fdf3dc" />
+                </linearGradient>
+                <linearGradient id="ini-lejos" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0" stop-color="#b5d9cb" />
+                  <stop offset="1" stop-color="#cfe6d9" />
+                </linearGradient>
+                <linearGradient id="ini-medio" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0" stop-color="#8cc8ad" />
+                  <stop offset="1" stop-color="#a9d6bf" />
+                </linearGradient>
+                <linearGradient id="ini-colina" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0" stop-color="#6cb895" />
+                  <stop offset=".4" stop-color="#4fa07f" />
+                  <stop offset="1" stop-color="#2f7d64" />
+                </linearGradient>
+                <radialGradient id="ini-charco" cx=".5" cy=".5" r=".5">
+                  <stop offset="0" stop-color="#fff4cf" stop-opacity=".7" />
+                  <stop offset="1" stop-color="#fff4cf" stop-opacity="0" />
+                </radialGradient>
+                <radialGradient id="ini-vineta" cx=".5" cy=".45" r=".75">
+                  <stop offset=".6" stop-color="#2a2316" stop-opacity="0" />
+                  <stop offset="1" stop-color="#2a2316" stop-opacity=".22" />
+                </radialGradient>
+              </defs>
 
-            <div class="tusi__ov-half tusi__ov-half--dark">
-              <div
-                class="tusi__ov-mol"
-                style="--rc: rgba(255, 238, 215, 0.24); --haloc: rgba(240, 168, 62, 0.5)"
-                aria-hidden="true"
+              <rect
+                data-material="cielo"
+                x="-200"
+                y="-400"
+                width="2320"
+                height="1480"
+                fill="url(#ini-cielo)"
+              />
+
+              <g class="ini__nubes" data-material="cielo" fill="#ffffff">
+                <path
+                  opacity=".85"
+                  d="M300 250c20-40 90-48 120-14 18-34 84-36 104 8 40-6 66 22 58 52H262c-26-18-6-52 38-46Z"
+                />
+                <path
+                  opacity=".7"
+                  d="M820 150c14-26 62-30 82-8 14-22 58-22 70 6 28-4 46 16 40 34H794c-18-12-4-34 26-32Z"
+                />
+                <path
+                  opacity=".75"
+                  d="M1560 380c18-34 78-40 104-12 16-30 72-30 90 6 34-4 56 18 50 44h-272c-22-16-6-44 28-38Z"
+                />
+              </g>
+
+              <path
+                fill="url(#ini-lejos)"
+                d="M-40 760C140 650 300 640 470 700S760 640 920 690s300-40 470 0 330 70 570 10V1080H-40Z"
+              />
+              <path
+                fill="url(#ini-medio)"
+                d="M-40 830C120 760 280 770 420 800s240-30 380 0 680-20 820 10 260 0 340-30V1080H-40Z"
+              />
+              <path data-material="pasto" fill="url(#ini-colina)" [attr.d]="paisaje.colina" />
+              <!-- La luz viene del átomo de arriba a la derecha y cae donde pisa Angie. -->
+              <ellipse cx="990" cy="800" rx="260" ry="34" fill="url(#ini-charco)" />
+              <g data-material="pasto">
+                @for (f of paisaje.flores; track $index) {
+                  <circle [attr.cx]="f.x" [attr.cy]="f.y" [attr.r]="f.r" [attr.fill]="f.color" />
+                }
+              </g>
+              <g data-material="pasto">
+                @for (m of paisaje.matas; track $index) {
+                  <path [attr.d]="m.d" [attr.fill]="m.tono" />
+                }
+              </g>
+
+              <g
+                class="ini__juncos ini__juncos--izq"
+                data-material="pasto"
+                fill="none"
+                stroke="#1f5e4c"
+                stroke-linecap="round"
               >
-                <span class="tusi__ov-guide"></span>
-                <span class="tusi__ov-halo"></span>
-                <span class="tusi__ov-ogrp" style="--rot: 24deg">
-                  <span class="tusi__ov-ring"></span>
-                  <span class="tusi__ov-el" style="--ec: #62c4ad; --dur: 7s"></span>
-                </span>
-                <span class="tusi__ov-ogrp" style="--rot: -40deg">
-                  <span class="tusi__ov-ring"></span>
-                  <span class="tusi__ov-el" style="--ec: #ff5a4a; --dur: 9s; --dly: -3.5s"></span>
-                </span>
-                <span class="tusi__ov-nuc"></span>
-              </div>
-              <span class="tusi__ov-kicker">En penumbra</span>
-              <span class="tusi__ov-h">Modo noche</span>
-              <button class="tusi__ov-btn tusi__ov-dark" data-role="pick-dark" type="button">
-                Entrar en penumbra →
-              </button>
+                @for (j of paisaje.juncosIzq; track $index) {
+                  <path [attr.d]="j.d" [attr.stroke-width]="j.ancho" />
+                }
+              </g>
+              <g
+                class="ini__juncos ini__juncos--der"
+                data-material="pasto"
+                fill="none"
+                stroke="#1f5e4c"
+                stroke-linecap="round"
+              >
+                @for (j of paisaje.juncosDer; track $index) {
+                  <path [attr.d]="j.d" [attr.stroke-width]="j.ancho" />
+                }
+              </g>
+              <rect
+                x="-200"
+                y="-400"
+                width="2320"
+                height="1480"
+                fill="url(#ini-vineta)"
+                pointer-events="none"
+              />
+            </svg>
+
+            <!-- El sol es el átomo de signals: la luz de la escena sale de ahí. -->
+            <div
+              class="tusi__ov-mol ini__sol"
+              style="--rc: rgba(120, 92, 40, 0.32); --haloc: rgba(235, 155, 60, 0.42)"
+              aria-hidden="true"
+            >
+              <span class="tusi__ov-guide"></span>
+              <span class="tusi__ov-halo"></span>
+              <span class="tusi__ov-ogrp" style="--rot: 22deg">
+                <span class="tusi__ov-ring"></span>
+                <span class="tusi__ov-el" style="--ec: #2f9e7f; --dur: 7.5s"></span>
+              </span>
+              <span class="tusi__ov-ogrp" style="--rot: -38deg">
+                <span class="tusi__ov-ring"></span>
+                <span class="tusi__ov-el" style="--ec: #e0503a; --dur: 9.5s; --dly: -4s"></span>
+              </span>
+              <span class="tusi__ov-nuc"></span>
             </div>
 
-            <div class="tusi__ov-half tusi__ov-half--light">
-              <div
-                class="tusi__ov-mol"
-                style="--rc: rgba(120, 92, 40, 0.32); --haloc: rgba(235, 155, 60, 0.34)"
-                aria-hidden="true"
-              >
-                <span class="tusi__ov-guide"></span>
-                <span class="tusi__ov-halo"></span>
-                <span class="tusi__ov-ogrp" style="--rot: 22deg">
-                  <span class="tusi__ov-ring"></span>
-                  <span class="tusi__ov-el" style="--ec: #2f9e7f; --dur: 7.5s"></span>
-                </span>
-                <span class="tusi__ov-ogrp" style="--rot: -38deg">
-                  <span class="tusi__ov-ring"></span>
-                  <span class="tusi__ov-el" style="--ec: #e0503a; --dur: 9.5s; --dly: -4s"></span>
-                </span>
-                <span class="tusi__ov-nuc"></span>
+            <!-- La noche que llega con la despedida: es el mismo cielo del prólogo. -->
+            <div class="ini__noche" aria-hidden="true">
+              <div class="ini__cielo-noche">
+                @for (e of paisaje.estrellas; track $index) {
+                  <span
+                    class="ini__estrella"
+                    [style.left.%]="e.x"
+                    [style.top.%]="e.y"
+                    [style.width.px]="e.tam"
+                    [style.height.px]="e.tam"
+                    [style.animation-delay.ms]="e.retraso"
+                  ></span>
+                }
               </div>
-              <span class="tusi__ov-kicker">A plena luz</span>
-              <span class="tusi__ov-h">Modo día</span>
-              <button class="tusi__ov-btn tusi__ov-light" data-role="pick-light" type="button">
-                Entrar a plena luz →
-              </button>
             </div>
+
+            <div class="ini__angie">
+              <app-mascota-viva />
+            </div>
+
+            <div class="ini__texto">
+              <p class="ini__kicker">Introducción interactiva</p>
+              <p class="ini__titulo">Angular <span class="ini__acento">Signals</span></p>
+              <button class="ini__entrar" data-role="entrar" type="button">Entrar →</button>
+            </div>
+
+            <div class="ini__luces" aria-hidden="true"></div>
 
             <div class="tusi__ov-capbar">
               <button
@@ -292,7 +400,7 @@
           </div>
         </div>
         <!-- Prólogo "la anomalía": la cinemática que enmarca el recorrido (ver prologo-anomalia.ts).
-           Se destapa al elegir el clima, porque ese click es el gesto que el navegador exige para
+           Se destapa al tocar Entrar, porque ese click es el gesto que el navegador exige para
            dejar sonar, y al terminar le pasa la posta a la construcción de Tusi. -->
         <div class="prologo" hidden>
           <div class="prologo__stage">

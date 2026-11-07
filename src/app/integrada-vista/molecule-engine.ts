@@ -1313,7 +1313,7 @@ export function initMolecule(
     }
     // Como el índice: invisibles en la landing, sus controles (bitácora, práctica, pausa) no pueden
     // quedar en el tab-order ni recibir clicks. Va sobre los links y no sobre el topbar, cuyo `inert`
-    // maneja la intro mientras no se elige clima.
+    // maneja la intro mientras no se entra.
     const linksApagados = s < INTRO_HASTA;
     if (tbLinksEl && tbLinksEl.inert !== linksApagados) tbLinksEl.inert = linksApagados;
     // En la pantalla inicial (overlay de bienvenida, s≈0) el título del topbar (el tagline del concepto

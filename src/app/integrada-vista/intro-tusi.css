@@ -1,5 +1,5 @@
-/* Landing "par de Tusi": animación que se construye sola + audio + controles. Themeable (Dark/Light)
-   solo para el intro (el resto de la app sigue claro; el dark global es otra fase). Ver intro-tusi.ts. */
+/* Landing "par de Tusi": animación que se construye sola + audio + controles. Ver intro-tusi.ts.
+   La pantalla de inicio que la tapa al llegar está en inicio-angie.css. */
 
 .tusi {
   position: absolute;
@@ -16,15 +16,6 @@
   --tusi-amber: #eb9b3c;
   --tusi-menu-bg: #ffffff;
   --tusi-menu-bd: #e4dbc9;
-}
-.tusi.dark {
-  background: radial-gradient(72% 68% at 50% 38%, #0c0e14, #05060a 92%);
-  --tusi-ink: #ece7dd;
-  --tusi-ink-soft: #b8b1a2;
-  --tusi-hair: #6b6456;
-  --tusi-label: #8f897c;
-  --tusi-menu-bg: #14161d;
-  --tusi-menu-bd: #2a2d38;
 }
 
 .tusi__canvas {
@@ -409,15 +400,12 @@
   color: var(--tusi-amber);
 }
 
-/* overlay "Primera luz": split-screen Dark/Light, cada mitad con preview viva del tema.
-   La elección arranca la experiencia (y desbloquea el audio). */
+/* Overlay de la pantalla de inicio: tapa la landing hasta que se toca Entrar (y desbloquea el audio). */
 .tusi__overlay {
   position: absolute;
   inset: 0;
   z-index: 8;
   pointer-events: auto;
-  display: grid;
-  grid-template-columns: 1fr 1fr;
   font-family: var(--font-display, system-ui, sans-serif);
   transition: opacity 0.5s;
 }
@@ -432,109 +420,6 @@
 .tusi__overlay.gone *,
 .intro.intro--fuera * {
   animation-play-state: paused;
-}
-
-.tusi__ov-half {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: clamp(0.5rem, 1.4vh, 1rem);
-  padding: 6% 5% 9%;
-  overflow: hidden;
-  text-align: center;
-}
-.tusi__ov-half--dark {
-  background: radial-gradient(120% 90% at 50% 30%, #21262e, #0c0f14 90%);
-  color: #eef1f6;
-}
-.tusi__ov-half--light {
-  background: radial-gradient(120% 90% at 50% 34%, #fbf9f2, #e6f1ea 92%);
-  color: #201d16;
-}
-
-/* raya divisoria central, tenue */
-.tusi__ov-divider {
-  position: absolute;
-  left: 50%;
-  top: 10%;
-  bottom: 10%;
-  width: 1px;
-  z-index: 5;
-  background: linear-gradient(
-    rgba(128, 128, 128, 0),
-    rgba(128, 128, 128, 0.35),
-    rgba(128, 128, 128, 0)
-  );
-}
-
-/* pregunta flotante, centrada arriba, por encima de las dos mitades */
-.tusi__ov-prompt {
-  position: absolute;
-  left: 50%;
-  top: 7%;
-  transform: translateX(-50%);
-  z-index: 6;
-  margin: 0;
-  font-family: var(--font-editorial, Georgia, serif);
-  font-weight: 600;
-  font-size: clamp(1rem, 2.5vw, 1.5rem);
-  color: #efeee9;
-  background: rgba(20, 22, 26, 0.55);
-  backdrop-filter: blur(4px);
-  padding: 0.5em 1.1em;
-  border-radius: 999px;
-  white-space: nowrap;
-}
-
-.tusi__ov-kicker {
-  font-family: var(--mono, ui-monospace, monospace);
-  font-size: clamp(0.62rem, 1.1vw, 0.78rem);
-  letter-spacing: 0.22em;
-  text-transform: uppercase;
-  opacity: 0.62;
-}
-.tusi__ov-h {
-  font-family: var(--font-editorial, Georgia, serif);
-  font-size: clamp(1.3rem, 3vw, 2rem);
-  font-weight: 700;
-  letter-spacing: -0.01em;
-  margin: 0.05em 0 0.2em;
-}
-
-.tusi__ov-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5em;
-  white-space: nowrap;
-  font-family: var(--font-display, system-ui, sans-serif);
-  font-weight: 700;
-  font-size: clamp(0.85rem, 1.5vw, 1rem);
-  border-radius: 999px;
-  border: 0;
-  padding: 0.7em 1.6em;
-  cursor: pointer;
-  transition:
-    transform 0.16s,
-    filter 0.16s;
-}
-.tusi__ov-btn:focus-visible {
-  outline: 2px solid var(--tusi-amber);
-  outline-offset: 3px;
-}
-.tusi__ov-btn:hover {
-  transform: translateY(-2px);
-  filter: brightness(1.06);
-}
-.tusi__ov-dark {
-  background: #f0b64a;
-  color: #16130c;
-}
-.tusi__ov-light {
-  background: #16130c;
-  color: #f7f3e8;
 }
 
 /* barra inferior: el sonido como toggle amable (no advertencia) */
@@ -606,7 +491,7 @@
 }
 
 /* ── molécula viva de preview (pura CSS, sin canvas): núcleo + halo que respira +
-   electrones orbitando por offset-path. Colores por mitad vía --ec/--rc/--haloc. ── */
+   electrones orbitando por offset-path. Colores vía --ec/--rc/--haloc. ── */
 .tusi__ov-mol {
   position: relative;
   width: clamp(120px, 22vh, 240px);
@@ -695,31 +580,6 @@
 @keyframes tusiOvOrbit {
   to {
     offset-distance: 100%;
-  }
-}
-
-/* En pantallas angostas (portrait/móvil) el split se apila vertical. */
-@media (max-width: 560px) {
-  .tusi__overlay {
-    grid-template-columns: 1fr;
-    grid-template-rows: 1fr 1fr;
-  }
-  .tusi__ov-divider {
-    left: 10%;
-    right: 10%;
-    top: 50%;
-    bottom: auto;
-    width: auto;
-    height: 1px;
-    background: linear-gradient(
-      90deg,
-      rgba(128, 128, 128, 0),
-      rgba(128, 128, 128, 0.35),
-      rgba(128, 128, 128, 0)
-    );
-  }
-  .tusi__ov-mol {
-    width: clamp(90px, 16vh, 150px);
   }
 }
 

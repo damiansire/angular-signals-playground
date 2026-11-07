@@ -21,6 +21,14 @@ import { RouterLink } from '@angular/router';
 
 import { MascotaVivaComponent } from '../components-draw/mascota-viva/mascota-viva.component';
 import { sinMovimiento } from '../libs/muelle';
+import {
+  caminoDeColina,
+  estrellas,
+  floresDeLadera,
+  initInicioAngie,
+  juncos,
+  matasDePasto,
+} from './inicio-angie';
 import { initMundoQueResponde } from './mundo-que-responde';
 
 import { signalsRoutesTree } from '../app.routes';
@@ -77,6 +85,7 @@ const ESPERA_FINAL_MS = 1600;
   styleUrls: [
     './integrada-vista.component.css',
     './intro-tusi.css',
+    './inicio-angie.css',
     './prologo-anomalia.css',
     './boot-fallo.css',
     './aviso-mas-abajo.css',
@@ -91,7 +100,18 @@ export class IntegradaVistaComponent {
   private readonly appRef = inject(ApplicationRef);
   private readonly location = inject(Location);
   private readonly errorHandler = inject(ErrorHandler);
-  private readonly guia = viewChild(MascotaVivaComponent);
+  // Por nombre: la pantalla de inicio tiene su propia Angie, y la primera del template no es esta.
+  private readonly guia = viewChild('guia', { read: MascotaVivaComponent });
+
+  /** El paisaje de la pantalla de inicio. Con semilla: la misma mañana en cada visita. */
+  protected readonly paisaje = {
+    colina: caminoDeColina(),
+    matas: matasDePasto(11, 70),
+    flores: floresDeLadera(23, 46),
+    juncosIzq: juncos(31, 9, -1),
+    juncosDer: juncos(47, 9, 1),
+    estrellas: estrellas(59, 70),
+  };
 
   /** Componentes reales de cada sub-nivel, por concepto (del árbol de conceptos). Un sub-nivel
    *  siempre trae componente; el tipo admite `undefined` porque `RouteItem.component` es opcional
@@ -196,17 +216,20 @@ export class IntegradaVistaComponent {
     this.destroyRef.onDestroy(dispose);
     this.destroyRef.onDestroy(initMundoQueResponde(this.host));
 
-    // Landing "par de Tusi" (canvas + audio + overlay Dark/Light). El motor ya fadea el `.intro`.
+    // Landing "par de Tusi" (canvas + audio + pantalla de inicio). El motor ya fadea el `.intro`.
     //
-    // Entre el clima y la construcción va el PRÓLOGO. El orden importa y no es arbitrario: elegir
-    // clima es el gesto que el navegador exige para dejar sonar, así que el prólogo arranca con
+    // Entre entrar y la construcción va el PRÓLOGO. El orden importa y no es arbitrario: tocar
+    // Entrar es el gesto que el navegador exige para dejar sonar, así que el prólogo arranca con
     // audio ya desbloqueado y sin pedirle nada más a nadie. Y la construcción de Tusi espera de
     // verdad: si corriera detrás durante esos minutos, llegaría terminada y se comería su propio
     // premio, que es ver aparecer el círculo.
+    const inicio = initInicioAngie(this.host);
+    this.destroyRef.onDestroy(inicio.dispose);
     landing = initIntroTusi(this.host, {
+      despedida: inicio.despedir,
       // La preferencia de sonido se elige en el overlay del intro pero quien suena después es el
       // prólogo: viaja con el gatillo para que silenciar antes de entrar valga para los dos.
-      onThemePicked: (startBuild) => {
+      alEntrar: (startBuild) => {
         // Quien ya pasó por el prólogo no lo vuelve a ver impuesto: en un juego, volver es
         // "continuar partida", no repetir la intro.
         if (this.partida().prologo) {

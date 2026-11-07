@@ -113,8 +113,8 @@ export function initPrologoAnomalia(host: HTMLElement, opts: PrologoOpciones): (
     !veloz
   ) {
     // Sin prólogo hay que seguir igual: `alTerminar` es el empalme que arranca la construcción de
-    // Tusi. Devolver un no-op sin llamarlo dejaba la landing congelada para siempre, con el clima
-    // ya elegido y nada pasando, que es peor que no tener prólogo.
+    // Tusi. Devolver un no-op sin llamarlo dejaba la landing congelada para siempre, ya con
+    // Entrar tocado y nada pasando, que es peor que no tener prólogo.
     opts.alTerminar();
     return () => undefined;
   }
@@ -1199,7 +1199,7 @@ export function initPrologoAnomalia(host: HTMLElement, opts: PrologoOpciones): (
     dichas = new Set();
     tAhora = desde;
     despausar();
-    // El gesto que el navegador exige lo dio quien eligió el clima, así que acá ya se puede abrir.
+    // El gesto que el navegador exige lo dio quien tocó Entrar, así que acá ya se puede abrir.
     // El director también lo abre solo con el primer gesto; pedirlo acá cubre a los navegadores que
     // solo aceptan destrabarlo adentro del click, no en el `pointerdown` que escucha él.
     if (sonido().activo()) sonido().desbloquear();

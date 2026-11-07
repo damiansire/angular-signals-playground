@@ -50,7 +50,7 @@ class ContextoFalso {
 }
 
 /**
- * El prólogo es el paso intermedio entre elegir el clima y que arranque la construcción de Tusi.
+ * El prólogo es el paso intermedio entre tocar Entrar y que arranque la construcción de Tusi.
  * `alTerminar` es lo único que destraba la landing, así que todo camino de salida tiene que
  * llamarlo, y exactamente una vez.
  *

@@ -13,8 +13,8 @@ import {
  * Intro "par de Tusi": la landing se CONSTRUYE sola. Arranca con una línea; cada 3 choques del punto
  * contra el extremo dispara la siguiente (propagación, como un signal actualizando a su dependiente),
  * hasta que el caos aparente se revela como un círculo. Suena en La menor (una nota por línea, timbre
- * sacado del video original). El usuario elige tema (Dark/Light) al entrar; ese click además desbloquea
- * el audio (política anti-autoplay del navegador). Imperativo como `molecule-engine`; devuelve su cleanup.
+ * sacado del video original). El click de "Entrar" desbloquea el audio (política anti-autoplay del
+ * navegador). Imperativo como `molecule-engine`; devuelve su cleanup.
  */
 
 interface Pal {
@@ -25,23 +25,13 @@ interface Pal {
   revB: string;
   flash: string;
 }
-const PALETTES: Record<'light' | 'dark', Pal> = {
-  light: {
-    dotA: '#eb9b3c',
-    dotB: '#2f9e83',
-    line: 'rgba(40,34,20,0.11)',
-    revA: 'rgba(235,155,60,0.55)',
-    revB: 'rgba(47,158,131,0.55)',
-    flash: 'rgba(235,155,60,0.5)',
-  },
-  dark: {
-    dotA: '#eb9b3c',
-    dotB: '#62c4ad',
-    line: 'rgba(233,227,211,0.11)',
-    revA: 'rgba(235,155,60,0.6)',
-    revB: 'rgba(98,196,173,0.6)',
-    flash: 'rgba(255,220,160,0.6)',
-  },
+const PAL: Pal = {
+  dotA: '#eb9b3c',
+  dotB: '#2f9e83',
+  line: 'rgba(40,34,20,0.11)',
+  revA: 'rgba(235,155,60,0.55)',
+  revB: 'rgba(47,158,131,0.55)',
+  flash: 'rgba(235,155,60,0.5)',
 };
 
 const MAX = 30;
@@ -63,7 +53,7 @@ interface Line {
 
 export interface IntroTusiOptions {
   /**
-   * Si está, elegir el clima NO arranca la construcción: la deja lista y avisa, pasando el gatillo
+   * Si está, entrar NO arranca la construcción: la deja lista y avisa, pasando el gatillo
    * para cuando corresponda. Es lo que deja meter el prólogo en el medio, porque si la construcción
    * corriera detrás durante esos minutos llegaría terminada y se comería su propio premio: el
    * círculo apareciendo. El overlay igual se cierra y el audio igual se desbloquea, que es lo único
@@ -73,7 +63,12 @@ export interface IntroTusiOptions {
    * (`libs/sonido.ts`) y el toggle de este overlay la cambia ahí mismo, así que el prólogo y todo lo
    * que suene después ya la encuentran resuelta.
    */
-  readonly onThemePicked?: (startBuild: () => void, conSonido: boolean) => void;
+  readonly alEntrar?: (startBuild: () => void, conSonido: boolean) => void;
+  /**
+   * La salida de la pantalla de inicio. Corre entre el click y el prólogo: el audio ya quedó
+   * desbloqueado (eso tiene que pasar adentro del click) y el overlay espera a que termine.
+   */
+  readonly despedida?: () => Promise<void>;
 }
 
 /** Lo que la landing le ofrece a quien la monta: cerrarla, y avisarle si está a la vista. */
@@ -97,13 +92,14 @@ export function initIntroTusi(host: HTMLElement, options: IntroTusiOptions = {})
 
   const mqlReduce = window.matchMedia('(prefers-reduced-motion: reduce)');
   let reduce = mqlReduce.matches;
-  let pal = PALETTES.light;
   let speedIdx = SPEED_START;
   let paused = false;
   let started = false;
-  /** El clima ya se eligió. Separado de `started` porque con prólogo hay un rato entre las dos. */
+  /** Ya se entró. Separado de `started` porque con prólogo hay un rato entre las dos. */
   let picked = false;
   let helpOn = false;
+  /** Para que una salida que termina después de desmontar no arranque nada. */
+  let cerrado = false;
   // El motor fadea el `.intro` (opacity inline 1↔0) al scrollear; cuando no es visible cortamos el audio.
   const introEl = host.querySelector('.intro') as HTMLElement | null;
   let visible = true;
@@ -268,7 +264,7 @@ export function initIntroTusi(host: HTMLElement, options: IntroTusiOptions = {})
     const c = curCenter();
 
     ctx!.lineWidth = 1;
-    ctx!.strokeStyle = pal.line;
+    ctx!.strokeStyle = PAL.line;
     for (const L of lines) {
       const dx = Math.cos(L.angle);
       const dy = Math.sin(L.angle);
@@ -283,11 +279,11 @@ export function initIntroTusi(host: HTMLElement, options: IntroTusiOptions = {})
       const a = emergentCircleCenter(R, ph, c.x, c.y, 1);
       const b = emergentCircleCenter(R, ph, c.x, c.y, -1);
       ctx!.lineWidth = 1.4;
-      ctx!.strokeStyle = pal.revA;
+      ctx!.strokeStyle = PAL.revA;
       ctx!.beginPath();
       ctx!.arc(a.x, a.y, R / 2, 0, 7);
       ctx!.stroke();
-      ctx!.strokeStyle = pal.revB;
+      ctx!.strokeStyle = PAL.revB;
       ctx!.beginPath();
       ctx!.arc(b.x, b.y, R / 2, 0, 7);
       ctx!.stroke();
@@ -296,7 +292,7 @@ export function initIntroTusi(host: HTMLElement, options: IntroTusiOptions = {})
     flashes = flashes.filter((f) => t - f.born < 0.6);
     for (const f of flashes) {
       const a = 1 - (t - f.born) / 0.6;
-      ctx!.strokeStyle = fade(pal.flash, a);
+      ctx!.strokeStyle = fade(PAL.flash, a);
       ctx!.lineWidth = 1.6;
       ctx!.beginPath();
       ctx!.arc(f.x, f.y, 6 + (1 - a) * 22, 0, 7);
@@ -307,8 +303,8 @@ export function initIntroTusi(host: HTMLElement, options: IntroTusiOptions = {})
       const dx = Math.cos(L.angle);
       const dy = Math.sin(L.angle);
       const s = dotOffset(R, ph, L.angle);
-      dot(c.x + s * dx, c.y + s * dy, pal.dotA);
-      dot(c.x - s * dx, c.y - s * dy, pal.dotB);
+      dot(c.x + s * dx, c.y + s * dy, PAL.dotA);
+      dot(c.x - s * dx, c.y - s * dy, PAL.dotB);
     }
   }
 
@@ -403,7 +399,7 @@ export function initIntroTusi(host: HTMLElement, options: IntroTusiOptions = {})
   document.addEventListener('click', onDocClick);
   document.addEventListener('keydown', onKeyDown);
 
-  // overlay "Primera luz": elegir tema arranca todo (y desbloquea el audio). El sonido es un
+  // Pantalla de inicio: "Entrar" arranca todo (y desbloquea el audio). El sonido es un
   // toggle amable que se pre-elige ANTES de entrar; `start` respeta esa preferencia.
   const overlay = q<HTMLElement>('.tusi__overlay');
   const ovSoundBtn = q<HTMLButtonElement>('[data-role="ov-sound"]');
@@ -424,27 +420,33 @@ export function initIntroTusi(host: HTMLElement, options: IntroTusiOptions = {})
     refreshSound();
     refreshOvSound();
   });
-  function applyTheme(t: 'light' | 'dark'): void {
-    pal = PALETTES[t];
-    root.classList.toggle('dark', t === 'dark');
-  }
   /** Empieza a construir. Separado de `start` porque el prólogo lo dispara más tarde. */
   function startBuild(): void {
     started = true;
     pedirCuadro();
-    // El chrome del recorrido se libera recién acá y no al elegir clima: con el prólogo en el medio
+    // El chrome del recorrido se libera recién acá y no al entrar: con el prólogo en el medio
     // quedaba clickeable y tabulable por encima de la cinemática (topbar y riel van en z-index 6).
     tapados().forEach((el) => (el.inert = false));
   }
-  function start(theme: 'light' | 'dark'): void {
+  function start(): void {
     if (started || picked) return;
     picked = true;
-    applyTheme(theme);
     // Este click es el gesto que el navegador exige para dejar sonar: se destraba acá, antes de que
     // el prólogo o la construcción lo necesiten. El director también lo hace solo con el primer
     // `pointerdown`, pero hay navegadores que solo lo aceptan adentro del click.
     if (sonido().activo()) sonido().desbloquear();
-    if (options.onThemePicked) options.onThemePicked(startBuild, sonido().activo());
+    if (!options.despedida) {
+      entrar();
+      return;
+    }
+    // Mientras dura la salida el overlay sigue puesto, pero ya no se puede volver a tocar.
+    overlay.inert = true;
+    void options.despedida().then(() => {
+      if (!cerrado) entrar();
+    });
+  }
+  function entrar(): void {
+    if (options.alEntrar) options.alEntrar(startBuild, sonido().activo());
     else startBuild();
     reset();
     pedirCuadro();
@@ -465,8 +467,7 @@ export function initIntroTusi(host: HTMLElement, options: IntroTusiOptions = {})
     );
   };
   tapados().forEach((el) => (el.inert = true));
-  q<HTMLButtonElement>('[data-role="pick-dark"]').addEventListener('click', () => start('dark'));
-  q<HTMLButtonElement>('[data-role="pick-light"]').addEventListener('click', () => start('light'));
+  q<HTMLButtonElement>('[data-role="entrar"]').addEventListener('click', start);
   // Desde el arranque y no recién al entrar: la preferencia se guarda entre visitas, así que puede
   // venir apagada de antes.
   refreshSound();
@@ -475,7 +476,7 @@ export function initIntroTusi(host: HTMLElement, options: IntroTusiOptions = {})
   // ── loop ──
   // El loop corre solo mientras algo se mueve: con la construcción andando (ni en pausa ni con
   // movimiento reducido) o con un destello apagándose. El resto del tiempo el cuadro sería idéntico
-  // al anterior (antes de elegir clima, en pausa, durante los minutos del prólogo, fuera de vista),
+  // al anterior (antes de entrar, en pausa, durante los minutos del prólogo, fuera de vista),
   // así que no se pide ninguno: cada cambio de estado que sí altera el dibujo llama a `pedirCuadro`.
   let rafId = 0;
   function pedirCuadro(): void {
@@ -491,21 +492,21 @@ export function initIntroTusi(host: HTMLElement, options: IntroTusiOptions = {})
     if (ahoraVisible === visible) return;
     visible = ahoraVisible;
     // El overlay cubre el viewport; si el intro no es la vista activa (scroll o deep-link directo al
-    // recorrido SIN elegir tema), su subárbol interceptaría los clicks de los demos que quedaron
+    // recorrido SIN entrar), su subárbol interceptaría los clicks de los demos que quedaron
     // debajo (pointer-events se hereda, así que apagarlo en el overlay apaga todo el subárbol). Solo
-    // mientras no se eligió tema: tras `start()`, `.gone` ya lo maneja y no hay que reactivarlo.
+    // mientras no se entró: tras `start()`, `.gone` ya lo maneja y no hay que reactivarlo.
     // Va contra `picked` y no contra `started`: con prólogo en el medio hay minutos en los que el
-    // clima ya se eligió y la construcción todavía no arrancó, y ahí el overlay volvería a tapar.
+    // usuario ya entró y la construcción todavía no arrancó, y ahí el overlay volvería a tapar.
     if (!picked) {
       overlay.classList.toggle('gone', !visible);
       overlay.inert = !visible;
-      // El chrome del recorrido va tapado solo mientras el overlay tapa. Con un deep-link nadie elige
-      // clima, y sin esto el recorrido entero quedaba inerte: sin clicks, sin Tab, sin lector.
+      // El chrome del recorrido va tapado solo mientras el overlay tapa. Con un deep-link nadie entra
+      // por acá, y sin esto el recorrido entero quedaba inerte: sin clicks, sin Tab, sin lector.
       tapados().forEach((el) => (el.inert = visible));
     }
     // El intro entero (controles de sonido/pausa/velocidad y el overlay) se desvanece con opacity,
     // que NO lo saca del tab-order ni del árbol de a11y. Con deep-link a un sub-nivel quedaban 7
-    // controles invisibles pero tabulables, capaces de cambiar el tema sin que se vea nada.
+    // controles invisibles pero tabulables, capaces de arrancar la intro sin que se vea nada.
     if (introEl) {
       introEl.inert = !visible;
       introEl.classList.toggle('intro--fuera', !visible);
@@ -594,6 +595,7 @@ export function initIntroTusi(host: HTMLElement, options: IntroTusiOptions = {})
   return {
     setVisible: aplicarVisibilidad,
     dispose: (): void => {
+      cerrado = true;
       window.cancelAnimationFrame(rafId);
       mqlReduce.removeEventListener('change', onReduceChange);
       window.removeEventListener('resize', onResize);
