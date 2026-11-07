@@ -110,3 +110,11 @@
     animation: none;
   }
 }
+
+/* Quien la desarma (la pantalla de inicio) mueve cada pieza con `translate`/`rotate` sueltos, que
+   se suman al `transform` de los muelles sin pisarlo. El origen va en el envoltorio, que no tiene
+   `transform` propio: puesto en el grupo del muelle, le corría el pivote a su rotación. */
+[data-pieza] {
+  transform-box: fill-box;
+  transform-origin: center;
+}
