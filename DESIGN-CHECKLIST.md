@@ -488,6 +488,17 @@ entrar desarma a Angie en luz y se hace noche, la costura con el prólogo.
       y una magenta seguía siendo una caja. El halo de la idea va DETRÁS del dibujo: delante, en
       `screen` sobre el cielo claro, no se notaba. Medir el llamado en un renglón a 375 px y sin
       tocar los pies de Angie ni los interruptores.
+- [ ] Se entra tocando en cualquier lugar de la escena, no solo la lamparita: apuntarle a un foco
+      chico era un examen de puntería. Arrastrar a Angie (más de 8 px entre bajar y soltar) no
+      entra, ni tocar un control. El llamado dice "Tocá para entrar", sin nombrar la idea.
+- [ ] Sonido y pausa son dos fichas de ícono arriba a la izquierda, con su texto en un globo al
+      pasar o enfocar. Abajo, al lado del llamado, eran dos píldoras oscuras que competían con él.
+      Probarlas con click REAL: el topbar invisible (opacidad 0, z 6) tapaba las fichas y se comía
+      el click. Con el chrome en 0 el motor lo deja en `visibility: hidden`; comprobar con
+      `elementFromPoint` en el centro de cada ficha.
+- [ ] El título es el de la historia ("Las aventuras de Angie por el SignalVerso") y la bajada dice
+      qué es. Medir título, bajada, sol y fichas sin solapes en los mismos seis anchos, y el
+      título en dos renglones.
 
 ## Overlays que tapan el recorrido (prólogo, modales a pantalla completa)
 
