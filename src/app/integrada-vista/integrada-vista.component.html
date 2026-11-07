@@ -334,10 +334,10 @@
             <!-- El sol es el átomo de signals: la luz de la escena sale de ahí. -->
             <div
               class="tusi__ov-mol ini__sol"
-              style="--rc: rgba(120, 92, 40, 0.32); --haloc: rgba(235, 155, 60, 0.42)"
+              style="--rc: rgba(196, 120, 30, 0.3); --haloc: rgba(255, 200, 90, 0.55)"
               aria-hidden="true"
             >
-              <span class="tusi__ov-guide"></span>
+              <span class="ini__rayos"></span>
               <span class="tusi__ov-halo"></span>
               <span class="tusi__ov-ogrp" style="--rot: 22deg">
                 <span class="tusi__ov-ring"></span>
@@ -366,19 +366,32 @@
               </div>
             </div>
 
+            <!-- La entrada es la idea de Angie: su lamparita. Un botón real encima del dibujo, así
+                 se llega con Tab y tiene nombre, y el llamado de abajo es su etiqueta. -->
             <div class="ini__angie">
+              <span class="ini__aura" aria-hidden="true"></span>
               <app-mascota-viva />
+              <button
+                id="ini-foco"
+                class="ini__foco"
+                data-role="entrar"
+                type="button"
+                aria-label="Entrar"
+              ></button>
             </div>
 
             <div class="ini__texto">
               <p class="ini__kicker">Introducción interactiva</p>
               <p class="ini__titulo">Angular <span class="ini__acento">Signals</span></p>
-              <button class="ini__entrar" data-role="entrar" type="button">Entrar →</button>
             </div>
 
             <div class="ini__luces" aria-hidden="true"></div>
 
             <div class="tusi__ov-capbar">
+              <label class="ini__llamado" for="ini-foco">
+                <span aria-hidden="true">✦</span> Tocá la idea para entrar
+                <span aria-hidden="true">✦</span>
+              </label>
               <button
                 class="tusi__ov-sound"
                 data-role="ov-sound"

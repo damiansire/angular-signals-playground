@@ -49,15 +49,43 @@
 }
 
 /* El átomo de signals hace de sol: la luz de la escena sale de ahí. Se acerca al borde sin salirse
-   en pantallas angostas, donde el recorte del paisaje lo dejaría afuera. */
+   en pantallas angostas, donde el recorte del paisaje lo dejaría afuera. En las anchas y bajas el
+   recorte se come el cielo y lo dejaba pegado al techo: el piso en `cqh` lo baja al cielo abierto. */
 .ini__sol {
   --sol: clamp(84px, 16cqh, 190px);
   position: absolute;
   width: var(--sol);
   left: min(calc(50% + 600 * var(--u)), calc(100% - var(--sol) * 0.62));
-  top: max(calc(var(--sol) * 0.62), calc(100% - 860 * var(--u)));
+  top: max(calc(var(--sol) * 0.62), calc(100% - 790 * var(--u)), 22cqh);
   transform: translate(-50%, -50%);
   z-index: 1;
+}
+/* Que se lea primero sol y después átomo: núcleo grande y amarillo, rayos, y las órbitas apenas
+   marcadas alrededor. El círculo guía lo hacía mira telescópica. */
+.ini__sol .tusi__ov-nuc {
+  width: 46%;
+  background: radial-gradient(circle at 42% 38%, #fffbe6, #ffe07a 38%, #ffb23c 78%, #f59a28);
+  box-shadow:
+    0 0 0 0.35em #ffd6785c,
+    0 0 2.6em 0.9em #ffbe508c,
+    inset 0 -0.3em 0.7em #dc781459;
+}
+.ini__rayos {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 170%;
+  aspect-ratio: 1;
+  translate: -50% -50%;
+  border-radius: 50%;
+  background: repeating-conic-gradient(#ffc85a80 0 5deg, transparent 5deg 30deg);
+  mask: radial-gradient(circle, transparent 28%, #000 31%, transparent 68%);
+  animation: ini-gira 90s linear infinite;
+}
+@keyframes ini-gira {
+  to {
+    rotate: 1turn;
+  }
 }
 .ini__sol::before {
   content: '';
@@ -89,7 +117,13 @@
   background: linear-gradient(to bottom, #07080c 0, #0d1124 66.7%, rgba(13, 17, 36, 0) 100%);
   transform: translateY(-100%);
   pointer-events: none;
-  transition: transform 1s cubic-bezier(0.5, 0, 0.3, 1);
+  /* Lenta: en un segundo el día se iba de golpe y la noche le robaba la atención al desarme. */
+  transition: transform 2.8s cubic-bezier(0.45, 0, 0.3, 1);
+}
+/* Mientras cae la noche el sol queda encima: es la única luz que le queda al cielo y adonde van
+   las piezas hechas luz. Se apaga con el destello final. */
+.ini--saliendo .ini__sol {
+  z-index: 3;
 }
 .ini--noche .ini__noche {
   transform: translateY(0);
@@ -173,43 +207,129 @@
 .ini__acento {
   color: #d1035c;
 }
-.ini__entrar {
-  margin-top: clamp(0.2rem, 1cqh, 0.6rem);
-  font-family: var(--font-display, system-ui, sans-serif);
-  font-weight: 800;
-  font-size: clamp(0.95rem, 2.2cqh, 1.15rem);
-  color: #fff8ec;
-  background: #22302a;
-  border: 0;
-  border-radius: 999px;
-  padding: 0.8em 2.1em;
-  cursor: pointer;
-  box-shadow:
-    0 5px 0 #0f1814,
-    0 14px 28px rgba(20, 40, 32, 0.3);
+/* La entrada es la lamparita de Angie, integrada a la escena como el pase de japanise-game: un
+   botón transparente encima del dibujo. La luz que emite dice que se toca; no hay caja. */
+.ini__foco,
+.ini__aura {
+  position: absolute;
+  /* La lamparita con sus rayos ocupa x 110-257, y 178-466 del dibujo de 1080. */
+  left: 9%;
+  top: 15.5%;
+  width: 16.5%;
+  height: 28.5%;
+}
+/* El halo va DETRÁS del dibujo: delante, sobre el cielo claro, ningún modo de mezcla se notaba. */
+.ini__aura {
+  z-index: -1;
+  pointer-events: none;
+}
+/* Al salir la lamparita se va volando: el halo no puede quedarse brillando en el aire. */
+.ini--saliendo .ini__aura::before {
+  animation: none;
+  opacity: 0;
+  transition: opacity 0.5s 0.2s;
+}
+.ini__aura::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 40%;
+  width: 260%;
+  aspect-ratio: 1;
+  translate: -50% -50%;
+  border-radius: 50%;
+  background: radial-gradient(circle, #fff3b0 0, #ffd56ad9 16%, #ffc24a66 38%, #ffc24a00 66%);
+  opacity: 0.6;
+  animation: ini-idea 2.4s ease-in-out infinite;
   transition:
-    transform 0.14s,
-    box-shadow 0.14s;
+    opacity 0.2s,
+    scale 0.25s cubic-bezier(0.3, 1.6, 0.5, 1);
 }
-.ini__entrar:hover {
-  transform: translateY(-2px);
-  box-shadow:
-    0 7px 0 #0f1814,
-    0 18px 32px rgba(20, 40, 32, 0.32);
+@keyframes ini-idea {
+  50% {
+    opacity: 1;
+    scale: 1.15;
+  }
 }
-.ini__entrar:active {
-  transform: translateY(4px);
-  box-shadow:
-    0 1px 0 #0f1814,
-    0 8px 18px rgba(20, 40, 32, 0.28);
+.ini__angie:has(.ini__foco:is(:hover, :focus-visible)) .ini__aura::before {
+  animation: none;
+  opacity: 1;
+  scale: 1.4;
+}
+.ini__foco {
+  padding: 0;
+  border: 0;
+  border-radius: 45%;
+  background: none;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+/* El destello de cuando se prende, delante del dibujo: apagado hasta que la tocan. */
+.ini__foco::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 40%;
+  width: 160%;
+  aspect-ratio: 1;
+  translate: -50% -50%;
+  border-radius: 50%;
+  background: radial-gradient(circle, #fffdf0 0, #fff3b0e6 25%, #ffd56a00 66%);
+  opacity: 0;
+  pointer-events: none;
 }
 /* Anillo doble: el ámbar solo sobre el cielo claro no llega a 3:1; la tinta da el contraste. */
-.ini__entrar:focus-visible {
+.ini__foco:focus-visible {
   outline: 3px solid var(--focus-ink);
-  outline-offset: 4px;
-  box-shadow:
-    0 5px 0 #0f1814,
-    0 0 0 3px var(--tusi-amber);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 6px var(--tusi-amber);
+}
+/* Tocada, se prende del todo: la idea que se enciende es la que desarma a Angie en luz. */
+.ini--saliendo .ini__foco::before {
+  animation: ini-prende 0.5s ease-out forwards;
+}
+@keyframes ini-prende {
+  40% {
+    opacity: 1;
+    scale: 2.4;
+  }
+  to {
+    opacity: 0;
+    scale: 3;
+  }
+}
+
+/* El llamado, como el «Tocá para entrar» de japanise-game: solo letra con contorno, sin caja. Es la
+   etiqueta de la lamparita, así que tocarlo también entra. */
+.ini__llamado {
+  flex-basis: 100%;
+  margin-bottom: 0.2rem;
+  font-family: var(--font-display, system-ui, sans-serif);
+  font-weight: 900;
+  /* El ancho también manda: en un celular, a 1.7rem, el llamado se partía en dos renglones. */
+  font-size: clamp(1.05rem, min(3.4cqh, 5.2cqw), 1.7rem);
+  letter-spacing: 0.01em;
+  text-align: center;
+  color: #fff8ec;
+  -webkit-text-stroke: 6px #173d31cc;
+  paint-order: stroke fill;
+  cursor: pointer;
+  animation:
+    ini-tarde 0.6s ease-out 1.2s both,
+    ini-parpadea 2s ease-in-out 1.8s infinite;
+}
+.ini__llamado span {
+  color: #ffd46a;
+}
+@keyframes ini-tarde {
+  from {
+    opacity: 0;
+  }
+}
+@keyframes ini-parpadea {
+  50% {
+    opacity: 0.65;
+  }
 }
 
 /* La salida: lo que no es Angie se corre para que el gag sea de ella. */
@@ -275,7 +395,10 @@
 @media (prefers-reduced-motion: reduce) {
   .ini__nubes,
   .ini__juncos,
-  .ini--noche .ini__estrella {
+  .ini--noche .ini__estrella,
+  .ini__rayos,
+  .ini__aura::before,
+  .ini__llamado {
     animation: none;
   }
   .ini__texto {

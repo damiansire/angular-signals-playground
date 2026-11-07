@@ -497,17 +497,6 @@
   width: clamp(120px, 22vh, 240px);
   aspect-ratio: 1 / 1;
 }
-.tusi__ov-guide {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  width: 96%;
-  aspect-ratio: 1 / 1;
-  transform: translate(-50%, -50%);
-  border-radius: 50%;
-  border: 1px solid var(--rc);
-  opacity: 0.5;
-}
 .tusi__ov-halo {
   position: absolute;
   left: 50%;

@@ -123,7 +123,16 @@ describe('inicio-angie', () => {
       const chica = dispersion(centro, { x: 300, y: 300 }, 3, 100);
       const grande = dispersion(centro, { x: 300, y: 300 }, 3, 400);
       expect(Math.abs(grande.dx)).toBeCloseTo(Math.abs(chica.dx) * 4, -1);
-      expect(Math.hypot(grande.dx, grande.dy)).toBeLessThan(400 * 0.4);
+      expect(Math.hypot(grande.dx, grande.dy)).toBeLessThan(400 * 0.7);
+    });
+
+    it('las piezas se separan de verdad: con saltos cortos quedaban pegadas', () => {
+      for (let i = 0; i < 12; i++) {
+        const d = dispersion(centro, { x: 200 + (i % 2 ? 60 : -60), y: 280 }, i, 300);
+        expect(Math.hypot(d.dx, d.dy))
+          .withContext(`pieza ${i}`)
+          .toBeGreaterThanOrEqual(300 * 0.3);
+      }
     });
 
     it('una pieza justo en el centro igual tiene adónde ir', () => {

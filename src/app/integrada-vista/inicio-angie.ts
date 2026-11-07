@@ -170,11 +170,13 @@ export function dispersion(
     ay = -1;
   }
   const d = Math.hypot(ax, ay);
-  const fuerza = alcance * (0.12 + r() * 0.12);
+  // Bien lejos: el desarme es el momento de la transición y con saltos cortos las piezas quedaban
+  // pegadas, se leía como Angie rota y no como Angie abriéndose.
+  const fuerza = alcance * (0.3 + r() * 0.2);
   return {
     dx: Math.round((ax / d) * fuerza),
-    dy: Math.round((ay / d) * fuerza - alcance * (0.06 + r() * 0.08)),
-    giro: Math.round((r() - 0.5) * 70),
+    dy: Math.round((ay / d) * fuerza - alcance * (0.08 + r() * 0.08)),
+    giro: Math.round((r() - 0.5) * 160),
   };
 }
 
@@ -194,20 +196,30 @@ export function estela(desde: Punto, hasta: Punto): Estela {
   };
 }
 
+function entre(valor: number, min: number, max: number): number {
+  return Math.min(max, Math.max(min, valor));
+}
+
 function n(valor: number): string {
   return valor.toFixed(1);
 }
 
 // ─── En pantalla ───────────────────────────────────────────────────────────────────────────────
 
-/** Tiempos de la despedida, en ms. Las acciones son rápidas: un golpe de más de medio segundo es flojo. */
+/**
+ * Tiempos de la despedida, en ms. El golpe que la abre es rápido; lo que sigue (quedar suspendida,
+ * volverse luz, que caiga la noche) es lento a propósito: es la transición y tiene que verse.
+ */
 const T = {
-  anticipar: 260,
-  dispersar: 440,
-  aLuz: 220,
-  escalon: 45,
-  subir: 720,
-  destello: 420,
+  idea: 240,
+  anticipar: 380,
+  dispersar: 900,
+  flotar: 650,
+  aLuz: 320,
+  escalon: 95,
+  subir: 1500,
+  absorber: 280,
+  destello: 800,
 };
 
 const COLORES_DE_LUZ = ['#ff5fa8', '#ffc65c', '#ffffff', '#ff8ac9'];
@@ -243,6 +255,17 @@ export function initInicioAngie(host: HTMLElement): InicioAngie {
 
   const alTocar = (e: PointerEvent): void => {
     if (e.button !== 0 || escena.classList.contains('ini--saliendo')) return;
+    // La idea se prende: chispas y una onda de luz que salen de la lamparita.
+    const foco = (e.target as Element | null)?.closest<HTMLElement>('.ini__foco');
+    if (foco) {
+      const r = escena.getBoundingClientRect();
+      const b = foco.getBoundingClientRect();
+      const x = b.left + b.width / 2 - r.left;
+      const y = b.top + b.height * 0.42 - r.top;
+      onda(escena, x, y, 'rgba(255, 200, 90, 0.7)', b.width * 2.4);
+      chispas(escena, x, y, '#ffc65c', 12);
+      return;
+    }
     const material = (e.target as Element | null)?.closest<SVGElement>('[data-material]')?.dataset[
       'material'
     ];
@@ -278,6 +301,9 @@ export function initInicioAngie(host: HTMLElement): InicioAngie {
     escena.classList.add('ini--saliendo');
     if (sinMovimiento() || !angie || !luces) return;
 
+    // Primero se ve la idea prenderse (el CSS la enciende con `ini--saliendo`): es la causa.
+    await esperar(T.idea);
+    if (cerrado) return;
     // Anticipación: se agacha y se estira, como quien toma impulso.
     await animar(
       angie,
@@ -292,37 +318,60 @@ export function initInicioAngie(host: HTMLElement): InicioAngie {
 
     const piezas = [...angie.querySelectorAll<SVGGraphicsElement>('[data-pieza]')];
     const caja = angie.getBoundingClientRect();
+    const origen = escena.getBoundingClientRect();
     const centro = { x: caja.left + caja.width / 2, y: caja.top + caja.height * 0.55 };
+    // El estallido marca el corte: sin él, separarse parecía un desarmado tranquilo.
+    const cx = centro.x - origen.left;
+    const cy = centro.y - origen.top;
+    onda(escena, cx, cy, 'rgba(255, 255, 255, 0.8)', caja.width * 1.6);
+    chispas(escena, cx, cy, '#ffffff', 12);
     // Cada pieza se mueve en las unidades de su dibujo (1080 de lado), no en píxeles de pantalla.
     const escala = 1080 / Math.max(caja.width, 1);
+    const margen = 24;
     piezas.forEach((p, i) => {
       const b = p.getBoundingClientRect();
-      const d = dispersion(
-        centro,
-        { x: b.left + b.width / 2, y: b.top + b.height / 2 },
-        i,
-        caja.width,
-      );
+      const desde = { x: b.left + b.width / 2, y: b.top + b.height / 2 };
+      const d = dispersion(centro, desde, i, caja.width);
+      // En un celular Angie ocupa casi todo el ancho: el salto se recorta contra el borde.
+      const dx = entre(desde.x + d.dx, origen.left + margen, origen.right - margen) - desde.x;
+      const dy = entre(desde.y + d.dy, origen.top + margen, origen.bottom - margen) - desde.y;
+      const t = (x: number, y: number): string => `${x * escala}px ${y * escala}px`;
+      // Sale disparada, frena y queda suspendida a la deriva: ese momento quieto es donde se mira.
       animar(
         p,
         [
-          { translate: '0 0', rotate: '0deg' },
-          { translate: `${d.dx * escala}px ${d.dy * escala}px`, rotate: `${d.giro}deg` },
+          { translate: '0 0', rotate: '0deg', easing: 'cubic-bezier(0.15, 0.9, 0.3, 1)' },
+          {
+            translate: t(dx, dy),
+            rotate: `${d.giro}deg`,
+            offset: T.dispersar / (T.dispersar + T.flotar),
+            easing: 'ease-in-out',
+          },
+          { translate: t(dx * 1.08, dy * 1.08 - 10), rotate: `${d.giro * 1.15}deg` },
         ],
-        { duration: T.dispersar, easing: 'cubic-bezier(0.3, 1.5, 0.6, 1)' },
+        { duration: T.dispersar + T.flotar },
       );
     });
     animar(angie, [{ transform: 'scale(0.94, 1.1)' }, { transform: 'scale(1, 1)' }], {
       duration: T.dispersar,
       easing: 'ease-out',
     });
-    escena.classList.add('ini--noche');
     await esperar(T.dispersar);
     if (cerrado) return;
+    // La noche empieza a caer mientras las piezas flotan y sigue bajando mientras suben las luces.
+    escena.classList.add('ini--noche');
+    await esperar(T.flotar);
+    if (cerrado) return;
 
-    const ancho = escena.clientWidth;
-    const origen = escena.getBoundingClientRect();
-    const cielo = { x: ancho / 2, y: -escena.clientHeight * 0.08 };
+    // Las luces van al sol: la luz de la escena sale de ahí y vuelve ahí.
+    const sol = escena.querySelector<HTMLElement>('.ini__sol');
+    const cajaSol = sol?.getBoundingClientRect();
+    const destino = cajaSol
+      ? {
+          x: cajaSol.left + cajaSol.width / 2 - origen.left,
+          y: cajaSol.top + cajaSol.height / 2 - origen.top,
+        }
+      : { x: escena.clientWidth / 2, y: -escena.clientHeight * 0.08 };
     const subidas = piezas.map((p, i) => {
       const b = p.getBoundingClientRect();
       const desde = { x: b.left + b.width / 2 - origen.left, y: b.top + b.height / 2 - origen.top };
@@ -332,13 +381,25 @@ export function initInicioAngie(host: HTMLElement): InicioAngie {
         delay: retraso,
         easing: 'ease-in',
       });
-      return subirLuz(desde, cielo, COLORES_DE_LUZ[i % COLORES_DE_LUZ.length], retraso);
+      const color = COLORES_DE_LUZ[i % COLORES_DE_LUZ.length];
+      return subirLuz(desde, destino, color, retraso).then(() => {
+        // Cada luz que llega lo hace latir: se ve que la recibe.
+        if (sol && !cerrado)
+          animar(sol, [{ scale: '1' }, { scale: '1.14' }, { scale: '1' }], {
+            duration: T.absorber,
+            easing: 'ease-out',
+            fill: 'none',
+          });
+      });
     });
     await Promise.all(subidas);
     if (cerrado) return;
 
     const destello = crear('ini__destello');
+    destello.style.left = `${destino.x}px`;
+    destello.style.top = `${destino.y}px`;
     luces.appendChild(destello);
+    if (sol) animar(sol, [{ opacity: 1 }, { opacity: 0 }], { duration: T.destello });
     await animar(
       destello,
       [
@@ -350,7 +411,7 @@ export function initInicioAngie(host: HTMLElement): InicioAngie {
     );
   }
 
-  /** Una pieza hecha luz: una cabeza brillante con su estela, que acelera hacia el cielo. */
+  /** Una pieza hecha luz: una cabeza brillante con su estela, que arranca lenta y se mete en el sol. */
   function subirLuz(desde: Punto, hasta: Punto, color: string, retraso: number): Promise<void> {
     const luz = crear('ini__luz');
     luz.style.setProperty('--luz', color);
@@ -358,18 +419,20 @@ export function initInicioAngie(host: HTMLElement): InicioAngie {
     luz.style.left = `${desde.x}px`;
     luz.style.top = `${desde.y}px`;
     luces!.appendChild(luz);
+    const giro = `rotate(${e.angulo}deg)`;
     return animar(
       luz,
       [
-        { opacity: 0, transform: `rotate(${e.angulo}deg) translateY(0) scaleY(0.2)` },
+        { opacity: 0, transform: `${giro} translateY(0) scaleY(0.2)` },
+        { opacity: 1, transform: `${giro} translateY(-10px) scaleY(0.5)`, offset: 0.18 },
         {
           opacity: 1,
-          transform: `rotate(${e.angulo}deg) translateY(-8px) scaleY(0.5)`,
-          offset: 0.2,
+          transform: `${giro} translateY(${-e.largo * 0.92}px) scaleY(1.3)`,
+          offset: 0.9,
         },
-        { opacity: 1, transform: `rotate(${e.angulo}deg) translateY(${-e.largo}px) scaleY(1.4)` },
+        { opacity: 0, transform: `${giro} translateY(${-e.largo}px) scaleY(0.3)` },
       ],
-      { duration: T.subir, delay: retraso, easing: 'cubic-bezier(0.55, 0, 0.9, 0.4)' },
+      { duration: T.subir, delay: retraso, easing: 'cubic-bezier(0.5, 0, 0.7, 0.4)' },
     );
   }
 
