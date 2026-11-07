@@ -465,9 +465,13 @@ entrar desarma a Angie en luz y se hace noche, la costura con el prólogo.
       pantalla de inicio en el mismo `.tusi`: van `inert` hasta que arranca la construcción. Antes
       de entrar, Tab pasaba por cinco botones tapados. Contar los tabulables: saltar, Entrar y los
       dos interruptores, nada más.
-- [ ] La noche baja desde arriba como cortina, no con un fundido parejo: el negro al 50% sobre el
-      verde pasaba por un gris sucio. Se revisa grabando la salida cuadro a cuadro (input real por
-      CDP), no con capturas sueltas del panel, que no alcanzan la animación a mitad de camino.
+- [ ] La noche cae en dos tiempos, como cae de verdad: primero un atardecer dorado y rosado, después
+      todo se apaga hacia el azul con la colina como silueta, y las estrellas se prenden de a una.
+      Ni un fundido parejo de negro (pasaba por un gris sucio) ni una cortina que baja (dejaba una
+      franja gris, como niebla, y la colina desaparecía de golpe): dos capas que multiplican, que
+      oscurecen sin lavar. El negro del prólogo entra recién detrás del destello final. Se revisa
+      grabando la salida cuadro a cuadro (input real por CDP), no con capturas sueltas del panel,
+      que no alcanzan la animación a mitad de camino.
 - [ ] El desarme escala con Angie: con un salto fijo en píxeles, en un celular (donde ocupa casi
       todo el ancho) las piezas llegaban al borde. Grabarlo a 1280 y a 390.
 - [ ] Lo que la salida crea a mano (las luces) lleva el atributo de encapsulación del componente:
@@ -481,6 +485,13 @@ entrar desarma a Angie en luz y se hace noche, la costura con el prólogo.
       quedan suspendidas un momento; la noche tarda ~3 s y las luces viajan al sol, que late con
       cada una y se apaga con el destello. Con un segundo de noche y saltos cortos se veía todo
       pegado y apurado. Se revisa con capturas encadenadas tras un click real.
+- [ ] Cada pieza se CONVIERTE en luz, no se cambia por una: se carga de brillo, se condensa en un
+      núcleo que se enciende en su centro, el núcleo flota un instante y recién al arrancar le
+      crece la estela. Si la pieza se apagaba y al lado aparecía una estela ya hecha, se leían como
+      dos cosas distintas. Las luces que esperan turno van con `fill: 'both'`: con `forwards` se
+      veían enteras, sin girar, como rayas colgando de las piezas.
+- [ ] Al desarmarse no queda nada en el piso: la sombra de contacto no es una pieza y quedaba en el
+      pasto como una mancha oscura durante toda la noche. Se apaga cuando las piezas despegan.
 - [ ] Entrar es un objeto de la escena, no un botón encima: la lamparita de Angie (un `<button>`
       transparente sobre el dibujo, con nombre "Entrar") y abajo solo el llamado "✦ Tocá la idea
       para entrar ✦", que es su `<label>`. Una píldora oscura bajo el título se leía como un hueco
