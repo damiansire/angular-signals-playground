@@ -153,7 +153,7 @@ describe('IntegradaVistaComponent', () => {
     it('la landing trae la misma pausa junto al sonido, con el estado compartido', async () => {
       const fixture = await montar();
       const host: HTMLElement = fixture.nativeElement;
-      const landing = host.querySelector<HTMLButtonElement>('.tusi__ov-capbar .tusi__ov-pausa')!;
+      const landing = host.querySelector<HTMLButtonElement>('.ini__ajustes .tusi__ov-pausa')!;
       const topbar = host.querySelector<HTMLButtonElement>('.tb-pausa')!;
 
       expect(landing.textContent).toContain('tocá para pausar');

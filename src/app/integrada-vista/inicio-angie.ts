@@ -253,19 +253,11 @@ export function initInicioAngie(host: HTMLElement): InicioAngie {
     return el;
   };
 
+  /** Dónde arrancó el último toque: un arrastre de Angie que termina en otro lado no es entrar. */
+  let desde: Punto | null = null;
   const alTocar = (e: PointerEvent): void => {
     if (e.button !== 0 || escena.classList.contains('ini--saliendo')) return;
-    // La idea se prende: chispas y una onda de luz que salen de la lamparita.
-    const foco = (e.target as Element | null)?.closest<HTMLElement>('.ini__foco');
-    if (foco) {
-      const r = escena.getBoundingClientRect();
-      const b = foco.getBoundingClientRect();
-      const x = b.left + b.width / 2 - r.left;
-      const y = b.top + b.height * 0.42 - r.top;
-      onda(escena, x, y, 'rgba(255, 200, 90, 0.7)', b.width * 2.4);
-      chispas(escena, x, y, '#ffc65c', 12);
-      return;
-    }
+    desde = { x: e.clientX, y: e.clientY };
     const material = (e.target as Element | null)?.closest<SVGElement>('[data-material]')?.dataset[
       'material'
     ];
@@ -282,6 +274,18 @@ export function initInicioAngie(host: HTMLElement): InicioAngie {
     emitirImpacto(escena, { x: e.clientX, y: e.clientY, fuerza: material === 'pasto' ? 0.5 : 0.3 });
   };
   escena.addEventListener('pointerdown', alTocar);
+
+  // Se entra tocando en cualquier lugar: buscar un botón chico en la escena era tarea. El toque pasa
+  // por la lamparita (la entrada con nombre, a la que llega Tab), así hay un solo camino para entrar.
+  const entrada = escena.querySelector<HTMLElement>('[data-role="entrar"]');
+  const alClic = (e: MouseEvent): void => {
+    const tocado = e.target as Element | null;
+    if (!entrada || !desde || tocado?.closest('button, a, label, input')) return;
+    const arrastre = Math.hypot(e.clientX - desde.x, e.clientY - desde.y) > 8;
+    desde = null;
+    if (!arrastre) entrada.click();
+  };
+  escena.addEventListener('click', alClic);
 
   const animar = (
     el: Element,
@@ -301,7 +305,17 @@ export function initInicioAngie(host: HTMLElement): InicioAngie {
     escena.classList.add('ini--saliendo');
     if (sinMovimiento() || !angie || !luces) return;
 
-    // Primero se ve la idea prenderse (el CSS la enciende con `ini--saliendo`): es la causa.
+    // Primero se ve la idea prenderse (el CSS la enciende con `ini--saliendo`): es la causa, toque
+    // donde toque.
+    const foco = escena.querySelector<HTMLElement>('.ini__foco');
+    if (foco) {
+      const r = escena.getBoundingClientRect();
+      const b = foco.getBoundingClientRect();
+      const x = b.left + b.width / 2 - r.left;
+      const y = b.top + b.height * 0.42 - r.top;
+      onda(escena, x, y, 'rgba(255, 200, 90, 0.7)', b.width * 2.4);
+      chispas(escena, x, y, '#ffc65c', 12);
+    }
     await esperar(T.idea);
     if (cerrado) return;
     // Anticipación: se agacha y se estira, como quien toma impulso.
@@ -441,6 +455,7 @@ export function initInicioAngie(host: HTMLElement): InicioAngie {
     dispose(): void {
       cerrado = true;
       escena.removeEventListener('pointerdown', alTocar);
+      escena.removeEventListener('click', alClic);
       animaciones.forEach((a) => a.cancel());
       animaciones.clear();
       luces?.replaceChildren();

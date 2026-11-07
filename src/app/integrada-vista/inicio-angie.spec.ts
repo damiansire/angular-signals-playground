@@ -169,13 +169,53 @@ describe('inicio-angie', () => {
         <div class="tusi__overlay ini" style="position:fixed;inset:0">
           <svg width="400" height="300"><rect data-material="cielo" width="400" height="150"/>
             <rect data-material="pasto" y="150" width="400" height="150"/></svg>
-          <div class="ini__angie"></div>
+          <div class="ini__angie"><button class="ini__foco" data-role="entrar"></button></div>
           <div class="ini__luces"></div>
+          <button class="ajuste"></button>
         </div>`;
       document.body.appendChild(host);
       hosts.push(host);
       return { host, escena: host.querySelector<HTMLElement>('.ini')! };
     }
+
+    describe('se entra tocando en cualquier lugar', () => {
+      function contarEntradas(escena: HTMLElement): () => number {
+        let n = 0;
+        escena.querySelector('[data-role="entrar"]')!.addEventListener('click', () => n++);
+        return () => n;
+      }
+      function tocar(el: Element, desde: [number, number], hasta = desde): void {
+        const op = { bubbles: true, button: 0 };
+        el.dispatchEvent(
+          new PointerEvent('pointerdown', { ...op, clientX: desde[0], clientY: desde[1] }),
+        );
+        el.dispatchEvent(new MouseEvent('click', { ...op, clientX: hasta[0], clientY: hasta[1] }));
+      }
+
+      it('un toque en el cielo o el pasto entra por la lamparita', () => {
+        const { host, escena } = montar();
+        cerrar.push(initInicioAngie(host).dispose);
+        const entradas = contarEntradas(escena);
+        tocar(escena.querySelector('[data-material="cielo"]')!, [40, 40]);
+        expect(entradas()).toBe(1);
+      });
+
+      it('arrastrar a Angie y soltarla en otro lado no entra', () => {
+        const { host, escena } = montar();
+        cerrar.push(initInicioAngie(host).dispose);
+        const entradas = contarEntradas(escena);
+        tocar(escena.querySelector('.ini__angie')!, [200, 200], [260, 120]);
+        expect(entradas()).toBe(0);
+      });
+
+      it('los controles (sonido, pausa) hacen lo suyo y no entran', () => {
+        const { host, escena } = montar();
+        cerrar.push(initInicioAngie(host).dispose);
+        const entradas = contarEntradas(escena);
+        tocar(escena.querySelector('.ajuste')!, [10, 10]);
+        expect(entradas()).toBe(0);
+      });
+    });
 
     it('sin la escena avisa en vez de dejar un Entrar que no hace nada', () => {
       expect(() => initInicioAngie(document.createElement('div'))).toThrowError(/\.tusi__overlay/);

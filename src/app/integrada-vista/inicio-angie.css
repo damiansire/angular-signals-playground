@@ -9,6 +9,8 @@
   --u: max(100cqw / 1920, 100cqh / 1080);
   overflow: hidden;
   background: #e9f3e6;
+  /* Toda la escena es la entrada: tocar en cualquier lado prende la idea. */
+  cursor: pointer;
   user-select: none;
   -webkit-user-select: none;
 }
@@ -182,22 +184,14 @@
     opacity 0.28s ease-in,
     transform 0.28s ease-in;
 }
-.ini__kicker {
-  margin: 0;
-  font-family: var(--mono, ui-monospace, monospace);
-  font-size: clamp(0.66rem, 1.6cqh, 0.82rem);
-  font-weight: 600;
-  letter-spacing: 0.24em;
-  text-transform: uppercase;
-  color: #2f5a4c;
-}
-/* Peso alto y sombra dura tintada: con menos, el texto se ve fino al lado del dibujo. */
+/* Peso alto y sombra dura tintada: con menos, el texto se ve fino al lado del dibujo. El título es
+   el de una historia (dos renglones), así que va más chico que el "Angular Signals" de antes. */
 .ini__titulo {
   margin: 0;
   font-family: var(--font-display, system-ui, sans-serif);
   font-weight: 900;
-  font-size: clamp(2rem, min(8.5cqw, 9cqh), 5rem);
-  line-height: 1;
+  font-size: clamp(1.7rem, min(5.6cqw, 6.4cqh), 3.6rem);
+  line-height: 1.04;
   letter-spacing: -0.02em;
   color: #22302a;
   text-shadow:
@@ -206,6 +200,17 @@
 }
 .ini__acento {
   color: #d1035c;
+}
+.ini__renglon {
+  display: block;
+}
+.ini__bajada {
+  margin: 0;
+  font-family: var(--font-display, system-ui, sans-serif);
+  font-weight: 700;
+  font-size: clamp(0.95rem, min(2.4cqh, 3.6cqw), 1.25rem);
+  color: #2f5a4c;
+  text-shadow: 0 2px 0 rgba(255, 250, 236, 0.8);
 }
 /* La entrada es la lamparita de Angie, integrada a la escena como el pase de japanise-game: un
    botón transparente encima del dibujo. La luz que emite dice que se toca; no hay caja. */
@@ -337,6 +342,17 @@
   opacity: 0;
   transform: translate(-50%, -14px);
 }
+.ini__ajustes {
+  position: absolute;
+  z-index: 6;
+  left: clamp(0.8rem, 2.4cqw, 1.6rem);
+  top: clamp(0.8rem, 2.4cqh, 1.6rem);
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  transition: opacity 0.28s ease-in;
+}
+.ini--saliendo .ini__ajustes,
 .ini--saliendo .tusi__ov-capbar {
   opacity: 0;
   transition: opacity 0.28s ease-in;

@@ -436,58 +436,80 @@
   gap: 0.6em 0.8em;
   padding: 2.4% 4%;
 }
+/* Sonido y pausa: fichas de papel crema con tinta verde, del mismo mundo que el título. El estado
+   lo dice el ícono (no solo el color) y el texto sale en un globito al apuntarlas. */
 .tusi__ov-sound {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.6em;
-  font-family: var(--mono, ui-monospace, monospace);
-  font-size: clamp(0.68rem, 1.2vw, 0.82rem);
-  letter-spacing: 0.02em;
-  color: #d7dae0;
-  /* Casi opaco y sin blur: la barra cruza las dos mitades y sobre la clara el texto, con el fondo al
-     50%, quedaba gris sobre gris (~2:1). Así llega a ~6.7:1 en los dos lados, sin un filtro caro. */
-  background: rgba(20, 22, 26, 0.8);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 999px;
-  padding: 0.5em 1em;
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 2.6rem;
+  aspect-ratio: 1;
+  padding: 0;
+  color: #22302a;
+  background: #fff8ec;
+  border: 0;
+  border-radius: 50%;
+  box-shadow:
+    0 3px 0 #2f5a4c40,
+    0 8px 18px #1e3c3238;
   cursor: pointer;
   transition:
-    color 0.16s,
-    border-color 0.16s;
+    transform 0.16s cubic-bezier(0.3, 1.6, 0.5, 1),
+    box-shadow 0.16s;
+}
+.tusi__ov-sound:hover {
+  transform: translateY(-2px) rotate(-6deg);
+}
+.tusi__ov-sound:active {
+  transform: translateY(2px);
+  box-shadow: 0 1px 0 #2f5a4c40;
 }
 .tusi__ov-sound:focus-visible {
-  outline: 2px solid var(--tusi-amber);
-  outline-offset: 2px;
+  outline: 3px solid var(--focus-ink);
+  outline-offset: 3px;
+  box-shadow: 0 0 0 6px var(--tusi-amber);
 }
-.tusi__ov-swi {
-  position: relative;
-  width: 2.4em;
-  height: 1.3em;
-  flex: none;
-  border-radius: 999px;
-  background: var(--tusi-amber);
-  transition:
-    background 0.18s,
-    opacity 0.18s;
+.ini__ico {
+  width: 58%;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
-.tusi__ov-swi::after {
-  content: '';
+.ini__ico-lleno {
+  fill: currentColor;
+}
+.ini__ico-off,
+.tusi__ov-sound[aria-pressed='false'] .ini__ico-on,
+.tusi__ov-pausa--activa .ini__ico-on {
+  display: none;
+}
+.tusi__ov-sound[aria-pressed='false'] .ini__ico-off,
+.tusi__ov-pausa--activa .ini__ico-off {
+  display: inline;
+}
+.ini__globo {
   position: absolute;
-  top: 0.18em;
-  right: 0.18em;
-  width: 0.94em;
-  height: 0.94em;
-  border-radius: 50%;
-  background: #fff;
-  transition: transform 0.18s;
+  left: calc(100% + 0.6rem);
+  top: 50%;
+  translate: -4px -50%;
+  white-space: nowrap;
+  font-family: var(--mono, ui-monospace, monospace);
+  font-size: 0.78rem;
+  color: #fff8ec;
+  background: #22302ae6;
+  border-radius: 0.5rem;
+  padding: 0.35em 0.7em;
+  opacity: 0;
+  pointer-events: none;
+  transition:
+    opacity 0.16s,
+    translate 0.16s;
 }
-.tusi__ov-sound[aria-pressed='false'] .tusi__ov-swi,
-.tusi__ov-pausa--activa .tusi__ov-swi {
-  background: rgba(255, 255, 255, 0.28);
-}
-.tusi__ov-sound[aria-pressed='false'] .tusi__ov-swi::after,
-.tusi__ov-pausa--activa .tusi__ov-swi::after {
-  transform: translateX(-1.1em);
+.tusi__ov-sound:is(:hover, :focus-visible) .ini__globo {
+  opacity: 1;
+  translate: 0 -50%;
 }
 
 /* ── molécula viva de preview (pura CSS, sin canvas): núcleo + halo que respira +

@@ -381,17 +381,27 @@
             </div>
 
             <div class="ini__texto">
-              <p class="ini__kicker">Introducción interactiva</p>
-              <p class="ini__titulo">Angular <span class="ini__acento">Signals</span></p>
+              <p class="ini__titulo">
+                <span class="ini__renglon">Las aventuras de Angie</span>
+                <span class="ini__renglon"
+                  >por el <span class="ini__acento">SignalVerso</span></span
+                >
+              </p>
+              <p class="ini__bajada">Una introducción interactiva a los Signals</p>
             </div>
 
             <div class="ini__luces" aria-hidden="true"></div>
 
             <div class="tusi__ov-capbar">
               <label class="ini__llamado" for="ini-foco">
-                <span aria-hidden="true">✦</span> Tocá la idea para entrar
+                <span aria-hidden="true">✦</span> Tocá para entrar
                 <span aria-hidden="true">✦</span>
               </label>
+            </div>
+
+            <!-- Sonido y pausa: dos fichas chicas en la esquina libre (el sol ocupa la otra), no una
+                 barra al pie que competía con el llamado. Su texto aparece al apuntarlas. -->
+            <div class="ini__ajustes">
               <button
                 class="tusi__ov-sound"
                 data-role="ov-sound"
@@ -399,15 +409,25 @@
                 aria-pressed="true"
                 aria-label="Silenciar el sonido de la intro"
               >
-                <span class="tusi__ov-swi" aria-hidden="true"></span>
-                <span class="tusi__ov-sound-txt">Sonido activado · tocá para silenciar</span>
+                <svg class="ini__ico" viewBox="0 0 24 24" aria-hidden="true">
+                  <path class="ini__ico-lleno" d="M4 9h3.5L12 5v14l-4.5-4H4z" />
+                  <path class="ini__ico-on" d="M15.5 9a4 4 0 0 1 0 6M18 6.5a7.5 7.5 0 0 1 0 11" />
+                  <path class="ini__ico-off" d="m16 9.5 5 5m0-5-5 5" />
+                </svg>
+                <span class="ini__globo tusi__ov-sound-txt"
+                  >Sonido activado · tocá para silenciar</span
+                >
               </button>
-              <!-- La pausa de la vida de fondo, también acá: en la landing el topbar todavía no se ve y
-                   estas moléculas giran sin fin al lado de la elección. La maneja el motor, con el
-                   mismo estado que el botón del topbar. -->
+              <!-- La pausa de la vida de fondo, también acá: en la landing el topbar todavía no se ve.
+                   La maneja el motor, con el mismo estado que el botón del topbar. -->
               <button class="tusi__ov-sound tusi__ov-pausa" type="button">
-                <span class="tusi__ov-swi" aria-hidden="true"></span>
-                <span class="tusi__ov-pausa-txt">Animaciones activas · tocá para pausar</span>
+                <svg class="ini__ico" viewBox="0 0 24 24" aria-hidden="true">
+                  <path class="ini__ico-on" d="M9 6.5v11M15 6.5v11" />
+                  <path class="ini__ico-lleno ini__ico-off" d="M8.5 5.5v13l10-6.5z" />
+                </svg>
+                <span class="ini__globo tusi__ov-pausa-txt"
+                  >Animaciones activas · tocá para pausar</span
+                >
               </button>
             </div>
           </div>
