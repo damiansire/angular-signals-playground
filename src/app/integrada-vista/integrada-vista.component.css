@@ -941,6 +941,9 @@
   font-size: 0.85rem;
   color: #6a6355;
   background: linear-gradient(180deg, #f7f5ed 40%, transparent);
+  /* Arranca apagado: la opacidad la pone el motor (`chromeVisible`) y hasta su primer cuadro el
+     topbar quedaba encima de la landing. */
+  opacity: 0;
 }
 .tb-title {
   letter-spacing: 0.18em;
@@ -1078,6 +1081,7 @@
   transform: translateY(-50%);
   z-index: 6;
   height: min(88%, 900px);
+  opacity: 0; /* igual que el topbar: lo prende el motor */
   /* La caja del riel mide hasta 312×900 y va por encima de la card (z 6): sin esto se comía los
      clicks de los demos que caen debajo (a 1440 px, el botón entero de 1/6). Solo las paradas
      (`.rail-stop-btn`) reciben el puntero. */

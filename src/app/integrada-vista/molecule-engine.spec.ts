@@ -11,8 +11,22 @@ import {
   SPIRAL_RSTEP,
   WIDE_ZOOM_FLOOR,
   TINTA,
+  chromeVisible,
 } from './molecule-engine';
 import { signalsRoutesTree } from '../app.routes';
+
+describe('chromeVisible (topbar y riel contra la landing)', () => {
+  // El chrome va por encima de la landing: si asoma antes de que se vaya, flota sobre la colina.
+  it('no se ve en ningún punto donde la landing sigue a la vista', () => {
+    for (const s of [0, 0.02, 0.05, 0.08, 0.1, 0.119]) expect(chromeVisible(s)).toBe(0);
+  });
+
+  it('pasada la landing aparece y llega entero', () => {
+    expect(chromeVisible(0.13)).toBeGreaterThan(0);
+    expect(chromeVisible(0.2)).toBe(1);
+    expect(chromeVisible(3)).toBe(1);
+  });
+});
 
 describe('conceptPos (espiral de la molécula)', () => {
   const all = Array.from({ length: CONCEPT_COUNT }, (_, i) => conceptPos(i));

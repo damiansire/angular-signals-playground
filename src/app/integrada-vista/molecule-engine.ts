@@ -254,6 +254,13 @@ const ELECTRONES_ENTRADA = ['#d9503f', '#3fae8f', '#eb9b3c'];
 const PARADA_ATOMO = 1.3;
 /** Hasta dónde del scroll (`s`) la landing sigue a la vista: el recorrido arranca pasado este punto. */
 const INTRO_HASTA = 0.12;
+/**
+ * Cuánto se ve el chrome del recorrido (topbar, riel): nada mientras la landing está a la vista, y
+ * después un fundido corto. Antes arrancaba en s = 0 y asomaba encima de la landing.
+ */
+export function chromeVisible(s: number): number {
+  return Math.max(0, Math.min(1, (s - INTRO_HASTA) / 0.04));
+}
 /** El concepto del medio (`resource`): el pico del recorrido, con su marca propia en el riel. */
 const CONCEPTO_PICO = 6;
 
@@ -1306,10 +1313,10 @@ export function initMolecule(
     // El riel se atenúa y el caption inferior se va.
     if (topbarEl) {
       topbarEl.classList.add('contextual');
-      // En la landing (s≈0) el topbar se atenúa como el título: su banda y "Practicá" no deben flotar
-      // sobre la portada (ni cruzar como franja clara el intro en tema oscuro). Gana presencia al
-      // scrollear y, al bucear (s alto), queda en 1.
-      topbarEl.style.opacity = Math.max(0, Math.min(1, (s - 0.03) / 0.09)).toFixed(2);
+      // Mientras la landing se ve, el topbar no existe: va por encima de ella (z 6 contra 5) y un
+      // fundido que arrancaba antes de que se fuera dejaba "Bitácora" y "El recorrido" flotando sobre
+      // la colina al primer toque de la rueda. Gana presencia pasada la landing y al bucear queda en 1.
+      topbarEl.style.opacity = chromeVisible(s).toFixed(2);
     }
     // Como el índice: invisibles en la landing, sus controles (bitácora, práctica, pausa) no pueden
     // quedar en el tab-order ni recibir clicks. Va sobre los links y no sobre el topbar, cuyo `inert`
@@ -1319,8 +1326,7 @@ export function initMolecule(
     // En la pantalla inicial (overlay de bienvenida, s≈0) el título del topbar (el tagline del concepto
     // 0, "Cómo la pantalla sabe qué cambió") competía con el "Angular Signals" del intro. Se oculta
     // hasta que empezás a scrollear, desvaneciéndose a la par que el intro.
-    if (tbCenterEl)
-      tbCenterEl.style.opacity = Math.max(0, Math.min(1, (s - 0.03) / 0.09)).toFixed(2);
+    if (tbCenterEl) tbCenterEl.style.opacity = chromeVisible(s).toFixed(2);
     // El riel hace ZOOM-IN al bucear: en vez de desvanecer el cuerpo entero de golpe (se leía como un
     // CORTE), los ticks se SEPARAN alrededor del concepto activo (que queda fijo) y crecen, los lejanos
     // salen del cuadro, mientras se apagan y el track de concepto se desvanece; su lugar lo toma la barra
@@ -1550,7 +1556,7 @@ export function initMolecule(
     // En la landing (intro "Primera luz" + hero) el panel del recorrido queda OCULTO: es rico (nombres,
     // actos, contador) y a media opacidad competía con la entrada. Aparece al empezar a scrollear el
     // recorrido. Fade propio del `.rail` entero (independiente del morph interno).
-    if (railEl) railEl.style.opacity = Math.min(1, s / 0.14).toFixed(2);
+    if (railEl) railEl.style.opacity = chromeVisible(s).toFixed(2);
 
     // Reflejar en la URL el nivel actual y, si estás adentro, el sub-nivel. -1 = vista molécula. Se
     // keyea por `diveDepth > 0.5` (el mismo umbral que el título del topbar), NO por `w > 1.3`: en la
