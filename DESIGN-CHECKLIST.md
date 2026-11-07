@@ -155,9 +155,9 @@ el 0, ~87% en el 8), así que verificar solo el concepto 0 no alcanza.
       (`estampado-tardio.ts`). Sin eso el tercer "Valor:" de 3/1 salía con el gris crudo de
       Tailwind y "Pionera…" de 6/1 a 3:1. Medir clickeando los botones de cada demo y contando
       los elementos de la card sin el atributo de encapsulación: cero.
-- [ ] Los controles de la barra del selector de clima (sonido, pausa) se leen sobre las DOS
-      mitades: fondo casi opaco y sin `backdrop-filter`. Con el fondo al 50% la pastilla que cae
-      sobre la mitad clara quedaba gris sobre gris (~2:1). Mirarla en captura a 1440, 820 y 500.
+- [ ] Los controles de la barra de la pantalla de inicio (sonido, pausa) se leen sobre el cielo y
+      sobre el pasto: fondo casi opaco y sin `backdrop-filter`. Con el fondo al 50% la pastilla
+      quedaba gris sobre gris (~2:1). Mirarla en captura a 1440, 820 y 500.
 
 ## Operable sin mouse y sin trampas de foco
 
@@ -181,7 +181,7 @@ puede alcanzar" son dos cosas distintas y hay que chequear las dos.
       activo) salen del tab-order mientras no se ven.
 - [ ] Abrir por deep-link (`?nivel=X&sub-nivel=Y`) deja el recorrido operable:
       tomar el árbol de accesibilidad y confirmar que topbar, card y riel están
-      ahí. Sin elegir clima nadie liberaba el `inert` que pone la landing, y un
+      ahí. Sin tocar Entrar nadie liberaba el `inert` que pone la landing, y un
       link compartido abría la app entera muerta (review de animaciones,
       2026-09-24).
 - [ ] Ningún contenedor del chrome (riel, topbar) atrapa clicks con su caja: solo
@@ -191,9 +191,9 @@ puede alcanzar" son dos cosas distintas y hay que chequear las dos.
 - [ ] Ninguna regla del recorrido apaga el foco de lo embebido. Los rings de
       Tailwind son `box-shadow`: un `box-shadow: none` genérico sobre la card
       también los borra. Tabular hasta un botón embebido y mirar el anillo.
-- [ ] En la landing el topbar está en opacidad 0 y, elegido el clima, ya no es inerte: sus links
+- [ ] En la landing el topbar está en opacidad 0 y, tocado Entrar, ya no es inerte: sus links
       (bitácora, práctica, pausa) van `inert` mientras no se ven, con el mismo umbral que el
-      índice. Tabular después de elegir clima: el foco no cae en el topbar.
+      índice. Tabular después de entrar: el foco no cae en el topbar.
 - [ ] Todo anillo de foco llega a 3:1 contra lo que tiene alrededor. Los acentos claros (ámbar,
       verde) sobre el crema no llegan: el anillo va doble, `var(--focus-ink)` en el `outline` (el
       contraste) y el acento en un `box-shadow` por dentro (la identidad).
@@ -214,7 +214,7 @@ puede alcanzar" son dos cosas distintas y hay que chequear las dos.
 - [ ] Consola limpia mientras se recorre: un `console.log` didáctico solo
       aparece cuando el usuario está en el sub-nivel que lo enseña.
 - [ ] Ningún loop de dibujo (rAF de canvas) corre sin algo que mover: parado en
-      pausa, antes de elegir clima o fuera de vista, contar `requestAnimationFrame`
+      pausa, antes de entrar o fuera de vista, contar `requestAnimationFrame`
       durante un segundo y esperar cero (review de animaciones, 2026-09-24).
 - [ ] Toda animación infinita sobre algo en opacidad 0 queda pausada. Verificar
       con `getComputedStyle(el).animationPlayState`, no leyendo la regla: un
@@ -450,6 +450,30 @@ posición de la perilla. Estos ítems son los defectos que YA aparecieron.
       con rueda real por CDP: un golpe de 500 px y muescas de 100 px separadas, del átomo 9 hacia
       arriba y de 8/4 hacia abajo (una parada por muesca), y una rueda girada a ritmo parejo
       (avanza siempre, sin temblar).
+
+## Pantalla de inicio (Angie en la colina)
+
+Origen: 2026-11-08, cuando el selector de modo noche/día pasó a ser una sola escena de día que al
+entrar desarma a Angie en luz y se hace noche, la costura con el prólogo.
+
+- [ ] Angie pisa la cima en todos los anchos: el paisaje se ancla abajo (`xMidYMax slice`) y ella
+      se ubica con la misma unidad (`--u`, contra el contenedor). Mirar los pies sobre el pasto en
+      1920, 1440, 1280, 820, 500 y 375, y medir con `getBoundingClientRect` sol, kicker, título,
+      Entrar, Angie y barra de abajo entre sí y contra el borde: cero solapes y nada afuera. El
+      átomo-sol pisaba "Signals" a 1024 px; en vertical va a la esquina, más chico, y el texto baja.
+- [ ] Los controles de la construcción (sonido, pausa, velocidad, ayuda) viven debajo de la
+      pantalla de inicio en el mismo `.tusi`: van `inert` hasta que arranca la construcción. Antes
+      de entrar, Tab pasaba por cinco botones tapados. Contar los tabulables: saltar, Entrar y los
+      dos interruptores, nada más.
+- [ ] La noche baja desde arriba como cortina, no con un fundido parejo: el negro al 50% sobre el
+      verde pasaba por un gris sucio. Se revisa grabando la salida cuadro a cuadro (input real por
+      CDP), no con capturas sueltas del panel, que no alcanzan la animación a mitad de camino.
+- [ ] El desarme escala con Angie: con un salto fijo en píxeles, en un celular (donde ocupa casi
+      todo el ancho) las piezas llegaban al borde. Grabarlo a 1280 y a 390.
+- [ ] Lo que la salida crea a mano (las luces) lleva el atributo de encapsulación del componente:
+      sin él el CSS no lo alcanza.
+- [ ] Con movimiento reducido Entrar pasa directo, sin desarme ni luces, y en la escena no queda
+      ninguna animación infinita.
 
 ## Overlays que tapan el recorrido (prólogo, modales a pantalla completa)
 
