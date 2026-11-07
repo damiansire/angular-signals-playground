@@ -383,6 +383,97 @@
   opacity: 0;
   transform: translate(-50%, -14px);
 }
+
+/* El pensamiento: una nube sobre la cabeza y dos burbujas que suben desde ella, como en una
+   historieta. Las burbujas salen primero, de la más chica a la más grande, y la nube después:
+   así se lee que el pensamiento sale de ella, no que aparece un cartel. El título ya se fue, así
+   que arriba de la cabeza hay lugar. */
+.ini__piensa {
+  --tinta: #2f5a4c;
+  position: absolute;
+  inset: 0;
+  margin: 0;
+  pointer-events: none;
+}
+.ini__rastro,
+.ini__burbuja {
+  position: absolute;
+  background: #fffdf6;
+  border: 3px solid var(--tinta);
+  box-shadow: 0 8px 22px rgba(30, 60, 50, 0.2);
+  opacity: 0;
+  scale: 0.3;
+  transition:
+    opacity 0.16s ease-in,
+    scale 0.2s ease-in;
+}
+.ini__rastro {
+  border-radius: 50%;
+}
+.ini__rastro:nth-child(1) {
+  left: 69%;
+  top: 13%;
+  width: max(10px, 5.4%);
+  aspect-ratio: 1;
+}
+.ini__rastro:nth-child(2) {
+  left: 73%;
+  top: 2.5%;
+  width: max(14px, 8.2%);
+  aspect-ratio: 1;
+}
+.ini__burbuja {
+  left: 62%;
+  bottom: 100%;
+  translate: -50% 4%;
+  padding: 0.5em 1.1em 0.55em;
+  border-radius: 999px;
+  white-space: nowrap;
+  font-family: var(--font-display, system-ui, sans-serif);
+  font-weight: 800;
+  font-size: max(1rem, calc(var(--w) * 0.068));
+  line-height: 1;
+  color: #22302a;
+  transform-origin: 60% 100%;
+}
+/* Al irse, los puntos esperan a que la nube se encoja: si se apagaban antes, quedaba "Es la hora"
+   pelado un instante. */
+.ini__puntos i {
+  font-style: normal;
+  opacity: 0;
+  transition: opacity 0s 0.2s;
+}
+.ini--piensa .ini__rastro,
+.ini--piensa .ini__burbuja {
+  opacity: 1;
+  scale: 1;
+  transition:
+    opacity 0.14s ease-out var(--d),
+    scale 0.34s cubic-bezier(0.3, 1.6, 0.5, 1) var(--d);
+}
+.ini--piensa .ini__rastro:nth-child(1) {
+  --d: 0ms;
+}
+.ini--piensa .ini__rastro:nth-child(2) {
+  --d: 120ms;
+}
+.ini--piensa .ini__burbuja {
+  --d: 240ms;
+}
+/* Los puntos van de a uno: es alguien pensándolo, no un texto que ya estaba escrito. */
+.ini--piensa .ini__puntos i {
+  opacity: 1;
+  transition: opacity 0.18s ease-out var(--d);
+}
+.ini--piensa .ini__puntos i:nth-child(1) {
+  --d: 700ms;
+}
+.ini--piensa .ini__puntos i:nth-child(2) {
+  --d: 950ms;
+}
+.ini--piensa .ini__puntos i:nth-child(3) {
+  --d: 1200ms;
+}
 .ini__ajustes {
   position: absolute;
   z-index: 6;

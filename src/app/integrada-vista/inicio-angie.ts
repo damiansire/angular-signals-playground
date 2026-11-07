@@ -244,6 +244,8 @@ function n(valor: number): string {
  */
 const T = {
   idea: 240,
+  pensar: 1900,
+  decidir: 220,
   anticipar: 380,
   dispersar: 900,
   flotar: 650,
@@ -389,8 +391,13 @@ export function initInicioAngie(host: HTMLElement): InicioAngie {
     await esperar(T.idea);
     if (cerrado) return;
     // La luz se vuelve dorada antes de que caiga la noche: un día que se apaga de golpe no es un
-    // atardecer, es un corte.
-    escena.classList.add('ini--atardecer');
+    // atardecer, es un corte. Arranca con el pensamiento: "es la hora" es la de este atardecer.
+    escena.classList.add('ini--atardecer', 'ini--piensa');
+    await esperar(T.pensar);
+    if (cerrado) return;
+    escena.classList.remove('ini--piensa');
+    await esperar(T.decidir);
+    if (cerrado) return;
     // Anticipación: se agacha y se estira, como quien toma impulso.
     await animar(
       angie,
