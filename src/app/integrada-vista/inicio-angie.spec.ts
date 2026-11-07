@@ -59,8 +59,8 @@ describe('inicio-angie', () => {
     });
   });
 
-  describe('el paseo hacia el mouse', () => {
-    it('se acerca sin perseguir: camina menos que la distancia al puntero', () => {
+  describe('asomarse hacia el mouse', () => {
+    it('se asoma sin ir: se corre mucho menos que la distancia al puntero', () => {
       expect(destinoDelPaseo(200, 1000)).toBeGreaterThan(0);
       expect(destinoDelPaseo(200, 1000)).toBeLessThan(200);
       expect(destinoDelPaseo(-200, 1000)).toBeLessThan(0);

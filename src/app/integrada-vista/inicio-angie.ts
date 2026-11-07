@@ -133,16 +133,18 @@ export function juncos(semilla: number, cantidad: number, lado: 1 | -1): Junco[]
 }
 
 /**
- * Hasta dónde camina Angie hacia el puntero, en unidades del dibujo. Más lejos la colina cae tanto
- * que dejaría de estar arriba, y se metería entre los juncos del primer plano.
+ * Cuánto se asoma Angie hacia el puntero, en unidades del dibujo. Es para mirar hacia el costado, no
+ * para ir: caminando 300 unidades, sin piernas que den pasos, se deslizaba y no se veía natural.
  */
-export const PASEO_MAX = 300;
-/** Qué fracción de la distancia al puntero camina: se acerca, no lo persigue. */
-const PASEO_ALCANCE = 0.45;
+export const PASEO_MAX = 60;
+/** Qué fracción de la distancia al puntero se corre: con el mouse en el borde llega al tope. */
+const PASEO_ALCANCE = 0.12;
+/** La inclinación con la que se asoma, en grados, cuando llega al tope. */
+const ASOMO_GRADOS = 3;
 
 /**
- * Adónde camina Angie con el puntero a `hacia` unidades del centro. `libre` es lo que deja el borde
- * de la pantalla: en una angosta, donde ella ocupa casi todo el ancho, casi no se mueve.
+ * Adónde se asoma Angie con el puntero a `hacia` unidades del centro. `libre` es lo que deja el
+ * borde de la pantalla: en una angosta, donde ella ocupa casi todo el ancho, casi no se mueve.
  */
 export function destinoDelPaseo(hacia: number, libre: number): number {
   const tope = Math.max(0, Math.min(PASEO_MAX, libre));
@@ -317,29 +319,26 @@ export function initInicioAngie(host: HTMLElement): InicioAngie {
   };
   escena.addEventListener('click', alClic);
 
-  // Con el mouse, camina por la cresta hacia donde está: se acerca a quien la mira. Va con
-  // `translate`/`rotate` sueltos porque la despedida anima el `transform` de este mismo elemento.
-  const paseo = crearMuelle(0, 32, 8.5);
-  let fase = 0;
+  // Con el mouse, se asoma hacia donde está: se corre un poco y se inclina, sin ir. La cara y el
+  // cuerpo que giran hacia el puntero los pone la mascota. Va con `translate`/`rotate` sueltos
+  // porque la despedida anima el `transform` de este mismo elemento. Muelle lento y casi sin
+  // rebote: es un gesto de curiosidad, no un resorte.
+  const paseo = crearMuelle(0, 14, 7);
   const motor = motorDeMuelles();
   const unidad = (): number =>
     Math.max(escena.clientWidth / ANCHO, escena.clientHeight / ALTO) || 1;
-  const caminar = (dt: number): boolean => {
+  const asomarse = (dt: number): boolean => {
     if (!angie) return false;
     avanzarMuelle(paseo, dt);
     const u = unidad();
-    const rapidez = limitar(Math.abs(paseo.v) / 260, 0, 1);
-    // Pasos: un rebotito por paso, más marcado cuanto más rápido va.
-    fase += Math.abs(paseo.v) * dt * 0.045;
-    const paso = Math.abs(Math.sin(fase)) * rapidez * 14;
-    const y = caidaDeLaColina(paseo.x) - paso;
+    const y = caidaDeLaColina(paseo.x);
     angie.style.translate = `${(paseo.x * u).toFixed(1)}px ${(y * u).toFixed(1)}px`;
-    angie.style.rotate = `${limitar(paseo.v * 0.03, -7, 7).toFixed(2)}deg`;
+    angie.style.rotate = `${((paseo.x / PASEO_MAX) * ASOMO_GRADOS).toFixed(2)}deg`;
     return !enReposo(paseo);
   };
-  const sacarPaseo = motor.agregar(caminar);
+  const sacarPaseo = motor.agregar(asomarse);
   const alMoverMouse = (e: PointerEvent): void => {
-    // Con un botón apretado es un agarre de Angie, no un paseo.
+    // Con un botón apretado es un agarre de Angie, no un asomarse.
     if (e.pointerType !== 'mouse' || e.buttons || !angie || sinMovimiento()) return;
     if (escena.classList.contains('ini--saliendo')) return;
     const r = escena.getBoundingClientRect();
