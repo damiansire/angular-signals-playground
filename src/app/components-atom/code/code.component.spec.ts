@@ -62,6 +62,21 @@ describe('CodeComponent', () => {
     expect(events[1].action).toBe('Deselect');
   });
 
+  it('clicks rápidos sobre el mismo tag alternan aunque la vista no se haya rehecho', () => {
+    const events: CodeClick[] = [];
+    component.codeClick.subscribe((e) => events.push(e));
+    fixture.componentRef.setInput('htmlCode', '<main></main>');
+    fixture.detectChanges();
+
+    // El template sigue pasando el objeto del primer render, sin seleccionar.
+    const line = component.codeLines()[0];
+    const tag = line.elements!.find((e) => e.id === 'main-1')!;
+    component.onElementClick(line, tag);
+    component.onElementClick(line, tag);
+    component.onElementClick(line, tag);
+    expect(events.map((e) => e.action)).toEqual(['Select', 'Deselect', 'Select']);
+  });
+
   it('parseCode marca reservedWord en los tags', () => {
     const lines = component.parseCode('<div>texto</div>');
     const elements = lines[0].elements ?? [];
