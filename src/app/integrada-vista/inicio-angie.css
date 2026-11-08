@@ -265,10 +265,10 @@
   height: 28.5%;
   transition: translate 0.5s ease-out;
 }
-/* Sentada, la lamparita baja con ella y se echa un poco atrás: el halo y la entrada la siguen. */
+/* Sentada de perfil, la lamparita baja con ella y pasa al hombro de adelante: el halo y la entrada la siguen. */
 .ini--sentada .ini__foco,
 .ini--sentada .ini__aura {
-  translate: -22% 33%;
+  translate: 46% 55%;
 }
 /* El halo va DETRÁS del dibujo: delante, sobre el cielo claro, ningún modo de mezcla se notaba. */
 .ini__aura {
