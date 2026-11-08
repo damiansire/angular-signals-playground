@@ -24,14 +24,6 @@ fecha y adónde fue. Los ids (H1, J1…) sirven para nombrarlos en una sesión (
 - **H5. El sol.** El canon propone que el sol de la colina es la anomalía vista desde Signal Space.
   Falta confirmarlo. El dibujo queda como está: `DESIGN-CHECKLIST.md` ya decidió un sol dibujado, no
   un átomo.
-- **H6. El salto atrás.** La colina pasa durante la llegada de la voz, y "Volver a casa" es antes:
-  hay un salto hacia atrás en el tiempo. **Propuesta:** un cartel corto ("Un rato antes…") después
-  del destello, o que las luces entren al sol y la cámara salga del otro lado, en el viaje a casa.
-- **H7. El intercambio con el sol.** Tiene que decir exactamente lo mismo en la colina y en la
-  cabina. Hoy el prólogo dice "Así que caótico…" y "Supongo que desde su perspectiva, se puede
-  interpretar como caos…" (`voz-asi-que`, `voz-perspectiva`). Damian propuso "Supongo que sí…
-  Desde su perspectiva puede ser caótico." **Propuesta:** la versión de Damian en los dos lugares,
-  sin "Así que caótico…".
 - **H8. El guion de la revelación.** Hay un borrador en el recorrido; falta pasarlo en limpio.
 - **H9. El género.** Angie es ella, pero el prólogo le dice "¿Estás loco?" (`reclamo-loco`) y "tú,
   tan tranquilo" (`reclamo-armonioso`). Además, un comentario de `prologo-guion.ts` dice "él se
@@ -44,12 +36,9 @@ fecha y adónde fue. Los ids (H1, J1…) sirven para nombrarlos en una sesión (
 
 ## Juego
 
-- **J1. El minijuego de operadores.** Qué dos o tres huecos, con qué valores y qué se ve en la nave.
-  Hay borradores en el recorrido.
-- **J2. Completar el hueco: ¿elegir o teclear?** `ManipulableChallenge` ya permite elegir entre
-  opciones. Teclear exige validar texto libre (mayúsculas, espacios, nombres parecidos).
-  **Propuesta:** elegir primero, y teclear como variante para quien quiera, validando contra las
-  mismas opciones.
+- **J2. Teclear el hueco.** Elegir ya está hecho (ver abajo). Falta decidir si se suma teclear como
+  variante para quien quiera, validando contra las mismas opciones (mayúsculas, espacios, nombres
+  parecidos).
 - **J3. ¿El final exige resolverlo?** Damian quiere que tengan que resolverlo para escapar, pero
   [ADR 0002](../adr/0002-capa-de-juego-cinematicas-partida-y-sonido.md) decidió que no se bloquea el
   avance (25 y 26 de julio). **Propuesta:** el escape pasa al resolverlo, y Angie ayuda un poco más
@@ -135,6 +124,19 @@ Textos que estaban desactualizados y no dependían de la historia nueva. Cerrado
 - **A5.** Los dos comentarios quedaron al día: el del símbolo de la nave en
   `cinematica.component.html` explica que es la flecha del prólogo viejo, y el de los electrones
   de `molecule-engine.ts` dice que la Introducción tiene 6.
+
+## Cerrados
+
+- **H6. El salto atrás** (2026-11-08). Sin marca: el prólogo arranca directo después de la colina,
+  sin cartel de "Un rato antes…". Está en el recorrido, en "La colina".
+- **H7. El intercambio con el sol** (2026-11-08). "Esto es demasiado caótico." y "Supongo que sí…
+  Desde su perspectiva puede ser caótico." en la colina y en la cabina, sin "Así que caótico…". En
+  el prólogo es la línea `voz-supongo`, que reemplaza a `voz-asi-que` y `voz-perspectiva`. Está
+  en el recorrido.
+- **J1. El minijuego de operadores** (2026-11-08). Tres huecos, uno por nave: `map`, `scan` y
+  `throttleTime`. Está en el recorrido, en "La anomalía y el minijuego de operadores".
+- **J2. Completar el hueco** (2026-11-08). Se elige entre tres operadores con la perilla de
+  `ManipulableChallenge`, como en los demás desafíos. Teclear quedó como pendiente aparte.
 
 ## Memoria
 

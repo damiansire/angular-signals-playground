@@ -29,7 +29,7 @@ sub-nivel, contando el sub-nivel desde 1.
 | ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------- |
 | La colina                | Desde el sol: "Esto es demasiado caótico." Angie contesta, piensa "Ellos ya están aquí…" y "La hora ha llegado…", y se vuelve luz                                    | —                                       |
 | Volver a casa            | Las cuatro naves y sus deseos. La exploradora, ya con los colores de Angie, los apura                                                                                | —                                       |
-| La anomalía              | Los atrae, y "¡Activen todos los operadores!" abre el minijuego. Funciona, pero el tirón es más rápido. La exploradora queda afuera                                    | 2 o 3 nuevos                            |
+| La anomalía              | Los atrae, y "¡Activen todos los operadores!" abre el minijuego. Funciona, pero el tirón es más rápido. La exploradora queda afuera                                    | 3 nuevos                                |
 | El manual de a bordo     | "¡Rápido, el manual de a bordo!": cinco páginas en la cabina                                                                                                          | 0/1 a 0/5                               |
 | Adentro                  | Caos y esquives, hasta "Esto es demasiado caótico."                                                                                                                  | —                                       |
 | La voz y Angie           | El mismo intercambio de la colina, ahora desde la cabina. Llegan sus luces, "El caos es orden", el par de Tusi, el pacto, y Signal Space con su árbol                 | 0/6                                     |
@@ -54,7 +54,13 @@ prólogo, contada desde el lado de Angie.
 6. Se desarma en luz, y las luces van al sol, como hoy.
 
 Los pasos 2 y 3 dicen exactamente lo mismo que en "La voz y Angie": así, cuando la tripulación los
-dice, se reconocen. Cada línea la pasa quien juega con un toque, como hoy los pensamientos.
+dice, se reconocen. Cada línea la pasa quien juega con un toque, como los pensamientos. No hay cartel
+de "Un rato antes…": el prólogo arranca directo, como antes (H6).
+
+Está hecho (2026-11-08). El texto vive una sola vez, en
+`src/app/integrada-vista/intercambio-del-sol.ts`, y lo toman la colina y el guion del prólogo. La voz
+del sol suena con los blips del capitán y su globo tiene el borde cortado de las transmisiones; el
+de Angie es un globo de diálogo, no una nube.
 
 ### Volver a casa
 
@@ -66,21 +72,28 @@ de Angie.
 ### La anomalía y el minijuego de operadores
 
 Es el acto 1 hasta la orden del capitán: `anom-que-pasa`, `anom-sin-control`, `anom-atraidos` y
-"¡Activen todos los operadores de RxJS, rápido!" (`anom-rxjs`). Ahí se abre el minijuego: dos o tres
-huecos cortos sobre velocidad y posición, para **completar el hueco**.
+"¡Activen todos los operadores de RxJS, rápido!" (`anom-rxjs`). Ahí se abre el minijuego: tres
+huecos cortos, uno por nave, para **completar el hueco** eligiendo el operador (J2).
 
 El minijuego reusa `ManipulableChallenge` (`src/app/libs/manipulable-challenge.ts`). El hueco es la
 perilla, las opciones son sus posiciones, y la primera es la rota, como en los 40 desafíos de hoy.
 Cada hueco entra en el `SHAPE` actual: una perilla, hasta dos lecturas y hasta seis renglones de
 código.
 
-Borradores:
+Está hecho (2026-11-08), en `src/app/integrada-vista/operadores-del-prologo.ts`:
 
-| Hueco              | Código                                     | Opciones, la rota primero                                                                                         | Lectura             |
-| ------------------ | ------------------------------------------ | ----------------------------------------------------------------------------------------------------------------- | ------------------- |
-| Corregir el rumbo  | `lecturas$.pipe(▢(p => p - deriva))`       | `filter` (filtra por verdadero o falso, no corrige) · `tap` (no cambia el valor) · `map`                          | desvío              |
-| Acumular el empuje | `empuje$.pipe(▢((vel, e) => vel + e, 0))`  | `reduce` (emite recién al completar: la nave no se mueve nunca) · `map` (no acumula) · `scan`                     | velocidad           |
-| Sensores saturados | `sensores$.pipe(▢(100), map(corregir))`    | `debounceTime` (en una ráfaga que no para, no emite nunca) · `bufferTime` (todo llega tarde) · `throttleTime`     | lecturas procesadas |
+| Nave    | Hueco              | Código                                     | Opciones, la rota primero                                                                                            | Lectura      |
+| ------- | ------------------ | ------------------------------------------ | -------------------------------------------------------------------------------------------------------------------- | ------------ |
+| Capitán | Corregir el rumbo  | `lecturas$.pipe(▢(p => p - deriva))`       | `filter` (usa la cuenta para filtrar, no corrige) · `tap` (hace la cuenta y la tira) · `map`                         | desvío       |
+| Nave A  | Acumular el empuje | `empuje$.pipe(▢((vel, e) => vel + e, 0))`  | `reduce` (emite recién al completar, y el motor no completa) · `map` (su segundo argumento es el índice) · `scan`    | velocidad    |
+| Nave B  | Sensores saturados | `sensores$.pipe(▢(100), map(corregir))`    | `debounceTime` (en una ráfaga que no para, no emite nunca) · `bufferTime` (`corregir` recibe listas) · `throttleTime` | correcciones |
+
+La historia se frena en la orden, con la escena viva, y espera. El hueco aparece en una hoja abajo a
+la derecha, donde no tapa a las naves, a la anomalía ni a la exploradora. Cada hueco se puede
+saltear, así que nunca traba (ADR 0002), y no hay cartel de acierto: cuando el código queda sano, la
+nave dispara su operador y la anomalía contesta con un golpe. La pista al fallar no aparece, porque
+la da Angie y todavía no puede intervenir. Quien arranca el prólogo más adelante con `?prologo=` no
+pasa por el minijuego.
 
 Cada hueco resuelto se nota en la nave, pero el tirón crece más rápido: "Los pipes están recargando
 energía." (`anom-pipes`) y "No funcionará, es demasiado lento." (`anom-lento`). Que los operadores

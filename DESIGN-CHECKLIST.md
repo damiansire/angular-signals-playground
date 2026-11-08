@@ -586,6 +586,19 @@ entrar desarma a Angie en luz y se hace noche, la costura con el prólogo.
       12 px y no se leían como rastro. Medir nube y burbujas contra sol, fichas, lamparita y
       llamado en los seis anchos y en 800×737 (cero solapes, a 8 px o más del borde), con cuadros
       encadenados tras un click real. Con movimiento reducido no aparece.
+- [ ] (2026-11-08) Antes de pensar, el sol habla y Angie le contesta: "Esto es demasiado
+      caótico." y "Supongo que sí… Desde su perspectiva puede ser caótico.". Es el mismo texto que
+      la línea `voz-supongo` del prólogo, y sale de un solo archivo (`intercambio-del-sol.ts`):
+      el bucle se nota porque las dos puntas dicen lo mismo, letra por letra. La voz del sol va
+      en un globo con borde punteado, en cursiva y con la cola hacia el sol (no tiene cuerpo, es
+      la anomalía); la de Angie, en un globo de diálogo con cola hacia su cabeza, en la misma
+      celda que la nube (no es un pensamiento, lo dice en voz alta). Cada globo espera un toque,
+      con el mismo triangulito que la nube, y suena con el timbre de quien habla (`hablar`).
+      Los dos van con `text-wrap: balance`: sin eso, a 390 la última palabra quedaba sola en su
+      renglón, y el globo de Angie se salía del ancho hasta que su máximo pasó a `92cqw`. Para
+      quien no ve la pantalla, lo dicho va a una región `aria-live` aparte. Medido a 390×844,
+      500×900, 800×737, 820×1180, 1280×720, 1440×900 y 1920×1080: nada afuera; los únicos
+      cruces son la cola contra el sol y el globo sobre la caja de Angie, igual que la nube.
 
 - [ ] Antes que nada, de noche, el aviso de auriculares (`app-aviso-auriculares`): Angie en el
       medio con los auriculares puestos (L y R) y lentes de sol, accesorios proyectados en su
@@ -701,6 +714,26 @@ Del prólogo reconstruido en SVG (2026-11-08):
 - [ ] El prólogo carga diferido, recién al bajar de la colina: en el bundle inicial pasaba el
       presupuesto por 21 kB. Si el pedazo no llega, se sigue como si se hubiera saltado: nunca
       queda la noche sin construcción.
+
+Del minijuego de operadores (2026-11-08):
+
+- [ ] "¡Activen todos los operadores!" detiene el reloj del guion (`ESPERA_OPERADORES`) y abre
+      una hoja por nave: el código con su hueco y el desafío manipulable de siempre, con su
+      perilla, su lectura y su barrido (`malformed`, `solutionFor`). Las naves siguen vivas
+      mientras tanto: el reloj se detiene, los resortes no.
+- [ ] La hoja va abajo a la derecha y la caja de diálogo se corre a la izquierda. Arriba a la
+      derecha tapaba a la exploradora; a media altura, a 1024 tapaba la anomalía. Medida contra
+      las naves, la anomalía, la caja de diálogo y el HUD a 1440×900, 1280×640 y 1024×700: cero
+      solapes.
+- [ ] Al arreglar un hueco, la nave DISPARA su operador: un proyectil SVG con el nombre en el
+      color de su antena y borde oscuro, como los de la ráfaga. Con `palabra()` el texto salía
+      oscuro sobre el espacio y no se leía. El disparo no suena: acertar es en silencio.
+- [ ] En el prólogo Angie todavía no puede intervenir: el desafío va con `[ayuda]="false"` y no
+      muestra su pista ni al fallar.
+- [ ] Los datos del minijuego viajan con el prólogo diferido (el motor se los pasa a la vista),
+      no en el bundle inicial: importados desde la vista lo pasaban de 740 kB.
+- [ ] Al medir o clickear, los selectores van dentro de `.prologo__operadores`: los sub-niveles
+      ocultos del recorrido también tienen `.ms__knob`, y el click caía en uno invisible.
 
 ## Cinemáticas de capítulo (que se sienta un juego, no un video)
 
