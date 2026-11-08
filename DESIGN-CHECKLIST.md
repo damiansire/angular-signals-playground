@@ -520,11 +520,24 @@ entrar desarma a Angie en luz y se hace noche, la costura con el prólogo.
       borrar los pasos del que corre: el brazo del saludo quedaba trabado arriba.
 - [ ] Esperando, Angie sonríe y se sonroja: la boquita en "o" sola es asombro y se leía seria. La
       sonrisa vive en el grupo de la boca, así el muelle la abre (ríe al saludar, bosteza al
-      estirarse). Solo con vida propia: las mascotas del mapa y de las cards no cambian. Sentada
-      y pensativa vuelve la "o", a propósito: ahí sí está seria.
-- [ ] Al llegar, Angie gira la cabeza hacia la derecha, camina despacio hasta el borde de la meseta
-      (`ASIENTO`, donde la colina empieza a caer, ~18° de pendiente) y se sienta en una piedra,
-      pensativa, mirando al sol. Antes se asomaba hacia el mouse sin caminar: corriéndose 300 unidades sin dar pasos se
+      estirarse). Solo con vida propia: las mascotas del mapa y de las cards no cambian. La
+      sonrisa es ancha, con las comisuras redondeadas por un trazo del mismo color y la lengua
+      recortada con la misma forma (`sonrisa`): en punta y con la lengua suelta asomando por
+      debajo, se leía rara.
+- [ ] Sentada en la piedra, la cara es MELANCÓLICA: ni preocupada ni triste. Párpados apenas
+      caídos hacia afuera (un `clipPath` que baja el muelle `pena`), cejas con el lado de adentro
+      apenas arriba (±6-7°), el brillo del ojo abajo y una sonrisa chica cerrada. Con la "o" y
+      una ceja levantada se leía preocupada; con las cejas a ±16-18° y los párpados más
+      inclinados, triste. Mirarla con una lupa (la mascota clonada a 2000 px) Y a tamaño real.
+- [ ] Al llegar, Angie espera parada a la derecha, en el borde de la meseta (`PARTIDA`, donde la
+      colina empieza a caer, ~18° de pendiente), gira la cabeza hacia la izquierda, camina despacio
+      hasta la piedra del CENTRO y se sienta, pensativa, mirando al sol. Hacia la izquierda el paso
+      es el mismo en espejo (`posturaDePaso(…, rumbo = -1)`: piernas, brazos, inclinación, cara y
+      ojos), no el dibujo dado vuelta: la lamparita cambiaría de lado al sentarse. En la ladera pisa
+      con el pie de ABAJO (`bajadaParaPisar`): con el piso bajo el centro de los pies, el de abajo
+      quedaba ~10 px en el aire y entre el pasto se leía caminando en el aire. Medir la SUELA de
+      cada pie (punto del pie por la matriz de la pierna), no la caja de la pierna: la caja gira
+      desde la cadera y su centro se mueve la mitad que el pie, y eso parece patinar sin serlo. Antes se asomaba hacia el mouse sin caminar: corriéndose 300 unidades sin dar pasos se
       deslizaba. Ahora da pasos de verdad, y lo que la arruinaría es:
       patinar (la fase del paso sale de lo que avanzó; cada pierna barre según su largo, porque la
       derecha nace 20 unidades más abajo y con la misma apertura patinaba; el pie apoyado barre a
@@ -543,8 +556,8 @@ entrar desarma a Angie en luz y se hace noche, la costura con el prólogo.
       sobre el visor curvo, porque con una sola afín el ojo de atrás quedaba entero donde el visor
       ya da la espalda, y la despedida desarma solo las piezas que se ven: las apagadas miden cero
       y su luz nacía en la esquina); sentada flotando o parada delante de la piedra (la piedra es
-      paisaje, `.ini__piedra`, con la misma caja que Angie y ubicada con el mismo cálculo al
-      iniciar y al redimensionar, debajo del atardecer para que se tiña con la colina; con una
+      paisaje, `.ini__piedra`, con la misma caja que Angie y en el centro, con la inclinación que
+      va a tener ella sentada, debajo del atardecer para que se tiña con la colina; con una
       piedra baja se leía parada delante: el cuerpo queda casi a altura de parada
       (`SENTADA_EN_LA_PIEDRA`), las piernas se acortan (`COLGADA_ALARGA`) para que se vean las
       pantorrillas con piedra debajo de los pies, y la sombra de contacto sube a la piedra y se
@@ -553,7 +566,7 @@ entrar desarma a Angie en luz y se hace noche, la costura con el prólogo.
       con la cara; nada de saltito, estirarse, saludar ni cambiar el peso). Medir con rAF dentro de
       la página la velocidad de cada pie a velocidad de crucero: el apoyado igual en los dos
       (~12 px/s de efecto de medir el centro del pie, no el apoyo) y el otro al doble del cuerpo.
-      En un ancho donde no entra un paso se sienta donde está. Con movimiento reducido queda
+      En un ancho donde no entra un paso (celular) arranca casi en la piedra y se sienta ahí. Con movimiento reducido queda
       sentada en su lugar, sin viaje. La pausa de fondo NO la frena: el paseo es su llegada, no
       vida de fondo, y con la pausa recordada (`signals-pausa`) se quedaba parada 1,2 s y aparecía
       en la piedra. Si la landing se va de vista caminando, el paseo espera y al volver sigue
@@ -563,7 +576,9 @@ entrar desarma a Angie en luz y se hace noche, la costura con el prólogo.
       Probarlo así, cargando con `?nivel=0` y volviendo con input real. Cambiar el tamaño a mitad
       de camino reajusta el destino sin saltar, y el tope del `dt` (0,25 s) frena solo los saltos
       de una pestaña que vuelve: con 0,05, a pocos cuadros por segundo caminaba en cámara lenta. Si la tocan en
-      camino, se frena parada y piensa ahí. La nube del pensamiento baja con ella sentada y se
+      camino, termina el paseo, se sienta, se acomoda (`T.acomodarse`) y recién ahí le llega la
+      idea: frenarla parada cortaba su llegada a la mitad. Probarlo con un click real a mitad de
+      camino. La nube del pensamiento baja con ella sentada y se
       desinclina (`--inclina`): torcida se leía como error. Va con `translate`/`rotate` sueltos,
       porque la despedida anima el `transform` del mismo elemento. Medir a Angie sentada y a la
       piedra contra sol, fichas, título y llamado en los seis anchos: cero solapes y nada afuera.
@@ -582,6 +597,18 @@ entrar desarma a Angie en luz y se hace noche, la costura con el prólogo.
       12 px y no se leían como rastro. Medir nube y burbujas contra sol, fichas, lamparita y
       llamado en los seis anchos y en 800×737 (cero solapes, a 8 px o más del borde), con cuadros
       encadenados tras un click real. Con movimiento reducido no aparece.
+
+- [ ] Antes que nada, de noche, el aviso de auriculares (`app-aviso-auriculares`): su toque es el
+      gesto que el navegador exige para dejar sonar, así toda la intro llega con audio. Al
+      activar suena la prueba de un oído al otro (izquierda, derecha y el acorde en los dos) y
+      la copa que suena se enciende a la vez (`planDeLaPrueba`); después sube el telón con el
+      alba en el borde de abajo, y recién ahí la colina se inicia y Angie arranca a caminar: con
+      la colina corriendo debajo, el paseo se perdía entero. Tocar en cualquier lado activa;
+      "Seguir sin sonido" guarda la preferencia apagada y los botones de sonido lo reflejan.
+      Mientras sube el telón, los botones del aviso no vuelven a aparecer. Va diferido
+      (`@defer`, con un telón liso del mismo color de placeholder): en el bundle inicial se
+      pasaba del presupuesto. En el acorde final, ondas y notas usan otra animación: con el mismo
+      nombre, las del lado que ya había sonado no volvían a salir.
 
 ## Overlays que tapan el recorrido (prólogo, modales a pantalla completa)
 
