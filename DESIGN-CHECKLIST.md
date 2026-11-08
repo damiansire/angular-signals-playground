@@ -929,11 +929,16 @@ Del minijuego de operadores (2026-11-08):
       a `bottom: 1rem` tapaba "Seguir el viaje" y el click caía en la card. Medirlo con
       `elementFromPoint` en el centro del botón.
 - [ ] Lo resuelto en una hoja del viaje se anota en la molécula con el mismo id ("0/0").
-- [ ] Recargar sigue en la misma página, sin repetir el prólogo ni la cinemática. Cerrar la hoja
-      (Escape o "Cerrar") abre el mapa con el lugar guardado, y la bitácora lo sigue con "Seguir
-      el viaje".
-- [ ] Después del capítulo 11 va la revelación y después el final; al terminar, el mapa, con el
-      viaje en `null`. En la molécula, el final también llega después de la revelación.
+- [ ] Recargar sigue en la misma página, sin repetir el comienzo ni la cinemática. La hoja del
+      viaje no tiene "Cerrar" y Escape no la cierra: es una sola historia (ADR 0008).
+- [ ] Entrar nunca abre la molécula: una partida que quedó en ella (`recorrido`, `construccion`)
+      carga en la colina, sin `?nivel=` en la barra, y entrar sigue el viaje; sin el comienzo visto,
+      lo arranca. Antes, una partida de antes del viaje iba directo a la molécula y parecía que la
+      introducción se había borrado.
+- [ ] Después del capítulo 11 va la revelación, después el final, y al terminar la historia queda
+      en su último cuadro, con "Empezar de cero" arriba en lugar de "Saltar" y sin el ▸. Recargar
+      vuelve a ese cuadro, sin repetir la revelación. En la molécula (solo con un link), el final
+      también llega después de la revelación.
 
 ## Cinemáticas de capítulo (que se sienta un juego, no un video)
 
