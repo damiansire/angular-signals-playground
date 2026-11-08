@@ -10,20 +10,21 @@
   --op-pad-lado: clamp(1.1rem, 2vw, 1.75rem);
   /* Sin card alrededor el código es lo principal: va más grande que en los conceptos. Van por
      variables porque las clases del desafío quedan encapsuladas en su componente. */
-  --ms-codigo: clamp(0.85rem, 1.1vw, 1rem);
+  --ms-codigo: clamp(0.92rem, 1.15vw, 1.08rem);
   --ms-ancho: none;
+  --ms-rotulo: none;
   position: absolute;
   z-index: 5;
   left: 50%;
   top: var(--op-arriba);
   bottom: var(--op-abajo);
-  width: min(40rem, calc(100% - 2rem));
+  width: min(46rem, calc(100% - 2rem));
   height: fit-content;
   max-height: calc(100% - var(--op-arriba) - var(--op-abajo));
   margin-block: auto;
   overflow: auto;
-  padding: var(--op-pad-arriba) var(--op-pad-lado) 1.1rem;
-  border-radius: 18px;
+  padding: var(--op-pad-arriba) var(--op-pad-lado) 1.3rem;
+  border-radius: 20px;
   border-top: 6px solid var(--quien);
   background: #fbf7ee;
   box-shadow: 0 24px 60px rgb(10 4 20 / 65%);
@@ -117,41 +118,124 @@
   margin: 0;
   /* El lugar de "Saltar", que va a su altura. */
   padding-right: 5.5rem;
-  font: 800 clamp(1.15rem, 1.6vw, 1.45rem) / 1.15 var(--font-display, system-ui, sans-serif);
+  font: 800 clamp(1.35rem, 2vw, 1.85rem) / 1.1 var(--font-display, system-ui, sans-serif);
   color: #1f1a14;
 }
-.hoja__encargo {
-  margin: 0.55rem 0 0;
-  font: 500 clamp(0.95rem, 1.2vw, 1.08rem) / 1.45 var(--font-display, system-ui, sans-serif);
+/* Dos bloques: a la izquierda qué es cada cosa, a la derecha qué hacer. En una pantalla angosta van
+   uno abajo del otro. */
+.hoja__cuerpo {
+  display: grid;
+  gap: 1rem;
+  margin-top: 0.9rem;
+}
+@media (min-width: 1100px) {
+  :host {
+    width: min(62rem, calc(100% - 2rem));
+  }
+  .hoja__cuerpo {
+    grid-template-columns: minmax(14rem, 18rem) 1fr;
+    gap: 1.5rem;
+    align-items: start;
+  }
+}
+/* El encargo va en su propio papel, teñido apenas con el color de la nave que lo pide. */
+.hoja__brief {
+  display: grid;
+  gap: 0.85rem;
+  padding: 0.95rem 1rem;
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--quien) 16%, #f4ecdc);
+}
+.hoja__nombres {
+  display: grid;
+  gap: 0.55rem;
+  margin: 0;
+}
+/* Un nombre por renglón: el código a la izquierda, lo que significa a la derecha. */
+.hoja__nombre {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: baseline;
+  gap: 0.6rem;
+}
+.hoja__nombre dt .hoja__codigo {
+  font-size: 1.02em;
+  background: #fffdf8;
+  box-shadow: inset 0 0 0 1px #ddd2bb;
+}
+.hoja__nombre dd {
+  margin: 0;
+  font: 500 clamp(0.98rem, 1.15vw, 1.08rem) / 1.35 var(--font-display, system-ui, sans-serif);
   color: #3b342b;
   text-wrap: pretty;
 }
+.hoja__encargo {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.55rem;
+  margin: 0;
+  padding-top: 0.8rem;
+  border-top: 1px dashed #cfc3a9;
+  font: 700 clamp(1rem, 1.2vw, 1.12rem) / 1.35 var(--font-display, system-ui, sans-serif);
+  color: #1f1a14;
+  text-wrap: pretty;
+}
+.hoja__diana {
+  flex: none;
+  width: 1.35em;
+  height: 1.35em;
+  margin-top: 0.02em;
+  fill: none;
+  stroke: #2f6b4f;
+  stroke-width: 2;
+}
+.hoja__diana-centro {
+  fill: #2f6b4f;
+  stroke: none;
+}
+.hoja__como {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0;
+  font: 600 0.95rem / 1.3 var(--font-display, system-ui, sans-serif);
+  color: #3b342b;
+}
+.hoja__como-num {
+  display: grid;
+  place-items: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 50%;
+  background: #f1dfb8;
+  font-size: 0.85rem;
+  color: #8a5a12;
+}
+/* La meta, proyectada en la barra del desafío: la misma gramática que la lectura (rótulo arriba,
+   número abajo), en verde, y separada por una raya. Comparar es mirar de un número al otro. */
 .hoja__meta {
   display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: 0.25rem 0.55rem;
-  margin: 0.6rem 0 0;
-  font: 400 0.9rem / 1.3 var(--font-display, system-ui, sans-serif);
-  color: #3b342b;
+  flex-direction: column;
+  gap: 0.1rem;
+  margin: 0;
+  padding-left: 1.2rem;
+  border-left: 2px solid #d9cdb4;
 }
 .hoja__meta-rotulo {
   font:
-    600 0.68rem / 1 'JetBrains Mono',
+    600 0.62rem / 1.3 'JetBrains Mono',
     'Cascadia Mono',
     Consolas,
     monospace;
-  letter-spacing: 0.14em;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: #5b5246;
+  color: #4d463b;
 }
 .hoja__meta b {
+  font: 400 1.9rem / 1 var(--font-editorial, Georgia, serif);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
   color: #2f6b4f;
-}
-.hoja__como {
-  flex-basis: 100%;
-  font-style: italic;
-  color: #5b5246;
 }
 /* Código dentro de la prosa, en el azul de las llamadas del bloque. Una expresión partida en dos
    renglones se lee como dos cosas. */
@@ -170,7 +254,7 @@
 }
 /* El desafío trae su propia separación de cuando cierra una card: acá ya está en su hoja. */
 app-manipulable-system {
-  margin-top: 0.75rem;
+  margin-top: 0.6rem;
   padding: 0;
   border-top: 0;
 }
@@ -220,9 +304,12 @@ app-manipulable-system {
     --ms-renglon: 1.6;
     --op-pad-arriba: 0.8rem;
   }
-  .hoja__encargo {
-    font-size: 0.92rem;
-    line-height: 1.38;
+  .hoja__brief {
+    gap: 0.6rem;
+    padding: 0.7rem 0.85rem;
+  }
+  .hoja__meta b {
+    font-size: 1.5rem;
   }
   .hoja__ayuda {
     margin-top: 0.55rem;

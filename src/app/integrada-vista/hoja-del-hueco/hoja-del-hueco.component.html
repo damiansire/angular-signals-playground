@@ -4,32 +4,34 @@
   <h2 id="prologo-hueco" class="hoja__titulo">{{ h.titulo }}</h2>
   <span class="hoja__paso">{{ paso() }} de {{ total() }}</span>
 </header>
-<!-- Qué entra, qué tiene que salir y cómo se juega: sin esto el hueco era adivinar. -->
-<p class="hoja__encargo">
-  @for (t of tramos(h.encargo); track $index) {
-    @if (t.codigo) {
-      <code class="hoja__codigo" [textContent]="t.texto"></code>
-    } @else {
-      <span [textContent]="t.texto"></span>
-    }
-  }
-</p>
-<p class="hoja__meta">
-  <span class="hoja__meta-rotulo">Meta</span>
-  <b [textContent]="h.meta"></b>
-  <!-- Con la pista a la vista sobra: la pista ya dice qué mirar. -->
-  @if (!pista()) {
-    <span class="hoja__como">Tocá el operador subrayado para cambiarlo.</span>
-  }
-</p>
-<app-manipulable-system [system]="h.sistema" [ayuda]="false" (corrida)="corrida.set($event)" />
-<!-- La ayuda la da otra nave: Angie todavía no puede intervenir, la tripulación sí. -->
-<div class="hoja__ayuda-zona" aria-live="polite">
-  @if (pista(); as p) {
-    <p class="hoja__ayuda" [attr.data-quien]="claveDeNave[h.ayuda.nave]">
-      <span class="hoja__quien">{{ h.ayuda.nombre }}</span>
+<div class="hoja__cuerpo">
+  <!-- Qué es cada nombre y qué tiene que salir, separados: en un solo párrafo los nombres del
+       código se perdían, y sin ellos el hueco era adivinar. -->
+  <section class="hoja__brief" aria-label="El encargo">
+    <dl class="hoja__nombres">
+      @for (n of h.nombres; track n.codigo) {
+        <div class="hoja__nombre">
+          <dt><code class="hoja__codigo" [textContent]="n.codigo"></code></dt>
+          <dd>
+            @for (t of tramos(n.es); track $index) {
+              @if (t.codigo) {
+                <code class="hoja__codigo" [textContent]="t.texto"></code>
+              } @else {
+                <span [textContent]="t.texto"></span>
+              }
+            }
+          </dd>
+        </div>
+      }
+    </dl>
+    <p class="hoja__encargo">
+      <svg class="hoja__diana" viewBox="0 0 24 24" aria-hidden="true">
+        <circle cx="12" cy="12" r="10" />
+        <circle cx="12" cy="12" r="6" />
+        <circle cx="12" cy="12" r="2.2" class="hoja__diana-centro" />
+      </svg>
       <span>
-        @for (t of tramos(p); track $index) {
+        @for (t of tramos(h.encargo); track $index) {
           @if (t.codigo) {
             <code class="hoja__codigo" [textContent]="t.texto"></code>
           } @else {
@@ -38,6 +40,36 @@
         }
       </span>
     </p>
-  }
+  </section>
+  <section class="hoja__juego">
+    <p class="hoja__como">
+      <span class="hoja__como-num" aria-hidden="true">→</span>
+      Tocá el operador subrayado para cambiarlo.
+    </p>
+    <app-manipulable-system [system]="h.sistema" [ayuda]="false" (corrida)="corrida.set($event)">
+      <!-- La meta al lado del número que da el código: se comparan sin leer. -->
+      <p msMeta class="hoja__meta">
+        <span class="hoja__meta-rotulo">Meta</span>
+        <b [textContent]="h.meta"></b>
+      </p>
+    </app-manipulable-system>
+    <!-- La ayuda la da otra nave: Angie todavía no puede intervenir, la tripulación sí. -->
+    <div class="hoja__ayuda-zona" aria-live="polite">
+      @if (pista(); as p) {
+        <p class="hoja__ayuda" [attr.data-quien]="claveDeNave[h.ayuda.nave]">
+          <span class="hoja__quien">{{ h.ayuda.nombre }}</span>
+          <span>
+            @for (t of tramos(p); track $index) {
+              @if (t.codigo) {
+                <code class="hoja__codigo" [textContent]="t.texto"></code>
+              } @else {
+                <span [textContent]="t.texto"></span>
+              }
+            }
+          </span>
+        </p>
+      }
+    </div>
+  </section>
 </div>
 <button type="button" class="hoja__saltar" (click)="saltar.emit()">Saltar &rarr;</button>

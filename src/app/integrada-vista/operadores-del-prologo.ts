@@ -19,12 +19,16 @@ export interface HuecoDelPrologo {
   readonly operador: string;
   readonly sistema: ManipulableChallenge;
   /**
-   * Qué entra y qué tiene que salir, con los nombres del código. Sin esto el hueco era adivinar:
-   * no se sabía qué era `p` ni qué lectura contaba como arreglo. El código va entre comillas
-   * invertidas.
+   * Qué es cada nombre del código, uno por renglón. Sin esto el hueco era adivinar: no se sabía
+   * qué era `p`. En una sola frase con el encargo, los nombres se perdían en el párrafo.
    */
+  readonly nombres: readonly { readonly codigo: string; readonly es: string }[];
+  /** Qué tiene que salir, en una frase. El código va entre comillas invertidas. */
   readonly encargo: string;
-  /** La lectura sana, para comparar con la de abajo. */
+  /**
+   * La lectura sana, sin el nombre de la lectura: va al lado del número que da el código, bajo su
+   * mismo rótulo, así se comparan sin leer.
+   */
   readonly meta: string;
   /**
    * Quien ayuda es OTRA nave: Angie todavía no puede intervenir (docs/historia), pero la
@@ -136,9 +140,9 @@ export const HUECOS_DEL_PROLOGO: readonly HuecoDelPrologo[] = [
     titulo: 'Corregir el rumbo',
     operador: 'map',
     sistema: RUMBO_SYSTEM,
-    encargo:
-      'Cada lectura `p` del sensor llega torcida por la `deriva`. Al timón tiene que llegar `p - deriva`.',
-    meta: 'desvío 0',
+    nombres: [{ codigo: 'p', es: 'cada lectura del sensor, torcida por la `deriva`' }],
+    encargo: 'Al timón tiene que llegar `p - deriva`.',
+    meta: '0 en cada lectura',
     ayuda: { nave: 1, nombre: 'Nave A' },
     pistas: {
       filter: '`filter` solo decide si la lectura pasa. Sale igual que entró.',
@@ -151,9 +155,12 @@ export const HUECOS_DEL_PROLOGO: readonly HuecoDelPrologo[] = [
     titulo: 'Acumular el empuje',
     operador: 'scan',
     sistema: EMPUJE_SYSTEM,
-    encargo:
-      'Cada encendido trae `e` de empuje, y `vel` es lo que va sumado. Tiene que crecer en cada encendido.',
-    meta: 'velocidad 10, 20, 30…',
+    nombres: [
+      { codigo: 'e', es: 'el empuje de cada encendido' },
+      { codigo: 'vel', es: 'lo que va sumado' },
+    ],
+    encargo: 'Tiene que crecer en cada encendido.',
+    meta: '10 → 20 → 30…',
     ayuda: { nave: 2, nombre: 'Nave B' },
     pistas: {
       reduce: '`reduce` suma, pero avisa recién cuando el motor se apaga. Y no se apaga.',
@@ -166,9 +173,9 @@ export const HUECOS_DEL_PROLOGO: readonly HuecoDelPrologo[] = [
     titulo: 'Sensores saturados',
     operador: 'throttleTime',
     sistema: SENSORES_SYSTEM,
-    encargo:
-      'Llega una lectura cada 10 ms y no paran. Hay que corregir una cada `100` ms y soltar el resto.',
-    meta: '3 correcciones por ráfaga',
+    nombres: [{ codigo: 'sensores$', es: 'una lectura cada 10 ms, sin parar' }],
+    encargo: 'Hay que corregir una cada `100` ms y soltar el resto.',
+    meta: '3 por ráfaga',
     ayuda: { nave: 0, nombre: 'Capitán' },
     pistas: {
       debounceTime: '`debounceTime` espera un silencio, y esta ráfaga no para nunca.',
