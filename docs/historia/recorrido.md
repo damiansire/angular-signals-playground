@@ -82,24 +82,28 @@ código.
 
 Está hecho (2026-11-08), en `src/app/integrada-vista/operadores-del-prologo.ts`:
 
-| Nave    | Hueco              | Código                                    | Opciones, la rota primero                                                                                             | Lectura      |
-| ------- | ------------------ | ----------------------------------------- | --------------------------------------------------------------------------------------------------------------------- | ------------ |
-| Capitán | Corregir el rumbo  | `lecturas$.pipe(▢(p => p - deriva))`      | `filter` (usa la cuenta para filtrar, no corrige) · `tap` (hace la cuenta y la tira) · `map`                          | desvío       |
-| Nave A  | Acumular el empuje | `empuje$.pipe(▢((vel, e) => vel + e, 0))` | `reduce` (emite recién al completar, y el motor no completa) · `map` (su segundo argumento es el índice) · `scan`     | velocidad    |
-| Nave B  | Sensores saturados | `sensores$.pipe(▢(100), map(corregir))`   | `debounceTime` (en una ráfaga que no para, no emite nunca) · `bufferTime` (`corregir` recibe listas) · `throttleTime` | correcciones |
+Los tres son los operadores más simples (`map`, `tap` y `filter`), con un encargo que se dice en
+una frase:
+
+| Nave    | Hueco                 | Código                                        | Opciones, la rota primero | Lecturas         |
+| ------- | --------------------- | --------------------------------------------- | ------------------------- | ---------------- |
+| Capitán | Duplicar la velocidad | `velocidad$.pipe(▢((v) => v * 2))`            | `tap` · `filter` · `map`  | entra · al motor |
+| Nave A  | Ver la velocidad      | `velocidad$.pipe(▢((v) => panel.mostrar(v)))` | `map` · `filter` · `tap`  | panel · al motor |
+| Nave B  | Sacar el agua         | `carga$.pipe(▢((c) => c !== 'agua'))`         | `tap` · `map` · `filter`  | nafta · agua     |
 
 La historia se frena en la orden, con la escena viva, y espera. El hueco aparece en una hoja en el
 centro, sobre un velo, con la orden del capitán debajo. La hoja dice qué es cada nombre del código,
-qué tiene que salir y la meta de la lectura. Cada hueco se puede saltear, así que nunca traba (ADR
+qué tiene que salir y la meta de la lectura. Una flecha señala el operador a cambiar, y al costado
+están los tres operadores con un dibujo y qué hace cada uno: tocar uno lo pone en el hueco. Cada hueco se puede saltear, así que nunca traba (ADR
 0002), y no hay cartel de acierto: cuando el código queda sano, la hoja se aparta, la nave dispara su
 operador y la anomalía contesta con un golpe. Angie todavía no puede intervenir, así que la ayuda al
 fallar la da otra nave: dice qué hizo el operador elegido, nunca cuál es el bueno.
 
-| Hueco              | Ayuda la… | Qué dice al fallar                                                        |
-| ------------------ | --------- | ------------------------------------------------------------------------- |
-| Corregir el rumbo  | Nave A    | `filter` solo decide si la lectura pasa · `tap` hace la cuenta y la tira  |
-| Acumular el empuje | Nave B    | `reduce` avisa recién cuando el motor se apaga · `map` no guarda nada     |
-| Sensores saturados | Capitán   | `debounceTime` espera un silencio que no llega · `bufferTime` arma listas |
+| Hueco                 | Ayuda la… | Qué dice al fallar                                                                  |
+| --------------------- | --------- | ----------------------------------------------------------------------------------- |
+| Duplicar la velocidad | Nave A    | `tap` hace la cuenta y la tira · `filter` la usa para decidir si pasa               |
+| Ver la velocidad      | Nave B    | `map` manda lo que devuelve `mostrar`, que es nada · `filter` no deja pasar ninguna |
+| Sacar el agua         | Capitán   | `tap` deja pasar la carga entera, con agua · `map` manda `true` y `false` al motor  |
 
 Quien arranca el prólogo más adelante con `?prologo=` no pasa por el minijuego.
 

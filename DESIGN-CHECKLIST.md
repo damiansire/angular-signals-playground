@@ -757,15 +757,37 @@ Del minijuego de operadores (2026-11-08):
       oscuro sobre el espacio y no se leía. El disparo no suena: acertar es en silencio. Mientras
       dispara, el velo y la hoja se apartan (`prologo--disparo`): tapado, el único aviso del acierto
       pasaba detrás de la hoja.
-- [ ] La hoja dice qué hacer: qué es cada nombre del código (`p`, `deriva`), qué tiene que salir,
-      la meta de la lectura y "Tocá el operador subrayado". Sin esto el hueco era adivinar.
+- [ ] La hoja dice qué hacer: qué es cada nombre del código (`v`, `c !== 'agua'`), qué tiene que
+      salir, la meta de la lectura y "Tocá el operador marcado". Sin esto el hueco era adivinar.
+- [ ] Los huecos se arreglan con `map`, `tap` y `filter`, uno por nave: los tres más simples, con
+      un encargo que se dice en una frase (duplicar la velocidad, verla en el panel, sacar el agua).
+      Con `scan` y `throttleTime` el primerizo no tenía de dónde sacar qué hacían.
+- [ ] Un óvalo trazado a mano marca EL operador, y una flecha con "tocá acá" lo señala hasta que se
+      elige algo. Los dos se miden contra el token real del código (`afterRenderEffect` y un
+      `ResizeObserver`), no contra una posición fija: el nombre cambia de ancho con cada operador.
+      La flecha se apaga al elegir por cualquiera de los dos caminos: elegir desde el panel el mismo
+      operador del arranque no mueve la perilla, y con solo mirar la posición quedaba prendida.
+- [ ] El óvalo se vuelve a trazar con WAAPI en cada operador nuevo. Recrearlo con un `@for` de un
+      elemento daba el warning NG0956 en cada cambio.
+- [ ] Al costado van los tres operadores con su dibujo animado y qué hace cada uno en una frase;
+      tocar uno lo pone en el hueco (`fijar` del átomo, la misma corrida que la perilla). Es la
+      excepción escrita a "el desafío no enumera opciones": el prólogo es antes de aprender nada,
+      y elegir entre tres nombres sin saber qué hacen era adivinar. El puesto dice "en el código".
+- [ ] "tocá acá" va en un naranja más oscuro que el trazo (#b93d0c): el del óvalo daba 4.2:1 sobre
+      el papel del código.
+- [ ] Con movimiento reducido el prólogo se termina solo, así que la hoja no aparece. Sus reglas
+      de `prefers-reduced-motion` (dibujos quietos en el momento que los explica) quedan por si eso
+      cambia.
 - [ ] Los nombres del código van uno por renglón (`nombres`), con el código a la izquierda, y lo
       que tiene que salir en su propia frase, en un papel teñido con el color de la nave. En un solo
       párrafo los nombres se perdían. La meta va en la barra del desafío (`msMeta`, proyectada), al
       lado del número que da el código y con su misma gramática: comparar es mirar de un número al
       otro. Debajo de la explicación quedaba lejos y se leía como una nota.
-- [ ] A 1100 px o más la hoja va en dos columnas (encargo | código); por debajo, en una. Medida a
-      1440×900, 1280×640 y 1024×700 con la ayuda abierta: cero solapes con HUD y diálogo, sin scroll.
+- [ ] A 1100 px o más la hoja va en tres columnas (encargo | código | operadores). Entre 760 y
+      1099, en dos: los operadores en su columna a la derecha y el encargo repartido en dos. Abajo y
+      en fila empujaban la hoja a scrollear por dentro a 1024×700. Por debajo de 760, en una, con
+      los operadores en fila. Medida con input real a 1440×900, 1280×640, 1024×700, 820×1180 y
+      700×900, con la ayuda abierta: cero solapes con HUD y diálogo, sin scroll, consola limpia.
 - [ ] En el prólogo Angie todavía no puede intervenir: el desafío va con `[ayuda]="false"` y no
       muestra su pista. La ayuda la da OTRA nave, solo con la corrida ya rota, y dice qué hizo el
       operador elegido, nunca cuál es el bueno (lo verifica `operadores-del-prologo.spec.ts`).

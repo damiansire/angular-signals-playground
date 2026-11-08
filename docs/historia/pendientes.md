@@ -149,8 +149,8 @@ Textos que estaban desactualizados y no dependían de la historia nueva. Cerrado
   Desde su perspectiva puede ser caótico." en la colina y en la cabina, sin "Así que caótico…". En
   el prólogo es la línea `voz-supongo`, que reemplaza a `voz-asi-que` y `voz-perspectiva`. Está
   en el recorrido.
-- **J1. El minijuego de operadores** (2026-11-08). Tres huecos, uno por nave: `map`, `scan` y
-  `throttleTime`. Está en el recorrido, en "La anomalía y el minijuego de operadores".
+- **J1. El minijuego de operadores** (2026-11-08). Tres huecos, uno por nave: `map`, `tap` y
+  `filter` (2026-11-09; antes `map`, `scan` y `throttleTime`). Está en el recorrido, en "La anomalía y el minijuego de operadores".
 - **J2. Completar el hueco** (2026-11-08). Se elige entre tres operadores con la perilla de
   `ManipulableChallenge`, como en los demás desafíos. Teclear quedó como pendiente aparte.
 
