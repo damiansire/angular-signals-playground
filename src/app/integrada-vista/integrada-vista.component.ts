@@ -39,7 +39,7 @@ import { LO_QUE_DICE_EL_SOL, LO_QUE_RESPONDE_ANGIE } from './intercambio-del-sol
 import type { HuecoDelPrologo } from './operadores-del-prologo';
 import { PAGINAS_DEL_MANUAL, pasoEnElManual, type PaginaDelManual } from './manual-de-a-bordo';
 import { HojaDelHuecoComponent } from './hoja-del-hueco/hoja-del-hueco.component';
-import { LaminaDelManualComponent } from './lamina-del-manual/lamina-del-manual.component';
+import { PAGINA_DEL_MANUAL } from '../signals/level-0-introduction/manual/pagina-del-manual';
 import { vigilarEstampado } from './estampado-tardio';
 import { AYUDA_DE_ANGIE } from '../components-atom/manipulable-system/manipulable-system.component';
 
@@ -107,7 +107,6 @@ const PROLOGO_PEDIDO =
     MascotaVivaComponent,
     AvisoAuricularesComponent,
     HojaDelHuecoComponent,
-    LaminaDelManualComponent,
   ],
   templateUrl: './integrada-vista.component.html',
   styleUrls: [
@@ -115,6 +114,7 @@ const PROLOGO_PEDIDO =
     './intro-tusi.css',
     './inicio-angie.css',
     './prologo-anomalia.css',
+    './manual-de-a-bordo.css',
     './boot-fallo.css',
     './aviso-mas-abajo.css',
     './angosto.css',
@@ -395,6 +395,10 @@ export class IntegradaVistaComponent {
     // En el prólogo Angie todavía no interviene: los desafíos de las páginas van sin su pista.
     const montada = this.montarDiferido(host, pagina.cargar, pagina.ley, [
       { provide: AYUDA_DE_ANGIE, useValue: false },
+      {
+        provide: PAGINA_DEL_MANUAL,
+        useValue: { numero: i + 1, ley: pagina.ley, enLaNave: pagina.enLaNave },
+      },
     ]);
     const vigia = this.enc ? vigilarEstampado(host, this.enc) : null;
     // Cada página arranca arriba, y el foco va a la hoja: con teclado, se lee sin buscarla.
