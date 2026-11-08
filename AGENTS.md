@@ -20,6 +20,7 @@ todos lados, estilada con Tailwind. No es una librería ni un monorepo.
 
   Si un paso falla en CI, el PR no mergea y el deploy a Pages tampoco ocurre:
   `deploy.yml` escucha el resultado de CI, no el push.
+
 - **`gate:prosa` es un ratchet de palabras por pantalla:** explica la demo, no el
   párrafo. Una pantalla puede quedar más corta, nunca más larga: si el gate falla
   porque sumaste texto, recortá. `--update` solo baja la línea base, y
@@ -91,7 +92,7 @@ realmente tocás; no inventes scopes nuevos.
 
 | Directorio                 | Qué contiene                                                                            | Scope        |
 | -------------------------- | --------------------------------------------------------------------------------------- | ------------ |
-| `src/app/integrada-vista/` | Vista integrada: recorrido molécula de los 11 capítulos, entrada por defecto (ruta `/`) | `integrada`  |
+| `src/app/integrada-vista/` | Vista integrada: prólogo, viaje por los 11 capítulos y la molécula como mapa (ruta `/`) | `integrada`  |
 | `src/app/practice/`        | Ejemplos aplicados para usar lo aprendido (`/practica/*`)                               | `practice`   |
 | `src/app/signals/`         | Los niveles de aprendizaje (0–11) y sus sub-niveles                                     | `signals`    |
 | `src/app/components/`      | Componentes de feature (histories, trees, forms…)                                       | `components` |

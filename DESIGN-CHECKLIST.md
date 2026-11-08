@@ -919,6 +919,22 @@ Del minijuego de operadores (2026-11-08):
       el `sistema-establecido` que sale de una card. Antes caía en el concepto que hubiera en
       pantalla, y Signal Space marcaba Signals 1/1.
 
+**El viaje** (cada capítulo después del prólogo: su cinemática y sus pantallas en la hoja, ADR 0007):
+
+- [ ] Al terminar el prólogo, visto o salteado, arranca la cinemática del capítulo 1 sin pasar por
+      la molécula. Escape la saltea y abre la hoja.
+- [ ] La hoja dice el nombre de la etapa ("La caja que avisa"), no "Nivel 1"; cada página lleva
+      el título de su pantalla y el pie dice "Seguir el viaje" en la última.
+- [ ] La pista de Angie (`app-concept-card`, fija en la esquina) va por encima del pie de la hoja:
+      a `bottom: 1rem` tapaba "Seguir el viaje" y el click caía en la card. Medirlo con
+      `elementFromPoint` en el centro del botón.
+- [ ] Lo resuelto en una hoja del viaje se anota en la molécula con el mismo id ("0/0").
+- [ ] Recargar sigue en la misma página, sin repetir el prólogo ni la cinemática. Cerrar la hoja
+      (Escape o "Cerrar") abre el mapa con el lugar guardado, y la bitácora lo sigue con "Seguir
+      el viaje".
+- [ ] Después del capítulo 11 va la revelación y después el final; al terminar, el mapa, con el
+      viaje en `null`. En la molécula, el final también llega después de la revelación.
+
 ## Cinemáticas de capítulo (que se sienta un juego, no un video)
 
 Lista escrita de lo que "que se sienta como la cinemática de un RPG" significa acá. Cada ítem es
@@ -961,6 +977,13 @@ verificable con `/cine/<n>?cuadro=<beat>` (fotograma congelado) o `/cine/<n>` (r
       `?cuadro=fin` contra TODOS los `.k-actor`, no contra uno.
 - [ ] El final se personaliza con la partida: solo se encienden los capítulos establecidos
       (clases `e-<n>`), la deuda queda punteada y visible.
+- [ ] Dos cinemáticas seguidas (la revelación y el final) son dos instancias: la segunda se abre
+      después del render que sacó a la primera. Abierta en el mismo tick, el `@if` reusaba la
+      instancia desvanecida y el final corría invisible (opacidad 0) con las clases de la
+      revelación. Verificar que `app-cinematica` tenga opacidad 1 y el título del final.
+- [ ] Una View Transition abortada (Escape mientras abre, otra encima) no deja
+      `InvalidStateError` sin manejar en la consola: medir con un listener de
+      `unhandledrejection` y saltear con Escape real.
 - [ ] La exploradora lleva la paleta de Angie porque es ella (ADR 0003): en el prólogo, casco,
       aletas, franja, antena y una cabina del tono de su cara (los ojos se leen por el trazo y la
       pupila); en las cinemáticas, nombre, retrato, flecha, transmisiones, la ventana, la onda y

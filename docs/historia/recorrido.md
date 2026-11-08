@@ -183,6 +183,13 @@ moverse, después comunicarse con la exploradora, y al final, la verdad.
 Cada etapa lleva qué quiere la tripulación, la ley (la de hoy, de `cinematicas-datos.ts`), el objeto
 de mundo (sacado de las cinemáticas actuales), el giro y la pista que siembra.
 
+Desde el 2026-11-09 el cuerpo se juega como un viaje (ADR 0007): después del prólogo, cada etapa
+abre con la cinemática de su capítulo y sigue con sus desafíos como páginas de la hoja del manual,
+con el nombre de la etapa arriba (`integrada-vista/viaje.ts`). Cerrar la hoja lleva al mapa (la
+molécula), y la bitácora sigue el viaje donde quedó. Las pistas de Angie ya están en el guion: el
+helado (`c4-helado`), "lentos" (`c5-lentos`), el silencio del capítulo 6 y la frecuencia
+(`c7-frecuencia`).
+
 ### Arco I · Aprender a leer
 
 Angie enseña las reglas básicas, y la tripulación quiere entender el mundo para poder moverse.
@@ -213,10 +220,12 @@ La meta cambia: hay algo en la banda vieja, y la tripulación quiere comunicarse
 | La tormenta      | Ante una ráfaga de avisos, actuá cuando se calme.  | La ráfaga en la banda               | La exploradora habla a pedazos: "¡sector ocho!" (`c10-sector`)                                                | "Ella todavía no terminó de hablar." (`c10-no-termino`) | Debounce, 10/1 a 10/3   |
 | Quien lee, avisa | Nadie revisa todo el árbol: quien lee, avisa.      | El árbol completo; Zone.js se apaga | **Penúltima etapa.** Responden la pregunta del viaje ("¿Quién le avisó a la pantalla?") y llega la revelación | —                                                       | Zoneless, 11/1          |
 
-#### La revelación (borrador)
+#### La revelación
 
-La banda por fin está limpia. La exploradora, desde afuera, avisa que va a entrar. El borrador ya
-cumple las reglas del guion (ocho palabras por línea, sin raya):
+La banda por fin está limpia. La exploradora, desde afuera, avisa que va a entrar. Está hecha
+(2026-11-09) como la cinemática 13, "Porque entré", que va después de la hoja del capítulo 11 y antes
+del final (ids `r-*`). Usa el dibujo del final, con la nave de la exploradora entrando en "Porque
+entré.":
 
 | Quién       | Línea                                    |
 | ----------- | ---------------------------------------- |
@@ -232,7 +241,13 @@ cumple las reglas del guion (ocho palabras por línea, sin raya):
 
 ## La salida
 
-Es el desafío final: un sistema que mezcla signals y RxJS, para completar con varios huecos. La
+Todavía no hay desafío: después de la revelación va directo el final, que ya cuenta la salida desde
+el otro lado. La exploradora ya entró, así que el final no la tiene transmitiendo desde afuera:
+Angie dice "Ahora sí puedo intervenir." (`c12-intervenir`), el capitán junta "Sus signals y
+nuestros operadores." (`c12-juntos`) y, con todo establecido, Angie les dice "Salgan de una vez,
+lentos." (`c12-lentos`).
+
+Lo que falta es el desafío final: un sistema que mezcla signals y RxJS, para completar con varios huecos. La
 tripulación pone lo suyo (operadores) y Angie lo suyo (signals): "Nada de lo suyo sobra" (`c8-reves`)
 deja de ser consejo y pasa a ser la salida. Angie, ya libre, interviene por primera vez: "Ahora sí
 puedo intervenir." (línea nueva).

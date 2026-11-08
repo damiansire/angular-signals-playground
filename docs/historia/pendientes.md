@@ -24,7 +24,8 @@ fecha y adónde fue. Los ids (H1, J1…) sirven para nombrarlos en una sesión (
 - **H5. El sol.** El canon propone que el sol de la colina es la anomalía vista desde Signal Space.
   Falta confirmarlo. El dibujo queda como está: `DESIGN-CHECKLIST.md` ya decidió un sol dibujado, no
   un átomo.
-- **H8. El guion de la revelación.** Hay un borrador en el recorrido; falta pasarlo en limpio.
+- **H8. El guion de la revelación.** Pasado en limpio el 2026-11-09 como la cinemática 13 (ADR
+  0007). Falta que Damian lo lea en pantalla: el ritmo y los huecos entre líneas son una propuesta.
 - **H9. El género.** Angie es ella, pero el prólogo le dice "¿Estás loco?" (`reclamo-loco`) y "tú,
   tan tranquilo" (`reclamo-armonioso`). Además, un comentario de `prologo-guion.ts` dice "él se
   NIEGA primero". **Propuesta:** "¿Estás loca?" y "tan tranquila", porque para entonces ya oyeron
@@ -96,6 +97,15 @@ fecha y adónde fue. Los ids (H1, J1…) sirven para nombrarlos en una sesión (
   no se renumeraron. La partida pasó a la versión 3 con su migración. Lo que sigue atado a la
   posición: `RAW` y `signalsRoutesTree` (mismo largo y orden), `ACTS` y `CONCEPTO_PICO` en
   `molecule-engine.ts`, y el final, que dibuja doce átomos por número de capítulo.
+- **T12. El estilo de las cinemáticas.** Damian pidió que las cinemáticas de capítulo se vean como
+  la intro. Siguen con su estilo (papel claro, barras de cine) y su "Capítulo N" arriba, que
+  contradice el principio de no mostrar números. **Propuesta:** el reproductor toma el cielo del
+  prólogo y muestra el nombre de la etapa en lugar del número.
+- **T13. Las pantallas en la hoja.** En el viaje, las pantallas de los capítulos se leen en la hoja
+  del manual tal como venían de la molécula: su explicación (la pista de Angie) flota en la esquina y
+  sus títulos son técnicos ("Read-only signals: asReadonly()"). **Propuesta:** pasarlas al formato
+  de las páginas del manual (qué hacer, la demo, la escena de la nave y el desafío), una etapa por
+  vez, como se hizo con la Introducción.
 - **T6. El gate de prosa.** `scripts/prose-budget.mjs` mide solo los `*.component.html` que están
   bajo `src/app/signals/**/sub-levels/`. Si las pantallas se mudan, mide cero y pasa sin avisar.
   Además, una pantalla movida o renombrada arranca sin crédito de línea base, con 8 palabras. La
@@ -118,7 +128,8 @@ fecha y adónde fue. Los ids (H1, J1…) sirven para nombrarlos en una sesión (
   0/5, que antes estaban en la molécula. Cada etapa que pase a la historia agranda el hueco. Falta
   decidir cómo se lee la historia sin la cinemática: por ejemplo, las páginas solas, sin la escena
   detrás. El manual y el árbol de Signal Space ya están (2026-11-09): la bitácora los abre sueltos,
-  sin la escena. Falta lo mismo para cada etapa nueva que pase a la historia.
+  sin la escena. El viaje (ADR 0007) cierra el resto: con el prólogo salteado solo, sigue la primera
+  etapa, y las cinemáticas tienen su modo quieto.
 
 ## Arreglos de docs
 
