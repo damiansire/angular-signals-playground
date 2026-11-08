@@ -54,6 +54,20 @@ describe('ManipulableSystemComponent', () => {
     expect(c.health()).toBe('healthy');
   });
 
+  it('fijar deja la perilla en la posición pedida, avisa una sola vez y arranca otra corrida', () => {
+    const c = crear().componentInstance;
+    const corridas: number[] = [];
+    c.corrida.subscribe(({ estado }) => corridas.push(estado.knobs['p']));
+    c.press();
+    c.fijar('p', 2);
+    expect(corridas).toEqual([0, 2]);
+    expect(c.health()).toBe('idle');
+    c.fijar('p', 2);
+    expect(corridas.length).toBe(2);
+    c.press();
+    expect(c.health()).toBe('healthy');
+  });
+
   describe('tono de la lectura', () => {
     function clasesDeLaLectura(fixture: ReturnType<typeof crear>): string {
       fixture.detectChanges();

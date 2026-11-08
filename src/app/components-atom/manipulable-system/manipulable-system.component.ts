@@ -96,6 +96,23 @@ export class ManipulableSystemComponent {
   }
 
   /**
+   * Deja la perilla en una posición. Quien muestra las opciones aparte (el minijuego del prólogo
+   * lista sus tres operadores) elige así sin hacer girar la perilla a mano. Gira lo que haga falta,
+   * así la corrida arranca de cero igual que con la perilla.
+   */
+  fijar(knobId: string, posicion: number): void {
+    const knob = this.system().knobs.find((k) => k.id === knobId);
+    if (!knob || this.state().knobs[knobId] === posicion) return;
+    this.settle(() => {
+      let s = this.state();
+      for (let i = 0; i < knob.positions && s.knobs[knobId] !== posicion; i++) {
+        s = turn(this.system(), s, knobId);
+      }
+      return s;
+    });
+  }
+
+  /**
    * Al quedar sano avisa por evento del DOM: el recorrido traza el enlace al concepto siguiente.
    * Sale solo en la TRANSICIÓN, no en cada toque, así el enlace se dibuja una vez.
    */
