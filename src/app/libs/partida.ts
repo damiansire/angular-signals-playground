@@ -19,7 +19,7 @@ export interface Partida {
   readonly establecidos: readonly string[];
   /** Cinemáticas ya vistas, por número de capítulo (12 es el final). */
   readonly cinematicas: readonly number[];
-  /** Ya vio el prólogo completo o lo salteó a propósito: no se le vuelve a imponer. */
+  /** Ya vio el prólogo completo o lo salteó a propósito: la bitácora le ofrece volver a verlo. */
   readonly prologo: boolean;
 }
 
