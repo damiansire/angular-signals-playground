@@ -1,0 +1,148 @@
+:host {
+  display: block;
+  color: #201d16;
+}
+
+/* A lo ancho, dos columnas que corren cada una por su cuenta: con una grilla de filas compartidas,
+   la escena (más alta que la ley) empujaba la demo y dejaba un hueco a la izquierda. */
+.pm {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) clamp(19rem, 31%, 27rem);
+  align-items: start;
+  gap: 1.25rem clamp(1.5rem, 2.6vw, 2.75rem);
+}
+.pm-col {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  gap: 1.1rem;
+}
+
+.pm-cabeza {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+.pm-ley {
+  margin: 0;
+  font:
+    700 0.72rem / 1.2 'JetBrains Mono',
+    'Cascadia Mono',
+    Consolas,
+    monospace;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #8a5a12;
+}
+.pm-titulo {
+  margin: 0;
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: clamp(1.8rem, 2.9vw, 2.6rem);
+  font-weight: 400;
+  line-height: 1.08;
+  letter-spacing: -0.01em;
+  color: #17140f;
+  text-wrap: balance;
+}
+
+/* El paso: el número y, al lado, qué hacer (y el botón que lo hace solo, si la página lo tiene). */
+.pm-paso {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.6rem 0.85rem;
+  font: 600 1.05rem / 1.35 var(--font-display, system-ui, sans-serif);
+  color: #2b261d;
+}
+.pm-num {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 1.85rem;
+  height: 1.85rem;
+  border-radius: 999px;
+  background: #ffd27a;
+  box-shadow:
+    inset 0 0 0 1.5px #b8791f,
+    0 2px 0 #d9a24a;
+  font:
+    800 0.92rem / 1 'JetBrains Mono',
+    'Cascadia Mono',
+    Consolas,
+    monospace;
+  color: #3a2a0c;
+}
+/* El desafío en su recuadro de papel, con el número arriba, a la altura de su rótulo. */
+.pm-paso--2 {
+  align-items: start;
+  flex-wrap: nowrap;
+  padding: 0.9rem 1rem 1rem;
+  border: 1px solid #e3d9c3;
+  border-radius: 16px;
+  background: #fffdf7;
+}
+.pm-desafio {
+  flex: 1;
+  min-width: 0;
+}
+
+.pm-demo {
+  min-width: 0;
+}
+
+/* La lámina: una ventanilla a la noche de la nave, con lo que la ley le hace a su pantalla. */
+.pm-escena {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+}
+.pm-nave {
+  margin: 0;
+  font: italic 600 clamp(0.98rem, 1.2vw, 1.1rem) / 1.3 var(--font-display, system-ui, sans-serif);
+  color: #3b342b;
+  text-wrap: pretty;
+}
+
+/* Entre 700 y 1099 la escena va al lado de la ley, chica, y la demo y el desafío abajo a lo ancho.
+   Las columnas se disuelven para que cada pieza tome su lugar en la grilla. */
+@media (max-width: 1099px) {
+  .pm {
+    grid-template-columns: minmax(0, 1fr) clamp(12rem, 27vw, 15.5rem);
+    grid-template-areas:
+      'cabeza escena'
+      'paso1 escena'
+      'demo demo'
+      'paso2 paso2';
+    gap: 1rem 1.5rem;
+  }
+  .pm-col {
+    display: contents;
+  }
+  .pm-cabeza {
+    grid-area: cabeza;
+    align-self: end;
+  }
+  .pm-paso--1 {
+    grid-area: paso1;
+    align-self: start;
+  }
+  .pm-demo {
+    grid-area: demo;
+  }
+  .pm-escena {
+    grid-area: escena;
+  }
+  .pm-paso--2 {
+    grid-area: paso2;
+  }
+}
+@media (max-width: 699px) {
+  .pm {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas: 'cabeza' 'escena' 'paso1' 'demo' 'paso2';
+  }
+  .pm-escena {
+    max-width: 24rem;
+  }
+}

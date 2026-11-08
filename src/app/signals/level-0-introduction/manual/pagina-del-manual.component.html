@@ -1,0 +1,34 @@
+<article class="pm">
+  <!-- Lo que se lee y se toca, de arriba hacia abajo: la ley, qué hacer y la demo. -->
+  <div class="pm-col pm-col--leer">
+    <header class="pm-cabeza">
+      @if (datos; as d) {
+        <p class="pm-ley">Ley {{ d.numero }}</p>
+        <h2 class="pm-titulo" id="manual-ley">{{ d.ley }}</h2>
+      }
+    </header>
+
+    <!-- El mismo número que el desafío: primero se prueba, después se confirma. -->
+    <div class="pm-paso pm-paso--1">
+      <span class="pm-num" aria-hidden="true">1</span>
+      <ng-content select="[hacer]" />
+    </div>
+
+    <div class="pm-demo"><ng-content select="[demo]" /></div>
+  </div>
+
+  <!-- Lo que le pasa a la nave mientras tanto, y el desafío que lo confirma. -->
+  <div class="pm-col pm-col--nave">
+    <figure class="pm-escena">
+      <ng-content select="[escena]" />
+      @if (datos; as d) {
+        <figcaption class="pm-nave">{{ d.enLaNave }}</figcaption>
+      }
+    </figure>
+
+    <div class="pm-paso pm-paso--2">
+      <span class="pm-num" aria-hidden="true">2</span>
+      <div class="pm-desafio"><ng-content select="[desafio]" /></div>
+    </div>
+  </div>
+</article>

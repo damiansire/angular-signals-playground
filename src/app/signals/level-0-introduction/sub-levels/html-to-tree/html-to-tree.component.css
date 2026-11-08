@@ -20,53 +20,19 @@
   }
 }
 
-/* Header al lenguaje nuevo (reemplaza el ConceptCard). Clases `htt-` para no colisionar con
-   el motor de la molécula, que estampa su enc sobre lo embebido. */
+/* La página la ordena el manual (ley, qué hacer, demo, desafío); acá solo lo propio. */
 :host {
   display: block;
-  max-width: 82rem;
-  margin: 0 auto;
   color: #1c1e24;
 }
 
-.htt-head {
-  max-width: 82rem;
-  margin: 0 auto 1.2rem;
-  padding: 0 1.5rem;
-  display: flex;
-  flex-direction: column;
-  gap: 0.35rem;
-  align-items: flex-start;
-}
-
-.htt-eyebrow {
+.htt-hacer {
   margin: 0;
-  font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
-  font-size: 0.72rem;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: #8a8172;
 }
 
-.htt-title {
-  margin: 0;
-  font-family: Georgia, 'Times New Roman', serif;
-  font-size: clamp(1.9rem, 3.6vw, 2.9rem);
-  line-height: 1.05;
-  letter-spacing: -0.01em;
-  color: #17140f;
-  text-wrap: balance;
-}
-
-.htt-sub {
-  margin: 0;
-  max-width: 58ch;
-  font-size: 1rem;
-  color: #5c5648;
-}
-
+/* Leer de corrido es la otra forma de hacer el paso: va al lado de la consigna, no suelto bajo el
+   título, donde no se sabía de qué era. */
 .htt-play {
-  margin-top: 0.5rem;
   font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
   font-size: 0.85rem;
   padding: 0.5rem 1rem;

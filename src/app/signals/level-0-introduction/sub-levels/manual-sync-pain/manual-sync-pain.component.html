@@ -1,55 +1,61 @@
-<section class="msp">
+<app-pagina-del-manual>
+  <p hacer class="msp-hacer">Sumá y mirá qué queda viejo.</p>
+
   <!-- Sin bajada: con el handler incompleto una de las tres vistas se marca "quedó viejo" sola.
        El bug se ve, no hace falta anunciarlo. -->
-  <header class="msp-head">
-    <h2 class="msp-title">A mano, te olvidás un lugar.</h2>
-  </header>
-
-  <div class="msp-toggle" role="group" aria-label="Versión del handler">
-    <button
-      class="msp-tab"
-      [class.msp-on]="!handlerComplete()"
-      [attr.aria-pressed]="!handlerComplete()"
-      (click)="setComplete(false)"
-    >
-      handler incompleto
-    </button>
-    <button
-      class="msp-tab"
-      [class.msp-on]="handlerComplete()"
-      [attr.aria-pressed]="handlerComplete()"
-      (click)="setComplete(true)"
-    >
-      handler completo
-    </button>
-  </div>
-
-  <div class="msp-stage">
-    <div class="msp-left">
-      <pre
-        class="msp-code"
-      >@for (r of renglones(); track $index) {<span class="msp-linea" [class]="r.clase" [innerHTML]="r.html"></span>}</pre>
-
-      <div class="msp-actions">
-        <button class="msp-inc" (click)="increment()">increment()</button>
-        <span class="msp-lines"
-          >sync a mano <strong>{{ syncLines() }}</strong></span
-        >
-      </div>
+  <section demo class="msp">
+    <div class="msp-toggle" role="group" aria-label="Versión del handler">
+      <button
+        class="msp-tab"
+        [class.msp-on]="!handlerComplete()"
+        [attr.aria-pressed]="!handlerComplete()"
+        (click)="setComplete(false)"
+      >
+        handler incompleto
+      </button>
+      <button
+        class="msp-tab"
+        [class.msp-on]="handlerComplete()"
+        [attr.aria-pressed]="handlerComplete()"
+        (click)="setComplete(true)"
+      >
+        handler completo
+      </button>
     </div>
 
-    <ul class="msp-spots">
-      @for (spot of spots; track spot.id) {
-        <li class="msp-spot" [class.msp-stale]="isStale(spot.id)">
-          <span class="msp-spot-label">{{ spot.label }}</span>
-          <span class="msp-spot-val">{{ rendered()[spot.id] }}</span>
-          @if (isStale(spot.id)) {
-            <span class="msp-badge">quedó viejo ✗</span>
-          }
-        </li>
-      }
-    </ul>
-  </div>
-</section>
+    <div class="msp-stage">
+      <div class="msp-left">
+        <pre
+          class="msp-code"
+        >@for (r of renglones(); track $index) {<span class="msp-linea" [class]="r.clase" [innerHTML]="r.html"></span>}</pre>
 
-<app-manipulable-system [system]="closingSystem" />
+        <div class="msp-actions">
+          <button class="msp-inc" (click)="increment()">increment()</button>
+          <span class="msp-lines"
+            >sync a mano <strong>{{ syncLines() }}</strong></span
+          >
+        </div>
+      </div>
+
+      <ul class="msp-spots">
+        @for (spot of spots; track spot.id) {
+          <li class="msp-spot" [class.msp-stale]="isStale(spot.id)">
+            <span class="msp-spot-label">{{ spot.label }}</span>
+            <span class="msp-spot-val">{{ rendered()[spot.id] }}</span>
+            @if (isStale(spot.id)) {
+              <span class="msp-badge">quedó viejo ✗</span>
+            }
+          </li>
+        }
+      </ul>
+    </div>
+  </section>
+
+  <app-escena-a-mano escena [lugares]="lugaresDelPanel()" [cuenta]="count()" [sano]="sano()" />
+
+  <app-manipulable-system
+    desafio
+    [system]="closingSystem"
+    (corrida)="sano.set($event.salud === 'healthy')"
+  />
+</app-pagina-del-manual>

@@ -1,13 +1,10 @@
-<section class="htt">
-  <!-- Sin bajada: el botón dice qué hacer y el árbol se arma nodo por nodo mientras lee. -->
-  <header class="htt-head">
-    <h2 class="htt-title">El HTML es un árbol de nodos.</h2>
-    <button class="htt-play" (click)="playParse()" [disabled]="parsePlaying()">
-      {{ parsePlaying() ? 'Leyendo…' : 'Leer el HTML' }}
-    </button>
-  </header>
+<app-pagina-del-manual>
+  <p hacer class="htt-hacer">Tocá un tag del código.</p>
+  <button hacer class="htt-play" (click)="playParse()" [disabled]="parsePlaying()">
+    {{ parsePlaying() ? 'Leyendo…' : 'Leer el HTML' }}
+  </button>
 
-  <app-two-column-layout title="">
+  <app-two-column-layout demo class="htt" title="">
     <app-tree
       [nodesToShow]="nodesToShow()"
       [htmlCode]="htmlCode"
@@ -42,6 +39,12 @@
       }
     </svg>
   </app-two-column-layout>
-</section>
 
-<app-manipulable-system [system]="closingSystem" />
+  <app-escena-arbol escena [reveladas]="reveladas()" [sano]="sano()" />
+
+  <app-manipulable-system
+    desafio
+    [system]="closingSystem"
+    (corrida)="sano.set($event.salud === 'healthy')"
+  />
+</app-pagina-del-manual>

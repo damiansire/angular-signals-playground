@@ -3,10 +3,6 @@
    las nuestras. */
 :host {
   display: block;
-  width: 100%;
-  max-width: 82rem;
-  margin: 0 auto;
-  padding: 0 1.5rem;
   color: #1c1e24;
 }
 
@@ -16,42 +12,16 @@
   gap: 1.5rem;
 }
 
-.dia-head {
+.dia-hacer {
+  margin: 0;
+}
+
+/* Los nodos y el botón de reiniciarlos, en una fila: reiniciar es de los nodos, no de la página. */
+.dia-fila {
   display: flex;
-  flex-direction: column;
-  gap: 0.35rem;
-}
-
-.dia-eyebrow {
-  margin: 0;
-  font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
-  font-size: 0.72rem;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: #8a8172;
-}
-
-.dia-title {
-  margin: 0;
-  font-family: Georgia, 'Times New Roman', serif;
-  font-size: clamp(1.9rem, 3.6vw, 2.9rem);
-  line-height: 1.05;
-  letter-spacing: -0.01em;
-  color: #17140f;
-  text-wrap: balance;
-}
-
-.dia-sub {
-  margin: 0;
-  max-width: 52ch;
-  font-size: 1rem;
-  color: #5c5648;
-}
-
-.dia-sub code {
-  font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
-  font-size: 0.9em;
-  color: #17140f;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1rem 1.5rem;
 }
 
 /* Consola: cada línea de JS es un botón que corre la mutación. */

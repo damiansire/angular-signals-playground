@@ -8,6 +8,8 @@ import {
   saltoDelFlujo,
 } from '../../../../libs/render-pipeline';
 import { ManipulableSystemComponent } from '../../../../components-atom/manipulable-system/manipulable-system.component';
+import { PaginaDelManualComponent } from '../../manual/pagina-del-manual.component';
+import { EscenaCostoComponent } from '../../manual/escena-costo.component';
 import { DOM_PIXEL_SYSTEM } from '../../introduction-systems';
 
 interface MutationDemo {
@@ -49,10 +51,12 @@ const COST_COLOR: Record<RenderCost, string> = {
   selector: 'app-dom-to-pixel',
   templateUrl: './dom-to-pixel.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ManipulableSystemComponent],
+  imports: [ManipulableSystemComponent, PaginaDelManualComponent, EscenaCostoComponent],
   styleUrl: './dom-to-pixel.component.css',
 })
 export class DomToPixelComponent {
+  /** El desafío quedó sano: la lámina festeja. */
+  protected readonly sano = signal(false);
   readonly closingSystem = DOM_PIXEL_SYSTEM;
   protected readonly stations: readonly Station[] = [
     { id: 'DOM', x: 60 },

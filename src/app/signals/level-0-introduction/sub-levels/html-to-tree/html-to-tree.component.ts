@@ -1,6 +1,7 @@
 import {
   Component,
   DestroyRef,
+  computed,
   ElementRef,
   effect,
   inject,
@@ -15,6 +16,9 @@ import { TwoColumnLayoutComponent } from '../../../../layouts/two-column-layout/
 import { getLevelColor } from '../../../../components-draw/node-level-color';
 import { ManipulableSystemComponent } from '../../../../components-atom/manipulable-system/manipulable-system.component';
 import { HTML_TREE_SYSTEM } from '../../introduction-systems';
+import { PaginaDelManualComponent } from '../../manual/pagina-del-manual.component';
+import { EscenaArbolComponent } from '../../manual/escena-arbol.component';
+import { posicionesEnElDocumento } from '../../manual/escenas.logica';
 
 interface ConnectorLine {
   id: string;
@@ -28,7 +32,14 @@ const FOLLOW_WINDOW_MS = 700;
 
 @Component({
   selector: 'app-html-to-tree',
-  imports: [ManipulableSystemComponent, CodeComponent, TreeComponent, TwoColumnLayoutComponent],
+  imports: [
+    ManipulableSystemComponent,
+    CodeComponent,
+    TreeComponent,
+    TwoColumnLayoutComponent,
+    PaginaDelManualComponent,
+    EscenaArbolComponent,
+  ],
   templateUrl: './html-to-tree.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   styleUrl: './html-to-tree.component.css',
@@ -53,6 +64,14 @@ export class HtmlToTreeComponent {
  </main> `;
   readonly nodesToShow = signal<string[]>([]);
   readonly connectors = signal<ConnectorLine[]>([]);
+  /** Los nodos revelados en orden de documento: la lámina arma con ellos la pantalla de la nave. */
+  protected readonly reveladas = computed(() =>
+    posicionesEnElDocumento(
+      (this.treeRef()?.nodesData() ?? []).map((node) => node.id),
+      this.nodesToShow(),
+    ),
+  );
+  protected readonly sano = signal(false);
 
   constructor() {
     // Recálculo inmediato (no espera al próximo frame) más una ventana breve de
