@@ -831,10 +831,26 @@ Del minijuego de operadores (2026-11-08):
       `inert`, y al cerrar se prende antes de devolverle el foco a "Bitácora".
 - [ ] Las teclas de leer las atiende la vista (`pasoEnElManual`, función pura), no el motor del
       prólogo: suelto, el motor no está, y sin `preventDefault` ↓ movía la molécula de atrás.
-- [ ] "Cerrar ×" en la cabeza, en su propia columna (`grid-area: 1 / 3`): con mouse, Escape no se
-      adivina. Sin el área explícita caía en la primera columna y se estiraba a lo ancho.
+- [ ] "Cerrar ×" en la cabeza, en su propia columna (`grid-area: 1 / 4`, después de las marcas y
+      el paso): con mouse, Escape no se adivina. Sin el área explícita caía en la primera columna y
+      se estiraba a lo ancho.
+- [ ] La hoja es una columna flex con el cuerpo estirado: en una página corta el pie flotaba a
+      mitad de la hoja, con media hoja vacía debajo.
+- [ ] Cada página tiene su lámina: la ley dibujada y animada (`lamina-del-manual/`, diferida) con
+      lo que le dice a la nave. A 1100 px o más va en una columna a la derecha, quieta al scrollear:
+      ese lado de la hoja quedaba vacío. Por debajo, es una franja arriba de la pantalla. Con
+      movimiento reducido cada dibujo queda en el momento que lo explica (el árbol armado, el panel
+      viejo en rojo, el layout trabado).
+- [ ] A lo ancho la hoja deja 5rem a cada lado (`calc(100% - 10rem)`): más ancha tapaba a medias
+      los botones de la colina, que quedan debajo del velo del manual suelto.
+- [ ] Pasar de página se ve: una hoja de papel gira desde el lomo (para atrás, desde el otro
+      borde) y la pantalla nueva entra apenas corrida. Gira por DEBAJO de la cabeza y el pie: por
+      encima, con la perspectiva, tapaba "Siguiente" y "Cerrar" mientras giraba. Sin animación con
+      movimiento reducido.
 - [ ] Suelto, medido a 1280×640, 1024×700 y 600×800 con input real: rueda, teclas, Escape y el
       botón; la molécula no se mueve mientras está abierto, y sí al cerrarlo.
+- [ ] Con la lámina, medido suelto a 1440×900, 1280×640 y 1024×700, y en la historia a 1440×900 y
+      1280×640: sin solapes con el HUD y sin desborde horizontal en las cinco páginas.
 
 ## Cinemáticas de capítulo (que se sienta un juego, no un video)
 
