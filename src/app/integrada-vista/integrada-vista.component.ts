@@ -144,6 +144,8 @@ export class IntegradaVistaComponent {
   );
   protected readonly bajada = letrasDelTitulo(['Una introducción interactiva a los Signals'])[0];
   protected readonly llamado = letrasDelTitulo(['Haz click para iniciar las aventuras'])[0];
+  /** En una pantalla táctil no hay click: se toca. El CSS muestra la que corresponde. */
+  protected readonly llamadoTactil = letrasDelTitulo(['Tocá para iniciar las aventuras'])[0];
 
   /** Angie en la colina se mueve sola hasta que la despedida la desarma: ahí manda la salida. */
   protected readonly angieEsperando = signal(true);

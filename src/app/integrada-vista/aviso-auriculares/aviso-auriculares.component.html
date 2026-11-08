@@ -216,7 +216,11 @@
   <div class="aa__pie">
     <!-- No es un botón a la vista: es la invitación a tocar donde sea. Sigue siendo un botón para el
        teclado y el lector, que no tienen "cualquier lado". -->
-    <button #seguir class="aa__seguir" type="button" [attr.aria-label]="llamado">
+    <!-- Las dos frases están, y el CSS muestra la que corresponde: con mouse se hace click, en
+         una pantalla táctil se toca. Cada una lleva su nombre para el lector. -->
+    <button #seguir class="aa__seguir" type="button">
+      <span class="sr-only aa__con-mouse">{{ llamado }}</span>
+      <span class="sr-only aa__tactil">{{ llamadoTactil }}</span>
       <!-- El cursor hace click y la ola sale de ahí: es la causa de que la frase se mueva. -->
       <span class="aa__raton" aria-hidden="true">
         <i></i><i></i>
@@ -224,8 +228,17 @@
           <path d="M3 2V24L8.6 18.8L12.6 27.6L16.8 25.8L12.8 17.2H20.6Z" />
         </svg>
       </span>
-      <span class="aa__frase" aria-hidden="true">
+      <span class="aa__frase aa__con-mouse" aria-hidden="true">
         @for (palabra of letras; track $index) {
+          <span class="aa__palabra">
+            @for (l of palabra; track $index) {
+              <span class="aa__letra-ola" [style.--i]="l.i">{{ l.c }}</span>
+            }
+          </span>
+        }
+      </span>
+      <span class="aa__frase aa__tactil" aria-hidden="true">
+        @for (palabra of letrasTactil; track $index) {
           <span class="aa__palabra">
             @for (l of palabra; track $index) {
               <span class="aa__letra-ola" [style.--i]="l.i">{{ l.c }}</span>

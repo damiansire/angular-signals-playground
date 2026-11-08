@@ -15,6 +15,7 @@ import { sinMovimiento } from '../../libs/muelle';
 import { sonido } from '../../libs/sonido';
 import {
   LLAMADO,
+  LLAMADO_TACTIL,
   aireQueCabe,
   aireQueCubre,
   caminoDelAire,
@@ -95,7 +96,9 @@ export class AvisoAuricularesComponent {
   protected readonly suena = signal<Lado | null>(null);
   protected readonly estrellas = estrellasDelAlba(11, 70);
   protected readonly llamado = LLAMADO;
+  protected readonly llamadoTactil = LLAMADO_TACTIL;
   protected readonly letras = letrasDelLlamado(LLAMADO);
+  protected readonly letrasTactil = letrasDelLlamado(LLAMADO_TACTIL);
   protected readonly lenteIzquierdo = LENTE_IZQUIERDO;
   protected readonly lenteDerecho = LENTE_DERECHO;
 

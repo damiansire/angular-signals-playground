@@ -513,15 +513,25 @@
             <div class="tusi__ov-capbar">
               <!-- El cursor hace click y la frase se mueve detrás: el mismo gesto del aviso. -->
               <label class="ini__llamado" for="ini-foco">
-                <span class="sr-only">Haz click para iniciar las aventuras</span>
+                <span class="sr-only ini__con-mouse">Haz click para iniciar las aventuras</span>
+                <span class="sr-only ini__tactil">Tocá para iniciar las aventuras</span>
                 <span class="ini__raton" aria-hidden="true">
                   <i></i><i></i>
                   <svg viewBox="0 0 24 30">
                     <path d="M3 2V24L8.6 18.8L12.6 27.6L16.8 25.8L12.8 17.2H20.6Z" />
                   </svg>
                 </span>
-                <span class="ini__frase-llamado" aria-hidden="true">
+                <span class="ini__frase-llamado ini__con-mouse" aria-hidden="true">
                   @for (palabra of llamado; track $index) {
+                    <span class="ini__palabra">
+                      @for (l of palabra.letras; track $index) {
+                        <span class="ini__ola" [style.--i]="l.i">{{ l.c }}</span>
+                      }
+                    </span>
+                  }
+                </span>
+                <span class="ini__frase-llamado ini__tactil" aria-hidden="true">
+                  @for (palabra of llamadoTactil; track $index) {
                     <span class="ini__palabra">
                       @for (l of palabra.letras; track $index) {
                         <span class="ini__ola" [style.--i]="l.i">{{ l.c }}</span>

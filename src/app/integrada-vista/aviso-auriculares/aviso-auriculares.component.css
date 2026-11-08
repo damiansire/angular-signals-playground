@@ -648,6 +648,51 @@
   color: #ffd46a;
 }
 
+/* Con mouse se hace click; en una pantalla táctil no hay cursor: se toca. La frase cambia, y el
+   cursor deja lugar a un punto que late con los mismos anillos, en el mismo instante. */
+.aa__tactil {
+  display: none;
+}
+@media (hover: none) and (pointer: coarse) {
+  .aa__con-mouse {
+    display: none;
+  }
+  .aa__tactil {
+    display: inline;
+  }
+  .aa__raton svg {
+    display: none;
+  }
+  .aa__raton::before {
+    content: '';
+    position: absolute;
+    left: 0.15em;
+    top: 0.35em;
+    width: 0.6em;
+    height: 0.6em;
+    border-radius: 50%;
+    background: #ff5fa8;
+    box-shadow: 0 0 12px #ff5fa8;
+    animation: aa-dedo 2.6s cubic-bezier(0.34, 1.4, 0.64, 1) infinite;
+  }
+  .aa__raton i {
+    left: -0.05em;
+    top: 0.25em;
+  }
+}
+@keyframes aa-dedo {
+  0% {
+    scale: 1;
+  }
+  4% {
+    scale: 0.6;
+  }
+  12%,
+  100% {
+    scale: 1;
+  }
+}
+
 /* Sin movimiento: el aviso y sus dos opciones siguen ahí, sin bucles ni cámara que se aleja. */
 @media (prefers-reduced-motion: reduce) {
   .aa__estrella,
@@ -656,6 +701,7 @@
   .aa__destello,
   .aa__letra-ola,
   .aa__raton svg,
+  .aa__raton::before,
   .aa__raton i,
   .aa__nota,
   .aa__parlante-ondas path {
