@@ -18,6 +18,7 @@ import {
   pasosDelPaseo,
   pendienteDeLaColina,
 } from './inicio-angie';
+import { hasta } from './testing/cuadros';
 
 /**
  * La pantalla de inicio es dibujo, pero lo que la sostiene son cuentas: el paisaje sale con semilla
@@ -295,6 +296,49 @@ describe('inicio-angie', () => {
 
       // El pasto pega más fuerte que el cielo; Angie responde sola a su propio toque.
       expect(golpes).toEqual(['0.5', '0.3']);
+    });
+
+    describe('camina hasta la piedra, nunca aparece en ella', () => {
+      const x = (el: HTMLElement): number => parseFloat(el.style.translate) || 0;
+      const dormir = (ms: number): Promise<void> => new Promise((r) => setTimeout(r, ms));
+      function caminando(): { host: HTMLElement; escena: HTMLElement; angie: HTMLElement } {
+        const { host, escena } = montar();
+        const angie = escena.querySelector<HTMLElement>('.ini__angie')!;
+        // Más angosta que la escena: si no, no le queda lugar para un paso y se sienta donde está.
+        angie.style.width = '100px';
+        return { host, escena, angie };
+      }
+
+      it('con la pausa de fondo recordada igual camina', async () => {
+        const { host, escena, angie } = caminando();
+        host.classList.add('fondo-en-pausa');
+        cerrar.push(initInicioAngie(host).dispose);
+
+        await hasta(() => x(angie) > 0);
+        const primerTramo = x(angie);
+        await hasta(() => x(angie) > primerTramo);
+
+        expect(x(angie)).toBeGreaterThan(primerTramo);
+        expect(escena.classList).not.toContain('ini--sentada');
+      });
+
+      it('si la landing se va de vista caminando, al volver sigue desde donde quedó', async () => {
+        const { host, escena, angie } = caminando();
+        cerrar.push(initInicioAngie(host).dispose);
+        await hasta(() => x(angie) > 0);
+
+        escena.classList.add('gone');
+        await dormir(50);
+        const alIrse = x(angie);
+        await dormir(250);
+        expect(x(angie)).toBe(alIrse);
+        expect(escena.classList).not.toContain('ini--sentada');
+
+        escena.classList.remove('gone');
+        await hasta(() => x(angie) > alIrse);
+        expect(x(angie)).toBeGreaterThan(alIrse);
+        expect(escena.classList).not.toContain('ini--sentada');
+      });
     });
 
     it('con movimiento reducido la salida termina enseguida, sin viaje', async () => {

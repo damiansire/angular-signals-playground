@@ -417,13 +417,12 @@ export function initInicioAngie(host: HTMLElement, cuerpo?: AngieDeLaColina): In
     escena.classList.add('ini--sentada');
     cuerpo?.sentarse();
   };
+  const aLaVista = (): boolean => !escena.classList.contains('gone');
   const pasear = (dt: number): boolean => {
     if (!paseo) return false;
-    // Con la pausa de la vida de fondo, lo que tiene fin salta a su final.
-    if (escena.closest('.fondo-en-pausa')) {
-      sentarse(paseo.hasta);
-      return false;
-    }
+    // Fuera de vista el paseo espera y al volver sigue desde donde quedó. Sentarla de una la hacía
+    // aparecer en la piedra: un teletransporte.
+    if (!aLaVista()) return false;
     // Una pestaña que vuelve trae un cuadro de segundos: el paseo no puede saltar de golpe. El tope
     // no es más bajo porque con pocos cuadros por segundo (una carga pesada) caminaba en cámara lenta.
     paseo.t += Math.min(dt, 0.25);
@@ -444,9 +443,9 @@ export function initInicioAngie(host: HTMLElement, cuerpo?: AngieDeLaColina): In
     const hasta = asiento();
     // La zancada del dibujo, pasada al paisaje: el pie apoyado barre justo lo que avanza el cuerpo.
     const largo = zancada() * deAngie();
-    // Sin movimiento, en pausa o sin lugar para un paso: ya sentada.
-    const quieta = sinMovimiento() || escena.closest('.fondo-en-pausa') !== null || hasta < largo;
-    if (quieta) {
+    // Sin movimiento o sin lugar para un paso: ya sentada. La pausa de la vida de fondo no la frena:
+    // el paseo es su llegada, no fondo, y con la pausa recordada aparecía en la piedra sin caminar.
+    if (sinMovimiento() || hasta < largo) {
       sentarse(hasta);
       return;
     }
@@ -461,7 +460,6 @@ export function initInicioAngie(host: HTMLElement, cuerpo?: AngieDeLaColina): In
     };
     motor.despertar();
   };
-  const aLaVista = (): boolean => !escena.classList.contains('gone');
   /**
    * El paseo arranca cuando la landing se ve, no al cargar: con un deep-link carga oculta, y al volver
    * a ella Angie ya estaba en el borde, como si se hubiera teletransportado.
@@ -474,15 +472,19 @@ export function initInicioAngie(host: HTMLElement, cuerpo?: AngieDeLaColina): In
     luego(T.antesDeMirar, () => cuerpo?.caminar(0.5));
     luego(T.antesDeCaminar, arrancar);
   };
-  // Si la landing se va de vista a mitad de camino, no camina para nadie: termina sentada. Si se va
-  // antes de arrancar, la llegada espera a la próxima vez que se vea.
+  // Si la landing se va de vista caminando, el paseo espera (lo frena `pasear`) y sigue al volver.
+  // Si ya llegó, se sienta: está en la piedra. Si se va antes de arrancar, la llegada espera a la
+  // próxima vez que se vea.
   const vigia = new MutationObserver(() => {
     if (escena.classList.contains('ini--saliendo')) return;
-    if (aLaVista()) return llegar();
-    if (llegada !== 'en camino') return;
+    if (aLaVista()) {
+      if (paseo) motor.despertar();
+      return llegar();
+    }
+    if (llegada !== 'en camino' || paseo) return;
     temporizadores.forEach(clearTimeout);
     temporizadores.clear();
-    if (arranco) sentarse(paseo?.hasta ?? asiento());
+    if (arranco) sentarse(asiento());
     else {
       llegada = 'espera';
       cuerpo?.pararse();
