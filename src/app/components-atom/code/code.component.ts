@@ -140,7 +140,10 @@ export class CodeComponent {
   }
 
   onLineClick(clickedItem: CodeLine) {
-    const isSelect = !clickedItem.selected;
+    // El estado se lee del signal, no del objeto del template: con clicks rápidos la vista todavía
+    // no se rehízo, el objeto sigue sin seleccionar y cada click volvía a emitir 'Select'.
+    const actual = this.codeLines().find((item) => item.id === clickedItem.id) ?? clickedItem;
+    const isSelect = !actual.selected;
     const updatedCodeLines = this.codeLines().map((item) =>
       item.id === clickedItem.id ? { ...item, selected: isSelect } : item,
     );
@@ -157,7 +160,11 @@ export class CodeComponent {
   }
 
   onElementClick(codeLine: CodeLine, clickedItem: CodeLineElement) {
-    const isSelect = !clickedItem.selected;
+    const actual =
+      this.codeLines()
+        .find((item) => item.id === codeLine.id)
+        ?.elements?.find((element) => element.id === clickedItem.id) ?? clickedItem;
+    const isSelect = !actual.selected;
     // Un token que no produce nodo no tiene nada que revelar en el árbol: seleccionarlo emitía un
     // id que ningún nodo matchea, o sea un click que no hacía nada.
     if (!isNodeId(clickedItem.id)) {
@@ -169,9 +176,7 @@ export class CodeComponent {
       }
       if (item.elements) {
         const elementsInLine = item.elements.map((lineElement) =>
-          lineElement.id === clickedItem.id
-            ? { ...clickedItem, selected: !clickedItem.selected }
-            : lineElement,
+          lineElement.id === clickedItem.id ? { ...actual, selected: isSelect } : lineElement,
         );
 
         return { ...item, elements: elementsInLine };

@@ -834,7 +834,7 @@ Del minijuego de operadores (2026-11-08):
       unos 45 selectores no llegaban: botones claros en vez de la pastilla oscura, y "handler
       completo" a 2.76:1. NO sumar `.card`: trae opacidad 0, escala y alto de la molécula.
 - [ ] Un solo borde izquierdo: el corrimiento de 1.5rem es para la espina de la molécula, y en la
-      hoja se anula. El de 0/1 (`.htt-head`) es de la pantalla y se ve igual en la molécula.
+      hoja se anula.
 - [ ] La hoja scrollea por dentro y se mueve con todo: rueda y dedo nativos (el prólogo corta su
       propagación ahí adentro, porque la rueda del recorrido está en un ancestro y en el borde movía
       la molécula), y ↑/↓, AvPág, Inicio, Fin y espacio a mano. Antes, solo arrastrando la barra.
@@ -862,11 +862,35 @@ Del minijuego de operadores (2026-11-08):
       se estiraba a lo ancho.
 - [ ] La hoja es una columna flex con el cuerpo estirado: en una página corta el pie flotaba a
       mitad de la hoja, con media hoja vacía debajo.
-- [ ] Cada página tiene su lámina: la ley dibujada y animada (`lamina-del-manual/`, diferida) con
-      lo que le dice a la nave. A 1100 px o más va en una columna a la derecha, quieta al scrollear:
-      ese lado de la hoja quedaba vacío. Por debajo, es una franja arriba de la pantalla. Con
-      movimiento reducido cada dibujo queda en el momento que lo explica (el árbol armado, el panel
-      viejo en rojo, el layout trabado).
+- [ ] Cada página lee igual: título → "1 · qué hacer" → la demo → "2 · el desafío", con la escena
+      de la nave al lado (`app-pagina-del-manual`, en `signals/level-0-introduction/manual/`).
+      Antes el código quedaba chico arriba a la izquierda con un hueco al lado, "Leer el HTML"
+      flotaba sin contexto, la lámina iba suelta en otra columna, el desafío quedaba abajo de una
+      raya y la mitad de abajo de la hoja, vacía. A 1100 px o más: dos columnas (leer | la nave y
+      el desafío); entre 700 y 1099, la escena al lado del título y la demo y el desafío a lo ancho;
+      por debajo, una sola columna.
+- [ ] La escena REACCIONA a la demo, no la ilustra: el árbol se arma con cada tag tocado, el paquete
+      viaja al instrumento que nombra la línea, el paisaje va a los tirones con el cambio caro, el
+      lápiz se saltea el lugar que el handler olvida, el barrido de Zone.js no ve lo que pasa por
+      afuera de la cerca. Y el desafío resuelto hace saltar a la nave.
+- [ ] La página sabe su número, su ley y lo que dice la nave por un token (`PAGINA_DEL_MANUAL`) que
+      la vista pasa al montarla: la misma pantalla en la molécula no lo recibe y no muestra la
+      cabeza del manual.
+- [ ] GSAP vive solo en los chunks diferidos de las páginas: el bundle inicial no lo trae.
+- [ ] Nada que GSAP anime tiene su posición en el atributo `transform`: GSAP lo pisa. Las cejas de
+      la nave, envueltas en su propio `<g>`; sin eso quedaban debajo de los ojos y la cara, triste.
+- [ ] La hoja del manual no selecciona texto (`user-select: none`): clickear varias veces un tag
+      del código lo pintaba de azul. La escena tampoco, para poder pinchar a la nave.
+- [ ] Clicks rápidos sobre un tag alternan: `app-code` lee la selección de su signal, no del objeto
+      que le pasa el template. Con tres clicks seguidos la vista no se rehacía, los tres decían
+      'Select' y el árbol duplicaba el nodo (NG0955).
+- [ ] La rueda encima del árbol de ECharts baja la hoja: el árbol se arrastra (`roam: 'move'`) pero
+      no hace zoom. Con zoom, la rueda encima del árbol no movía la hoja ni la molécula.
+- [ ] El ancho máximo de 64rem de las pantallas en la molécula se anula en la hoja: con él, a 2000 px
+      la página quedaba en una franja angosta. El CSS del manual vive en `manual-de-a-bordo.css`.
+- [ ] En cada escena, nada importante detrás de la nave: el planeta va arriba a la izquierda, el
+      lápiz descansa adentro del cuadro y el rótulo "zone" cuelga de la cerca. Con movimiento
+      reducido cada escena queda en el momento que explica, sin bucles.
 - [ ] A lo ancho la hoja deja 5rem a cada lado (`calc(100% - 10rem)`): más ancha tapaba a medias
       los botones de la colina, que quedan debajo del velo del manual suelto.
 - [ ] Pasar de página se ve: una hoja de papel gira desde el lomo (para atrás, desde el otro
@@ -875,8 +899,9 @@ Del minijuego de operadores (2026-11-08):
       movimiento reducido.
 - [ ] Suelto, medido a 1280×640, 1024×700 y 600×800 con input real: rueda, teclas, Escape y el
       botón; la molécula no se mueve mientras está abierto, y sí al cerrarlo.
-- [ ] Con la lámina, medido suelto a 1440×900, 1280×640 y 1024×700, y en la historia a 1440×900 y
-      1280×640: sin solapes con el HUD y sin desborde horizontal en las cinco páginas.
+- [ ] Con las escenas, medido con input real en la historia a 1440×900 y 1280×640, suelto a
+      1024×700 y 600×800, y suelto a 1440×900 con movimiento reducido (en la historia el prólogo
+      se termina solo): sin solapes con el HUD y sin desborde horizontal en las cinco páginas.
 
 ## Cinemáticas de capítulo (que se sienta un juego, no un video)
 

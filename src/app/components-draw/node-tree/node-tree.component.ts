@@ -67,7 +67,9 @@ export class NodeTreeComponent {
         type: 'graph',
         symbol: 'roundRect',
         symbolSize: [NODE_SYMBOL_WIDTH, 32],
-        roam: true,
+        // Se arrastra, pero la rueda no hace zoom: el árbol vive en pantallas que scrollean (la
+        // molécula, la hoja del manual), y con zoom la rueda encima del árbol no movía nada.
+        roam: 'move',
         label: {
           show: true,
           fontFamily: 'var(--font-mono, ui-monospace, monospace)',

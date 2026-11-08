@@ -706,7 +706,7 @@
     class="prologo__manual card--dissolve"
     tabindex="-1"
     role="region"
-    aria-labelledby="manual-en-la-nave"
+    aria-labelledby="manual-ley"
   >
     <header class="prologo__manual-cabeza">
       <span class="prologo__manual-libro">Manual de a bordo</span>
@@ -730,14 +730,7 @@
       </button>
     </header>
     <div class="prologo__manual-cuerpo">
-      <!-- La ley dibujada al lado de la pantalla que la demuestra, con lo que le dice a la nave. -->
-      <aside class="prologo__manual-lamina">
-        <span class="prologo__manual-ley">Ley {{ pagina()! + 1 }}</span>
-        @defer (on immediate) {
-          <app-lamina-del-manual class="prologo__manual-dibujo" [pagina]="p.id" />
-        }
-        <h2 id="manual-en-la-nave" class="prologo__manual-nave">{{ p.enLaNave }}</h2>
-      </aside>
+      <!-- La página trae su ley, su lámina y su desafío (ver `app-pagina-del-manual`). -->
       <div #pantallaDelManual class="subhost"></div>
       <!-- La hoja que se da vuelta al pasar de página: papel, sin contenido. -->
       <div #hojaQuePasa class="prologo__manual-pasa" aria-hidden="true"></div>

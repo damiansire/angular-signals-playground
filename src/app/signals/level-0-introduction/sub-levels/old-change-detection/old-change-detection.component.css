@@ -2,10 +2,6 @@
    las clases del motor de la molécula pisarían las nuestras. */
 :host {
   display: block;
-  width: 100%;
-  max-width: 82rem;
-  margin: 0 auto;
-  padding: 0 1.5rem;
   color: #1c1e24;
 }
 
@@ -13,44 +9,6 @@
   display: flex;
   flex-direction: column;
   gap: 1.4rem;
-}
-
-.ocd-head {
-  display: flex;
-  flex-direction: column;
-  gap: 0.35rem;
-}
-
-.ocd-eyebrow {
-  margin: 0;
-  font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
-  font-size: 0.72rem;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: #8a8172;
-}
-
-.ocd-title {
-  margin: 0;
-  font-family: Georgia, 'Times New Roman', serif;
-  font-size: clamp(1.9rem, 3.6vw, 2.9rem);
-  line-height: 1.05;
-  letter-spacing: -0.01em;
-  color: #17140f;
-  text-wrap: balance;
-}
-
-.ocd-sub {
-  margin: 0;
-  max-width: 60ch;
-  font-size: 1rem;
-  color: #5c5648;
-}
-
-.ocd-sub em {
-  font-style: normal;
-  font-weight: 600;
-  color: #17140f;
 }
 
 /* APIs que Zone.js parchea: cada una dispara el barrido. */

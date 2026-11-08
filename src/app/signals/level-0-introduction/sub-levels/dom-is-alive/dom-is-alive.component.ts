@@ -7,6 +7,8 @@ import {
   applyMutation,
 } from './dom-is-alive.data';
 import { ManipulableSystemComponent } from '../../../../components-atom/manipulable-system/manipulable-system.component';
+import { PaginaDelManualComponent } from '../../manual/pagina-del-manual.component';
+import { EscenaVivoComponent } from '../../manual/escena-vivo.component';
 import { DOM_ALIVE_SYSTEM } from '../../introduction-systems';
 import { conCortes } from '../../../../libs/cortes-de-codigo';
 
@@ -14,10 +16,12 @@ import { conCortes } from '../../../../libs/cortes-de-codigo';
   selector: 'app-dom-is-alive',
   templateUrl: './dom-is-alive.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ManipulableSystemComponent],
+  imports: [ManipulableSystemComponent, PaginaDelManualComponent, EscenaVivoComponent],
   styleUrl: './dom-is-alive.component.css',
 })
 export class DomIsAliveComponent {
+  /** El desafío quedó sano: la lámina festeja. */
+  protected readonly sano = signal(false);
   readonly closingSystem = DOM_ALIVE_SYSTEM;
   protected readonly mutations: readonly DomMutation[] = MUTATIONS;
   // El código del botón con puntos de corte: angosto se parte en "." y "(", no a mitad de un nombre.

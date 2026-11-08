@@ -7,17 +7,23 @@ import {
   staleSpots,
 } from './manual-sync-pain.data';
 import { ManipulableSystemComponent } from '../../../../components-atom/manipulable-system/manipulable-system.component';
+import { PaginaDelManualComponent } from '../../manual/pagina-del-manual.component';
+import { EscenaAManoComponent, type LugarDelPanel } from '../../manual/escena-a-mano.component';
 import { MANUAL_SYNC_SYSTEM } from '../../introduction-systems';
 import { conCortes } from '../../../../libs/cortes-de-codigo';
+
+const GLIFOS: Record<SpotId, string> = { value: '#', mult2: '×2', mult3: '×3' };
 
 @Component({
   selector: 'app-manual-sync-pain',
   templateUrl: './manual-sync-pain.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ManipulableSystemComponent],
+  imports: [ManipulableSystemComponent, PaginaDelManualComponent, EscenaAManoComponent],
   styleUrl: './manual-sync-pain.component.css',
 })
 export class ManualSyncPainComponent {
+  /** El desafío quedó sano: la lámina festeja. */
+  protected readonly sano = signal(false);
   readonly closingSystem = MANUAL_SYNC_SYSTEM;
   protected readonly spots = SPOTS;
   protected readonly count = signal(0);
@@ -60,6 +66,17 @@ export class ManualSyncPainComponent {
   protected readonly truth = computed(() => deriveOutputs(this.count()));
   protected readonly stale = computed(() => new Set(staleSpots(this.count(), this.synced())));
   protected readonly syncLines = computed(() => this.synced().size);
+
+  /** Los tres lugares como los ve el panel de la nave en la lámina. */
+  protected readonly lugaresDelPanel = computed<LugarDelPanel[]>(() =>
+    this.spots.map((spot) => ({
+      id: spot.id,
+      glifo: GLIFOS[spot.id],
+      valor: this.rendered()[spot.id],
+      viejo: this.stale().has(spot.id),
+      sincronizado: this.synced().has(spot.id),
+    })),
+  );
 
   protected increment(): void {
     this.count.update((n) => n + 1);

@@ -1,0 +1,233 @@
+/* El manual de a bordo: la hoja de papel del recorrido, ahora en la cabina. Ocupa todo lo que deja
+   el HUD porque cada página es una pantalla entera, y la caja de diálogo se esconde: la orden ya se
+   leyó, y debajo de la hoja solo asomaba cortada. Cada página se ordena sola (ley, qué hacer, demo,
+   lámina y desafío: ver `app-pagina-del-manual`); la hoja pone el libro alrededor. */
+.prologo__manual {
+  position: absolute;
+  z-index: 5;
+  inset: 4.25rem 0 1rem;
+  width: min(76rem, calc(100% - 2rem));
+  margin-inline: auto;
+  overflow: auto;
+  padding: 1.1rem clamp(1.1rem, 2.4vw, 2.2rem) 1rem;
+  border-top: 6px solid #ffd27a;
+  border-radius: 18px;
+  color: #201d16;
+  box-shadow: 0 24px 60px rgb(10 4 20 / 65%);
+  /* Es un juego que se toca: tocar el código o un botón varias veces no pinta de azul la hoja. */
+  user-select: none;
+  -webkit-user-select: none;
+  animation: prologo-velo 0.3s ease-out;
+  /* El prólogo frena la rueda y el dedo para que no se mueva el recorrido de atrás: acá se dejan
+     pasar, y el scroll no se encadena a la página. */
+  overscroll-behavior: contain;
+  touch-action: pan-y;
+  /* Lo que se alcanza con Tab no queda debajo del pie, que es sticky. */
+  scroll-padding-bottom: 5rem;
+  /* Una barra de sistema se lee como iframe ajeno; el aviso "más abajo" la reemplaza. */
+  scrollbar-width: none;
+  /* En columna, con el cuerpo estirado: en una página corta el pie flotaba a mitad de la hoja. */
+  display: flex;
+  flex-direction: column;
+}
+.prologo__manual > * {
+  flex-shrink: 0;
+}
+.prologo__manual::-webkit-scrollbar {
+  display: none;
+}
+/* Más ancha a lo ancho, sin tapar los botones de la colina del costado izquierdo. */
+@media (min-width: 1100px) {
+  .prologo__manual {
+    width: min(84rem, calc(100% - 10rem));
+  }
+}
+/* La armonización corre el contenido 1.5rem para salvar la espina de la molécula. Acá no hay espina,
+   y el corrimiento dejaba dos bordes izquierdos en la hoja. */
+.prologo__manual.card--dissolve .subhost > * {
+  padding-left: 0;
+}
+/* El tope de 64rem es de la card de la molécula, que tiene la espina al lado. La página del manual
+   ocupa la hoja entera: con el tope quedaba una franja vacía a la derecha. */
+.prologo__manual.card--dissolve .subhost > * > app-pagina-del-manual {
+  max-width: none;
+}
+/* `card--dissolve` trae la armonización de las pantallas, y también un fondo transparente. */
+.prologo__manual.card--dissolve {
+  background: linear-gradient(180deg, #fcfbf5, #f5f2e8);
+}
+.prologo__manual:focus {
+  outline: none;
+}
+.prologo--manual .prologo__dialogo {
+  visibility: hidden;
+}
+.prologo__manual-cabeza {
+  display: grid;
+  grid-template-columns: auto 1fr auto auto;
+  align-items: center;
+  gap: 0.15rem 1rem;
+  margin-bottom: 1.1rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid #e6dfcf;
+}
+/* Las marcas del libro: las leídas en tinta, la de ahora más larga y en el dorado del manual. */
+.prologo__manual-marcas {
+  display: flex;
+  gap: 0.35rem;
+}
+.prologo__manual-marca {
+  width: 0.55rem;
+  height: 0.55rem;
+  border-radius: 999px;
+  background: #ddd3bf;
+  transition:
+    width 0.3s ease,
+    background 0.3s ease;
+}
+.prologo__manual-marca--leida {
+  background: #8a7d66;
+}
+.prologo__manual-marca--aca {
+  width: 1.6rem;
+  background: #e0a63a;
+}
+/* El cuerpo se estira hasta el pie; la página adentro decide sus columnas. */
+.prologo__manual-cuerpo {
+  position: relative;
+  flex: 1 0 auto;
+}
+/* La hoja que se da vuelta: papel con su sombra de lomo, encima del cuerpo mientras gira. */
+.prologo__manual-pasa {
+  position: absolute;
+  z-index: 3;
+  inset: 0;
+  border-radius: 12px;
+  background: linear-gradient(90deg, #ebe4d3, #fcfbf5 18%, #f7f3ea 82%, #e6dfcd);
+  box-shadow: 0 12px 30px rgb(43 38 32 / 22%);
+  opacity: 0;
+  pointer-events: none;
+  backface-visibility: hidden;
+}
+.prologo__manual-libro,
+.prologo__manual-paso {
+  font:
+    700 0.72rem / 1 'JetBrains Mono',
+    'Cascadia Mono',
+    Consolas,
+    monospace;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #5b5246;
+}
+/* La cabeza y el pie quedan encima de la hoja que se da vuelta: es el marco del libro. */
+.prologo__manual-cabeza {
+  position: relative;
+  z-index: 4;
+  background: #fcfbf5;
+}
+.prologo__manual-pie {
+  z-index: 4;
+  position: sticky;
+  bottom: -1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 1.25rem calc(-1 * clamp(1.1rem, 2.4vw, 2.2rem)) -1rem;
+  padding: 0.7rem clamp(1.1rem, 2.4vw, 2.2rem);
+  border-top: 1px solid #e6dfcf;
+  background: #f5f2e8;
+}
+.prologo__manual-boton {
+  padding: 0.5rem 0.9rem;
+  border: 1px solid #d9cfba;
+  border-radius: 10px;
+  background: #fffdf7;
+  font: 600 0.9rem / 1 var(--font-display, system-ui, sans-serif);
+  color: #1f1a14;
+  cursor: pointer;
+}
+/* Apagado sin bajar de 3:1 contra el pie. */
+.prologo__manual-boton:disabled {
+  opacity: 0.65;
+  cursor: default;
+}
+.prologo__manual-boton--sigue {
+  border-color: #b8791f;
+  background: #ffd27a;
+}
+/* Como el de las cards: sigue al scroll de la hoja y se apaga al llegar al final. */
+.prologo__manual-abajo {
+  padding: 0.15rem 0.7rem;
+  border: 1px solid #e2dccb;
+  border-radius: 999px;
+  background: #fcfbf5;
+  font:
+    500 0.7rem / 1.4 'JetBrains Mono',
+    'Cascadia Mono',
+    Consolas,
+    monospace;
+  letter-spacing: 0.08em;
+  color: #6a6355;
+  pointer-events: none;
+  opacity: 0;
+  /* Keyframes propios: Angular renombra los de cada hoja de estilo, y los de las cards no llegan. */
+  animation: prologo-mas-abajo linear both;
+  animation-timeline: scroll(nearest block);
+  animation-range: calc(100% - 3rem) 100%;
+}
+@keyframes prologo-mas-abajo {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+/* Cerrar sin hojear hasta el final: con mouse, Escape no se adivina. */
+.prologo__manual-cerrar {
+  grid-area: 1 / 4;
+  align-self: center;
+  padding: 0.35rem 0.7rem;
+  font-size: 0.82rem;
+}
+/* Abierto desde la bitácora, sin la escena: va afuera del escenario y a la altura de ella. Sin el HUD
+   del prólogo arriba, la hoja aprovecha el alto entero. */
+.manual-suelto {
+  position: fixed;
+  inset: 0;
+  z-index: 70;
+}
+.manual-suelto .prologo__velo {
+  background: rgb(6 3 14 / 72%);
+}
+.manual-suelto .prologo__manual {
+  inset: 1rem 0;
+}
+.prologo__manual-boton:focus-visible {
+  outline: 3px solid #b8791f;
+  outline-offset: 2px;
+}
+
+/* Lo que la hoja ajusta de las pantallas que monta (las alcanza por el estampado). */
+
+/* 0/1: el lugar del árbol es un escenario a la vista, no un hueco con una frase suelta. */
+.prologo__manual .subhost .tree-card {
+  border: 1.5px dashed #d6c9ab;
+  border-radius: 16px;
+  background-color: #fffdf6;
+  box-shadow: none;
+}
+
+/* El desafío va en su recuadro, con su número: la regla de arriba y el aire del átomo son para
+   cerrar una card larga, y acá separaban el número de su rótulo. */
+.prologo__manual .subhost [desafio] {
+  margin-top: 0;
+  padding: 0;
+  border-top: 0;
+}
+
+/* La consigna de cada página va en el renglón de su número, sin el margen de un párrafo suelto. */
+.prologo__manual .subhost [hacer] {
+  margin: 0;
+}
