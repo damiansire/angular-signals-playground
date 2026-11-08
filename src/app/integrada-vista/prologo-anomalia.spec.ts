@@ -63,14 +63,20 @@ describe('initPrologoAnomalia', () => {
     const host = document.createElement('div');
     host.innerHTML = `
       <div class="prologo">
-        <div class="prologo__stage">
-          <canvas class="prologo__canvas" width="640" height="360"></canvas>
-          <p class="prologo__quien"></p>
-          <div class="prologo__mascot"></div>
+        <svg class="prologo__escena"></svg>
+        <div class="prologo__mascot"></div>
+        <p class="prologo__voz"></p>
+        <div class="prologo__dialogo">
+          <p class="prologo__globo" data-quien="">
+            <span class="prologo__quien"></span><span class="prologo__frase"></span>
+          </p>
+          <p class="prologo__globo" data-quien="">
+            <span class="prologo__quien"></span><span class="prologo__frase"></span>
+          </p>
         </div>
+        <p class="prologo__titulo"></p>
         <div class="prologo__hud">
           <button class="prologo__pause" type="button"></button>
-          <button class="prologo__voice" type="button"></button>
           <button class="prologo__sound" type="button"></button>
           <button class="prologo__speed" type="button"></button>
           <button class="prologo__full" type="button"></button>
@@ -111,7 +117,6 @@ describe('initPrologoAnomalia', () => {
       host,
       skip: host.querySelector<HTMLButtonElement>('.prologo__skip')!,
       raiz: host.querySelector<HTMLElement>('.prologo')!,
-      voces: host.querySelector<HTMLButtonElement>('.prologo__voice')!,
       sonido: host.querySelector<HTMLButtonElement>('.prologo__sound')!,
       velocidad: host.querySelector<HTMLButtonElement>('.prologo__speed')!,
       veces: () => terminado,
@@ -187,13 +192,6 @@ describe('initPrologoAnomalia', () => {
       p.velocidad.click();
     }
 
-    it('arrancan prendidas y el botón habla de voces, no de si el sistema tiene una', () => {
-      const p = arrancar();
-      expect(p.voces.textContent).toBe('Voces: sí');
-      expect(p.voces.getAttribute('aria-pressed')).toBe('true');
-      expect(p.voces.disabled).toBeFalse();
-    });
-
     it('cada línea habla con la voz de su personaje, en la ventana que dura en pantalla', async () => {
       const habla = spyOn(sonido(), 'hablar');
       const p = arrancar();
@@ -207,20 +205,34 @@ describe('initPrologoAnomalia', () => {
       expect(ventana).toBeGreaterThan(0);
     });
 
-    it('apagarlas calla a los personajes pero no toca la preferencia global', async () => {
-      const habla = spyOn(sonido(), 'hablar');
-      const antes = sonido().activo();
+    it('un solo interruptor: apagar el sonido calla también a los personajes', () => {
+      sonido().alternar(true);
+      const callar = spyOn(sonido(), 'callar');
       const p = arrancar();
 
-      p.voces.click();
-      aTodaVelocidad(p);
-      await new Promise((r) => setTimeout(r, 900));
+      p.sonido.click();
 
-      expect(p.voces.textContent).toBe('Voces: no');
-      expect(p.voces.getAttribute('aria-pressed')).toBe('false');
-      expect(habla).not.toHaveBeenCalled();
-      expect(sonido().activo()).toBe(antes);
+      expect(sonido().activo()).toBeFalse();
+      expect(callar).toHaveBeenCalled();
+      expect(p.host.querySelector('.prologo__voice')).toBeNull();
     });
+  });
+
+  it('dibuja la escena en el SVG: las cuatro naves, cada una tocable', () => {
+    const p = arrancar();
+    const naves = p.host.querySelectorAll('.prologo__escena [data-nave]');
+    expect(naves.length).toBe(4);
+  });
+
+  it('tocar una nave no pausa ni termina el prólogo', () => {
+    const p = arrancar();
+    const nave = p.host.querySelector<SVGGElement>('.prologo__escena [data-nave="0"]')!;
+    nave.dispatchEvent(
+      new PointerEvent('pointerdown', { bubbles: true, clientX: 10, clientY: 10 }),
+    );
+
+    expect(p.veces()).toBe(0);
+    expect(p.host.querySelector('.prologo__pause')!.getAttribute('aria-pressed')).toBe('false');
   });
 
   it('con su markup completo NO cede la posta de entrada: el prólogo corre', () => {

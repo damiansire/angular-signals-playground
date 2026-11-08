@@ -1,99 +1,213 @@
 /* Prólogo "la anomalía". Tapa la intro entera mientras corre: es una cinemática, no un adorno al
    costado, y compartir pantalla con la construcción de Tusi haría que las dos compitan.
-   El motor solo saca y pone el atributo `hidden`; toda la geometría vive acá. */
+   El motor solo saca y pone el atributo `hidden`; toda la geometría de la pantalla vive acá, y la
+   del dibujo en el SVG. */
 
 .prologo {
   position: absolute;
   inset: 0;
   z-index: 30;
-  /* Casi negro, no negro puro: el patrón dibuja sobre este fondo y el negro absoluto le come el
-     degradado de las estelas. Es el mismo valor con el que se aprobó la escena. */
+  /* El mismo casi negro con que termina la noche de la colina: el empalme no tiene costura. */
   background: #07080c;
-  display: grid;
-  place-items: center;
   overflow: hidden;
-}
+  /* Apretar y arrastrar sobre la escena seleccionaba el texto del diálogo. */
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: none;
 
-.prologo[hidden] {
-  display: none;
-}
-
-/* El escenario mantiene la proporción del lienzo (1000 × 562) y siempre CABE, en pantallas anchas
-   por altura y en angostas por ancho. No es cosmética: el motor ubica la mascota con
-   `stage.clientWidth / 1000`, así que si este ancho deja de coincidir con el del canvas, la mascota
-   nace corrida del choque que la produce. */
-.prologo__stage {
-  position: relative;
-  width: min(100%, calc(100vh * 1000 / 562));
-  aspect-ratio: 1000 / 562;
-}
-
-.prologo__canvas {
-  display: block;
-  width: 100%;
-  height: auto;
-}
-
-/* La mascota es la REAL, un <img> encima del canvas, para que se vea igual de nítida que en la card
-   de concepto y sea el mismo asset. El motor le escribe `transform` y `opacity`. */
-/* Quién habla. Arriba a la izquierda del escenario, fuera del dibujo: el lienzo está medido al
-   píxel contra los cascos y la mascota, y un rótulo adentro los pisaba. Toma el color del
-   renglón de quien habla, así nombre y frase se leen como una sola cosa. */
-.prologo__quien {
-  position: absolute;
-  left: 2.2%;
-  top: 3.2%;
-  z-index: 2;
-  margin: 0;
-  font:
-    600 clamp(10px, 1.25vw, 13px) / 1 'JetBrains Mono',
-    'Cascadia Mono',
-    Consolas,
-    monospace;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-  opacity: 0;
-  transition: opacity 220ms ease-out;
-  pointer-events: none;
-}
-
-.prologo__quien--visible {
-  opacity: 0.92;
-}
-
-.prologo__mascot {
-  position: absolute;
-  left: 0;
-  top: 0;
-  width: 18%;
-  opacity: 0;
-  transform-origin: 50% 50%;
-  pointer-events: none;
-  will-change: transform, opacity;
-}
-
-/* Los controles son un TRÁMITE: siempre alcanzables, nunca compitiendo con la escena. Van en el
-   mismo rincón donde la intro ya tiene los suyos, para sumarse al grupo en vez de inventar lugar.
-
-   El color va por CUSTOM PROPERTIES y no por reglas que se pisen. Con una regla por estado, el
-   estado claro perdía la cascada contra la base y el HUD quedaba lavado sobre el crema del final
-   (1,2:1 medido) aunque el CSS declarara lo contrario. Con variables hay UNA sola regla por
-   propiedad y el estado solo cambia el valor: no hay especificidad que pelear. */
-.prologo {
-  --hud-tinta: rgb(255 255 255 / 72%);
+  --hud-tinta: rgb(255 255 255 / 76%);
   --hud-tinta-viva: #fff;
-  --hud-fondo: rgb(0 0 0 / 30%);
+  --hud-fondo: rgb(20 10 30 / 45%);
   --hud-borde: rgb(255 255 255 / 28%);
   --hud-borde-vivo: rgb(255 255 255 / 60%);
   --hud-skip: #f0b458;
   --hud-skip-vivo: #ffd9a3;
   --hud-skip-borde: rgb(235 155 60 / 55%);
   --hud-opacidad: 1;
+  --caja-fondo: rgb(22 11 34 / 78%);
+  --caja-borde: rgb(255 236 210 / 16%);
+  --caja-tinta: #f7f0e6;
+  --sombra-dura: 0 3px 0 rgb(25 8 40 / 75%), 0 10px 28px rgb(25 8 40 / 55%);
 }
 
-/* Sobre el crema del final la escena se invierte, y el HUD con ella. El fondo del velo se aclara
-   TAMBIÉN: en viewports que no son 16:9 queda una franja de letterbox, el HUD cae encima de esa
-   franja y no del lienzo, y con el velo en negro la tinta oscura del estado claro daba 1,78:1. */
+.prologo[hidden] {
+  display: none;
+}
+
+/* Con `meet` la escena entera siempre CABE, y lo que el SVG pinta afuera de su viewBox (cielo,
+   interior, papel) llena el sobrante: en una pantalla que no es 16:9 no quedan franjas. */
+.prologo__escena {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* Angie es HTML encima del dibujo: es el componente de la colina, con sus muelles y su cara. El
+   motor le escribe ancho, `transform` y `opacity`; ella misma atiende los toques. */
+.prologo__mascot {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 18%;
+  opacity: 0;
+  visibility: hidden;
+  transform-origin: 50% 50%;
+  will-change: transform, opacity;
+  z-index: 2;
+}
+
+/* La voz que todavía no tiene cuerpo: arriba, sin caja ni nombre, en serif y dorada. El grito de
+   todos usa el mismo lugar, grande y temblando. */
+.prologo__voz {
+  position: absolute;
+  left: 50%;
+  top: 13%;
+  z-index: 3;
+  width: min(86%, 1100px);
+  margin: 0 0 0 calc(min(86%, 1100px) / -2);
+  text-align: center;
+  white-space: pre-line;
+  font:
+    600 clamp(20px, 2.6vw, 38px) / 1.3 'Fraunces',
+    'Palatino Linotype',
+    Georgia,
+    serif;
+  color: #f6c26e;
+  text-shadow:
+    0 3px 0 rgb(60 20 10 / 70%),
+    0 0 26px rgb(246 181 98 / 45%),
+    0 12px 34px rgb(25 8 40 / 60%);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.prologo__voz[data-quien='todos'] {
+  top: 40%;
+  font: 700 clamp(40px, 6vw, 84px) / 1 var(--font-display, system-ui);
+  letter-spacing: 0.04em;
+  color: #ffe2c4;
+  text-shadow: var(--sombra-dura);
+}
+
+/* La caja de diálogo, como en un juego: quién habla en su color, y la frase. Dos a la vez cuando el
+   guion las encima (la interrupción, los que gritan juntos). */
+.prologo__dialogo {
+  position: absolute;
+  left: 50%;
+  bottom: 5.5%;
+  z-index: 3;
+  width: min(92%, 1180px);
+  transform: translateX(-50%);
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  gap: 1.2rem;
+  pointer-events: none;
+}
+
+.prologo__globo {
+  margin: 0;
+  flex: 0 1 auto;
+  max-width: 640px;
+  padding: 0.8rem 1.2rem 0.95rem;
+  border-radius: 18px;
+  border: 1.5px solid var(--caja-borde);
+  background: var(--caja-fondo);
+  box-shadow: 0 14px 34px rgb(25 8 40 / 45%);
+  color: var(--caja-tinta);
+  opacity: 0;
+  transform-origin: 50% 100%;
+  --quien: #f6f1e8;
+}
+
+.prologo__globo[data-quien=''] {
+  display: none;
+}
+
+.prologo__globo[data-quien='cap'] {
+  --quien: #ffd27a;
+}
+.prologo__globo[data-quien='naveA'] {
+  --quien: #cbb8ff;
+  order: -1;
+}
+.prologo__globo[data-quien='naveB'] {
+  --quien: #ffb59a;
+  order: 2;
+}
+.prologo__globo[data-quien='nave4'] {
+  --quien: #8ff0d4;
+  order: 1;
+}
+.prologo__globo[data-quien='mascota'] {
+  --quien: #ffd78a;
+}
+
+.prologo__quien {
+  display: none;
+  margin-bottom: 0.3rem;
+  font:
+    700 clamp(11px, 1vw, 13px) / 1 'JetBrains Mono',
+    'Cascadia Mono',
+    Consolas,
+    monospace;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--quien);
+}
+
+.prologo__quien--visible {
+  display: block;
+}
+
+/* El punto de color es el retrato mínimo: el mismo tono que la luz de la antena de esa nave. */
+.prologo__quien--visible::before {
+  content: '';
+  display: inline-block;
+  width: 0.62em;
+  height: 0.62em;
+  margin-right: 0.5em;
+  border-radius: 50%;
+  background: var(--quien);
+  box-shadow: 0 0 10px var(--quien);
+  vertical-align: 0.02em;
+}
+
+.prologo__frase {
+  display: block;
+  white-space: pre-line;
+  font: 700 clamp(16px, 1.55vw, 23px) / 1.32 var(--font-display, system-ui);
+  text-shadow: 0 2px 0 rgb(25 8 40 / 55%);
+}
+
+/* Angie habla en serif, como la voz: es ella, y ahora tiene cuerpo. */
+.prologo__globo[data-quien='mascota'] .prologo__frase {
+  font:
+    600 clamp(17px, 1.65vw, 25px) / 1.3 'Fraunces',
+    'Palatino Linotype',
+    Georgia,
+    serif;
+}
+
+.prologo__titulo {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 4%;
+  z-index: 3;
+  margin: 0;
+  text-align: center;
+  font: 700 clamp(28px, 3.4vw, 50px) / 1 var(--font-display, system-ui);
+  color: #201d16;
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Los controles son un TRÁMITE: arriba, chicos, nunca compitiendo con la escena ni con la caja de
+   abajo. Saltar va solo a la derecha: es el que alguien busca con apuro. El color va por CUSTOM
+   PROPERTIES: con una regla por estado la cascada decidía, y decidía mal. */
 .prologo--claro {
   background: #f0ece0;
   --hud-tinta: #6a6355;
@@ -113,22 +227,30 @@
 
 .prologo__hud {
   position: absolute;
-  right: 1.1rem;
-  bottom: 1.1rem;
+  top: 1rem;
+  z-index: 4;
   display: flex;
-  gap: 0.5rem;
+  gap: 0.45rem;
   align-items: center;
   opacity: var(--hud-opacidad);
   transition: opacity 0.3s;
 }
 
+.prologo__hud--controles {
+  left: 1rem;
+}
+
+.prologo__hud--salida {
+  right: 1rem;
+}
+
 .prologo__hud button {
   font-family: var(--mono, ui-monospace, monospace);
-  font-size: 0.78rem;
-  letter-spacing: 0.08em;
-  /* 44 px de alto: es el mínimo cómodo para apuntarle, y el skip es el único control que alguien
-     busca con apuro. */
-  padding: 0.72rem 1rem;
+  font-size: 0.74rem;
+  letter-spacing: 0.06em;
+  /* 44 px de alto: el mínimo cómodo para apuntarle. */
+  min-height: 44px;
+  padding: 0.6rem 0.9rem;
   border-radius: 999px;
   border: 1px solid var(--hud-borde);
   background: var(--hud-fondo);
@@ -149,39 +271,37 @@
   outline-offset: 2px;
 }
 
-/* Deshabilitado pero LEGIBLE: a 0,45 de opacidad quedaba en 2,4:1 y no se podía leer por qué. */
-.prologo__hud button:disabled {
-  opacity: 0.82;
-  cursor: default;
-}
-
-/* Saltar pesa más que los otros dos. Sin `!important`: con él ganaba también sobre su propio
-   `:hover` y era el único control que no daba ninguna señal al pasarle el mouse por encima. */
+/* Sin `!important`: con él ganaba también sobre su propio `:hover`. */
 .prologo__hud .prologo__skip {
   border-color: var(--hud-skip-borde);
   color: var(--hud-skip);
+  font-size: 0.8rem;
 }
 
-/* Al apuntarlo NO se despinta a blanco: es el unico control con color de prioridad y perder el
-   ambar justo en el hover le borra la identidad que tiene por algo. */
+/* Al apuntarlo NO se despinta a blanco: el ámbar es su identidad. */
 .prologo__hud .prologo__skip:hover:not(:disabled) {
   color: var(--hud-skip-vivo);
 }
 
-/* Sin movimiento la cinemática no aporta y sí molesta, así que el motor la saltea entera. Esto es
-   la red por si algún día se muestra igual: nada de lo de acá parpadea. */
-@media (prefers-reduced-motion: reduce) {
-  .prologo {
-    transition: none;
-  }
+/* Sobre el papel del final la caja se invierte con el resto. */
+.prologo--claro .prologo__globo {
+  --caja-fondo: rgb(255 252 244 / 88%);
+  --caja-borde: rgb(32 29 22 / 18%);
+  --caja-tinta: #2b1b33;
+}
+.prologo--claro .prologo__globo[data-quien='mascota'] {
+  --quien: #b8791f;
+}
 
+/* Sin movimiento la cinemática no aporta y sí molesta, así que el motor la saltea entera. Esto es la
+   red por si algún día se muestra igual. */
+@media (prefers-reduced-motion: reduce) {
   .prologo__mascot {
     will-change: auto;
   }
 }
 
-/* En pantalla completa el velo ES la pantalla: sin esto el `:fullscreen` del navegador le pone
-   fondo negro propio y el escenario queda flotando sobre un negro distinto al de la escena. */
+/* En pantalla completa el velo ES la pantalla. */
 .prologo:fullscreen {
   background: #07080c;
 }

@@ -41,7 +41,6 @@ import {
   type SubHandle,
 } from './molecule-engine';
 import { initIntroTusi, type IntroTusiHandle } from './intro-tusi';
-import { initPrologoAnomalia } from './prologo-anomalia';
 import { buildWhereQuery, parseWhereQuery } from './url-sync';
 import {
   almacenDelNavegador,
@@ -68,6 +67,13 @@ const ESPERA_CINEMATICA_MS = 650;
 
 /** El final entra después de que el enlace del capítulo 11 terminó de trazarse. */
 const ESPERA_FINAL_MS = 1600;
+
+/**
+ * `?prologo=<id de línea>` (solo en dev) se lee al cargar el módulo: para cuando el prólogo
+ * arranca, la sincronía con la URL ya reescribió la barra y el parámetro no está más.
+ */
+const PROLOGO_PEDIDO =
+  typeof location === 'undefined' ? null : new URLSearchParams(location.search).get('prologo');
 
 /**
  * Vista integrada: el recorrido de los 12 conceptos como una MOLÉCULA reactiva.
@@ -119,6 +125,8 @@ export class IntegradaVistaComponent {
 
   /** Angie en la colina se mueve sola hasta que la despedida la desarma: ahí manda la salida. */
   protected readonly angieEsperando = signal(true);
+  /** Angie del prólogo: tiene vida propia solo mientras está en escena y la escena corre. */
+  protected readonly angiePrologo = signal(false);
 
   /** El paisaje de la pantalla de inicio. Con semilla: la misma mañana en cada visita. */
   protected readonly paisaje = {
@@ -180,6 +188,35 @@ export class IntegradaVistaComponent {
   private cargarDatosCinematicas(): Promise<typeof import('./cinematicas/cinematicas-datos')> {
     this.datosCinematicas ??= import('./cinematicas/cinematicas-datos');
     return this.datosCinematicas;
+  }
+
+  /**
+   * El prólogo se pide recién al bajar de la colina: son 25 kB de escena que nadie ve en el
+   * primer segundo, y el aviso de auriculares más la colina dan tiempo de sobra para traerlos.
+   * Cada pedido invalida al anterior, así un pedido viejo que llega tarde no monta un segundo
+   * prólogo. Si el pedazo no llega (red caída a mitad de camino), se sigue como si se hubiera
+   * saltado: quedarse en la noche sin construcción sería peor que perderse la escena.
+   */
+  private pedidoPrologo = 0;
+  private abrirPrologo(alTerminar: () => void): void {
+    this.cerrarPrologo?.();
+    this.cerrarPrologo = null;
+    const pedido = ++this.pedidoPrologo;
+    import('./prologo-anomalia').then(
+      ({ initPrologoAnomalia }) => {
+        if (pedido !== this.pedidoPrologo) return;
+        this.cerrarPrologo = initPrologoAnomalia(this.host, {
+          alTerminar,
+          alCambiarMascota: (viva) => this.angiePrologo.set(viva),
+          desde: isDevMode() ? PROLOGO_PEDIDO : null,
+        });
+      },
+      (error: unknown) => {
+        if (pedido !== this.pedidoPrologo) return;
+        this.errorHandler.handleError(error);
+        alTerminar();
+      },
+    );
   }
 
   constructor() {
@@ -257,16 +294,18 @@ export class IntegradaVistaComponent {
       alEntrar: (startBuild) => {
         // Las luces de Angie suben a las estrellas y ahí están las naves: el prólogo es la
         // continuación de esa escena, así que va siempre. Quien ya lo vio lo salta con su botón.
-        this.cerrarPrologo = initPrologoAnomalia(this.host, {
-          alTerminar: () => {
-            this.guardar(conPrologo(this.partida()));
-            startBuild();
-          },
+        this.abrirPrologo(() => {
+          this.guardar(conPrologo(this.partida()));
+          startBuild();
         });
       },
     });
     this.destroyRef.onDestroy(landing.dispose);
-    this.destroyRef.onDestroy(() => this.cerrarPrologo?.());
+    this.destroyRef.onDestroy(() => {
+      // Un pedido en vuelo que llega después de desmontar no tiene dónde montarse.
+      this.pedidoPrologo++;
+      this.cerrarPrologo?.();
+    });
   }
 
   /**
@@ -402,8 +441,7 @@ export class IntegradaVistaComponent {
     this.cerrarBitacora();
     const stage = this.host.querySelector<HTMLElement>('#stage');
     if (stage) stage.scrollTop = 0;
-    this.cerrarPrologo?.();
-    this.cerrarPrologo = initPrologoAnomalia(this.host, { alTerminar: () => undefined });
+    this.abrirPrologo(() => undefined);
   }
 
   /** Borrar la partida y recargar: el motor arma la molécula desde lo guardado, y ya no hay nada. */
