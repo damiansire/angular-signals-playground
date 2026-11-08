@@ -13,7 +13,7 @@ import {
 } from './partida';
 
 /** La forma real del recorrido: 12 conceptos con su cantidad de sub-niveles. */
-const SUBS = [6, 7, 3, 3, 2, 2, 2, 3, 4, 2, 2, 1];
+const SUBS = [1, 7, 3, 3, 2, 2, 2, 3, 4, 2, 2, 1];
 
 describe('partida', () => {
   it('ida y vuelta: lo que se escribe se lee igual', () => {
@@ -41,9 +41,29 @@ describe('partida', () => {
     expect(leerPartida(vieja, SUBS)).toEqual(PARTIDA_VACIA);
   });
 
+  it('una partida de la versión 1 se traduce: el viejo 0/5 es el 0/0, y 0/0 a 0/4 son del manual', () => {
+    const v1 = JSON.stringify({
+      v: 1,
+      establecidos: ['0/0', '0/2', '0/4', '0/5', '1/3', '11/0'],
+      cinematicas: [0, 1],
+      prologo: true,
+    });
+    expect(leerPartida(v1, SUBS)).toEqual({
+      establecidos: ['0/0', '1/3', '11/0'],
+      cinematicas: [0, 1],
+      prologo: true,
+    });
+    const sinElCero = JSON.stringify({ v: 1, establecidos: ['0/0', '0/3'], cinematicas: [] });
+    expect(leerPartida(sinElCero, SUBS).establecidos).toEqual([]);
+  });
+
+  it('lo que se escribe hoy lleva la versión 2', () => {
+    expect(JSON.parse(escribirPartida(PARTIDA_VACIA)).v).toBe(2);
+  });
+
   it('descarta ids que ya no existen en el recorrido y los que no tienen forma de id', () => {
     const crudo = JSON.stringify({
-      v: 1,
+      v: 2,
       establecidos: ['11/0', '11/1', '12/0', '2/9', 'x/y', 7, '3/1', '3/1'],
       cinematicas: [0, 12, 13, -1, 2.5, 'tres'],
       prologo: 'si',
@@ -94,7 +114,7 @@ describe('partida', () => {
       getItem: (k: string) => memoria.get(k) ?? null,
       setItem: (k: string, v: string) => void memoria.set(k, v),
     };
-    const p = conEstablecido(conPrologo(PARTIDA_VACIA), 0, 5);
+    const p = conEstablecido(conPrologo(PARTIDA_VACIA), 1, 5);
     expect(guardarPartida(almacen, p)).toBeTrue();
     expect(memoria.has(CLAVE_PARTIDA)).toBeTrue();
     expect(cargarPartida(almacen, SUBS)).toEqual(p);

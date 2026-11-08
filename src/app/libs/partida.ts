@@ -11,8 +11,26 @@
 
 export const CLAVE_PARTIDA = 'signals-cuaderno';
 
-/** Si el formato cambia de manera incompatible, se sube y las partidas viejas arrancan de cero. */
-const VERSION = 1;
+/**
+ * Si el formato cambia de manera incompatible, se sube. Una versión con migración se lee y se
+ * traduce; una sin migración arranca de cero.
+ */
+const VERSION = 2;
+
+/**
+ * Cómo se lee hoy un id guardado con una versión anterior, o `null` si eso ya no existe. En la 2
+ * (2026-11-09) los sub-niveles 0/1 a 0/5 pasaron a ser las páginas del manual de a bordo del
+ * prólogo: el viejo `0/5` es el `0/0` de hoy, y lo resuelto en las páginas no se marca en ningún
+ * lado. Sin esto, un `0/0` viejo (el árbol de HTML) aparecía como resuelto en un desafío que nunca
+ * se tocó.
+ */
+const MIGRACIONES: Readonly<Record<number, (id: string) => string | null>> = {
+  1: (id) => {
+    const par = parsearId(id);
+    if (!par || par.concepto !== 0) return id;
+    return par.sub === 5 ? idDe(0, 0) : null;
+  },
+};
 
 export interface Partida {
   /** Sub-niveles establecidos como `"concepto/sub"`, ambos desde 0 (la URL usa sub desde 1). */
@@ -41,11 +59,22 @@ export function leerPartida(crudo: string | null, subPorConcepto: readonly numbe
   } catch {
     return PARTIDA_VACIA;
   }
-  if (!esObjeto(dato) || dato['v'] !== VERSION) return PARTIDA_VACIA;
+  if (!esObjeto(dato)) return PARTIDA_VACIA;
+  const v = dato['v'];
+  // `hasOwn`: un `v` como "constructor" no puede colarse como migración.
+  const migrar =
+    v === VERSION
+      ? (id: string): string | null => id
+      : typeof v === 'number' && Object.hasOwn(MIGRACIONES, v)
+        ? MIGRACIONES[v]
+        : null;
+  if (!migrar) return PARTIDA_VACIA;
 
   const establecidos = new Set<string>();
-  for (const id of arreglo(dato['establecidos'])) {
-    if (typeof id !== 'string') continue;
+  for (const guardado of arreglo(dato['establecidos'])) {
+    if (typeof guardado !== 'string') continue;
+    const id = migrar(guardado);
+    if (id === null) continue;
     const par = parsearId(id);
     if (par && par.sub < (subPorConcepto[par.concepto] ?? 0))
       establecidos.add(idDe(par.concepto, par.sub));
