@@ -854,8 +854,8 @@ Del minijuego de operadores (2026-11-08):
       rehace deja el foco en el `body`). Al cerrar, el foco vuelve a Pausa, no al `body`.
 - [ ] Angie no da pistas en el prólogo: el manual provee `AYUDA_DE_ANGIE` en `false`, porque los
       desafíos vienen adentro de cada pantalla y no se les puede pasar `[ayuda]`.
-- [ ] "← Anterior" apagado a 0.65, no a 0.4 (2.56:1). `scroll-padding-bottom` deja lo tabulado
-      arriba del pie sticky.
+- [ ] En la primera página no hay "← Anterior": apagado igual se leía como un camino que todavía
+      no se había abierto. `scroll-padding-bottom` deja lo tabulado arriba del pie sticky.
 - [ ] Medido a 1440×900, 1280×640 y 1024×700 con input real: sin choques con el HUD, sin desborde
       horizontal, pie siempre visible, nada sin estampar, la caja de diálogo escondida, y al cerrar
       sigue "Debería ser imposible…".
@@ -870,10 +870,10 @@ Del minijuego de operadores (2026-11-08):
       se estiraba a lo ancho.
 - [ ] La hoja es una columna flex con el cuerpo estirado: en una página corta el pie flotaba a
       mitad de la hoja, con media hoja vacía debajo.
-- [ ] Cada página lee igual: título → "1 · qué hacer" → la demo → "2 · el desafío", con la escena
-      de la nave al lado (`app-pagina-del-manual`, en `signals/level-0-introduction/manual/`).
-      Antes el código quedaba chico arriba a la izquierda con un hueco al lado, "Leer el HTML"
-      flotaba sin contexto, la lámina iba suelta en otra columna, el desafío quedaba abajo de una
+- [ ] Cada página lee igual: la ley suelta sobre el cielo, y en papel "1 · qué hacer" con la demo,
+      la escena de la nave y "2 · el desafío" (`app-pagina-del-manual`, en
+      `signals/level-0-introduction/manual/`). Antes el código quedaba chico arriba a la izquierda
+      con un hueco al lado, "Leer el HTML" flotaba sin contexto, el desafío quedaba abajo de una
       raya y la mitad de abajo de la hoja, vacía. A 1100 px o más: dos columnas (leer | la nave y
       el desafío); entre 700 y 1099, la escena al lado del título y la demo y el desafío a lo ancho;
       por debajo, una sola columna.
@@ -899,10 +899,12 @@ Del minijuego de operadores (2026-11-08):
 - [ ] En cada escena, nada importante detrás de la nave: el planeta va arriba a la izquierda, el
       lápiz descansa adentro del cuadro y el rótulo "zone" cuelga de la cerca. Con movimiento
       reducido cada escena queda en el momento que explica, sin bucles.
-- [ ] A lo ancho la hoja deja 5rem a cada lado (`calc(100% - 10rem)`): más ancha tapaba a medias
-      los botones de la colina, que quedan debajo del velo del manual suelto.
-- [ ] Pasar de página se ve: una hoja de papel gira desde el lomo (para atrás, desde el otro
-      borde) y la pantalla nueva entra apenas corrida. Gira por DEBAJO de la cabeza y el pie: por
+- [ ] Suelto, el libro va sobre el cielo del prólogo casi opaco y desenfocado: sin papel propio, el
+      velo gris dejaba leer el mapa a través y "11 sin establecer" se pisaba con la cabecera.
+- [ ] Pasar de página se ve. En el libro de leyes la página nueva entra deslizándose desde el lado
+      al que se va: la hoja de papel que gira, sobre un libro sin papel, era un destello blanco a
+      pantalla entera. En la hoja del viaje, una hoja de papel gira desde el lomo (para atrás, desde
+      el otro borde) y la pantalla nueva entra apenas corrida. Gira por DEBAJO de la cabeza y el pie: por
       encima, con la perspectiva, tapaba "Siguiente" y "Cerrar" mientras giraba. Sin animación con
       movimiento reducido.
 - [ ] Suelto, medido a 1280×640, 1024×700 y 600×800 con input real: rueda, teclas, Escape y el
@@ -910,6 +912,38 @@ Del minijuego de operadores (2026-11-08):
 - [ ] Con las escenas, medido con input real en la historia a 1440×900 y 1280×640, suelto a
       1024×700 y 600×800, y suelto a 1440×900 con movimiento reducido (en la historia el prólogo
       se termina solo): sin solapes con el HUD y sin desborde horizontal en las cinco páginas.
+
+**El libro de leyes integrado a la pantalla** (el manual y Signal Space, `prologo__manual--libro`):
+
+- [ ] No es un rectángulo encima de la escena: la hoja no tiene fondo, borde ni barras; la escena
+      queda detrás, desenfocada y oscurecida hacia el medio, y la ley va suelta en Fraunces con
+      sombra tintada. Lo que se toca (la mesa, la escena, el desafío) es papel con borde de tinta.
+      La hoja del viaje sigue siendo de papel: su `concepto` está definido.
+- [ ] La mano guía señala lo próximo que hay que tocar y amaga el toque hasta que alguien lo toca
+      (cada página dice qué con `guia`, un selector). Antes "Clickeá un tag" no decía cuál y nadie
+      empezaba. Entra 1,2 s después de la ley para no robarle la mirada.
+- [ ] "▶ Mostrame" toca por quien no se anima, con la misma mano y un click real en el objetivo,
+      hasta que la página no señala nada nuevo (tope de 16 toques). Al terminar la mano se va y el
+      botón desaparece. Con movimiento reducido la mano aparece quieta en su lugar, sin amague.
+- [ ] El dedo cae en el borde derecho del objetivo, a 60 % del alto (`puntaDeLaMano`): en el centro
+      tapaba el valor de las pastillas anchas, y arriba parecía señalar el renglón de abajo.
+- [ ] Si la página re-mide mientras la mano entra, el viaje nuevo lleva escala y opacidad: sin
+      ellas cortaba la entrada y la mano quedaba invisible.
+- [ ] A 600 px o menos la vista integrada topa todo lo montado con `max-width: 100%`: la caja de la
+      mano mide lo que el guante, porque adentro de una caja de 0 el guante también medía 0.
+- [ ] "Mostrame" y los botones del pie le ganan a la pastilla oscura global de los botones de las
+      pantallas (especificidad 0,4,1): con `.pm .pm-paso .pm-mostrar` y los selectores del libro.
+- [ ] Solo la demo que crece con el alto estira la mesa (`llena`, el árbol de la ley 1). Las de
+      tamaño fijo, estiradas, dejaban media mesa de papel vacía: van centradas en el alto.
+- [ ] El lienzo de ECharts va `position: absolute` en su lugar: guarda su alto en píxeles, y con
+      él en el flujo el mínimo de la grilla crecía y la hoja desbordaba 12 px a 1366×768.
+- [ ] El árbol no recorta nodos a los costados: `zoom: 0.8` con `nodeScaleRatio: 0`. Los márgenes
+      de la serie (`left`/`right`) deformaban los nodos.
+- [ ] Los nodos con rótulo largo de la ley 5 son píldoras que crecen con el texto: "section" en
+      un círculo de radio 15 se leía "ectio".
+- [ ] Medido con input real a 1920×1080, 1366×768 (entra sin scroll), 1024×768 y 480×900 (scroll
+      con "más abajo"), suelto a 1440×900 y con movimiento reducido: la mano a la vista y
+      "Mostrame" hasta el final en las cinco páginas.
 
 **El árbol de Signal Space** (el viejo 0/6, la misma hoja con una sola página):
 
