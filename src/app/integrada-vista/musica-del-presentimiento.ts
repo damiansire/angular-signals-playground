@@ -8,7 +8,7 @@ import type { SalidaDeAudio } from '../libs/sonido';
  *
  * - Un fondo grave en re, quieto, que no cambia: la calma.
  * - Un acorde por pensamiento. "Ellos ya están aquí…" en re menor con novena: lo presiente.
- *   "La hora ha llegado…" en si bemol mayor con séptima: la decisión, más luminosa. Al volverse
+ *   "Entonces… La hora ha llegado…" en si bemol mayor con séptima: la decisión, más luminosa. Al volverse
  *   luz, la suspendida de la: queda sin resolver, porque lo que viene todavía no llegó.
  * - Una cajita de música encima: baja despacio en el primero, sube en el segundo y, cuando las
  *   piezas suben al sol, se va hacia arriba con ellas.

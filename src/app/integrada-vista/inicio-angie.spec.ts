@@ -372,7 +372,7 @@ describe('inicio-angie', () => {
       tocar();
       await hasta('ini--piensa');
       expect(escena.classList).not.toContain('ini--responde');
-      expect(dicho.textContent).toBe('Ellos ya están aquí…');
+      expect(dicho.textContent).toBe('Así que… Ellos ya están aquí…');
     });
 
     it('cerrar a mitad de la salida no deja luces colgadas', async () => {

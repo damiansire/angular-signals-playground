@@ -585,12 +585,12 @@ export function initInicioAngie(host: HTMLElement, cuerpo?: AngieDeLaColina): In
     // atardecer, es un corte. Arranca con el pensamiento: "la hora" que llegó es la de este atardecer.
     escena.classList.add('ini--atardecer', 'ini--piensa');
     sonar('presiente');
-    contar('Ellos ya están aquí…');
+    contar('Así que… Ellos ya están aquí…');
     await pensamiento(T.presentir);
     if (cerrado) return;
     escena.classList.add('ini--piensa-2');
     sonar('decide');
-    contar('La hora ha llegado…');
+    contar('Entonces… La hora ha llegado…');
     await pensamiento(T.pensar);
     if (cerrado) return;
     escena.classList.remove('ini--piensa', 'ini--piensa-2');
