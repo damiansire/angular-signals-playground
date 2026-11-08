@@ -1,7 +1,9 @@
 import { type Cinematica } from './cinematica-guion';
 
 /**
- * Los guiones de los doce capítulos y el final. Una línea declara quién habla, qué dice y qué beat
+ * Los guiones de los capítulos 1 a 11 y el final. El capítulo 0 se fue con la Introducción: su
+ * pregunta ("¿Y quién le avisó a la pantalla?") la hace ahora la tripulación en el prólogo, cuando
+ * Angie les muestra el árbol de Signal Space. Una línea declara quién habla, qué dice y qué beat
  * visual enciende; el reloj lo calcula `relojDe`. Las reglas (ocho palabras por línea, sin raya,
  * beats declarados) las verifica `cinematica-guion.spec.ts` sobre este mismo arreglo.
  *
@@ -10,48 +12,6 @@ import { type Cinematica } from './cinematica-guion';
  * pregunta del viaje; el final se abre entero o a medias según lo que quedó establecido.
  */
 export const CINEMATICAS: readonly Cinematica[] = [
-  {
-    capitulo: 0,
-    titulo: 'Cómo la pantalla sabe qué cambió',
-    ley: 'La pantalla no adivina: alguien tiene que avisarle.',
-    apertura: ['titulo', 'naves'],
-    beats: ['panel-viejo', 'arbol-entero', 'arbol-apagado', 'pregunta'],
-    lineas: [
-      { id: 'c0-circulos', quien: 'naveA', txt: 'Dos círculos. Eso era el caos.' },
-      { id: 'c0-pantalla', quien: 'cap', txt: 'Bien. Ahora, nuestra pantalla.' },
-      {
-        id: 'c0-vieja',
-        quien: 'naveB',
-        txt: 'Sigue marcando la velocidad vieja.',
-        beat: 'panel-viejo',
-      },
-      {
-        id: 'c0-zone',
-        quien: 'naveA',
-        txt: 'En casa, Zone.js revisaba\ntodo el árbol.',
-        beat: 'arbol-entero',
-      },
-      { id: 'c0-nadie', quien: 'naveB', txt: 'Acá nadie revisa nada.', beat: 'arbol-apagado' },
-      {
-        id: 'c0-pregunta',
-        quien: 'cap',
-        txt: '¿Y quién le avisó a la pantalla?',
-        beat: 'pregunta',
-      },
-      {
-        id: 'c0-avisa',
-        quien: 'mascota',
-        txt: 'Nadie revisa todo. Alguien avisa.',
-        beat: 'mascota',
-        hueco: 400,
-      },
-      {
-        id: 'c0-guarden',
-        quien: 'mascota',
-        txt: 'Guarden esa pregunta.\nLos acompaña todo el viaje.',
-      },
-    ],
-  },
   {
     capitulo: 1,
     titulo: 'El que avisa',

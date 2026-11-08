@@ -38,6 +38,7 @@ import { initMundoQueResponde } from './mundo-que-responde';
 import { LO_QUE_DICE_EL_SOL, LO_QUE_RESPONDE_ANGIE } from './intercambio-del-sol';
 import type { HuecoDelPrologo } from './operadores-del-prologo';
 import { PAGINAS_DEL_MANUAL, pasoEnElManual, type PaginaDelManual } from './manual-de-a-bordo';
+import { ARBOL_DE_SIGNAL_SPACE } from './arbol-de-signal-space';
 import { HojaDelHuecoComponent } from './hoja-del-hueco/hoja-del-hueco.component';
 import { PAGINA_DEL_MANUAL } from '../signals/level-0-introduction/manual/pagina-del-manual';
 import { vigilarEstampado } from './estampado-tardio';
@@ -47,6 +48,8 @@ import { signalsRoutesTree } from '../app.routes';
 import { type RouteItem, type SubNivelDiferido } from '../interfaces/route-item.interface';
 import {
   initMolecule,
+  CAPITULO_DE_CONCEPTO,
+  conceptoDeCapitulo,
   NOMBRES_DE_CONCEPTO,
   TITULOS_DE_CAPITULO,
   type MountSub,
@@ -85,6 +88,19 @@ const ESPERA_FINAL_MS = 1600;
 
 /** Cuánto dura el "¿seguro?" de "Empezar de cero" antes de volver a su estado normal. */
 const CONFIRMACION_DE_BORRADO_MS = 4000;
+
+/** Qué libro muestra la hoja: su nombre, cómo se cierra y desde qué número cuenta sus leyes. */
+interface Libro {
+  readonly nombre: string;
+  readonly cerrar: string;
+  readonly primeraLey: number;
+}
+const MANUAL: Libro = { nombre: 'Manual de a bordo', cerrar: 'Cerrar el manual', primeraLey: 1 };
+const SIGNAL_SPACE: Libro = {
+  nombre: 'Signal Space',
+  cerrar: 'Seguir',
+  primeraLey: PAGINAS_DEL_MANUAL.length + 1,
+};
 
 /**
  * `?prologo=<id de línea>` (solo en dev) se lee al cargar el módulo: para cuando el prólogo
@@ -211,7 +227,14 @@ export class IntegradaVistaComponent {
   /** La cinemática en pantalla, si hay una. */
   protected readonly cinematica = signal<Cinematica | null>(null);
   protected readonly cinematicaCompleta = signal(false);
-  protected readonly conceptosHechos = computed(() => [...conceptosEstablecidos(this.partida())]);
+  /**
+   * Lo establecido, por número de capítulo, para el final, que dibuja los doce átomos de antes. El 0
+   * (la Introducción) va siempre: ya no es un concepto del recorrido, lo cuenta la historia.
+   */
+  protected readonly capitulosHechos = computed(() => [
+    0,
+    ...[...conceptosEstablecidos(this.partida())].map((c) => CAPITULO_DE_CONCEPTO[c]),
+  ]);
   protected readonly origenIris = signal<{ x: number; y: number } | null>(null);
 
   protected readonly partida = signal<Partida>(PARTIDA_VACIA);
@@ -327,9 +350,15 @@ export class IntegradaVistaComponent {
   /** La página que se veía antes: dice para qué lado se da vuelta la hoja. */
   private paginaPrevia: number | null = null;
   private terminarManual: (() => void) | null = null;
+  /**
+   * La misma hoja sirve para el árbol que Angie muestra en Signal Space: es una página más del libro
+   * de leyes, la sexta, pero ya no es el manual de la nave.
+   */
+  protected readonly libro = signal<Libro>(MANUAL);
 
-  private leerManual(paginas: readonly PaginaDelManual[]): Promise<void> {
+  private leerManual(paginas: readonly PaginaDelManual[], libro: Libro = MANUAL): Promise<void> {
     return new Promise((listo) => {
+      this.libro.set(libro);
       this.paginas.set(paginas);
       this.terminarManual = () => {
         // El botón con el foco desaparece con la hoja: el foco vuelve a quien lo abrió, no al `body`.
@@ -403,7 +432,11 @@ export class IntegradaVistaComponent {
       { provide: AYUDA_DE_ANGIE, useValue: false },
       {
         provide: PAGINA_DEL_MANUAL,
-        useValue: { numero: i + 1, ley: pagina.ley, enLaNave: pagina.enLaNave },
+        useValue: {
+          numero: this.libro().primeraLey + i,
+          ley: pagina.ley,
+          enLaNave: pagina.enLaNave,
+        },
       },
     ]);
     const vigia = this.enc ? vigilarEstampado(host, this.enc) : null;
@@ -475,6 +508,7 @@ export class IntegradaVistaComponent {
           },
           operadores: (huecos, alArreglar) => this.jugarOperadores(huecos, alArreglar),
           manual: (paginas) => this.leerManual(paginas),
+          arbol: (pagina) => this.leerManual([pagina], SIGNAL_SPACE),
           alCambiarMascota: (viva) => this.angiePrologo.set(viva),
           desde: (isDevMode() ? PROLOGO_PEDIDO : null) ?? historia?.desde ?? null,
           alPasarPunto: historia?.alPasarPunto,
@@ -595,9 +629,13 @@ export class IntegradaVistaComponent {
   /**
    * Deep-link: lee `?nivel=X(&sub-nivel=Z)` de la URL para abrir el recorrido donde quedó.
    * `?nivel=X` solo (sin sub-nivel, la vista molécula) también es válido: encuadra el átomo.
+   * `X` es el número de capítulo, no la posición: un capítulo que ya no está en el recorrido (el 0,
+   * que pasó a la historia) se ignora, y manda lo guardado.
    */
   private initialFromUrl(): { concept: number; sub: number } | null {
-    return parseWhereQuery(window.location.search);
+    const link = parseWhereQuery(window.location.search);
+    const concepto = link ? conceptoDeCapitulo(link.concept) : null;
+    return link && concepto !== null ? { concept: concepto, sub: link.sub } : null;
   }
 
   /**
@@ -606,7 +644,8 @@ export class IntegradaVistaComponent {
    * así el componente no se desmonta ni se pierde el scroll. `subIdx` -1 = vista molécula.
    */
   private readonly onWhere = (conceptIdx: number, subIdx: number): void => {
-    this.location.replaceState('/', buildWhereQuery(conceptIdx, subIdx));
+    const capitulo = conceptIdx >= 0 ? (CAPITULO_DE_CONCEPTO[conceptIdx] ?? -1) : -1;
+    this.location.replaceState('/', buildWhereQuery(capitulo, subIdx));
     const llego = conceptIdx !== this.donde.concepto;
     // Llegar a otro átomo es lo único que cambia lo que dice el globo: la mascota lo anuncia.
     if (subIdx === -1 && conceptIdx >= 0 && llego) {
@@ -649,14 +688,15 @@ export class IntegradaVistaComponent {
   private programarCinematica(concepto: number, sub: number, llego: boolean): void {
     if (this.esperaCinematica) clearTimeout(this.esperaCinematica);
     this.esperaCinematica = null;
-    if (concepto < 0 || sub !== -1 || this.cinematica() || concepto > CAPITULO_FINAL) return;
-    if (!llego && this.partida().cinematicas.includes(concepto)) return;
+    const capitulo = CAPITULO_DE_CONCEPTO[concepto];
+    if (capitulo === undefined || sub !== -1 || this.cinematica()) return;
+    if (!llego && this.partida().cinematicas.includes(capitulo)) return;
     // Se adelanta la carga del guion mientras corre la espera: al abrir ya está.
     void this.cargarDatosCinematicas();
     this.esperaCinematica = setTimeout(() => {
       this.esperaCinematica = null;
       if (this.donde.concepto === concepto && this.donde.sub === -1)
-        void this.abrirCinematica(concepto);
+        void this.abrirCinematica(capitulo);
     }, ESPERA_CINEMATICA_MS);
   }
 
@@ -698,13 +738,17 @@ export class IntegradaVistaComponent {
   protected async abrirBitacora(): Promise<void> {
     const { cinematicaDe } = await this.cargarDatosCinematicas();
     this.capitulosBitacora.set(
-      NOMBRES_DE_CONCEPTO.map((nombre, numero) => ({
-        numero,
-        nombre,
-        titulo: TITULOS_DE_CAPITULO[numero],
-        ley: cinematicaDe(numero)?.ley ?? null,
-        subs: this.subComponents[numero]?.length ?? 0,
-      })),
+      NOMBRES_DE_CONCEPTO.map((nombre, concepto) => {
+        const numero = CAPITULO_DE_CONCEPTO[concepto];
+        return {
+          concepto,
+          numero,
+          nombre,
+          titulo: TITULOS_DE_CAPITULO[concepto],
+          ley: cinematicaDe(numero)?.ley ?? null,
+          subs: this.subComponents[concepto]?.length ?? 0,
+        };
+      }),
     );
     this.leyFinal.set(cinematicaDe(CAPITULO_FINAL)?.ley ?? null);
     this.escenarioInerte(true);
@@ -739,9 +783,18 @@ export class IntegradaVistaComponent {
    * sigue apagado mientras está abierto, como con la bitácora.
    */
   protected async verManualDesdeBitacora(): Promise<void> {
+    await this.leerSuelto(PAGINAS_DEL_MANUAL, MANUAL);
+  }
+
+  /** El árbol de Signal Space suelto: quien no vio el prólogo no lo vio nunca. */
+  protected async verArbolDesdeBitacora(): Promise<void> {
+    await this.leerSuelto([ARBOL_DE_SIGNAL_SPACE], SIGNAL_SPACE);
+  }
+
+  private async leerSuelto(paginas: readonly PaginaDelManual[], libro: Libro): Promise<void> {
     this.bitacoraAbierta.set(false);
     this.manualSuelto.set(true);
-    await this.leerManual(PAGINAS_DEL_MANUAL);
+    await this.leerManual(paginas, libro);
     this.manualSuelto.set(false);
   }
 

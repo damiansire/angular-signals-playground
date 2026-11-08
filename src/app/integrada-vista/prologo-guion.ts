@@ -297,6 +297,21 @@ export const GUION: readonly LineaGuion[] = [
     quien: 'mascota',
     txt: 'Eso que ustedes llaman caos no era más que armonía: partículas siguiendo las reglas.',
   },
+  // ACTO 7 · Signal Space. La pregunta del viaje nace acá, con la pantalla que vienen arrastrando
+  // desde la anomalía; Angie no la contesta con palabras: muestra el árbol (el 6 de la Introducción
+  // de antes) y la deja abierta, como hilo hasta la penúltima etapa.
+  {
+    id: 'leccion-pantalla',
+    quien: 'cap',
+    txt: 'Nuestra pantalla sigue marcando la velocidad vieja.',
+  },
+  { id: 'leccion-pregunta', quien: 'naveB', txt: '¿Y quién le avisó a la pantalla?' },
+  { id: 'leccion-arbol', quien: 'mascota', txt: 'Aquí nadie revisa todo. Miren el árbol.' },
+  {
+    id: 'leccion-guarden',
+    quien: 'mascota',
+    txt: 'Guarden esa pregunta. Los acompaña todo el viaje.',
+  },
   {
     id: 'frase-angulo',
     hueco: 800,

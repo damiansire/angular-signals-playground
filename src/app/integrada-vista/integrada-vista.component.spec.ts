@@ -275,8 +275,10 @@ describe('IntegradaVistaComponent', () => {
     it('monta el componente REAL del sub-nivel dentro de la .subhost, y renderiza algo', async () => {
       const fixture = await montar();
       const subhost = fixture.nativeElement.querySelector('.subhost') as HTMLElement;
-
       expect(subhost).toBeTruthy();
+      // El primer concepto llega diferido: se espera la carga, no se da por vacía antes.
+      await hasta(() => subhost.childElementCount > 0);
+
       expect(subhost.childElementCount)
         .withContext('la card se montó vacía: mountSub degrada sin ruido')
         .toBeGreaterThan(0);
@@ -290,6 +292,7 @@ describe('IntegradaVistaComponent', () => {
     it('al destruir se lleva el componente montado pero NO la .subhost que lo aloja', async () => {
       const fixture = await montar();
       const subhost = fixture.nativeElement.querySelector('.subhost') as HTMLElement;
+      await hasta(() => subhost.childElementCount > 0);
       const montado = subhost.firstElementChild;
 
       expect(montado).toBeTruthy();
@@ -415,8 +418,9 @@ describe('IntegradaVistaComponent', () => {
       const enlaces = [...fixture.nativeElement.querySelectorAll('#bonds .bond')] as Element[];
       const soldados = enlaces
         .map((e, j) => (e.classList.contains('on') ? j : -1))
-        .filter((j) => j >= 0 && j < 10);
-      expect(soldados).toEqual([1, 3]);
+        .filter((j) => j >= 0 && j < 9);
+      // La partida es de la versión 1, de cuando existía la Introducción: todo se corre uno.
+      expect(soldados).toEqual([0, 2]);
 
       fixture.destroy();
     });
@@ -438,7 +442,7 @@ describe('IntegradaVistaComponent', () => {
       localStorage.setItem(
         CLAVE,
         JSON.stringify({
-          v: 2,
+          v: 3,
           establecidos: [],
           cinematicas: [],
           prologo: true,
@@ -467,7 +471,8 @@ describe('IntegradaVistaComponent', () => {
       await hasta(() => localStorage.getItem(CLAVE) !== null);
 
       const guardado = JSON.parse(localStorage.getItem(CLAVE) ?? '{}');
-      expect(guardado.punto).toEqual({ lugar: 'recorrido', concepto: 4, sub: -1 });
+      // `nivel` es el número de capítulo, no la posición: el 4 es el cuarto concepto desde 0 = 3.
+      expect(guardado.punto).toEqual({ lugar: 'recorrido', concepto: 3, sub: -1 });
       fixture.destroy();
     });
 

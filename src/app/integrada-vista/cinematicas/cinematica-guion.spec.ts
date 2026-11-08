@@ -10,7 +10,7 @@ import {
   type Cinematica,
 } from './cinematica-guion';
 import { CINEMATICAS } from './cinematicas-datos';
-import { TITULOS_DE_CAPITULO } from '../molecule-engine';
+import { CAPITULO_DE_CONCEPTO, TITULOS_DE_CAPITULO } from '../molecule-engine';
 
 /** Un capítulo mínimo que cumple todo, para variar de a una regla por test. */
 function capitulo(cambios: Partial<Cinematica> = {}): Cinematica {
@@ -163,9 +163,9 @@ describe('cinematica-guion', () => {
   });
 
   describe('los guiones reales', () => {
-    it('hay una cinemática por capítulo (0 a 11) y un final, sin repetir', () => {
+    it('hay una cinemática por capítulo del recorrido y un final, sin repetir', () => {
       const capitulos = CINEMATICAS.map((c) => c.capitulo).sort((a, b) => a - b);
-      expect(capitulos).toEqual([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, CAPITULO_FINAL]);
+      expect(capitulos).toEqual([...CAPITULO_DE_CONCEPTO, CAPITULO_FINAL]);
     });
 
     it('ninguno rompe las reglas del guion', () => {
@@ -177,7 +177,7 @@ describe('cinematica-guion', () => {
       for (const c of CINEMATICAS.filter((x) => x.capitulo !== CAPITULO_FINAL)) {
         expect(c.titulo)
           .withContext(`capítulo ${c.capitulo}`)
-          .toBe(TITULOS_DE_CAPITULO[c.capitulo]);
+          .toBe(TITULOS_DE_CAPITULO[CAPITULO_DE_CONCEPTO.indexOf(c.capitulo)]);
       }
     });
 

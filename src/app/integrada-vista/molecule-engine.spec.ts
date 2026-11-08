@@ -5,6 +5,8 @@ import {
   cameraAt,
   opacidadDeVecinos,
   CONCEPT_COUNT,
+  CAPITULO_DE_CONCEPTO,
+  conceptoDeCapitulo,
   conceptPos,
   wideZoom,
   ATOM_CLOUD_R,
@@ -188,12 +190,20 @@ describe('CONCEPT_COUNT — RAW ↔ signalsRoutesTree acoplados por índice', ()
     expect(signalsRoutesTree.length).toBe(CONCEPT_COUNT);
   });
 
+  it('el capítulo de cada concepto es su path: la Introducción se fue sin renumerar nada', () => {
+    expect(CAPITULO_DE_CONCEPTO.map(String)).toEqual(signalsRoutesTree.map((c) => c.path));
+    expect(conceptoDeCapitulo(1)).toBe(0);
+    expect(conceptoDeCapitulo(11)).toBe(CONCEPT_COUNT - 1);
+    expect(conceptoDeCapitulo(0)).toBeNull();
+    expect(conceptoDeCapitulo(12)).toBeNull();
+  });
+
   it('initMolecule falla ruidoso si subCounts no coincide con RAW', () => {
     const root = document.createElement('div');
     const mountStub = () => ({ dispose: () => undefined });
     expect(() =>
       initMolecule(root, mountStub, [1, 2, 3], null, () => undefined, null),
-    ).toThrowError(/subCounts tiene 3 conceptos pero RAW tiene 12/);
+    ).toThrowError(/subCounts tiene 3 conceptos pero RAW tiene 11/);
   });
 });
 

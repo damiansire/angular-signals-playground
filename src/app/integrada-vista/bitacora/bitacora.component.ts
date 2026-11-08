@@ -16,6 +16,9 @@ import { variablesDeResorteSiSoporta } from '../../libs/resorte';
 import { acentoDe } from '../cinematicas/escenas/acentos';
 
 export interface CapituloDeBitacora {
+  /** La posición en el recorrido: es como la partida guarda lo establecido. */
+  readonly concepto: number;
+  /** El número de capítulo: el de su cinemática y el que se lee. */
   readonly numero: number;
   readonly nombre: string;
   readonly titulo: string;
@@ -57,6 +60,8 @@ export class BitacoraComponent {
   readonly verPrologo = output<void>();
   /** El manual de a bordo sin la escena: también lo lee quien salteó el prólogo. */
   readonly verManual = output<void>();
+  /** El árbol que Angie muestra en Signal Space, también sin la escena. */
+  readonly verArbol = output<void>();
   readonly borrar = output<void>();
   readonly cerrar = output<void>();
 
@@ -67,11 +72,11 @@ export class BitacoraComponent {
     const partida = this.partida();
     const hechos = this.establecidos();
     return this.capitulos().map((c) => {
-      const sellados = subsEstablecidos(partida, c.numero);
+      const sellados = subsEstablecidos(partida, c.concepto);
       return {
         ...c,
         acento: acentoDe(c.numero),
-        establecido: hechos.has(c.numero),
+        establecido: hechos.has(c.concepto),
         vista: partida.cinematicas.includes(c.numero),
         pips: Array.from({ length: c.subs }, (_, i) => sellados.has(i)),
         sellados: sellados.size,

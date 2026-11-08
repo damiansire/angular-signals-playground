@@ -4,15 +4,24 @@ import { provideZonelessChangeDetection } from '@angular/core';
 import { BitacoraComponent, type CapituloDeBitacora } from './bitacora.component';
 import { PARTIDA_VACIA, type Partida } from '../../libs/partida';
 
+/** La posición (`concepto`) y el capítulo no coinciden: el capítulo 0 pasó a la historia. */
 const CAPITULOS: CapituloDeBitacora[] = [
   {
-    numero: 0,
-    nombre: 'Introducción',
-    titulo: 'Cómo sabe',
-    ley: 'La pantalla no adivina.',
+    concepto: 0,
+    numero: 1,
+    nombre: 'Signals',
+    titulo: 'El que avisa',
+    ley: 'Un valor avisa.',
     subs: 3,
   },
-  { numero: 1, nombre: 'Signals', titulo: 'El que avisa', ley: 'Un valor avisa.', subs: 2 },
+  {
+    concepto: 1,
+    numero: 2,
+    nombre: 'Computed',
+    titulo: 'El derivado',
+    ley: 'Un derivado no se toca.',
+    subs: 2,
+  },
 ];
 
 describe('BitacoraComponent', () => {
@@ -41,7 +50,7 @@ describe('BitacoraComponent', () => {
     const leyes = [...fixture.nativeElement.querySelectorAll('.bita__ley')].map((e) =>
       (e as HTMLElement).textContent?.trim(),
     );
-    expect(leyes).toEqual(['Sin establecer', 'Un valor avisa.']);
+    expect(leyes).toEqual(['Sin establecer', 'Un derivado no se toca.']);
   });
 
   it('marca un pip por sub-nivel sellado', async () => {
@@ -55,16 +64,17 @@ describe('BitacoraComponent', () => {
   });
 
   it('solo deja volver a ver las cinemáticas que ya se vieron', async () => {
-    const fixture = await montar({ ...PARTIDA_VACIA, cinematicas: [1] });
+    const fixture = await montar({ ...PARTIDA_VACIA, cinematicas: [2] });
     const botones = [
       ...fixture.nativeElement.querySelectorAll('.bita__ver'),
     ] as HTMLButtonElement[];
     expect(botones.map((b) => b.disabled)).toEqual([true, false]);
 
+    // Pide el capítulo, no la posición: la cinemática se busca por su número.
     let pedido = -1;
     fixture.componentInstance.verCinematica.subscribe((n) => (pedido = n));
     botones[1].click();
-    expect(pedido).toBe(1);
+    expect(pedido).toBe(2);
   });
 
   it('el manual de a bordo se abre aunque no se haya visto el prólogo', async () => {
@@ -78,6 +88,20 @@ describe('BitacoraComponent', () => {
     let pidio = false;
     fixture.componentInstance.verManual.subscribe(() => (pidio = true));
     manual!.click();
+    expect(pidio).toBeTrue();
+  });
+
+  it('el árbol de Signal Space se abre aunque no se haya visto el prólogo', async () => {
+    const fixture = await montar(PARTIDA_VACIA);
+    const botones = [
+      ...fixture.nativeElement.querySelectorAll('.bita__pie .bita__accion'),
+    ] as HTMLButtonElement[];
+    const arbol = botones.find((b) => b.textContent?.includes('Signal Space'));
+    expect(arbol).withContext('botón del árbol').toBeDefined();
+
+    let pidio = false;
+    fixture.componentInstance.verArbol.subscribe(() => (pidio = true));
+    arbol!.click();
     expect(pidio).toBeTrue();
   });
 

@@ -1,6 +1,6 @@
 /**
  * Las líneas del prólogo desde donde se retoma al recargar: el comienzo de cada tramo que se lee
- * solo. Volver justo antes del minijuego y del manual los abre otra vez, porque recargar a mitad
+ * solo. Volver justo antes del minijuego, del manual o del árbol los abre otra vez, porque recargar a mitad
  * de una hoja es no haberla terminado.
  *
  * Vive aparte del guion a propósito: la vista lo necesita al arrancar, y el guion viaja con el
@@ -15,4 +15,6 @@ export const PUNTOS_DEL_PROLOGO: readonly string[] = [
   'voz-supongo',
   'orden-caos-es-orden',
   'leccion-entiendes',
+  'leccion-pantalla',
+  'leccion-guarden',
 ];

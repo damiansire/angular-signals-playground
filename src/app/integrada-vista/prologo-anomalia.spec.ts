@@ -481,6 +481,47 @@ describe('initPrologoAnomalia', () => {
     });
   });
 
+  describe('el árbol de Signal Space', () => {
+    function conArbol(desde: string) {
+      const cuadros = cuadrosFalsos();
+      const host = hostCompleto();
+      hosts.push(host);
+      let resolver: () => void = () => undefined;
+      const pedido = jasmine
+        .createSpy('arbol')
+        .and.callFake(() => new Promise<void>((ok) => (resolver = ok)));
+      cerrar.push(initPrologoAnomalia(host, { alTerminar: () => undefined, desde, arbol: pedido }));
+      const frase = (): string =>
+        [...host.querySelectorAll('.prologo__frase')].map((f) => f.textContent).join(' | ');
+      return { cuadros, pedido, frase, resolver: () => resolver() };
+    }
+
+    it('Angie lo muestra con la pregunta del viaje ya hecha, y la historia espera', async () => {
+      const m = conArbol('leccion-pregunta');
+      m.cuadros.avanzar(400);
+      expect(m.pedido).toHaveBeenCalledTimes(1);
+      expect((m.pedido.calls.mostRecent().args[0] as { id: string }).id).toBe(
+        'signals-change-detection',
+      );
+      expect(m.frase()).toContain('Miren el árbol');
+
+      m.cuadros.avanzar(1000);
+      expect(m.frase()).not.toContain('Guarden esa pregunta');
+
+      m.resolver();
+      await new Promise((ok) => setTimeout(ok));
+      m.cuadros.avanzar(120);
+      expect(m.frase()).toContain('Guarden esa pregunta');
+      expect(m.pedido).toHaveBeenCalledTimes(1);
+    });
+
+    it('quien arranca después de mostrarlo no lo vuelve a ver', () => {
+      const m = conArbol('leccion-guarden');
+      m.cuadros.avanzar(400);
+      expect(m.pedido).not.toHaveBeenCalled();
+    });
+  });
+
   it('dice quién habla, y la voz misteriosa no se nombra', async () => {
     const host = hostCompleto();
     const cerrar = initPrologoAnomalia(host, { alTerminar: () => undefined });

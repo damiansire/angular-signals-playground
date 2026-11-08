@@ -114,16 +114,12 @@ interface SubDot {
   ly: number;
 }
 
-/** Los 12 conceptos (metadata del atomo). Los sub-niveles reales se embeben en cada dive. */
+/**
+ * Los conceptos (metadata del atomo). Los sub-niveles reales se embeben en cada dive. La
+ * Introducción ya no está: sus pantallas pasaron a la historia (el manual de a bordo y el árbol de
+ * Signal Space, en el prólogo).
+ */
 const RAW: RawConcept[] = [
-  {
-    name: 'Introducción',
-    code: 'detección de cambios',
-    accent: 'ink',
-    dotted: false,
-    tagline: 'Cómo la pantalla sabe qué cambió',
-    tip: 'Primero lo primero: ¿cómo se entera Angular de qué parte de la pantalla volver a dibujar?',
-  },
   {
     name: 'Signals',
     tagline: 'El que avisa',
@@ -226,6 +222,20 @@ const RAW: RawConcept[] = [
 export const CONCEPT_COUNT = RAW.length;
 
 /**
+ * El número de capítulo de cada concepto, en el orden del recorrido. El capítulo es un nombre y no
+ * una posición: cuando la Introducción (el 0) pasó a la historia, Signals siguió siendo el 1, y con
+ * él su cinemática, su color, el número del riel y los links `?nivel=` que ya andaban por ahí. Es
+ * también el `path` de cada concepto en `signalsRoutesTree`, y un test lo ata.
+ */
+export const CAPITULO_DE_CONCEPTO: readonly number[] = RAW.map((_, i) => i + 1);
+
+/** El concepto de un capítulo, o `null` si ese capítulo no está en el recorrido. */
+export function conceptoDeCapitulo(capitulo: number): number | null {
+  const i = CAPITULO_DE_CONCEPTO.indexOf(capitulo);
+  return i < 0 ? null : i;
+}
+
+/**
  * El título de cada capítulo tal como se ve en el recorrido (su tagline). Las cinemáticas y la
  * bitácora lo leen de acá para que un capítulo se llame igual en todos lados.
  */
@@ -262,7 +272,7 @@ export function chromeVisible(s: number): number {
   return Math.max(0, Math.min(1, (s - INTRO_HASTA) / 0.04));
 }
 /** El concepto del medio (`resource`): el pico del recorrido, con su marca propia en el riel. */
-const CONCEPTO_PICO = 6;
+const CONCEPTO_PICO = 5;
 
 /**
  * Radio ocupado por un átomo: la órbita (ORX) más el electrón que la recorre. Dos átomos a menos
@@ -465,7 +475,7 @@ export function initMolecule(
     readonly alEstablecer: (conceptIdx: number, subIdx: number) => void;
   } | null = null,
 ): () => void {
-  // RAW (metadata de los 12 conceptos) y `subCounts` (derivado de signalsRoutesTree) están
+  // RAW (metadata de los conceptos) y `subCounts` (derivado de signalsRoutesTree) están
   // acoplados por índice: si no cuadran, un concepto se pintaría sin sub-niveles o se descartaría
   // en silencio. Fallamos ruidoso en el boot en vez de degradar mudo.
   if (subCounts.length !== RAW.length) {
@@ -1200,12 +1210,12 @@ export function initMolecule(
   const railSegEl = q<HTMLElement>('#railSeg');
   const railTicksOl = q<HTMLElement>('#railTicks')!;
 
-  // Los 12 conceptos, agrupados en 3 ACTOS (chunking tipo battle-pass). Un acto arranca en su
+  // Los conceptos, agrupados en 3 ACTOS (chunking tipo battle-pass). Un acto arranca en su
   // primer concepto; el motor inserta la cabecera antes de esa parada. Índices atados a RAW.
   const ACTS: { at: number; label: string }[] = [
     { at: 0, label: 'Acto I · quién avisa' },
-    { at: 4, label: 'Acto II · con qué precisión' },
-    { at: 7, label: 'Acto III · el aparato completo' },
+    { at: 3, label: 'Acto II · con qué precisión' },
+    { at: 6, label: 'Acto III · el aparato completo' },
   ];
 
   // Barra segmentada del progreso (una marca por concepto): render() enciende las de los ya hechos.
@@ -1237,9 +1247,9 @@ export function initMolecule(
     const li = document.createElement('li');
     li.className = 'rail-stop';
     li.style.setProperty('--nc', COL[C[i].accent]);
-    // Marca especial de la parada. El final ya tenía su trofeo; el 6 (`resource`) suma el suyo
+    // Marca especial de la parada. El final ya tenía su trofeo; el capítulo 6 (`resource`) suma el suyo
     // porque es el PICO del medio: es donde el sistema deja de ser sincrónico y el dato empieza a
-    // tardar. Con 12 paradas, el medio es donde la información se muere si todas se tratan igual.
+    // tardar. Con 11 paradas, el medio es donde la información se muere si todas se tratan igual.
     // Reusa la clase del trofeo a propósito: es el mismo slot, y no cuesta CSS nueva.
     const mark = i === N - 1 ? '🏆' : i === CONCEPTO_PICO ? '◆' : '';
     const trophy = mark ? `<span class="rail-trophy" aria-hidden="true">${mark}</span>` : '';
@@ -1251,15 +1261,15 @@ export function initMolecule(
     btn.className = 'rail-stop-btn';
     const rol =
       i === N - 1 ? ', el cierre' : i === CONCEPTO_PICO ? ', donde el dato empieza a tardar' : '';
-    btn.setAttribute('aria-label', `Ir al concepto ${i}: ${C[i].name}${rol}`);
+    btn.setAttribute('aria-label', `Ir al capítulo ${CAPITULO_DE_CONCEPTO[i]}: ${C[i].name}${rol}`);
     btn.innerHTML =
       `<span class="rail-mark" aria-hidden="true"><i class="rail-halo"></i><i class="rail-orb"></i><i class="rail-core"></i></span>` +
-      `<span class="rail-num">${i}</span>` +
+      `<span class="rail-num">${CAPITULO_DE_CONCEPTO[i]}</span>` +
       `<span class="rail-name">${C[i].name}</span>` +
       trophy +
       `<span class="rail-badge">estás acá</span>`;
-    // Salta al ENCUADRE del átomo del concepto (misma parada que el deep-link `?nivel=i`): desde ahí
-    // se bucea scrolleando. goToUnit ya sincroniza la URL y respeta reduced-motion.
+    // Salta al ENCUADRE del átomo del concepto (misma parada que el deep-link `?nivel=` de su
+    // capítulo): desde ahí se bucea scrolleando. goToUnit ya sincroniza la URL y respeta reduced-motion.
     btn.addEventListener('click', () => goToUnit(off[i] + PARADA_ATOMO));
     li.appendChild(btn);
     stamp(li);
@@ -1326,8 +1336,8 @@ export function initMolecule(
     // maneja la intro mientras no se entra.
     const linksApagados = s < INTRO_HASTA;
     if (tbLinksEl && tbLinksEl.inert !== linksApagados) tbLinksEl.inert = linksApagados;
-    // En la pantalla inicial (overlay de bienvenida, s≈0) el título del topbar (el tagline del concepto
-    // 0, "Cómo la pantalla sabe qué cambió") competía con el "Angular Signals" del intro. Se oculta
+    // En la pantalla inicial (overlay de bienvenida, s≈0) el título del topbar (el tagline del primer
+    // concepto) competía con el "Angular Signals" del intro. Se oculta
     // hasta que empezás a scrollear, desvaneciéndose a la par que el intro.
     if (tbCenterEl) tbCenterEl.style.opacity = chromeVisible(s).toFixed(2);
     // El riel hace ZOOM-IN al bucear: en vez de desvanecer el cuerpo entero de golpe (se leía como un

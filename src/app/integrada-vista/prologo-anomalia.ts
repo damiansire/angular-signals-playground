@@ -3,6 +3,7 @@ import { chispas, palabra } from '../libs/rastros';
 import { sonido } from '../libs/sonido';
 import { HUECOS_DEL_PROLOGO, type HuecoDelPrologo } from './operadores-del-prologo';
 import { PAGINAS_DEL_MANUAL, type PaginaDelManual } from './manual-de-a-bordo';
+import { ARBOL_DE_SIGNAL_SPACE } from './arbol-de-signal-space';
 import { PUNTOS_DEL_PROLOGO } from './puntos-del-prologo';
 import {
   GUION,
@@ -110,6 +111,11 @@ export interface PrologoOpciones {
    * prólogo corre de corrido.
    */
   readonly manual?: (paginas: readonly PaginaDelManual[]) => Promise<void>;
+  /**
+   * El árbol de Signal Space de "Miren el árbol.". Como el manual: la historia se frena con la línea
+   * ya leída y espera a que se cierre. Sin esto, el prólogo corre de corrido.
+   */
+  readonly arbol?: (pagina: PaginaDelManual) => Promise<void>;
 }
 
 const NS = 'http://www.w3.org/2000/svg';
@@ -1964,6 +1970,17 @@ export function initPrologoAnomalia(host: HTMLElement, opts: PrologoOpciones): (
   const ESPERA_MANUAL = M.manual - 150;
   let manual: 'antes' | 'leyendo' | 'despues' = opts.manual ? 'antes' : 'despues';
 
+  /** Dónde espera la historia al árbol: con "Miren el árbol." ya leída. */
+  const ESPERA_ARBOL = M.arbol - 150;
+  let arbol: 'antes' | 'mirando' | 'despues' = opts.arbol ? 'antes' : 'despues';
+
+  function pedirArbol(): void {
+    arbol = 'mirando';
+    void opts.arbol?.(ARBOL_DE_SIGNAL_SPACE).then(() => {
+      arbol = 'despues';
+    });
+  }
+
   function pedirManual(): void {
     manual = 'leyendo';
     void opts.manual?.(PAGINAS_DEL_MANUAL).then(() => {
@@ -2037,6 +2054,10 @@ export function initPrologoAnomalia(host: HTMLElement, opts: PrologoOpciones): (
       t = ESPERA_MANUAL;
       if (manual === 'antes') pedirManual();
     }
+    if (arbol !== 'despues' && t >= ESPERA_ARBOL) {
+      t = ESPERA_ARBOL;
+      if (arbol === 'antes') pedirArbol();
+    }
     tAhora = t;
     // El índice avanza afuera de la llamada: con `?.` y sin quien escuche, el argumento no se
     // evalúa, el índice no se mueve y el bucle no termina nunca.
@@ -2068,9 +2089,10 @@ export function initPrologoAnomalia(host: HTMLElement, opts: PrologoOpciones): (
     anterior0 = flota.map(() => ({ x: 0, y: 0 }));
     tAhora = desde;
     // Quien arranca más adelante no tiene que pasar por el minijuego. Un punto guardado arranca
-    // antes de su espera, así que el minijuego o el manual sin terminar se vuelven a abrir.
+    // antes de su espera, así que el minijuego, el manual o el árbol sin terminar se vuelven a abrir.
     if (desde > ESPERA_OPERADORES) operadores = 'despues';
     if (desde > ESPERA_MANUAL) manual = 'despues';
+    if (desde > ESPERA_ARBOL) arbol = 'despues';
     siguientePunto = puntos.findIndex((p) => p.t0 > desde);
     if (siguientePunto < 0) siguientePunto = puntos.length;
     despausar();
