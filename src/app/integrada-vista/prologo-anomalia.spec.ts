@@ -370,6 +370,35 @@ describe('initPrologoAnomalia', () => {
     });
   });
 
+  describe('los puntos para retomar', () => {
+    it('avisa cada punto una vez y en orden, y no los que quedaron antes del arranque', () => {
+      const cuadros = cuadrosFalsos();
+      const host = hostCompleto();
+      hosts.push(host);
+      const pasados: string[] = [];
+      cerrar.push(
+        initPrologoAnomalia(host, {
+          alTerminar: () => undefined,
+          desde: 'anom-lento',
+          alPasarPunto: (linea) => pasados.push(linea),
+        }),
+      );
+      for (let i = 0; i < 4000 && pasados.length < 2; i++) cuadros.avanzar(1);
+
+      expect(pasados).toEqual(['anom-manual', 'dentro-vivos']);
+    });
+
+    it('sin nadie que escuche, la historia avanza igual por los puntos', () => {
+      const cuadros = cuadrosFalsos();
+      const host = hostCompleto();
+      hosts.push(host);
+      cerrar.push(initPrologoAnomalia(host, { alTerminar: () => undefined, desde: 'anom-lento' }));
+      cuadros.avanzar(600);
+
+      expect(cuadros.pendientes()).toBe(1);
+    });
+  });
+
   describe('el manual de a bordo', () => {
     function conManual(desde: string) {
       const cuadros = cuadrosFalsos();

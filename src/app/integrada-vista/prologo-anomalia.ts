@@ -1,9 +1,9 @@
-import { isDevMode } from '@angular/core';
 import { avanzarMuelle, crearMuelle, limitar, type Muelle } from '../libs/muelle';
 import { chispas, palabra } from '../libs/rastros';
 import { sonido } from '../libs/sonido';
 import { HUECOS_DEL_PROLOGO, type HuecoDelPrologo } from './operadores-del-prologo';
 import { PAGINAS_DEL_MANUAL, type PaginaDelManual } from './manual-de-a-bordo';
+import { PUNTOS_DEL_PROLOGO } from './puntos-del-prologo';
 import {
   GUION,
   PRESUPUESTO,
@@ -84,11 +84,16 @@ export interface PrologoOpciones {
    */
   readonly alCambiarMascota?: (viva: boolean) => void;
   /**
-   * Solo en desarrollo: el id de la línea donde arrancar, para revisar una escena sin mirar los
-   * minutos de antes. Lo lee quien monta: este módulo carga diferido, y para entonces la sincronía
-   * con la URL ya borró el parámetro de la barra.
+   * El id de la línea donde arrancar: el punto donde quedó la partida, o en desarrollo
+   * `?prologo=<id>` para revisar una escena sin mirar los minutos de antes. Lo decide quien monta:
+   * este módulo carga diferido, y para entonces la sincronía con la URL ya borró el parámetro.
    */
   readonly desde?: string | null | undefined;
+  /**
+   * Avisa cada vez que la historia pasa por uno de `PUNTOS_DEL_PROLOGO`, para guardar desde dónde
+   * se retoma al recargar. Los puntos anteriores al arranque no se avisan.
+   */
+  readonly alPasarPunto?: ((linea: string) => void) | undefined;
   /**
    * El minijuego de "¡Activen todos los operadores!". La historia se frena en la orden y espera a
    * que se resuelva o se saltee; la escena sigue viva mientras tanto. Cada hueco que queda sano se
@@ -1942,6 +1947,13 @@ export function initPrologoAnomalia(host: HTMLElement, opts: PrologoOpciones): (
   let velocidad = 1;
   let raf = 0;
   let tAhora = 0;
+
+  /** Los puntos de retomar con su instante, y el próximo que todavía no se avisó. */
+  const puntos = PUNTOS_DEL_PROLOGO.flatMap((id) => {
+    const linea = reloj.find((l) => l.id === id);
+    return linea ? [{ id, t0: linea.t0 }] : [];
+  });
+  let siguientePunto = 0;
   let pausado = false;
 
   /** Dónde espera la historia al minijuego: con la orden ya leída y antes de la ráfaga. */
@@ -2026,6 +2038,13 @@ export function initPrologoAnomalia(host: HTMLElement, opts: PrologoOpciones): (
       if (manual === 'antes') pedirManual();
     }
     tAhora = t;
+    // El índice avanza afuera de la llamada: con `?.` y sin quien escuche, el argumento no se
+    // evalúa, el índice no se mueve y el bucle no termina nunca.
+    while (siguientePunto < puntos.length && puntos[siguientePunto].t0 <= tAhora) {
+      const punto = puntos[siguientePunto];
+      siguientePunto += 1;
+      opts.alPasarPunto?.(punto.id);
+    }
     dibujar(tAhora, (dt * velocidad) / 1000);
     if (tAhora < T.fin) raf = requestAnimationFrame((t) => frame(t, gen));
     else terminar();
@@ -2048,9 +2067,12 @@ export function initPrologoAnomalia(host: HTMLElement, opts: PrologoOpciones): (
     dichas = new Set();
     anterior0 = flota.map(() => ({ x: 0, y: 0 }));
     tAhora = desde;
-    // Quien arranca más adelante para revisar una escena no tiene que pasar por el minijuego.
+    // Quien arranca más adelante no tiene que pasar por el minijuego. Un punto guardado arranca
+    // antes de su espera, así que el minijuego o el manual sin terminar se vuelven a abrir.
     if (desde > ESPERA_OPERADORES) operadores = 'despues';
     if (desde > ESPERA_MANUAL) manual = 'despues';
+    siguientePunto = puntos.findIndex((p) => p.t0 > desde);
+    if (siguientePunto < 0) siguientePunto = puntos.length;
     despausar();
     if (sonido().activo()) sonido().desbloquear();
     anterior = null;
@@ -2234,9 +2256,7 @@ export function initPrologoAnomalia(host: HTMLElement, opts: PrologoOpciones): (
   pintarSonido();
   pintarPantalla();
   pintarVelocidad();
-  // `?prologo=<id de línea>` es el `?cuadro=` de las cinemáticas, para el prólogo.
-  const pedido = isDevMode() ? opts.desde : null;
-  const desde = pedido ? reloj.find((l) => l.id === pedido)?.t0 : undefined;
+  const desde = opts.desde ? reloj.find((l) => l.id === opts.desde)?.t0 : undefined;
   arrancar(desde === undefined ? 0 : Math.max(0, desde - 300));
 
   return () => {

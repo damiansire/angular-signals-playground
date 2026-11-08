@@ -511,6 +511,15 @@
   opacity: 1;
   translate: 0 -50%;
 }
+/* El "¿seguro?" se lee sin apuntar: con el globo escondido, el segundo toque borraba a ciegas. */
+.ini__reinicio--confirmar {
+  color: #fff8ec;
+  background: #a3361c;
+}
+.ini__reinicio--confirmar .ini__globo {
+  opacity: 1;
+  translate: 0 -50%;
+}
 
 /* ── molécula viva de preview (pura CSS, sin canvas): núcleo + halo que respira +
    electrones orbitando por offset-path. Colores vía --ec/--rc/--haloc. ── */

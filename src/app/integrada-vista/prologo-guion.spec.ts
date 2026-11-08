@@ -11,6 +11,7 @@ import {
   type LineaGuion,
 } from './prologo-guion';
 import { LO_QUE_DICE_EL_SOL, LO_QUE_RESPONDE_ANGIE } from './intercambio-del-sol';
+import { PUNTOS_DEL_PROLOGO } from './puntos-del-prologo';
 
 /** Tres líneas mínimas para probar el encadenado sin arrastrar el guion entero. */
 const CORTA: LineaGuion = { id: 'a', quien: 'cap', txt: 'Hola.' };
@@ -236,5 +237,14 @@ describe('la charla con el sol', () => {
   it('se dice una sola vez de cada lado', () => {
     expect(GUION.filter((l) => l.txt === LO_QUE_DICE_EL_SOL).length).toBe(1);
     expect(GUION.filter((l) => l.txt === LO_QUE_RESPONDE_ANGIE).length).toBe(1);
+  });
+});
+
+describe('PUNTOS_DEL_PROLOGO', () => {
+  it('cada punto es una línea del guion, en el orden en que se dicen', () => {
+    const ids = GUION.map((l) => l.id);
+    const indices = PUNTOS_DEL_PROLOGO.map((id) => ids.indexOf(id));
+    expect(indices).not.toContain(-1);
+    expect([...indices].sort((a, b) => a - b)).toEqual(indices);
   });
 });

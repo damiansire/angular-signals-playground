@@ -5,6 +5,7 @@ import { provideRouter } from '@angular/router';
 import { IntegradaVistaComponent } from './integrada-vista.component';
 import { signalsRoutesTree } from '../app.routes';
 import { cuadrosFalsos, hasta } from './testing/cuadros';
+import { CLAVE_PARTIDA } from '../libs/partida';
 
 /**
  * La vista de la ruta `/` es el producto entero, y su boot son ~3.900 líneas imperativas que
@@ -34,6 +35,10 @@ describe('IntegradaVistaComponent', () => {
       providers: [provideZonelessChangeDetection(), provideRouter([])],
     }),
   );
+  // La vista guarda dónde quedó la historia apenas el recorrido se mueve: sin esto, cada test le
+  // dejaba su lugar al siguiente, que arrancaba adentro de la molécula en vez de en la landing.
+  beforeEach(() => localStorage.removeItem(CLAVE_PARTIDA));
+  afterEach(() => localStorage.removeItem(CLAVE_PARTIDA));
 
   it('arranca sin tirar y deja el escenario en pie', async () => {
     const fixture = await montar();
@@ -426,6 +431,43 @@ describe('IntegradaVistaComponent', () => {
       const guardado = JSON.parse(localStorage.getItem(CLAVE) ?? '{}');
       expect(guardado.establecidos).toEqual(['2/0']);
 
+      fixture.destroy();
+    });
+
+    it('al recargar sin link, el recorrido abre en el átomo donde quedó la partida', async () => {
+      localStorage.setItem(
+        CLAVE,
+        JSON.stringify({
+          v: 2,
+          establecidos: [],
+          cinematicas: [],
+          prologo: true,
+          punto: { lugar: 'recorrido', concepto: 9, sub: -1 },
+        }),
+      );
+      history.replaceState(null, '', location.pathname);
+      const fixture = await montar();
+      const host: HTMLElement = fixture.nativeElement;
+      await hastaElArranque(host);
+      // El átomo enfocado es el de la partida, no el primero: abrió donde había quedado.
+      const enfocado = (): number =>
+        [...host.querySelectorAll('#atoms .atom')].findIndex((a) =>
+          a.classList.contains('current'),
+        );
+      await hasta(() => enfocado() >= 0);
+
+      expect(enfocado()).toBe(9);
+      fixture.destroy();
+    });
+
+    it('moverse por el recorrido guarda el lugar para retomar', async () => {
+      history.replaceState(null, '', `${location.pathname}?nivel=4`);
+      const fixture = await montar();
+      await hastaElArranque(fixture.nativeElement);
+      await hasta(() => localStorage.getItem(CLAVE) !== null);
+
+      const guardado = JSON.parse(localStorage.getItem(CLAVE) ?? '{}');
+      expect(guardado.punto).toEqual({ lugar: 'recorrido', concepto: 4, sub: -1 });
       fixture.destroy();
     });
 

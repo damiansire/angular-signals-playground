@@ -289,6 +289,11 @@
   color: var(--hud-skip-vivo);
 }
 
+.prologo__hud .prologo__reinicio--confirmar {
+  border-color: var(--hud-skip-borde);
+  color: var(--hud-skip-vivo);
+}
+
 /* Sobre el papel del final la caja se invierte con el resto. */
 .prologo--claro .prologo__globo {
   --caja-fondo: rgb(255 252 244 / 97%);

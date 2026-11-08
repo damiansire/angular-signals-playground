@@ -49,6 +49,14 @@
         <span class="tb-links">
           <span class="tb-q" id="tbQ"></span>
           <button class="tb-bitacora" type="button" (click)="abrirBitacora()">Bitácora</button>
+          <button
+            class="tb-bitacora"
+            type="button"
+            [style.color]="confirmandoBorrado() ? colorDeBorrar : null"
+            (click)="pedirEmpezarDeCero()"
+          >
+            {{ confirmandoBorrado() ? '¿Seguro? Se borra todo' : 'Empezar de cero' }}
+          </button>
           <a routerLink="/practica/carrito">Practicá</a>
         </span>
       </div>
@@ -584,6 +592,23 @@
                   >Animaciones activas · tocá para pausar</span
                 >
               </button>
+              <!-- Con una partida guardada, entrar sigue donde quedó: acá se puede volver al principio. -->
+              @if (partida().punto) {
+                <button
+                  class="tusi__ov-sound ini__reinicio"
+                  type="button"
+                  [class.ini__reinicio--confirmar]="confirmandoBorrado()"
+                  (click)="pedirEmpezarDeCero()"
+                >
+                  <svg class="ini__ico" viewBox="0 0 24 24" aria-hidden="true">
+                    <path class="ini__ico-on" d="M5.5 12a6.5 6.5 0 1 0 2-4.7" />
+                    <path class="ini__ico-lleno" d="M4 4.5v5h5z" />
+                  </svg>
+                  <span class="ini__globo">{{
+                    confirmandoBorrado() ? '¿Borrar todo? Tocá otra vez' : 'Empezar de cero'
+                  }}</span>
+                </button>
+              }
             </div>
 
             <!-- Antes que nada, de noche: el aviso de auriculares. Su toque abre el audio de toda la
@@ -657,6 +682,14 @@
             </button>
           </div>
           <div class="prologo__hud prologo__hud--salida">
+            <button
+              class="prologo__reinicio"
+              type="button"
+              [class.prologo__reinicio--confirmar]="confirmandoBorrado()"
+              (click)="pedirEmpezarDeCero()"
+            >
+              {{ confirmandoBorrado() ? '¿Seguro? Se borra todo' : 'Empezar de cero' }}
+            </button>
             <button class="prologo__skip" type="button">Saltar intro &rarr;</button>
           </div>
         </div>

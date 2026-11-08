@@ -60,12 +60,15 @@ import {
   conCinematica,
   conEstablecido,
   conPrologo,
+  conPunto,
   conceptosEstablecidos,
   guardarPartida,
   PARTIDA_VACIA,
   type Partida,
 } from '../libs/partida';
 import { CinematicaComponent } from './cinematicas/cinematica.component';
+import { PUNTOS_DEL_PROLOGO } from './puntos-del-prologo';
+import { entradaDeLaHistoria, inicioDelRecorrido, puntoDelRecorrido } from './retomar';
 import { AvisoAuricularesComponent } from './aviso-auriculares/aviso-auriculares.component';
 import { BitacoraComponent, type CapituloDeBitacora } from './bitacora/bitacora.component';
 import { CAPITULO_FINAL, type Cinematica } from './cinematicas/cinematica-guion';
@@ -79,6 +82,9 @@ const ESPERA_CINEMATICA_MS = 650;
 
 /** El final entra después de que el enlace del capítulo 11 terminó de trazarse. */
 const ESPERA_FINAL_MS = 1600;
+
+/** Cuánto dura el "¿seguro?" de "Empezar de cero" antes de volver a su estado normal. */
+const CONFIRMACION_DE_BORRADO_MS = 4000;
 
 /**
  * `?prologo=<id de línea>` (solo en dev) se lee al cargar el módulo: para cuando el prólogo
@@ -446,7 +452,10 @@ export class IntegradaVistaComponent {
    * saltado: quedarse en la noche sin construcción sería peor que perderse la escena.
    */
   private pedidoPrologo = 0;
-  private abrirPrologo(alTerminar: () => void): void {
+  private abrirPrologo(
+    alTerminar: () => void,
+    historia: { desde: string | null; alPasarPunto: (linea: string) => void } | null = null,
+  ): void {
     this.cerrarPrologo?.();
     this.cerrarPrologo = null;
     const pedido = ++this.pedidoPrologo;
@@ -463,7 +472,8 @@ export class IntegradaVistaComponent {
           operadores: (huecos, alArreglar) => this.jugarOperadores(huecos, alArreglar),
           manual: (paginas) => this.leerManual(paginas),
           alCambiarMascota: (viva) => this.angiePrologo.set(viva),
-          desde: isDevMode() ? PROLOGO_PEDIDO : null,
+          desde: (isDevMode() ? PROLOGO_PEDIDO : null) ?? historia?.desde ?? null,
+          alPasarPunto: historia?.alPasarPunto,
         });
       },
       (error: unknown) => {
@@ -516,7 +526,7 @@ export class IntegradaVistaComponent {
       subCounts,
       enc,
       this.onWhere,
-      this.initialFromUrl(),
+      inicioDelRecorrido(this.partida().punto, this.initialFromUrl()),
       (visible) => landing?.setVisible(visible),
       {
         establecidos: new Set(this.partida().establecidos),
@@ -550,11 +560,24 @@ export class IntegradaVistaComponent {
       // prólogo: viaja con el gatillo para que silenciar antes de entrar valga para los dos.
       alEntrar: (startBuild) => {
         // Las luces de Angie suben a las estrellas y ahí están las naves: el prólogo es la
-        // continuación de esa escena, así que va siempre. Quien ya lo vio lo salta con su botón.
-        this.abrirPrologo(() => {
-          this.guardar(conPrologo(this.partida()));
+        // continuación de esa escena. Se retoma donde quedó la partida; si ya se pasó, entrar
+        // sigue con la construcción, que es donde estaba.
+        const entrada = entradaDeLaHistoria(this.partida().punto, PUNTOS_DEL_PROLOGO);
+        if (entrada.saltarPrologo) {
           startBuild();
-        });
+          return;
+        }
+        this.abrirPrologo(
+          () => {
+            this.guardar(conPunto(conPrologo(this.partida()), { lugar: 'construccion' }));
+            startBuild();
+          },
+          {
+            desde: entrada.desde,
+            alPasarPunto: (linea) =>
+              this.guardar(conPunto(this.partida(), { lugar: 'prologo', linea })),
+          },
+        );
       },
     });
     this.destroyRef.onDestroy(landing.dispose);
@@ -587,6 +610,9 @@ export class IntegradaVistaComponent {
       this.sacudirGlobo();
     }
     this.donde = { concepto: conceptIdx, sub: subIdx };
+    this.guardar(
+      conPunto(this.partida(), puntoDelRecorrido(this.partida().punto, conceptIdx, subIdx)),
+    );
     this.programarCinematica(conceptIdx, subIdx, llego);
   };
 
@@ -715,10 +741,34 @@ export class IntegradaVistaComponent {
     this.manualSuelto.set(false);
   }
 
-  /** Borrar la partida y recargar: el motor arma la molécula desde lo guardado, y ya no hay nada. */
+  /**
+   * Borrar la partida y volver al principio. Se recarga sin la query: con `?nivel=` en la barra,
+   * el link reabría el recorrido en el mismo lugar que se acababa de borrar.
+   */
   protected empezarDeCero(): void {
     this.guardar(PARTIDA_VACIA);
-    window.location.reload();
+    window.location.assign(window.location.pathname);
+  }
+
+  /** "Empezar de cero" a la vista pide una segunda confirmación, que caduca sola. */
+  protected readonly confirmandoBorrado = signal(false);
+  /**
+   * Borrar no es un link más: en el "¿seguro?" toma el rojo de la acción que no se deshace. Va en
+   * línea porque la hoja de la vista ya está en su presupuesto.
+   */
+  protected readonly colorDeBorrar = '#a3361c';
+  private confirmacionBorrado: ReturnType<typeof setTimeout> | null = null;
+  protected pedirEmpezarDeCero(): void {
+    if (this.confirmacionBorrado) clearTimeout(this.confirmacionBorrado);
+    if (this.confirmandoBorrado()) {
+      this.empezarDeCero();
+      return;
+    }
+    this.confirmandoBorrado.set(true);
+    this.confirmacionBorrado = setTimeout(
+      () => this.confirmandoBorrado.set(false),
+      CONFIRMACION_DE_BORRADO_MS,
+    );
   }
 
   /** Lo de atrás no recibe foco, clicks ni teclas mientras corre una cinemática. */
