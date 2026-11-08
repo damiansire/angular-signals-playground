@@ -579,15 +579,28 @@ entrar desarma a Angie en luz y se hace noche, la costura con el prólogo.
       continúa sin sonido y los botones de sonido de la colina lo reflejan. Con sonido, su toque es
       el gesto que el navegador exige: suena la prueba de un oído al otro (`planDeLaPrueba`), la
       copa que suena golpea y Angie se vuelca hacia ese lado (`inclinarse`), y en el acorde salta.
-      Después la CÁMARA SE ALEJA (`ALEJARSE_MS`): la colina viene de `CERCA` (2,6×) hacia Angie en
-      la piedra, y el aviso, que compensa esa escala (arranca en `1 / CERCA`, así el primer cuadro
-      no salta), se achica a `LEJOS` con bordes redondeados y se desvanece. Probarlo con click real
-      y medir la escala cuadro a cuadro: la neta del aviso arranca en 1. Ojo: un click por `ref`
+      Después la CÁMARA SE ALEJA (`ALEJARSE_MS`) desde la BOCA de Angie en la piedra (punto fijo de
+      las dos escalas, sacado con `getScreenCTM` del dibujo): la noche era un suspiro suyo. La
+      colina viene de `CERCA` (2,6×); el aviso compensa esa escala (arranca en `1 / CERCA`, así el
+      primer cuadro no salta) y se cierra como una BOCANADA (máscara de nubes que crece con
+      `--aa-aire`) que vuelve a la boca mientras ella suspira (`suspirar`). Defecto resuelto: un
+      rectángulo con bordes redondeados que se achica se leía como una ventana, "muy cuadrado". Por
+      eso el aviso sigue del tamaño de la pantalla hasta `ENCAJA`, cuando la bocanada ya cabe
+      adentro (`aireQueCabe`): si se achica antes, asoman sus bordes rectos. El aire baja en escala
+      pareja (`caminoDelAire`): en línea recta casi todo el primer tramo pasaba tapado y la nube
+      aparecía de golpe. Probarlo con click real, pausando las animaciones (y reteniendo el timer
+      de `ALEJARSE_MS`, que si no esconde el aviso) para mirar cuadros a 0,5 / 0,75 / 1 / 1,25 s,
+      en escritorio y en 375 de ancho. Ojo: un click por `ref`
       de la herramienta hace scroll del overlay (`overflow: hidden` igual scrollea): no es un bug,
       repetir con click por coordenada. En el acorde final, ondas y notas usan otra animación: con
       el mismo nombre, las del lado que ya había sonado no volvían a salir. Va diferido (`@defer`,
       con un telón liso del mismo color de placeholder). En celular, la invitación va en línea (no
-      flex): en flex el toque quedaba solo a un costado del renglón partido.
+      flex): en flex el toque quedaba solo a un costado del renglón partido. El bloque va
+      centrado de verdad: el renglón del lado que suena comparte lugar con la invitación (grid
+      apilado) en vez de sumar un renglón vacío abajo. Colores: un velo de noche oscurece bordes y
+      alba (el rosado de abajo competía con Angie), el título es crema con un solo acento rosa en
+      "auriculares" y "volumen", y la invitación va en crema suave con la ola en amarillo; el foco
+      de teclado es una línea rosa debajo, no un fondo de pastilla que la volvía botón.
 - [ ] Después de que las luces de Angie suben a las estrellas arranca SIEMPRE el prólogo de las
       naves, aunque ya se haya visto: es la continuación de esa escena. Quien ya lo vio lo salta
       con su botón.
