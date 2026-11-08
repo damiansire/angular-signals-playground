@@ -7,6 +7,9 @@ import {
   recheckedByZone,
 } from '../../../../libs/cd-tree';
 import { ManipulableSystemComponent } from '../../../../components-atom/manipulable-system/manipulable-system.component';
+import type { Health, SystemState } from '../../../../libs/manipulable-challenge';
+import { PaginaDelManualComponent } from '../../manual/pagina-del-manual.component';
+import { EscenaSignalComponent, type Aviso } from '../../manual/escena-signal.component';
 import { SIGNAL_NOTIFY_SYSTEM } from '../../introduction-systems';
 
 /**
@@ -26,7 +29,7 @@ function pillWidth(label: string): number {
   selector: 'app-signals-change-detection',
   templateUrl: './signals-change-detection.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ManipulableSystemComponent],
+  imports: [ManipulableSystemComponent, PaginaDelManualComponent, EscenaSignalComponent],
   styleUrl: './signals-change-detection.component.css',
 })
 export class SignalsChangeDetectionComponent {
@@ -48,8 +51,27 @@ export class SignalsChangeDetectionComponent {
     return `M${from.x},${from.y} L${to.x},${to.y}`;
   });
 
+  /** El desafío quedó sano: la lámina festeja. */
+  protected readonly sano = signal(false);
+  /** El último cambio de valor, para la lámina: el de la demo o el del desafío. */
+  protected readonly aviso = signal<Aviso | null>(null);
+
   protected changeSignal(): void {
     this.changed.set(true);
+    this.avisar(true);
+  }
+
+  /**
+   * En el desafío, cada vez que se cambia el valor la lámina lo cuenta: con `signal` se enteran los
+   * dos que leen, con un `let` alguien barre el árbol entero. Girar la perilla no cambia nada.
+   */
+  protected alCorrerElDesafio({ estado, salud }: { estado: SystemState; salud: Health }): void {
+    this.sano.set(salud === 'healthy');
+    if (estado.actions > 0) this.avisar(estado.values['revisados'] === 2);
+  }
+
+  private avisar(esSignal: boolean): void {
+    this.aviso.update((antes) => ({ n: (antes?.n ?? 0) + 1, signal: esSignal }));
   }
 
   protected reset(): void {
