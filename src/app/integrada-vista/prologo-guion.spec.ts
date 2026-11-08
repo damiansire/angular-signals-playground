@@ -168,9 +168,24 @@ describe('el guion publicado', () => {
     expect(renglonesLargos(GUION)).toEqual([]);
   });
 
-  it('la baranda de columnas avisa cuando un renglón se va a partir solo', () => {
-    const ancha: LineaGuion = { id: 'ancha', quien: 'cap', txt: 'palabra '.repeat(12) };
+  it('la baranda de columnas avisa cuando un renglón sin caja se va a partir solo', () => {
+    const ancha: LineaGuion = { id: 'ancha', quien: 'voz', txt: 'palabra '.repeat(12) };
     expect(renglonesLargos([ancha]).length).toBe(1);
+  });
+
+  it('en la caja no se corta a mano: la caja corta sola por su ancho', () => {
+    const cortada: LineaGuion = { id: 'cortada', quien: 'cap', txt: 'Sea lo que sea.\nRápido.' };
+    expect(malformado([cortada])).toContain(
+      '"cortada" corta a mano adentro de la caja: la caja corta sola',
+    );
+    expect(malformado([{ ...cortada, quien: 'voz' }])).toEqual([]);
+  });
+
+  it('en la caja se mide la frase entera, y las marcas de código no cuentan', () => {
+    const larga: LineaGuion = { id: 'larga', quien: 'cap', txt: 'palabra '.repeat(20) };
+    expect(renglonesLargos([larga]).length).toBe(1);
+    const conCodigo: LineaGuion = { id: 'c', quien: 'naveB', txt: '`switchMap` no funciona.' };
+    expect(largoDe(conCodigo)).toBe('switchMap no funciona.'.length);
   });
 
   it('detecta la primera línea marcada como simultánea', () => {

@@ -16,7 +16,12 @@ export interface LineaGuion {
   /** Referencia ESTABLE. Los segundos se mueven en cada cambio; el id no. */
   readonly id: string;
   readonly quien: Hablante;
-  /** `\n` es un corte de renglón decidido a mano: dónde parte la frase es puesta en pantalla. */
+  /**
+   * En la caja de diálogo la frase corta sola, por el ancho de la caja: un `\n` a mano más el corte
+   * automático dejaba renglones de una palabra. Solo lo que va arriba sin caja (la voz, el grito)
+   * declara sus cortes con `\n`. El código va entre comillas invertidas (`switchMap`) y se ve como
+   * código.
+   */
   readonly txt: string;
   /**
    * PISO de duración, para las pocas líneas que duran por drama y no por lectura (un grito, la
@@ -58,6 +63,14 @@ const ARRANQUE = 800;
 /** Renglones declarados como máximo por línea: más que eso deja de leerse de un vistazo. */
 const MAX_RENGLONES = 3;
 
+/** Los que hablan sin caja, arriba de la escena. Son los únicos que cortan sus renglones a mano. */
+const SIN_CAJA: ReadonlySet<Hablante> = new Set(['voz', 'todos']);
+
+/** Lo que se lee de una línea: sin las comillas invertidas que marcan el código. */
+export function textoVisible(linea: LineaGuion): string {
+  return linea.txt.replace(/`/g, '');
+}
+
 export const GUION: readonly LineaGuion[] = [
   // ACTO 0 · vuelven a casa. Charla de nada, a propósito: sin esto no hay a quién perder después.
   { id: 'casa-volver', quien: 'cap', txt: 'Al fin es hora de volver a casa.' },
@@ -70,7 +83,7 @@ export const GUION: readonly LineaGuion[] = [
     id: 'casa-apuren',
     pisa: 500,
     quien: 'nave4',
-    txt: '¡Oigan! Dejen de desear y apúrense,\nvan muy lento.',
+    txt: '¡Oigan! Dejen de desear y apúrense, van muy lento.',
   },
   { id: 'linea-msxheigk', quien: 'naveA', txt: 'Siempre tan aguafiestas.' },
 
@@ -90,7 +103,7 @@ export const GUION: readonly LineaGuion[] = [
     id: 'anom-rxjs',
     dur: 6200,
     quien: 'cap',
-    txt: '¡Activen todos los operadores\nde RxJS, rápido!',
+    txt: '¡Activen todos los operadores de RxJS, rápido!',
   },
   {
     id: 'anom-pipes',
@@ -107,7 +120,7 @@ export const GUION: readonly LineaGuion[] = [
   {
     id: 'anom-leyes',
     quien: 'cap',
-    txt: 'Debería ser imposible.\nEsto contradice todas las leyes\ndel espacio Zone.js.',
+    txt: 'Debería ser imposible. Esto contradice todas las leyes del espacio Zone.js.',
   },
 
   // La exploradora quedó AFUERA y ve cómo se los llevan. Sus cuatro líneas son el último intento de
@@ -120,12 +133,12 @@ export const GUION: readonly LineaGuion[] = [
   {
     id: 'expl-vuelvan',
     quien: 'nave4',
-    txt: '¡No! Vuelvan al espacio de Zone.js,\nestán yendo a un espacio desconocido.',
+    txt: '¡No! Vuelvan al espacio de Zone.js, están yendo a un espacio desconocido.',
   },
   {
     id: 'anom-perdiendo',
     quien: 'cap',
-    txt: 'Los sistemas no responden a tiempo.\nEstamos perdiendo el control.',
+    txt: 'Los sistemas no responden a tiempo. Estamos perdiendo el control.',
   },
   {
     id: 'anom-grito',
@@ -155,36 +168,36 @@ export const GUION: readonly LineaGuion[] = [
   {
     id: 'dentro-nunca-visto',
     quien: 'naveA',
-    txt: 'No lo sé, nunca había visto\nnada como esto.',
+    txt: 'No lo sé, nunca había visto nada como esto.',
   },
   // Acá se lanzan hacia adelante y frenan de golpe sobre la línea de abajo: el intento de escapar y
   // el "apenas puedo esquivar" son el mismo gesto visto de afuera y de adentro.
   {
     id: 'dentro-escapemos',
     quien: 'cap',
-    txt: 'Sea lo que sea, debemos escapar.\nRápido.',
+    txt: 'Sea lo que sea, debemos escapar. Rápido.',
   },
   {
     id: 'dentro-esquivar',
     quien: 'naveA',
-    txt: 'Apenas puedo esquivar las partículas.\nNo me pidas escapar.',
+    txt: 'Apenas puedo esquivar las partículas. No me pidas escapar.',
   },
   // El diagnóstico va de lo concreto a lo general: primero la herramienta que no responde, después
   // la categoría entera.
   {
     id: 'dentro-switchmap',
     quien: 'naveB',
-    txt: 'switchMap no funciona,\ntampoco puedo usar los pipes.',
+    txt: '`switchMap` no funciona, tampoco puedo usar los pipes.',
   },
   {
     id: 'dentro-azar',
     quien: 'cap',
-    txt: 'Ningún operador de RxJS\nsirve a este nivel.',
+    txt: 'Ningún operador de RxJS sirve a este nivel.',
   },
   {
     id: 'dentro-rendicion',
     quien: 'cap',
-    txt: 'Aunque intentemos escapar,\ncon tantas moléculas será imposible.',
+    txt: 'Aunque intentemos escapar, con tantas moléculas será imposible.',
   },
   // Cierra con la palabra que ella va a repetir: el corte deja de ser un corte porque lo escuchó.
   { id: 'dentro-caotico', quien: 'cap', txt: LO_QUE_DICE_EL_SOL },
@@ -236,7 +249,7 @@ export const GUION: readonly LineaGuion[] = [
   {
     id: 'reclamo-armonioso',
     quien: 'cap',
-    txt: 'Es lo más caótico que vivimos en nuestras vidas,\ny tú, tan tranquilo, lo llamas armonioso.',
+    txt: 'Es lo más caótico que vivimos en nuestras vidas, y tú, tan tranquilo, lo llamas armonioso.',
   },
 
   // ACTO 5 · la tesis, en tres golpes cada vez más largos. Ya tiene cuerpo: deja de ser "la voz".
@@ -245,7 +258,7 @@ export const GUION: readonly LineaGuion[] = [
   {
     id: 'orden-malinterpretado',
     quien: 'mascota',
-    txt: 'Lo que ustedes ven como caos\nes un orden malinterpretado.',
+    txt: 'Lo que ustedes ven como caos es un orden malinterpretado.',
   },
 
   // ACTO 6 · el pacto, que es el puente al recorrido. Lo que lo hace un pacto y no un favor es que
@@ -260,38 +273,38 @@ export const GUION: readonly LineaGuion[] = [
   {
     id: 'leccion-depende',
     quien: 'mascota',
-    txt: 'Pero si saldrán de aquí o no,\ndependerá de ustedes…',
+    txt: 'Pero si saldrán de aquí o no, dependerá de ustedes…',
   },
   {
     id: 'leccion-dejar-atras',
     quien: 'mascota',
-    txt: 'Y de si tienen la capacidad de dejar atrás\nlo que conocen y creen correcto.',
+    txt: 'Y de si tienen la capacidad de dejar atrás lo que conocen y creen correcto.',
   },
   { id: 'leccion-listos', quien: 'cap', txt: 'Estamos listos para lo que sea.' },
   { id: 'leccion-que-hacer', quien: 'naveB', txt: '¿Qué debemos hacer?' },
   {
     id: 'leccion-reglas',
     quien: 'mascota',
-    txt: 'Lo más importante es entender\nque este mundo sigue reglas.',
+    txt: 'Lo más importante es entender que este mundo sigue reglas.',
   },
   // Cierra el arco de la palabra: "caos" entró como queja en `dentro-caotico` y sale acá como
   // diagnóstico equivocado.
   {
     id: 'leccion-armonia',
     quien: 'mascota',
-    txt: 'Eso que ustedes llaman caos\nno era más que armonía:\npartículas siguiendo las reglas.',
+    txt: 'Eso que ustedes llaman caos no era más que armonía: partículas siguiendo las reglas.',
   },
   {
     id: 'frase-angulo',
     hueco: 800,
     quien: 'mascota',
-    txt: 'Hasta lo que parece más complejo e inalcanzable\nse vuelve fácil y predecible\nsi lo miras desde el ángulo correcto.',
+    txt: 'Hasta lo que parece más complejo e inalcanzable se vuelve fácil y predecible si lo miras desde el ángulo correcto.',
   },
 ];
 
-/** Caracteres visibles de una línea, sin contar los cortes de renglón. */
+/** Caracteres visibles de una línea, sin contar los cortes de renglón ni las marcas de código. */
 export function largoDe(linea: LineaGuion): number {
-  return linea.txt.replace(/\n/g, ' ').length;
+  return textoVisible(linea).replace(/\n/g, ' ').length;
 }
 
 /**
@@ -377,6 +390,9 @@ export function malformado(guion: readonly LineaGuion[] = GUION): readonly strin
     if (linea.txt.split('\n').length > MAX_RENGLONES) {
       problemas.push(`"${linea.id}" declara más de ${MAX_RENGLONES} renglones`);
     }
+    if (!SIN_CAJA.has(linea.quien) && linea.txt.includes('\n')) {
+      problemas.push(`"${linea.id}" corta a mano adentro de la caja: la caja corta sola`);
+    }
     if (linea.junto && linea.pisa) {
       problemas.push(`"${linea.id}" pisa y arranca junta a la vez: son dos cosas distintas`);
     }
@@ -388,11 +404,22 @@ export function malformado(guion: readonly LineaGuion[] = GUION): readonly strin
 
 const MAX_COLUMNAS = 52;
 
+/**
+ * Sin caja, cada renglón declarado entra en el techo de columnas. En la caja corta el navegador, así
+ * que lo que se mide es la frase entera contra los renglones que caben de un vistazo.
+ */
 export function renglonesLargos(guion: readonly LineaGuion[] = GUION): readonly string[] {
-  return guion.flatMap((linea) =>
-    linea.txt
+  return guion.flatMap((linea) => {
+    const texto = textoVisible(linea);
+    if (!SIN_CAJA.has(linea.quien)) {
+      const techo = MAX_COLUMNAS * MAX_RENGLONES;
+      return texto.length > techo
+        ? [`"${linea.id}": ${texto.length} caracteres en la caja, el techo es ${techo}`]
+        : [];
+    }
+    return texto
       .split('\n')
       .filter((renglon) => renglon.length > MAX_COLUMNAS)
-      .map((renglon) => `"${linea.id}": ${renglon.length} columnas en "${renglon.slice(0, 24)}…"`),
-  );
+      .map((renglon) => `"${linea.id}": ${renglon.length} columnas en "${renglon.slice(0, 24)}…"`);
+  });
 }

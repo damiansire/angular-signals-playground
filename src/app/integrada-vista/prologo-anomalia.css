@@ -180,6 +180,8 @@
      una caja medida solo por el ancho tapaba las naves. */
   display: block;
   white-space: pre-line;
+  /* La caja corta sola: sin esto el último renglón podía quedar con una palabra. */
+  text-wrap: pretty;
   font: 700 clamp(18px, min(2.1vw, 4.2vh), 34px) / 1.28 var(--font-display, system-ui);
   text-shadow: 0 2px 0 rgb(25 8 40 / 55%);
 }
@@ -291,6 +293,10 @@
   --caja-borde: rgb(32 29 22 / 18%);
   --caja-tinta: #2b1b33;
 }
+.prologo--claro .prologo__codigo {
+  background: #efe7d6;
+  color: #1d5fa8;
+}
 .prologo--claro .prologo__globo[data-quien='mascota'] {
   --quien: #b8791f;
 }
@@ -396,6 +402,22 @@
 .prologo__op-saltar:focus-visible {
   color: #1f1a14;
   background: #efe7d6;
+}
+
+/* Código dentro de lo que se dice en la caja oscura del diálogo. */
+.prologo__codigo {
+  padding: 0.05em 0.3em;
+  border-radius: 5px;
+  background: rgb(255 255 255 / 10%);
+  font:
+    600 0.92em / 1 'JetBrains Mono',
+    'Cascadia Mono',
+    Consolas,
+    monospace;
+  color: #9fe3d0;
+  font-variant-ligatures: none;
+  /* Una expresión partida en dos renglones se lee como dos cosas. */
+  white-space: nowrap;
 }
 
 @media (prefers-reduced-motion: reduce) {

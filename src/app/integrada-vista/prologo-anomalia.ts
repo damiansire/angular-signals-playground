@@ -11,7 +11,9 @@ import {
   type Anclajes,
   type Hablante,
   type LineaEnReloj,
+  textoVisible,
 } from './prologo-guion';
+import { tramosDeFrase } from '../libs/tramos-de-frase';
 import {
   ALTO,
   ANCHO,
@@ -148,6 +150,25 @@ const NOMBRES: Record<Hablante, string> = {
   voz: '',
   mascota: 'Angie',
 };
+
+/**
+ * La frase en la caja, con el código (`switchMap`) en su propio elemento: un operador nombrado en
+ * medio de la charla tiene que leerse como código, no como una palabra más.
+ */
+function escribirFrase(destino: HTMLElement, txt: string): void {
+  // Creado a mano no lleva el atributo de encapsulación, y sin él el CSS de la vista no lo alcanza.
+  const enc = destino.getAttributeNames().find((a) => a.startsWith('_ngcontent'));
+  destino.replaceChildren(
+    ...tramosDeFrase(txt).map((tramo) => {
+      if (!tramo.codigo) return document.createTextNode(tramo.texto);
+      const codigo = document.createElement('code');
+      codigo.className = 'prologo__codigo';
+      if (enc) codigo.setAttribute(enc, '');
+      codigo.textContent = tramo.texto;
+      return codigo;
+    }),
+  );
+}
 
 /** Qué nave es cada voz, para que la que habla se note en la escena y no solo en la caja. */
 const NAVE_DE: Partial<Record<Hablante, number>> = { cap: 0, naveA: 1, naveB: 2, nave4: 3 };
@@ -1457,7 +1478,7 @@ export function initPrologoAnomalia(host: HTMLElement, opts: PrologoOpciones): (
     for (const d of activas) {
       if (dichas.has(d.id)) continue;
       dichas.add(d.id);
-      sonido().hablar(d.quien, d.txt, (d.t1 - d.t0) / velocidad);
+      sonido().hablar(d.quien, textoVisible(d), (d.t1 - d.t0) / velocidad);
       const nave = NAVE_DE[d.quien];
       if (nave !== undefined) tomaLaPalabra(nave);
       if (d.quien === 'mascota') angieHabla.v -= 3.2;
@@ -1484,7 +1505,7 @@ export function initPrologoAnomalia(host: HTMLElement, opts: PrologoOpciones): (
       if (ocupado[k] !== d.id) {
         ocupado[k] = d.id;
         g.dataset['quien'] = d.quien;
-        if (frase) frase.textContent = d.txt;
+        if (frase) escribirFrase(frase, d.txt);
         if (quien) {
           quien.textContent = NOMBRES[d.quien];
           quien.classList.toggle('prologo__quien--visible', NOMBRES[d.quien] !== '');
