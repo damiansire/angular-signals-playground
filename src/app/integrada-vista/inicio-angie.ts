@@ -291,6 +291,8 @@ const T = {
    */
   oir: 1100,
   responder: 1500,
+  /** El globo de la respuesta viajando al sol: lento como para seguirlo con la vista. */
+  enviar: 1150,
   presentir: 1200,
   pensar: 1000,
   decidir: 220,
@@ -490,6 +492,48 @@ export function initInicioAngie(host: HTMLElement, cuerpo?: AngieDeLaColina): In
     sonido().hablar(quien, texto.replace(/\n/g, ' '), ms);
   };
 
+  /**
+   * La respuesta no se apaga donde la dijo: viaja al sol, que es de donde vino la voz. Así se lee
+   * como un mensaje que se manda y no como un globo que desaparece.
+   */
+  const enviarAlSol = async (): Promise<void> => {
+    const globo = escena.querySelector<HTMLElement>('.ini__dice');
+    const sol = escena.querySelector<HTMLElement>('.ini__sol');
+    if (!globo || !sol || sinMovimiento()) return;
+    const g = globo.getBoundingClientRect();
+    const s = sol.getBoundingClientRect();
+    const o = escena.getBoundingClientRect();
+    const dx = s.left + s.width / 2 - (g.left + g.width / 2);
+    const dy = s.top + s.height / 2 - (g.top + g.height / 2);
+    // Primero toma vuelo hacia arriba, después se curva al sol y se achica hasta un punto.
+    const vuelo = animar(
+      globo,
+      [
+        { transformOrigin: '50% 50%', transform: 'translate(0, 0) scale(1)', opacity: 1 },
+        {
+          transform: `translate(${dx * 0.08}px, -2.2em) scale(0.96)`,
+          opacity: 1,
+          offset: 0.22,
+          easing: 'cubic-bezier(0.5, 0, 0.6, 1)',
+        },
+        { transform: `translate(${dx * 0.55}px, ${dy * 0.7 - 30}px) scale(0.5)`, opacity: 0.95 },
+        {
+          transformOrigin: '50% 50%',
+          transform: `translate(${dx}px, ${dy}px) scale(0.06)`,
+          opacity: 0,
+        },
+      ],
+      { duration: T.enviar, easing: 'ease-in' },
+    );
+    await vuelo;
+    if (cerrado) return;
+    // El sol lo recibe: un latido de luz donde llegó.
+    const x = s.left + s.width / 2 - o.left;
+    const y = s.top + s.height / 2 - o.top;
+    onda(escena, x, y, 'rgba(255, 210, 110, 0.75)', s.width * 1.6);
+    chispas(escena, x, y, '#ffc65c', 8);
+  };
+
   /** Lo que suena: el fondo sigue, y cada momento trae su fase y apaga la anterior. */
   let fase: Musica | null = null;
   const sonar = (cual: FaseDelPresentimiento): void => {
@@ -533,6 +577,8 @@ export function initInicioAngie(host: HTMLElement, cuerpo?: AngieDeLaColina): In
     escena.classList.replace('ini--oye', 'ini--responde');
     decir('mascota', LO_QUE_RESPONDE_ANGIE, T.responder);
     await pensamiento(T.responder);
+    if (cerrado) return;
+    await enviarAlSol();
     if (cerrado) return;
     escena.classList.remove('ini--responde');
     // La luz se vuelve dorada antes de que caiga la noche: un día que se apaga de golpe no es un
