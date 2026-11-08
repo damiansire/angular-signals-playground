@@ -300,6 +300,15 @@ export class MascotaVivaComponent {
     this.despertar();
   }
 
+  /** Un suspiro: se desinfla, abre la boca para soltar el aire y se le aflojan las cejas. */
+  suspirar(): void {
+    if (sinMovimiento() || this.cayendo || this.agarre) return;
+    this.m.aplastar.v = Math.min(this.m.aplastar.v + 2.4, 6.5);
+    this.m.boca.v += 18;
+    this.m.cejas.v -= 120;
+    this.despertar();
+  }
+
   // ─── Caminar y sentarse ──────────────────────────────────────────────────────────────────────
 
   /**
