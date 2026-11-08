@@ -764,6 +764,31 @@ Del minijuego de operadores (2026-11-08):
 - [ ] Al medir o clickear, los selectores van dentro de `.prologo__operadores`: los sub-niveles
       ocultos del recorrido también tienen `.ms__knob`, y el click caía en uno invisible.
 
+**El manual de a bordo** (0/1 a 0/5, pantallas enteras en el prólogo):
+
+- [ ] Las pantallas se ven como en la molécula: la hoja lleva `card--dissolve` y las reglas
+      globales de `src/styles.css` van con `:is(.card, .prologo__manual).card--dissolve`. Sin eso,
+      unos 45 selectores no llegaban: botones claros en vez de la pastilla oscura, y "handler
+      completo" a 2.76:1. NO sumar `.card`: trae opacidad 0, escala y alto de la molécula.
+- [ ] Un solo borde izquierdo: el corrimiento de 1.5rem es para la espina de la molécula, y en la
+      hoja se anula. El de 0/1 (`.htt-head`) es de la pantalla y se ve igual en la molécula.
+- [ ] La hoja scrollea por dentro y se mueve con todo: rueda y dedo nativos (el prólogo corta su
+      propagación ahí adentro, porque la rueda del recorrido está en un ancestro y en el borde movía
+      la molécula), y ↑/↓, AvPág, Inicio, Fin y espacio a mano. Antes, solo arrastrando la barra.
+- [ ] Sin barra de sistema y con "más abajo" en el pie, que se apaga al final. Sus keyframes son
+      propios: Angular renombra los de cada hoja de estilo, y los de las cards no llegaban.
+- [ ] Adentro del manual el espacio desplaza, no pausa: pausaba la historia, y al cerrar el manual
+      quedaba congelada hasta tocar Continuar.
+- [ ] Escape cierra el manual y ←/→ pasan de página (en `document`: un botón de la pantalla que se
+      rehace deja el foco en el `body`). Al cerrar, el foco vuelve a Pausa, no al `body`.
+- [ ] Angie no da pistas en el prólogo: el manual provee `AYUDA_DE_ANGIE` en `false`, porque los
+      desafíos vienen adentro de cada pantalla y no se les puede pasar `[ayuda]`.
+- [ ] "← Anterior" apagado a 0.65, no a 0.4 (2.56:1). `scroll-padding-bottom` deja lo tabulado
+      arriba del pie sticky.
+- [ ] Medido a 1440×900, 1280×640 y 1024×700 con input real: sin choques con el HUD, sin desborde
+      horizontal, pie siempre visible, nada sin estampar, la caja de diálogo escondida, y al cerrar
+      sigue "Debería ser imposible…".
+
 ## Cinemáticas de capítulo (que se sienta un juego, no un video)
 
 Lista escrita de lo que "que se sienta como la cinemática de un RPG" significa acá. Cada ítem es

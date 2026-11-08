@@ -76,11 +76,14 @@ fecha y adónde fue. Los ids (H1, J1…) sirven para nombrarlos en una sesión (
   historia vive en una carpeta nueva, su fila y su scope se suman en el mismo cambio.
 - **T3. Reemplazo por etapas.** `CONTRIBUTING.md` no acepta reescrituras masivas: cada cambio tiene
   que leerse como un diff. **Propuesta:** la historia nueva crece al lado del recorrido actual, una
-  etapa por vez, y cada etapa nueva retira lo que reemplaza.
+  etapa por vez, y cada etapa nueva retira lo que reemplaza. La primera fue el manual de a bordo
+  (2026-11-09): sacó 0/1 a 0/5 de la molécula.
 - **T4. La partida.** `libs/partida.ts` guarda `"concepto/sub"` (con el sub-nivel desde 0) y lo
   valida contra la cantidad de sub-niveles de cada concepto. Con etapas, esos ids cambian de
   sentido. Hay dos caminos: subir `VERSION` a 2, y las partidas viejas arrancan de cero como ya prevé
-  ADR 0002, o escribir una migración.
+  ADR 0002, o escribir una migración. Con el manual se eligió migrar: la versión 2 traduce las
+  partidas de la 1 (el viejo `0/5` es el `0/0`, y lo de `0/0` a `0/4` se descarta) y el resto de lo
+  guardado sigue. Cada etapa que retire sub-niveles suma su migración en `MIGRACIONES`.
 - **T5. Lo que fija la forma de 0 a 11.** Va a fallar al cambiarla:
   - `RAW` (`molecule-engine.ts`) y `signalsRoutesTree` (`app.routes.ts`) tienen que tener el mismo
     largo y el mismo orden;
@@ -90,10 +93,15 @@ fecha y adónde fue. Los ids (H1, J1…) sirven para nombrarlos en una sesión (
     importa los 12 archivos por ruta y espera 40;
   - sin test: `ACTS`, `CAPITULO_FINAL = 12`, el mapa `ESCENAS`, `LARGOS = {6, 12}` y el "de 12" de
     la bitácora.
+
+  Achicar un concepto no rompió nada: con el manual la Introducción pasó de 6 sub-niveles a 1 y los
+  specs siguieron verdes, porque leen la cantidad de las rutas. Lo de arriba aplica a sacar un
+  concepto entero.
 - **T6. El gate de prosa.** `scripts/prose-budget.mjs` mide solo los `*.component.html` que están
   bajo `src/app/signals/**/sub-levels/`. Si las pantallas se mudan, mide cero y pasa sin avisar.
   Además, una pantalla movida o renombrada arranca sin crédito de línea base, con 8 palabras. La
-  raíz del escaneo se mueve junto con las pantallas.
+  raíz del escaneo se mueve junto con las pantallas. El manual dejó sus cinco pantallas en su
+  carpeta de `signals/`, así que el gate las sigue midiendo.
 - **T7. El sonido.** Si Angie y la exploradora comparten algo del timbre, es una pista más. Hoy, en
   `libs/sonido.ts`, la exploradora suena en onda cuadrada a 392 Hz (la más aguda y rápida) y Angie
   en senoidal a 330 Hz, lenta. Además, `sonido.spec.ts` exige que la exploradora tenga la voz más
@@ -106,6 +114,11 @@ fecha y adónde fue. Los ids (H1, J1…) sirven para nombrarlos en una sesión (
   el componente vivo (`mascota-viva`) en todos lados.
 - **T10. La captura del README.** `public/preview.jpeg` (también es la `og:image`) y el README en
   inglés se rehacen cuando cambie la vista integrada.
+- **T11. Quien no ve el prólogo.** Sin movimiento (`prefers-reduced-motion`) o con menos de 700 px de
+  ancho, el prólogo se saltea entero, y con él el manual de a bordo: esas personas ya no ven 0/1 a
+  0/5, que antes estaban en la molécula. Cada etapa que pase a la historia agranda el hueco. Falta
+  decidir cómo se lee la historia sin la cinemática: por ejemplo, las páginas solas, sin la escena
+  detrás.
 
 ## Arreglos de docs
 

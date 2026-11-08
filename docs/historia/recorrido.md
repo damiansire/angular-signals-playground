@@ -127,6 +127,14 @@ desafíos 1 a 5 de la Introducción de hoy, con la estética de la cabina y a mo
 La página 5 desemboca en "Debería ser imposible. Esto contradice todas las leyes del espacio
 Zone.js." (`anom-leyes`).
 
+Está hecho (2026-11-09), en `src/app/integrada-vista/manual-de-a-bordo.ts`. La línea nueva es
+`anom-manual`, entre `anom-velocidad` y `anom-leyes`. La historia se frena al final de la orden, con
+la escena viva, y el manual se abre en una hoja de papel sobre el velo. Cada página monta la pantalla
+de hoy entera (la demo y su desafío), cargada diferida, con lo que le dice a la tripulación arriba.
+Se puede ir y volver, y "Cerrar el manual" en la página 5 sigue con `anom-leyes`. No pide resolver
+nada para avanzar (ADR 0002). Las cinco pantallas salieron de la molécula: la Introducción queda con
+un solo sub-nivel, "El signal avisa quién lo lee.", que pasa a la historia con La voz y Angie.
+
 ### Adentro
 
 Es el acto 2, más corto: de `dentro-vivos` a `dentro-rendicion`. Cierra con "Esto es demasiado
