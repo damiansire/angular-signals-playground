@@ -249,11 +249,13 @@ export const GUION: readonly LineaGuion[] = [
   // que nadie la llame es un efecto; apareciendo acá, es una respuesta.
   { id: 'reclamo-quien-eres', quien: 'cap', txt: '¿Quién eres?' },
   { id: 'reclamo-casi-matan', quien: 'naveA', txt: 'Esas moléculas casi nos matan.' },
+  // Una frase por caja y en un renglón: la queja larga se parte donde se toma aire.
   {
     id: 'reclamo-armonioso',
     quien: 'cap',
-    txt: 'Es lo más caótico que vivimos en nuestras vidas, y tú, tan tranquilo, lo llamas armonioso.',
+    txt: 'Es lo más caótico que vivimos en nuestras vidas…',
   },
+  { id: 'reclamo-tranquilo', quien: 'cap', txt: '…y tú, tan tranquilo, lo llamas armonioso.' },
 
   // ACTO 5 · la tesis, en tres golpes cada vez más largos. Ya tiene cuerpo: deja de ser "la voz".
   { id: 'orden-caos-es-orden', quien: 'mascota', txt: 'El caos es orden.' },
@@ -295,8 +297,9 @@ export const GUION: readonly LineaGuion[] = [
   {
     id: 'leccion-armonia',
     quien: 'mascota',
-    txt: 'Eso que ustedes llaman caos no era más que armonía: partículas siguiendo las reglas.',
+    txt: 'Eso que ustedes llaman caos no era más que armonía…',
   },
+  { id: 'leccion-particulas', quien: 'mascota', txt: '…partículas siguiendo las reglas.' },
   // ACTO 7 · Signal Space. La pregunta del viaje nace acá, con la pantalla que vienen arrastrando
   // desde la anomalía; Angie no la contesta con palabras: muestra el árbol (el 6 de la Introducción
   // de antes) y la deja abierta, como hilo hasta la penúltima etapa.
@@ -312,11 +315,18 @@ export const GUION: readonly LineaGuion[] = [
     quien: 'mascota',
     txt: 'Guarden esa pregunta. Los acompaña todo el viaje.',
   },
+  // La frase del final, partida en dos cajas sin cambiarle una palabra: `frase` arranca con la
+  // primera y `orden` se ancla al final de la segunda.
   {
-    id: 'frase-angulo',
+    id: 'frase-complejo',
     hueco: 800,
     quien: 'mascota',
-    txt: 'Hasta lo que parece más complejo e inalcanzable se vuelve fácil y predecible si lo miras desde el ángulo correcto.',
+    txt: 'Hasta lo que parece más complejo e inalcanzable…',
+  },
+  {
+    id: 'frase-angulo',
+    quien: 'mascota',
+    txt: '…se vuelve fácil y predecible si lo miras desde el ángulo correcto.',
   },
 ];
 
@@ -390,7 +400,7 @@ export function anclajesDe(reloj: readonly LineaEnReloj[]): Anclajes {
     caos: en('dentro-vivos').t0,
     fusion: en('voz-supongo').t0,
     choque: en('reclamo-quien-eres').t0 + 250,
-    frase: en('frase-angulo').t0,
+    frase: en('frase-complejo').t0,
     orden,
     fin: orden + COLA,
   };
@@ -423,16 +433,24 @@ export function malformado(guion: readonly LineaGuion[] = GUION): readonly strin
 const MAX_COLUMNAS = 52;
 
 /**
- * Sin caja, cada renglón declarado entra en el techo de columnas. En la caja corta el navegador, así
- * que lo que se mide es la frase entera contra los renglones que caben de un vistazo.
+ * Lo que entra en un renglón de la caja, que es tan ancha como la escena. Medido con la fuente real
+ * en la ventana donde la letra es más grande respecto del ancho (2000×840): 75 columnas de Fraunces
+ * ocupan el 98%. Una frase en dos renglones se lee como un párrafo, no como alguien que habla.
+ */
+const MAX_COLUMNAS_CAJA = 75;
+
+/**
+ * Sin caja, cada renglón declarado entra en el techo de columnas. En la caja, la frase entera entra
+ * en un renglón: si no, se parte en dos líneas del guion, cada una con su caja.
  */
 export function renglonesLargos(guion: readonly LineaGuion[] = GUION): readonly string[] {
   return guion.flatMap((linea) => {
     const texto = textoVisible(linea);
     if (!SIN_CAJA.has(linea.quien)) {
-      const techo = MAX_COLUMNAS * MAX_RENGLONES;
-      return texto.length > techo
-        ? [`"${linea.id}": ${texto.length} caracteres en la caja, el techo es ${techo}`]
+      return texto.length > MAX_COLUMNAS_CAJA
+        ? [
+            `"${linea.id}": ${texto.length} caracteres, en la caja entran ${MAX_COLUMNAS_CAJA} en un renglón`,
+          ]
         : [];
     }
     return texto

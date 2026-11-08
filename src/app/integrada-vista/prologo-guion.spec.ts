@@ -182,9 +182,13 @@ describe('el guion publicado', () => {
     expect(malformado([{ ...cortada, quien: 'voz' }])).toEqual([]);
   });
 
-  it('en la caja se mide la frase entera, y las marcas de código no cuentan', () => {
-    const larga: LineaGuion = { id: 'larga', quien: 'cap', txt: 'palabra '.repeat(20) };
-    expect(renglonesLargos([larga]).length).toBe(1);
+  it('en la caja cada frase entra en un renglón: una de 76 columnas ya se parte', () => {
+    const entra: LineaGuion = { id: 'entra', quien: 'mascota', txt: 'x'.repeat(75) };
+    expect(renglonesLargos([entra])).toEqual([]);
+    const larga: LineaGuion = { id: 'larga', quien: 'cap', txt: 'x'.repeat(76) };
+    expect(renglonesLargos([larga])).toEqual([
+      '"larga": 76 caracteres, en la caja entran 75 en un renglón',
+    ]);
     const conCodigo: LineaGuion = { id: 'c', quien: 'naveB', txt: '`switchMap` no funciona.' };
     expect(largoDe(conCodigo)).toBe('switchMap no funciona.'.length);
   });

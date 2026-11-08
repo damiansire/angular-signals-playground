@@ -1218,7 +1218,8 @@ export function initPrologoAnomalia(host: HTMLElement, opts: PrologoOpciones): (
     };
     if (i === 1 && en('linea-msxheigk')) return 'harta';
     if (i === 1 && en('leccion-tirados', 1400)) return 'triste';
-    if (i === 0 && (en('reclamo-loco') || en('reclamo-armonioso'))) return 'enojada';
+    if (i === 0 && (en('reclamo-loco') || en('reclamo-armonioso') || en('reclamo-tranquilo')))
+      return 'enojada';
     if (i === 0 && en('leccion-listos', 1400)) return 'decidida';
     if (i === 3 && t < T.temblor) return 'decidida';
     if (t >= T.fusion && t < T.choque + 1600) return 'sorprendida';

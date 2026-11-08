@@ -111,7 +111,10 @@
 .prologo__globo {
   margin: 0;
   flex: 0 1 auto;
-  max-width: 860px;
+  /* Del ancho de la frase, hasta el de la escena: a 860 px una frase de 50 columnas se partía en
+     dos renglones con media caja vacía al lado. Que cada línea entre en uno lo cuida el guion
+     (`renglonesLargos`). */
+  max-width: 100%;
   padding: clamp(0.8rem, 1.2vw, 1.25rem) clamp(1.2rem, 1.7vw, 1.8rem) clamp(0.95rem, 1.4vw, 1.45rem);
   border-radius: clamp(18px, 1.6vw, 26px);
   border: 1.5px solid var(--caja-borde);
