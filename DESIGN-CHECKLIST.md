@@ -741,6 +741,10 @@ Del prólogo reconstruido en SVG (2026-11-08):
 - [ ] En la caja la frase corta sola, por su ancho: un `\n` a mano más el corte automático dejaba
       renglones de una palabra ("Rápido." solo, "inalcanzable" solo). Solo la voz y el grito, sin
       caja, declaran sus cortes; `malformado()` rechaza un `\n` en la caja.
+- [ ] Cada frase de la caja entra en UN renglón: la caja ocupa el ancho de la escena (tenía tope de
+      860 px y con dos cajas lado a lado "¡Oigan! Dejen de desear…" se partía) y ninguna línea pasa
+      de 75 columnas (`renglonesLargos()`). Una frase más larga se parte en dos líneas con "…".
+      Medido a 2000×840 con la caja más larga del guion y con dos cajas a la vez.
 - [ ] La caja es casi opaca (96%; 97% sobre el papel del final): al 78% las líneas de la anomalía
       y las moléculas cruzaban la frase. Sin `backdrop-filter`, que la escena no usa.
 - [ ] Angie habla con su rosa (#ff8ac9, el de la exploradora: es ella; #c2185b sobre papel). En
