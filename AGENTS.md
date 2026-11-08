@@ -80,6 +80,9 @@ Esto es lo que funciona:
   gramática de modal en `DESIGN-CHECKLIST.md`).
 - **Syncs bidireccionales** (URL↔estado, navegación↔UI): al menos un test por
   dirección.
+- **Historia:** el canon (quién es quién y el bucle de Angie), el recorrido por
+  etapas y lo que falta cerrar están en [`docs/historia/`](./docs/historia/README.md).
+  Leelo antes de tocar guiones, cinemáticas o el orden de los conceptos.
 
 ## Mapa del repo → scope de commit
 
