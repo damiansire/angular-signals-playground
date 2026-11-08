@@ -120,19 +120,21 @@ fecha y adónde fue. Los ids (H1, J1…) sirven para nombrarlos en una sesión (
 
 ## Arreglos de docs
 
-Cosas desactualizadas hoy, que no dependen de la historia nueva:
+Textos que estaban desactualizados y no dependían de la historia nueva. Cerrados el 2026-11-08:
 
-- **A1.** "Quien vuelve no ve el prólogo" lo dicen el README, ADR 0002 y un comentario de
-  `libs/partida.ts`. Desde `c675989`, el prólogo se juega siempre después de la colina y se saltea
-  con "Saltar intro →".
-- **A2.** "37 desafíos" (`DESIGN-CHECKLIST.md`, ADR 0002): son 40 desde que se sumaron 6/3, 7/4 y
-  10/3.
-- **A3.** [ADR 0001](../adr/0001-computed-vs-linked-signal-vs-resource.md) nombra
-  `level-4-computed`, pero computed es el nivel 2.
-- **A4.** `DESIGN-CHECKLIST.md` conserva el llamado viejo "Tocá la idea para entrar" al lado del
-  actual.
-- **A5.** Hay dos comentarios viejos: el del símbolo de la nave en `cinematica.component.html`, que
-  describe el prólogo viejo en canvas, y el "Introducción = 4" de `molecule-engine.ts`.
+- **A1.** "Quien vuelve no ve el prólogo": el README ya dice que el prólogo sigue siempre a la
+  colina y se saltea con "Saltar intro →", y el comentario de `libs/partida.ts` dice para qué
+  sirve hoy el prólogo guardado: la bitácora ofrece volver a verlo. ADR 0002 queda como se
+  escribió, porque entonces era cierto; el cambio está en las consecuencias de ADR 0003.
+- **A2.** "37 desafíos": el checklist dice 40, también donde decía 35. ADR 0002 sigue diciendo 37,
+  que eran los de entonces.
+- **A3.** [ADR 0001](../adr/0001-computed-vs-linked-signal-vs-resource.md) nombraba
+  `level-4-computed`, una carpeta que no existió nunca: ahora dice `level-2-computed-signals`, con
+  una fe de erratas al pie.
+- **A4.** El ítem de la lamparita en `DESIGN-CHECKLIST.md` ya no cita el llamado viejo.
+- **A5.** Los dos comentarios quedaron al día: el del símbolo de la nave en
+  `cinematica.component.html` explica que es la flecha del prólogo viejo, y el de los electrones
+  de `molecule-engine.ts` dice que la Introducción tiene 6.
 
 ## Memoria
 

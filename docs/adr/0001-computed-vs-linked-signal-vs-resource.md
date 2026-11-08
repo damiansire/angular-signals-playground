@@ -5,9 +5,9 @@
 Las 3 primitivas reactivas derivadas de Angular Signals se solapan lo
 suficiente como para generar dudas reales al elegir: las tres devuelven un
 signal de solo lectura calculado a partir de otras señales. Este playground
-las separa en niveles distintos (`level-4-computed`, `level-5-linked-signal`,
-`level-6-resource`) precisamente porque la diferencia importa y se presta a
-confusión. Este ADR documenta el criterio de elección.
+las separa en niveles distintos (`level-2-computed-signals`,
+`level-5-linked-signal`, `level-6-resource`) precisamente porque la diferencia
+importa y se presta a confusión. Este ADR documenta el criterio de elección.
 
 ## Decisión: criterio de elección
 
@@ -58,7 +58,10 @@ hacen, porque ninguna de las dos está diseñada para trabajo async.
 
 ## Consecuencias
 
-Los niveles 4/5/6 de este playground (`level-4-computed`,
+Los niveles 2, 5 y 6 de este playground (`level-2-computed-signals`,
 `level-5-linked-signal`, `level-6-resource`) quedan como el material de
 referencia práctico de esta decisión — cada uno demuestra el caso donde la
 primitiva anterior de la lista se queda corta.
+
+> Corregido el 2026-11-08: decía `level-4-computed`, una carpeta que no existió nunca. Computed
+> siempre fue el nivel 2.

@@ -110,7 +110,7 @@ el 0, ~87% en el 8), así que verificar solo el concepto 0 no alcanza.
       DESLIZA de una parada a la siguiente en la barra derecha, sin saltar.
 - [ ] Sin overflow: CADA sub-nivel entra en la card a 860px de alto (contenido
       ≤ el `max-height` de la card) sin depender del scroll interno. Verificado
-      con `scrollHeight` de la card en los 35 sub-niveles, no a ojo. Ojo con
+      con `scrollHeight` de la card en los 40 sub-niveles, no a ojo. Ojo con
       demos de lista que crecen por timer (cap explícito) y con demos de varios
       bloques que se apilan en el grid dissolve (agruparlos en un contenedor).
 - [ ] Nada del topbar se parte por dentro (el contador nunca queda "1 /" arriba y "3" abajo) y el
@@ -391,9 +391,9 @@ puede alcanzar" son dos cosas distintas y hay que chequear las dos.
 - [ ] Agrandar la mascota del mapa corre el globo a la izquierda, contra el nombre de los átomos de
       abajo. Se mide texto contra texto en las 12 paradas, a 1440×860 y 1280×720.
 
-## Cierre del sub-nivel (el desafío manipulable, los 37)
+## Cierre del sub-nivel (el desafío manipulable, los 40)
 
-Los 37 sub-niveles terminan con el mismo gesto: un bloque de código con una
+Los 40 sub-niveles terminan con el mismo gesto: un bloque de código con una
 parte que se mueve, las lecturas del sistema y el verbo que lo acciona. Con esa
 cantidad, la uniformidad no se sostiene con buena voluntad: la forma está fijada
 en `SHAPE` (`libs/manipulable-challenge.ts`) y la verifica `malformed()` en cada
@@ -491,11 +491,11 @@ entrar desarma a Angie en luz y se hace noche, la costura con el prólogo.
 - [ ] Al desarmarse no queda nada en el piso: la sombra de contacto no es una pieza y quedaba en el
       pasto como una mancha oscura durante toda la noche. Se apaga cuando las piezas despegan.
 - [ ] Entrar es un objeto de la escena, no un botón encima: la lamparita de Angie (un `<button>`
-      transparente sobre el dibujo, con nombre "Entrar") y abajo solo el llamado "✦ Tocá la idea
-      para entrar ✦", que es su `<label>`. Una píldora oscura bajo el título se leía como un hueco
-      y una magenta seguía siendo una caja. El halo de la idea va DETRÁS del dibujo: delante, en
-      `screen` sobre el cielo claro, no se notaba. Medir el llamado en un renglón a 375 px y sin
-      tocar los pies de Angie ni los interruptores.
+      transparente sobre el dibujo, con nombre "Entrar") y abajo solo el llamado, que es su
+      `<label>` (el texto de hoy está en el ítem siguiente). Una píldora oscura bajo el título se
+      leía como un hueco y una magenta seguía siendo una caja. El halo de la idea va DETRÁS del
+      dibujo: delante, en `screen` sobre el cielo claro, no se notaba. Medir el llamado en un
+      renglón a 375 px y sin tocar los pies de Angie ni los interruptores.
 - [ ] Se entra tocando en cualquier lugar de la escena, no solo la lamparita: apuntarle a un foco
       chico era un examen de puntería. Arrastrar a Angie (más de 8 px entre bajar y soltar) no
       entra, ni tocar un control. El llamado dice "Haz click para iniciar las aventuras", sin

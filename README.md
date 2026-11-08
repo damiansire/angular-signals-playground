@@ -30,8 +30,8 @@ them the rules. Each concept is a chapter of that trip:
   evidence, turns red if the system is broken and green once you fix it. No "well done" banner:
   the numbers are the answer.
 - **Saved progress.** What you establish is stored in your browser (`localStorage`,
-  `signals-cuaderno`): reload and the molecule keeps its bonds. Returning players skip the
-  prologue.
+  `signals-cuaderno`): reload and the molecule keeps its bonds. The prologue still plays after
+  the hill every time, because it continues that scene; "Saltar intro →" skips it.
 - **The logbook** ("Bitácora", top bar): the chapters you established, the rule of the world you
   wrote in each one, and replays of the cinematics and the prologue.
 - **Sound that works on any machine.** Everything is synthesized with one Web Audio context
