@@ -566,9 +566,15 @@ entrar desarma a Angie en luz y se hace noche, la costura con el prólogo.
       Un cambio de tamaño la reacomoda en la piedra. Medir a Angie sentada y a la piedra contra
       sol, fichas, título y llamado en los seis anchos: cero solapes y nada afuera. Las piezas
       apagadas miden 0,0: filtrarlas antes de armar la caja de Angie.
+- [ ] La respuesta de Angie no se apaga donde la dijo: al tocar, el globo toma vuelo, se curva y
+      se achica hasta entrar en el sol (`enviarAlSol`), que late al recibirla. Se lee como un
+      mensaje que se manda, de vuelta a donde vino la voz. Sin movimiento, no viaja.
+- [ ] No se entra mientras la portada todavía está entrando: el click se frena en captura hasta
+      que el llamado termina su animación (`animationend` de `.ini__llamado`). Un toque a mitad de
+      la bajada cortaba la portada sin terminar de leerla. Sin movimiento, se puede de entrada.
 - [ ] Antes de desarmarse, Angie lo piensa en dos tiempos, en la misma nube y con el atardecer ya
-      empezando: "Ellos ya están aquí…" (lo presiente, `T.presentir`) y después "La hora ha
-      llegado…" (lo decide). Cada pensamiento lo pasa QUIEN MIRA con un click (o Enter/Espacio en
+      empezando: "Así que… Ellos ya están aquí…" (lo presiente, `T.presentir`) y después "Entonces… La
+      hora ha llegado…" (lo decide). Cada pensamiento lo pasa QUIEN MIRA con un click (o Enter/Espacio en
       `document`), no un reloj; `T.presentir`/`T.pensar` son solo lo mínimo que tarda en entrar la
       nube. Un triangulito que late abajo a la derecha de la nube (como en un diálogo de juego)
       aparece con el último punto y dice "tocá para seguir". Sonido y pausa no pasan el
@@ -751,6 +757,13 @@ Del minijuego de operadores (2026-11-08):
       pasaba detrás de la hoja.
 - [ ] La hoja dice qué hacer: qué es cada nombre del código (`p`, `deriva`), qué tiene que salir,
       la meta de la lectura y "Tocá el operador subrayado". Sin esto el hueco era adivinar.
+- [ ] Los nombres del código van uno por renglón (`nombres`), con el código a la izquierda, y lo
+      que tiene que salir en su propia frase, en un papel teñido con el color de la nave. En un solo
+      párrafo los nombres se perdían. La meta va en la barra del desafío (`msMeta`, proyectada), al
+      lado del número que da el código y con su misma gramática: comparar es mirar de un número al
+      otro. Debajo de la explicación quedaba lejos y se leía como una nota.
+- [ ] A 1100 px o más la hoja va en dos columnas (encargo | código); por debajo, en una. Medida a
+      1440×900, 1280×640 y 1024×700 con la ayuda abierta: cero solapes con HUD y diálogo, sin scroll.
 - [ ] En el prólogo Angie todavía no puede intervenir: el desafío va con `[ayuda]="false"` y no
       muestra su pista. La ayuda la da OTRA nave, solo con la corrida ya rota, y dice qué hizo el
       operador elegido, nunca cuál es el bueno (lo verifica `operadores-del-prologo.spec.ts`).

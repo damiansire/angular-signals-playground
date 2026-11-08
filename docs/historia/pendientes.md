@@ -52,6 +52,7 @@ fecha y adónde fue. Los ids (H1, J1…) sirven para nombrarlos en una sesión (
   - 10/1 a 10/3 son tres formas del mismo debounce, y la de RxJS puede ir al final.
 
   **Propuesta:** revisarlo al rehacer cada etapa, sin perder ninguna ley.
+
 - **J6. El carrito.** `/practica/carrito` es el único ejemplo de práctica, y no es parte de los
   desafíos ni de la partida. **Propuesta:** "la heladería de la colina", un juego para después del
   final, con la misma lógica de `cart.model.ts` y los productos del epílogo.
@@ -97,6 +98,7 @@ fecha y adónde fue. Los ids (H1, J1…) sirven para nombrarlos en una sesión (
   Achicar un concepto no rompió nada: con el manual la Introducción pasó de 6 sub-niveles a 1 y los
   specs siguieron verdes, porque leen la cantidad de las rutas. Lo de arriba aplica a sacar un
   concepto entero.
+
 - **T6. El gate de prosa.** `scripts/prose-budget.mjs` mide solo los `*.component.html` que están
   bajo `src/app/signals/**/sub-levels/`. Si las pantallas se mudan, mide cero y pasa sin avisar.
   Además, una pantalla movida o renombrada arranca sin crédito de línea base, con 8 palabras. La

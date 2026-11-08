@@ -25,9 +25,9 @@ con ella ya libre de ayudar, escapan del caos y se quedan a vivir en su mundo.
 
 Es el universo entero, y tiene dos lugares:
 
-| Lugar               | Qué es                          | Cómo funciona                                                                                                                                                                                 |
-| ------------------- | ------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Espacio Zone.js** | Casa: de donde vienen las naves | Zone.js revisa todo el árbol después de cada evento, y ahí funcionan los operadores de RxJS. RxJS son las herramientas, no el lugar                                                          |
+| Lugar               | Qué es                          | Cómo funciona                                                                                                                                                                                               |
+| ------------------- | ------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Espacio Zone.js** | Casa: de donde vienen las naves | Zone.js revisa todo el árbol después de cada evento, y ahí funcionan los operadores de RxJS. RxJS son las herramientas, no el lugar                                                                         |
 | **Signal Space**    | El mundo de Angie               | Sigue reglas: nadie revisa todo, quien lee avisa. Con ojos de Zone.js se ve como caos (moléculas, partículas que casi los matan); desde el ángulo correcto es armonía (la colina, los dos círculos de Tusi) |
 
 **Propuesta:** el sol de la colina es la anomalía vista desde Signal Space. Desde la armonía, el caos
@@ -35,13 +35,13 @@ brilla como un sol. Por eso de ahí llega la voz del capitán, y por eso ahí va
 
 ## Personajes
 
-| Quién          | En el guion              | Qué lo define                                                                                                                       |
-| -------------- | ------------------------ | ----------------------------------------------------------------------------------------------------------------------------------- |
-| Capitán        | `cap`                    | Da las órdenes y hace las preguntas que abren cada concepto ("¿Y quién le avisó a la pantalla?")                                     |
+| Quién          | En el guion              | Qué lo define                                                                                                                           |
+| -------------- | ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------- |
+| Capitán        | `cap`                    | Da las órdenes y hace las preguntas que abren cada concepto ("¿Y quién le avisó a la pantalla?")                                        |
 | Nave A         | `naveA`                  | "Extraño a mi familia." y el deseo que quedó cortado: "Y yo quiero unas…". Es la que le dice "Siempre tan aguafiestas" a la exploradora |
-| Nave B         | `naveB`                  | "Yo quiero comer helado de chocolate."                                                                                              |
-| La exploradora | `nave4`                  | La impaciente: "¡Oigan! Dejen de desear y apúrense, van muy lento." Queda afuera de la anomalía                                      |
-| Angie          | `voz`, después `mascota` | La gema que espera en la colina, y es la exploradora. Habla tranquila, enseña sin apurar y no dice quién es hasta la penúltima etapa |
+| Nave B         | `naveB`                  | "Yo quiero comer helado de chocolate."                                                                                                  |
+| La exploradora | `nave4`                  | La impaciente: "¡Oigan! Dejen de desear y apúrense, van muy lento." Queda afuera de la anomalía                                         |
+| Angie          | `voz`, después `mascota` | La gema que espera en la colina, y es la exploradora. Habla tranquila, enseña sin apurar y no dice quién es hasta la penúltima etapa    |
 
 Angie es **ella**.
 
@@ -55,17 +55,17 @@ lleva la paleta de Angie, en el prólogo y en las cinemáticas.
 Las dos columnas cuentan la misma historia, cada una desde un lado. Para la tripulación pasan minutos
 entre la anomalía y la voz; para la exploradora pasa muchísimo tiempo.
 
-| La tripulación                                                                                    | La exploradora, después Angie                                                                                                                                                         |
-| ------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Vuelven a casa con la exploradora                                                                 | Vuelve a casa con ellos y los apura                                                                                                                                                   |
-| La anomalía los arrastra a Signal Space                                                           | Queda afuera y los ve irse                                                                                                                                                            |
-| Adentro hay caos y no sirve ningún operador                                                       | Desde afuera, intenta comunicarse                                                                                                                                                     |
-| Escuchan una voz: "Supongo que sí…"                                                               | Ya es Angie y está en la colina. Escucha desde el sol "Esto es demasiado caótico", contesta, piensa "Ellos ya están aquí…" y "La hora ha llegado…", y va hacia ellos hecha luz      |
-| Angie aparece frente a ellos y les enseña las reglas                                              | Les enseña sin decir quién es: no puede intervenir                                                                                                                                    |
-| Reciben transmisiones de la exploradora desde afuera                                              | Su yo de afuera transmite. Angie sabe qué dice y cómo termina cada mensaje                                                                                                            |
-| **Penúltima etapa:** la exploradora avisa que va a entrar, y Angie dice "Porque entré."           | Su yo de afuera entra. Signal Space la deja mucho antes en su tiempo, y ahí empieza la espera en la colina. El bucle se cierra                                                         |
-| El desafío final: escapar del caos                                                                | Ya puede intervenir, y los ayuda                                                                                                                                                      |
-| Epílogo: viven en su mundo                                                                        | Ya no espera a nadie                                                                                                                                                                  |
+| La tripulación                                                                          | La exploradora, después Angie                                                                                                                                                                     |
+| --------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Vuelven a casa con la exploradora                                                       | Vuelve a casa con ellos y los apura                                                                                                                                                               |
+| La anomalía los arrastra a Signal Space                                                 | Queda afuera y los ve irse                                                                                                                                                                        |
+| Adentro hay caos y no sirve ningún operador                                             | Desde afuera, intenta comunicarse                                                                                                                                                                 |
+| Escuchan una voz: "Supongo que sí…"                                                     | Ya es Angie y está en la colina. Escucha desde el sol "Esto es demasiado caótico", contesta, piensa "Así que… Ellos ya están aquí…" y "Entonces… La hora ha llegado…", y va hacia ellos hecha luz |
+| Angie aparece frente a ellos y les enseña las reglas                                    | Les enseña sin decir quién es: no puede intervenir                                                                                                                                                |
+| Reciben transmisiones de la exploradora desde afuera                                    | Su yo de afuera transmite. Angie sabe qué dice y cómo termina cada mensaje                                                                                                                        |
+| **Penúltima etapa:** la exploradora avisa que va a entrar, y Angie dice "Porque entré." | Su yo de afuera entra. Signal Space la deja mucho antes en su tiempo, y ahí empieza la espera en la colina. El bucle se cierra                                                                    |
+| El desafío final: escapar del caos                                                      | Ya puede intervenir, y los ayuda                                                                                                                                                                  |
+| Epílogo: viven en su mundo                                                              | Ya no espera a nadie                                                                                                                                                                              |
 
 ## Las reglas del bucle
 
@@ -99,22 +99,22 @@ Permiten adivinar la revelación antes de que llegue. Ninguna lo dice; juntas lo
 
 Con el lore nuevo, varias líneas del guion actual se leen distinto la segunda vez:
 
-| Línea                                             | Dónde                               | Lo que significa ahora                                  |
-| ------------------------------------------------- | ----------------------------------- | ------------------------------------------------------- |
-| "Siempre tan aguafiestas."                        | `linea-msxheigk`, `c12-helado`      | Era un reproche; en la revelación vuelve como cariño    |
-| "No puedo intervenir con ustedes."                | `leccion-no-intervengo`             | No es una regla del mundo: es el bucle                  |
-| "…dejar atrás lo que conocen y creen correcto."   | `leccion-dejar-atras`, `c11-atras`  | Ella ya lo hizo: dejó de ser nave                       |
-| "Ella todavía no terminó de hablar."              | `c10-no-termino`                    | Lo sabe porque es ella                                  |
-| "Este mundo también es casa."                     | `c12-casa`                          | El epílogo: se quedan                                   |
+| Línea                                           | Dónde                              | Lo que significa ahora                               |
+| ----------------------------------------------- | ---------------------------------- | ---------------------------------------------------- |
+| "Siempre tan aguafiestas."                      | `linea-msxheigk`, `c12-helado`     | Era un reproche; en la revelación vuelve como cariño |
+| "No puedo intervenir con ustedes."              | `leccion-no-intervengo`            | No es una regla del mundo: es el bucle               |
+| "…dejar atrás lo que conocen y creen correcto." | `leccion-dejar-atras`, `c11-atras` | Ella ya lo hizo: dejó de ser nave                    |
+| "Ella todavía no terminó de hablar."            | `c10-no-termino`                   | Lo sabe porque es ella                               |
+| "Este mundo también es casa."                   | `c12-casa`                         | El epílogo: se quedan                                |
 
 ## Nombres
 
-| Nombre               | Qué es                                                                                      |
-| -------------------- | ------------------------------------------------------------------------------------------- |
-| SignalVerso          | El universo entero. Es el título de la colina: "Las aventuras de Angie por el SignalVerso"  |
-| Espacio Zone.js      | Casa                                                                                        |
-| Signal Space         | El mundo de Angie                                                                           |
-| El manual de a bordo | El libro de la nave: cómo funciona su pantalla en casa                                      |
-| La voz               | Angie antes de tomar cuerpo: `voz` en el guion, sin nombre ni caja                          |
-| Angie                | Su nombre en la caja de diálogo                                                             |
-| Exploradora          | Como la llama la tripulación                                                                |
+| Nombre               | Qué es                                                                                     |
+| -------------------- | ------------------------------------------------------------------------------------------ |
+| SignalVerso          | El universo entero. Es el título de la colina: "Las aventuras de Angie por el SignalVerso" |
+| Espacio Zone.js      | Casa                                                                                       |
+| Signal Space         | El mundo de Angie                                                                          |
+| El manual de a bordo | El libro de la nave: cómo funciona su pantalla en casa                                     |
+| La voz               | Angie antes de tomar cuerpo: `voz` en el guion, sin nombre ni caja                         |
+| Angie                | Su nombre en la caja de diálogo                                                            |
+| Exploradora          | Como la llama la tripulación                                                               |

@@ -27,7 +27,7 @@ sub-nivel, contando el sub-nivel desde 1.
 
 | Etapa                    | Qué pasa                                                                                                                                              | Desafíos       |
 | ------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------- | -------------- |
-| La colina                | Desde el sol: "Esto es demasiado caótico." Angie contesta, piensa "Ellos ya están aquí…" y "La hora ha llegado…", y se vuelve luz                     | —              |
+| La colina                | Desde el sol: "Esto es demasiado caótico." Angie contesta, piensa "Así que… Ellos ya están aquí…" y "Entonces… La hora ha llegado…", y se vuelve luz  | —              |
 | Volver a casa            | Las cuatro naves y sus deseos. La exploradora, ya con los colores de Angie, los apura                                                                 | —              |
 | La anomalía              | Los atrae, y "¡Activen todos los operadores!" abre el minijuego. Funciona, pero el tirón es más rápido. La exploradora queda afuera                   | 3 nuevos       |
 | El manual de a bordo     | "¡Rápido, el manual de a bordo!": cinco páginas en la cabina                                                                                          | 0/1 a 0/5      |
@@ -49,8 +49,8 @@ prólogo, contada desde el lado de Angie.
 1. Mañana en la colina. Angie, sentada en la piedra, mira el sol con melancolía, como hoy.
 2. Desde el sol, lejano: "Esto es demasiado caótico." Es el capitán, adentro de la anomalía.
 3. Angie contesta en voz alta: "Supongo que sí… Desde su perspectiva puede ser caótico."
-4. Piensa: "Ellos ya están aquí…"
-5. Piensa: "La hora ha llegado…"
+4. Piensa: "Así que… Ellos ya están aquí…"
+5. Piensa: "Entonces… La hora ha llegado…"
 6. Se desarma en luz, y las luces van al sol, como hoy.
 
 Los pasos 2 y 3 dicen exactamente lo mismo que en "La voz y Angie": así, cuando la tripulación los
