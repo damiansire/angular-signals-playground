@@ -8,10 +8,12 @@
   border-top: 1px solid #ddd6c6;
 }
 
+/* Quien lo muestra solo, sin card alrededor (el minijuego del prólogo), ajusta estas variables: la
+   vista que lo contiene no puede alcanzar sus clases, porque los estilos están encapsulados. */
 .ms {
   display: flex;
   flex-direction: column;
-  gap: 0.85rem;
+  gap: var(--ms-aire, 0.85rem);
   text-align: left;
 }
 
@@ -30,7 +32,7 @@
 /* El bloque es UNO solo, el real: no es una lista de opciones. Acotado al ancho del código para
    que no se lea como un banner a lo ancho de la card. */
 .ms__code {
-  max-width: 34rem;
+  max-width: var(--ms-ancho, 34rem);
   padding: 0.7rem 0.85rem;
   border: 1px solid #ddd6c6;
   border-radius: 3px;
@@ -42,8 +44,8 @@
 .ms__line {
   display: flex;
   font-family: var(--font-mono, ui-monospace, monospace);
-  font-size: 0.76rem;
-  line-height: 1.75;
+  font-size: var(--ms-codigo, 0.76rem);
+  line-height: var(--ms-renglon, 1.75);
   color: #3a352d;
   /* Un renglón vacío es un separador del bloque, no un renglón que no está: sin esto el flex lo
      colapsa a cero y el mismo desafío se ve con distinto aire que el de al lado. */
@@ -79,9 +81,10 @@
   padding: 0;
   text-align: left;
   font-family: var(--font-mono, ui-monospace, monospace);
-  font-size: 0.76rem;
-  line-height: 1.75;
+  font-size: var(--ms-codigo, 0.76rem);
+  line-height: var(--ms-renglon, 1.75);
   font-weight: 400;
+  white-space: pre-wrap;
   border: 0;
   border-bottom: 1px dashed #b8791f;
   border-radius: 0;
@@ -100,6 +103,42 @@
   box-shadow: 0 0 0 2px #eb9b3c;
 }
 
+.ms__body {
+  white-space: pre-wrap;
+}
+
+/* Lo que el ojo busca primero tiene color: qué se llama (el operador), qué es un flujo `$`, qué es
+   palabra del lenguaje y qué es dato literal. Todos llegan a 4.5:1 contra el papel y contra el
+   hover de la perilla. El resto queda en la tinta del bloque. */
+.ms__tk--clave {
+  color: #8b2f8f;
+}
+.ms__tk--cadena {
+  color: #3f6b12;
+}
+.ms__tk--numero {
+  color: #a24b00;
+}
+.ms__tk--llamada {
+  color: #1d5fa8;
+}
+.ms__tk--flujo {
+  color: #0e6b6b;
+}
+.ms__tk--etiqueta {
+  color: #a1342b;
+}
+.ms__tk--operador {
+  color: #7a5a3a;
+}
+.ms__tk--comentario,
+.ms__tk--puntuacion {
+  color: #6a6355;
+}
+.ms__tk--comentario {
+  font-style: italic;
+}
+
 /* La acción va pegada a las lecturas, no flotando lejos: el botón y los números son una sola
    unidad de causa y efecto. */
 .ms__bar {
@@ -107,7 +146,7 @@
   flex-wrap: wrap;
   align-items: flex-end;
   gap: 1.4rem;
-  max-width: 34rem;
+  max-width: var(--ms-ancho, 34rem);
 }
 
 .ms__gauges {

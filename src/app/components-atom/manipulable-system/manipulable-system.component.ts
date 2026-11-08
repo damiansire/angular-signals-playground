@@ -6,9 +6,11 @@ import {
   inject,
   input,
   linkedSignal,
+  output,
 } from '@angular/core';
 import {
   act,
+  Health,
   healthOf,
   ManipulableChallenge,
   readings,
@@ -17,6 +19,7 @@ import {
   SystemState,
   turn,
 } from '../../libs/manipulable-challenge';
+import { tokensDeCodigo } from '../../libs/resaltado-de-codigo';
 
 /**
  * Cierre de un sub-nivel donde el código ES el control: el bloque arranca averiado, el usuario mueve
@@ -37,6 +40,11 @@ export class ManipulableSystemComponent {
    * que ahí el desafío se juega sin ella.
    */
   readonly ayuda = input(true);
+  /**
+   * Cada toque, con el estado que dejó. Quien muestra el desafío afuera de una card (el minijuego del
+   * prólogo) arma con esto su propia ayuda: qué hizo el operador elegido.
+   */
+  readonly corrida = output<{ estado: SystemState; salud: Health }>();
 
   /** Arranca averiado, y vuelve a arrancar si se monta otro sistema en el mismo lugar. */
   private readonly state = linkedSignal(() => startOf(this.system()));
@@ -50,7 +58,12 @@ export class ManipulableSystemComponent {
       .code(this.state().knobs)
       .map((line) => {
         const body = line.text.trimStart();
-        return { ...line, indent: line.text.slice(0, line.text.length - body.length), body };
+        return {
+          ...line,
+          indent: line.text.slice(0, line.text.length - body.length),
+          body,
+          tokens: tokensDeCodigo(body),
+        };
       }),
   );
   readonly gauges = computed(() => readings(this.system(), this.state()));
@@ -78,6 +91,7 @@ export class ManipulableSystemComponent {
   private settle(next: () => SystemState): void {
     const wasHealthy = this.healthy();
     this.state.set(next());
+    this.corrida.emit({ estado: this.state(), salud: this.health() });
     if (!wasHealthy && this.healthy()) {
       this.host.nativeElement.dispatchEvent(
         new CustomEvent(SISTEMA_ESTABLECIDO, { bubbles: true }),
