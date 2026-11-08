@@ -20,6 +20,11 @@ export class OldChangeDetectionComponent {
   protected readonly total = CD_NODES.length;
   protected readonly patchedApis = ['setTimeout', 'addEventListener', 'fetch', 'Promise'];
 
+  /** Mono de 12 px: unos 7,4 px por letra, más aire a los costados; nunca menos que el círculo. */
+  protected ancho(rotulo: string): number {
+    return Math.max(30, Math.round(rotulo.length * 7.4 + 14));
+  }
+
   protected readonly swept = signal(false);
   protected readonly lastTrigger = signal<string | null>(null);
   protected readonly rechecked = computed(() => (this.swept() ? recheckedByZone() : 0));

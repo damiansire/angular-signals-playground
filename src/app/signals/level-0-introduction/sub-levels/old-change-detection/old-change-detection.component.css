@@ -71,7 +71,7 @@
   stroke-width: 2;
 }
 
-.ocd-node circle {
+.ocd-node rect {
   fill: #ffffff;
   stroke: #cfc9bd;
   stroke-width: 2;
@@ -86,7 +86,7 @@
   fill: #7c7566;
 }
 
-.ocd-node.ocd-swept circle {
+.ocd-node.ocd-swept rect {
   fill: #c07a12;
   stroke: #9a610d;
 }
@@ -172,7 +172,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .ocd-node circle {
+  .ocd-node rect {
     transition: none;
   }
 }
