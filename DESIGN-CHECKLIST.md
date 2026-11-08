@@ -503,6 +503,11 @@ entrar desarma a Angie en luz y se hace noche, la costura con el prólogo.
       se mueve en ola detrás (causa y reacción) y la chispa del final salta cuando la ola llega.
       Defecto resuelto: "Tocá para entrar" solo parpadeaba en opacidad y se leía apagado. Llega
       después del título (no antes: competía con la entrada de las letras).
+- [ ] En una pantalla táctil (`(hover: none) and (pointer: coarse)`) no hay click ni cursor: el
+      aviso y la colina dicen "Tocá…" y el cursor deja lugar a un punto que late con los mismos
+      anillos. Las dos frases están en el DOM y el CSS muestra una; cada una con su texto para el
+      lector. Probarlo con touch emulado por CDP (`setTouchEmulationEnabled`) y un tap real: el
+      ancho de 375 solo no cambia el puntero.
 - [ ] Sonido y pausa son dos fichas de ícono arriba a la izquierda, con su texto en un globo al
       pasar o enfocar. Abajo, al lado del llamado, eran dos píldoras oscuras que competían con él.
       Probarlas con click REAL: el topbar invisible (opacidad 0, z 6) tapaba las fichas y se comía
