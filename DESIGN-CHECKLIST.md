@@ -714,6 +714,12 @@ Del prólogo reconstruido en SVG (2026-11-08):
 - [ ] Quién habla va en una caja HTML con su nombre y el punto del color de su antena; la voz
       sin cuerpo va arriba, dorada y sin caja; el grito de todos, al centro. Nada de texto
       dentro del SVG.
+- [ ] En la caja la frase corta sola, por su ancho: un `\n` a mano más el corte automático dejaba
+      renglones de una palabra ("Rápido." solo, "inalcanzable" solo). Solo la voz y el grito, sin
+      caja, declaran sus cortes; `malformado()` rechaza un `\n` en la caja.
+- [ ] Un operador nombrado en la charla (`switchMap`) se ve como código: va entre comillas
+      invertidas en el guion y el motor lo escribe en un `<code>` estampado con el atributo de
+      encapsulación. Sin estampar, el `<code>` salía sin color.
 - [ ] Angie nace del choque como el componente real (`app-mascota-viva`), no como un dibujo:
       es la misma que la colina y la misma que recibe en la construcción de Tusi.
 - [ ] Toda reacción pasa por `impacto(x, y, fuerza)`: toques, la bola del grito, el choque.
@@ -731,15 +737,28 @@ Del minijuego de operadores (2026-11-08):
       una hoja por nave: el código con su hueco y el desafío manipulable de siempre, con su
       perilla, su lectura y su barrido (`malformed`, `solutionFor`). Las naves siguen vivas
       mientras tanto: el reloj se detiene, los resortes no.
-- [ ] La hoja va abajo a la derecha y la caja de diálogo se corre a la izquierda. Arriba a la
-      derecha tapaba a la exploradora; a media altura, a 1024 tapaba la anomalía. Medida contra
-      las naves, la anomalía, la caja de diálogo y el HUD a 1440×900, 1280×640 y 1024×700: cero
-      solapes.
+- [ ] La hoja va al CENTRO, sobre un velo: es lo único que hay que hacer mientras la historia
+      espera. Abajo a la derecha se leía como un aviso secundario. Es la excepción escrita a "sin
+      backdrop" de la gramática de modal, que vale para las cards del recorrido. Se centra en la
+      franja libre entre el HUD y la caja de diálogo, y la caja queda por encima del velo: centrada
+      en la pantalla entera, a 1280×640 tapaba la mitad de la orden del capitán. Medida contra la
+      caja de diálogo y el HUD a 1440×900, 1280×640 y 1024×700, con la pista abierta: cero solapes
+      y sin scroll interno.
 - [ ] Al arreglar un hueco, la nave DISPARA su operador: un proyectil SVG con el nombre en el
       color de su antena y borde oscuro, como los de la ráfaga. Con `palabra()` el texto salía
-      oscuro sobre el espacio y no se leía. El disparo no suena: acertar es en silencio.
+      oscuro sobre el espacio y no se leía. El disparo no suena: acertar es en silencio. Mientras
+      dispara, el velo y la hoja se apartan (`prologo--disparo`): tapado, el único aviso del acierto
+      pasaba detrás de la hoja.
+- [ ] La hoja dice qué hacer: qué es cada nombre del código (`p`, `deriva`), qué tiene que salir,
+      la meta de la lectura y "Tocá el operador subrayado". Sin esto el hueco era adivinar.
 - [ ] En el prólogo Angie todavía no puede intervenir: el desafío va con `[ayuda]="false"` y no
-      muestra su pista ni al fallar.
+      muestra su pista. La ayuda la da OTRA nave, solo con la corrida ya rota, y dice qué hizo el
+      operador elegido, nunca cuál es el bueno (lo verifica `operadores-del-prologo.spec.ts`).
+- [ ] La hoja no alcanza las clases del desafío (estilos encapsulados): lo que cambia adentro va
+      por variables del átomo (`--ms-codigo`, `--ms-ancho`, `--ms-aire`, `--ms-renglon`). Una regla
+      `.prologo__operadores .ms__code` no aplicaba y nadie lo notaba.
+- [ ] La hoja es su propio componente diferido (`hoja-del-hueco/`): plantilla, CSS, desafío y
+      resaltador fuera del bundle inicial, que con la hoja adentro pasaba el presupuesto de 740 kB.
 - [ ] Los datos del minijuego viajan con el prólogo diferido (el motor se los pasa a la vista),
       no en el bundle inicial: importados desde la vista lo pasaban de 740 kB.
 - [ ] Al medir o clickear, los selectores van dentro de `.prologo__operadores`: los sub-niveles

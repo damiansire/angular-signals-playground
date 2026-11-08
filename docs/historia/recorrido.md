@@ -25,19 +25,19 @@ sub-nivel, contando el sub-nivel desde 1.
 
 ## Mapa
 
-| Etapa                    | Qué pasa                                                                                                                                                              | Desafíos                                |
-| ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------- |
-| La colina                | Desde el sol: "Esto es demasiado caótico." Angie contesta, piensa "Ellos ya están aquí…" y "La hora ha llegado…", y se vuelve luz                                    | —                                       |
-| Volver a casa            | Las cuatro naves y sus deseos. La exploradora, ya con los colores de Angie, los apura                                                                                | —                                       |
-| La anomalía              | Los atrae, y "¡Activen todos los operadores!" abre el minijuego. Funciona, pero el tirón es más rápido. La exploradora queda afuera                                    | 3 nuevos                                |
-| El manual de a bordo     | "¡Rápido, el manual de a bordo!": cinco páginas en la cabina                                                                                                          | 0/1 a 0/5                               |
-| Adentro                  | Caos y esquives, hasta "Esto es demasiado caótico."                                                                                                                  | —                                       |
-| La voz y Angie           | El mismo intercambio de la colina, ahora desde la cabina. Llegan sus luces, "El caos es orden", el par de Tusi, el pacto, y Signal Space con su árbol                 | 0/6                                     |
-| Arco I · Aprender a leer | La caja que avisa · La molécula punteada · La baliza · Las coordenadas gemelas                                                                                        | 1/1 a 4/2 (15)                          |
-| Arco II · La banda vieja | El mapa de rutas · La transmisión · El repetidor · Los pipes se traducen                                                                                              | 5/1 a 8/4 (13)                          |
-| Arco III · La verdad     | La antena · La tormenta · Quien lee, avisa (penúltima etapa: la revelación)                                                                                           | 9/1 a 11/1 (6)                          |
-| La salida                | Desafío final de signals y RxJS. La tripulación pone sus operadores, Angie pone signals                                                                               | nuevo                                   |
-| Epílogo                  | La colina, todos juntos                                                                                                                                               | —                                       |
+| Etapa                    | Qué pasa                                                                                                                                              | Desafíos       |
+| ------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------- | -------------- |
+| La colina                | Desde el sol: "Esto es demasiado caótico." Angie contesta, piensa "Ellos ya están aquí…" y "La hora ha llegado…", y se vuelve luz                     | —              |
+| Volver a casa            | Las cuatro naves y sus deseos. La exploradora, ya con los colores de Angie, los apura                                                                 | —              |
+| La anomalía              | Los atrae, y "¡Activen todos los operadores!" abre el minijuego. Funciona, pero el tirón es más rápido. La exploradora queda afuera                   | 3 nuevos       |
+| El manual de a bordo     | "¡Rápido, el manual de a bordo!": cinco páginas en la cabina                                                                                          | 0/1 a 0/5      |
+| Adentro                  | Caos y esquives, hasta "Esto es demasiado caótico."                                                                                                   | —              |
+| La voz y Angie           | El mismo intercambio de la colina, ahora desde la cabina. Llegan sus luces, "El caos es orden", el par de Tusi, el pacto, y Signal Space con su árbol | 0/6            |
+| Arco I · Aprender a leer | La caja que avisa · La molécula punteada · La baliza · Las coordenadas gemelas                                                                        | 1/1 a 4/2 (15) |
+| Arco II · La banda vieja | El mapa de rutas · La transmisión · El repetidor · Los pipes se traducen                                                                              | 5/1 a 8/4 (13) |
+| Arco III · La verdad     | La antena · La tormenta · Quien lee, avisa (penúltima etapa: la revelación)                                                                           | 9/1 a 11/1 (6) |
+| La salida                | Desafío final de signals y RxJS. La tripulación pone sus operadores, Angie pone signals                                                               | nuevo          |
+| Epílogo                  | La colina, todos juntos                                                                                                                               | —              |
 
 ## La apertura
 
@@ -82,18 +82,26 @@ código.
 
 Está hecho (2026-11-08), en `src/app/integrada-vista/operadores-del-prologo.ts`:
 
-| Nave    | Hueco              | Código                                     | Opciones, la rota primero                                                                                            | Lectura      |
-| ------- | ------------------ | ------------------------------------------ | -------------------------------------------------------------------------------------------------------------------- | ------------ |
-| Capitán | Corregir el rumbo  | `lecturas$.pipe(▢(p => p - deriva))`       | `filter` (usa la cuenta para filtrar, no corrige) · `tap` (hace la cuenta y la tira) · `map`                         | desvío       |
-| Nave A  | Acumular el empuje | `empuje$.pipe(▢((vel, e) => vel + e, 0))`  | `reduce` (emite recién al completar, y el motor no completa) · `map` (su segundo argumento es el índice) · `scan`    | velocidad    |
-| Nave B  | Sensores saturados | `sensores$.pipe(▢(100), map(corregir))`    | `debounceTime` (en una ráfaga que no para, no emite nunca) · `bufferTime` (`corregir` recibe listas) · `throttleTime` | correcciones |
+| Nave    | Hueco              | Código                                    | Opciones, la rota primero                                                                                             | Lectura      |
+| ------- | ------------------ | ----------------------------------------- | --------------------------------------------------------------------------------------------------------------------- | ------------ |
+| Capitán | Corregir el rumbo  | `lecturas$.pipe(▢(p => p - deriva))`      | `filter` (usa la cuenta para filtrar, no corrige) · `tap` (hace la cuenta y la tira) · `map`                          | desvío       |
+| Nave A  | Acumular el empuje | `empuje$.pipe(▢((vel, e) => vel + e, 0))` | `reduce` (emite recién al completar, y el motor no completa) · `map` (su segundo argumento es el índice) · `scan`     | velocidad    |
+| Nave B  | Sensores saturados | `sensores$.pipe(▢(100), map(corregir))`   | `debounceTime` (en una ráfaga que no para, no emite nunca) · `bufferTime` (`corregir` recibe listas) · `throttleTime` | correcciones |
 
-La historia se frena en la orden, con la escena viva, y espera. El hueco aparece en una hoja abajo a
-la derecha, donde no tapa a las naves, a la anomalía ni a la exploradora. Cada hueco se puede
-saltear, así que nunca traba (ADR 0002), y no hay cartel de acierto: cuando el código queda sano, la
-nave dispara su operador y la anomalía contesta con un golpe. La pista al fallar no aparece, porque
-la da Angie y todavía no puede intervenir. Quien arranca el prólogo más adelante con `?prologo=` no
-pasa por el minijuego.
+La historia se frena en la orden, con la escena viva, y espera. El hueco aparece en una hoja en el
+centro, sobre un velo, con la orden del capitán debajo. La hoja dice qué es cada nombre del código,
+qué tiene que salir y la meta de la lectura. Cada hueco se puede saltear, así que nunca traba (ADR
+0002), y no hay cartel de acierto: cuando el código queda sano, la hoja se aparta, la nave dispara su
+operador y la anomalía contesta con un golpe. Angie todavía no puede intervenir, así que la ayuda al
+fallar la da otra nave: dice qué hizo el operador elegido, nunca cuál es el bueno.
+
+| Hueco              | Ayuda la… | Qué dice al fallar                                                        |
+| ------------------ | --------- | ------------------------------------------------------------------------- |
+| Corregir el rumbo  | Nave A    | `filter` solo decide si la lectura pasa · `tap` hace la cuenta y la tira  |
+| Acumular el empuje | Nave B    | `reduce` avisa recién cuando el motor se apaga · `map` no guarda nada     |
+| Sensores saturados | Capitán   | `debounceTime` espera un silencio que no llega · `bufferTime` arma listas |
+
+Quien arranca el prólogo más adelante con `?prologo=` no pasa por el minijuego.
 
 Cada hueco resuelto se nota en la nave, pero el tirón crece más rápido: "Los pipes están recargando
 energía." (`anom-pipes`) y "No funcionará, es demasiado lento." (`anom-lento`). Que los operadores
@@ -108,13 +116,13 @@ Mientras se acercan, el capitán pide: "¡Rápido, el manual de a bordo!" (líne
 la nave en el espacio Zone.js, y explica cómo funciona su pantalla en casa. Sus cinco páginas son los
 desafíos 1 a 5 de la Introducción de hoy, con la estética de la cabina y a modo de estudio:
 
-| Página | Hoy                                                        | Qué le dice a la tripulación                                         |
-| ------ | ---------------------------------------------------------- | -------------------------------------------------------------------- |
-| 1      | "El HTML es un árbol de nodos." (`html-to-tree`)           | La pantalla de la nave es un árbol                                   |
-| 2      | "El DOM está vivo." (`dom-is-alive`)                       | Cambiar un nodo cambia la pantalla                                   |
-| 3      | "No todo cambio cuesta lo mismo." (`dom-to-pixel`)         | Algunos cambios frenan la pantalla                                   |
-| 4      | "A mano, te olvidás un lugar." (`manual-sync-pain`)        | Por eso el panel sigue marcando la velocidad vieja                   |
-| 5      | "Zone.js revisa todo el árbol." (`old-change-detection`)   | Pero Zone.js solo ve lo que parchea, y la anomalía no está parcheada |
+| Página | Hoy                                                      | Qué le dice a la tripulación                                         |
+| ------ | -------------------------------------------------------- | -------------------------------------------------------------------- |
+| 1      | "El HTML es un árbol de nodos." (`html-to-tree`)         | La pantalla de la nave es un árbol                                   |
+| 2      | "El DOM está vivo." (`dom-is-alive`)                     | Cambiar un nodo cambia la pantalla                                   |
+| 3      | "No todo cambio cuesta lo mismo." (`dom-to-pixel`)       | Algunos cambios frenan la pantalla                                   |
+| 4      | "A mano, te olvidás un lugar." (`manual-sync-pain`)      | Por eso el panel sigue marcando la velocidad vieja                   |
+| 5      | "Zone.js revisa todo el árbol." (`old-change-detection`) | Pero Zone.js solo ve lo que parchea, y la anomalía no está parcheada |
 
 La página 5 desemboca en "Debería ser imposible. Esto contradice todas las leyes del espacio
 Zone.js." (`anom-leyes`).
@@ -153,48 +161,48 @@ de mundo (sacado de las cinemáticas actuales), el giro y la pista que siembra.
 
 Angie enseña las reglas básicas, y la tripulación quiere entender el mundo para poder moverse.
 
-| Etapa                   | Ley                                                    | Objeto                       | Giro                                                                      | Pista                              | Desafíos            |
-| ----------------------- | ------------------------------------------------------ | ---------------------------- | ------------------------------------------------------------------------- | ---------------------------------- | ------------------- |
-| La caja que avisa       | Un valor avisa solo a quien lo lee.                    | La caja ámbar                | El panel de una nave se entera del cambio y el de otra no                 | —                                  | Signals, 1/1 a 1/7  |
-| La molécula punteada    | Un derivado no se toca: sigue a su fuente.             | La molécula punteada         | "Rumbo es velocidad más viento": la suma a mano queda vieja               | —                                  | Computed, 2/1 a 2/3 |
-| La baliza               | El que actúa repite cuando cambia lo que leyó.         | La baliza coral              | Salir a hacer algo deja rastro                                            | —                                  | Effects, 3/1 a 3/3  |
-| Las coordenadas gemelas | Antes de avisar, el valor compara: ¿cambió de verdad?  | Las coordenadas y la balanza | "¿Idénticas para quién?"                                                  | Angie nombra el helado de chocolate | Igualdad, 4/1 y 4/2 |
+| Etapa                   | Ley                                                   | Objeto                       | Giro                                                        | Pista                               | Desafíos            |
+| ----------------------- | ----------------------------------------------------- | ---------------------------- | ----------------------------------------------------------- | ----------------------------------- | ------------------- |
+| La caja que avisa       | Un valor avisa solo a quien lo lee.                   | La caja ámbar                | El panel de una nave se entera del cambio y el de otra no   | —                                   | Signals, 1/1 a 1/7  |
+| La molécula punteada    | Un derivado no se toca: sigue a su fuente.            | La molécula punteada         | "Rumbo es velocidad más viento": la suma a mano queda vieja | —                                   | Computed, 2/1 a 2/3 |
+| La baliza               | El que actúa repite cuando cambia lo que leyó.        | La baliza coral              | Salir a hacer algo deja rastro                              | —                                   | Effects, 3/1 a 3/3  |
+| Las coordenadas gemelas | Antes de avisar, el valor compara: ¿cambió de verdad? | Las coordenadas y la balanza | "¿Idénticas para quién?"                                    | Angie nombra el helado de chocolate | Igualdad, 4/1 y 4/2 |
 
 ### Arco II · La banda vieja
 
 La meta cambia: hay algo en la banda vieja, y la tripulación quiere comunicarse con la exploradora.
 
-| Etapa                 | Ley                                                      | Objeto                             | Giro                                                                                               | Pista                       | Desafíos                  |
-| --------------------- | -------------------------------------------------------- | ---------------------------------- | -------------------------------------------------------------------------------------------------- | --------------------------- | ------------------------- |
-| El mapa de rutas      | Podés pisar un derivado; su fuente lo reinicia.          | El mapa de rutas                   | Eligen a mano una ruta hacia el borde donde se oye la banda                                        | A Angie se le escapa "lentos" | Linked, 5/1 y 5/2         |
-| La transmisión        | Un dato que viaja tiene estado: cargando, error, valor.  | El estado en viaje y los paquetes  | El pico del viaje: la primera transmisión de la exploradora, "…cap… ¿me… reciben?…" (`c6-reciben`) | Angie calla                 | Resource, 6/1 a 6/3       |
-| El repetidor          | Un aparato recibe por un borde, avisa por otro.          | El repetidor                       | Arman un aparato para hablar con la exploradora                                                    | Angie sabe la frecuencia    | Inputs y outputs, 7/1 a 7/4 |
-| Los pipes se traducen | Pantalla y streams también se leen como valores.         | Los pipes en la esclusa y el puente | "No los tiren. Se traducen." (`c8-traducen`): sus operadores vuelven a servir                     | —                           | Queries e interop, 8/1 a 8/4 |
+| Etapa                 | Ley                                                     | Objeto                              | Giro                                                                                               | Pista                         | Desafíos                     |
+| --------------------- | ------------------------------------------------------- | ----------------------------------- | -------------------------------------------------------------------------------------------------- | ----------------------------- | ---------------------------- |
+| El mapa de rutas      | Podés pisar un derivado; su fuente lo reinicia.         | El mapa de rutas                    | Eligen a mano una ruta hacia el borde donde se oye la banda                                        | A Angie se le escapa "lentos" | Linked, 5/1 y 5/2            |
+| La transmisión        | Un dato que viaja tiene estado: cargando, error, valor. | El estado en viaje y los paquetes   | El pico del viaje: la primera transmisión de la exploradora, "…cap… ¿me… reciben?…" (`c6-reciben`) | Angie calla                   | Resource, 6/1 a 6/3          |
+| El repetidor          | Un aparato recibe por un borde, avisa por otro.         | El repetidor                        | Arman un aparato para hablar con la exploradora                                                    | Angie sabe la frecuencia      | Inputs y outputs, 7/1 a 7/4  |
+| Los pipes se traducen | Pantalla y streams también se leen como valores.        | Los pipes en la esclusa y el puente | "No los tiren. Se traducen." (`c8-traducen`): sus operadores vuelven a servir                      | —                             | Queries e interop, 8/1 a 8/4 |
 
 ### Arco III · La verdad
 
-| Etapa            | Ley                                                  | Objeto                              | Giro                                                                                                                   | Pista                                                   | Desafíos              |
-| ---------------- | ---------------------------------------------------- | ----------------------------------- | ---------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------- | --------------------- |
-| La antena        | Para medir la pantalla, esperá a que esté pintada.   | La antena del repetidor             | Apuntan el repetidor: hay que medir después de pintar                                                                  | —                                                       | After render, 9/1 y 9/2 |
-| La tormenta      | Ante una ráfaga de avisos, actuá cuando se calme.    | La ráfaga en la banda               | La exploradora habla a pedazos: "¡sector ocho!" (`c10-sector`)                                                          | "Ella todavía no terminó de hablar." (`c10-no-termino`) | Debounce, 10/1 a 10/3 |
-| Quien lee, avisa | Nadie revisa todo el árbol: quien lee, avisa.        | El árbol completo; Zone.js se apaga | **Penúltima etapa.** Responden la pregunta del viaje ("¿Quién le avisó a la pantalla?") y llega la revelación          | —                                                       | Zoneless, 11/1        |
+| Etapa            | Ley                                                | Objeto                              | Giro                                                                                                          | Pista                                                   | Desafíos                |
+| ---------------- | -------------------------------------------------- | ----------------------------------- | ------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------- | ----------------------- |
+| La antena        | Para medir la pantalla, esperá a que esté pintada. | La antena del repetidor             | Apuntan el repetidor: hay que medir después de pintar                                                         | —                                                       | After render, 9/1 y 9/2 |
+| La tormenta      | Ante una ráfaga de avisos, actuá cuando se calme.  | La ráfaga en la banda               | La exploradora habla a pedazos: "¡sector ocho!" (`c10-sector`)                                                | "Ella todavía no terminó de hablar." (`c10-no-termino`) | Debounce, 10/1 a 10/3   |
+| Quien lee, avisa | Nadie revisa todo el árbol: quien lee, avisa.      | El árbol completo; Zone.js se apaga | **Penúltima etapa.** Responden la pregunta del viaje ("¿Quién le avisó a la pantalla?") y llega la revelación | —                                                       | Zoneless, 11/1          |
 
 #### La revelación (borrador)
 
 La banda por fin está limpia. La exploradora, desde afuera, avisa que va a entrar. El borrador ya
 cumple las reglas del guion (ocho palabras por línea, sin raya):
 
-| Quién       | Línea                                     |
-| ----------- | ----------------------------------------- |
-| Exploradora | No los encuentro. Voy a entrar.           |
-| Nave A      | ¡No! ¡Quedate afuera!                     |
-| Angie       | Va a entrar igual.                        |
-| Capitán     | ¿Cómo lo sabés?                           |
-| Angie       | Porque entré.                             |
-| Nave A      | ¿Exploradora?                             |
-| Angie       | Llegué antes que ustedes. Mucho antes.    |
-| Angie       | No podía decirlo. Ella tenía que entrar.  |
-| Nave A      | Siempre tan aguafiestas.                  |
+| Quién       | Línea                                    |
+| ----------- | ---------------------------------------- |
+| Exploradora | No los encuentro. Voy a entrar.          |
+| Nave A      | ¡No! ¡Quedate afuera!                    |
+| Angie       | Va a entrar igual.                       |
+| Capitán     | ¿Cómo lo sabés?                          |
+| Angie       | Porque entré.                            |
+| Nave A      | ¿Exploradora?                            |
+| Angie       | Llegué antes que ustedes. Mucho antes.   |
+| Angie       | No podía decirlo. Ella tenía que entrar. |
+| Nave A      | Siempre tan aguafiestas.                 |
 
 ## La salida
 
@@ -215,40 +223,40 @@ qué era). Angie ya no mira el sol con melancolía. "Este mundo también es casa
 
 ## Los 40 desafíos
 
-| Etapa                   | Desafíos de hoy                                                                                                                                                                      |
-| ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| El manual de a bordo    | 0/1 El HTML es un árbol de nodos. · 0/2 El DOM está vivo. · 0/3 No todo cambio cuesta lo mismo. · 0/4 A mano, te olvidás un lugar. · 0/5 Zone.js revisa todo el árbol.               |
-| La voz y Angie          | 0/6 El signal avisa quién lo lee.                                                                                                                                                    |
+| Etapa                   | Desafíos de hoy                                                                                                                                                                                    |
+| ----------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| El manual de a bordo    | 0/1 El HTML es un árbol de nodos. · 0/2 El DOM está vivo. · 0/3 No todo cambio cuesta lo mismo. · 0/4 A mano, te olvidás un lugar. · 0/5 Zone.js revisa todo el árbol.                             |
+| La voz y Angie          | 0/6 El signal avisa quién lo lee.                                                                                                                                                                  |
 | La caja que avisa       | 1/1 Variables (repaso pre-signals) · 1/2 Qué es un signal · 1/3 Tipos de signal · 1/4 Leer un signal: el getter () · 1/5 Writable Signal · 1/6 Update Signal · 1/7 Read-only signals: asReadonly() |
-| La molécula punteada    | 2/1 Computed signals · 2/2 Dependencias dinámicas · 2/3 Perezoso y memoizado                                                                                                         |
-| La baliza               | 3/1 Dependencias del effect · 3/2 Intervalo filtrado · 3/3 Limpieza con onCleanup                                                                                                    |
-| Las coordenadas gemelas | 4/1 Igualdad por defecto (Object.is) · 4/2 Función equal custom                                                                                                                      |
-| El mapa de rutas        | 5/1 linkedSignal: reinicio con la fuente · 5/2 linkedSignal: preservar si sigue válida                                                                                               |
-| La transmisión          | 6/1 resource(): loader con Promise · 6/2 rxResource(): stream de RxJS · 6/3 httpResource(): pedir por URL                                                                            |
+| La molécula punteada    | 2/1 Computed signals · 2/2 Dependencias dinámicas · 2/3 Perezoso y memoizado                                                                                                                       |
+| La baliza               | 3/1 Dependencias del effect · 3/2 Intervalo filtrado · 3/3 Limpieza con onCleanup                                                                                                                  |
+| Las coordenadas gemelas | 4/1 Igualdad por defecto (Object.is) · 4/2 Función equal custom                                                                                                                                    |
+| El mapa de rutas        | 5/1 linkedSignal: reinicio con la fuente · 5/2 linkedSignal: preservar si sigue válida                                                                                                             |
+| La transmisión          | 6/1 resource(): loader con Promise · 6/2 rxResource(): stream de RxJS · 6/3 httpResource(): pedir por URL                                                                                          |
 | El repetidor            | 7/1 input() y output() basados en signals · 7/2 model(): binding two-way con [(value)] · 7/3 input.required() y transform · 7/4 Formularios con signals                                            |
-| Los pipes se traducen   | 8/1 viewChild() como signal · 8/2 toSignal() · toObservable() · untracked() · 8/3 viewChildren() como signal · 8/4 contentChild() y contentChildren()                                |
-| La antena               | 9/1 afterRenderEffect(): medir el DOM · 9/2 effect((onCleanup) => …)                                                                                                                     |
-| La tormenta             | 10/1 Debounce con RxJS · 10/2 Debounce a mano (effect + onCleanup) · 10/3 debounced() nativo                                                                                         |
-| Quien lee, avisa        | 11/1 Change detection sin Zone.js                                                                                                                                                    |
+| Los pipes se traducen   | 8/1 viewChild() como signal · 8/2 toSignal() · toObservable() · untracked() · 8/3 viewChildren() como signal · 8/4 contentChild() y contentChildren()                                              |
+| La antena               | 9/1 afterRenderEffect(): medir el DOM · 9/2 effect((onCleanup) => …)                                                                                                                               |
+| La tormenta             | 10/1 Debounce con RxJS · 10/2 Debounce a mano (effect + onCleanup) · 10/3 debounced() nativo                                                                                                       |
+| Quien lee, avisa        | 11/1 Change detection sin Zone.js                                                                                                                                                                  |
 
 Son 6 + 15 + 13 + 6 = 40. Los desafíos que quizá conviene mover o juntar están en
 [pendientes](./pendientes.md).
 
 ## Lo que se reusa y lo que se rehace
 
-| Se reusa                                                                                       | Por qué                                                                    |
-| ---------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------- |
-| `libs/manipulable-challenge.ts`, los 12 `*-systems.ts` y su barrido de los 40                   | Son la lógica de cada desafío, ya probada como función pura                |
-| `libs/cd-tree.ts`                                                                              | El árbol de las páginas 5 y 6 y de Quien lee, avisa                        |
-| `libs/partida.ts`                                                                              | El guardado, con una versión nueva                                         |
-| `libs/sonido.ts`, `libs/resorte.ts`, `libs/muelle.ts`, `libs/rastros.ts`                        | El sonido, los resortes, el reloj de muelles y los rastros de los toques   |
-| `armarReloj` (`prologo-guion.ts`) y `REGLAS_GUION` (`cinematica-guion.ts`)                      | El reloj derivado del texto y las reglas del guion                         |
-| Las naves del prólogo, la colina, el aviso, `mascota-viva` y el par de Tusi                    | Ya son la estética nueva                                                   |
-| La ley de cada capítulo                                                                        | Son las reglas que Angie promete enseñar                                   |
+| Se reusa                                                                      | Por qué                                                                  |
+| ----------------------------------------------------------------------------- | ------------------------------------------------------------------------ |
+| `libs/manipulable-challenge.ts`, los 12 `*-systems.ts` y su barrido de los 40 | Son la lógica de cada desafío, ya probada como función pura              |
+| `libs/cd-tree.ts`                                                             | El árbol de las páginas 5 y 6 y de Quien lee, avisa                      |
+| `libs/partida.ts`                                                             | El guardado, con una versión nueva                                       |
+| `libs/sonido.ts`, `libs/resorte.ts`, `libs/muelle.ts`, `libs/rastros.ts`      | El sonido, los resortes, el reloj de muelles y los rastros de los toques |
+| `armarReloj` (`prologo-guion.ts`) y `REGLAS_GUION` (`cinematica-guion.ts`)    | El reloj derivado del texto y las reglas del guion                       |
+| Las naves del prólogo, la colina, el aviso, `mascota-viva` y el par de Tusi   | Ya son la estética nueva                                                 |
+| La ley de cada capítulo                                                       | Son las reglas que Angie promete enseñar                                 |
 
-| Se rehace                                         | Por qué                                         |
-| ------------------------------------------------- | ----------------------------------------------- |
-| `molecule-engine.ts` (el recorrido molécula)      | Es la UI de los niveles                         |
-| Las 40 pantallas de los desafíos                  | Pasan a ser aparatos del mundo                  |
-| `cinematicas/escenas/`                            | Las cinemáticas por capítulo pasan a ser etapas |
-| La bitácora, `/cine/<n>` y la URL `?nivel=`        | Están atadas a la forma de 0 a 11               |
+| Se rehace                                    | Por qué                                         |
+| -------------------------------------------- | ----------------------------------------------- |
+| `molecule-engine.ts` (el recorrido molécula) | Es la UI de los niveles                         |
+| Las 40 pantallas de los desafíos             | Pasan a ser aparatos del mundo                  |
+| `cinematicas/escenas/`                       | Las cinemáticas por capítulo pasan a ser etapas |
+| La bitácora, `/cine/<n>` y la URL `?nivel=`  | Están atadas a la forma de 0 a 11               |
