@@ -149,7 +149,7 @@ export class IntegradaVistaComponent {
     new Set(['SignalVerso']),
   );
   protected readonly bajada = letrasDelTitulo(['Una introducción interactiva a los Signals'])[0];
-  protected readonly llamado = letrasDelTitulo(['Haz click para iniciar las aventuras'])[0];
+  protected readonly llamado = letrasDelTitulo(['Hacé click para iniciar las aventuras'])[0];
   /** En una pantalla táctil no hay click: se toca. El CSS muestra la que corresponde. */
   protected readonly llamadoTactil = letrasDelTitulo(['Tocá para iniciar las aventuras'])[0];
 

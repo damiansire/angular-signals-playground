@@ -118,7 +118,7 @@ export function estrellasDelAlba(semilla: number, cantidad: number): EstrellaDel
 }
 
 /** Lo que invita a seguir: no es un botón a la vista, es la frase que dice que se toca en cualquier lado. */
-export const LLAMADO = 'Haz click en cualquier lado para continuar';
+export const LLAMADO = 'Hacé click en cualquier lado para continuar';
 /** Lo mismo en una pantalla táctil, donde no hay click ni cursor: se toca. */
 export const LLAMADO_TACTIL = 'Tocá en cualquier lado para continuar';
 
