@@ -47,12 +47,12 @@ jobs:
        github.event.workflow_run.head_branch == github.event.repository.default_branch &&
        github.event.workflow_run.conclusion == 'success')
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           # Publicar EXACTAMENTE el commit que CI aprobo, no la punta de master, que para cuando
           # termina CI puede tener commits nuevos todavia sin verificar.
           ref: ${{ github.event.workflow_run.head_sha || github.ref }}
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
           node-version: 22
           cache: npm
@@ -63,7 +63,7 @@ jobs:
       # Fallback SPA: Pages sirve 404.html ante una ruta desconocida (deep-link o
       # reload). Copiar el index deja que el router de Angular resuelva la ruta.
       - run: cp dist/angular-examples/browser/index.html dist/angular-examples/browser/404.html
-      - uses: actions/upload-pages-artifact@v3
+      - uses: actions/upload-pages-artifact@v5
         with:
           path: dist/angular-examples/browser
 
@@ -75,4 +75,4 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5
