@@ -489,8 +489,8 @@ import { ChangeDetectionStrategy, Component, ViewEncapsulation } from '@angular/
       border-radius: 50%;
       background: radial-gradient(
         circle closest-side,
-        rgba(47, 158, 127, 0.3),
-        rgba(47, 158, 127, 0) 100%
+        rgba(233, 4, 101, 0.22),
+        rgba(233, 4, 101, 0) 100%
       );
       opacity: 0;
       transform: scale(0.4);
@@ -508,22 +508,22 @@ import { ChangeDetectionStrategy, Component, ViewEncapsulation } from '@angular/
       display: grid;
       place-items: center;
       border-radius: 50%;
-      border: max(1.5px, 0.16cqw) dashed #2f9e7f;
-      background: #f4faf7;
+      border: max(1.5px, 0.16cqw) dashed #e90465;
+      background: #fdf2f8;
       opacity: 0;
       transform: scale(0.2);
       transition:
         opacity 220ms ease-out 420ms,
         transform var(--resorte-rebote-ms, 620ms) var(--resorte-rebote, ease-out) 420ms;
     }
-    /* La señal sin dueño todavía: un punto verde en la ventana cerrada. */
+    /* La señal sin dueño todavía: un punto rosa en la ventana cerrada. */
     .cine-e6__ventana::before {
       content: '';
       grid-area: 1 / 1;
       width: 16%;
       aspect-ratio: 1 / 1;
       border-radius: 50%;
-      background: #2f9e7f;
+      background: #e90465;
     }
     .cine.b-transmision .cine-e6__ventana {
       opacity: 1;
@@ -537,7 +537,7 @@ import { ChangeDetectionStrategy, Component, ViewEncapsulation } from '@angular/
       width: 100%;
       height: 100%;
       border-radius: 50%;
-      background: radial-gradient(circle at 50% 45%, #ffffff 0%, #e2f3ec 100%);
+      background: radial-gradient(circle at 50% 45%, #ffffff 0%, #f8e1ef 100%);
       clip-path: circle(0% at 50% 50%);
       transition: clip-path 760ms cubic-bezier(0.22, 0.9, 0.24, 1) 200ms;
     }
@@ -546,7 +546,7 @@ import { ChangeDetectionStrategy, Component, ViewEncapsulation } from '@angular/
     }
     .cine-e6__fuente .cine-e6__exploradora {
       width: 70%;
-      color: #2f9e7f;
+      color: #e90465;
       transform: scaleX(-1);
     }
 
@@ -571,7 +571,7 @@ import { ChangeDetectionStrategy, Component, ViewEncapsulation } from '@angular/
     }
     .cine-e6__onda-debil {
       fill: none;
-      stroke: #2f9e7f;
+      stroke: #e90465;
       stroke-width: 4;
       stroke-linecap: round;
       stroke-dasharray: 0.045 0.012 0.018 0.03 0.07 0.015 0.008 0.022 0.03 0.05;
@@ -640,9 +640,9 @@ import { ChangeDetectionStrategy, Component, ViewEncapsulation } from '@angular/
       place-items: center;
       aspect-ratio: 1 / 1;
       border-radius: 26%;
-      border: max(1.5px, 0.15cqw) solid #20705a;
-      background: radial-gradient(circle at 36% 30%, #5cc7a8 0%, #2f9e7f 70%);
-      box-shadow: 0 8px 14px -8px rgba(20, 70, 55, 0.55);
+      border: max(1.5px, 0.15cqw) solid #940054;
+      background: radial-gradient(circle at 36% 30%, #f637e3 0%, #e90465 70%);
+      box-shadow: 0 8px 14px -8px rgba(110, 0, 60, 0.55);
       opacity: 0;
       transition:
         opacity 160ms linear var(--sale),

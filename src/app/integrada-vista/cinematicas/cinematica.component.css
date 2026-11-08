@@ -37,7 +37,7 @@
   --c-cap: #f2c27a;
   --c-naveA: #9fc3e6;
   --c-naveB: #c9b6ea;
-  --c-nave4: #7fd6bd;
+  --c-nave4: #ff8ac9;
   --c-mascota: #f4ece0;
   --c-todos: #f6d9c0;
   --barra-arriba: clamp(40px, 7vh, 60px);
@@ -438,8 +438,9 @@
   color: var(--tinta);
 }
 
+/* La exploradora lleva el color de Angie: es ella. */
 .k-nave--4 {
-  color: #2f9e7f;
+  color: #e90465;
 }
 
 /* Mascota: sube con rebote, que es su forma de estar. */
@@ -564,7 +565,7 @@
   position: absolute;
   inset: 0;
   border-radius: 50%;
-  border: 2px dashed #2f9e7f;
+  border: 2px dashed #e90465;
   opacity: 0;
 }
 

@@ -149,12 +149,15 @@ interface Paleta {
   readonly luz: string;
 }
 
-/** Una paleta por nave. Sin negro: la tinta es oscura con tono, igual que las sombras. */
+/**
+ * Una paleta por nave. Sin negro: la tinta es oscura con tono, igual que las sombras. La
+ * exploradora lleva los colores de Angie porque es ella (ver docs/historia).
+ */
 const PALETAS: readonly Paleta[] = [
   { claro: '#f6f1e8', medio: '#cfc5cf', oscuro: '#6f6280', acento: '#eb9b3c', luz: '#ffd27a' },
   { claro: '#e4d8ff', medio: '#ab95e2', oscuro: '#56448a', acento: '#ff7a9c', luz: '#ffb8cc' },
   { claro: '#ffdcc8', medio: '#efa088', oscuro: '#97524f', acento: '#6b3a2a', luz: '#ff5d6c' },
-  { claro: '#bff6e6', medio: '#5fc3ab', oscuro: '#1f6156', acento: '#f0b458', luz: '#a8f6ff' },
+  { claro: '#f637e3', medio: '#e90465', oscuro: '#ba005e', acento: '#ffc65c', luz: '#ff8ac9' },
 ];
 
 const TINTA = '#2b1b33';
@@ -346,7 +349,8 @@ function construirNave(padre: SVGGElement, i: number, defs: SVGDefsElement): Nav
   const cab = exploradora
     ? { cx: 30, cy: -14, rx: 28, ry: 13 }
     : { cx: 24, cy: -17, rx: 26, ry: 18 };
-  el(rig, 'ellipse', { ...cab, fill: 'url(#pa-vidrio)', stroke: TINTA, 'stroke-width': 2 });
+  const vidrio = exploradora ? 'url(#pa-vidrio-exploradora)' : 'url(#pa-vidrio)';
+  el(rig, 'ellipse', { ...cab, fill: vidrio, stroke: TINTA, 'stroke-width': 2 });
   const ojos = el(rig, 'g');
   const cerca = { x: cab.cx + 10, y: cab.cy - 1, r: exploradora ? 5.6 : 7 };
   const lejos = { x: cab.cx - 5, y: cab.cy - 2, r: exploradora ? 4.4 : 5.4 };
@@ -606,6 +610,16 @@ export function initPrologoAnomalia(host: HTMLElement, opts: PrologoOpciones): (
       [0, '#d9f0ff'],
       [0.5, '#7aa3d6'],
       [1, '#3b4f8a'],
+    ],
+    { x1: 0, y1: 0, x2: 0, y2: 1 },
+  );
+  // La cabina de la exploradora tiene el tono de la cara de Angie: es la cara que va a tener.
+  lineal(
+    'pa-vidrio-exploradora',
+    [
+      [0, '#eadbe7'],
+      [0.5, '#e3d1e0'],
+      [1, '#d8c0d6'],
     ],
     { x1: 0, y1: 0, x2: 0, y2: 1 },
   );

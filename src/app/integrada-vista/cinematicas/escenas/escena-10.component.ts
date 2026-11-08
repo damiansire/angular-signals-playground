@@ -122,7 +122,7 @@ import { ChangeDetectionStrategy, Component, ViewEncapsulation } from '@angular/
             <circle class="cine-e10__luz" cx="812" cy="502" r="6" />
             <path class="cine-e10__rejilla" d="M 846 494 H 882 M 846 502 H 882 M 846 510 H 882" />
           </svg>
-          <!-- El mensaje completo: llega verde como un pedazo más y se asienta ámbar. -->
+          <!-- El mensaje completo: llega rosa como un pedazo más y se asienta ámbar. -->
           <div class="cine-e10__ficha">
             <span class="cine-e10__ficha-oro"></span>
             <i></i><i></i><i></i><i></i>
@@ -220,13 +220,13 @@ import { ChangeDetectionStrategy, Component, ViewEncapsulation } from '@angular/
     }
     .cine-e10__fuente-halo {
       fill: none;
-      stroke: #2f9e7f;
+      stroke: #e90465;
       stroke-width: 3;
       stroke-dasharray: 4 7;
     }
     .cine-e10__fuente-nucleo {
-      fill: #2f9e7f;
-      stroke: #1d6b55;
+      fill: #e90465;
+      stroke: #940054;
       stroke-width: 3;
     }
     /* El kit no le da alto a la transmisión: sin esto sus anillos serían una raya. */
@@ -235,7 +235,7 @@ import { ChangeDetectionStrategy, Component, ViewEncapsulation } from '@angular/
     }
     .cine-e10__banda {
       fill: none;
-      stroke: #9fd3c2;
+      stroke: #f7b6da;
       stroke-width: 5;
       stroke-linecap: round;
       stroke-dasharray: 0.5 14;
@@ -345,8 +345,8 @@ import { ChangeDetectionStrategy, Component, ViewEncapsulation } from '@angular/
       width: 1.9cqw;
       height: 0.62cqw;
       border-radius: 999px;
-      background: #2f9e7f;
-      box-shadow: inset 0 -0.12cqw 0 rgba(20, 70, 55, 0.35);
+      background: #e90465;
+      box-shadow: inset 0 -0.12cqw 0 rgba(110, 0, 60, 0.35);
     }
     /* El cuadro congelado: cada gota donde estaba a 1,7 s del ciclo. En reproducción la animación
        lo pisa; con movimiento reducido es lo que queda. */
@@ -523,7 +523,7 @@ import { ChangeDetectionStrategy, Component, ViewEncapsulation } from '@angular/
       justify-content: center;
       gap: 4.5%;
       border-radius: 0.8cqw;
-      background: #2f9e7f;
+      background: #e90465;
       box-shadow: 0 0.6cqw 1cqw -0.6cqw rgba(0, 0, 0, 0.6);
       opacity: 0;
       transform: translateY(-18.67cqh) scale(0.4);
@@ -546,7 +546,7 @@ import { ChangeDetectionStrategy, Component, ViewEncapsulation } from '@angular/
       width: 16%;
       height: 19%;
       border-radius: 999px;
-      background: #d9f2e9;
+      background: #fbd5e6;
       transition: background-color 450ms ease-out 650ms;
     }
     .cine.b-calma .cine-e10__ficha {
