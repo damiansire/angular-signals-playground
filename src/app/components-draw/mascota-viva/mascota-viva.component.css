@@ -27,6 +27,16 @@
   fill: rgba(60, 22, 50, 0.22);
 }
 
+/* De frente o de perfil: dos dibujos y no uno deformado. `display` y no opacidad, para que la
+   despedida no desarme también las piezas del que no se ve. */
+.mv__perfil,
+:host(.mv--perfil) .mv__frente {
+  display: none;
+}
+:host(.mv--perfil) .mv__perfil {
+  display: inline;
+}
+
 /* Vida: respirar y parpadear son CSS y no timers ni rAF. Así el motor de resortes se duerme en
    reposo y la pausa de la vida de fondo los alcanza como a cualquier otro loop. */
 .mv__respira {

@@ -54,6 +54,29 @@
       <stop offset=".75" stop-color="#c90160" />
       <stop offset="1" stop-color="#ba005e" />
     </linearGradient>
+    <linearGradient
+      [attr.id]="uid + 'lado'"
+      x1="400"
+      y1="170"
+      x2="460"
+      y2="840"
+      gradientUnits="userSpaceOnUse"
+    >
+      <stop offset="0" stop-color="#d4026a" />
+      <stop offset="1" stop-color="#a3005c" />
+    </linearGradient>
+    <linearGradient
+      [attr.id]="uid + 'frente'"
+      x1="560"
+      y1="170"
+      x2="760"
+      y2="820"
+      gradientUnits="userSpaceOnUse"
+    >
+      <stop offset="0" stop-color="#f637a8" />
+      <stop offset=".45" stop-color="#ec0f78" />
+      <stop offset="1" stop-color="#d4026a" />
+    </linearGradient>
     <radialGradient
       [attr.id]="uid + 'cara'"
       cx="544"
@@ -83,6 +106,42 @@
 
   <g #cuerpo>
     <g class="mv__respira">
+      <!-- Sentada, de perfil hacia la derecha: la gema girada muestra el costado (atrás, en sombra) y
+           la faceta de adelante, donde va la cara. Va primero para que el brazo de la lamparita, el
+           de este lado, le quede delante. -->
+      <g class="mv__perfil">
+        <path
+          data-pieza
+          [attr.fill]="'url(#' + uid + 'lado)'"
+          stroke="#b8015f"
+          stroke-width="22"
+          stroke-linejoin="round"
+          d="M530 168 L575 842 L330 700 L282 385 Z"
+        />
+        <path
+          data-pieza
+          fill="#9b005c"
+          stroke="#9b005c"
+          stroke-width="22"
+          stroke-linejoin="round"
+          d="M575 842 L800 745 L804 776 L582 870 Z"
+        />
+        <path
+          data-pieza
+          [attr.fill]="'url(#' + uid + 'frente)'"
+          stroke="#e4056a"
+          stroke-width="22"
+          stroke-linejoin="round"
+          d="M530 168 L735 255 L858 470 L800 745 L575 842 Z"
+        />
+        <path
+          data-pieza
+          fill="#ff5fb4"
+          opacity=".55"
+          d="M530 168 L735 255 L858 470 L838 474 L722 274 L536 196 Z"
+        />
+      </g>
+
       <!-- Brazo con la lamparita: gira desde el hombro; la lamparita sigue con retraso. El vaivén
            de reposo (`mv__alza`, `mv__bambolea`, `mv__cuelga`) va en un grupo propio: un
            `transform` de CSS en el grupo del muelle le pisaría el atributo que pinta el muelle. -->
@@ -161,32 +220,35 @@
         </g>
       </g>
 
-      <!-- El escudo: el cuerpo es la marca de Angular. -->
-      <path
-        data-pieza
-        [attr.fill]="'url(#' + uid + 'lomo)'"
-        d="M909.12,427.64l-254.48-240.9c-3.91-3.73-8.76-5.92-13.79-6.49l-59.09-6.67-15.98,28.6-7.78,21.41-21.69,192.03,385.65,43.55c.26-11.77-4.23-23.33-12.85-31.54Z"
-      />
-      <path
-        data-pieza
-        fill="#9b005c"
-        d="M741.84,724.19l-225.61,102.42-.33,2.96,50.97,5.76h0c6.75.76,13.68-.09,20.25-2.61l194.68-78.58c7.04-2.76,13.36-7.05,18.61-12.48l-58.56-17.45Z"
-      />
-      <path
-        data-pieza
-        fill="#ac015f"
-        d="M921.97,459.18h0c.04-1.77-.04-3.53-.21-5.27l-384.85-43.46,21.1-186.85-233.85,137.98c-14.74,8.76-22.71,26.23-19.89,43.62l48.7,267.64c2.57,14.56,10.69,27.34,22.5,35.4l142.89,99.56-2.12,18.81,236.75-99.1,47.42,14.13c4.68-4.84,8.51-10.59,11.22-17.01l107.16-250.03c2.03-5,3.07-10.23,3.18-15.42Z"
-      />
-      <path
-        data-pieza
-        [attr.fill]="'url(#' + uid + 'luz)'"
-        d="M581.76,173.58c-4.87-.55-9.93.52-14.44,3.3l-293.05,179.06c-14.31,8.81-22.1,26.3-19.43,43.67l46.25,267.36c2.43,14.55,10.26,27.29,21.68,35.31l166.48,119.37c5.65,3.9,12,6.25,18.53,6.99l73.98-655.06Z"
-      />
-      <path
-        data-pieza
-        [attr.fill]="'url(#' + uid + 'sombra)'"
-        d="M507.78,828.64c6.53.74,13.25-.14,19.63-2.68l188.91-79.24c12.92-5.27,23.39-15.95,29.01-29.58l104.71-250.31c6.48-16.34,2.79-35.13-9.2-46.9l-245.73-239.91c-3.78-3.71-8.47-5.88-13.34-6.44l-73.98,655.06Z"
-      />
+      <!-- El escudo: el cuerpo es la marca de Angular. De frente nada más: sentada lo reemplaza
+           la gema de perfil. -->
+      <g class="mv__frente">
+        <path
+          data-pieza
+          [attr.fill]="'url(#' + uid + 'lomo)'"
+          d="M909.12,427.64l-254.48-240.9c-3.91-3.73-8.76-5.92-13.79-6.49l-59.09-6.67-15.98,28.6-7.78,21.41-21.69,192.03,385.65,43.55c.26-11.77-4.23-23.33-12.85-31.54Z"
+        />
+        <path
+          data-pieza
+          fill="#9b005c"
+          d="M741.84,724.19l-225.61,102.42-.33,2.96,50.97,5.76h0c6.75.76,13.68-.09,20.25-2.61l194.68-78.58c7.04-2.76,13.36-7.05,18.61-12.48l-58.56-17.45Z"
+        />
+        <path
+          data-pieza
+          fill="#ac015f"
+          d="M921.97,459.18h0c.04-1.77-.04-3.53-.21-5.27l-384.85-43.46,21.1-186.85-233.85,137.98c-14.74,8.76-22.71,26.23-19.89,43.62l48.7,267.64c2.57,14.56,10.69,27.34,22.5,35.4l142.89,99.56-2.12,18.81,236.75-99.1,47.42,14.13c4.68-4.84,8.51-10.59,11.22-17.01l107.16-250.03c2.03-5,3.07-10.23,3.18-15.42Z"
+        />
+        <path
+          data-pieza
+          [attr.fill]="'url(#' + uid + 'luz)'"
+          d="M581.76,173.58c-4.87-.55-9.93.52-14.44,3.3l-293.05,179.06c-14.31,8.81-22.1,26.3-19.43,43.67l46.25,267.36c2.43,14.55,10.26,27.29,21.68,35.31l166.48,119.37c5.65,3.9,12,6.25,18.53,6.99l73.98-655.06Z"
+        />
+        <path
+          data-pieza
+          [attr.fill]="'url(#' + uid + 'sombra)'"
+          d="M507.78,828.64c6.53.74,13.25-.14,19.63-2.68l188.91-79.24c12.92-5.27,23.39-15.95,29.01-29.58l104.71-250.31c6.48-16.34,2.79-35.13-9.2-46.9l-245.73-239.91c-3.78-3.71-8.47-5.88-13.34-6.44l-73.98,655.06Z"
+        />
+      </g>
 
       <!-- La cara se corre un poco contra el giro del cuerpo: es lo que da el volumen de tres cuartos. -->
       <g data-pieza>
@@ -305,7 +367,8 @@
         </g>
       </g>
 
-      <g data-pieza>
+      <!-- De perfil, este brazo queda del otro lado del cuerpo: no se ve. -->
+      <g data-pieza class="mv__frente">
         <g class="mv__cuelga">
           <g #brazoR>
             <path

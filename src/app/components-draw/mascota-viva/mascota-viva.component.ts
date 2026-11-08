@@ -55,24 +55,38 @@ const PALABRAS = {
 };
 
 /**
- * Sentada en el piso, de frente: las piernas vienen hacia quien mira, así que se ven cortas (escorzo)
- * y con los pies abiertos, y el cuerpo baja hasta que el escudo apoya en el pasto.
+ * Sentada, de perfil hacia la derecha: otro dibujo del cuerpo (`mv__perfil`), la gema girada con la
+ * cara sobre la faceta de adelante, apoyada en el pasto y con las piernas estiradas ladera abajo.
+ * Correr solo la cara sobre el cuerpo de frente la deformaba.
  */
-const SENTADA_BAJA = 78;
-const SENTADA_ABRE = 36;
-const SENTADA_ESCORZO = 0.52;
+const SENTADA_BAJA = 80;
+/** Cuánto gira cada pierna hacia adelante; la de atrás un poco menos, para que no se tapen. */
+const SENTADA_ESTIRA_L = 74;
+const SENTADA_ESTIRA_R = 84;
+/**
+ * Las caderas van al borde de abajo de la faceta de adelante: de ahí salen las piernas, una detrás de
+ * la otra. Más adentro, la gema las tapaba enteras.
+ */
+const CADERA_L = { x: 270, y: 5 };
+const CADERA_R = { x: 40, y: 10 };
+/**
+ * La cara de frente puesta sobre la faceta de adelante: angosta por el giro y con el lado de atrás
+ * apenas más bajo, que es lo que la hace mirar hacia allá y no estar pegada encima.
+ */
+const CARA_DE_PERFIL = 'translate(712 596) skewY(-7) scale(0.56 0.96) translate(-556 -612)';
 
 type Postura = 'parada' | 'caminando' | 'sentada';
 
 /**
  * Adónde vuelve cada parte cuando no hace nada. Parada, de frente. Caminando, mira hacia donde va
  * (de costado y mirando al público se leía como un cangrejo). Sentada mira a lo lejos, un poco hacia
- * arriba: es lo que la hace pensativa sin que tenga que hacer nada.
+ * arriba, echada apenas hacia atrás y con la mano hacia las rodillas: es lo que la hace pensativa sin
+ * que tenga que hacer nada.
  */
 const REPOSO: Record<Postura, Readonly<Record<string, number>>> = {
   parada: {},
   caminando: { cara: 12, mirarX: 12, mirarY: 1 },
-  sentada: { cara: 13, mirarX: 13, mirarY: -7, giro: -1, brazoR: -14, cejas: -3 },
+  sentada: { mirarX: 10, mirarY: -8, giro: -6, cejas: -4, boca: -0.3 },
 };
 
 const QUIETA: PosturaDePaso = {
@@ -689,24 +703,30 @@ export class MascotaVivaComponent {
     const sentada = m.sentar.x;
     const aplastar = limitar(m.aplastar.x, -0.4, 0.4);
     const bajar = m.y.x + sentada * SENTADA_BAJA + p.alzar;
+    const ancho = 1 + aplastar * 0.82;
+    // Se da vuelta a mitad de sentarse, de un cuadro al otro: así giran los dibujos animados.
+    const perfil = sentada > 0.5;
+    this.host.classList.toggle('mv--perfil', perfil);
     set(
       this.elCuerpo(),
       `translate(${n(m.x.x)} ${n(bajar)}) translate(${PIES_X} ${PIES_Y}) rotate(${n(m.giro.x + p.giro)}) ` +
-        `skewX(${n(m.torcer.x)}) scale(${n(1 + aplastar * 0.82)} ${n(1 - aplastar)}) ` +
+        `skewX(${n(m.torcer.x)}) scale(${n(ancho)} ${n(1 - aplastar)}) ` +
         `translate(${-PIES_X} ${-PIES_Y})`,
     );
     // La sombra se achica cuando se despega del piso.
     const altura = limitar(-m.y.x / 900, 0, 0.7);
     set(
       this.elSombra(),
-      `translate(${PIES_X + m.x.x} 930) scale(${n(1 - altura + aplastar * 0.5)} ${n(1 - altura * 0.6)}) translate(${-PIES_X} -930)`,
+      `translate(${n(PIES_X + m.x.x + sentada * 90)} 930) scale(${n(1 - altura + aplastar * 0.5)} ${n(1 - altura * 0.6)}) translate(${-PIES_X} -930)`,
     );
     this.elSombra().nativeElement.style.opacity = n(1 - altura * 0.7);
     set(this.elBrazoL(), `rotate(${n(m.brazoL.x + p.brazoL)} 286.7 557.42)`);
     set(this.elBrazoR(), `rotate(${n(m.brazoR.x + p.brazoR)} 828.71 623.84)`);
     set(this.elFoco(), `rotate(${n(m.foco.x)} 184 470)`);
-    set(this.elCara(), `translate(${n(m.cara.x * 0.5)} 0)`);
-    set(this.elRostro(), `translate(${n(m.cara.x)} ${n(m.aplastar.x * 18)})`);
+    const cara = m.cara.x;
+    const deCara = perfil ? `${CARA_DE_PERFIL} ` : '';
+    set(this.elCara(), `${deCara}translate(${n(cara * 0.5)} 0)`);
+    set(this.elRostro(), `${deCara}translate(${n(cara)} ${n(m.aplastar.x * 18)})`);
     set(this.elOjos(), `translate(${n(m.mirarX.x)} ${n(m.mirarY.x)})`);
     set(this.elCejaL(), `translate(0 ${n(m.cejas.x)}) rotate(${n(m.cejas.x * 0.5)} 463 547)`);
     set(this.elCejaR(), `translate(0 ${n(m.cejas.x)}) rotate(${n(-m.cejas.x * 0.5)} 612 563)`);
@@ -715,18 +735,16 @@ export class MascotaVivaComponent {
       this.elBoca(),
       `translate(526.58 650) scale(${n(1 + m.boca.x * 0.2)} ${n(boca)}) translate(-526.58 -650)`,
     );
-    // Cada pierna por su lado: caminando se cruzan, y sentada se abren y se acortan (escorzo).
-    const escorzo = n(1 - SENTADA_ESCORZO * sentada);
-    const abre = sentada * SENTADA_ABRE;
+    // Cada pierna por su lado: caminando se cruzan, y sentada se estiran hacia adelante, ladera abajo.
+    const cadera = (c: { x: number; y: number }): string =>
+      `translate(${n(c.x * sentada)} ${n(c.y * sentada)})`;
     set(
       this.elPiernaL(),
-      `rotate(${n(m.piernas.x + p.piernaL + m.vaiven.x + abre)} 465 770) ` +
-        `translate(465 770) scale(1 ${escorzo}) translate(-465 -770)`,
+      `${cadera(CADERA_L)} rotate(${n(m.piernas.x + p.piernaL + m.vaiven.x - SENTADA_ESTIRA_L * sentada)} 465 770)`,
     );
     set(
       this.elPiernaR(),
-      `rotate(${n(m.piernas.x + p.piernaR - m.vaiven.x - abre)} 650 790) ` +
-        `translate(650 790) scale(1 ${escorzo}) translate(-650 -790)`,
+      `${cadera(CADERA_R)} rotate(${n(m.piernas.x + p.piernaR - m.vaiven.x - SENTADA_ESTIRA_R * sentada)} 650 790)`,
     );
   }
 }
