@@ -644,6 +644,32 @@ eran de dibujo sino de que el recorrido seguía vivo por debajo del velo.
       mismo. Las etiquetas de operadores salían de a cinco y se leían
       "mergeMapetryrror": ilegible equivale a no haberlo dibujado.
 
+Del prólogo reconstruido en SVG (2026-11-08):
+
+- [ ] Los planos de fondo (cielo, interior, papel) se pintan MÁS ALLÁ del viewBox: con `meet`
+      la escena entera cabe y el sobrante muestra escena, no franjas. Revisado a 16:9, 4:3 y
+      768×1024 en vertical.
+- [ ] El rumbo de un personaje sale de su pose del GUION, nunca de la pintada. Con el balanceo
+      y los muelles adentro, una nave quieta en la ronda se inclinaba 30° por respirar; y el
+      vaivén de la exploradora daba vuelta su `mira` y la hacía volar marcha atrás.
+- [ ] Lo plano de un objeto que escala se desvanece antes de que la escala lo delate: en el
+      salto, los anillos punteados de la anomalía a ×5 se leían como rectángulos volando.
+- [ ] La trayectoria de un personaje no cruza un hito del fondo: la exploradora pasaba por
+      encima del planeta de casa. Se mueve el hito, no se le recorta el camino.
+- [ ] Quién habla va en una caja HTML con su nombre y el punto del color de su antena; la voz
+      sin cuerpo va arriba, dorada y sin caja; el grito de todos, al centro. Nada de texto
+      dentro del SVG.
+- [ ] Angie nace del choque como el componente real (`app-mascota-viva`), no como un dibujo:
+      es la misma que la colina y la misma que recibe en la construcción de Tusi.
+- [ ] Toda reacción pasa por `impacto(x, y, fuerza)`: toques, la bola del grito, el choque.
+      Tocar una nave la sacude y vuelve a reposo; tocar el cielo deja chispas; tocar nunca
+      pausa ni termina.
+- [ ] `?prologo=<id de línea>` arranca el prólogo en esa línea, solo en dev. Lo lee el módulo
+      de la vista al cargar: la sincronía de la URL lo borra antes de que el prólogo arranque.
+- [ ] El prólogo carga diferido, recién al bajar de la colina: en el bundle inicial pasaba el
+      presupuesto por 21 kB. Si el pedazo no llega, se sigue como si se hubiera saltado: nunca
+      queda la noche sin construcción.
+
 ## Cinemáticas de capítulo (que se sienta un juego, no un video)
 
 Lista escrita de lo que "que se sienta como la cinemática de un RPG" significa acá. Cada ítem es
@@ -690,7 +716,8 @@ verificable con `/cine/<n>?cuadro=<beat>` (fotograma congelado) o `/cine/<n>` (r
 - [ ] Nada de `speechSynthesis`: las voces de los personajes son blips sintetizados. El ritmo de
       un diálogo no puede cambiar según qué voces tenga instaladas la máquina.
 - [ ] Un solo interruptor de sonido: silenciar en la intro, el prólogo o una cinemática silencia
-      en todos (preferencia `signals-sonido`).
+      en todos (preferencia `signals-sonido`). El prólogo ya no tiene botón de voces aparte:
+      apagar el sonido calla también a los personajes.
 - [ ] Silencio al acertar: ningún sonido de "¡bien!" al establecer un sistema.
 - [ ] La música de la despedida de Angie (`integrada-vista/musica-del-presentimiento.ts`) arranca
       con el toque, no antes: el contexto se abre con ese gesto. Sale por `sonido().salida()`:
