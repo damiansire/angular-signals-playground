@@ -33,6 +33,9 @@ convertidos a `linear()` (`libs/resorte.ts`), el iris de entrada y salida es una
 y cada escena se carga diferida. El final lee la partida: solo se encienden los capítulos
 establecidos.
 
+> Reemplazado en parte por el [ADR 0004](./0004-la-cinematica-se-juega-en-cada-llegada.md): la
+> cinemática de un capítulo ya no se juega una vez por partida sino en cada llegada a su átomo.
+
 **Bitácora de a bordo**: el repaso decidido ("leer tu propio cuaderno"). Lista los capítulos con
 su ley (solo si está establecido), los sub-niveles sellados y el acceso a volver a ver
 cinemáticas y el prólogo. No es un examen.

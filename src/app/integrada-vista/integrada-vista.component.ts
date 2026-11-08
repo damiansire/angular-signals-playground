@@ -580,13 +580,14 @@ export class IntegradaVistaComponent {
    */
   private readonly onWhere = (conceptIdx: number, subIdx: number): void => {
     this.location.replaceState('/', buildWhereQuery(conceptIdx, subIdx));
+    const llego = conceptIdx !== this.donde.concepto;
     // Llegar a otro átomo es lo único que cambia lo que dice el globo: la mascota lo anuncia.
-    if (subIdx === -1 && conceptIdx >= 0 && conceptIdx !== this.donde.concepto) {
+    if (subIdx === -1 && conceptIdx >= 0 && llego) {
       this.guia()?.saltar(0.8);
       this.sacudirGlobo();
     }
     this.donde = { concepto: conceptIdx, sub: subIdx };
-    this.programarCinematica(conceptIdx, subIdx);
+    this.programarCinematica(conceptIdx, subIdx, llego);
   };
 
   /** Teclado o lector de pantalla: el puntero ya lo resuelve la mascota con su física. */
@@ -610,14 +611,16 @@ export class IntegradaVistaComponent {
   }
 
   /**
-   * La cinemática de un capítulo se juega la primera vez que el jugador se detiene en su parada de
-   * la molécula (no adentro de un sub-nivel: un deep-link a un ejercicio no se interrumpe).
+   * La cinemática de un capítulo se juega cada vez que el jugador llega a su parada de la molécula,
+   * aunque ya la haya visto (ADR 0004). Salir de un sub-nivel al átomo del mismo capítulo no es
+   * llegar: repetirla ahí cortaría cada ejercicio. Adentro de un sub-nivel tampoco se juega, para
+   * que un deep-link a un ejercicio no se interrumpa.
    */
-  private programarCinematica(concepto: number, sub: number): void {
+  private programarCinematica(concepto: number, sub: number, llego: boolean): void {
     if (this.esperaCinematica) clearTimeout(this.esperaCinematica);
     this.esperaCinematica = null;
-    if (concepto < 0 || sub !== -1 || this.cinematica()) return;
-    if (this.partida().cinematicas.includes(concepto) || concepto > CAPITULO_FINAL) return;
+    if (concepto < 0 || sub !== -1 || this.cinematica() || concepto > CAPITULO_FINAL) return;
+    if (!llego && this.partida().cinematicas.includes(concepto)) return;
     // Se adelanta la carga del guion mientras corre la espera: al abrir ya está.
     void this.cargarDatosCinematicas();
     this.esperaCinematica = setTimeout(() => {
