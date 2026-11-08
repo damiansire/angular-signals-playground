@@ -278,11 +278,6 @@ export const routes: Routes = [
       import('./practice/cart/cart-example.component').then((m) => m.CartExampleComponent),
   },
   {
-    path: 'studio',
-    loadComponent: () => import('./studio/studio.component').then((m) => m.StudioComponent),
-    title: 'Estudio de Cinemática · Angular Signals',
-  },
-  {
     path: 'cine/:capitulo',
     loadComponent: () =>
       import('./integrada-vista/cinematicas/cine-preview.component').then(
