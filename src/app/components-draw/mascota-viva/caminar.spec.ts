@@ -70,6 +70,37 @@ describe('el paso de la mascota', () => {
     for (const fase of [0.1, 0.5, 1.3]) expect(posturaDePaso(fase).giro).toBeGreaterThan(0);
   });
 
+  describe('hacia la izquierda', () => {
+    it('es el mismo paso en espejo: el rebote no cambia', () => {
+      for (let fase = 0; fase < 3; fase += 0.17) {
+        const der = posturaDePaso(fase);
+        const izq = posturaDePaso(fase, APERTURA, -1);
+        expect(izq.piernaL).toBeCloseTo(-der.piernaL, 9);
+        expect(izq.piernaR).toBeCloseTo(-der.piernaR, 9);
+        expect(izq.brazoL).toBeCloseTo(-der.brazoL, 9);
+        expect(izq.brazoR).toBeCloseTo(-der.brazoR, 9);
+        expect(izq.alzar).toBeCloseTo(der.alzar, 9);
+      }
+    });
+
+    it('el pie apoyado barre hacia la derecha una zancada por paso: no patina', () => {
+      for (const paso of [0, 1, 2]) {
+        const desde = posturaDePaso(paso + 0.001, APERTURA, -1);
+        const hasta = posturaDePaso(paso + 0.999, APERTURA, -1);
+        // Ahora atrás es la derecha: el apoyado es el que gira hacia ese lado (su giro decrece).
+        const apoyado = desde.piernaL > hasta.piernaL ? 'piernaL' : 'piernaR';
+        const barrido = pie(hasta[apoyado], LARGO[apoyado]) - pie(desde[apoyado], LARGO[apoyado]);
+        expect(barrido).withContext(`paso ${paso}`).toBeCloseTo(zancada(), 0);
+      }
+    });
+
+    it('se inclina hacia la izquierda', () => {
+      for (const fase of [0.1, 0.5, 1.3]) {
+        expect(posturaDePaso(fase, APERTURA, -1).giro).toBeLessThan(0);
+      }
+    });
+  });
+
   it('la apertura y la zancada se corresponden', () => {
     expect(aperturaPara(zancada())).toBeCloseTo(APERTURA, 6);
     expect(aperturaPara(zancada(12))).toBeCloseTo(12, 6);

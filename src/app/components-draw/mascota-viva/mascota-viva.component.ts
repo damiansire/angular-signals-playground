@@ -115,6 +115,9 @@ const REPOSO: Record<Postura, Readonly<Record<string, number>>> = {
     : { mirarX: -4, mirarY: -2, giro: -6, cejas: -4, boca: -0.3 },
 };
 
+/** Lo del reposo caminando que apunta hacia donde va: hacia la izquierda va en espejo. */
+const LADEADOS = new Set(['cara', 'mirarX']);
+
 const QUIETA: PosturaDePaso = {
   piernaL: 0,
   piernaR: 0,
@@ -215,6 +218,8 @@ export class MascotaVivaComponent {
   private postura: Postura = 'parada';
   /** El paso no es un muelle: lo dicta quien la mueve, cuadro a cuadro, según lo que avanzó. */
   private pisada: PosturaDePaso = QUIETA;
+  /** Hacia dónde camina: la cara y los ojos van para ese lado. */
+  private rumbo: 1 | -1 = 1;
 
   private readonly destroyRef = inject(DestroyRef);
 
@@ -283,9 +288,12 @@ export class MascotaVivaComponent {
    * Da el paso que corresponde a `fase` (en pasos desde que arrancó). Quien la lleva por la pantalla
    * calcula la fase con lo que avanzó: así el pie apoyado no patina.
    */
-  caminar(fase: number, apertura?: number): void {
-    if (this.postura !== 'caminando') this.cambiarPostura('caminando');
-    this.pisada = posturaDePaso(fase, apertura);
+  caminar(fase: number, apertura?: number, rumbo: 1 | -1 = 1): void {
+    if (this.postura !== 'caminando' || this.rumbo !== rumbo) {
+      this.rumbo = rumbo;
+      this.cambiarPostura('caminando');
+    }
+    this.pisada = posturaDePaso(fase, apertura, rumbo);
     this.pintar();
   }
 
@@ -667,9 +675,11 @@ export class MascotaVivaComponent {
    */
   private calmar(): void {
     const reposo = REPOSO[this.postura];
+    const caminando = this.postura === 'caminando';
     for (const [nombre, k] of Object.entries(this.m)) {
       if (k === this.m.y || k === this.m.sentar) continue;
-      k.destino = reposo[nombre] ?? 0;
+      const lado = caminando && LADEADOS.has(nombre) ? this.rumbo : 1;
+      k.destino = (reposo[nombre] ?? 0) * lado;
     }
   }
 

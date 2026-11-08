@@ -41,8 +41,11 @@ export interface PosturaDePaso {
  * atrás a ritmo parejo (si el ritmo se curvara, el pie patinaría a mitad del paso) y el otro lo cruza
  * en el aire; en cada paso entero se cambian. Con las piernas juntas (media fase) el cuerpo queda
  * arriba, y con las piernas abiertas, abajo: ese rebote es lo que hace que se lea como un paso.
+ *
+ * `rumbo` -1 es caminar hacia la izquierda: el mismo paso en espejo. No se da vuelta el dibujo
+ * entero: la lamparita cambiaría de lado y saltaría de un cuadro al otro al sentarse.
  */
-export function posturaDePaso(fase: number, apertura = APERTURA): PosturaDePaso {
+export function posturaDePaso(fase: number, apertura = APERTURA, rumbo: 1 | -1 = 1): PosturaDePaso {
   const paso = Math.floor(fase);
   const u = fase - paso;
   const lado = paso % 2 === 0 ? 1 : -1;
@@ -53,13 +56,13 @@ export function posturaDePaso(fase: number, apertura = APERTURA): PosturaDePaso 
   const barridoR = grados((seno * LARGO_DE_PIERNA) / LARGO_DE_PIERNA_R);
   const arco = Math.sin(u * Math.PI);
   return {
-    piernaL: lado * barrido,
-    piernaR: -lado * barridoR,
+    piernaL: rumbo * lado * barrido,
+    piernaR: -rumbo * lado * barridoR,
     alzar: -10 * arco,
-    giro: 2 + 1.2 * lado * (u - 0.5),
+    giro: rumbo * (2 + 1.2 * lado * (u - 0.5)),
     // Cada brazo va a contratiempo de la pierna de su lado, y más corto: es lo que suelta el cuerpo.
-    brazoL: -lado * barrido * 0.45,
-    brazoR: lado * barrido * 0.45,
+    brazoL: -rumbo * lado * barrido * 0.45,
+    brazoR: rumbo * lado * barrido * 0.45,
   };
 }
 
