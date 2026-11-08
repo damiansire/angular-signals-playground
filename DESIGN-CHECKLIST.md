@@ -299,6 +299,18 @@ puede alcanzar" son dos cosas distintas y hay que chequear las dos.
       sin átomos amontonados); un cambio puede romper solo una de las dos.
 - [ ] URL sync bidireccional: navegar actualiza la URL Y pegar una URL
       restaura el estado (nivel y sub-nivel). Testear ambas direcciones.
+- [ ] Retomar al recargar (ADR 0005), probado con input real: con un punto del prólogo, aviso →
+      colina → entrar arranca en esa línea; con un lugar del recorrido, abre ahí sin pasar por la
+      colina; con el prólogo pasado, entrar va a la construcción. La landing del arranque no pisa el
+      punto del prólogo: la vista la reporta antes de que se entre.
+- [ ] Un bucle que avanza un índice no lo hace adentro de una llamada con `?.`: sin quien escuche,
+      el argumento no se evalúa y el bucle no termina. Pasó con `alPasarPunto` y colgaba el prólogo
+      abierto desde la bitácora (y a Karma, que se desconectaba sin nombrar el spec).
+- [ ] "Empezar de cero" está en la barra, en el HUD del prólogo y en la colina, y pide un segundo
+      toque que caduca. Su globo en la colina es corto: el largo tapaba el título a 1024×768, y el
+      del "¿seguro?" se ve sin apuntar. Borrar recarga SIN la query.
+- [ ] Los specs que montan la vista limpian la partida antes y después: la vista guarda el punto
+      apenas el recorrido se mueve, y cada test le dejaba su lugar al siguiente.
 - [ ] Probar en la ruta ancha Y en el embed angosto: un fix de layout
       (`whitespace-nowrap`, etc.) debe verificarse en los dos contextos.
 - [ ] Ningún bloque de código se aprieta por debajo de ~27 columnas: por debajo de 1200 px la fila
