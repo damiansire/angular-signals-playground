@@ -392,13 +392,19 @@ function iniciarTransicion(
   cambio: () => void,
 ): { finished: Promise<unknown> } | null {
   const doc = document as Document & {
-    startViewTransition?: (cb: () => void) => { finished: Promise<unknown> };
+    startViewTransition?: (cb: () => void) => {
+      finished: Promise<unknown>;
+      ready: Promise<unknown>;
+    };
   };
   if (typeof doc.startViewTransition !== 'function') return null;
   raiz.classList.add(clase);
   try {
     const vt = doc.startViewTransition(cambio);
-    vt.finished.finally(() => raiz.classList.remove(clase));
+    // Una transición abortada (otra que arranca encima, o la pestaña que se oculta) rechaza `ready`,
+    // pero el cambio de DOM igual se aplica: no hay nada que hacer, salvo no ensuciar la consola.
+    vt.ready.catch(() => undefined);
+    vt.finished.catch(() => undefined).finally(() => raiz.classList.remove(clase));
     return vt;
   } catch {
     raiz.classList.remove(clase);
