@@ -18,7 +18,7 @@ import {
   signal,
   viewChild,
 } from '@angular/core';
-import { Location } from '@angular/common';
+import { Location, NgTemplateOutlet } from '@angular/common';
 import { RouterLink } from '@angular/router';
 
 import { MascotaVivaComponent } from '../components-draw/mascota-viva/mascota-viva.component';
@@ -37,7 +37,7 @@ import {
 import { initMundoQueResponde } from './mundo-que-responde';
 import { LO_QUE_DICE_EL_SOL, LO_QUE_RESPONDE_ANGIE } from './intercambio-del-sol';
 import type { HuecoDelPrologo } from './operadores-del-prologo';
-import type { PaginaDelManual } from './manual-de-a-bordo';
+import { PAGINAS_DEL_MANUAL, pasoEnElManual, type PaginaDelManual } from './manual-de-a-bordo';
 import { HojaDelHuecoComponent } from './hoja-del-hueco/hoja-del-hueco.component';
 import { vigilarEstampado } from './estampado-tardio';
 import { AYUDA_DE_ANGIE } from '../components-atom/manipulable-system/manipulable-system.component';
@@ -99,6 +99,7 @@ const PROLOGO_PEDIDO =
 @Component({
   selector: 'app-integrada-vista',
   imports: [
+    NgTemplateOutlet,
     RouterLink,
     CinematicaComponent,
     BitacoraComponent,
@@ -294,13 +295,24 @@ export class IntegradaVistaComponent {
    * El manual de a bordo del prólogo. El motor frena la historia con la orden del capitán ya
    * leída y pide `leerManual`; esto muestra una página por vez y resuelve al cerrarlo. Se lee a
    * modo de estudio: se puede ir y volver, y cerrarlo no exige resolver nada (ADR 0002).
+   *
+   * También se abre suelto desde la bitácora, para quien salteó el prólogo. Suelto va afuera del
+   * escenario; en la historia va adentro del prólogo, porque la pantalla completa es la del prólogo
+   * y lo que queda afuera no se ve.
    */
   protected readonly paginas = signal<readonly PaginaDelManual[]>([]);
   protected readonly pagina = signal<number | null>(null);
+  protected readonly manualSuelto = signal(false);
   protected readonly paginaActual = computed(() => {
     const i = this.pagina();
     return i === null ? null : (this.paginas()[i] ?? null);
   });
+  protected readonly paginaEnElPrologo = computed(() =>
+    this.manualSuelto() ? null : this.paginaActual(),
+  );
+  protected readonly paginaSuelta = computed(() =>
+    this.manualSuelto() ? this.paginaActual() : null,
+  );
   private readonly hojaDelManual = viewChild<ElementRef<HTMLElement>>('hojaDelManual');
   private readonly pantallaDelManual = viewChild<ElementRef<HTMLElement>>('pantallaDelManual');
   private terminarManual: (() => void) | null = null;
@@ -309,8 +321,12 @@ export class IntegradaVistaComponent {
     return new Promise((listo) => {
       this.paginas.set(paginas);
       this.terminarManual = () => {
-        // El botón con el foco desaparece con la hoja: el foco vuelve al prólogo, no al `body`.
-        this.host.querySelector<HTMLElement>('.prologo__pause')?.focus({ preventScroll: true });
+        // El botón con el foco desaparece con la hoja: el foco vuelve a quien lo abrió, no al `body`.
+        // Suelto, eso está en el escenario, que se prende antes para poder recibirlo.
+        if (this.manualSuelto()) this.escenarioInerte(false);
+        this.host
+          .querySelector<HTMLElement>(this.manualSuelto() ? '.tb-bitacora' : '.prologo__pause')
+          ?.focus({ preventScroll: true });
         this.pagina.set(null);
         this.terminarManual = null;
         listo();
@@ -321,17 +337,31 @@ export class IntegradaVistaComponent {
 
   /**
    * Escape cierra el manual y las flechas de costado pasan de página, salvo adentro de la pantalla,
-   * donde las flechas pueden ser de la demo. El `preventDefault` aparta al recorrido de atrás, que
-   * escucha las flechas en `window`.
+   * donde las flechas pueden ser de la demo. Las de leer scrollean la hoja a mano: el
+   * `preventDefault` aparta al recorrido de atrás, que escucha las flechas en `window`, y también
+   * frena el scroll nativo.
    */
   protected teclaDelManual(e: KeyboardEvent): void {
-    if (this.pagina() === null || e.defaultPrevented) return;
-    const enLaPantalla = (e.target as Element | null)?.closest('.subhost');
+    const hoja = this.hojaDelManual()?.nativeElement;
+    if (this.pagina() === null || !hoja || e.defaultPrevented) return;
+    const objetivo = e.target instanceof Element ? e.target : null;
+    const enLaPantalla = objetivo?.closest('.subhost');
     if (e.key === 'Escape') this.terminarManual?.();
     else if (e.key === 'ArrowRight' && !enLaPantalla) this.pasarPagina(1);
     else if (e.key === 'ArrowLeft' && !enLaPantalla) this.pasarPagina(-1);
-    else return;
+    else {
+      // En la historia, una tecla afuera de la hoja es del prólogo (la pausa, por ejemplo). Un botón
+      // que se rehace al tocarlo deja el foco en el `body`: eso sigue siendo de la hoja.
+      const deLaHoja = this.manualSuelto() || objetivo === document.body || hoja.contains(objetivo);
+      const paso = deLaHoja ? pasoEnElManual(e, hoja.clientHeight, hoja.scrollHeight) : null;
+      if (paso === null) return;
+      hoja.scrollBy({ top: paso });
+    }
     e.preventDefault();
+  }
+
+  protected cerrarManual(): void {
+    this.terminarManual?.();
   }
 
   protected pasarPagina(paso: 1 | -1): void {
@@ -626,6 +656,17 @@ export class IntegradaVistaComponent {
     const stage = this.host.querySelector<HTMLElement>('#stage');
     if (stage) stage.scrollTop = 0;
     this.abrirPrologo(() => undefined);
+  }
+
+  /**
+   * El manual suelto, sin la escena: quien salteó el prólogo también lo puede leer. El escenario
+   * sigue apagado mientras está abierto, como con la bitácora.
+   */
+  protected async verManualDesdeBitacora(): Promise<void> {
+    this.bitacoraAbierta.set(false);
+    this.manualSuelto.set(true);
+    await this.leerManual(PAGINAS_DEL_MANUAL);
+    this.manualSuelto.set(false);
   }
 
   /** Borrar la partida y recargar: el motor arma la molécula desde lo guardado, y ya no hay nada. */

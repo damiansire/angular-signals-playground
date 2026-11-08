@@ -2133,54 +2133,16 @@ export function initPrologoAnomalia(host: HTMLElement, opts: PrologoOpciones): (
   const manualDe = (t: EventTarget | null): HTMLElement | null =>
     t instanceof Element ? t.closest<HTMLElement>('.prologo__manual') : null;
 
-  /** Cuánto mueve cada tecla al manual, como en una página; `null` si la tecla no desplaza. */
-  function pasoEnElManual(e: KeyboardEvent, manual: HTMLElement): number | null {
-    const objetivo = e.target as HTMLElement;
-    if (objetivo.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(objetivo.tagName)) {
-      return null;
-    }
-    const pagina = manual.clientHeight * 0.85;
-    switch (e.key) {
-      case 'ArrowDown':
-        return 48;
-      case 'ArrowUp':
-        return -48;
-      case 'PageDown':
-        return pagina;
-      case 'PageUp':
-        return -pagina;
-      case 'Home':
-        return -manual.scrollHeight;
-      case 'End':
-        return manual.scrollHeight;
-      case ' ':
-        // Sobre un botón, el espacio lo aprieta.
-        return objetivo.closest('button, a, [role="button"]')
-          ? null
-          : e.shiftKey
-            ? -pagina
-            : pagina;
-      default:
-        return null;
-    }
-  }
-
   const alTeclado = (e: KeyboardEvent): void => {
     // En `document`: colgado del contenedor no se dispara nunca, el foco jamás está ahí.
     if (terminado || raiz.hidden) return;
-    // Un botón que se rehace al tocarlo deja el foco en el `body`: con el manual abierto, sigue siendo
-    // del manual.
-    const manual =
+    // Las teclas del manual las atiende la vista, que lo muestra (`pasoEnElManual`). Un botón que se
+    // rehace al tocarlo deja el foco en el `body`: con el manual abierto, sigue siendo del manual.
+    // Leyendo el manual el espacio no pausa: la historia ya está esperando.
+    if (
       manualDe(e.target) ??
-      (e.target === document.body ? raiz.querySelector<HTMLElement>('.prologo__manual') : null);
-    if (manual) {
-      const paso = pasoEnElManual(e, manual);
-      // A mano y con `preventDefault`: el recorrido de atrás también escucha estas teclas.
-      if (paso !== null) {
-        e.preventDefault();
-        manual.scrollBy({ top: paso });
-      }
-      // Leyendo el manual el espacio no pausa: la historia ya está esperando.
+      (e.target === document.body && raiz.querySelector('.prologo__manual'))
+    ) {
       return;
     }
     // El recorrido de atrás escucha las flechas en `window` y el `inert` no alcanza a su scroller.

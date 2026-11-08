@@ -67,6 +67,20 @@ describe('BitacoraComponent', () => {
     expect(pedido).toBe(1);
   });
 
+  it('el manual de a bordo se abre aunque no se haya visto el prólogo', async () => {
+    const fixture = await montar(PARTIDA_VACIA);
+    const botones = [
+      ...fixture.nativeElement.querySelectorAll('.bita__pie .bita__accion'),
+    ] as HTMLButtonElement[];
+    const manual = botones.find((b) => b.textContent?.includes('Manual de a bordo'));
+    expect(manual).withContext('botón del manual').toBeDefined();
+
+    let pidio = false;
+    fixture.componentInstance.verManual.subscribe(() => (pidio = true));
+    manual!.click();
+    expect(pidio).toBeTrue();
+  });
+
   it('el final aparece en la lista recién cuando se vio', async () => {
     const sinFinal = await montar(PARTIDA_VACIA);
     expect(sinFinal.nativeElement.querySelector('.bita__cap--final')).toBeNull();

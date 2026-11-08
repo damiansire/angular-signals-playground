@@ -64,3 +64,43 @@ export const PAGINAS_DEL_MANUAL: readonly PaginaDelManual[] = [
       ),
   },
 ];
+
+/** Lo que importa de una tecla para saber cuánto mueve al manual. */
+export interface TeclaEnElManual {
+  readonly key: string;
+  readonly shiftKey: boolean;
+  readonly target: EventTarget | null;
+}
+
+/**
+ * Cuánto mueve cada tecla a la hoja del manual, como en una página; `null` si esa tecla no
+ * desplaza ahí. El manual scrollea a mano porque el recorrido de atrás también escucha estas teclas,
+ * y para apartarlo hay que frenarlas con `preventDefault`, que también frena el scroll nativo.
+ */
+export function pasoEnElManual(tecla: TeclaEnElManual, alto: number, total: number): number | null {
+  const objetivo = tecla.target instanceof HTMLElement ? tecla.target : null;
+  if (objetivo?.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(objetivo?.tagName ?? '')) {
+    return null;
+  }
+  const pagina = alto * 0.85;
+  switch (tecla.key) {
+    case 'ArrowDown':
+      return 48;
+    case 'ArrowUp':
+      return -48;
+    case 'PageDown':
+      return pagina;
+    case 'PageUp':
+      return -pagina;
+    case 'Home':
+      return -total;
+    case 'End':
+      return total;
+    case ' ':
+      // Sobre un botón, el espacio lo aprieta.
+      if (objetivo?.closest('button, a, [role="button"]')) return null;
+      return tecla.shiftKey ? -pagina : pagina;
+    default:
+      return null;
+  }
+}

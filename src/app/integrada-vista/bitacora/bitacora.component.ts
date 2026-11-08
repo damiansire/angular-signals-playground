@@ -55,6 +55,8 @@ export class BitacoraComponent {
 
   readonly verCinematica = output<number>();
   readonly verPrologo = output<void>();
+  /** El manual de a bordo sin la escena: también lo lee quien salteó el prólogo. */
+  readonly verManual = output<void>();
   readonly borrar = output<void>();
   readonly cerrar = output<void>();
 

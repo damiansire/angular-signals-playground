@@ -192,6 +192,7 @@
 }
 
 .bita__pie {
+  flex-wrap: wrap;
   display: flex;
   justify-content: space-between;
   gap: 12px;

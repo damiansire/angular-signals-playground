@@ -405,7 +405,7 @@ describe('initPrologoAnomalia', () => {
       expect(m.pedido).toHaveBeenCalledTimes(1);
     });
 
-    it('adentro del manual el espacio y las flechas lo desplazan, y la historia no se pausa', () => {
+    it('adentro del manual las teclas son del manual, y el espacio no pausa la historia', () => {
       const m = conManual('anom-velocidad');
       m.cuadros.avanzar(400);
       const raiz = m.host.querySelector<HTMLElement>('.prologo')!;
@@ -413,19 +413,20 @@ describe('initPrologoAnomalia', () => {
       manual.className = 'prologo__manual';
       manual.tabIndex = -1;
       raiz.append(manual);
-      const desplazar = spyOn(manual, 'scrollBy');
+      const tecla = (destino: EventTarget, key: string, code = key) => {
+        const e = new KeyboardEvent('keydown', { key, code, bubbles: true, cancelable: true });
+        destino.dispatchEvent(e);
+        return e;
+      };
 
-      const espacio = new KeyboardEvent('keydown', {
-        key: ' ',
-        code: 'Space',
-        bubbles: true,
-        cancelable: true,
-      });
-      manual.dispatchEvent(espacio);
-      expect(espacio.defaultPrevented).toBeTrue();
-      expect(desplazar).toHaveBeenCalled();
+      // Las desplaza la vista, que muestra el manual (`pasoEnElManual`): el motor no las toca.
+      expect(tecla(manual, ' ', 'Space').defaultPrevented).toBeFalse();
+      expect(tecla(manual, 'ArrowDown').defaultPrevented).toBeFalse();
+      expect(tecla(document.body, 'ArrowDown').defaultPrevented).toBeFalse();
       const pausa = m.host.querySelector<HTMLButtonElement>('.prologo__pause')!;
       expect(pausa.getAttribute('aria-pressed')).toBe('false');
+      // Afuera del manual siguen frenadas: el recorrido de atrás las escucha.
+      expect(tecla(pausa, 'ArrowDown').defaultPrevented).toBeTrue();
 
       // La rueda scrollea el manual, pero no llega al recorrido de atrás, que la escucha más arriba.
       const atras = jasmine.createSpy('rueda del recorrido');
