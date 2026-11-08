@@ -1782,14 +1782,15 @@ export function initMolecule(
   };
 
   // El cierre del sub-nivel avisa por evento del DOM cuando el sistema queda sano. Es a propósito
-  // el acoplamiento más flojo posible: el átomo no conoce al motor ni el motor al átomo, y el
-  // evento solo puede venir de la card montada, así que se atribuye al concepto en pantalla.
+  // el acoplamiento más flojo posible: el átomo no conoce al motor ni el motor al átomo.
   const onEstablished = (e: Event): void => {
     // Por el target y no por `liveConcept`: en el fade de salida la card del concepto anterior sigue
-    // viva (amt > 0.6) cuando `liveConcept` ya es el siguiente.
+    // viva (amt > 0.6) cuando `liveConcept` ya es el siguiente. Y lo que no viene de una card no
+    // cuenta: las hojas del prólogo (el manual, el árbol) también están en el escenario, y su
+    // desafío caía en el concepto en pantalla, que nunca se había tocado.
     const card = (e.target as Element | null)?.closest('.card');
-    const i = C.findIndex((cc) => cc.card === card);
-    const concepto = i >= 0 ? i : liveConcept;
+    const concepto = C.findIndex((cc) => cc.card === card);
+    if (concepto < 0) return;
     const sub = C[concepto].subIdx;
     established.add(concepto);
     subsEstablecidos.add(`${concepto}/${sub}`);

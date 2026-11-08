@@ -438,6 +438,19 @@ describe('IntegradaVistaComponent', () => {
       fixture.destroy();
     });
 
+    it('un desafío de la historia (el manual, el árbol) no marca nada en el recorrido', async () => {
+      const fixture = await montar();
+      await hastaElArranque(fixture.nativeElement);
+      // Las hojas del prólogo viven adentro del escenario, pero no en una card de la molécula.
+      const hoja = document.createElement('section');
+      fixture.nativeElement.querySelector('#stage').append(hoja);
+      hoja.dispatchEvent(new CustomEvent('sistema-establecido', { bubbles: true }));
+
+      const guardado = JSON.parse(localStorage.getItem(CLAVE) ?? '{}');
+      expect(guardado.establecidos ?? []).toEqual([]);
+      fixture.destroy();
+    });
+
     it('al recargar sin link, el recorrido abre en el átomo donde quedó la partida', async () => {
       localStorage.setItem(
         CLAVE,
