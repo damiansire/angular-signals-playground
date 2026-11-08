@@ -498,7 +498,11 @@ entrar desarma a Angie en luz y se hace noche, la costura con el prólogo.
       tocar los pies de Angie ni los interruptores.
 - [ ] Se entra tocando en cualquier lugar de la escena, no solo la lamparita: apuntarle a un foco
       chico era un examen de puntería. Arrastrar a Angie (más de 8 px entre bajar y soltar) no
-      entra, ni tocar un control. El llamado dice "Tocá para entrar", sin nombrar la idea.
+      entra, ni tocar un control. El llamado dice "Haz click para iniciar las aventuras", sin
+      nombrar la idea, y tiene vida: un cursor hace click al empezar cada vuelta de 2,6 s, la frase
+      se mueve en ola detrás (causa y reacción) y la chispa del final salta cuando la ola llega.
+      Defecto resuelto: "Tocá para entrar" solo parpadeaba en opacidad y se leía apagado. Llega
+      después del título (no antes: competía con la entrada de las letras).
 - [ ] Sonido y pausa son dos fichas de ícono arriba a la izquierda, con su texto en un globo al
       pasar o enfocar. Abajo, al lado del llamado, eran dos píldoras oscuras que competían con él.
       Probarlas con click REAL: el topbar invisible (opacidad 0, z 6) tapaba las fichas y se comía
@@ -506,7 +510,19 @@ entrar desarma a Angie en luz y se hace noche, la costura con el prólogo.
       `elementFromPoint` en el centro de cada ficha.
 - [ ] El título es el de la historia ("Las aventuras de Angie por el SignalVerso") y la bajada dice
       qué es. Medir título, bajada, sol y fichas sin solapes en los mismos seis anchos, y el
-      título en dos renglones.
+      título en dos renglones. Va en Baloo 2 (800 el título, 600 la bajada): redonda y gruesa,
+      de dibujo animado; la Archivo, recta, era la de un cartel. Entra cuando se va el aviso
+      (`ini--revelada`, que pone `revelar()`), no al cargar: detrás del aviso nadie lo veía. Las
+      letras caen y rebotan de a una, de punta a punta (`letrasDelTitulo` numera sin reiniciar en
+      el segundo renglón); la bajada llega después, de a una palabra que sube y se aclara; y
+      "SignalVerso" se mece cada tanto, lo único del título que sigue vivo. El lector lee la frase
+      entera (`sr-only`); las letras van `aria-hidden`. Con movimiento reducido están quietas y a
+      la vista.
+- [ ] El sol es un sol dibujado y vivo: cuerpo con degradé y brillo que respira, corona que late,
+      rayos alternados largo/corto que crecen desde su base (no desde el centro: se despegaban) en
+      una ola que da la vuelta, y todo gira despacio. Defecto resuelto: el átomo con anillos de
+      órbita y dos puntos de color se leía raro, y los rayos de un degradé cónico que giraban en
+      90 s parecían pintados. En vertical, las puntas de los rayos no salen de la pantalla.
 - [ ] Angie tiene vida propia mientras espera (`vidaPropia`; parada, porque sentada hace solo lo
       tranquilo, ver el paseo más abajo): se balancea, los brazos y la lamparita
       se mecen a destiempo, y cada 1.6-4.2 s se le ocurre algo (saluda, mira la idea, mira al sol,
@@ -570,8 +586,9 @@ entrar desarma a Angie en luz y se hace noche, la costura con el prólogo.
       medio con los auriculares puestos (L y R) y lentes de sol, accesorios proyectados en su
       propio dibujo (`mvDetras`, `mvCara`, `mvDelante` en `app-mascota-viva`) para que la sigan en
       cada golpe; las cejas asoman por arriba del marco. No hay botón a la vista: la invitación es
-      texto ("Tocá en cualquier lado para continuar") con una ola que la recorre y un toque que
-      late; sigue siendo un `<button>` para teclado y lector, sin anillo de foco (el foco llega solo
+      texto ("Haz click en cualquier lado para continuar") con un cursor que hace click y una ola
+      que sale de ese click, separada del título con aire (pegados se leían como un renglón
+      partido); sigue siendo un `<button>` para teclado y lector, sin anillo de foco (el foco llega solo
       al cargar y lo volvía botón). Arriba a la derecha, el control de sonido: apagado, las copas
       pierden el color, las ondas se cierran y se dibuja la cruz; tocar en cualquier lado entonces
       continúa sin sonido y los botones de sonido de la colina lo reflejan. Con sonido, su toque es
@@ -601,6 +618,18 @@ entrar desarma a Angie en luz y se hace noche, la costura con el prólogo.
       alba (el rosado de abajo competía con Angie), el título es crema con un solo acento rosa en
       "auriculares" y "volumen", y la invitación va en crema suave con la ola en amarillo; el foco
       de teclado es una línea rosa debajo, no un fondo de pastilla que la volvía botón.
+- [ ] Mientras espera, Angie ESCUCHA la música de sus auriculares (`escuchar`, pulso de
+      `TIEMPO_MS` = 600 ms): cabecea en cada tiempo, se mece cada medio compás con la cabeza
+      adelantada, marca el pulso con un pie y después con el otro, y le salen notas de las copas.
+      El compás (2,4 s) dura lo mismo que el latido de las ondas. Sin sonido no hay música: deja de
+      moverse (`dejarDeEscuchar`) y vuelve su vida propia. La prueba de auriculares también corta
+      la música. El primer tiempo llega con el timer, no al montar: si la vista se destruye
+      enseguida, no queda un cuadro pedido al motor (lo vigila el contrato de teardown).
+- [ ] La colina tiene su música (`musica-de-la-colina.ts`): melancólica, en re menor como la
+      despedida, una vuelta de cuatro acordes que termina suspendida y vuelve a empezar. Cada vuelta
+      se agenda en el reloj del audio pegada a la anterior (un timer atrasado no abre huecos), y al
+      entrar se funde con la de la despedida. Si se eligió sin sonido espera callada y suena cuando
+      lo prenden en la colina.
 - [ ] Después de que las luces de Angie suben a las estrellas arranca SIEMPRE el prólogo de las
       naves, aunque ya se haya visto: es la continuación de esa escena. Quien ya lo vio lo salta
       con su botón.
@@ -677,6 +706,9 @@ verificable con `/cine/<n>?cuadro=<beat>` (fotograma congelado) o `/cine/<n>` (r
       lo mostraba y era la fricción número uno de un jugador nuevo.
 - [ ] Una línea en pantalla por vez y nunca más de ocho palabras (lo verifica
       `cinematica-guion.spec.ts`). El texto va en la caja de diálogo, NUNCA dentro de la escena.
+      La caja del prólogo de las naves escala con el ancho Y con el alto (`min(2.1vw, 4.2vh)`): a
+      1440 la frase quedaba en 22 px y se leía chica, y medida solo por el ancho, en una ventana
+      ancha y baja la caja de tres renglones tapaba las naves.
 - [ ] Cada beat cambia algo visible que la línea que lo dispara nombra. Un beat que no se ve es
       un beat que no existe; uno que no se corresponde con la línea es ruido.
 - [ ] Coreografía: primero el entorno, después el héroe, después los personajes, al final el
