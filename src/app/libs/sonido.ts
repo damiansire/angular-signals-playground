@@ -390,8 +390,8 @@ export function crearSonido(entorno: EntornoSonido = {}): Sonido {
 let compartido: Sonido | null = null;
 
 /**
- * El director de sonido de la app: uno solo, compartido por la intro, el prólogo, las cinemáticas
- * y el Estudio. Se crea recién cuando alguien lo pide, así una pantalla que no suena no paga nada.
+ * El director de sonido de la app: uno solo, compartido por la intro, el prólogo y las cinemáticas.
+ * Se crea recién cuando alguien lo pide, así una pantalla que no suena no paga nada.
  */
 export function sonido(): Sonido {
   compartido ??= crearSonido({
