@@ -707,6 +707,7 @@
     tabindex="-1"
     role="region"
     aria-labelledby="manual-ley"
+    (sistema-establecido)="alEstablecerEnLaHoja()"
   >
     <header class="prologo__manual-cabeza">
       <span class="prologo__manual-libro">{{ libro().nombre }}</span>
@@ -733,7 +734,11 @@
       </button>
     </header>
     <div class="prologo__manual-cuerpo">
-      <!-- La página trae su ley, su lámina y su desafío (ver `app-pagina-del-manual`). -->
+      <!-- La página del manual trae su ley, su lámina y su desafío (ver `app-pagina-del-manual`). Una
+           pantalla del viaje no: en la molécula su nombre lo ponía la barra de arriba. -->
+      @if (libro().concepto !== undefined) {
+        <h2 class="prologo__manual-titulo" id="manual-ley">{{ p.ley }}</h2>
+      }
       <div #pantallaDelManual class="subhost"></div>
       <!-- La hoja que se da vuelta al pasar de página: papel, sin contenido. -->
       <div #hojaQuePasa class="prologo__manual-pasa" aria-hidden="true"></div>
@@ -784,6 +789,7 @@
       (verPrologo)="verPrologoDesdeBitacora()"
       (verManual)="verManualDesdeBitacora()"
       (verArbol)="verArbolDesdeBitacora()"
+      (seguirViaje)="seguirElViajeDesdeBitacora()"
       (borrar)="empezarDeCero()"
       (cerrar)="cerrarBitacora()"
     />

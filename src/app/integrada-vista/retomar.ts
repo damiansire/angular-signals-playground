@@ -15,12 +15,14 @@ export function inicioDelRecorrido(
   return { concept: punto.concepto, sub: punto.sub + 1 };
 }
 
-export interface Entrada {
-  /** El prólogo ya se pasó: entrar va directo a la construcción de Tusi. */
-  readonly saltarPrologo: boolean;
-  /** La línea donde arranca el prólogo, o `null` para el principio. */
-  readonly desde: string | null;
-}
+/**
+ * Qué sigue al entrar: el prólogo desde una línea (`null` es el principio), el viaje donde quedó, o
+ * el mapa, si el viaje se dejó por él. El mapa arranca con la construcción de Tusi.
+ */
+export type Entrada =
+  | { readonly a: 'prologo'; readonly desde: string | null }
+  | { readonly a: 'viaje' }
+  | { readonly a: 'mapa' };
 
 /**
  * Qué pasa al entrar desde la colina. Una línea guardada que el guion ya no tiene como punto se
@@ -30,11 +32,10 @@ export function entradaDeLaHistoria(
   punto: Punto | null,
   puntosDelPrologo: readonly string[],
 ): Entrada {
-  if (punto?.lugar === 'construccion' || punto?.lugar === 'recorrido') {
-    return { saltarPrologo: true, desde: null };
-  }
+  if (punto?.lugar === 'viaje') return { a: 'viaje' };
+  if (punto?.lugar === 'construccion' || punto?.lugar === 'recorrido') return { a: 'mapa' };
   const desde = punto?.lugar === 'prologo' && puntosDelPrologo.includes(punto.linea);
-  return { saltarPrologo: false, desde: desde ? punto.linea : null };
+  return { a: 'prologo', desde: desde ? punto.linea : null };
 }
 
 /**

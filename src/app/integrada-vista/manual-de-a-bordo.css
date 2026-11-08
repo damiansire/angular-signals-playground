@@ -97,6 +97,21 @@
   position: relative;
   flex: 1 0 auto;
 }
+/* La pista de Angie flota en la esquina, como en la molécula, pero arriba del pie de la hoja: a la
+   altura de siempre tapaba "Seguir el viaje" y el click caía en ella. */
+.prologo__manual app-concept-card {
+  bottom: 5.5rem;
+}
+/* El nombre de la pantalla, en una etapa del viaje: con la letra de la ley del manual. */
+.prologo__manual-titulo {
+  margin: 0.4rem 0 1.4rem;
+  font:
+    400 clamp(1.6rem, 2.6vw, 2.3rem) / 1.08 Georgia,
+    'Times New Roman',
+    serif;
+  color: #17140f;
+  text-wrap: balance;
+}
 /* La hoja que se da vuelta: papel con su sombra de lomo, encima del cuerpo mientras gira. */
 .prologo__manual-pasa {
   position: absolute;

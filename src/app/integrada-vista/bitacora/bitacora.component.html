@@ -69,6 +69,9 @@
   </ol>
 
   <footer class="bita__pie">
+    <button class="bita__accion bita__accion--viaje" type="button" (click)="seguirViaje.emit()">
+      Seguir el viaje &rarr;
+    </button>
     @if (partida().prologo) {
       <button class="bita__accion" type="button" (click)="verPrologo.emit()">▶ Prólogo</button>
     }

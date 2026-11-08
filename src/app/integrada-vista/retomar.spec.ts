@@ -26,24 +26,28 @@ describe('retomar', () => {
 
   describe('entradaDeLaHistoria', () => {
     it('sin partida, el prólogo arranca del principio', () => {
-      expect(entradaDeLaHistoria(null, PUNTOS)).toEqual({ saltarPrologo: false, desde: null });
+      expect(entradaDeLaHistoria(null, PUNTOS)).toEqual({ a: 'prologo', desde: null });
     });
 
     it('con un punto del prólogo, arranca en esa línea', () => {
       expect(entradaDeLaHistoria(EN_EL_PROLOGO, PUNTOS)).toEqual({
-        saltarPrologo: false,
+        a: 'prologo',
         desde: 'anom-manual',
       });
     });
 
     it('una línea que ya no es punto se ignora y arranca del principio', () => {
       const viejo: Punto = { lugar: 'prologo', linea: 'casa-helado' };
-      expect(entradaDeLaHistoria(viejo, PUNTOS)).toEqual({ saltarPrologo: false, desde: null });
+      expect(entradaDeLaHistoria(viejo, PUNTOS)).toEqual({ a: 'prologo', desde: null });
     });
 
-    it('con el prólogo pasado, entrar va directo a la construcción', () => {
+    it('en pleno viaje, entrar lo sigue donde quedó, sin volver al prólogo', () => {
+      expect(entradaDeLaHistoria({ lugar: 'viaje' }, PUNTOS)).toEqual({ a: 'viaje' });
+    });
+
+    it('con el viaje dejado por el mapa, entrar va directo a la construcción', () => {
       for (const punto of [{ lugar: 'construccion' } as const, EN_EL_ATOMO]) {
-        expect(entradaDeLaHistoria(punto, PUNTOS).saltarPrologo).toBeTrue();
+        expect(entradaDeLaHistoria(punto, PUNTOS)).toEqual({ a: 'mapa' });
       }
     });
   });
@@ -62,8 +66,10 @@ describe('retomar', () => {
       expect(puntoDelRecorrido(EN_UN_SUB, -1, -1)).toEqual({ lugar: 'construccion' });
     });
 
-    it('la landing del arranque no pisa el punto del prólogo', () => {
+    it('la landing del arranque no pisa el punto del prólogo ni el del viaje', () => {
       expect(puntoDelRecorrido(EN_EL_PROLOGO, -1, -1)).toBe(EN_EL_PROLOGO);
+      const viajando: Punto = { lugar: 'viaje' };
+      expect(puntoDelRecorrido(viajando, -1, -1)).toBe(viajando);
       expect(puntoDelRecorrido(null, -1, -1)).toBeNull();
     });
 

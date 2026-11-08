@@ -62,6 +62,8 @@ export class BitacoraComponent {
   readonly verManual = output<void>();
   /** El árbol que Angie muestra en Signal Space, también sin la escena. */
   readonly verArbol = output<void>();
+  /** El viaje sigue donde quedó: cerrar una hoja lo deja, no lo pierde. */
+  readonly seguirViaje = output<void>();
   readonly borrar = output<void>();
   readonly cerrar = output<void>();
 

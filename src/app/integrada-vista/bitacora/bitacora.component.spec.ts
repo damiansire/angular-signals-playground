@@ -105,6 +105,17 @@ describe('BitacoraComponent', () => {
     expect(pidio).toBeTrue();
   });
 
+  it('el viaje se sigue desde la bitácora, aunque se haya dejado por el mapa', async () => {
+    const fixture = await montar(PARTIDA_VACIA);
+    const seguir = fixture.nativeElement.querySelector('.bita__accion--viaje') as HTMLButtonElement;
+    expect(seguir?.textContent).toContain('Seguir el viaje');
+
+    let pidio = false;
+    fixture.componentInstance.seguirViaje.subscribe(() => (pidio = true));
+    seguir.click();
+    expect(pidio).toBeTrue();
+  });
+
   it('el final aparece en la lista recién cuando se vio', async () => {
     const sinFinal = await montar(PARTIDA_VACIA);
     expect(sinFinal.nativeElement.querySelector('.bita__cap--final')).toBeNull();
