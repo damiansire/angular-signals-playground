@@ -177,17 +177,19 @@ body {
    El prefijo `.card.card--dissolve` no es decorativo: en el CSS del componente el stamping le
    sumaba dos atributos de encapsulación a cada selector (0-4-1), y sin esos dos niveles les
    ganaban las reglas propias de los demos (pestaña activa ilegible, hovers en azul crudo).
+   El `:is()` suma el manual de a bordo del prólogo, que monta las mismas pantallas sin ser una
+   `.card`, con la misma especificidad: sin él, sus botones y textos quedaban sin homologar.
    ============================================================================ */
-.card.card--dissolve .subhost button[class*='bg-blue-'],
-.card.card--dissolve .subhost button[class*='bg-green-'],
-.card.card--dissolve .subhost button[class*='bg-amber-'],
-.card.card--dissolve .subhost button[class*='bg-indigo-'],
-.card.card--dissolve .subhost button[class*='bg-emerald-'],
-.card.card--dissolve .subhost button[class*='bg-fuchsia-'],
-.card.card--dissolve .subhost button[class*='bg-purple-'],
-.card.card--dissolve .subhost button[class*='bg-sky-'],
-.card.card--dissolve .subhost button[class*='bg-cyan-'],
-.card.card--dissolve .subhost button[class*='bg-gray-'] {
+:is(.card, .prologo__manual).card--dissolve .subhost button[class*='bg-blue-'],
+:is(.card, .prologo__manual).card--dissolve .subhost button[class*='bg-green-'],
+:is(.card, .prologo__manual).card--dissolve .subhost button[class*='bg-amber-'],
+:is(.card, .prologo__manual).card--dissolve .subhost button[class*='bg-indigo-'],
+:is(.card, .prologo__manual).card--dissolve .subhost button[class*='bg-emerald-'],
+:is(.card, .prologo__manual).card--dissolve .subhost button[class*='bg-fuchsia-'],
+:is(.card, .prologo__manual).card--dissolve .subhost button[class*='bg-purple-'],
+:is(.card, .prologo__manual).card--dissolve .subhost button[class*='bg-sky-'],
+:is(.card, .prologo__manual).card--dissolve .subhost button[class*='bg-cyan-'],
+:is(.card, .prologo__manual).card--dissolve .subhost button[class*='bg-gray-'] {
   font-family: var(--sans);
   font-weight: 600;
   border: none;
@@ -195,19 +197,19 @@ body {
   padding: 0.6rem 1.35rem;
   transition: filter 0.15s ease;
 }
-.card.card--dissolve .subhost button[class*='bg-blue-'],
-.card.card--dissolve .subhost button[class*='bg-green-'],
-.card.card--dissolve .subhost button[class*='bg-amber-'],
-.card.card--dissolve .subhost button[class*='bg-indigo-'],
-.card.card--dissolve .subhost button[class*='bg-emerald-'],
-.card.card--dissolve .subhost button[class*='bg-fuchsia-'],
-.card.card--dissolve .subhost button[class*='bg-purple-'],
-.card.card--dissolve .subhost button[class*='bg-sky-'],
-.card.card--dissolve .subhost button[class*='bg-cyan-'] {
+:is(.card, .prologo__manual).card--dissolve .subhost button[class*='bg-blue-'],
+:is(.card, .prologo__manual).card--dissolve .subhost button[class*='bg-green-'],
+:is(.card, .prologo__manual).card--dissolve .subhost button[class*='bg-amber-'],
+:is(.card, .prologo__manual).card--dissolve .subhost button[class*='bg-indigo-'],
+:is(.card, .prologo__manual).card--dissolve .subhost button[class*='bg-emerald-'],
+:is(.card, .prologo__manual).card--dissolve .subhost button[class*='bg-fuchsia-'],
+:is(.card, .prologo__manual).card--dissolve .subhost button[class*='bg-purple-'],
+:is(.card, .prologo__manual).card--dissolve .subhost button[class*='bg-sky-'],
+:is(.card, .prologo__manual).card--dissolve .subhost button[class*='bg-cyan-'] {
   background: var(--glow, #eb9b3c);
   color: #201d16;
 }
-.card.card--dissolve .subhost button[class*='bg-gray-'] {
+:is(.card, .prologo__manual).card--dissolve .subhost button[class*='bg-gray-'] {
   background: #3a352d;
   color: #f2ecdc;
 }
@@ -216,7 +218,7 @@ body {
    con la TINTA del acento (el mismo tono, oscuro) y no con el acento: el acento claro sobre una
    escena de su mismo tono quedaba a 1.4-2:1 ("Ground" de 5/1, el "264px" de 9/1). Un chip con fondo
    propio (bg-emerald-100) ya se lee sobre ese fondo y queda como está. */
-.card.card--dissolve
+:is(.card, .prologo__manual).card--dissolve
   .subhost
   :is(
     [class*='text-indigo-'],
@@ -235,7 +237,7 @@ body {
   color: var(--tinta, #4a4436);
 }
 /* Adentro de una caja oscura la tinta se apagaría: ahí va el acento claro. */
-.card.card--dissolve
+:is(.card, .prologo__manual).card--dissolve
   .subhost
   :is([class*='bg-gray-7'], [class*='bg-gray-8'], [class*='bg-gray-9'])
   :is(
@@ -255,26 +257,26 @@ body {
   color: var(--glow, #eb9b3c);
 }
 /* El error es el único rojo con significado: queda rojo, pero oscuro (red-600 daba 3:1 sobre la escena). */
-.card.card--dissolve .subhost [class*='text-red-6'] {
+:is(.card, .prologo__manual).card--dissolve .subhost [class*='text-red-6'] {
   color: #991b1b;
 }
-.card.card--dissolve .subhost button[class*='bg-blue-']:hover:not(:disabled),
-.card.card--dissolve .subhost button[class*='bg-green-']:hover:not(:disabled),
-.card.card--dissolve .subhost button[class*='bg-amber-']:hover:not(:disabled),
-.card.card--dissolve .subhost button[class*='bg-indigo-']:hover:not(:disabled),
-.card.card--dissolve .subhost button[class*='bg-emerald-']:hover:not(:disabled),
-.card.card--dissolve .subhost button[class*='bg-fuchsia-']:hover:not(:disabled),
-.card.card--dissolve .subhost button[class*='bg-purple-']:hover:not(:disabled),
-.card.card--dissolve .subhost button[class*='bg-sky-']:hover:not(:disabled),
-.card.card--dissolve .subhost button[class*='bg-cyan-']:hover:not(:disabled),
-.card.card--dissolve .subhost button[class*='bg-gray-']:hover:not(:disabled) {
+:is(.card, .prologo__manual).card--dissolve .subhost button[class*='bg-blue-']:hover:not(:disabled),
+:is(.card, .prologo__manual).card--dissolve .subhost button[class*='bg-green-']:hover:not(:disabled),
+:is(.card, .prologo__manual).card--dissolve .subhost button[class*='bg-amber-']:hover:not(:disabled),
+:is(.card, .prologo__manual).card--dissolve .subhost button[class*='bg-indigo-']:hover:not(:disabled),
+:is(.card, .prologo__manual).card--dissolve .subhost button[class*='bg-emerald-']:hover:not(:disabled),
+:is(.card, .prologo__manual).card--dissolve .subhost button[class*='bg-fuchsia-']:hover:not(:disabled),
+:is(.card, .prologo__manual).card--dissolve .subhost button[class*='bg-purple-']:hover:not(:disabled),
+:is(.card, .prologo__manual).card--dissolve .subhost button[class*='bg-sky-']:hover:not(:disabled),
+:is(.card, .prologo__manual).card--dissolve .subhost button[class*='bg-cyan-']:hover:not(:disabled),
+:is(.card, .prologo__manual).card--dissolve .subhost button[class*='bg-gray-']:hover:not(:disabled) {
   filter: brightness(1.08);
 }
 /* Botones SIN clase de color Tailwind (p.ej. el <button>Destroy</button> pelado de effect-destroy,
    o los estilados desde el CSS del componente): sueltos sobre el campo se leen como texto plano,
    sin afford de acción. Les damos la misma pastilla base que a los grises, así todo lo clickeable
    se lee como control. Los bg-* ya tienen su tratamiento arriba y quedan excluidos. */
-.card.card--dissolve .subhost button:not([class*='bg-']) {
+:is(.card, .prologo__manual).card--dissolve .subhost button:not([class*='bg-']) {
   font-family: var(--sans);
   font-weight: 600;
   border: none;
@@ -288,13 +290,13 @@ body {
   cursor: pointer;
   transition: filter 0.15s ease;
 }
-.card.card--dissolve .subhost button:not([class*='bg-']):hover:not(:disabled) {
+:is(.card, .prologo__manual).card--dissolve .subhost button:not([class*='bg-']):hover:not(:disabled) {
   filter: brightness(1.08);
 }
 /* Foco de los inputs de texto en el acento del concepto en vez del cian/teal/rosa/naranja
    al azar que trae cada sub-nivel (mismo color de foco, no la variedad Tailwind). */
-.card.card--dissolve .subhost input[type='text']:focus,
-.card.card--dissolve .subhost input[type='number']:focus {
+:is(.card, .prologo__manual).card--dissolve .subhost input[type='text']:focus,
+:is(.card, .prologo__manual).card--dissolve .subhost input[type='number']:focus {
   outline: none;
   box-shadow: 0 0 0 2px var(--glow, #eb9b3c);
   border-color: transparent;
@@ -331,7 +333,7 @@ body {
   .lab__demo {
     flex-basis: 19rem;
   }
-  .card.card--dissolve.card--sub
+  :is(.card.card--sub, .prologo__manual.prologo__manual).card--dissolve
     .subhost
     .flex:has(> section > .lab__demo)
     > section:first-child:has(.lab__demo) {
@@ -385,7 +387,7 @@ body {
   gap: 0.5rem;
 }
 /* Son controles de un banco, no la llamada principal de la página: la pastilla global es enorme acá. */
-.card.card--dissolve.card--sub .subhost .lab .lab__acciones button:not([class*='bg-']) {
+:is(.card.card--sub, .prologo__manual.prologo__manual).card--dissolve .subhost .lab .lab__acciones button:not([class*='bg-']) {
   padding: 0.42rem 0.95rem;
   font-size: 0.88rem;
 }
@@ -394,7 +396,7 @@ body {
   font-family: var(--font-mono);
 }
 /* Dos clases de la raíz más tres propias: le gana a `.subhost button:not([class*='bg-'])`. */
-.card.card--dissolve .subhost .lab .lab__chip,
+:is(.card, .prologo__manual).card--dissolve .subhost .lab .lab__chip,
 .lab .lab__chip {
   padding: 0.28rem 0.8rem;
   font-family: var(--font-mono);
@@ -409,11 +411,11 @@ body {
     background-color 0.15s,
     transform 0.15s;
 }
-.card.card--dissolve .subhost .lab .lab__chip:hover,
+:is(.card, .prologo__manual).card--dissolve .subhost .lab .lab__chip:hover,
 .lab .lab__chip:hover {
   transform: translateY(-1px);
 }
-.card.card--dissolve .subhost .lab .lab__chip[aria-pressed='true'],
+:is(.card, .prologo__manual).card--dissolve .subhost .lab .lab__chip[aria-pressed='true'],
 .lab .lab__chip[aria-pressed='true'] {
   color: #201d16;
   background: var(--glow, var(--accent-source));
@@ -494,8 +496,8 @@ body {
   min-width: 0;
 }
 .lab app-event-history h2,
-.card.card--dissolve.card--sub .subhost .lab app-click-history h1,
-.card.card--dissolve.card--sub .subhost .lab app-computed-tracker h1 {
+:is(.card.card--sub, .prologo__manual.prologo__manual).card--dissolve .subhost .lab app-click-history h1,
+:is(.card.card--sub, .prologo__manual.prologo__manual).card--dissolve .subhost .lab app-computed-tracker h1 {
   display: block;
   margin: 0 0 0.2rem;
   font-family: var(--font-mono);
@@ -572,7 +574,7 @@ body {
   padding: 0;
   background: transparent;
 }
-.card.card--dissolve.card--sub .subhost .lab.lab app-dependencies-status h2 {
+:is(.card.card--sub, .prologo__manual.prologo__manual).card--dissolve .subhost .lab.lab app-dependencies-status h2 {
   margin: 0;
   font-family: var(--font-mono);
   font-size: 0.74rem;
@@ -599,7 +601,7 @@ body {
   gap: 0.5rem;
   padding: 0;
 }
-.card.card--dissolve.card--sub .subhost .lab app-basic-form h1 {
+:is(.card.card--sub, .prologo__manual.prologo__manual).card--dissolve .subhost .lab app-basic-form h1 {
   display: block;
   flex: 1 1 100%;
   margin: 0;
@@ -614,7 +616,7 @@ body {
   width: auto;
   min-width: 0;
 }
-.card.card--dissolve.card--sub .subhost .lab app-basic-form .mb-5 {
+:is(.card.card--sub, .prologo__manual.prologo__manual).card--dissolve .subhost .lab app-basic-form .mb-5 {
   margin: 0;
 }
 .lab app-basic-form label {

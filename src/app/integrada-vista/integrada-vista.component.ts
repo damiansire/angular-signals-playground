@@ -6,6 +6,7 @@ import {
   ElementRef,
   EnvironmentInjector,
   ErrorHandler,
+  Provider,
   Type,
   afterNextRender,
   createComponent,
@@ -13,6 +14,7 @@ import {
   inject,
   isDevMode,
   computed,
+  effect,
   signal,
   viewChild,
 } from '@angular/core';
@@ -35,7 +37,10 @@ import {
 import { initMundoQueResponde } from './mundo-que-responde';
 import { LO_QUE_DICE_EL_SOL, LO_QUE_RESPONDE_ANGIE } from './intercambio-del-sol';
 import type { HuecoDelPrologo } from './operadores-del-prologo';
+import type { PaginaDelManual } from './manual-de-a-bordo';
 import { HojaDelHuecoComponent } from './hoja-del-hueco/hoja-del-hueco.component';
+import { vigilarEstampado } from './estampado-tardio';
+import { AYUDA_DE_ANGIE } from '../components-atom/manipulable-system/manipulable-system.component';
 
 import { signalsRoutesTree } from '../app.routes';
 import { type RouteItem, type SubNivelDiferido } from '../interfaces/route-item.interface';
@@ -112,6 +117,8 @@ const PROLOGO_PEDIDO =
     './angosto.css',
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  // En `document`: un botón de la pantalla que se rehace al tocarlo deja el foco en el `body`.
+  host: { '(document:keydown)': 'teclaDelManual($event)' },
 })
 export class IntegradaVistaComponent {
   private readonly host = inject(ElementRef<HTMLElement>).nativeElement as HTMLElement;
@@ -284,6 +291,81 @@ export class IntegradaVistaComponent {
   }
 
   /**
+   * El manual de a bordo del prólogo. El motor frena la historia con la orden del capitán ya
+   * leída y pide `leerManual`; esto muestra una página por vez y resuelve al cerrarlo. Se lee a
+   * modo de estudio: se puede ir y volver, y cerrarlo no exige resolver nada (ADR 0002).
+   */
+  protected readonly paginas = signal<readonly PaginaDelManual[]>([]);
+  protected readonly pagina = signal<number | null>(null);
+  protected readonly paginaActual = computed(() => {
+    const i = this.pagina();
+    return i === null ? null : (this.paginas()[i] ?? null);
+  });
+  private readonly hojaDelManual = viewChild<ElementRef<HTMLElement>>('hojaDelManual');
+  private readonly pantallaDelManual = viewChild<ElementRef<HTMLElement>>('pantallaDelManual');
+  private terminarManual: (() => void) | null = null;
+
+  private leerManual(paginas: readonly PaginaDelManual[]): Promise<void> {
+    return new Promise((listo) => {
+      this.paginas.set(paginas);
+      this.terminarManual = () => {
+        // El botón con el foco desaparece con la hoja: el foco vuelve al prólogo, no al `body`.
+        this.host.querySelector<HTMLElement>('.prologo__pause')?.focus({ preventScroll: true });
+        this.pagina.set(null);
+        this.terminarManual = null;
+        listo();
+      };
+      this.pagina.set(0);
+    });
+  }
+
+  /**
+   * Escape cierra el manual y las flechas de costado pasan de página, salvo adentro de la pantalla,
+   * donde las flechas pueden ser de la demo. El `preventDefault` aparta al recorrido de atrás, que
+   * escucha las flechas en `window`.
+   */
+  protected teclaDelManual(e: KeyboardEvent): void {
+    if (this.pagina() === null || e.defaultPrevented) return;
+    const enLaPantalla = (e.target as Element | null)?.closest('.subhost');
+    if (e.key === 'Escape') this.terminarManual?.();
+    else if (e.key === 'ArrowRight' && !enLaPantalla) this.pasarPagina(1);
+    else if (e.key === 'ArrowLeft' && !enLaPantalla) this.pasarPagina(-1);
+    else return;
+    e.preventDefault();
+  }
+
+  protected pasarPagina(paso: 1 | -1): void {
+    const i = this.pagina();
+    if (i === null) return;
+    const j = i + paso;
+    if (j >= this.paginas().length) this.terminarManual?.();
+    else if (j >= 0) this.pagina.set(j);
+  }
+
+  /**
+   * Cada página monta la pantalla REAL, igual que la card del recorrido: el mismo `.subhost`, el
+   * mismo estampado y la misma armonización, así se ve como se veía en la molécula.
+   */
+  private readonly montarPagina = effect((onCleanup) => {
+    const pagina = this.paginaActual();
+    const host = this.pantallaDelManual()?.nativeElement;
+    const hoja = this.hojaDelManual()?.nativeElement;
+    if (!pagina || !host || !hoja) return;
+    // En el prólogo Angie todavía no interviene: los desafíos de las páginas van sin su pista.
+    const montada = this.montarDiferido(host, pagina.cargar, pagina.ley, [
+      { provide: AYUDA_DE_ANGIE, useValue: false },
+    ]);
+    const vigia = this.enc ? vigilarEstampado(host, this.enc) : null;
+    // Cada página arranca arriba, y el foco va a la hoja: con teclado, se lee sin buscarla.
+    hoja.scrollTop = 0;
+    hoja.focus({ preventScroll: true });
+    onCleanup(() => {
+      vigia?.();
+      montada.dispose();
+    });
+  });
+
+  /**
    * El prólogo se pide recién al bajar de la colina: son 25 kB de escena que nadie ve en el
    * primer segundo, y el aviso de auriculares más la colina dan tiempo de sobra para traerlos.
    * Cada pedido invalida al anterior, así un pedido viejo que llega tarde no monta un segundo
@@ -302,9 +384,11 @@ export class IntegradaVistaComponent {
           // Saltar la intro en pleno minijuego también lo cierra.
           alTerminar: () => {
             this.terminarOperadores?.();
+            this.terminarManual?.();
             alTerminar();
           },
           operadores: (huecos, alArreglar) => this.jugarOperadores(huecos, alArreglar),
+          manual: (paginas) => this.leerManual(paginas),
           alCambiarMascota: (viva) => this.angiePrologo.set(viva),
           desde: isDevMode() ? PROLOGO_PEDIDO : null,
         });
@@ -600,6 +684,7 @@ export class IntegradaVistaComponent {
     host: HTMLElement,
     cargar: () => Promise<SubNivelDiferido>,
     title: string | undefined,
+    lugar: readonly Provider[] = [],
   ): SubHandle {
     let vivo = true;
     let desmontar: (() => void) | null = null;
@@ -607,7 +692,8 @@ export class IntegradaVistaComponent {
     cargar()
       .then(({ component, providers }) => {
         if (!vivo) return;
-        injector = providers?.length ? createEnvironmentInjector([...providers], this.env) : null;
+        const todos = [...(providers ?? []), ...lugar];
+        injector = todos.length ? createEnvironmentInjector(todos, this.env) : null;
         desmontar = this.montar(host, component, injector ?? this.env);
         const enc = this.enc;
         if (enc) host.querySelectorAll('*').forEach((e) => e.setAttribute(enc, ''));

@@ -51,6 +51,8 @@ export interface Momentos {
   readonly sinControl: Tramo;
   readonly rxjs: number;
   readonly pipes: number;
+  /** El fin de "¡Rápido, el manual de a bordo!": ahí se abre el manual, con la orden ya leída. */
+  readonly manual: number;
   /** Los tres tirones del capitán: cada línea es un tirón más fuerte hacia el centro. */
   readonly tirones: readonly number[];
   readonly bala: Tramo;
@@ -78,6 +80,7 @@ export function momentosDe(reloj: readonly LineaEnReloj[]): Momentos {
     sinControl: tramo('anom-sin-control'),
     rxjs: en('anom-rxjs').t0 + 400,
     pipes: en('anom-pipes').t0 + 300,
+    manual: en('anom-manual').t1,
     tirones: ['anom-fuerza', 'anom-velocidad', 'anom-leyes'].map((id) => en(id).t0),
     bala: { t0: en('dentro-cuidado').t0 - 300, t1: en('dentro-cuidado').t0 + 1300 },
     lanza: en('dentro-escapemos').t0,

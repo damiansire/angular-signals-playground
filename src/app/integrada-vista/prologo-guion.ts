@@ -117,6 +117,9 @@ export const GUION: readonly LineaGuion[] = [
   // nombrar lo que se rompe. Ahí el problema deja de ser operativo y pasa a ser de física.
   { id: 'anom-fuerza', quien: 'cap', txt: '¿Qué es esta fuerza…?' },
   { id: 'anom-velocidad', quien: 'cap', txt: 'Esta velocidad…' },
+  // Antes de rendirse a la física nueva, el capitán busca en el libro de la física vieja. El manual
+  // explica cómo funciona la pantalla en casa, y su última página es la que la anomalía contradice.
+  { id: 'anom-manual', quien: 'cap', txt: '¡Rápido, el manual de a bordo!' },
   {
     id: 'anom-leyes',
     quien: 'cap',

@@ -3,6 +3,7 @@ import { avanzarMuelle, crearMuelle, limitar, type Muelle } from '../libs/muelle
 import { chispas, palabra } from '../libs/rastros';
 import { sonido } from '../libs/sonido';
 import { HUECOS_DEL_PROLOGO, type HuecoDelPrologo } from './operadores-del-prologo';
+import { PAGINAS_DEL_MANUAL, type PaginaDelManual } from './manual-de-a-bordo';
 import {
   GUION,
   PRESUPUESTO,
@@ -98,6 +99,12 @@ export interface PrologoOpciones {
     huecos: readonly HuecoDelPrologo[],
     alArreglar: (nave: number, operador: string) => void,
   ) => Promise<void>;
+  /**
+   * El manual de a bordo de "¡Rápido, el manual de a bordo!". La historia se frena con la orden ya
+   * leída y espera a que el manual se cierre; la escena sigue viva mientras tanto. Sin esto, el
+   * prólogo corre de corrido.
+   */
+  readonly manual?: (paginas: readonly PaginaDelManual[]) => Promise<void>;
 }
 
 const NS = 'http://www.w3.org/2000/svg';
@@ -1941,6 +1948,17 @@ export function initPrologoAnomalia(host: HTMLElement, opts: PrologoOpciones): (
   const ESPERA_OPERADORES = M.rxjs - 100;
   let operadores: 'antes' | 'jugando' | 'despues' = opts.operadores ? 'antes' : 'despues';
 
+  /** Dónde espera la historia al manual: al final de la orden, antes del tercer tirón. */
+  const ESPERA_MANUAL = M.manual - 150;
+  let manual: 'antes' | 'leyendo' | 'despues' = opts.manual ? 'antes' : 'despues';
+
+  function pedirManual(): void {
+    manual = 'leyendo';
+    void opts.manual?.(PAGINAS_DEL_MANUAL).then(() => {
+      manual = 'despues';
+    });
+  }
+
   function pedirOperadores(): void {
     operadores = 'jugando';
     void opts.operadores?.(HUECOS_DEL_PROLOGO, arreglado).then(() => {
@@ -2003,6 +2021,10 @@ export function initPrologoAnomalia(host: HTMLElement, opts: PrologoOpciones): (
       t = ESPERA_OPERADORES;
       if (operadores === 'antes') pedirOperadores();
     }
+    if (manual !== 'despues' && t >= ESPERA_MANUAL) {
+      t = ESPERA_MANUAL;
+      if (manual === 'antes') pedirManual();
+    }
     tAhora = t;
     dibujar(tAhora, (dt * velocidad) / 1000);
     if (tAhora < T.fin) raf = requestAnimationFrame((t) => frame(t, gen));
@@ -2028,6 +2050,7 @@ export function initPrologoAnomalia(host: HTMLElement, opts: PrologoOpciones): (
     tAhora = desde;
     // Quien arranca más adelante para revisar una escena no tiene que pasar por el minijuego.
     if (desde > ESPERA_OPERADORES) operadores = 'despues';
+    if (desde > ESPERA_MANUAL) manual = 'despues';
     despausar();
     if (sonido().activo()) sonido().desbloquear();
     anterior = null;
@@ -2106,9 +2129,60 @@ export function initPrologoAnomalia(host: HTMLElement, opts: PrologoOpciones): (
     'End',
   ]);
 
+  /** El manual de a bordo scrollea por dentro: ahí las teclas, la rueda y el dedo lo mueven a él. */
+  const manualDe = (t: EventTarget | null): HTMLElement | null =>
+    t instanceof Element ? t.closest<HTMLElement>('.prologo__manual') : null;
+
+  /** Cuánto mueve cada tecla al manual, como en una página; `null` si la tecla no desplaza. */
+  function pasoEnElManual(e: KeyboardEvent, manual: HTMLElement): number | null {
+    const objetivo = e.target as HTMLElement;
+    if (objetivo.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(objetivo.tagName)) {
+      return null;
+    }
+    const pagina = manual.clientHeight * 0.85;
+    switch (e.key) {
+      case 'ArrowDown':
+        return 48;
+      case 'ArrowUp':
+        return -48;
+      case 'PageDown':
+        return pagina;
+      case 'PageUp':
+        return -pagina;
+      case 'Home':
+        return -manual.scrollHeight;
+      case 'End':
+        return manual.scrollHeight;
+      case ' ':
+        // Sobre un botón, el espacio lo aprieta.
+        return objetivo.closest('button, a, [role="button"]')
+          ? null
+          : e.shiftKey
+            ? -pagina
+            : pagina;
+      default:
+        return null;
+    }
+  }
+
   const alTeclado = (e: KeyboardEvent): void => {
     // En `document`: colgado del contenedor no se dispara nunca, el foco jamás está ahí.
     if (terminado || raiz.hidden) return;
+    // Un botón que se rehace al tocarlo deja el foco en el `body`: con el manual abierto, sigue siendo
+    // del manual.
+    const manual =
+      manualDe(e.target) ??
+      (e.target === document.body ? raiz.querySelector<HTMLElement>('.prologo__manual') : null);
+    if (manual) {
+      const paso = pasoEnElManual(e, manual);
+      // A mano y con `preventDefault`: el recorrido de atrás también escucha estas teclas.
+      if (paso !== null) {
+        e.preventDefault();
+        manual.scrollBy({ top: paso });
+      }
+      // Leyendo el manual el espacio no pausa: la historia ya está esperando.
+      return;
+    }
     // El recorrido de atrás escucha las flechas en `window` y el `inert` no alcanza a su scroller.
     if (TECLAS_DE_DESPLAZAMIENTO.has(e.key)) {
       e.preventDefault();
@@ -2120,7 +2194,11 @@ export function initPrologoAnomalia(host: HTMLElement, opts: PrologoOpciones): (
   };
 
   const alDesplazar = (e: Event): void => {
-    if (!terminado && !raiz.hidden) e.preventDefault();
+    if (terminado || raiz.hidden) return;
+    // Adentro del manual la rueda y el dedo lo scrollean a él, y no siguen hasta el recorrido de
+    // atrás: su rueda está en un ancestro del prólogo y, en el borde del manual, movía la molécula.
+    if (manualDe(e.target)) e.stopPropagation();
+    else e.preventDefault();
   };
 
   /** Con la pestaña oculta el rAF se frena, pero el zumbido y la voz no: se pausa como un botón. */

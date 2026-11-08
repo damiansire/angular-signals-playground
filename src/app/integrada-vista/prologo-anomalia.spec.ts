@@ -370,6 +370,87 @@ describe('initPrologoAnomalia', () => {
     });
   });
 
+  describe('el manual de a bordo', () => {
+    function conManual(desde: string) {
+      const cuadros = cuadrosFalsos();
+      const host = hostCompleto();
+      hosts.push(host);
+      let resolver: () => void = () => undefined;
+      const pedido = jasmine
+        .createSpy('manual')
+        .and.callFake(() => new Promise<void>((ok) => (resolver = ok)));
+      cerrar.push(
+        initPrologoAnomalia(host, { alTerminar: () => undefined, desde, manual: pedido }),
+      );
+      const frase = (): string =>
+        [...host.querySelectorAll('.prologo__frase')].map((f) => f.textContent).join(' | ');
+      return { cuadros, host, pedido, frase, resolver: () => resolver() };
+    }
+
+    it('se abre con la orden del capitán ya leída, con sus cinco páginas, y la historia espera', async () => {
+      const m = conManual('anom-velocidad');
+      m.cuadros.avanzar(400);
+      expect(m.pedido).toHaveBeenCalledTimes(1);
+      expect((m.pedido.calls.mostRecent().args[0] as readonly unknown[]).length).toBe(5);
+      expect(m.frase()).toContain('el manual de a bordo');
+
+      m.cuadros.avanzar(1000);
+      expect(m.frase()).not.toContain('leyes del espacio');
+
+      m.resolver();
+      await new Promise((ok) => setTimeout(ok));
+      // Dos segundos: alcanza para la línea siguiente y no para pasarla.
+      m.cuadros.avanzar(120);
+      expect(m.frase()).toContain('leyes del espacio');
+      expect(m.pedido).toHaveBeenCalledTimes(1);
+    });
+
+    it('adentro del manual el espacio y las flechas lo desplazan, y la historia no se pausa', () => {
+      const m = conManual('anom-velocidad');
+      m.cuadros.avanzar(400);
+      const raiz = m.host.querySelector<HTMLElement>('.prologo')!;
+      const manual = document.createElement('section');
+      manual.className = 'prologo__manual';
+      manual.tabIndex = -1;
+      raiz.append(manual);
+      const desplazar = spyOn(manual, 'scrollBy');
+
+      const espacio = new KeyboardEvent('keydown', {
+        key: ' ',
+        code: 'Space',
+        bubbles: true,
+        cancelable: true,
+      });
+      manual.dispatchEvent(espacio);
+      expect(espacio.defaultPrevented).toBeTrue();
+      expect(desplazar).toHaveBeenCalled();
+      const pausa = m.host.querySelector<HTMLButtonElement>('.prologo__pause')!;
+      expect(pausa.getAttribute('aria-pressed')).toBe('false');
+
+      // La rueda scrollea el manual, pero no llega al recorrido de atrás, que la escucha más arriba.
+      const atras = jasmine.createSpy('rueda del recorrido');
+      m.host.addEventListener('wheel', atras);
+      const ruedaAdentro = new WheelEvent('wheel', {
+        deltaY: 100,
+        bubbles: true,
+        cancelable: true,
+      });
+      manual.dispatchEvent(ruedaAdentro);
+      expect(ruedaAdentro.defaultPrevented).toBeFalse();
+      expect(atras).not.toHaveBeenCalled();
+      m.host.removeEventListener('wheel', atras);
+      const ruedaAfuera = new WheelEvent('wheel', { deltaY: 100, bubbles: true, cancelable: true });
+      raiz.dispatchEvent(ruedaAfuera);
+      expect(ruedaAfuera.defaultPrevented).toBeTrue();
+    });
+
+    it('quien arranca después de la orden no pasa por el manual', () => {
+      const m = conManual('anom-leyes');
+      m.cuadros.avanzar(400);
+      expect(m.pedido).not.toHaveBeenCalled();
+    });
+  });
+
   it('dice quién habla, y la voz misteriosa no se nombra', async () => {
     const host = hostCompleto();
     const cerrar = initPrologoAnomalia(host, { alTerminar: () => undefined });

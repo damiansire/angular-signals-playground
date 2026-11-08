@@ -604,6 +604,7 @@
           class="prologo"
           [class.prologo--operadores]="hueco() !== null"
           [class.prologo--disparo]="disparando()"
+          [class.prologo--manual]="pagina() !== null"
           hidden
         >
           <svg
@@ -639,6 +640,47 @@
                 (saltar)="siguienteHueco()"
               />
             }
+          }
+          <!-- "¡Rápido, el manual de a bordo!": el libro de la física de casa, una pantalla por
+               página. Se lee a modo de estudio, se puede ir y volver, y se cierra cuando se quiere. -->
+          @if (paginaActual(); as p) {
+            <div class="prologo__velo" aria-hidden="true"></div>
+            <section
+              #hojaDelManual
+              class="prologo__manual card--dissolve"
+              tabindex="-1"
+              role="region"
+              aria-labelledby="manual-en-la-nave"
+            >
+              <header class="prologo__manual-cabeza">
+                <span class="prologo__manual-libro">Manual de a bordo</span>
+                <span class="prologo__manual-paso"
+                  >{{ pagina()! + 1 }} de {{ paginas().length }}</span
+                >
+                <h2 id="manual-en-la-nave" class="prologo__manual-nave">{{ p.enLaNave }}</h2>
+              </header>
+              <div #pantallaDelManual class="subhost"></div>
+              <nav class="prologo__manual-pie" aria-label="Páginas del manual">
+                <button
+                  type="button"
+                  class="prologo__manual-boton"
+                  [disabled]="pagina() === 0"
+                  (click)="pasarPagina(-1)"
+                >
+                  &larr; Anterior
+                </button>
+                <!-- Sigue al scroll de la hoja: con todo a la vista no aparece. -->
+                <span class="prologo__manual-abajo" aria-hidden="true">más abajo &darr;</span>
+                <button
+                  type="button"
+                  class="prologo__manual-boton prologo__manual-boton--sigue"
+                  (click)="pasarPagina(1)"
+                >
+                  {{ pagina()! + 1 < paginas().length ? 'Siguiente página' : 'Cerrar el manual' }}
+                  &rarr;
+                </button>
+              </nav>
+            </section>
           }
           <p class="prologo__titulo" aria-hidden="true">Angular Signals</p>
           <div class="prologo__hud prologo__hud--controles">
