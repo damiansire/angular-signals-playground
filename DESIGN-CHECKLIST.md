@@ -553,8 +553,11 @@ entrar desarma a Angie en luz y se hace noche, la costura con el prólogo.
       con la cara; nada de saltito, estirarse, saludar ni cambiar el peso). Medir con rAF dentro de
       la página la velocidad de cada pie a velocidad de crucero: el apoyado igual en los dos
       (~12 px/s de efecto de medir el centro del pie, no el apoyo) y el otro al doble del cuerpo.
-      En un ancho donde no entra un paso se sienta donde está. Con movimiento reducido o con la
-      pausa de fondo queda sentada en su lugar, sin viaje. El paseo arranca cuando la landing SE
+      En un ancho donde no entra un paso se sienta donde está. Con movimiento reducido queda
+      sentada en su lugar, sin viaje. La pausa de fondo NO la frena: el paseo es su llegada, no
+      vida de fondo, y con la pausa recordada (`signals-pausa`) se quedaba parada 1,2 s y aparecía
+      en la piedra. Si la landing se va de vista caminando, el paseo espera y al volver sigue
+      desde donde quedó (sentarla ahí también era aparecer en la piedra). El paseo arranca cuando la landing SE
       VE, no al cargar: con un deep-link (`?nivel=0`, la URL que queda al recargar después de
       entrar) carga oculta, y al volver con la rueda ya estaba en el borde: un teletransporte.
       Probarlo así, cargando con `?nivel=0` y volviendo con input real. Cambiar el tamaño a mitad
