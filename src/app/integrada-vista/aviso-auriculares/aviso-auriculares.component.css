@@ -76,6 +76,68 @@
     opacity: 0.25;
   }
 }
+/* La cruz late con el mismo titileo que su punto, desfasada igual: se estira cuando brilla. */
+.aa__destello-estrella {
+  fill: #fff8ec;
+  transform-origin: 0 0;
+  animation: aa-destella 4s ease-in-out infinite;
+}
+@keyframes aa-destella {
+  0%,
+  100% {
+    opacity: 0.9;
+    scale: 1;
+  }
+  50% {
+    opacity: 0.15;
+    scale: 0.45;
+  }
+}
+/* La fugaz cruza en menos de un segundo cada once: si pasara seguido sería un protector de pantalla. */
+.aa__fugaz {
+  opacity: 0;
+  animation: aa-fugaz 11s ease-in 3s infinite;
+}
+@keyframes aa-fugaz {
+  0% {
+    opacity: 0;
+    translate: 300px 50px;
+  }
+  1% {
+    opacity: 1;
+  }
+  7% {
+    opacity: 0;
+    translate: 860px 200px;
+  }
+  100% {
+    opacity: 0;
+    translate: 860px 200px;
+  }
+}
+
+/* Las lomas van debajo del velo, que las funde con la noche en los bordes. La de lejos es apenas más
+   clara que la de cerca, y el alba le marca el filo: sin ese borde eran una mancha. */
+.aa__lomas {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  height: clamp(80px, 24vh, 260px);
+}
+.aa__loma-lejos {
+  fill: #2a2950;
+}
+.aa__loma-borde {
+  fill: none;
+  stroke: #ff9fc6;
+  stroke-opacity: 0.28;
+  stroke-width: 3;
+}
+.aa__loma-cerca {
+  fill: #171a36;
+}
 
 /* ─── El sonido, arriba y aparte ──────────────────────────────────────────────────────────────── */
 
@@ -178,7 +240,7 @@
    así el texto queda cerca de sus pies. */
 .aa__escena {
   position: relative;
-  width: min(400px, 76vw, 44vh);
+  width: min(440px, 76vw, 48vh);
   aspect-ratio: 1;
   margin: -6% 0 -2%;
 }
@@ -696,6 +758,8 @@
 /* Sin movimiento: el aviso y sus dos opciones siguen ahí, sin bucles ni cámara que se aleja. */
 @media (prefers-reduced-motion: reduce) {
   .aa__estrella,
+  .aa__destello-estrella,
+  .aa__fugaz,
   .aa__halo,
   .aa__onda,
   .aa__destello,

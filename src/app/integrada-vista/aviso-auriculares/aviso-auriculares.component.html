@@ -9,6 +9,46 @@
         [style.animation-delay.s]="-e.retraso"
       />
     }
+    <!-- Las más grandes brillan en cruz, como en un dibujo animado: los puntos solos eran un cielo de
+         planetario. -->
+    @for (e of destellos; track $index) {
+      <g [attr.transform]="'translate(' + e.x + ' ' + e.y + ') scale(' + e.r * 3.4 + ')'">
+        <path
+          class="aa__destello-estrella"
+          [style.animation-delay.s]="-e.retraso"
+          d="M0-1Q.1-.1 1 0Q.1 .1 0 1Q-.1 .1-1 0Q-.1-.1 0-1Z"
+        />
+      </g>
+    }
+    <defs>
+      <linearGradient id="aa-estela" x1="1" y1="0" x2="0" y2="0">
+        <stop offset="0" stop-color="#fff8ec" />
+        <stop offset="1" stop-color="#fff8ec" stop-opacity="0" />
+      </linearGradient>
+    </defs>
+    <!-- Cada tanto cruza una fugaz: el cielo vive mientras se espera, sin pedir atención. -->
+    <g class="aa__fugaz">
+      <path d="M0 0L-170-46" stroke="url(#aa-estela)" stroke-width="3" stroke-linecap="round" />
+      <circle r="3.2" fill="#fff8ec" />
+    </g>
+  </svg>
+  <!-- Las lomas de lejos, en silueta contra el alba: dan un horizonte, y la de adelante anuncia la
+       colina adonde va la cámara. Se estiran con la pantalla: recortadas, en una ventana baja
+       perdían el filo. -->
+  <svg class="aa__lomas" viewBox="0 0 1920 300" preserveAspectRatio="none">
+    <path
+      class="aa__loma-lejos"
+      d="M0 170C240 120 420 110 640 140S1040 92 1300 122S1700 150 1920 108V300H0Z"
+    />
+    <path
+      class="aa__loma-borde"
+      vector-effect="non-scaling-stroke"
+      d="M0 170C240 120 420 110 640 140S1040 92 1300 122S1700 150 1920 108"
+    />
+    <path
+      class="aa__loma-cerca"
+      d="M0 236C300 186 560 180 820 208S1240 252 1500 204S1800 174 1920 194V300H0Z"
+    />
   </svg>
 </div>
 <!-- Arriba y aparte, para que tocar en cualquier lado siga siendo "continuar". -->

@@ -95,6 +95,8 @@ export class AvisoAuricularesComponent {
   /** El lado que está sonando en la prueba: enciende esa copa. */
   protected readonly suena = signal<Lado | null>(null);
   protected readonly estrellas = estrellasDelAlba(11, 70);
+  /** Las más grandes, lejos de la franja de arriba: en un celular una cruz caía sobre el sonido. */
+  protected readonly destellos = this.estrellas.filter((e) => e.r >= 3 && e.y >= 110);
   protected readonly llamado = LLAMADO;
   protected readonly llamadoTactil = LLAMADO_TACTIL;
   protected readonly letras = letrasDelLlamado(LLAMADO);
