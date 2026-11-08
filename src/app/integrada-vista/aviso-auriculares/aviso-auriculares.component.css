@@ -1,0 +1,376 @@
+/* El telón de antes del amanecer: noche arriba, el alba tibia en el borde de abajo. Planos de atrás
+   hacia adelante: cielo, estrellas, alba, halo, auriculares, texto. */
+:host {
+  position: absolute;
+  inset: 0;
+  z-index: 20;
+  display: block;
+  overflow: hidden;
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+  background: linear-gradient(
+    to bottom,
+    #121732 0%,
+    #1f2a52 42%,
+    #3d3c68 70%,
+    #7a587a 88%,
+    #c98a86 100%
+  );
+  /* Sube con aceleración, como un telón que se suelta: con ease-out se sentía un fundido. */
+  transition: translate 1.1s cubic-bezier(0.55, 0, 0.75, 0.2);
+}
+:host([hidden]) {
+  display: none;
+}
+:host(.aa--abriendo) {
+  translate: 0 calc(-100% - 36vh);
+}
+
+.aa__cielo,
+.aa__estrellas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+.aa__estrella {
+  fill: #fff8ec;
+  animation: aa-titila 4s ease-in-out infinite;
+}
+@keyframes aa-titila {
+  0%,
+  100% {
+    opacity: 0.85;
+  }
+  50% {
+    opacity: 0.25;
+  }
+}
+
+/* El alba cuelga del borde de abajo, fuera del telón: al subir, barre la colina como luz que llega. */
+.aa__alba {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 100%;
+  height: 34vh;
+  background: linear-gradient(
+    to bottom,
+    #c98a86 0%,
+    rgba(255, 200, 150, 0.65) 30%,
+    rgba(255, 228, 190, 0.25) 65%,
+    rgba(255, 240, 220, 0) 100%
+  );
+  pointer-events: none;
+}
+:host(.aa--abriendo) {
+  overflow: visible;
+}
+
+.aa__centro {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(0.4rem, 1.6vh, 0.9rem);
+  padding: 16px;
+  text-align: center;
+}
+
+.aa__auris {
+  width: min(460px, 80vw, 46vh);
+  height: auto;
+  overflow: visible;
+}
+.aa__halo {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: aa-respira 3.2s ease-in-out infinite;
+}
+@keyframes aa-respira {
+  50% {
+    scale: 1.08;
+    opacity: 0.8;
+  }
+}
+.aa__flota {
+  animation: aa-flota 2.6s ease-in-out infinite;
+}
+@keyframes aa-flota {
+  50% {
+    translate: 0 -8px;
+  }
+}
+
+/* En espera las ondas laten de adentro hacia afuera, despacio: dicen "esto suena" sin hacer ruido. */
+.aa__onda {
+  opacity: 0;
+  animation: aa-late 2.4s ease-out infinite;
+}
+.aa__onda:nth-child(2) {
+  animation-delay: 0.25s;
+}
+.aa__onda:nth-child(3) {
+  animation-delay: 0.5s;
+}
+@keyframes aa-late {
+  20% {
+    opacity: 0.45;
+  }
+  60%,
+  100% {
+    opacity: 0;
+  }
+}
+
+.aa__copa {
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+}
+.aa__letra {
+  font-family: var(--font-display, system-ui, sans-serif);
+  font-weight: 900;
+  font-size: 26px;
+  fill: #fff8ec;
+  fill-opacity: 0.85;
+  text-anchor: middle;
+}
+
+/* La prueba: la copa que suena se aplasta y estira como un parlante, sus ondas salen fuertes y sus
+   notas suben. La otra se queda quieta: es lo que deja ver de qué lado suena. */
+:host(.aa--probando) .aa__onda {
+  animation: none;
+}
+:host(.aa--izquierda) .aa__copa--izquierda,
+:host(.aa--derecha) .aa__copa--derecha {
+  animation: aa-golpe 0.32s cubic-bezier(0.34, 1.8, 0.64, 1);
+}
+/* El acorde repite el golpe en las dos copas: con el mismo nombre de animación, la que ya había
+   sonado no volvía a arrancar. Lo mismo con ondas y notas. */
+:host(.aa--ambos) .aa__copa {
+  animation: aa-golpe-2 0.32s cubic-bezier(0.34, 1.8, 0.64, 1);
+}
+@keyframes aa-golpe {
+  0% {
+    scale: 1;
+  }
+  35% {
+    scale: 1.1 0.88;
+  }
+  100% {
+    scale: 1;
+  }
+}
+@keyframes aa-golpe-2 {
+  0% {
+    scale: 1;
+  }
+  35% {
+    scale: 1.1 0.88;
+  }
+  100% {
+    scale: 1;
+  }
+}
+:host(.aa--izquierda) .aa__ondas--izquierda .aa__onda,
+:host(.aa--derecha) .aa__ondas--derecha .aa__onda {
+  animation: aa-sale 0.7s ease-out both;
+}
+:host(.aa--ambos) .aa__onda {
+  animation: aa-sale-2 0.7s ease-out both;
+}
+:host(.aa--izquierda) .aa__ondas--izquierda .aa__onda:nth-child(2),
+:host(.aa--derecha) .aa__ondas--derecha .aa__onda:nth-child(2),
+:host(.aa--ambos) .aa__onda:nth-child(2) {
+  animation-delay: 0.08s;
+}
+:host(.aa--izquierda) .aa__ondas--izquierda .aa__onda:nth-child(3),
+:host(.aa--derecha) .aa__ondas--derecha .aa__onda:nth-child(3),
+:host(.aa--ambos) .aa__onda:nth-child(3) {
+  animation-delay: 0.16s;
+}
+@keyframes aa-sale {
+  0% {
+    opacity: 0;
+  }
+  25% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+@keyframes aa-sale-2 {
+  0% {
+    opacity: 0;
+  }
+  25% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+.aa__ondas--izquierda {
+  transform-box: fill-box;
+  transform-origin: 100% 50%;
+}
+.aa__ondas--derecha {
+  transform-box: fill-box;
+  transform-origin: 0% 50%;
+}
+
+.aa__nota {
+  opacity: 0;
+}
+:host(.aa--izquierda) .aa__notas--izquierda .aa__nota,
+:host(.aa--derecha) .aa__notas--derecha .aa__nota {
+  animation: aa-nota 1.1s ease-out both;
+}
+:host(.aa--ambos) .aa__nota {
+  animation: aa-nota-2 1.1s ease-out both;
+}
+:host(.aa--izquierda) .aa__notas--izquierda .aa__nota:nth-child(2),
+:host(.aa--derecha) .aa__notas--derecha .aa__nota:nth-child(2),
+:host(.aa--ambos) .aa__nota:nth-child(2) {
+  animation-delay: 0.14s;
+}
+@keyframes aa-nota {
+  0% {
+    opacity: 0;
+    translate: 0 10px;
+  }
+  20% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    translate: 0 -60px;
+  }
+}
+@keyframes aa-nota-2 {
+  0% {
+    opacity: 0;
+    translate: 0 10px;
+  }
+  20% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    translate: 0 -60px;
+  }
+}
+/* Al final suenan los dos oídos: el halo se enciende con el acorde. */
+:host(.aa--ambos) .aa__halo {
+  animation: aa-acorde 0.6s ease-out both;
+}
+@keyframes aa-acorde {
+  40% {
+    scale: 1.25;
+    opacity: 1;
+  }
+  100% {
+    scale: 1.12;
+    opacity: 0.9;
+  }
+}
+
+/* Peso alto y sombra tintada de noche, como el título de la mañana. */
+.aa__titulo {
+  margin: 0.4rem 0 0;
+  font-family: var(--font-display, system-ui, sans-serif);
+  font-weight: 900;
+  font-size: clamp(1.5rem, min(5vw, 6vh), 3rem);
+  line-height: 1.08;
+  letter-spacing: -0.02em;
+  color: #fff8ec;
+  text-shadow:
+    0 4px 0 rgba(10, 12, 34, 0.7),
+    0 12px 30px rgba(10, 12, 34, 0.55);
+}
+.aa__activar {
+  margin-top: 0.4rem;
+  padding: 0.75rem 1.5rem;
+  border: 0;
+  border-radius: 999px;
+  font-family: var(--font-display, system-ui, sans-serif);
+  font-weight: 900;
+  font-size: clamp(1rem, min(3vw, 3.4vh), 1.35rem);
+  color: #2b1b33;
+  background: #ffd46a;
+  box-shadow:
+    0 5px 0 #b8862a,
+    0 14px 30px rgba(255, 198, 92, 0.3);
+  cursor: pointer;
+  transition:
+    translate 0.15s ease-out,
+    box-shadow 0.15s ease-out;
+}
+.aa__activar span {
+  color: #c8005d;
+}
+.aa__activar:hover {
+  translate: 0 -2px;
+}
+.aa__activar:active {
+  translate: 0 4px;
+  box-shadow: 0 1px 0 #b8862a;
+}
+.aa__activar:focus-visible,
+.aa__sin:focus-visible {
+  outline: 3px solid #fff8ec;
+  outline-offset: 4px;
+}
+/* En la prueba el botón ya hizo lo suyo: se aparta para que se mire a los auriculares, y no vuelve
+   mientras sube el telón. */
+:host(.aa--probando) .aa__activar,
+:host(.aa--probando) .aa__sin,
+:host(.aa--abriendo) .aa__activar,
+:host(.aa--abriendo) .aa__sin {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease-in;
+}
+.aa__lado {
+  min-height: 1.4em;
+  margin: 0;
+  font-family: var(--font-display, system-ui, sans-serif);
+  font-weight: 800;
+  font-size: clamp(0.95rem, 2.6vh, 1.15rem);
+  color: #ffd46a;
+}
+.aa__sin {
+  padding: 0.3rem 0.6rem;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: rgba(255, 248, 236, 0.78);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+.aa__sin:hover {
+  color: #fff8ec;
+}
+
+/* Sin movimiento: el aviso y sus dos opciones siguen ahí; no hay bucles ni telón que sube. */
+@media (prefers-reduced-motion: reduce) {
+  :host {
+    transition: none;
+  }
+  .aa__estrella,
+  .aa__halo,
+  .aa__flota,
+  .aa__onda {
+    animation: none;
+  }
+  .aa__onda {
+    opacity: 0.35;
+  }
+}

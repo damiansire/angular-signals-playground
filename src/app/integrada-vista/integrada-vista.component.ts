@@ -28,6 +28,7 @@ import {
   initInicioAngie,
   juncos,
   matasDePasto,
+  type InicioAngie,
 } from './inicio-angie';
 import { initMundoQueResponde } from './mundo-que-responde';
 
@@ -55,6 +56,7 @@ import {
   type Partida,
 } from '../libs/partida';
 import { CinematicaComponent } from './cinematicas/cinematica.component';
+import { AvisoAuricularesComponent } from './aviso-auriculares/aviso-auriculares.component';
 import { BitacoraComponent, type CapituloDeBitacora } from './bitacora/bitacora.component';
 import { CAPITULO_FINAL, type Cinematica } from './cinematicas/cinematica-guion';
 
@@ -80,7 +82,13 @@ const ESPERA_FINAL_MS = 1600;
  */
 @Component({
   selector: 'app-integrada-vista',
-  imports: [RouterLink, CinematicaComponent, BitacoraComponent, MascotaVivaComponent],
+  imports: [
+    RouterLink,
+    CinematicaComponent,
+    BitacoraComponent,
+    MascotaVivaComponent,
+    AvisoAuricularesComponent,
+  ],
   templateUrl: './integrada-vista.component.html',
   styleUrls: [
     './integrada-vista.component.css',
@@ -104,6 +112,9 @@ export class IntegradaVistaComponent {
   private readonly guia = viewChild('guia', { read: MascotaVivaComponent });
   /** La de la colina: la escena la lleva hasta el borde, y el paso y la pose los pone ella. */
   private readonly angieInicio = viewChild('angieInicio', { read: MascotaVivaComponent });
+
+  /** La colina se despierta cuando se eligió el sonido en el aviso de auriculares, no al cargar. */
+  private despertarColina: () => void = () => undefined;
 
   /** Angie en la colina se mueve sola hasta que la despedida la desarma: ahí manda la salida. */
   protected readonly angieEsperando = signal(true);
@@ -228,16 +239,22 @@ export class IntegradaVistaComponent {
     // audio ya desbloqueado y sin pedirle nada más a nadie. Y la construcción de Tusi espera de
     // verdad: si corriera detrás durante esos minutos, llegaría terminada y se comería su propio
     // premio, que es ver aparecer el círculo.
-    const inicio = initInicioAngie(this.host, {
-      caminar: (fase, apertura, rumbo) => this.angieInicio()?.caminar(fase, apertura, rumbo),
-      sentarse: () => this.angieInicio()?.sentarse(),
-      pararse: () => this.angieInicio()?.pararse(),
-    });
-    this.destroyRef.onDestroy(inicio.dispose);
+    //
+    // La colina arranca recién con el aviso de auriculares: el paseo de Angie es lo primero que se
+    // ve, y con el telón puesto se lo perdía entero.
+    let inicio: InicioAngie | null = null;
+    const despertar = (): InicioAngie =>
+      (inicio ??= initInicioAngie(this.host, {
+        caminar: (fase, apertura, rumbo) => this.angieInicio()?.caminar(fase, apertura, rumbo),
+        sentarse: () => this.angieInicio()?.sentarse(),
+        pararse: () => this.angieInicio()?.pararse(),
+      }));
+    this.despertarColina = despertar;
+    this.destroyRef.onDestroy(() => inicio?.dispose());
     landing = initIntroTusi(this.host, {
       despedida: () => {
         this.angieEsperando.set(false);
-        return inicio.despedir();
+        return despertar().despedir();
       },
       // La preferencia de sonido se elige en el overlay del intro pero quien suena después es el
       // prólogo: viaja con el gatillo para que silenciar antes de entrar valga para los dos.
@@ -291,6 +308,11 @@ export class IntegradaVistaComponent {
   }
 
   /** El globo es de quien habla: si la mascota salta o la tocan, él también se entera. */
+  /** Con o sin sonido, el telón del aviso empieza a subir: la colina se despierta debajo. */
+  protected alElegirSonido(): void {
+    this.despertarColina();
+  }
+
   protected sacudirGlobo(): void {
     if (sinMovimiento()) return;
     this.host.querySelector('.rec-guide__bubble')?.animate(

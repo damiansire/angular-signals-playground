@@ -493,6 +493,16 @@
                 >
               </button>
             </div>
+
+            <!-- Antes que nada, de noche: el aviso de auriculares. Su toque abre el audio de toda la
+                 intro, y al subir su telón la colina se despierta. -->
+            <!-- Diferido: el bundle inicial no tenía lugar. Mientras llega, el telón liso del mismo
+                 color tapa la colina, así no se ve la mañana un instante antes de la noche. -->
+            @defer (on immediate) {
+              <app-aviso-auriculares (elegido)="alElegirSonido()" />
+            } @placeholder {
+              <div class="ini__telon" aria-hidden="true"></div>
+            }
           </div>
         </div>
         <!-- Prólogo "la anomalía": la cinemática que enmarca el recorrido (ver prologo-anomalia.ts).

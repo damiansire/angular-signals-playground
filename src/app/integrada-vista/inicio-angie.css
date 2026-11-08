@@ -593,6 +593,21 @@
   );
 }
 
+/* El telón del aviso de auriculares mientras su código llega: el mismo cielo de antes del alba. */
+.ini__telon {
+  position: absolute;
+  inset: 0;
+  z-index: 20;
+  background: linear-gradient(
+    to bottom,
+    #121732 0%,
+    #1f2a52 42%,
+    #3d3c68 70%,
+    #7a587a 88%,
+    #c98a86 100%
+  );
+}
+
 /* Vertical: no hay ancho para el título y el sol en la misma franja. El sol va a la esquina, más
    chico, y el texto baja para no quedar debajo de él. */
 @container (max-aspect-ratio: 1 / 1) {

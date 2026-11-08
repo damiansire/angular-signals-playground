@@ -1,0 +1,135 @@
+<div class="aa__cielo" aria-hidden="true">
+  <svg class="aa__estrellas" viewBox="0 0 1920 1080" preserveAspectRatio="xMidYMin slice">
+    @for (e of estrellas; track $index) {
+      <circle
+        class="aa__estrella"
+        [attr.cx]="e.x"
+        [attr.cy]="e.y"
+        [attr.r]="e.r"
+        [style.animation-delay.s]="-e.retraso"
+      />
+    }
+  </svg>
+</div>
+<!-- El borde de abajo del telón es el alba: al subir, esa franja tibia barre la colina. -->
+<div class="aa__alba" aria-hidden="true"></div>
+
+<div class="aa__centro">
+  <svg class="aa__auris" viewBox="-60 -20 440 280" aria-hidden="true">
+    <defs>
+      <radialGradient id="aa-halo">
+        <stop offset="0" stop-color="#ff8ac9" stop-opacity=".32" />
+        <stop offset=".55" stop-color="#ff5fa8" stop-opacity=".12" />
+        <stop offset="1" stop-color="#ff5fa8" stop-opacity="0" />
+      </radialGradient>
+      <linearGradient id="aa-copa" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#ff5fa8" />
+        <stop offset="1" stop-color="#c8005d" />
+      </linearGradient>
+      <linearGradient id="aa-banda" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#5a4775" />
+        <stop offset="1" stop-color="#2b1b33" />
+      </linearGradient>
+    </defs>
+    <circle class="aa__halo" cx="160" cy="150" r="150" fill="url(#aa-halo)" />
+
+    <!-- Ondas: en espera laten suaves; en la prueba salen fuertes del lado que suena. -->
+    <g class="aa__ondas aa__ondas--izquierda" fill="none" stroke="#ffd46a" stroke-linecap="round">
+      <path class="aa__onda" stroke-width="6" d="M14 150Q0 174 14 198" />
+      <path class="aa__onda" stroke-width="5" d="M-6 136Q-28 174 -6 212" />
+      <path class="aa__onda" stroke-width="4" d="M-26 122Q-56 174 -26 226" />
+    </g>
+    <g class="aa__ondas aa__ondas--derecha" fill="none" stroke="#ffd46a" stroke-linecap="round">
+      <path class="aa__onda" stroke-width="6" d="M306 150Q320 174 306 198" />
+      <path class="aa__onda" stroke-width="5" d="M326 136Q348 174 326 212" />
+      <path class="aa__onda" stroke-width="4" d="M346 122Q376 174 346 226" />
+    </g>
+
+    <g class="aa__flota">
+      <!-- La vincha, con un brillo arriba: sin él era un arco plano. -->
+      <path
+        d="M58 160C58 40 262 40 262 160"
+        fill="none"
+        stroke="url(#aa-banda)"
+        stroke-width="22"
+        stroke-linecap="round"
+      />
+      <path
+        d="M84 112C104 62 216 62 236 112"
+        fill="none"
+        stroke="#fff"
+        stroke-opacity=".2"
+        stroke-width="5"
+        stroke-linecap="round"
+      />
+
+      <g class="aa__copa aa__copa--izquierda">
+        <rect x="28" y="130" width="60" height="96" rx="28" fill="url(#aa-copa)" />
+        <rect x="76" y="140" width="20" height="76" rx="10" fill="#f6dbe9" />
+        <path
+          d="M42 156Q44 142 58 139"
+          fill="none"
+          stroke="#fff"
+          stroke-opacity=".55"
+          stroke-width="5"
+          stroke-linecap="round"
+        />
+        <text class="aa__letra" x="52" y="200">L</text>
+      </g>
+      <g class="aa__copa aa__copa--derecha">
+        <rect x="232" y="130" width="60" height="96" rx="28" fill="url(#aa-copa)" />
+        <rect x="224" y="140" width="20" height="76" rx="10" fill="#f6dbe9" />
+        <path
+          d="M246 156Q248 142 262 139"
+          fill="none"
+          stroke="#fff"
+          stroke-opacity=".55"
+          stroke-width="5"
+          stroke-linecap="round"
+        />
+        <text class="aa__letra" x="256" y="200">R</text>
+      </g>
+
+      <!-- Las notas salen de la copa que suena y se van hacia arriba. -->
+      <g class="aa__notas aa__notas--izquierda" fill="#ffd46a">
+        <g class="aa__nota">
+          <ellipse cx="40" cy="120" rx="8" ry="6" transform="rotate(-20 40 120)" />
+          <path d="M46 118V92l10 4" fill="none" stroke="#ffd46a" stroke-width="3" />
+        </g>
+        <g class="aa__nota">
+          <ellipse cx="74" cy="112" rx="7" ry="5" transform="rotate(-20 74 112)" />
+          <path d="M79 110V88" fill="none" stroke="#ffd46a" stroke-width="3" />
+        </g>
+      </g>
+      <g class="aa__notas aa__notas--derecha" fill="#ffd46a">
+        <g class="aa__nota">
+          <ellipse cx="262" cy="112" rx="7" ry="5" transform="rotate(-20 262 112)" />
+          <path d="M267 110V88" fill="none" stroke="#ffd46a" stroke-width="3" />
+        </g>
+        <g class="aa__nota">
+          <ellipse cx="290" cy="120" rx="8" ry="6" transform="rotate(-20 290 120)" />
+          <path d="M296 118V92l10 4" fill="none" stroke="#ffd46a" stroke-width="3" />
+        </g>
+      </g>
+    </g>
+  </svg>
+
+  <h2 id="aa-titulo" class="aa__titulo">Se recomienda usar auriculares</h2>
+  <button #activar class="aa__activar" type="button">
+    <span aria-hidden="true">✦</span> Tocá para activar el sonido <span aria-hidden="true">✦</span>
+  </button>
+  <p class="aa__lado" aria-live="polite">
+    @switch (suena()) {
+      @case ('izquierda') {
+        Izquierda…
+      }
+      @case ('derecha') {
+        …derecha
+      }
+      @case ('ambos') {
+        ¡Listo!
+      }
+    }
+  </p>
+  <button class="aa__sin" type="button" (click)="sinSonido()">Seguir sin sonido</button>
+</div>
