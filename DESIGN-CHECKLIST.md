@@ -121,9 +121,7 @@ el 0, ~87% en el 8), así que verificar solo el concepto 0 no alcanza.
       (pasarlos a dos renglones subía el topbar a 100 px y tapaba la card y el riel). Medido con el
       título más largo (8/2, "toSignal() · toObservable() · untracked()") a 360, 375, 500, 600, 768,
       820, 1001, 1440 y 1920 px,
-      y la primera parada del riel contra el TEXTO del topbar que le queda encima. Medirlo sin el
-      link "Estudio" (solo existe en desarrollo y además empuja el margen del siguiente link): con
-      él la medición da un topbar partido que en producción no pasa. Un control nuevo, angosto,
+      y la primera parada del riel contra el TEXTO del topbar que le queda encima. Un control nuevo, angosto,
       pasa a ícono con un blanco de 24px y su etiqueta queda como nombre accesible.
 
 ## Color y afordancia (que el clima no tape, que el vacío no confunda)

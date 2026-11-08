@@ -127,7 +127,6 @@ src/app/
 ├── components-draw/  # Drawing/visualization components (variable boxes, node tree)
 ├── layouts/          # Reusable page layouts (two-column, column + code)
 ├── libs/             # Framework-agnostic helpers (HTML parser, saved game, sound, springs)
-├── studio/           # Author tool to edit the prologue script (/studio, dev only link)
 ├── interfaces/       # Shared TypeScript types
 └── app.routes.ts     # Route tree that powers the leveled navigation
 ```

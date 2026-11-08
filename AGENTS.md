@@ -97,7 +97,6 @@ realmente tocás; no inventes scopes nuevos.
 | `src/app/layouts/`         | Layouts de página reutilizables                                                       | `layouts`    |
 | `src/app/libs/`            | Helpers agnósticos del framework (p.ej. parser de HTML)                               | `libs`       |
 | `src/app/interfaces/`      | Tipos TypeScript compartidos                                                          | `interfaces` |
-| `src/app/studio/`          | Estudio: editor del guion del prólogo (`/studio`; enlace y sync a disco solo en dev)  | `studio`     |
 | Routing / arranque         | `app.routes.ts`, `app.config.ts`, navegación                                          | `routing`    |
 | Config / tooling           | tsconfig, eslint, angular.json, package.json, CI                                      | `config`     |
 | README / docs              | Documentación                                                                         | sin scope    |
