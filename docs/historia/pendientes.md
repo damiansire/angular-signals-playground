@@ -118,7 +118,8 @@ fecha y adónde fue. Los ids (H1, J1…) sirven para nombrarlos en una sesión (
   ancho, el prólogo se saltea entero, y con él el manual de a bordo: esas personas ya no ven 0/1 a
   0/5, que antes estaban en la molécula. Cada etapa que pase a la historia agranda el hueco. Falta
   decidir cómo se lee la historia sin la cinemática: por ejemplo, las páginas solas, sin la escena
-  detrás.
+  detrás. El manual ya está (2026-11-09): la bitácora lo abre suelto, sin la escena. Falta lo mismo
+  para cada etapa nueva que pase a la historia.
 
 ## Arreglos de docs
 

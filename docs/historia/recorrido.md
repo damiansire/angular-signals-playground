@@ -135,6 +135,9 @@ Se puede ir y volver, y "Cerrar el manual" en la página 5 sigue con `anom-leyes
 nada para avanzar (ADR 0002). Las cinco pantallas salieron de la molécula: la Introducción queda con
 un solo sub-nivel, "El signal avisa quién lo lee.", que pasa a la historia con La voz y Angie.
 
+El manual también se abre suelto desde la bitácora, sin la escena: así lo lee quien salteó el
+prólogo, y cualquiera que quiera volver a una página.
+
 ### Adentro
 
 Es el acto 2, más corto: de `dentro-vivos` a `dentro-rendicion`. Cierra con "Esto es demasiado

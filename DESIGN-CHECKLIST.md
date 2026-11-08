@@ -788,6 +788,16 @@ Del minijuego de operadores (2026-11-08):
 - [ ] Medido a 1440×900, 1280×640 y 1024×700 con input real: sin choques con el HUD, sin desborde
       horizontal, pie siempre visible, nada sin estampar, la caja de diálogo escondida, y al cerrar
       sigue "Debería ser imposible…".
+- [ ] Se abre suelto desde la bitácora ("Manual de a bordo", siempre a la vista): la misma hoja en
+      un `ng-template`, afuera del escenario y en el z 70 de la bitácora. En la historia sigue
+      adentro del prólogo, porque la pantalla completa es la del prólogo. El escenario queda
+      `inert`, y al cerrar se prende antes de devolverle el foco a "Bitácora".
+- [ ] Las teclas de leer las atiende la vista (`pasoEnElManual`, función pura), no el motor del
+      prólogo: suelto, el motor no está, y sin `preventDefault` ↓ movía la molécula de atrás.
+- [ ] "Cerrar ×" en la cabeza, en su propia columna (`grid-area: 1 / 3`): con mouse, Escape no se
+      adivina. Sin el área explícita caía en la primera columna y se estiraba a lo ancho.
+- [ ] Suelto, medido a 1280×640, 1024×700 y 600×800 con input real: rueda, teclas, Escape y el
+      botón; la molécula no se mueve mientras está abierto, y sí al cerrarlo.
 
 ## Cinemáticas de capítulo (que se sienta un juego, no un video)
 
