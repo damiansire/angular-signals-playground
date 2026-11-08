@@ -136,8 +136,8 @@ Está hecho (2026-11-09), en `src/app/integrada-vista/manual-de-a-bordo.ts`. La 
 la escena viva, y el manual se abre en una hoja de papel sobre el velo. Cada página monta la pantalla
 de hoy entera (la demo y su desafío), cargada diferida, con lo que le dice a la tripulación arriba.
 Se puede ir y volver, y "Cerrar el manual" en la página 5 sigue con `anom-leyes`. No pide resolver
-nada para avanzar (ADR 0002). Las cinco pantallas salieron de la molécula: la Introducción queda con
-un solo sub-nivel, "El signal avisa quién lo lee.", que pasa a la historia con La voz y Angie.
+nada para avanzar (ADR 0002). Las cinco pantallas salieron de la molécula, y la sexta pasó a la
+historia con La voz y Angie.
 
 El manual también se abre suelto desde la bitácora, sin la escena: así lo lee quien salteó el
 prólogo, y cualquiera que quiera volver a una página.
@@ -160,9 +160,20 @@ caótico." (`dentro-caotico`), la línea que ya se escuchó desde el sol.
 5. El pacto, de `leccion-entiendes` a `leccion-reglas`. Con el lore nuevo, "No puedo intervenir con
    ustedes." es el bucle.
 6. Angie les presenta Signal Space y les muestra cómo se actualiza el árbol: el desafío 6 de la
-   Introducción de hoy, "El signal avisa quién lo lee." (`signals-change-detection`). Es el mismo
+   Introducción de antes, "El signal avisa quién lo lee." (`signals-change-detection`). Es el mismo
    árbol de la página 5, pero ahora se encienden solo los dos nodos que leen el valor: en casa se
    revisaban 7, en Signal Space se revisan 2.
+
+Los pasos 5 y 6 están hechos (2026-11-09). Después del pacto (`leccion-armonia`), el capitán dice
+"Nuestra pantalla sigue marcando la velocidad vieja." (`leccion-pantalla`), la Nave B pregunta "¿Y
+quién le avisó a la pantalla?" (`leccion-pregunta`) y Angie contesta "Aquí nadie revisa todo. Miren
+el árbol." (`leccion-arbol`). La historia se frena ahí y se abre la hoja del manual con el título
+"Signal Space" y la ley 6 (`arbol-de-signal-space.ts`). Su lámina tiene la nave, el árbol en su
+pantalla y una caja ámbar con un hilo hasta cada nodo que lee el valor: al cambiarlo, el aviso viaja
+solo por esos hilos. Con un `let`, alguien barre el árbol entero como en casa, y la nave se preocupa.
+"Seguir" cierra la hoja y Angie dice "Guarden esa pregunta. Los acompaña todo el viaje."
+(`leccion-guarden`). Esas líneas reemplazan a la cinemática del capítulo 0, que se retiró con la
+Introducción (ADR 0006). La bitácora abre el árbol suelto, como el manual.
 
 ## El cuerpo: tres arcos
 
@@ -274,4 +285,4 @@ Son 6 + 15 + 13 + 6 = 40. Los desafíos que quizá conviene mover o juntar está
 | `molecule-engine.ts` (el recorrido molécula) | Es la UI de los niveles                         |
 | Las 40 pantallas de los desafíos             | Pasan a ser aparatos del mundo                  |
 | `cinematicas/escenas/`                       | Las cinemáticas por capítulo pasan a ser etapas |
-| La bitácora, `/cine/<n>` y la URL `?nivel=`  | Están atadas a la forma de 0 a 11               |
+| La bitácora, `/cine/<n>` y la URL `?nivel=`  | Están atadas a los números de capítulo          |

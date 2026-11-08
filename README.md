@@ -10,7 +10,7 @@ signals, `computed`, `effect` and change detection actually behave.
 ![The integrated "reactive molecule" tour, inside the Inputs & Outputs concept: the real demo, its code and a challenge to touch, with the numbered sub-levels on the left rail](public/preview.jpeg)
 
 The default entry (`/`) is the **integrated view**: a "reactive molecule" tour
-where each of the 12 concepts is an atom. Scroll to dive into an atom and its
+where each of the 11 chapters is an atom. Scroll to dive into an atom and its
 sub-levels orbit the card, each one embedding the _real_ demo component of that
 lesson. Deep-links are shareable: `?nivel=1&sub-nivel=2` reopens exactly where
 you were.
@@ -117,7 +117,7 @@ whose CI run went green.
 
 ```
 src/app/
-├── integrada-vista/  # The default entry (/): the "reactive molecule" tour of the 12 concepts
+├── integrada-vista/  # The default entry (/): the "reactive molecule" tour of the 11 chapters
 │   ├── cinematicas/  # Chapter cinematics: player, scripts and one lazy scene per chapter
 │   └── bitacora/     # The logbook: established chapters, their rules, replays
 ├── signals/          # The learning levels (0–11) and their sub-levels

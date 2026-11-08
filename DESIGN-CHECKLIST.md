@@ -37,8 +37,8 @@ sub-niveles, que se pisaban entre sí y con las instrucciones). El electrón
 actual (dot + órbita + sonar) se mantiene CEÑIDO al ancho del riel para no pisar
 la espina vertical "Signals" que vive a su derecha.
 
-- [ ] Una SOLA barra visible por vez: en la vista molécula muestra los 12
-      conceptos (0-11); al bucear, su cuerpo (ticks + línea) se desvanece y la
+- [ ] Una SOLA barra visible por vez: en la vista molécula muestra los 11
+      capítulos (1-11); al bucear, su cuerpo (ticks + línea) se desvanece y la
       barra de sub-niveles ocupa el mismo eje. Nunca dos barras a la vez.
 - [ ] Al bucear, los extremos de la barra de sub-niveles se ABREN hacia los
       bordes (arriba/abajo) — el gesto de "morph" — en vez de aparecer de golpe.
@@ -309,6 +309,10 @@ puede alcanzar" son dos cosas distintas y hay que chequear las dos.
 - [ ] "Empezar de cero" está en la barra, en el HUD del prólogo y en la colina, y pide un segundo
       toque que caduca. Su globo en la colina es corto: el largo tapaba el título a 1024×768, y el
       del "¿seguro?" se ve sin apuntar. Borrar recarga SIN la query.
+- [ ] El capítulo es un nombre, no una posición (ADR 0006): `?nivel=`, la cinemática, el número del
+      riel y la bitácora usan `CAPITULO_DE_CONCEPTO`; la partida y el motor, la posición. Signals es
+      el capítulo 1 en la posición 0. `?nivel=0` se ignora y manda lo guardado. Un cambio que
+      mezcla los dos abre la cinemática o el link de al lado.
 - [ ] Los specs que montan la vista limpian la partida antes y después: la vista guarda el punto
       apenas el recorrido se mueve, y cada test le dejaba su lugar al siguiente.
 - [ ] Probar en la ruta ancha Y en el embed angosto: un fix de layout
@@ -902,6 +906,18 @@ Del minijuego de operadores (2026-11-08):
 - [ ] Con las escenas, medido con input real en la historia a 1440×900 y 1280×640, suelto a
       1024×700 y 600×800, y suelto a 1440×900 con movimiento reducido (en la historia el prólogo
       se termina solo): sin solapes con el HUD y sin desborde horizontal en las cinco páginas.
+
+**El árbol de Signal Space** (el viejo 0/6, la misma hoja con una sola página):
+
+- [ ] La historia se frena en "Miren el árbol." y sigue con "Guarden esa pregunta." al tocar
+      "Seguir". Retomar desde `leccion-guarden` no la vuelve a abrir.
+- [ ] La hoja dice "Signal Space" y la ley 6 (sigue a las cinco del manual), no "Manual de a
+      bordo". Con una sola página no hay marcas, ni "1 de 1", ni "← Anterior".
+- [ ] La lámina reacciona a la demo: el aviso viaja solo por los hilos de los dos nodos que leen;
+      con el desafío roto (`let`), el árbol entero se pinta, como en casa, y la nave se preocupa.
+- [ ] Un desafío resuelto en una hoja del prólogo no se anota en la molécula: el motor solo cuenta
+      el `sistema-establecido` que sale de una card. Antes caía en el concepto que hubiera en
+      pantalla, y Signal Space marcaba Signals 1/1.
 
 ## Cinemáticas de capítulo (que se sienta un juego, no un video)
 

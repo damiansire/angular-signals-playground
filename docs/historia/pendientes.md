@@ -72,33 +72,30 @@ fecha y adónde fue. Los ids (H1, J1…) sirven para nombrarlos en una sesión (
   porque lo excedía por 21 kB. **Propuesta:** usar el método del skill (causa y reacción, planos, luz,
   resortes, un solo impacto) con el motor del repo: CSS, Web Animations, `libs/resorte.ts`,
   `libs/muelle.ts`, `libs/rastros.ts` y `emitirImpacto`. Sumar GSAP sería un cambio de stack
-  (`CONTRIBUTING.md`) y pediría su ADR.
+  (`CONTRIBUTING.md`) y pediría su ADR. Actualización (2026-11-09): las láminas del manual ya usan
+  GSAP (`EscenaDelManual`), y la del árbol de Signal Space también; el prólogo y las cinemáticas
+  siguen con el motor del repo.
 - **T2. Dónde vive el código nuevo.** La tabla de scopes de `AGENTS.md` es una lista cerrada: si la
   historia vive en una carpeta nueva, su fila y su scope se suman en el mismo cambio.
 - **T3. Reemplazo por etapas.** `CONTRIBUTING.md` no acepta reescrituras masivas: cada cambio tiene
   que leerse como un diff. **Propuesta:** la historia nueva crece al lado del recorrido actual, una
   etapa por vez, y cada etapa nueva retira lo que reemplaza. La primera fue el manual de a bordo
-  (2026-11-09): sacó 0/1 a 0/5 de la molécula.
+  (2026-11-09): sacó 0/1 a 0/5 de la molécula. La segunda, el árbol de Signal Space (el mismo día):
+  sacó 0/6, y con él la Introducción entera.
 - **T4. La partida.** `libs/partida.ts` guarda `"concepto/sub"` (con el sub-nivel desde 0) y lo
   valida contra la cantidad de sub-niveles de cada concepto. Con etapas, esos ids cambian de
   sentido. Hay dos caminos: subir `VERSION` a 2, y las partidas viejas arrancan de cero como ya prevé
   ADR 0002, o escribir una migración. Con el manual se eligió migrar: la versión 2 traduce las
   partidas de la 1 (el viejo `0/5` es el `0/0`, y lo de `0/0` a `0/4` se descarta) y el resto de lo
-  guardado sigue. Cada etapa que retire sub-niveles suma su migración en `MIGRACIONES`.
-- **T5. Lo que fija la forma de 0 a 11.** Va a fallar al cambiarla:
-  - `RAW` (`molecule-engine.ts`) y `signalsRoutesTree` (`app.routes.ts`) tienen que tener el mismo
-    largo y el mismo orden;
-  - los specs: `app.routes.spec.ts` (12 niveles), `molecule-engine.spec.ts`,
-    `cinematica-guion.spec.ts` (capítulos 0 a 12), `integrada-vista.component.spec.ts`,
-    `url-sync.spec.ts`, `libs/partida.spec.ts` y `libs/manipulable-systems.sweep.spec.ts`, que
-    importa los 12 archivos por ruta y espera 40;
-  - sin test: `ACTS`, `CAPITULO_FINAL = 12`, el mapa `ESCENAS`, `LARGOS = {6, 12}` y el "de 12" de
-    la bitácora.
-
-  Achicar un concepto no rompió nada: con el manual la Introducción pasó de 6 sub-niveles a 1 y los
-  specs siguieron verdes, porque leen la cantidad de las rutas. Lo de arriba aplica a sacar un
-  concepto entero.
-
+  guardado sigue. Con el árbol, la versión 3 corre todo un concepto, punto del recorrido incluido,
+  y descarta lo de la Introducción (ADR 0006). Cada etapa que retire sub-niveles suma su migración
+  en `MIGRACIONES`.
+- **T5. Lo que fija la forma de 0 a 11.** Resuelto el 2026-11-09 (ADR 0006), al sacar la
+  Introducción entera. El número de capítulo quedó como nombre (`CAPITULO_DE_CONCEPTO`, atado al
+  `path` de `signalsRoutesTree`), así que las cinemáticas 1 a 12, el riel, la bitácora y `?nivel=`
+  no se renumeraron. La partida pasó a la versión 3 con su migración. Lo que sigue atado a la
+  posición: `RAW` y `signalsRoutesTree` (mismo largo y orden), `ACTS` y `CONCEPTO_PICO` en
+  `molecule-engine.ts`, y el final, que dibuja doce átomos por número de capítulo.
 - **T6. El gate de prosa.** `scripts/prose-budget.mjs` mide solo los `*.component.html` que están
   bajo `src/app/signals/**/sub-levels/`. Si las pantallas se mudan, mide cero y pasa sin avisar.
   Además, una pantalla movida o renombrada arranca sin crédito de línea base, con 8 palabras. La
@@ -120,8 +117,8 @@ fecha y adónde fue. Los ids (H1, J1…) sirven para nombrarlos en una sesión (
   ancho, el prólogo se saltea entero, y con él el manual de a bordo: esas personas ya no ven 0/1 a
   0/5, que antes estaban en la molécula. Cada etapa que pase a la historia agranda el hueco. Falta
   decidir cómo se lee la historia sin la cinemática: por ejemplo, las páginas solas, sin la escena
-  detrás. El manual ya está (2026-11-09): la bitácora lo abre suelto, sin la escena. Falta lo mismo
-  para cada etapa nueva que pase a la historia.
+  detrás. El manual y el árbol de Signal Space ya están (2026-11-09): la bitácora los abre sueltos,
+  sin la escena. Falta lo mismo para cada etapa nueva que pase a la historia.
 
 ## Arreglos de docs
 

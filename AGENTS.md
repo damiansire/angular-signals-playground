@@ -89,20 +89,20 @@ Esto es lo que funciona:
 Cada área de `src/app/` mapea a un scope de commit. Usá el scope del área que
 realmente tocás; no inventes scopes nuevos.
 
-| Directorio                 | Qué contiene                                                                          | Scope        |
-| -------------------------- | ------------------------------------------------------------------------------------- | ------------ |
-| `src/app/integrada-vista/` | Vista integrada: recorrido molécula de los 12 niveles, entrada por defecto (ruta `/`) | `integrada`  |
-| `src/app/practice/`        | Ejemplos aplicados para usar lo aprendido (`/practica/*`)                             | `practice`   |
-| `src/app/signals/`         | Los niveles de aprendizaje (0–11) y sus sub-niveles                                   | `signals`    |
-| `src/app/components/`      | Componentes de feature (histories, trees, forms…)                                     | `components` |
-| `src/app/components-atom/` | Bloques atómicos de UI (button, code, input, title…)                                  | `atom`       |
-| `src/app/components-draw/` | Componentes de dibujo/visualización                                                   | `draw`       |
-| `src/app/layouts/`         | Layouts de página reutilizables                                                       | `layouts`    |
-| `src/app/libs/`            | Helpers agnósticos del framework (p.ej. parser de HTML)                               | `libs`       |
-| `src/app/interfaces/`      | Tipos TypeScript compartidos                                                          | `interfaces` |
-| Routing / arranque         | `app.routes.ts`, `app.config.ts`, navegación                                          | `routing`    |
-| Config / tooling           | tsconfig, eslint, angular.json, package.json, CI                                      | `config`     |
-| README / docs              | Documentación                                                                         | sin scope    |
+| Directorio                 | Qué contiene                                                                            | Scope        |
+| -------------------------- | --------------------------------------------------------------------------------------- | ------------ |
+| `src/app/integrada-vista/` | Vista integrada: recorrido molécula de los 11 capítulos, entrada por defecto (ruta `/`) | `integrada`  |
+| `src/app/practice/`        | Ejemplos aplicados para usar lo aprendido (`/practica/*`)                               | `practice`   |
+| `src/app/signals/`         | Los niveles de aprendizaje (0–11) y sus sub-niveles                                     | `signals`    |
+| `src/app/components/`      | Componentes de feature (histories, trees, forms…)                                       | `components` |
+| `src/app/components-atom/` | Bloques atómicos de UI (button, code, input, title…)                                    | `atom`       |
+| `src/app/components-draw/` | Componentes de dibujo/visualización                                                     | `draw`       |
+| `src/app/layouts/`         | Layouts de página reutilizables                                                         | `layouts`    |
+| `src/app/libs/`            | Helpers agnósticos del framework (p.ej. parser de HTML)                                 | `libs`       |
+| `src/app/interfaces/`      | Tipos TypeScript compartidos                                                            | `interfaces` |
+| Routing / arranque         | `app.routes.ts`, `app.config.ts`, navegación                                            | `routing`    |
+| Config / tooling           | tsconfig, eslint, angular.json, package.json, CI                                        | `config`     |
+| README / docs              | Documentación                                                                           | sin scope    |
 
 ## Commits
 
