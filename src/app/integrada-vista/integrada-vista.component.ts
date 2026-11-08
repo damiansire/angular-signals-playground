@@ -157,9 +157,6 @@ export class IntegradaVistaComponent {
    */
   readonly bootFallo = signal(false);
 
-  /** El Estudio es una herramienta de autor: su enlace solo aparece mientras se desarrolla. */
-  protected readonly modoDesarrollo = isDevMode();
-
   /** La cinemática en pantalla, si hay una. */
   protected readonly cinematica = signal<Cinematica | null>(null);
   protected readonly cinematicaCompleta = signal(false);
