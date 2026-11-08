@@ -5,7 +5,6 @@ import { DestroyEffectComponent } from './signals/level-3-effect/sub-levels/2-in
 import { EffectDestroyComponent } from './signals/level-3-effect/sub-levels/5-effect-destroy/effect-destroy.component';
 import { ReferenceEqualityComponent } from './signals/level-4-signal-equality-functions/sub-levels/1-reference-equality/reference-equality.component';
 import { CustomEqualComponent } from './signals/level-4-signal-equality-functions/sub-levels/2-custom-equal/custom-equal.component';
-import { SignalsChangeDetectionComponent } from './signals/level-0-introduction/sub-levels/signals-change-detection/signals-change-detection.component';
 import { BasicLinkedSignalComponent } from './signals/level-5-linked-signal/sub-levels/1-basic-linked-signal/basic-linked-signal.component';
 import { LinkedSignalWithSourceComponent } from './signals/level-5-linked-signal/sub-levels/2-linked-signal-with-source/linked-signal-with-source.component';
 import { ResourceBasicComponent } from './signals/level-6-resource/sub-levels/1-resource-basic/resource-basic.component';
@@ -25,23 +24,15 @@ import { ZonelessComponent } from './signals/level-11-zoneless/sub-levels/1-zone
 import { IntegradaVistaComponent } from './integrada-vista/integrada-vista.component';
 
 /**
- * Árbol de los 12 conceptos y sus sub-niveles. NO genera rutas: es la fuente de datos que la
+ * Árbol de los conceptos y sus sub-niveles. NO genera rutas: es la fuente de datos que la
  * vista integrada (`/`) consume para embeber el componente real de cada sub-nivel. Los niveles
  * no llevan componente propio: en la molécula el nivel es un átomo, no una página aparte.
  */
 export const signalsRoutesTree: RouteItem[] = [
-  {
-    path: '0',
-    // Las cinco pantallas de antes de esta pasaron a la historia: son las páginas del manual de a
-    // bordo, en el prólogo (`integrada-vista/manual-de-a-bordo.ts`).
-    subLevels: [
-      {
-        path: '1',
-        title: 'El signal avisa quién lo lee.',
-        component: SignalsChangeDetectionComponent,
-      },
-    ],
-  },
+  // La Introducción (el `path` 0) pasó entera a la historia: sus cinco primeras pantallas son las
+  // páginas del manual de a bordo, y la sexta es el árbol de Signal Space, las dos en el prólogo
+  // (`integrada-vista/manual-de-a-bordo.ts` y `arbol-de-signal-space.ts`). El `path` de cada
+  // concepto es su número de capítulo: no se renumera.
   // Capítulos 1 y 2 diferidos: el circuito que comparten solo lo paga quien llega a verlos.
   {
     path: '1',

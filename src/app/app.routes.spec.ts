@@ -11,8 +11,10 @@ describe('signalsRoutesTree', () => {
     (level.subLevels ?? []).map((sub) => ({ id: `${level.path}/${sub.path}`, sub })),
   );
 
-  it('tiene los 12 conceptos del recorrido', () => {
-    expect(signalsRoutesTree.length).toBe(12);
+  it('tiene los 11 conceptos del recorrido, del capítulo 1 al 11', () => {
+    expect(signalsRoutesTree.map((level) => level.path)).toEqual(
+      Array.from({ length: 11 }, (_, i) => String(i + 1)),
+    );
   });
 
   it('todo sub-nivel trae componente: sin esto la card se monta vacía y nadie se entera', () => {
