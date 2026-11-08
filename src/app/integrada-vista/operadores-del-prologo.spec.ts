@@ -112,11 +112,11 @@ describe('los huecos del minijuego de operadores', () => {
     });
   });
 
-  it('una sola carga ya delata a tap (pasa el agua) y a map (no llega nafta)', () => {
+  it('una sola carga ya delata a tap (pasa el agua) y a map (no llega combustible)', () => {
     const agua = HUECOS_DEL_PROLOGO[2].sistema;
     const [tap, map, filter] = [0, 1, 2].map((p) => corrida(agua, p, 1));
     expect(tap.values['agua']).toBeGreaterThan(0);
-    expect(map.values['nafta']).toBe(0);
+    expect(map.values['combustible']).toBe(0);
     expect(healthOf(agua, filter)).toBe('healthy');
   });
 

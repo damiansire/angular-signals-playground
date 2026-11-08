@@ -112,40 +112,40 @@ export const MIRAR_SYSTEM: ManipulableChallenge = {
     s.actions >= 1 && s.values['motor'] === s.values['panel'] && s.values['panel'] > 0,
 };
 
-/** Cada carga trae nafta, agua y nafta: dos que sirven y una que hay que sacar. */
-const NAFTA_POR_CARGA = 2;
+/** Cada carga trae combustible, agua y combustible: dos que sirven y una que hay que sacar. */
+const COMBUSTIBLE_POR_CARGA = 2;
 const AGUA_POR_CARGA = 1;
 const LIMPIAR = ['tap', 'map', 'filter'] as const;
 
 /**
- * Sacar el agua del combustible: `filter` deja pasar solo lo que no es agua. `tap` mira y deja
+ * Sacar el agua del combustible: `filter` deja pasar solo lo que es combustible. `tap` mira y deja
  * pasar todo, agua incluida, y `map` cambia cada carga por la respuesta de la pregunta: al motor
  * llegan `true` y `false`, que no son combustible.
  */
 export const AGUA_SYSTEM: ManipulableChallenge = {
   knobs: hueco('el operador que saca el agua'),
   gauges: [
-    { id: 'nafta', label: 'nafta' },
+    { id: 'combustible', label: 'combustible' },
     { id: 'agua', label: 'agua' },
   ],
   action: 'cargar el tanque',
-  start: { nafta: 0, agua: 0 },
+  start: { combustible: 0, agua: 0 },
   code: (k) => [
     { text: 'const limpio$ = carga$.pipe(' },
-    opcion(LIMPIAR, k[K], "((c) => c !== 'agua'),"),
+    opcion(LIMPIAR, k[K], "((c) => c === 'combustible'),"),
     { text: ');' },
     { text: 'motor.cargar(limpio$);' },
   ],
   settle: (s: SystemState) => {
     const operador = LIMPIAR[s.knobs[K]];
-    if (operador === 'map') return { nafta: 0, agua: 0 };
+    if (operador === 'map') return { combustible: 0, agua: 0 };
     return {
-      nafta: NAFTA_POR_CARGA * s.actions,
+      combustible: COMBUSTIBLE_POR_CARGA * s.actions,
       agua: operador === 'tap' ? AGUA_POR_CARGA * s.actions : 0,
     };
   },
   healthy: (s: SystemState) =>
-    s.actions >= 1 && s.values['agua'] === 0 && s.values['nafta'] === NAFTA_POR_CARGA * s.actions,
+    s.actions >= 1 && s.values['agua'] === 0 && s.values['combustible'] === COMBUSTIBLE_POR_CARGA * s.actions,
 };
 
 /** En el orden en que se juegan, que es el de la flota: primero el capitán. */
@@ -190,10 +190,10 @@ export const HUECOS_DEL_PROLOGO: readonly HuecoDelPrologo[] = [
     operador: 'filter',
     sistema: AGUA_SYSTEM,
     nombres: [
-      { codigo: 'c', es: 'lo que trae la carga: nafta o agua' },
-      { codigo: "c !== 'agua'", es: 'verdadero si no es agua' },
+      { codigo: 'c', es: 'lo que trae la carga: combustible o agua' },
+      { codigo: "c === 'combustible'", es: 'verdadero si es combustible' },
     ],
-    encargo: 'Al motor tiene que llegar solo nafta.',
+    encargo: 'Al motor tiene que llegar solo combustible.',
     meta: 'agua 0',
     ayuda: { nave: 0, nombre: 'Capitán' },
     pistas: {
