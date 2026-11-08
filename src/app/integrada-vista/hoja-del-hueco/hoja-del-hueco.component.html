@@ -1,0 +1,43 @@
+@let h = hueco();
+<header class="hoja__cabeza">
+  <span class="hoja__quien">{{ h.nombre }}</span>
+  <h2 id="prologo-hueco" class="hoja__titulo">{{ h.titulo }}</h2>
+  <span class="hoja__paso">{{ paso() }} de {{ total() }}</span>
+</header>
+<!-- Qué entra, qué tiene que salir y cómo se juega: sin esto el hueco era adivinar. -->
+<p class="hoja__encargo">
+  @for (t of tramos(h.encargo); track $index) {
+    @if (t.codigo) {
+      <code class="hoja__codigo" [textContent]="t.texto"></code>
+    } @else {
+      <span [textContent]="t.texto"></span>
+    }
+  }
+</p>
+<p class="hoja__meta">
+  <span class="hoja__meta-rotulo">Meta</span>
+  <b [textContent]="h.meta"></b>
+  <!-- Con la pista a la vista sobra: la pista ya dice qué mirar. -->
+  @if (!pista()) {
+    <span class="hoja__como">Tocá el operador subrayado para cambiarlo.</span>
+  }
+</p>
+<app-manipulable-system [system]="h.sistema" [ayuda]="false" (corrida)="corrida.set($event)" />
+<!-- La ayuda la da otra nave: Angie todavía no puede intervenir, la tripulación sí. -->
+<div class="hoja__ayuda-zona" aria-live="polite">
+  @if (pista(); as p) {
+    <p class="hoja__ayuda" [attr.data-quien]="claveDeNave[h.ayuda.nave]">
+      <span class="hoja__quien">{{ h.ayuda.nombre }}</span>
+      <span>
+        @for (t of tramos(p); track $index) {
+          @if (t.codigo) {
+            <code class="hoja__codigo" [textContent]="t.texto"></code>
+          } @else {
+            <span [textContent]="t.texto"></span>
+          }
+        }
+      </span>
+    </p>
+  }
+</div>
+<button type="button" class="hoja__saltar" (click)="saltar.emit()">Saltar &rarr;</button>

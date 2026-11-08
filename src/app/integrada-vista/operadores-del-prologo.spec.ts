@@ -8,6 +8,7 @@ import {
   type ManipulableChallenge,
   type SystemState,
 } from '../libs/manipulable-challenge';
+import { operadorEn, pistaDe, type Corrida } from './ayuda-del-hueco';
 import { HUECOS_DEL_PROLOGO } from './operadores-del-prologo';
 
 /** La corrida limpia con la perilla en `posicion`, accionada `veces`. */
@@ -73,6 +74,40 @@ describe('los huecos del minijuego de operadores', () => {
           s = turn(sistema, s, id);
           expect(healthOf(sistema, s)).not.toBe('healthy');
         }
+      });
+    });
+  });
+
+  HUECOS_DEL_PROLOGO.forEach((hueco) => {
+    describe(`la ayuda de ${hueco.titulo}`, () => {
+      const { sistema } = hueco;
+
+      it('la da otra nave, no la que pide el arreglo', () => {
+        expect(hueco.ayuda.nave).not.toBe(hueco.nave);
+      });
+
+      it('cada operador roto tiene su pista, y ninguna nombra al que arregla', () => {
+        const rotos = [0, 1, 2]
+          .map((p) => operadorEn(hueco, corrida(sistema, p, 0)))
+          .filter((op) => op !== hueco.operador);
+        expect(Object.keys(hueco.pistas).sort()).toEqual(rotos.sort());
+        for (const pista of Object.values(hueco.pistas)) {
+          expect(pista).not.toContain(`\`${hueco.operador}\``);
+        }
+      });
+
+      const leida = (s: SystemState): Corrida => ({ estado: s, salud: healthOf(sistema, s) });
+
+      it('habla solo cuando la corrida delató al operador roto', () => {
+        expect(pistaDe(hueco, null)).toBeNull();
+        expect(pistaDe(hueco, leida(corrida(sistema, 0, 0)))).toBeNull();
+        expect(pistaDe(hueco, leida(corrida(sistema, 0, 3)))).toBe(
+          hueco.pistas[operadorEn(hueco, corrida(sistema, 0, 0))],
+        );
+        const sana = [0, 1, 2].find(
+          (p) => operadorEn(hueco, corrida(sistema, p, 0)) === hueco.operador,
+        )!;
+        expect(pistaDe(hueco, leida(corrida(sistema, sana, 3)))).toBeNull();
       });
     });
   });

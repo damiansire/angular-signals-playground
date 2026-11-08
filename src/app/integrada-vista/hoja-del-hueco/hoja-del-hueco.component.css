@@ -1,0 +1,241 @@
+/* La hoja del manual de a bordo, en el centro y sobre el velo: es lo único que hay que hacer mientras
+   la historia espera, así que no compite con la escena (en una esquina se leía como un aviso
+   secundario). Se centra en la franja libre entre el HUD y la caja de diálogo: centrada en la
+   pantalla entera, a 1280×640 tapaba la mitad de la orden del capitán. La franja de arriba es el
+   color de la nave que lo pide, el mismo de su nombre en la caja de diálogo. */
+:host {
+  --op-arriba: 4.25rem;
+  --op-abajo: calc(5.5% + 6.25rem);
+  --op-pad-arriba: clamp(1rem, 2.2vh, 1.5rem);
+  --op-pad-lado: clamp(1.1rem, 2vw, 1.75rem);
+  /* Sin card alrededor el código es lo principal: va más grande que en los conceptos. Van por
+     variables porque las clases del desafío quedan encapsuladas en su componente. */
+  --ms-codigo: clamp(0.85rem, 1.1vw, 1rem);
+  --ms-ancho: none;
+  position: absolute;
+  z-index: 5;
+  left: 50%;
+  top: var(--op-arriba);
+  bottom: var(--op-abajo);
+  width: min(40rem, calc(100% - 2rem));
+  height: fit-content;
+  max-height: calc(100% - var(--op-arriba) - var(--op-abajo));
+  margin-block: auto;
+  overflow: auto;
+  padding: var(--op-pad-arriba) var(--op-pad-lado) 1.1rem;
+  border-radius: 18px;
+  border-top: 6px solid var(--quien);
+  background: #fbf7ee;
+  box-shadow: 0 24px 60px rgb(10 4 20 / 65%);
+  color: #2b2620;
+  transform: translateX(-50%);
+  user-select: text;
+  -webkit-user-select: text;
+  animation: hoja-entra 0.32s cubic-bezier(0.3, 1.4, 0.5, 1);
+  transition:
+    opacity 0.25s ease,
+    scale 0.25s ease;
+}
+:host(:focus) {
+  outline: none;
+}
+:host(:focus-visible) {
+  outline: 3px solid var(--quien);
+  outline-offset: 3px;
+}
+/* La nave dispara su operador: la hoja se aparta para que se vea, y vuelve con el hueco siguiente.
+   Tapado, el único aviso del acierto pasaba detrás de la hoja. */
+:host-context(.prologo--disparo) {
+  opacity: 0;
+  scale: 0.96;
+  pointer-events: none;
+}
+@keyframes hoja-entra {
+  from {
+    opacity: 0;
+    translate: 0 12px;
+    scale: 0.96;
+  }
+}
+:host([data-quien='cap']),
+.hoja__ayuda[data-quien='cap'] {
+  --quien: #ffd27a;
+}
+:host([data-quien='naveA']),
+.hoja__ayuda[data-quien='naveA'] {
+  --quien: #cbb8ff;
+}
+:host([data-quien='naveB']),
+.hoja__ayuda[data-quien='naveB'] {
+  --quien: #ffb59a;
+}
+
+.hoja__cabeza {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: baseline;
+  gap: 0.2rem 1rem;
+}
+/* Sobre el papel, el nombre va en tinta: el color claro de la nave queda en el punto y en la franja,
+   que son decoración y no tienen que leerse. */
+.hoja__quien {
+  display: block;
+  grid-column: 1;
+  font:
+    700 0.72rem / 1 'JetBrains Mono',
+    'Cascadia Mono',
+    Consolas,
+    monospace;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #5b5246;
+}
+/* El punto de color es el retrato mínimo, como en la caja de diálogo. */
+.hoja__quien::before {
+  content: '';
+  display: inline-block;
+  width: 0.62em;
+  height: 0.62em;
+  margin-right: 0.5em;
+  border-radius: 50%;
+  background: var(--quien);
+  box-shadow: 0 0 10px var(--quien);
+  vertical-align: 0.02em;
+}
+.hoja__paso {
+  grid-column: 2;
+  grid-row: 1;
+  font:
+    600 0.72rem / 1 'JetBrains Mono',
+    'Cascadia Mono',
+    Consolas,
+    monospace;
+  color: #5b5246;
+}
+.hoja__titulo {
+  grid-column: 1 / -1;
+  margin: 0;
+  /* El lugar de "Saltar", que va a su altura. */
+  padding-right: 5.5rem;
+  font: 800 clamp(1.15rem, 1.6vw, 1.45rem) / 1.15 var(--font-display, system-ui, sans-serif);
+  color: #1f1a14;
+}
+.hoja__encargo {
+  margin: 0.55rem 0 0;
+  font: 500 clamp(0.95rem, 1.2vw, 1.08rem) / 1.45 var(--font-display, system-ui, sans-serif);
+  color: #3b342b;
+  text-wrap: pretty;
+}
+.hoja__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.25rem 0.55rem;
+  margin: 0.6rem 0 0;
+  font: 400 0.9rem / 1.3 var(--font-display, system-ui, sans-serif);
+  color: #3b342b;
+}
+.hoja__meta-rotulo {
+  font:
+    600 0.68rem / 1 'JetBrains Mono',
+    'Cascadia Mono',
+    Consolas,
+    monospace;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #5b5246;
+}
+.hoja__meta b {
+  color: #2f6b4f;
+}
+.hoja__como {
+  flex-basis: 100%;
+  font-style: italic;
+  color: #5b5246;
+}
+/* Código dentro de la prosa, en el azul de las llamadas del bloque. Una expresión partida en dos
+   renglones se lee como dos cosas. */
+.hoja__codigo {
+  padding: 0.05em 0.3em;
+  border-radius: 5px;
+  background: #efe7d6;
+  font:
+    600 0.92em / 1 'JetBrains Mono',
+    'Cascadia Mono',
+    Consolas,
+    monospace;
+  color: #1d5fa8;
+  font-variant-ligatures: none;
+  white-space: nowrap;
+}
+/* El desafío trae su propia separación de cuando cierra una card: acá ya está en su hoja. */
+app-manipulable-system {
+  margin-top: 0.75rem;
+  padding: 0;
+  border-top: 0;
+}
+.hoja__ayuda-zona:empty {
+  display: none;
+}
+/* La ayuda es otra nave hablando: su nombre y su color, como en la caja de diálogo. */
+.hoja__ayuda {
+  margin: 0.7rem 0 0;
+  padding: 0.6rem 0.8rem;
+  border-left: 4px solid var(--quien);
+  border-radius: 8px;
+  background: #f1e9d8;
+  font: 500 0.95rem / 1.4 var(--font-display, system-ui, sans-serif);
+  color: #2b2620;
+  animation: hoja-entra 0.32s cubic-bezier(0.3, 1.4, 0.5, 1);
+}
+.hoja__ayuda .hoja__quien {
+  margin-bottom: 0.3rem;
+}
+/* Arriba a la derecha, a la altura del título: abajo ocupaba un renglón entero, y en una pantalla
+   baja ese renglón empujaba la pista de la otra nave fuera de la hoja. En el DOM sigue al final, así
+   con teclado se llega después de intentar. */
+.hoja__saltar {
+  position: absolute;
+  top: calc(var(--op-pad-arriba) + 0.95rem);
+  right: calc(var(--op-pad-lado) - 0.6rem);
+  padding: 0.35rem 0.6rem;
+  border: 0;
+  border-radius: 8px;
+  background: none;
+  font: 600 0.82rem / 1 var(--font-display, system-ui, sans-serif);
+  color: #5b5246;
+  cursor: pointer;
+}
+.hoja__saltar:hover,
+.hoja__saltar:focus-visible {
+  color: #1f1a14;
+  background: #efe7d6;
+}
+
+/* En una pantalla baja la hoja se aprieta antes de scrollear por dentro. */
+@media (max-height: 720px) {
+  :host {
+    --ms-codigo: 0.8rem;
+    --ms-aire: 0.55rem;
+    --ms-renglon: 1.6;
+    --op-pad-arriba: 0.8rem;
+  }
+  .hoja__encargo {
+    font-size: 0.92rem;
+    line-height: 1.38;
+  }
+  .hoja__ayuda {
+    margin-top: 0.55rem;
+    padding: 0.45rem 0.7rem;
+  }
+  app-manipulable-system {
+    margin-top: 0.5rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :host,
+  .hoja__ayuda {
+    animation: none;
+  }
+}

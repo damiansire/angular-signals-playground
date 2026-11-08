@@ -303,107 +303,31 @@
 
 /* Sin movimiento la cinemática no aporta y sí molesta, así que el motor la saltea entera. Esto es la
    red por si algún día se muestra igual. */
-/* El minijuego de operadores: una hoja del manual de a bordo apoyada sobre la escena, abajo a la
-   derecha, a la altura de la caja de diálogo. Arriba pasa la exploradora, en el centro está la
-   anomalía y a la izquierda las naves: ninguna se puede tapar. La franja de arriba es el color de la nave que
-   lo pide, el mismo de su nombre en la caja de diálogo. */
-.prologo__operadores {
-  position: absolute;
-  z-index: 5;
-  bottom: 5.5%;
-  right: clamp(1rem, 3vw, 2.5rem);
-  width: min(30rem, 44vw);
-  max-height: calc(100% - 6rem);
-  overflow: auto;
-  padding: 1rem 1.25rem 0.9rem;
-  border-radius: 16px;
-  border-top: 6px solid var(--quien);
-  background: #fbf7ee;
-  box-shadow: 0 18px 44px rgb(10 4 20 / 60%);
-  color: #2b2620;
-  user-select: text;
-  -webkit-user-select: text;
-  animation: prologo-hoja 0.32s cubic-bezier(0.3, 1.4, 0.5, 1);
-}
-/* Mientras se juega, la orden del capitán se corre a la izquierda para dejarle lugar a la hoja. */
+/* El minijuego de operadores: la hoja del manual de a bordo es su propio componente, diferido; acá
+   queda lo que es de la escena. El velo apaga la escena para que la hoja sea lo único que hay que
+   mirar, y la orden que abre el minijuego queda por encima: es quien pide el arreglo. */
 .prologo--operadores .prologo__dialogo {
-  left: clamp(1rem, 3vw, 2.5rem);
-  width: calc(54vw - clamp(1rem, 3vw, 2.5rem) - 1.5rem);
-  transform: none;
-  justify-content: flex-start;
+  z-index: 5;
 }
-.prologo__operadores:focus {
-  outline: none;
+.prologo__velo {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  background: radial-gradient(ellipse at 50% 50%, rgb(10 5 22 / 55%), rgb(6 3 14 / 78%));
+  animation: prologo-velo 0.3s ease-out;
+  transition: opacity 0.25s ease;
 }
-.prologo__operadores:focus-visible {
-  outline: 3px solid var(--quien);
-  outline-offset: 3px;
+/* La nave dispara su operador: el velo se aparta (la hoja también, desde su componente) para que se
+   vea, y vuelve con el hueco siguiente. Tapado, el único premio del acierto pasaba detrás. */
+.prologo--disparo .prologo__velo {
+  opacity: 0;
+  pointer-events: none;
 }
-@keyframes prologo-hoja {
+@keyframes prologo-velo {
   from {
     opacity: 0;
-    translate: 0 12px;
-    scale: 0.96;
   }
 }
-.prologo__operadores[data-quien='cap'] {
-  --quien: #ffd27a;
-}
-.prologo__operadores[data-quien='naveA'] {
-  --quien: #cbb8ff;
-}
-.prologo__operadores[data-quien='naveB'] {
-  --quien: #ffb59a;
-}
-.prologo__op-cabeza {
-  display: grid;
-  grid-template-columns: 1fr auto;
-  align-items: baseline;
-  gap: 0.2rem 1rem;
-}
-/* Sobre el papel, el nombre va en tinta: el color claro de la nave queda en el punto y en la
-   franja, que son decoración y no tienen que leerse. */
-.prologo__operadores .prologo__quien {
-  grid-column: 1;
-  margin: 0;
-  color: #5b5246;
-  font-size: 0.72rem;
-}
-.prologo__op-paso {
-  grid-column: 2;
-  grid-row: 1;
-  font: 600 0.72rem / 1 'JetBrains Mono', 'Cascadia Mono', Consolas, monospace;
-  color: #5b5246;
-}
-.prologo__op-titulo {
-  grid-column: 1 / -1;
-  margin: 0;
-  font: 800 clamp(1.15rem, 1.6vw, 1.45rem) / 1.15 var(--font-display, system-ui, sans-serif);
-  color: #1f1a14;
-}
-/* El desafío trae su propia separación de cuando cierra una card: acá ya está en su hoja. */
-.prologo__operadores app-manipulable-system {
-  margin-top: 0.6rem;
-  padding: 0;
-  border-top: 0;
-}
-.prologo__op-saltar {
-  display: block;
-  margin: 0.4rem 0 0 auto;
-  padding: 0.35rem 0.6rem;
-  border: 0;
-  border-radius: 8px;
-  background: none;
-  font: 600 0.82rem / 1 var(--font-display, system-ui, sans-serif);
-  color: #5b5246;
-  cursor: pointer;
-}
-.prologo__op-saltar:hover,
-.prologo__op-saltar:focus-visible {
-  color: #1f1a14;
-  background: #efe7d6;
-}
-
 /* Código dentro de lo que se dice en la caja oscura del diálogo. */
 .prologo__codigo {
   padding: 0.05em 0.3em;

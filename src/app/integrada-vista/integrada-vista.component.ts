@@ -6,7 +6,6 @@ import {
   ElementRef,
   EnvironmentInjector,
   ErrorHandler,
-  Injector,
   Type,
   afterNextRender,
   createComponent,
@@ -36,7 +35,7 @@ import {
 import { initMundoQueResponde } from './mundo-que-responde';
 import { LO_QUE_DICE_EL_SOL, LO_QUE_RESPONDE_ANGIE } from './intercambio-del-sol';
 import type { HuecoDelPrologo } from './operadores-del-prologo';
-import { ManipulableSystemComponent } from '../components-atom/manipulable-system/manipulable-system.component';
+import { HojaDelHuecoComponent } from './hoja-del-hueco/hoja-del-hueco.component';
 
 import { signalsRoutesTree } from '../app.routes';
 import { type RouteItem, type SubNivelDiferido } from '../interfaces/route-item.interface';
@@ -100,7 +99,7 @@ const PROLOGO_PEDIDO =
     BitacoraComponent,
     MascotaVivaComponent,
     AvisoAuricularesComponent,
-    ManipulableSystemComponent,
+    HojaDelHuecoComponent,
   ],
   templateUrl: './integrada-vista.component.html',
   styleUrls: [
@@ -117,7 +116,6 @@ const PROLOGO_PEDIDO =
 export class IntegradaVistaComponent {
   private readonly host = inject(ElementRef<HTMLElement>).nativeElement as HTMLElement;
   private readonly destroyRef = inject(DestroyRef);
-  private readonly injector = inject(Injector);
   private readonly env = inject(EnvironmentInjector);
   private readonly appRef = inject(ApplicationRef);
   private readonly location = inject(Location);
@@ -240,6 +238,8 @@ export class IntegradaVistaComponent {
   private terminarOperadores: (() => void) | null = null;
   /** El respiro entre un hueco sano y el siguiente, para ver a la nave disparar. */
   private respiroHueco: ReturnType<typeof setTimeout> | null = null;
+  /** Mientras dura ese respiro la hoja se aparta: el disparo es el único aviso del acierto. */
+  protected readonly disparando = signal(false);
 
   private jugarOperadores(
     huecos: readonly HuecoDelPrologo[],
@@ -256,10 +256,6 @@ export class IntegradaVistaComponent {
         listo();
       };
       this.hueco.set(0);
-      // El foco va al panel: con teclado, la orden se atiende sin buscarla.
-      afterNextRender(() => this.host.querySelector<HTMLElement>('.prologo__operadores')?.focus(), {
-        injector: this.injector,
-      });
     });
   }
 
@@ -269,6 +265,7 @@ export class IntegradaVistaComponent {
     const h = this.huecoActual();
     if (!h || this.respiroHueco) return;
     this.avisarArreglo?.(h.nave, h.operador);
+    this.disparando.set(true);
     this.respiroHueco = setTimeout(() => this.siguienteHueco(), 1400);
   }
 
@@ -283,6 +280,7 @@ export class IntegradaVistaComponent {
   private cortarRespiro(): void {
     if (this.respiroHueco) clearTimeout(this.respiroHueco);
     this.respiroHueco = null;
+    this.disparando.set(false);
   }
 
   /**
