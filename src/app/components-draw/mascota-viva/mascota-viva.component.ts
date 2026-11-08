@@ -80,8 +80,13 @@ const HOMBRO_DE_PERFIL = 'translate(54 58)';
 const SENTADA_DE_FRENTE = true;
 /** Pensativa mira al sol, el cielo de donde van a llegar; si no, mira su lamparita. */
 const MIRA_AL_SOL = true;
-/** Pensativa, la boquita se corre hacia la mano: el "mmm" de quien piensa con la boca de costado. */
-const BOCA_DE_LADO = 24;
+/** Pensativa, la boquita se corre apenas hacia la mano que le sostiene la cara. */
+const BOCA_DE_LADO = 10;
+/**
+ * Cuánto bajan los párpados con la pena: en reposo la línea del párpado queda arriba del ojo y no
+ * recorta nada.
+ */
+const PARPADO_ALTO = 70;
 /**
  * De frente se sienta en el borde de la piedra del paisaje (y = 790 del dibujo, la altura de sus
  * caderas): queda casi a la altura de parada, y lo que cambia es que los pies ya no tocan el piso.
@@ -103,15 +108,17 @@ type Postura = 'parada' | 'caminando' | 'sentada';
  * Adónde vuelve cada parte cuando no hace nada. Parada, de frente. Caminando, mira hacia donde va
  * (de costado y mirando al público se leía como un cangrejo). Sentada mira a lo lejos, un poco hacia
  * arriba, echada apenas hacia atrás y con la mano hacia las rodillas: es lo que la hace pensativa sin
- * que tenga que hacer nada.
+ * que tenga que hacer nada. La cara es melancólica, ni preocupada ni triste: párpados apenas
+ * caídos y una sonrisa chica cerrada. La ceja levantada y la boca en "o" se leían como susto, y
+ * las cejas muy inclinadas, como pena.
  */
 const REPOSO: Record<Postura, Readonly<Record<string, number>>> = {
   parada: {},
   caminando: { cara: 12, mirarX: 12, mirarY: 1 },
   sentada: SENTADA_DE_FRENTE
     ? MIRA_AL_SOL
-      ? { mirarX: 13, mirarY: -10, cara: 10, giro: 3, cejas: -2, boca: -0.5, duda: 12 }
-      : { mirarX: -12, mirarY: -10, cara: -8, giro: 3, cejas: -2, boca: -0.5, duda: 12 }
+      ? { mirarX: 13, mirarY: -10, cara: 10, giro: 3, pena: 1 }
+      : { mirarX: -12, mirarY: -10, cara: -8, giro: 3, pena: 1 }
     : { mirarX: -4, mirarY: -2, giro: -6, cejas: -4, boca: -0.3 },
 };
 
@@ -156,6 +163,8 @@ export class MascotaVivaComponent {
   readonly aterrizo = output<number>();
 
   protected readonly uid = `mv${++instancias}-`;
+  /** Ancha y con las comisuras arriba: la boca abierta y la lengua se recortan con la misma forma. */
+  protected readonly sonrisa = 'M490 650Q527 668 564 650C562 674 548 690 527 690S492 674 490 650Z';
 
   private readonly host: HTMLElement = inject(ElementRef<HTMLElement>).nativeElement;
   private readonly lienzo = viewChild.required<ElementRef<SVGSVGElement>>('lienzo');
@@ -171,6 +180,7 @@ export class MascotaVivaComponent {
   private readonly elCejaL = viewChild.required<ElementRef<SVGGElement>>('cejaL');
   private readonly elCejaR = viewChild.required<ElementRef<SVGGElement>>('cejaR');
   private readonly elBoca = viewChild.required<ElementRef<SVGGElement>>('boca');
+  private readonly elParpados = viewChild.required<ElementRef<SVGPathElement>>('parpados');
   private readonly elPiernaL = viewChild.required<ElementRef<SVGGElement>>('piernaL');
   private readonly elPiernaR = viewChild.required<ElementRef<SVGGElement>>('piernaR');
 
@@ -193,8 +203,8 @@ export class MascotaVivaComponent {
     mirarY: crearMuelle(0, 120, 16),
     cejas: crearMuelle(0, 160, 14),
     boca: crearMuelle(0, 220, 14),
-    /** Una ceja sube y la otra baja: la cara de "a ver…". */
-    duda: crearMuelle(0, 140, 14),
+    /** Las cejas suben apenas por el lado de adentro y los párpados bajan: la nostalgia. */
+    pena: crearMuelle(0, 60, 12),
   };
   private readonly muelles = Object.values(this.m);
 
@@ -778,12 +788,13 @@ export class MascotaVivaComponent {
     set(this.elOjos(), `translate(${n(m.mirarX.x)} ${n(m.mirarY.x)})`);
     set(
       this.elCejaL(),
-      `translate(0 ${n(m.cejas.x - m.duda.x)}) rotate(${n(m.cejas.x * 0.5 + m.duda.x * 0.6)} 463 547)`,
+      `translate(0 ${n(m.cejas.x + m.pena.x)}) rotate(${n(m.cejas.x * 0.5 - m.pena.x * 7)} 463 547)`,
     );
     set(
       this.elCejaR(),
-      `translate(0 ${n(m.cejas.x + m.duda.x * 0.35)}) rotate(${n(-m.cejas.x * 0.5 + m.duda.x * 0.4)} 612 563)`,
+      `translate(0 ${n(m.cejas.x + m.pena.x)}) rotate(${n(-m.cejas.x * 0.5 + m.pena.x * 6)} 612 563)`,
     );
+    set(this.elParpados(), `translate(0 ${n(-PARPADO_ALTO * (1 - limitar(m.pena.x, 0, 1)))})`);
     const boca = limitar(1 + m.boca.x, 0.5, 2.2);
     set(
       this.elBoca(),

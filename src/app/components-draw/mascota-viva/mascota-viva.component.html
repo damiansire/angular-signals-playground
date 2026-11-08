@@ -81,6 +81,15 @@
         d="M440 497L472 502L665 558L685 555L710 544L782 502L794 499L796 509L787 561L758 689L736 709L701 734L674 746L657 749L633 747L591 737L506 704L477 691L474 686L467 648L456 616L446 571L436 510L436 501Z"
       />
     </clipPath>
+    <!-- Los párpados de la nostalgia: apenas caídos hacia afuera. Más inclinados, la cara se leía
+         triste y no melancólica. El muelle los baja desde arriba. -->
+    <clipPath [attr.id]="uid + 'pena'">
+      <path #parpados d="M400 603L500 598L500 780L400 780ZM560 606L650 624L650 800L560 800Z" />
+    </clipPath>
+    <!-- La lengua se recorta con la boca: suelta, asomaba por debajo como un labio. -->
+    <clipPath [attr.id]="uid + 'boca'">
+      <path [attr.d]="sonrisa" />
+    </clipPath>
     <!-- El panel es un cilindro: la luz entra por la izquierda y se apaga hacia el lado que gira. -->
     <linearGradient
       [attr.id]="uid + 'visorLuz'"
@@ -365,25 +374,32 @@
         <g #rostro>
           <!-- La mirada mueve los ojos; el parpadeo vive en un grupo aparte para no pisarla. -->
           <g #ojos>
-            <g class="mv__parpado">
-              <ellipse
-                fill="#0f0f11"
-                cx="602.24"
-                cy="623.37"
-                rx="29.11"
-                ry="16.53"
-                transform="rotate(-83.57 602.24 623.37)"
-              />
-              <ellipse
-                fill="#0f0f11"
-                cx="461.01"
-                cy="607.46"
-                rx="29.11"
-                ry="16.53"
-                transform="rotate(-83.57 461.01 607.46)"
-              />
-              <circle fill="#fff" cx="606" cy="611" r="6" />
-              <circle fill="#fff" cx="465" cy="595" r="6" />
+            <g [attr.clip-path]="'url(#' + uid + 'pena)'">
+              <g class="mv__parpado">
+                <ellipse
+                  fill="#0f0f11"
+                  cx="602.24"
+                  cy="623.37"
+                  rx="29.11"
+                  ry="16.53"
+                  transform="rotate(-83.57 602.24 623.37)"
+                />
+                <ellipse
+                  fill="#0f0f11"
+                  cx="461.01"
+                  cy="607.46"
+                  rx="29.11"
+                  ry="16.53"
+                  transform="rotate(-83.57 461.01 607.46)"
+                />
+                <circle class="mv__brillo" fill="#fff" cx="606" cy="611" r="6" />
+                <circle class="mv__brillo" fill="#fff" cx="465" cy="595" r="6" />
+                <!-- Con los párpados bajos, el brillo de arriba queda tapado: baja al borde del ojo. -->
+                <g class="mv__brillo-pena" fill="#fff">
+                  <circle cx="609" cy="637" r="5" />
+                  <circle cx="468" cy="621" r="5" />
+                </g>
+              </g>
             </g>
           </g>
           <!-- Mareada: los ojos pasan a espiral. Va en el mismo lugar y solo se ve con la clase. -->
@@ -417,12 +433,32 @@
           </g>
           <g #boca>
             <g class="mv__sonrisa" transform="rotate(6.72 526.58 666.57)">
+              <!-- El trazo del mismo color redondea las comisuras: en punta, la sonrisa se leía rara. -->
               <path
                 fill="#940054"
-                d="M496 651C510 659 546 660 559 651C558 676 545 689 527 689S497 676 496 651Z"
+                stroke="#940054"
+                stroke-width="5"
+                stroke-linejoin="round"
+                [attr.d]="sonrisa"
               />
-              <ellipse fill="#e2477f" cx="528" cy="680" rx="15" ry="7" />
+              <ellipse
+                fill="#e2477f"
+                cx="527"
+                cy="694"
+                rx="22"
+                ry="12"
+                [attr.clip-path]="'url(#' + uid + 'boca)'"
+              />
             </g>
+            <path
+              class="mv__boca-pena"
+              fill="none"
+              stroke="#940054"
+              stroke-width="7"
+              stroke-linecap="round"
+              d="M508 666Q526 678 544 669"
+              transform="rotate(6.72 526.58 666.57)"
+            />
             <rect
               class="mv__boca-o"
               fill="#940054"
