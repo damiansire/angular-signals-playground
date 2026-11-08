@@ -520,10 +520,11 @@ entrar desarma a Angie en luz y se hace noche, la costura con el prólogo.
       borrar los pasos del que corre: el brazo del saludo quedaba trabado arriba.
 - [ ] Esperando, Angie sonríe y se sonroja: la boquita en "o" sola es asombro y se leía seria. La
       sonrisa vive en el grupo de la boca, así el muelle la abre (ríe al saludar, bosteza al
-      estirarse). Solo con vida propia: las mascotas del mapa y de las cards no cambian.
+      estirarse). Solo con vida propia: las mascotas del mapa y de las cards no cambian. Sentada
+      y pensativa vuelve la "o", a propósito: ahí sí está seria.
 - [ ] Al llegar, Angie gira la cabeza hacia la derecha, camina despacio hasta el borde de la meseta
-      (`ASIENTO`, donde la colina empieza a caer, ~18° de pendiente) y se sienta a mirar a lo
-      lejos. Antes se asomaba hacia el mouse sin caminar: corriéndose 300 unidades sin dar pasos se
+      (`ASIENTO`, donde la colina empieza a caer, ~18° de pendiente) y se sienta en una piedra,
+      pensativa, mirando al sol. Antes se asomaba hacia el mouse sin caminar: corriéndose 300 unidades sin dar pasos se
       deslizaba. Ahora da pasos de verdad, y lo que la arruinaría es:
       patinar (la fase del paso sale de lo que avanzó; cada pierna barre según su largo, porque la
       derecha nace 20 unidades más abajo y con la misma apertura patinaba; el pie apoyado barre a
@@ -532,19 +533,23 @@ entrar desarma a Angie en luz y se hace noche, la costura con el prólogo.
       al público (caminando mira hacia donde va y no sigue al mouse); arrancar o frenar en seco
       (acelera y frena en el primer y el último 20%, con pasos enteros: empieza y termina con las
       piernas juntas, se queda un instante y recién ahí se sienta); sentarse de golpe (baja con un
-      muelle de un solo rebote); sentada de frente (sentada es OTRO dibujo, `mv__perfil`: la gema
-      del modelo 3D oficial de la mascota vista a 45° hacia la derecha, vectorizada por tono de
-      faceta, con los huecos de brazos y piernas rellenos; de frente y en cuclillas no miraba a lo
-      lejos, y correr la cara o girar el escudo plano la deformaban: dibujada a mano tampoco se
-      leía como la misma gema. La cara 2D va proyectada PUNTO A PUNTO sobre el visor curvo y
-      recortada con su silueta: con una sola afín para toda la cara se veía deforme, porque a 62°
-      el ojo de atrás cae donde el visor ya da la espalda y la afín lo dejaba entero. Comparar
-      contra el render del modelo al mismo ángulo: a 62° queda un solo ojo y el borde corta la
-      boca; a 45° se ven los dos ojos y la sonrisa entera. Cambia de dibujo a mitad de sentarse, y la despedida desarma
-      solo las piezas del que se ve: las apagadas miden cero y su luz nacía en la esquina);
-      sentada flotando (la punta de la gema apoya en el pasto, las dos piernas salen por delante,
-      estiradas ladera abajo); halo corrido (la entrada y el halo bajan con la lamparita, ~46%/55%
-      de su caja, medido contra la lamparita a 800, 1280 y 1920); pensativa muerta (respira, mira lejos, balancea los pies, sigue al mouse
+      muelle de un solo rebote); sentada que no se lee pensativa (de perfil, la gema del modelo 3D
+      con el visor hundido miraba a lo lejos pero no pensaba: sentada es de frente
+      (`mv--pensativa`), con la mano en el mentón (`mv__menton` reemplaza al brazo que cuelga),
+      una ceja arriba y la otra abajo (muelle `duda`), la boquita en "o" corrida hacia la mano,
+      la mirada al sol (`MIRA_AL_SOL`; mirando la lamparita se leía distraída) y las piernas
+      colgando del borde, balanceándose a destiempo. El cuerpo de perfil, `mv__perfil`, queda
+      apagado en el código (`SENTADA_DE_FRENTE`); si vuelve: la cara va proyectada PUNTO A PUNTO
+      sobre el visor curvo, porque con una sola afín el ojo de atrás quedaba entero donde el visor
+      ya da la espalda, y la despedida desarma solo las piezas que se ven: las apagadas miden cero
+      y su luz nacía en la esquina); sentada flotando o parada delante de la piedra (la piedra es
+      paisaje, `.ini__piedra`, con la misma caja que Angie y ubicada con el mismo cálculo al
+      iniciar y al redimensionar, debajo del atardecer para que se tiña con la colina; con una
+      piedra baja se leía parada delante: el cuerpo queda casi a altura de parada
+      (`SENTADA_EN_LA_PIEDRA`), las piernas se acortan (`COLGADA_ALARGA`) para que se vean las
+      pantorrillas con piedra debajo de los pies, y la sombra de contacto sube a la piedra y se
+      achica); halo corrido (la entrada y el halo siguen a la lamparita, `translate: 24% -4%`,
+      a 4 px o menos de ella a 800, 1280 y 1920); pensativa muerta (respira, mira lejos, balancea los pies, sigue al mouse
       con la cara; nada de saltito, estirarse, saludar ni cambiar el peso). Medir con rAF dentro de
       la página la velocidad de cada pie a velocidad de crucero: el apoyado igual en los dos
       (~12 px/s de efecto de medir el centro del pie, no el apoyo) y el otro al doble del cuerpo.
@@ -557,17 +562,23 @@ entrar desarma a Angie en luz y se hace noche, la costura con el prólogo.
       de una pestaña que vuelve: con 0,05, a pocos cuadros por segundo caminaba en cámara lenta. Si la tocan en
       camino, se frena parada y piensa ahí. La nube del pensamiento baja con ella sentada y se
       desinclina (`--inclina`): torcida se leía como error. Va con `translate`/`rotate` sueltos,
-      porque la despedida anima el `transform` del mismo elemento. Medir a Angie sentada contra
-      sol, fichas, título y llamado en los seis anchos: cero solapes y nada afuera.
-- [ ] Antes de desarmarse, Angie lo piensa: "Es la hora…" en una nube sobre la cabeza, con el
-      atardecer ya empezando. Primero salen las burbujas del rastro, de la más chica a la más
+      porque la despedida anima el `transform` del mismo elemento. Medir a Angie sentada y a la
+      piedra contra sol, fichas, título y llamado en los seis anchos: cero solapes y nada afuera.
+      Las piezas apagadas miden 0,0: filtrarlas antes de armar la caja de Angie.
+- [ ] Antes de desarmarse, Angie lo piensa en dos tiempos, en la misma nube y con el atardecer ya
+      empezando: "Ellos ya están aquí…" (lo presiente, `T.presentir`) y después "La hora ha
+      llegado…" (lo decide, `T.pensar`). Las dos frases ocupan la misma celda y cruzan opacidad:
+      la nube toma el ancho de la más larga y no salta al cambiar, y los puntos de la segunda
+      empiezan recién cuando ella aparece. La nube va corrida a la izquierda (`-62%`; a 800 px
+      la frase larga se salía 11 px) y un poco arriba (`-14%`; con Angie sentada la esquina
+      rozaba los rayos de la lamparita, 53-77 px² contra `.ini__foco` de 1280 a 1920). Primero salen las burbujas del rastro, de la más chica a la más
       grande, y después la nube, así se lee que el pensamiento sale de ella. Los puntos aparecen de
       a uno y la nube se va antes de que tome impulso: nunca se desarma con el globo encima. Va
       dentro de `.ini__angie` (sigue su asomo) y arriba de la cabeza, donde ya no está el título.
       Las burbujas del rastro tienen un mínimo en px: con el porcentaje solo, a 1024 px medían 8 y
       12 px y no se leían como rastro. Medir nube y burbujas contra sol, fichas, lamparita y
-      llamado en los seis anchos (cero solapes, a 8 px o más del borde), con cuadros encadenados
-      tras un click real. Con movimiento reducido no aparece.
+      llamado en los seis anchos y en 800×737 (cero solapes, a 8 px o más del borde), con cuadros
+      encadenados tras un click real. Con movimiento reducido no aparece.
 
 ## Overlays que tapan el recorrido (prólogo, modales a pantalla completa)
 
@@ -654,3 +665,10 @@ verificable con `/cine/<n>?cuadro=<beat>` (fotograma congelado) o `/cine/<n>` (r
 - [ ] Un solo interruptor de sonido: silenciar en la intro, el prólogo o una cinemática silencia
       en todos (preferencia `signals-sonido`).
 - [ ] Silencio al acertar: ningún sonido de "¡bien!" al establecer un sistema.
+- [ ] La música de la despedida de Angie (`integrada-vista/musica-del-presentimiento.ts`) arranca
+      con el toque, no antes: el contexto se abre con ese gesto. Sale por `sonido().salida()`:
+      silenciada no se agenda, y silenciar a mitad de camino la baja a cero. Se corta al
+      desmontar (`apagar`). El plan es una función pura con test: un acorde por pensamiento, la
+      cajita baja con el primero y sube con el segundo, y si un pensamiento dura poco toca menos
+      notas en vez de pisar el siguiente. Verificarla contando por CDP los osciladores agendados
+      tras un click real: contexto `running` y cada entrada en el tiempo del plan.
