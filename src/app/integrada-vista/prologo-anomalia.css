@@ -98,21 +98,21 @@
   left: 50%;
   bottom: 5.5%;
   z-index: 3;
-  width: min(92%, 1180px);
+  width: min(94%, 1320px);
   transform: translateX(-50%);
   display: flex;
   justify-content: center;
   align-items: flex-end;
-  gap: 1.2rem;
+  gap: 1.4rem;
   pointer-events: none;
 }
 
 .prologo__globo {
   margin: 0;
   flex: 0 1 auto;
-  max-width: 640px;
-  padding: 0.8rem 1.2rem 0.95rem;
-  border-radius: 18px;
+  max-width: 860px;
+  padding: clamp(0.8rem, 1.2vw, 1.25rem) clamp(1.2rem, 1.7vw, 1.8rem) clamp(0.95rem, 1.4vw, 1.45rem);
+  border-radius: clamp(18px, 1.6vw, 26px);
   border: 1.5px solid var(--caja-borde);
   background: var(--caja-fondo);
   box-shadow: 0 14px 34px rgb(25 8 40 / 45%);
@@ -147,9 +147,9 @@
 
 .prologo__quien {
   display: none;
-  margin-bottom: 0.3rem;
+  margin-bottom: 0.45rem;
   font:
-    700 clamp(11px, 1vw, 13px) / 1 'JetBrains Mono',
+    700 clamp(12px, 1.2vw, 18px) / 1 'JetBrains Mono',
     'Cascadia Mono',
     Consolas,
     monospace;
@@ -176,16 +176,18 @@
 }
 
 .prologo__frase {
+  /* Con el alto también: la escena se encoge por el lado más corto, y en una ventana ancha y baja
+     una caja medida solo por el ancho tapaba las naves. */
   display: block;
   white-space: pre-line;
-  font: 700 clamp(16px, 1.55vw, 23px) / 1.32 var(--font-display, system-ui);
+  font: 700 clamp(18px, min(2.1vw, 4.2vh), 34px) / 1.28 var(--font-display, system-ui);
   text-shadow: 0 2px 0 rgb(25 8 40 / 55%);
 }
 
 /* Angie habla en serif, como la voz: es ella, y ahora tiene cuerpo. */
 .prologo__globo[data-quien='mascota'] .prologo__frase {
   font:
-    600 clamp(17px, 1.65vw, 25px) / 1.3 'Fraunces',
+    600 clamp(19px, min(2.2vw, 4.4vh), 36px) / 1.28 'Fraunces',
     'Palatino Linotype',
     Georgia,
     serif;
