@@ -198,7 +198,8 @@
 
 /* Angie pisa la cima de la colina (y = 790 del dibujo, más su ondulación). Sus pies están en
    (560, 920) de su propio dibujo de 1080: de ahí salen el 0.5185 y el 0.148. */
-.ini__angie {
+.ini__angie,
+.ini__piedra {
   --w: min(calc(430 * var(--u)), 64cqw, 44cqh);
   position: absolute;
   z-index: 3;
@@ -206,6 +207,18 @@
   left: calc(50% - var(--w) * 0.5185);
   bottom: calc(282 * var(--u) - var(--w) * 0.148);
   transform-origin: 50% 85%;
+}
+/* La piedra donde se sienta es del paisaje: comparte la caja de Angie (así su asiento cae justo
+   debajo de ella en cualquier ancho), pero va debajo del atardecer y la noche, que la tiñen como a
+   la colina. Cuando Angie se va en luz, la piedra se queda. */
+.ini__piedra {
+  z-index: 0;
+  pointer-events: none;
+}
+.ini__piedra svg {
+  display: block;
+  width: 100%;
+  overflow: visible;
 }
 
 .ini__texto {
@@ -265,10 +278,10 @@
   height: 28.5%;
   transition: translate 0.5s ease-out;
 }
-/* Sentada de perfil, la lamparita baja con ella y pasa al hombro de adelante: el halo y la entrada la siguen. */
+/* Sentada en la piedra, la lamparita sube con ella: el halo y la entrada la siguen. */
 .ini--sentada .ini__foco,
 .ini--sentada .ini__aura {
-  translate: 46% 55%;
+  translate: 24% -4%;
 }
 /* El halo va DETRÁS del dibujo: delante, sobre el cielo claro, ningún modo de mezcla se notaba. */
 .ini__aura {
@@ -435,7 +448,9 @@
 .ini__burbuja {
   left: 62%;
   bottom: 100%;
-  translate: -50% 4%;
+  /* Corrida a la izquierda de su centro: "Ellos ya están aquí…" a 800 px se salía por la derecha.
+     Y un poco más arriba: con Angie sentada, la esquina rozaba los rayos de la lamparita. */
+  translate: -62% -14%;
   padding: 0.5em 1.1em 0.55em;
   border-radius: 999px;
   white-space: nowrap;
@@ -447,8 +462,8 @@
   transform-origin: 60% 100%;
   rotate: calc(var(--inclina, 0deg) * -1);
 }
-/* Al irse, los puntos esperan a que la nube se encoja: si se apagaban antes, quedaba "Es la hora"
-   pelado un instante. */
+/* Al irse, los puntos esperan a que la nube se encoja: si se apagaban antes, quedaba la frase
+   pelada un instante. */
 .ini__puntos i {
   font-style: normal;
   opacity: 0;
@@ -484,6 +499,31 @@
 }
 .ini--piensa .ini__puntos i:nth-child(3) {
   --d: 1200ms;
+}
+/* Las dos frases ocupan la misma celda: la nube toma el ancho de la más larga y no salta al
+   cambiar de una a la otra. */
+.ini__burbuja {
+  display: grid;
+}
+.ini__frase {
+  grid-area: 1 / 1;
+  text-align: center;
+  transition: opacity 0.3s ease-in-out;
+}
+.ini__frase + .ini__frase,
+.ini--piensa-2 .ini__frase:first-child {
+  opacity: 0;
+}
+.ini--piensa-2 .ini__frase + .ini__frase {
+  opacity: 1;
+}
+/* Los puntos de la segunda frase recién empiezan cuando ella aparece. */
+.ini--piensa .ini__frase + .ini__frase .ini__puntos i {
+  opacity: 0;
+}
+.ini--piensa-2 .ini__frase + .ini__frase .ini__puntos i {
+  opacity: 1;
+  transition: opacity 0.18s ease-out calc(var(--d) - 300ms);
 }
 .ini__ajustes {
   position: absolute;
@@ -565,7 +605,8 @@
     top: calc(clamp(64px, 11cqh, 110px) * 1.3 + 3cqh);
   }
   /* El recorte deja ver solo el centro del paisaje: Angie ocupa más de ese ancho. */
-  .ini__angie {
+  .ini__angie,
+  .ini__piedra {
     --w: min(calc(430 * var(--u)), 84cqw, 44cqh);
   }
 }

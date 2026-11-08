@@ -1,6 +1,12 @@
 import { aperturaPara, zancada } from '../components-draw/mascota-viva/caminar';
 import { emitirImpacto, limitar, motorDeMuelles, sinMovimiento } from '../libs/muelle';
 import { chispas, onda } from '../libs/rastros';
+import { sonido } from '../libs/sonido';
+import {
+  planDelPresentimiento,
+  tocarPresentimiento,
+  type Musica,
+} from './musica-del-presentimiento';
 
 /**
  * Pantalla de inicio: una mañana en la colina. Angie camina hasta el borde y se sienta a mirar a lo
@@ -265,7 +271,9 @@ const T = {
   antesDeCaminar: 1200,
   antesDeSentarse: 380,
   idea: 240,
-  pensar: 1900,
+  /** Lo que tarda cada pensamiento: "Ellos ya están aquí…" y después "La hora ha llegado…". */
+  presentir: 2300,
+  pensar: 2100,
   decidir: 220,
   anticipar: 380,
   dispersar: 900,
@@ -311,9 +319,11 @@ export function initInicioAngie(host: HTMLElement, cuerpo?: AngieDeLaColina): In
   if (!encontrada) throw new Error('inicio-angie: falta .tusi__overlay en el host');
   const escena: HTMLElement = encontrada;
   const angie = escena.querySelector<HTMLElement>('.ini__angie');
+  const piedra = escena.querySelector<HTMLElement>('.ini__piedra');
   const luces = escena.querySelector<HTMLElement>('.ini__luces');
   const animaciones = new Set<Animation>();
   let cerrado = false;
+  let musica: Musica | null = null;
   // Lo que se crea a mano no lleva el atributo de encapsulación de Angular: sin él, el CSS del
   // componente no lo alcanza y la luz quedaba como un span sin estilo.
   const enc = escena.getAttributeNames().find((a) => a.startsWith('_ngcontent'));
@@ -376,12 +386,21 @@ export function initInicioAngie(host: HTMLElement, cuerpo?: AngieDeLaColina): In
   const deAngie = (): number => (angie ? angie.offsetWidth / 1080 / unidad() : 1);
   const asiento = (): number =>
     angie ? asientoEnLaColina(((escena.clientWidth - angie.offsetWidth) / 2 - 24) / unidad()) : 0;
+  const ubicarEn = (el: HTMLElement, x: number, inclinar: number): string => {
+    const u = unidad();
+    el.style.translate = `${(x * u).toFixed(1)}px ${(caidaDeLaColina(x) * u).toFixed(1)}px`;
+    const inclina = `${(pendienteDeLaColina(x) * inclinar).toFixed(2)}deg`;
+    el.style.rotate = inclina;
+    return inclina;
+  };
+  /** La piedra está desde el principio en el asiento: Angie camina hacia ella. */
+  const ubicarPiedra = (): void => {
+    if (piedra) ubicarEn(piedra, asiento(), INCLINA_SENTADA);
+  };
+  ubicarPiedra();
   const ubicar = (x: number, inclinar: number): void => {
     if (!angie) return;
-    const u = unidad();
-    angie.style.translate = `${(x * u).toFixed(1)}px ${(caidaDeLaColina(x) * u).toFixed(1)}px`;
-    const inclina = `${(pendienteDeLaColina(x) * inclinar).toFixed(2)}deg`;
-    angie.style.rotate = inclina;
+    const inclina = ubicarEn(angie, x, inclinar);
     // La nube del pensamiento la desinclina: un texto torcido se leía como un error.
     angie.style.setProperty('--inclina', inclina);
   };
@@ -475,6 +494,7 @@ export function initInicioAngie(host: HTMLElement, cuerpo?: AngieDeLaColina): In
   // el asiento nuevo sin saltar, y sentada se reacomoda en él.
   const alRedimensionar = (): void => {
     if (escena.classList.contains('ini--saliendo')) return;
+    ubicarPiedra();
     if (paseo) {
       paseo.hasta = Math.max(asiento(), 1);
       paseo.apertura = aperturaPara(paseo.hasta / paseo.pasos / deAngie());
@@ -507,6 +527,21 @@ export function initInicioAngie(host: HTMLElement, cuerpo?: AngieDeLaColina): In
       cuerpo?.pararse();
     }
     if (sinMovimiento() || !angie || !luces) return;
+    // El toque abrió el audio: la música acompaña desde los pensamientos hasta que cae la noche.
+    const salida = sonido().salida();
+    if (salida) {
+      const s = (ms: number): number => ms / 1000;
+      const seVuelveLuz = s(T.idea + T.presentir + T.pensar);
+      musica = tocarPresentimiento(
+        salida,
+        planDelPresentimiento({
+          presiente: s(T.idea),
+          decide: s(T.idea + T.presentir),
+          seVuelveLuz,
+          noche: seVuelveLuz + 5,
+        }),
+      );
+    }
 
     // Primero se ve la idea prenderse (el CSS la enciende con `ini--saliendo`): es la causa, toque
     // donde toque.
@@ -522,11 +557,14 @@ export function initInicioAngie(host: HTMLElement, cuerpo?: AngieDeLaColina): In
     await esperar(T.idea);
     if (cerrado) return;
     // La luz se vuelve dorada antes de que caiga la noche: un día que se apaga de golpe no es un
-    // atardecer, es un corte. Arranca con el pensamiento: "es la hora" es la de este atardecer.
+    // atardecer, es un corte. Arranca con el pensamiento: "la hora" que llegó es la de este atardecer.
     escena.classList.add('ini--atardecer', 'ini--piensa');
+    await esperar(T.presentir);
+    if (cerrado) return;
+    escena.classList.add('ini--piensa-2');
     await esperar(T.pensar);
     if (cerrado) return;
-    escena.classList.remove('ini--piensa');
+    escena.classList.remove('ini--piensa', 'ini--piensa-2');
     await esperar(T.decidir);
     if (cerrado) return;
     // Anticipación: se agacha y se estira, como quien toma impulso.
@@ -719,6 +757,7 @@ export function initInicioAngie(host: HTMLElement, cuerpo?: AngieDeLaColina): In
     despedir,
     dispose(): void {
       cerrado = true;
+      musica?.apagar();
       vigia.disconnect();
       escena.removeEventListener('pointerdown', alTocar);
       escena.removeEventListener('click', alClic);
