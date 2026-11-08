@@ -742,6 +742,18 @@ verificable con `/cine/<n>?cuadro=<beat>` (fotograma congelado) o `/cine/<n>` (r
       `?cuadro=fin` contra TODOS los `.k-actor`, no contra uno.
 - [ ] El final se personaliza con la partida: solo se encienden los capítulos establecidos
       (clases `e-<n>`), la deuda queda punteada y visible.
+- [ ] La exploradora lleva la paleta de Angie porque es ella (ADR 0003): en el prólogo, casco,
+      aletas, franja, antena y una cabina del tono de su cara (los ojos se leen por el trazo y la
+      pupila); en las cinemáticas, nombre, retrato, flecha, transmisiones, la ventana, la onda y
+      los paquetes del capítulo 6, y la fuente, la banda, las gotas y la ficha del 10. Lo que es del
+      concepto no cambia: la molécula menta y el giro de carga del 6 son del resource, y la
+      anomalía del prólogo sigue ámbar y menta. Antes la exploradora y la molécula del 6 eran del
+      mismo verde. Al recolorear se cuida el PESO, no el número: el rosa al mismo alfa que el verde
+      pesaba más, y el halo del 6 bajó de 0.3 a 0.22. Los dígitos blancos de los paquetes daban
+      2.1:1 sobre el verde; con la faceta con luz de Angie como brillo, 3.2:1 en el peor punto. Un
+      recolor busca también los comentarios que nombran el color ("un punto verde"). Mirar
+      `?prologo=casa-apuren`, `/cine/6?cuadro=dos-paquetes` y `/cine/10?cuadro=rafaga`, y medir
+      el nombre en las dos cajas (8:1).
 
 ## Sonido (tiene que andar en cualquier PC)
 
