@@ -27,6 +27,7 @@ import {
 } from '../../libs/muelle';
 import { chispas, palabra } from '../../libs/rastros';
 import { posturaDePaso, type PosturaDePaso } from './caminar';
+import { movidaDelTiempo } from './escuchar';
 import { elegirOcurrencia, esperaHastaLaProxima, type Ocurrencia } from './ocurrencias';
 
 /** Tamaño del dibujo: `viewBox` del SVG, y el punto de los pies, de donde se aplasta y estira. */
@@ -306,6 +307,29 @@ export class MascotaVivaComponent {
     this.m.aplastar.v = Math.min(this.m.aplastar.v + 2.4, 6.5);
     this.m.boca.v += 18;
     this.m.cejas.v -= 120;
+    this.despertar();
+  }
+
+  /**
+   * Un tiempo de la música que oye en los auriculares (`tiempo` cuenta desde que empezó). Quien
+   * tiene la música lleva el pulso; ella solo lo sigue, con sus muelles.
+   */
+  escuchar(tiempo: number): void {
+    if (sinMovimiento() || this.cayendo || this.agarre) return;
+    const { destinos, impulsos } = movidaDelTiempo(tiempo);
+    for (const [parte, destino] of Object.entries(destinos)) {
+      this.m[parte as keyof typeof destinos].destino = destino;
+    }
+    for (const [parte, impulso] of Object.entries(impulsos)) {
+      this.m[parte as keyof typeof impulsos].v += impulso;
+    }
+    this.m.aplastar.v = Math.min(this.m.aplastar.v, 6.5);
+    this.despertar();
+  }
+
+  /** Se le cortó la música: vuelve a su reposo. */
+  dejarDeEscuchar(): void {
+    this.calmar();
     this.despertar();
   }
 
@@ -719,6 +743,8 @@ export class MascotaVivaComponent {
     this.pasosDelGesto.clear();
     if (this.agarre) return;
     this.calmar();
+    // Ya quieta (al nacer sin vida propia, por ejemplo) no hay viaje: no hace falta pedir cuadros.
+    if (!this.cayendo && this.muelles.every(enReposo)) return;
     this.despertar();
   }
 
