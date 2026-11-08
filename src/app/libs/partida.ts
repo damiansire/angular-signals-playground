@@ -64,7 +64,8 @@ export interface Partida {
 /**
  * Un lugar del viaje: el concepto (la misma posición que los ids) y la página de su hoja, desde 0.
  * La página -1 es la cinemática del capítulo, que va antes de sus páginas. El concepto que sigue al
- * último, con la página -1, es el cierre: la revelación y el final.
+ * último, con la página -1, es el cierre: la revelación y el final; con la página 0, el fin: la
+ * historia ya se contó y queda su último cuadro.
  */
 export interface LugarDelViaje {
   readonly concepto: number;
@@ -186,7 +187,7 @@ function leerViaje(
   const l = migrar({ concepto: concepto as number, sub: pagina as number });
   if (!l) return null;
   const { concepto: c, sub: p } = l;
-  if (c === subPorConcepto.length && p === -1) return { concepto: c, pagina: p };
+  if (c === subPorConcepto.length && (p === -1 || p === 0)) return { concepto: c, pagina: p };
   if (c < 0 || c >= subPorConcepto.length || p < -1 || p >= subPorConcepto[c]) return null;
   return { concepto: c, pagina: p };
 }

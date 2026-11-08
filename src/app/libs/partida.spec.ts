@@ -221,12 +221,17 @@ describe('partida', () => {
       }
     });
 
+    it('el fin de la historia (el concepto que sigue al último, página 0) también se guarda', () => {
+      const fin = { concepto: 11, pagina: 0 };
+      expect(leerPartida(escribirPartida(conViaje(PARTIDA_VACIA, fin)), SUBS).viaje).toEqual(fin);
+    });
+
     it('una partida de antes, sin viaje, lo empieza del principio', () => {
       expect(leer(undefined)).toBeNull();
     });
 
     it('descarta un lugar que no existe en el viaje de hoy o no tiene forma', () => {
-      expect(leer({ concepto: 11, pagina: 0 })).toBeNull();
+      expect(leer({ concepto: 11, pagina: 1 })).toBeNull();
       expect(leer({ concepto: 12, pagina: -1 })).toBeNull();
       expect(leer({ concepto: 0, pagina: 7 })).toBeNull();
       expect(leer({ concepto: 1, pagina: -2 })).toBeNull();
