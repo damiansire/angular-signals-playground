@@ -37,6 +37,43 @@
   display: inline;
 }
 
+/* Pensativa (sentada de frente): la mano va al mentón y la boca deja de sonreír, pasa a la "o" chica. */
+.mv__menton,
+:host(.mv--pensativa) .mv__suelto,
+:host(.mv--viva.mv--pensativa) .mv__sonrisa {
+  display: none;
+}
+:host(.mv--pensativa) .mv__menton,
+:host(.mv--viva.mv--pensativa) .mv__boca-o {
+  display: inline;
+}
+
+/* Sentada en el borde, los pies cuelgan y van y vienen a destiempo, cada uno desde su cadera. */
+.mv__colgada {
+  transform-box: view-box;
+}
+.mv__colgada--l {
+  transform-origin: 465px 790px;
+}
+.mv__colgada--r {
+  transform-origin: 650px 800px;
+}
+:host(.mv--viva.mv--pensativa) .mv__colgada--l {
+  animation: mv-colgada 2.6s ease-in-out infinite;
+}
+:host(.mv--viva.mv--pensativa) .mv__colgada--r {
+  animation: mv-colgada 2.6s ease-in-out -1.1s infinite;
+}
+@keyframes mv-colgada {
+  0%,
+  100% {
+    rotate: 7deg;
+  }
+  50% {
+    rotate: -7deg;
+  }
+}
+
 /* Vida: respirar y parpadear son CSS y no timers ni rAF. Así el motor de resortes se duerme en
    reposo y la pausa de la vida de fondo los alcanza como a cualquier otro loop. */
 .mv__respira {
@@ -192,7 +229,8 @@
 :host-context([inert]) .mv__rayos,
 :host-context([inert]) .mv__alza,
 :host-context([inert]) .mv__bambolea,
-:host-context([inert]) .mv__cuelga {
+:host-context([inert]) .mv__cuelga,
+:host-context([inert]) .mv__colgada {
   animation-play-state: paused;
 }
 
@@ -203,7 +241,8 @@
   .mv__rayos,
   :host(.mv--viva) .mv__alza,
   :host(.mv--viva) .mv__bambolea,
-  :host(.mv--viva) .mv__cuelga {
+  :host(.mv--viva) .mv__cuelga,
+  :host(.mv--viva.mv--pensativa) .mv__colgada {
     animation: none;
   }
 }

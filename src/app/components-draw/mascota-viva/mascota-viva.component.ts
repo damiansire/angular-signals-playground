@@ -71,7 +71,31 @@ const SENTADA_ESTIRA_R = 84;
 const CADERA_L = { x: 55, y: 20 };
 const CADERA_R = { x: -150, y: 15 };
 /** El hombro del brazo cercano va al hueco del costado de la gema, no al del escudo de frente. */
-const HOMBRO_DE_PERFIL = 'translate(152 58)';
+const HOMBRO_DE_PERFIL = 'translate(54 58)';
+/**
+ * Sentada de frente, en el borde de la loma: la gema apoya en el filo y las piernas cuelgan ladera
+ * abajo, balanceándose. Con la mano en el mentón y los ojos en su idea se lee pensativa; girada de
+ * perfil, la cara quedaba lejos de quien la mira.
+ */
+const SENTADA_DE_FRENTE = true;
+/** Pensativa mira al sol, el cielo de donde van a llegar; si no, mira su lamparita. */
+const MIRA_AL_SOL = true;
+/** Pensativa, la boquita se corre hacia la mano: el "mmm" de quien piensa con la boca de costado. */
+const BOCA_DE_LADO = 24;
+/**
+ * De frente se sienta en el borde de la piedra del paisaje (y = 790 del dibujo, la altura de sus
+ * caderas): queda casi a la altura de parada, y lo que cambia es que los pies ya no tocan el piso.
+ * Más arriba, las piernas asomaban enteras sobre la piedra y se leía parada encima de ella.
+ */
+const SENTADA_EN_LA_PIEDRA = -6;
+/** La sombra de contacto sube del pasto a la piedra, debajo de ella. */
+const SOMBRA_EN_LA_PIEDRA = -140;
+/**
+ * Desde el borde de la piedra se ven las pantorrillas, no la pierna entera: un poco más cortas, y
+ * entre los pies y el pasto queda piedra a la vista. Enteras, los pies llegaban al piso y se leía
+ * parada delante de la piedra.
+ */
+const COLGADA_ALARGA = -0.22;
 
 type Postura = 'parada' | 'caminando' | 'sentada';
 
@@ -84,7 +108,11 @@ type Postura = 'parada' | 'caminando' | 'sentada';
 const REPOSO: Record<Postura, Readonly<Record<string, number>>> = {
   parada: {},
   caminando: { cara: 12, mirarX: 12, mirarY: 1 },
-  sentada: { mirarX: 10, mirarY: -8, giro: -6, cejas: -4, boca: -0.3 },
+  sentada: SENTADA_DE_FRENTE
+    ? MIRA_AL_SOL
+      ? { mirarX: 13, mirarY: -10, cara: 10, giro: 3, cejas: -2, boca: -0.5, duda: 12 }
+      : { mirarX: -12, mirarY: -10, cara: -8, giro: 3, cejas: -2, boca: -0.5, duda: 12 }
+    : { mirarX: -4, mirarY: -2, giro: -6, cejas: -4, boca: -0.3 },
 };
 
 const QUIETA: PosturaDePaso = {
@@ -162,6 +190,8 @@ export class MascotaVivaComponent {
     mirarY: crearMuelle(0, 120, 16),
     cejas: crearMuelle(0, 160, 14),
     boca: crearMuelle(0, 220, 14),
+    /** Una ceja sube y la otra baja: la cara de "a ver…". */
+    duda: crearMuelle(0, 140, 14),
   };
   private readonly muelles = Object.values(this.m);
 
@@ -701,11 +731,14 @@ export class MascotaVivaComponent {
     const p = this.pisada;
     const sentada = m.sentar.x;
     const aplastar = limitar(m.aplastar.x, -0.4, 0.4);
-    const bajar = m.y.x + sentada * SENTADA_BAJA + p.alzar;
+    const bajar =
+      m.y.x + sentada * (SENTADA_DE_FRENTE ? SENTADA_EN_LA_PIEDRA : SENTADA_BAJA) + p.alzar;
     const ancho = 1 + aplastar * 0.82;
     // Se da vuelta a mitad de sentarse, de un cuadro al otro: así giran los dibujos animados.
-    const perfil = sentada > 0.5;
+    const perfil = !SENTADA_DE_FRENTE && sentada > 0.5;
+    const pensativa = SENTADA_DE_FRENTE && sentada > 0.5;
     this.host.classList.toggle('mv--perfil', perfil);
+    this.host.classList.toggle('mv--pensativa', pensativa);
     set(
       this.elCuerpo(),
       `translate(${n(m.x.x)} ${n(bajar)}) translate(${PIES_X} ${PIES_Y}) rotate(${n(m.giro.x + p.giro)}) ` +
@@ -716,7 +749,8 @@ export class MascotaVivaComponent {
     const altura = limitar(-m.y.x / 900, 0, 0.7);
     set(
       this.elSombra(),
-      `translate(${n(PIES_X + m.x.x + sentada * 90)} 930) scale(${n(1 - altura + aplastar * 0.5)} ${n(1 - altura * 0.6)}) translate(${-PIES_X} -930)`,
+      `translate(${n(PIES_X + m.x.x + sentada * (SENTADA_DE_FRENTE ? 0 : 90))} ${n(930 + (SENTADA_DE_FRENTE ? SOMBRA_EN_LA_PIEDRA * sentada : 0))}) ` +
+        `scale(${n((1 - altura + aplastar * 0.5) * (SENTADA_DE_FRENTE ? 1 - 0.3 * sentada : 1))} ${n(1 - altura * 0.6)}) translate(${-PIES_X} -930)`,
     );
     this.elSombra().nativeElement.style.opacity = n(1 - altura * 0.7);
     const hombro = perfil ? `${HOMBRO_DE_PERFIL} ` : '';
@@ -732,23 +766,34 @@ export class MascotaVivaComponent {
       `translate(${n(cara * 0.3 + m.mirarX.x * 0.4)} ${n(m.mirarY.x * 0.5)})`,
     );
     set(this.elOjos(), `translate(${n(m.mirarX.x)} ${n(m.mirarY.x)})`);
-    set(this.elCejaL(), `translate(0 ${n(m.cejas.x)}) rotate(${n(m.cejas.x * 0.5)} 463 547)`);
-    set(this.elCejaR(), `translate(0 ${n(m.cejas.x)}) rotate(${n(-m.cejas.x * 0.5)} 612 563)`);
+    set(
+      this.elCejaL(),
+      `translate(0 ${n(m.cejas.x - m.duda.x)}) rotate(${n(m.cejas.x * 0.5 + m.duda.x * 0.6)} 463 547)`,
+    );
+    set(
+      this.elCejaR(),
+      `translate(0 ${n(m.cejas.x + m.duda.x * 0.35)}) rotate(${n(-m.cejas.x * 0.5 + m.duda.x * 0.4)} 612 563)`,
+    );
     const boca = limitar(1 + m.boca.x, 0.5, 2.2);
     set(
       this.elBoca(),
-      `translate(526.58 650) scale(${n(1 + m.boca.x * 0.2)} ${n(boca)}) translate(-526.58 -650)`,
+      `translate(${n(526.58 + (pensativa ? BOCA_DE_LADO * sentada : 0))} 650) scale(${n(1 + m.boca.x * 0.2)} ${n(boca)}) translate(-526.58 -650)`,
     );
     // Cada pierna por su lado: caminando se cruzan, y sentada se estiran hacia adelante, ladera abajo.
+    // De frente las piernas cuelgan derechas del borde: ni caderas corridas ni estiradas.
+    const estira = SENTADA_DE_FRENTE ? 0 : sentada;
     const cadera = (c: { x: number; y: number }): string =>
-      `translate(${n(c.x * sentada)} ${n(c.y * sentada)})`;
+      `translate(${n(c.x * estira)} ${n(c.y * estira)})`;
+    const largo = SENTADA_DE_FRENTE ? 1 + COLGADA_ALARGA * sentada : 1;
+    const colgar = (x: number, y: number): string =>
+      `translate(${x} ${y}) scale(1 ${n(largo)}) translate(${-x} ${-y})`;
     set(
       this.elPiernaL(),
-      `${cadera(CADERA_L)} rotate(${n(m.piernas.x + p.piernaL + m.vaiven.x - SENTADA_ESTIRA_L * sentada)} 465 770)`,
+      `${cadera(CADERA_L)} ${colgar(465, 770)} rotate(${n(m.piernas.x + p.piernaL + m.vaiven.x - SENTADA_ESTIRA_L * estira)} 465 770)`,
     );
     set(
       this.elPiernaR(),
-      `${cadera(CADERA_R)} rotate(${n(m.piernas.x + p.piernaR - m.vaiven.x - SENTADA_ESTIRA_R * sentada)} 650 790)`,
+      `${cadera(CADERA_R)} ${colgar(650, 790)} rotate(${n(m.piernas.x + p.piernaR - m.vaiven.x - SENTADA_ESTIRA_R * estira)} 650 790)`,
     );
   }
 }
