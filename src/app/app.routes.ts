@@ -5,12 +5,7 @@ import { DestroyEffectComponent } from './signals/level-3-effect/sub-levels/2-in
 import { EffectDestroyComponent } from './signals/level-3-effect/sub-levels/5-effect-destroy/effect-destroy.component';
 import { ReferenceEqualityComponent } from './signals/level-4-signal-equality-functions/sub-levels/1-reference-equality/reference-equality.component';
 import { CustomEqualComponent } from './signals/level-4-signal-equality-functions/sub-levels/2-custom-equal/custom-equal.component';
-import { HtmlToTreeComponent } from './signals/level-0-introduction/sub-levels/html-to-tree/html-to-tree.component';
-import { OldChangeDetectionComponent } from './signals/level-0-introduction/sub-levels/old-change-detection/old-change-detection.component';
 import { SignalsChangeDetectionComponent } from './signals/level-0-introduction/sub-levels/signals-change-detection/signals-change-detection.component';
-import { ManualSyncPainComponent } from './signals/level-0-introduction/sub-levels/manual-sync-pain/manual-sync-pain.component';
-import { DomToPixelComponent } from './signals/level-0-introduction/sub-levels/dom-to-pixel/dom-to-pixel.component';
-import { DomIsAliveComponent } from './signals/level-0-introduction/sub-levels/dom-is-alive/dom-is-alive.component';
 import { BasicLinkedSignalComponent } from './signals/level-5-linked-signal/sub-levels/1-basic-linked-signal/basic-linked-signal.component';
 import { LinkedSignalWithSourceComponent } from './signals/level-5-linked-signal/sub-levels/2-linked-signal-with-source/linked-signal-with-source.component';
 import { ResourceBasicComponent } from './signals/level-6-resource/sub-levels/1-resource-basic/resource-basic.component';
@@ -37,14 +32,11 @@ import { IntegradaVistaComponent } from './integrada-vista/integrada-vista.compo
 export const signalsRoutesTree: RouteItem[] = [
   {
     path: '0',
+    // Las cinco pantallas de antes de esta pasaron a la historia: son las páginas del manual de a
+    // bordo, en el prólogo (`integrada-vista/manual-de-a-bordo.ts`).
     subLevels: [
-      { path: '1', title: 'El HTML es un árbol de nodos.', component: HtmlToTreeComponent },
-      { path: '2', title: 'El DOM está vivo.', component: DomIsAliveComponent },
-      { path: '3', title: 'No todo cambio cuesta lo mismo.', component: DomToPixelComponent },
-      { path: '4', title: 'A mano, te olvidás un lugar.', component: ManualSyncPainComponent },
-      { path: '5', title: 'Zone.js revisa todo el árbol.', component: OldChangeDetectionComponent },
       {
-        path: '6',
+        path: '1',
         title: 'El signal avisa quién lo lee.',
         component: SignalsChangeDetectionComponent,
       },
