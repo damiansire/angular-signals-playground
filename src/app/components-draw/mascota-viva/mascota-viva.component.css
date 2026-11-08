@@ -37,17 +37,14 @@
   display: inline;
 }
 
-/* Pensativa (sentada de frente): la mano va al mentón y la sonrisa abierta pasa a una chica y
-   cerrada. La "o" de antes, con la mano en la cara, se leía preocupada. */
-.mv__menton,
+/* Pensativa (sentada de frente): la sonrisa abierta pasa a una chica y cerrada. La "o" de antes se
+   leía preocupada. */
 .mv__boca-pena,
 .mv__brillo-pena,
-:host(.mv--pensativa) .mv__suelto,
 :host(.mv--pensativa) .mv__brillo,
 :host(.mv--viva.mv--pensativa) .mv__sonrisa {
   display: none;
 }
-:host(.mv--pensativa) .mv__menton,
 :host(.mv--pensativa) .mv__brillo-pena,
 :host(.mv--viva.mv--pensativa) .mv__boca-pena {
   display: inline;

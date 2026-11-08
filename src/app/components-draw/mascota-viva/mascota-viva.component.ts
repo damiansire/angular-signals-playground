@@ -74,14 +74,12 @@ const CADERA_R = { x: -150, y: 15 };
 const HOMBRO_DE_PERFIL = 'translate(54 58)';
 /**
  * Sentada de frente, en el borde de la loma: la gema apoya en el filo y las piernas cuelgan ladera
- * abajo, balanceándose. Con la mano en el mentón y los ojos en su idea se lee pensativa; girada de
- * perfil, la cara quedaba lejos de quien la mira.
+ * abajo, balanceándose. Con los ojos en el cielo se lee pensativa; girada de perfil, la cara quedaba
+ * lejos de quien la mira. La mano en el mentón le tapaba la cara: los brazos quedan al costado.
  */
 const SENTADA_DE_FRENTE = true;
 /** Pensativa mira al sol, el cielo de donde van a llegar; si no, mira su lamparita. */
 const MIRA_AL_SOL = true;
-/** Pensativa, la boquita se corre apenas hacia la mano que le sostiene la cara. */
-const BOCA_DE_LADO = 10;
 /**
  * Cuánto bajan los párpados con la pena: en reposo la línea del párpado queda arriba del ojo y no
  * recorta nada.
@@ -107,7 +105,7 @@ type Postura = 'parada' | 'caminando' | 'sentada';
 /**
  * Adónde vuelve cada parte cuando no hace nada. Parada, de frente. Caminando, mira hacia donde va
  * (de costado y mirando al público se leía como un cangrejo). Sentada mira a lo lejos, un poco hacia
- * arriba, echada apenas hacia atrás y con la mano hacia las rodillas: es lo que la hace pensativa sin
+ * arriba y echada apenas hacia atrás: es lo que la hace pensativa sin
  * que tenga que hacer nada. La cara es melancólica, ni preocupada ni triste: párpados apenas
  * caídos y una sonrisa chica cerrada. La ceja levantada y la boca en "o" se leían como susto, y
  * las cejas muy inclinadas, como pena.
@@ -292,6 +290,16 @@ export class MascotaVivaComponent {
     this.despertar();
   }
 
+  /** Se vuelca hacia un lado, como quien oye algo que suena de ese lado. */
+  inclinarse(lado: 1 | -1): void {
+    if (sinMovimiento() || this.cayendo || this.agarre) return;
+    this.m.giro.v += lado * 150;
+    this.m.cara.v += lado * 240;
+    this.m.cejas.v -= 180;
+    this.m.aplastar.v = Math.min(this.m.aplastar.v + 2, 6.5);
+    this.despertar();
+  }
+
   // ─── Caminar y sentarse ──────────────────────────────────────────────────────────────────────
 
   /**
@@ -307,9 +315,12 @@ export class MascotaVivaComponent {
     this.pintar();
   }
 
-  /** Se sienta donde está y se queda mirando a lo lejos. */
-  sentarse(): void {
-    this.cambiarPostura('sentada');
+  /**
+   * Se sienta donde está y se queda mirando a lo lejos. `deUna`: ya estaba sentada cuando se la ve,
+   * sin la bajada.
+   */
+  sentarse(deUna = false): void {
+    this.cambiarPostura('sentada', deUna);
   }
 
   /** Se queda parada con las piernas juntas: termina el paso o se levanta. */
@@ -317,12 +328,13 @@ export class MascotaVivaComponent {
     this.cambiarPostura('parada');
   }
 
-  private cambiarPostura(postura: Postura): void {
+  /** `deUna`: llega a la pose sin viaje, y sin despertar el reloj para nada. */
+  private cambiarPostura(postura: Postura, deUna = false): void {
     this.postura = postura;
     this.pisada = QUIETA;
     this.m.sentar.destino = postura === 'sentada' ? 1 : 0;
     this.calmar();
-    if (sinMovimiento()) {
+    if (deUna || sinMovimiento()) {
       this.muelles.forEach(asentar);
       this.pintar();
       return;
@@ -798,7 +810,7 @@ export class MascotaVivaComponent {
     const boca = limitar(1 + m.boca.x, 0.5, 2.2);
     set(
       this.elBoca(),
-      `translate(${n(526.58 + (pensativa ? BOCA_DE_LADO * sentada : 0))} 650) scale(${n(1 + m.boca.x * 0.2)} ${n(boca)}) translate(-526.58 -650)`,
+      `translate(526.58 650) scale(${n(1 + m.boca.x * 0.2)} ${n(boca)}) translate(-526.58 -650)`,
     );
     // Cada pierna por su lado: caminando se cruzan, y sentada se estiran hacia adelante, ladera abajo.
     // De frente las piernas cuelgan derechas del borde: ni caderas corridas ni estiradas.
