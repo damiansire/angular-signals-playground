@@ -30,8 +30,10 @@
   box-shadow: 0 24px 60px rgb(10 4 20 / 65%);
   color: #2b2620;
   transform: translateX(-50%);
-  user-select: text;
-  -webkit-user-select: text;
+  /* Es un tablero para tocar, no un texto para copiar: tocar la perilla varias veces seguidas
+     pintaba de azul medio renglón de código. */
+  user-select: none;
+  -webkit-user-select: none;
   animation: hoja-entra 0.32s cubic-bezier(0.3, 1.4, 0.5, 1);
   transition:
     opacity 0.25s ease,
@@ -177,96 +179,75 @@
   margin: 0;
   /* El lugar de "Saltar", que va a su altura. */
   padding-right: 5.5rem;
-  font: 800 clamp(1.35rem, 2vw, 1.85rem) / 1.1 var(--font-display, system-ui, sans-serif);
+  font: 800 clamp(1.5rem, 2.3vw, 2.15rem) / 1.1 var(--font-display, system-ui, sans-serif);
   color: #1f1a14;
 }
-/* Dos bloques: a la izquierda qué es cada cosa, a la derecha qué hacer. En una pantalla angosta van
-   uno abajo del otro. */
+/* Dos columnas: el código con su banco de prueba, y al costado los operadores para elegir. En una
+   pantalla angosta van uno abajo del otro. */
 .hoja__cuerpo {
   display: grid;
   gap: 1rem;
-  margin-top: 0.9rem;
+  margin-top: 1rem;
 }
-/* A media anchura los operadores van en su columna, a la derecha del encargo y el código: abajo, en
-   fila, empujaban la hoja a scrollear por dentro a 1024×700. El encargo se reparte en dos columnas
-   para no gastar alto. */
-@media (min-width: 760px) and (max-width: 1099.98px) {
+@media (min-width: 760px) {
   :host {
-    width: min(64rem, calc(100% - 2rem));
+    width: min(62rem, calc(100% - 2rem));
   }
   .hoja__cuerpo {
-    grid-template-columns: minmax(0, 1fr) minmax(14rem, 16rem);
-    column-gap: 1.2rem;
+    grid-template-columns: minmax(0, 1fr) minmax(14.5rem, 17rem);
+    column-gap: 1.3rem;
     align-items: start;
   }
-  .hoja__ops {
-    grid-column: 2;
-    grid-row: 1 / 3;
-  }
 }
-@media (min-width: 600px) and (max-width: 1099.98px) {
-  .hoja__brief {
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-    column-gap: 1rem;
-  }
-  .hoja__encargo {
-    padding: 0 0 0 1rem;
-    border-top: 0;
-    border-left: 1px dashed #cfc3a9;
-  }
-}
-/* A lo ancho: el encargo, el código y los operadores, en ese orden de lectura. */
 @media (min-width: 1100px) {
   :host {
-    width: min(78rem, calc(100% - 2rem));
+    width: min(70rem, calc(100% - 2rem));
   }
   .hoja__cuerpo {
-    grid-template-columns: minmax(12rem, 15rem) minmax(0, 1fr) minmax(17rem, 20rem);
-    gap: 1.4rem;
-    align-items: start;
+    grid-template-columns: minmax(0, 1fr) minmax(17rem, 20rem);
+    column-gap: 1.8rem;
   }
 }
-/* El encargo va en su propio papel, teñido apenas con el color de la nave que lo pide. */
-.hoja__brief {
-  display: grid;
-  gap: 0.85rem;
-  padding: 0.95rem 1rem;
-  border-radius: 14px;
-  background: color-mix(in srgb, var(--quien) 16%, #f4ecdc);
-}
+/* Los nombres del código, en fila arriba del bloque: la leyenda del plano. */
 .hoja__nombres {
-  display: grid;
-  gap: 0.55rem;
-  margin: 0;
-}
-/* Un nombre por renglón: el código a la izquierda, lo que significa a la derecha. */
-.hoja__nombre {
   display: flex;
   flex-wrap: wrap;
+  gap: 0.35rem 1.3rem;
+  margin: 0.55rem 0 0;
+}
+.hoja__nombre {
+  display: flex;
   align-items: baseline;
-  gap: 0.2rem 0.6rem;
+  gap: 0.45rem;
 }
 .hoja__nombre dt .hoja__codigo {
-  font-size: 1.02em;
+  font-size: 1em;
   background: #fffdf8;
   box-shadow: inset 0 0 0 1px #ddd2bb;
 }
 .hoja__nombre dd {
   margin: 0;
-  font: 500 clamp(0.98rem, 1.15vw, 1.08rem) / 1.35 var(--font-display, system-ui, sans-serif);
+  font: 500 clamp(0.9rem, 1vw, 0.98rem) / 1.35 var(--font-display, system-ui, sans-serif);
   color: #3b342b;
-  text-wrap: pretty;
 }
+/* La meta, en la franja del color de la nave que la pide, de lado a lado bajo el título. */
 .hoja__encargo {
+  grid-column: 1 / -1;
   display: flex;
-  align-items: flex-start;
-  gap: 0.55rem;
-  margin: 0;
-  padding-top: 0.8rem;
-  border-top: 1px dashed #cfc3a9;
-  font: 700 clamp(1rem, 1.2vw, 1.12rem) / 1.35 var(--font-display, system-ui, sans-serif);
+  align-items: center;
+  gap: 0.7rem;
+  margin: 0.75rem 0 0;
+  padding: 0.7rem 1.1rem;
+  border-left: 6px solid color-mix(in srgb, var(--quien) 65%, #2b2620);
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--quien) 26%, #fbf3e2);
+  font: 800 clamp(1.1rem, 1.55vw, 1.4rem) / 1.3 var(--font-display, system-ui, sans-serif);
   color: #1f1a14;
   text-wrap: pretty;
+}
+.hoja__encargo .hoja__diana {
+  width: 1.45em;
+  height: 1.45em;
 }
 .hoja__diana {
   flex: none;
@@ -280,6 +261,11 @@
 .hoja__diana-centro {
   fill: #2f6b4f;
   stroke: none;
+}
+.hoja__meta-rotulo .hoja__diana {
+  width: 1.15em;
+  height: 1.15em;
+  stroke-width: 2.6;
 }
 .hoja__como {
   display: flex;
@@ -310,6 +296,9 @@
   border-left: 2px solid #d9cdb4;
 }
 .hoja__meta-rotulo {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
   font:
     600 0.62rem / 1.3 'JetBrains Mono',
     'Cascadia Mono',
@@ -392,9 +381,15 @@ app-manipulable-system {
     --ms-renglon: 1.6;
     --op-pad-arriba: 0.8rem;
   }
-  .hoja__brief {
-    gap: 0.6rem;
-    padding: 0.7rem 0.85rem;
+  .hoja__encargo {
+    margin-top: 0.6rem;
+    padding: 0.5rem 0.9rem;
+  }
+  .hoja__cuerpo {
+    margin-top: 0.75rem;
+  }
+  .hoja__titulo {
+    font-size: 1.55rem;
   }
   .hoja__meta b {
     font-size: 1.5rem;
@@ -405,6 +400,25 @@ app-manipulable-system {
   }
   app-manipulable-system {
     margin-top: 0.5rem;
+  }
+}
+
+/* Baja y ancha, la instrucción y la leyenda comparten renglón: con la ayuda abierta, a 1280×640 la
+   hoja scrolleaba por dentro. El óvalo y la flecha quedan fuera de la grilla: se miden contra el
+   bloque entero. */
+@media (max-height: 720px) and (min-width: 760px) {
+  .hoja__juego {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: center;
+    column-gap: 1.4rem;
+  }
+  .hoja__juego > :not(.hoja__como, .hoja__nombres, .hoja__halo, .hoja__flecha) {
+    grid-column: 1 / -1;
+  }
+  .hoja__nombres {
+    justify-content: flex-end;
+    margin-top: 0;
   }
 }
 
