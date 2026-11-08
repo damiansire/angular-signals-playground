@@ -10,6 +10,8 @@ import {
   estrellas,
   floresDeLadera,
   initInicioAngie,
+  letrasDelTitulo,
+  rayosDelSol,
   juncos,
   matasDePasto,
 } from './inicio-angie';
@@ -33,6 +35,41 @@ describe('inicio-angie', () => {
       const serie = Array.from({ length: 50 }, () => a());
       expect(serie).not.toEqual(Array.from({ length: 50 }, () => b()));
       expect(serie.every((v) => v >= 0 && v < 1)).toBeTrue();
+    });
+  });
+
+  describe('el título', () => {
+    const titulo = letrasDelTitulo(
+      ['Las aventuras de Angie', 'por el SignalVerso'],
+      new Set(['SignalVerso']),
+    );
+
+    it('numera las letras de punta a punta, sin reiniciar en el segundo renglón', () => {
+      const indices = titulo.flat().flatMap((p) => p.letras.map((l) => l.i));
+      expect(indices).toEqual(indices.map((_, k) => k));
+    });
+
+    it('no pierde letras ni espacios de más', () => {
+      const renglones = titulo.map((r) =>
+        r.map((p) => p.letras.map((l) => l.c).join('')).join(' '),
+      );
+      expect(renglones).toEqual(['Las aventuras de Angie', 'por el SignalVerso']);
+    });
+
+    it('marca solo la palabra del acento', () => {
+      const acentuadas = titulo
+        .flat()
+        .filter((p) => p.acento)
+        .map((p) => p.letras.map((l) => l.c).join(''));
+      expect(acentuadas).toEqual(['SignalVerso']);
+    });
+  });
+
+  describe('los rayos del sol', () => {
+    it('se reparten parejos y alternan largo y corto', () => {
+      const rayos = rayosDelSol(12);
+      expect(rayos.map((r) => r.angulo)).toEqual(rayos.map((_, i) => i * 30));
+      expect(rayos.map((r) => r.corto)).toEqual(rayos.map((_, i) => i % 2 === 1));
     });
   });
 

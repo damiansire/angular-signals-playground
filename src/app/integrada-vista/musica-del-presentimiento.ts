@@ -121,8 +121,15 @@ const ENVOLVENTE: Readonly<Record<VozDeMusica, { entra: number; sale: number }>>
   caja: { entra: 0.005, sale: 0 },
 };
 
-/** Agenda el plan en la salida común. Si algo del audio falla, queda en silencio y no tira. */
-export function tocarPresentimiento(salida: SalidaDeAudio, plan: readonly NotaDeMusica[]): Musica {
+/**
+ * Agenda el plan en la salida común. Si algo del audio falla, queda en silencio y no tira. `desde`,
+ * en el reloj del audio: para pegar una vuelta a la anterior sin hueco; si no, arranca ya.
+ */
+export function tocarPresentimiento(
+  salida: SalidaDeAudio,
+  plan: readonly NotaDeMusica[],
+  desde?: number,
+): Musica {
   const { ctx } = salida;
   const osciladores: OscillatorNode[] = [];
   let maestro: GainNode | null = null;
@@ -135,20 +142,20 @@ export function tocarPresentimiento(salida: SalidaDeAudio, plan: readonly NotaDe
     filtro.type = 'lowpass';
     filtro.frequency.value = 900;
     filtro.connect(maestro);
-    const cero = ctx.currentTime + 0.02;
+    const cero = (desde ?? ctx.currentTime) + 0.02;
     for (const n of plan) {
-      const desde = cero + n.t;
+      const inicio = cero + n.t;
       const env = ctx.createGain();
       env.connect(n.voz === 'caja' ? maestro : filtro);
       const { entra, sale } = ENVOLVENTE[n.voz];
-      env.gain.setValueAtTime(0, desde);
-      env.gain.linearRampToValueAtTime(n.volumen, desde + entra);
+      env.gain.setValueAtTime(0, inicio);
+      env.gain.linearRampToValueAtTime(n.volumen, inicio + entra);
       let fin: number;
       if (n.voz === 'caja') {
-        fin = desde + n.dura;
+        fin = inicio + n.dura;
         env.gain.exponentialRampToValueAtTime(0.0001, fin);
       } else {
-        const suelta = desde + Math.max(n.dura, entra);
+        const suelta = inicio + Math.max(n.dura, entra);
         env.gain.setValueAtTime(n.volumen, suelta);
         fin = suelta + sale;
         env.gain.linearRampToValueAtTime(0, fin);
@@ -173,7 +180,7 @@ export function tocarPresentimiento(salida: SalidaDeAudio, plan: readonly NotaDe
         const g = ctx.createGain();
         g.gain.value = amp;
         osc.connect(g).connect(env);
-        osc.start(desde);
+        osc.start(inicio);
         osc.stop(fin + 0.05);
         osciladores.push(osc);
       }

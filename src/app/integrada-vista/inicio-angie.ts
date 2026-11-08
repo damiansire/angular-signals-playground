@@ -10,6 +10,7 @@ import {
   type FaseDelPresentimiento,
   type Musica,
 } from './musica-del-presentimiento';
+import { tocarColina } from './musica-de-la-colina';
 
 /**
  * Pantalla de inicio: una mañana en la colina. Angie está sentada en la piedra del centro, mirando
@@ -165,6 +166,55 @@ export function estrellas(semilla: number, cantidad: number): Estrella[] {
   }));
 }
 
+/** Una letra del título, con su lugar en todo el título: entran de a una, de punta a punta. */
+export interface LetraDelTitulo {
+  readonly c: string;
+  readonly i: number;
+}
+
+export interface PalabraDelTitulo {
+  readonly texto: string;
+  readonly letras: readonly LetraDelTitulo[];
+  /** La palabra que va en el color de Angie. */
+  readonly acento: boolean;
+}
+
+/**
+ * Los renglones del título en palabras y letras. La cuenta sigue de un renglón al otro: el segundo
+ * empieza a entrar cuando termina el primero, no a la vez. Las palabras no se parten al bajar.
+ */
+export function letrasDelTitulo(
+  renglones: readonly string[],
+  acentos: ReadonlySet<string> = new Set(),
+): PalabraDelTitulo[][] {
+  let i = 0;
+  return renglones.map((renglon) =>
+    renglon
+      .split(' ')
+      .filter(Boolean)
+      .map((palabra) => ({
+        texto: palabra,
+        letras: [...palabra].map((c) => ({ c, i: i++ })),
+        acento: acentos.has(palabra),
+      })),
+  );
+}
+
+export interface RayoDelSol {
+  /** En grados, desde arriba y en el sentido del reloj. */
+  readonly angulo: number;
+  /** Uno largo y uno corto: todos iguales se leían como un engranaje. */
+  readonly corto: boolean;
+}
+
+/** Los rayos del sol, parejos alrededor, alternando largos y cortos. */
+export function rayosDelSol(cantidad = 12): RayoDelSol[] {
+  return Array.from({ length: cantidad }, (_, i) => ({
+    angulo: (360 / cantidad) * i,
+    corto: i % 2 === 1,
+  }));
+}
+
 export interface Dispersion {
   readonly dx: number;
   readonly dy: number;
@@ -259,6 +309,11 @@ const INCLINA_SENTADA = 0.45;
 const COLORES_DE_LUZ = ['#ff5fa8', '#ffc65c', '#ffffff', '#ff8ac9'];
 
 export interface InicioAngie {
+  /**
+   * La colina aparece (el aviso se fue): entra el título de a poco y suena su música, que sigue
+   * hasta que se toca para entrar.
+   */
+  revelar(): void;
   /** Angie se desarma en luz y el cielo se hace noche. Resuelve cuando se puede pasar al prólogo. */
   despedir(): Promise<void>;
   dispose(): void;
@@ -288,6 +343,7 @@ export function initInicioAngie(host: HTMLElement, cuerpo?: AngieDeLaColina): In
   /** Ya tocaron para entrar: la escena deja de responder a los toques de entrar. */
   let yendose = false;
   let musica: Musica | null = null;
+  let colina: Musica | null = null;
   // Lo que se crea a mano no lleva el atributo de encapsulación de Angular: sin él, el CSS del
   // componente no lo alcanza y la luz quedaba como un span sin estilo.
   const enc = escena.getAttributeNames().find((a) => a.startsWith('_ngcontent'));
@@ -417,6 +473,9 @@ export function initInicioAngie(host: HTMLElement, cuerpo?: AngieDeLaColina): In
     if (yendose) return;
     yendose = true;
     escena.classList.add('ini--saliendo');
+    // La de la colina se va mientras entra la de la despedida: las dos en re, se funden.
+    colina?.apagar(2.4);
+    colina = null;
     if (sinMovimiento() || !angie || !luces) return;
     // El toque abrió el audio: la música acompaña desde los pensamientos hasta que cae la noche.
     const salida = sonido().salida();
@@ -636,9 +695,15 @@ export function initInicioAngie(host: HTMLElement, cuerpo?: AngieDeLaColina): In
   }
 
   return {
+    revelar(): void {
+      if (cerrado || yendose || colina) return;
+      escena.classList.add('ini--revelada');
+      colina = tocarColina(() => sonido().salida());
+    },
     despedir,
     dispose(): void {
       cerrado = true;
+      colina?.apagar();
       musica?.apagar();
       fase?.apagar();
       soltarToque?.();

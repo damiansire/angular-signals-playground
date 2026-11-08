@@ -27,7 +27,10 @@ import {
   floresDeLadera,
   initInicioAngie,
   juncos,
+  letrasDelTitulo,
   matasDePasto,
+  rayosDelSol,
+  type InicioAngie,
 } from './inicio-angie';
 import { initMundoQueResponde } from './mundo-que-responde';
 
@@ -123,6 +126,25 @@ export class IntegradaVistaComponent {
     this.angieInicio()?.suspirar();
   }
 
+  /** La escena de la colina, para que el aviso le avise cuando se va. */
+  private inicio: InicioAngie | null = null;
+
+  /**
+   * El aviso se va y aparece la colina: entra el título y empieza su música. Aunque hayan elegido
+   * sin sonido: la música espera callada, y si lo prenden en la colina, suena ahí.
+   */
+  protected alIrseElAviso(): void {
+    this.inicio?.revelar();
+  }
+
+  /** El título, la bajada y el llamado de la colina, en letras: entran y se mueven de a una. */
+  protected readonly titulo = letrasDelTitulo(
+    ['Las aventuras de Angie', 'por el SignalVerso'],
+    new Set(['SignalVerso']),
+  );
+  protected readonly bajada = letrasDelTitulo(['Una introducción interactiva a los Signals'])[0];
+  protected readonly llamado = letrasDelTitulo(['Haz click para iniciar las aventuras'])[0];
+
   /** Angie en la colina se mueve sola hasta que la despedida la desarma: ahí manda la salida. */
   protected readonly angieEsperando = signal(true);
   /** Angie del prólogo: tiene vida propia solo mientras está en escena y la escena corre. */
@@ -131,6 +153,7 @@ export class IntegradaVistaComponent {
   /** El paisaje de la pantalla de inicio. Con semilla: la misma mañana en cada visita. */
   protected readonly paisaje = {
     colina: caminoDeColina(),
+    rayos: rayosDelSol(),
     matas: matasDePasto(11, 70),
     flores: floresDeLadera(23, 46),
     juncosIzq: juncos(31, 9, -1),
@@ -280,6 +303,7 @@ export class IntegradaVistaComponent {
     const inicio = initInicioAngie(this.host, {
       sentarse: (deUna) => this.angieInicio()?.sentarse(deUna),
     });
+    this.inicio = inicio;
     this.destroyRef.onDestroy(() => inicio.dispose());
     landing = initIntroTusi(this.host, {
       despedida: () => {

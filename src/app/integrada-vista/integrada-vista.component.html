@@ -373,23 +373,65 @@
             <div class="ini__ocaso" aria-hidden="true"></div>
             <div class="ini__penumbra" aria-hidden="true"></div>
 
-            <!-- El sol es el átomo de signals: la luz de la escena sale de ahí. -->
-            <div
-              class="tusi__ov-mol ini__sol"
-              style="--rc: rgba(196, 120, 30, 0.3); --haloc: rgba(255, 200, 90, 0.55)"
-              aria-hidden="true"
-            >
-              <span class="ini__rayos"></span>
-              <span class="tusi__ov-halo"></span>
-              <span class="tusi__ov-ogrp" style="--rot: 22deg">
-                <span class="tusi__ov-ring"></span>
-                <span class="tusi__ov-el" style="--ec: #2f9e7f; --dur: 7.5s"></span>
-              </span>
-              <span class="tusi__ov-ogrp" style="--rot: -38deg">
-                <span class="tusi__ov-ring"></span>
-                <span class="tusi__ov-el" style="--ec: #e0503a; --dur: 9.5s; --dly: -4s"></span>
-              </span>
-              <span class="tusi__ov-nuc"></span>
+            <!-- El sol: la luz de la escena sale de ahí, y ahí vuelven las luces de Angie. Respira, y
+                 sus rayos se estiran de a uno, en ola, mientras gira despacio. -->
+            <div class="ini__sol" aria-hidden="true">
+              <svg class="ini__sol-dibujo" viewBox="-100 -100 200 200">
+                <defs>
+                  <radialGradient id="ini-sol-nucleo" cx="42%" cy="38%" r="70%">
+                    <stop offset="0" stop-color="#fffbe6" />
+                    <stop offset=".38" stop-color="#ffe07a" />
+                    <stop offset=".78" stop-color="#ffb23c" />
+                    <stop offset="1" stop-color="#f59a28" />
+                  </radialGradient>
+                  <radialGradient id="ini-sol-corona">
+                    <stop offset=".55" stop-color="#ffd46a" stop-opacity=".55" />
+                    <stop offset="1" stop-color="#ffd46a" stop-opacity="0" />
+                  </radialGradient>
+                  <linearGradient
+                    id="ini-sol-rayo"
+                    x1="0"
+                    y1="-36"
+                    x2="0"
+                    y2="-84"
+                    gradientUnits="userSpaceOnUse"
+                  >
+                    <stop offset="0" stop-color="#ffc24d" />
+                    <stop offset="1" stop-color="#ffdd85" stop-opacity=".25" />
+                  </linearGradient>
+                </defs>
+                <g class="ini__sol-giro">
+                  @for (r of paisaje.rayos; track $index) {
+                    <g [attr.transform]="'rotate(' + r.angulo + ')'">
+                      <path
+                        class="ini__sol-rayo"
+                        [class.ini__sol-rayo--corto]="r.corto"
+                        [style.--i]="$index"
+                        d="M-7 -37Q0 -41 7 -37L2 -80Q0 -84 -2 -80Z"
+                      />
+                    </g>
+                  }
+                </g>
+                <circle class="ini__sol-corona" r="48" fill="url(#ini-sol-corona)" />
+                <g class="ini__sol-cuerpo">
+                  <circle r="33" fill="url(#ini-sol-nucleo)" />
+                  <circle
+                    r="31.5"
+                    fill="none"
+                    stroke="#dc7814"
+                    stroke-opacity=".22"
+                    stroke-width="3"
+                  />
+                  <path
+                    d="M-21 -12Q-15 -24 -2 -26"
+                    fill="none"
+                    stroke="#fff"
+                    stroke-opacity=".7"
+                    stroke-width="5"
+                    stroke-linecap="round"
+                  />
+                </g>
+              </svg>
             </div>
 
             <!-- La noche que llega con la despedida: es el mismo cielo del prólogo. -->
@@ -441,21 +483,53 @@
             </div>
 
             <div class="ini__texto">
+              <!-- Letra por letra para que entren de a una; el lector lee la frase entera. -->
               <p class="ini__titulo">
-                <span class="ini__renglon">Las aventuras de Angie</span>
-                <span class="ini__renglon"
-                  >por el <span class="ini__acento">SignalVerso</span></span
-                >
+                <span class="sr-only">Las aventuras de Angie por el SignalVerso</span>
+                @for (renglon of titulo; track $index) {
+                  <span class="ini__renglon" aria-hidden="true">
+                    @for (palabra of renglon; track $index) {
+                      <span class="ini__palabra" [class.ini__acento]="palabra.acento">
+                        @for (l of palabra.letras; track $index) {
+                          <span class="ini__letra" [style.--i]="l.i">{{ l.c }}</span>
+                        }
+                      </span>
+                    }
+                  </span>
+                }
               </p>
-              <p class="ini__bajada">Una introducción interactiva a los Signals</p>
+              <p class="ini__bajada">
+                <span class="sr-only">Una introducción interactiva a los Signals</span>
+                @for (palabra of bajada; track $index) {
+                  <span class="ini__palabra-bajada" aria-hidden="true" [style.--p]="$index">{{
+                    palabra.texto
+                  }}</span>
+                }
+              </p>
             </div>
 
             <div class="ini__luces" aria-hidden="true"></div>
 
             <div class="tusi__ov-capbar">
+              <!-- El cursor hace click y la frase se mueve detrás: el mismo gesto del aviso. -->
               <label class="ini__llamado" for="ini-foco">
-                <span aria-hidden="true">✦</span> Tocá para entrar
-                <span aria-hidden="true">✦</span>
+                <span class="sr-only">Haz click para iniciar las aventuras</span>
+                <span class="ini__raton" aria-hidden="true">
+                  <i></i><i></i>
+                  <svg viewBox="0 0 24 30">
+                    <path d="M3 2V24L8.6 18.8L12.6 27.6L16.8 25.8L12.8 17.2H20.6Z" />
+                  </svg>
+                </span>
+                <span class="ini__frase-llamado" aria-hidden="true">
+                  @for (palabra of llamado; track $index) {
+                    <span class="ini__palabra">
+                      @for (l of palabra.letras; track $index) {
+                        <span class="ini__ola" [style.--i]="l.i">{{ l.c }}</span>
+                      }
+                    </span>
+                  }
+                </span>
+                <span class="ini__chispa" aria-hidden="true">✦</span>
               </label>
             </div>
 
@@ -496,7 +570,7 @@
             <!-- Diferido: el bundle inicial no tenía lugar. Mientras llega, el telón liso del mismo
                  color tapa la colina, así no se ve la mañana un instante antes de la noche. -->
             @defer (on immediate) {
-              <app-aviso-auriculares (suspiro)="angieSuspira()" />
+              <app-aviso-auriculares (suspiro)="angieSuspira()" (elegido)="alIrseElAviso()" />
             } @placeholder {
               <div class="ini__telon" aria-hidden="true"></div>
             }
