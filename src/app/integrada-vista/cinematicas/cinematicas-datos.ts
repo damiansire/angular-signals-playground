@@ -1,4 +1,4 @@
-import { type Cinematica } from './cinematica-guion';
+import { CAPITULO_REVELACION, type Cinematica } from './cinematica-guion';
 
 /**
  * Los guiones de los capítulos 1 a 11 y el final. El capítulo 0 se fue con la Introducción: su
@@ -9,7 +9,8 @@ import { type Cinematica } from './cinematica-guion';
  *
  * El arco: la tripulación deja atrás, capítulo a capítulo, sus reflejos de RxJS y Zone.js. En el 6
  * (el pico) llega la primera transmisión de la exploradora desde afuera; en el 11 contestan la
- * pregunta del viaje; el final se abre entero o a medias según lo que quedó establecido.
+ * pregunta del viaje; en la revelación (13, que va antes del final) Angie dice quién es; el final se
+ * abre entero o a medias según lo que quedó establecido.
  */
 export const CINEMATICAS: readonly Cinematica[] = [
   {
@@ -138,7 +139,12 @@ export const CINEMATICAS: readonly Cinematica[] = [
         hueco: 500,
       },
       { id: 'c4-quien', quien: 'naveA', txt: '¿Idénticas para quién?', beat: 'balanza' },
-      { id: 'c4-compara', quien: 'mascota', txt: 'El mundo compara antes de avisar.' },
+      // Pista: nadie le contó que a la Nave B le gusta el chocolate (`casa-helado`).
+      {
+        id: 'c4-helado',
+        quien: 'mascota',
+        txt: 'Dos helados de chocolate\ntambién parecen idénticos.',
+      },
       {
         id: 'c4-criterio',
         quien: 'mascota',
@@ -184,6 +190,8 @@ export const CINEMATICAS: readonly Cinematica[] = [
         beat: 'marcador-suspenso',
       },
       { id: 'c5-huerfana', quien: 'cap', txt: '¿Queda huérfana o vuelve a la fuente?' },
+      // Pista: la muletilla de la exploradora (`casa-apuren`), y la paciencia que le dejó la espera.
+      { id: 'c5-lentos', quien: 'mascota', txt: 'Vamos, lentos… Perdón.\nTómense su tiempo.' },
     ],
   },
   {
@@ -245,10 +253,11 @@ export const CINEMATICAS: readonly Cinematica[] = [
     beats: ['repetidor', 'frecuencia-vieja', 'borde-salida', 'vacio'],
     lineas: [
       { id: 'c7-repetidor', quien: 'cap', txt: 'Armemos un repetidor\npara la exploradora.' },
+      // Pista: Angie sabe la frecuencia de la exploradora, que nadie le dijo.
       {
         id: 'c7-frecuencia',
-        quien: 'naveA',
-        txt: 'Necesita la frecuencia. Se la paso.',
+        quien: 'mascota',
+        txt: 'Pásenle la ciento cuarenta y dos.',
         beat: 'repetidor',
       },
       {
@@ -450,6 +459,31 @@ export const CINEMATICAS: readonly Cinematica[] = [
       },
     ],
   },
+  // La revelación, la penúltima etapa: la banda está limpia y la exploradora, desde afuera, avisa
+  // que va a entrar. Angie lo sabe porque ya entró. Es el borrador del recorrido pasado en limpio.
+  {
+    capitulo: CAPITULO_REVELACION,
+    titulo: 'Porque entré',
+    ley: 'Quien espera sabe cómo termina el mensaje.',
+    apertura: ['titulo', 'naves', 'molecula-entera'],
+    beats: ['molecula-entera', 'salida-iris', 'nave4-entra', 'regreso'],
+    lineas: [
+      {
+        id: 'r-entrar',
+        quien: 'nave4',
+        txt: 'No los encuentro. Voy a entrar.',
+        beat: 'transmision',
+      },
+      { id: 'r-afuera', quien: 'naveA', txt: '¡No! ¡Quedate afuera!' },
+      { id: 'r-igual', quien: 'mascota', txt: 'Va a entrar igual.', beat: 'mascota', hueco: 500 },
+      { id: 'r-como', quien: 'cap', txt: '¿Cómo lo sabés?' },
+      { id: 'r-entre', quien: 'mascota', txt: 'Porque entré.', beat: 'nave4-entra', hueco: 700 },
+      { id: 'r-exploradora', quien: 'naveA', txt: '¿Exploradora?', hueco: 600 },
+      { id: 'r-antes', quien: 'mascota', txt: 'Llegué antes que ustedes.\nMucho antes.' },
+      { id: 'r-tenia', quien: 'mascota', txt: 'No podía decirlo.\nElla tenía que entrar.' },
+      { id: 'r-aguafiestas', quien: 'naveA', txt: 'Siempre tan aguafiestas.', hueco: 500 },
+    ],
+  },
   {
     capitulo: 12,
     titulo: 'Quien lee, vuelve',
@@ -457,19 +491,16 @@ export const CINEMATICAS: readonly Cinematica[] = [
     apertura: ['titulo', 'naves', 'molecula-entera'],
     beats: ['molecula-entera', 'salida-iris', 'nave4-entra', 'regreso'],
     lineas: [
+      // Después de la revelación: la exploradora ya entró, y Angie por fin puede intervenir.
+      { id: 'c12-banda', quien: 'naveA', txt: 'La banda está limpia.\nYa nadie transmite.' },
       {
-        id: 'c12-banda',
-        quien: 'naveA',
-        txt: 'La banda está limpia.\nElla está cerca.',
-        beat: 'transmision',
-      },
-      {
-        id: 'c12-responden',
-        quien: 'nave4',
-        txt: '¡Al fin responden!\n¿Dónde se metieron?',
+        id: 'c12-intervenir',
+        quien: 'mascota',
+        txt: 'Ahora sí puedo intervenir.',
+        beat: 'mascota',
         hueco: 400,
       },
-      { id: 'c12-reglas', quien: 'cap', txt: 'En un mundo que sigue reglas.' },
+      { id: 'c12-juntos', quien: 'cap', txt: 'Sus signals y nuestros operadores.\nJuntos.' },
       {
         id: 'c12-salida',
         quien: 'naveB',
@@ -478,17 +509,11 @@ export const CINEMATICAS: readonly Cinematica[] = [
         hueco: 500,
         si: 'completo',
       },
-      {
-        id: 'c12-lentos',
-        quien: 'nave4',
-        txt: 'Los veo. Salgan de una vez, lentos.',
-        beat: 'nave4-entra',
-        si: 'completo',
-      },
+      { id: 'c12-lentos', quien: 'mascota', txt: 'Salgan de una vez, lentos.', si: 'completo' },
       {
         id: 'c12-helado',
-        quien: 'naveA',
-        txt: 'Siempre tan aguafiestas.\nVamos por tu helado.',
+        quien: 'naveB',
+        txt: 'Y después, helado de chocolate.',
         beat: 'regreso',
         si: 'completo',
       },
@@ -500,13 +525,7 @@ export const CINEMATICAS: readonly Cinematica[] = [
         hueco: 500,
         si: 'incompleto',
       },
-      {
-        id: 'c12-medias',
-        quien: 'nave4',
-        txt: 'Los veo a medias. ¿Vienen o no?',
-        beat: 'nave4-entra',
-        si: 'incompleto',
-      },
+      { id: 'c12-medias', quien: 'mascota', txt: 'Los espero. Tengo práctica.', si: 'incompleto' },
       {
         id: 'c12-casa',
         quien: 'cap',

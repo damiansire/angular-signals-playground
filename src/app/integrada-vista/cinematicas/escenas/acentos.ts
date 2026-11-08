@@ -16,6 +16,7 @@ export const ACENTOS: readonly string[] = [
   '#ff5a4a', // 10 · Debounce (effect)
   '#c98a2a', // 11 · Zoneless (capstone)
   '#c98a2a', // 12 · Final
+  '#c98a2a', // 13 · La revelación
 ];
 
 export function acentoDe(capitulo: number): string {

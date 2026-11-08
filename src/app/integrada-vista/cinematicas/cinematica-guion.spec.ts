@@ -1,6 +1,7 @@
 import {
   BEATS_COMUNES,
   CAPITULO_FINAL,
+  CAPITULO_REVELACION,
   COLA_MS,
   duracionDe,
   lineasPara,
@@ -163,9 +164,14 @@ describe('cinematica-guion', () => {
   });
 
   describe('los guiones reales', () => {
-    it('hay una cinemática por capítulo del recorrido y un final, sin repetir', () => {
+    it('hay una cinemática por capítulo del recorrido, la revelación y un final, sin repetir', () => {
       const capitulos = CINEMATICAS.map((c) => c.capitulo).sort((a, b) => a - b);
-      expect(capitulos).toEqual([...CAPITULO_DE_CONCEPTO, CAPITULO_FINAL]);
+      expect(capitulos).toEqual([...CAPITULO_DE_CONCEPTO, CAPITULO_FINAL, CAPITULO_REVELACION]);
+    });
+
+    it('la revelación va antes del final en el orden de la lista', () => {
+      const orden = CINEMATICAS.map((c) => c.capitulo);
+      expect(orden.indexOf(CAPITULO_REVELACION)).toBe(orden.indexOf(CAPITULO_FINAL) - 1);
     });
 
     it('ninguno rompe las reglas del guion', () => {
@@ -174,7 +180,8 @@ describe('cinematica-guion', () => {
     });
 
     it('el título de cada capítulo es el mismo tagline que tiene en el recorrido', () => {
-      for (const c of CINEMATICAS.filter((x) => x.capitulo !== CAPITULO_FINAL)) {
+      const fueraDelRecorrido = [CAPITULO_FINAL, CAPITULO_REVELACION];
+      for (const c of CINEMATICAS.filter((x) => !fueraDelRecorrido.includes(x.capitulo))) {
         expect(c.titulo)
           .withContext(`capítulo ${c.capitulo}`)
           .toBe(TITULOS_DE_CAPITULO[CAPITULO_DE_CONCEPTO.indexOf(c.capitulo)]);

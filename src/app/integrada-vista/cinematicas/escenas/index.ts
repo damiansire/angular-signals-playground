@@ -19,6 +19,9 @@ const ESCENAS: Readonly<Record<number, () => Promise<Type<unknown>>>> = {
   10: () => import('./escena-10.component').then((m) => m.Escena10Component),
   11: () => import('./escena-11.component').then((m) => m.Escena11Component),
   12: () => import('./escena-12.component').then((m) => m.Escena12Component),
+  // La revelación pasa en el mismo lugar que el final: la molécula entera, y la nave de la
+  // exploradora que entra.
+  13: () => import('./escena-12.component').then((m) => m.Escena12Component),
 };
 
 export function cargarEscena(capitulo: number): Promise<Type<unknown>> {

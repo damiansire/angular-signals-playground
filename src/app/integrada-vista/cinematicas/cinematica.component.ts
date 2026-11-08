@@ -19,6 +19,7 @@ import { sonido } from '../../libs/sonido';
 import { variablesDeResorteSiSoporta } from '../../libs/resorte';
 import {
   CAPITULO_FINAL,
+  CAPITULO_REVELACION,
   PASO_APERTURA_MS,
   duracionDe,
   relojDe,
@@ -114,6 +115,7 @@ export class CinematicaComponent {
   protected readonly reloj = computed(() => relojDe(this.cinematica(), this.completo()));
   protected readonly etiqueta = computed(() => {
     const c = this.cinematica().capitulo;
+    if (c === CAPITULO_REVELACION) return 'La revelación';
     return c === CAPITULO_FINAL ? 'Final' : `Capítulo ${c}`;
   });
 

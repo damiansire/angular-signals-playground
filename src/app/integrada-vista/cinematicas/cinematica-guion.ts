@@ -36,6 +36,12 @@ export type LineaEnPantalla = LineaCine & { readonly t0: number; readonly t1: nu
 
 export const CAPITULO_FINAL = 12;
 
+/**
+ * La revelación: va después del capítulo 11 y antes del final, aunque lleve un número más alto. Es
+ * la penúltima etapa del recorrido (`docs/historia/recorrido.md`), y en el capítulo 11 no entraba.
+ */
+export const CAPITULO_REVELACION = 13;
+
 /** Beats que dibuja el kit común de todas las escenas. */
 export const BEATS_COMUNES = ['titulo', 'naves', 'mascota', 'transmision'] as const;
 
@@ -57,8 +63,8 @@ export const COLA_MS = 1400;
 /** Separación entre los beats de apertura: el entorno primero, el héroe después. */
 export const PASO_APERTURA_MS = 520;
 
-/** Capítulos con permiso para ser más largos: el pico del medio y la salida. */
-const LARGOS = new Set([6, CAPITULO_FINAL]);
+/** Capítulos con permiso para ser más largos: el pico del medio, la revelación y la salida. */
+const LARGOS = new Set([6, CAPITULO_REVELACION, CAPITULO_FINAL]);
 
 export function palabrasDe(txt: string): number {
   return txt.replace(/\n/g, ' ').split(/\s+/).filter(Boolean).length;
