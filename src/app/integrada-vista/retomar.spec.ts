@@ -1,5 +1,5 @@
 import type { Punto } from '../libs/partida';
-import { entradaDeLaHistoria, inicioDelRecorrido, puntoDelRecorrido } from './retomar';
+import { entradaDeLaHistoria, puntoDelRecorrido } from './retomar';
 
 const PUNTOS = ['anom-rxjs', 'anom-manual', 'voz-supongo'];
 const EN_EL_PROLOGO: Punto = { lugar: 'prologo', linea: 'anom-manual' };
@@ -7,30 +7,13 @@ const EN_EL_ATOMO: Punto = { lugar: 'recorrido', concepto: 3, sub: -1 };
 const EN_UN_SUB: Punto = { lugar: 'recorrido', concepto: 1, sub: 4 };
 
 describe('retomar', () => {
-  describe('inicioDelRecorrido (partida → recorrido)', () => {
-    it('vuelve al átomo o al sub-nivel donde quedó, con el sub de la URL', () => {
-      expect(inicioDelRecorrido(EN_EL_ATOMO, null)).toEqual({ concept: 3, sub: 0 });
-      expect(inicioDelRecorrido(EN_UN_SUB, null)).toEqual({ concept: 1, sub: 5 });
-    });
-
-    it('un link manda sobre lo guardado', () => {
-      expect(inicioDelRecorrido(EN_UN_SUB, { concept: 7, sub: 2 })).toEqual({ concept: 7, sub: 2 });
-    });
-
-    it('antes del recorrido no abre nada: la historia sigue desde la colina', () => {
-      expect(inicioDelRecorrido(null, null)).toBeNull();
-      expect(inicioDelRecorrido(EN_EL_PROLOGO, null)).toBeNull();
-      expect(inicioDelRecorrido({ lugar: 'construccion' }, null)).toBeNull();
-    });
-  });
-
   describe('entradaDeLaHistoria', () => {
-    it('sin partida, el prólogo arranca del principio', () => {
-      expect(entradaDeLaHistoria(null, PUNTOS)).toEqual({ a: 'prologo', desde: null });
+    it('sin partida, la historia arranca del principio', () => {
+      expect(entradaDeLaHistoria(null, PUNTOS, false)).toEqual({ a: 'prologo', desde: null });
     });
 
-    it('con un punto del prólogo, arranca en esa línea', () => {
-      expect(entradaDeLaHistoria(EN_EL_PROLOGO, PUNTOS)).toEqual({
+    it('con un punto del comienzo, arranca en esa línea', () => {
+      expect(entradaDeLaHistoria(EN_EL_PROLOGO, PUNTOS, false)).toEqual({
         a: 'prologo',
         desde: 'anom-manual',
       });
@@ -38,16 +21,34 @@ describe('retomar', () => {
 
     it('una línea que ya no es punto se ignora y arranca del principio', () => {
       const viejo: Punto = { lugar: 'prologo', linea: 'casa-helado' };
-      expect(entradaDeLaHistoria(viejo, PUNTOS)).toEqual({ a: 'prologo', desde: null });
+      expect(entradaDeLaHistoria(viejo, PUNTOS, false)).toEqual({ a: 'prologo', desde: null });
     });
 
-    it('en pleno viaje, entrar lo sigue donde quedó, sin volver al prólogo', () => {
-      expect(entradaDeLaHistoria({ lugar: 'viaje' }, PUNTOS)).toEqual({ a: 'viaje' });
+    it('en pleno viaje, entrar lo sigue donde quedó, sin volver al comienzo', () => {
+      expect(entradaDeLaHistoria({ lugar: 'viaje' }, PUNTOS, true)).toEqual({ a: 'viaje' });
     });
 
-    it('con el viaje dejado por el mapa, entrar va directo a la construcción', () => {
-      for (const punto of [{ lugar: 'construccion' } as const, EN_EL_ATOMO]) {
-        expect(entradaDeLaHistoria(punto, PUNTOS)).toEqual({ a: 'mapa' });
+    it('con el comienzo visto, entrar sigue el viaje aunque la partida quedó en la molécula', () => {
+      for (const punto of [{ lugar: 'construccion' } as const, EN_EL_ATOMO, EN_UN_SUB, null]) {
+        expect(entradaDeLaHistoria(punto, PUNTOS, true)).toEqual({ a: 'viaje' });
+      }
+    });
+
+    it('una partida vieja en la molécula sin el comienzo visto lo arranca del principio', () => {
+      expect(entradaDeLaHistoria(EN_UN_SUB, PUNTOS, false)).toEqual({ a: 'prologo', desde: null });
+    });
+
+    it('entrar nunca abre la molécula', () => {
+      const lugares: (Punto | null)[] = [
+        null,
+        EN_EL_PROLOGO,
+        EN_EL_ATOMO,
+        { lugar: 'construccion' },
+      ];
+      for (const punto of lugares) {
+        for (const visto of [true, false]) {
+          expect(['prologo', 'viaje']).toContain(entradaDeLaHistoria(punto, PUNTOS, visto).a);
+        }
       }
     });
   });
@@ -66,24 +67,11 @@ describe('retomar', () => {
       expect(puntoDelRecorrido(EN_UN_SUB, -1, -1)).toEqual({ lugar: 'construccion' });
     });
 
-    it('la landing del arranque no pisa el punto del prólogo ni el del viaje', () => {
+    it('la landing del arranque no pisa el punto del comienzo ni el del viaje', () => {
       expect(puntoDelRecorrido(EN_EL_PROLOGO, -1, -1)).toBe(EN_EL_PROLOGO);
       const viajando: Punto = { lugar: 'viaje' };
       expect(puntoDelRecorrido(viajando, -1, -1)).toBe(viajando);
       expect(puntoDelRecorrido(null, -1, -1)).toBeNull();
-    });
-
-    it('ida y vuelta: lo que se guarda en el recorrido se reabre en el mismo lugar', () => {
-      for (const [c, s] of [
-        [0, -1],
-        [4, 0],
-        [11, 0],
-        [1, 6],
-      ]) {
-        const punto = puntoDelRecorrido(null, c, s);
-        const where = inicioDelRecorrido(punto, null);
-        expect(where).toEqual({ concept: c, sub: s + 1 });
-      }
     });
   });
 });

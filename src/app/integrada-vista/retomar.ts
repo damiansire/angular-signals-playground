@@ -1,39 +1,25 @@
 import type { Punto } from '../libs/partida';
-import type { WhereState } from './url-sync';
 
 /**
- * Dónde abre el recorrido al cargar. Un link manda, porque alguien lo eligió; si no hay, el lugar
- * del recorrido donde quedó la partida. Antes del recorrido no hay nada que abrir: la historia
- * sigue desde la colina.
- */
-export function inicioDelRecorrido(
-  punto: Punto | null,
-  deepLink: WhereState | null,
-): WhereState | null {
-  if (deepLink) return deepLink;
-  if (punto?.lugar !== 'recorrido') return null;
-  return { concept: punto.concepto, sub: punto.sub + 1 };
-}
-
-/**
- * Qué sigue al entrar: el prólogo desde una línea (`null` es el principio), el viaje donde quedó, o
- * el mapa, si el viaje se dejó por él. El mapa arranca con la construcción de Tusi.
+ * Qué sigue al entrar: la historia desde una línea de su comienzo (`null` es el principio), o el
+ * viaje donde quedó, que también puede ser su último cuadro. No hay un tercer lugar: la app es una
+ * sola historia, y la molécula solo se abre con un link (ADR 0008).
  */
 export type Entrada =
-  | { readonly a: 'prologo'; readonly desde: string | null }
-  | { readonly a: 'viaje' }
-  | { readonly a: 'mapa' };
+  { readonly a: 'prologo'; readonly desde: string | null } | { readonly a: 'viaje' };
 
 /**
- * Qué pasa al entrar desde la colina. Una línea guardada que el guion ya no tiene como punto se
- * ignora: el prólogo arranca del principio antes que en un lugar que no existe.
+ * Qué pasa al entrar desde la colina: siempre sigue la historia, aunque la partida haya quedado en
+ * la molécula. Con el comienzo ya visto, sigue el viaje; una partida de antes del viaje lo arranca
+ * del principio. Una línea guardada que el guion ya no tiene como punto se ignora: el comienzo
+ * arranca del principio antes que en un lugar que no existe.
  */
 export function entradaDeLaHistoria(
   punto: Punto | null,
   puntosDelPrologo: readonly string[],
+  prologoVisto: boolean,
 ): Entrada {
-  if (punto?.lugar === 'viaje') return { a: 'viaje' };
-  if (punto?.lugar === 'construccion' || punto?.lugar === 'recorrido') return { a: 'mapa' };
+  if (prologoVisto || punto?.lugar === 'viaje') return { a: 'viaje' };
   const desde = punto?.lugar === 'prologo' && puntosDelPrologo.includes(punto.linea);
   return { a: 'prologo', desde: desde ? punto.linea : null };
 }

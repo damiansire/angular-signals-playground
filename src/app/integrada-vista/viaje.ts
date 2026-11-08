@@ -51,6 +51,24 @@ export function paginasDeEtapa(capitulo: number, subs: readonly RouteItem[]): Pa
  * cierre (el concepto que sigue al último): la revelación y el final. Un concepto sin pantallas se
  * saltea entero, sin cinemática suelta.
  */
+/**
+ * El fin: el concepto que sigue al último, con la página 0. La historia ya se contó y queda su último
+ * cuadro; recargar vuelve ahí, no a la revelación.
+ */
+export function finDelViaje(subPorConcepto: readonly number[]): {
+  readonly concepto: number;
+  readonly pagina: number;
+} {
+  return { concepto: subPorConcepto.length, pagina: 0 };
+}
+
+export function esElFin(
+  lugar: { readonly concepto: number; readonly pagina: number },
+  subPorConcepto: readonly number[],
+): boolean {
+  return lugar.concepto >= subPorConcepto.length && lugar.pagina >= 0;
+}
+
 export function siguienteEtapa(
   concepto: number,
   subPorConcepto: readonly number[],

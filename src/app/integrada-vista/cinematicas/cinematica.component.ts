@@ -105,6 +105,12 @@ export class CinematicaComponent {
    * `fin` muestra el último cuadro. `null` = reproducción normal.
    */
   readonly fotograma = input<string | null>(null);
+  /**
+   * Con un cuadro congelado, el botón de arriba hace esto en vez de saltar: el último cuadro de la
+   * historia ofrece empezar de cero. `null` = el "Saltar" de siempre.
+   */
+  readonly accionFinal = input<string | null>(null);
+  readonly accion = output<void>();
   readonly termino = output<FinDeCinematica>();
 
   private readonly host = inject(ElementRef<HTMLElement>).nativeElement as HTMLElement;

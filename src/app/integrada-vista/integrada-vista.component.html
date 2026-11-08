@@ -725,13 +725,17 @@
         </span>
         <span class="prologo__manual-paso">{{ pagina()! + 1 }} de {{ paginas().length }}</span>
       }
-      <button
-        type="button"
-        class="prologo__manual-boton prologo__manual-cerrar"
-        (click)="cerrarManual()"
-      >
-        Cerrar &times;
-      </button>
+      <!-- En el viaje la hoja no se cierra: la historia es una sola, y lo único que sigue es la
+           página siguiente. -->
+      @if (libro().concepto === undefined) {
+        <button
+          type="button"
+          class="prologo__manual-boton prologo__manual-cerrar"
+          (click)="cerrarManual()"
+        >
+          Cerrar &times;
+        </button>
+      }
     </header>
     <div class="prologo__manual-cuerpo">
       <!-- La página del manual trae su ley, su lámina y su desafío (ver `app-pagina-del-manual`). Una
@@ -803,6 +807,11 @@
       [completo]="cinematicaCompleta()"
       [establecidos]="capitulosHechos()"
       [origen]="origenIris()"
+      [fotograma]="enElFin() ? 'fin' : null"
+      [accionFinal]="
+        enElFin() ? (confirmandoBorrado() ? '¿Seguro? Se borra todo' : 'Empezar de cero') : null
+      "
+      (accion)="pedirEmpezarDeCero()"
       (termino)="alTerminarCinematica()"
     />
   }

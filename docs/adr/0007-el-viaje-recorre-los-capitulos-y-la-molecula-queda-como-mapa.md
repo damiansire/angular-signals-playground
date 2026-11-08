@@ -24,7 +24,9 @@ escribir lo que el canon decidió y ningún guion tenía: las pistas de Angie y 
    `Partida.viaje` dice dónde: el concepto y la página, con la página -1 para la cinemática. Al
    recargar, entrar desde la colina sigue ahí sin repetir el prólogo. Es un campo nuevo, así que la
    versión no sube: una partida sin él empieza el viaje del principio.
-4. **Cerrar la hoja deja el viaje y abre el mapa:** la molécula, con la construcción de Tusi
+4. **Cerrar la hoja deja el viaje y abre el mapa** (reemplazado por
+   [0008](./0008-entrar-siempre-sigue-la-historia.md): la hoja no se cierra y la molécula no es una
+   salida): la molécula, con la construcción de Tusi
    delante, como antes. El lugar del viaje queda guardado y la bitácora lo sigue con "Seguir el
    viaje". Escape en una cinemática la saltea y sigue la hoja. Nunca hay que resolver nada para
    seguir ([0002](./0002-capa-de-juego-cinematicas-partida-y-sonido.md)).

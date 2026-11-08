@@ -74,7 +74,7 @@ import {
 } from '../libs/partida';
 import { CinematicaComponent } from './cinematicas/cinematica.component';
 import { PUNTOS_DEL_PROLOGO } from './puntos-del-prologo';
-import { entradaDeLaHistoria, inicioDelRecorrido, puntoDelRecorrido } from './retomar';
+import { entradaDeLaHistoria, puntoDelRecorrido } from './retomar';
 import { AvisoAuricularesComponent } from './aviso-auriculares/aviso-auriculares.component';
 import { BitacoraComponent, type CapituloDeBitacora } from './bitacora/bitacora.component';
 import {
@@ -82,7 +82,7 @@ import {
   CAPITULO_REVELACION,
   type Cinematica,
 } from './cinematicas/cinematica-guion';
-import { etapaDe, paginasDeEtapa, siguienteEtapa } from './viaje';
+import { esElFin, etapaDe, finDelViaje, paginasDeEtapa, siguienteEtapa } from './viaje';
 
 /**
  * Cuánto tiene que quedarse el recorrido en la parada de un capítulo para que arranque su
@@ -423,8 +423,10 @@ export class IntegradaVistaComponent {
     if (this.pagina() === null || !hoja || e.defaultPrevented) return;
     const objetivo = e.target instanceof Element ? e.target : null;
     const enLaPantalla = objetivo?.closest('.subhost');
-    if (e.key === 'Escape') this.terminarManual?.(false);
-    else if (e.key === 'ArrowRight' && !enLaPantalla) this.pasarPagina(1);
+    if (e.key === 'Escape') {
+      // En el viaje la hoja no se cierra: la historia sigue con la página siguiente.
+      if (this.libro().concepto === undefined) this.terminarManual?.(false);
+    } else if (e.key === 'ArrowRight' && !enLaPantalla) this.pasarPagina(1);
     else if (e.key === 'ArrowLeft' && !enLaPantalla) this.pasarPagina(-1);
     else {
       // En la historia, una tecla afuera de la hoja es del prólogo (la pausa, por ejemplo). Un botón
@@ -601,7 +603,8 @@ export class IntegradaVistaComponent {
       subCounts,
       enc,
       this.onWhere,
-      inicioDelRecorrido(this.partida().punto, this.initialFromUrl()),
+      // La molécula solo se abre con un link: sin él, la historia sigue desde la colina (ADR 0008).
+      this.initialFromUrl(),
       (visible) => landing?.setVisible(visible),
       {
         establecidos: new Set(this.partida().establecidos),
@@ -633,25 +636,20 @@ export class IntegradaVistaComponent {
       },
       // La preferencia de sonido se elige en el overlay del intro pero quien suena después es el
       // prólogo: viaja con el gatillo para que silenciar antes de entrar valga para los dos.
-      alEntrar: (startBuild) => {
-        // Las luces de Angie suben a las estrellas y ahí están las naves: el prólogo es la
-        // continuación de esa escena. Se retoma donde quedó la partida; si ya se pasó, entrar
-        // sigue con la construcción, que es donde estaba.
-        const entrada = entradaDeLaHistoria(this.partida().punto, PUNTOS_DEL_PROLOGO);
-        if (entrada.a === 'mapa') {
-          startBuild();
-          return;
-        }
-        // Al viaje se llega del prólogo, visto o salteado, y del viaje al mapa: la construcción
-        // de Tusi espera hasta que el viaje termina o se deja.
+      alEntrar: () => {
+        // Las luces de Angie suben a las estrellas y ahí están las naves: el comienzo es la
+        // continuación de esa escena, y el viaje la continuación del comienzo. Es una sola
+        // historia: entrar la sigue donde quedó, nunca abre la molécula (ADR 0008).
+        const { punto, prologo } = this.partida();
+        const entrada = entradaDeLaHistoria(punto, PUNTOS_DEL_PROLOGO, prologo);
         if (entrada.a === 'viaje') {
-          void this.viajar(startBuild);
+          void this.viajar();
           return;
         }
         this.abrirPrologo(
           () => {
             this.guardar(conPrologo(this.partida()));
-            void this.viajar(startBuild);
+            void this.viajar();
           },
           {
             desde: entrada.desde,
@@ -789,13 +787,13 @@ export class IntegradaVistaComponent {
   }
 
   /**
-   * El viaje: después del prólogo, cada capítulo es una etapa con su cinemática y su hoja, y al
-   * final va la cinemática del final. Se guarda cada paso, así recargar lo sigue en el mismo lugar.
-   * Cerrar una hoja deja el viaje y abre el mapa (la molécula), con el lugar guardado: la bitácora lo
-   * retoma. Nunca exige resolver nada para seguir (ADR 0002).
+   * El viaje: después del comienzo, cada capítulo es una etapa con su cinemática y su hoja, después
+   * la revelación y el final, y al terminar la historia queda en su último cuadro. Se guarda cada
+   * paso, así recargar lo sigue en el mismo lugar. No hay salida a la molécula: la hoja no se cierra,
+   * pero nunca exige resolver nada para seguir (ADR 0002, ADR 0008).
    */
   private viajando = false;
-  private async viajar(alDejarlo: () => void): Promise<void> {
+  private async viajar(): Promise<void> {
     if (this.viajando) return;
     this.viajando = true;
     const subs = this.subComponents.map((s) => s.length);
@@ -809,27 +807,34 @@ export class IntegradaVistaComponent {
           lugar = { concepto: lugar.concepto, pagina: 0 };
           continue;
         }
-        const concepto = lugar.concepto;
-        const leida = await this.leerEtapa(concepto, lugar.pagina);
-        if (!leida) {
-          this.guardar(conPunto(this.partida(), { lugar: 'construccion' }));
-          return;
-        }
-        lugar = siguienteEtapa(concepto, subs);
+        await this.leerEtapa(lugar.concepto, lugar.pagina);
+        lugar = siguienteEtapa(lugar.concepto, subs);
       }
-      // El cierre: recargar acá vuelve a la revelación, no al principio del viaje.
-      this.guardar(conViaje(conPunto(this.partida(), { lugar: 'viaje' }), lugar));
-      await this.verEntera(CAPITULO_REVELACION);
-      await this.verEntera(CAPITULO_FINAL);
-      this.guardar(conViaje(conPunto(this.partida(), { lugar: 'construccion' }), null));
+      if (!esElFin(lugar, subs)) {
+        // El cierre: recargar acá vuelve a la revelación, no al principio del viaje.
+        this.guardar(conViaje(conPunto(this.partida(), { lugar: 'viaje' }), lugar));
+        await this.verEntera(CAPITULO_REVELACION);
+        await this.verEntera(CAPITULO_FINAL);
+      }
+      this.guardar(conViaje(conPunto(this.partida(), { lugar: 'viaje' }), finDelViaje(subs)));
+      await this.mostrarElFin();
     } finally {
       this.viajando = false;
-      alDejarlo();
     }
   }
 
+  /**
+   * El último cuadro de la historia: el final congelado, con su última línea, y arriba la única
+   * acción que queda, empezar de cero. Recargar vuelve acá.
+   */
+  protected readonly enElFin = signal(false);
+  private async mostrarElFin(): Promise<void> {
+    this.enElFin.set(true);
+    await this.abrirCinematica(CAPITULO_FINAL, false);
+  }
+
   /** La hoja de una etapa, desde la página donde quedó; cada página que se abre queda guardada. */
-  private async leerEtapa(concepto: number, desde: number): Promise<boolean> {
+  private async leerEtapa(concepto: number, desde: number): Promise<void> {
     const capitulo = CAPITULO_DE_CONCEPTO[concepto];
     const libro: Libro = {
       nombre: etapaDe(capitulo)?.nombre ?? NOMBRES_DE_CONCEPTO[concepto],
@@ -841,18 +846,17 @@ export class IntegradaVistaComponent {
     const paginas = paginasDeEtapa(capitulo, this.subComponents[concepto] ?? []);
     this.manualSuelto.set(true);
     this.escenarioInerte(true);
-    const leida = await this.leerManual(paginas, libro, desde, (pagina) =>
+    await this.leerManual(paginas, libro, desde, (pagina) =>
       this.guardar(conViaje(this.partida(), { concepto, pagina })),
     );
     this.manualSuelto.set(false);
-    return leida;
   }
 
-  /** Desde la bitácora: el viaje sigue donde quedó, sobre el mapa, que ya está construido. */
+  /** Desde la bitácora de la molécula (a la que se llega con un link): el viaje sigue donde quedó. */
   protected seguirElViajeDesdeBitacora(): void {
     this.bitacoraAbierta.set(false);
     this.escenarioInerte(false);
-    void this.viajar(() => undefined);
+    void this.viajar();
   }
 
   private alEstablecer(concepto: number, sub: number): void {

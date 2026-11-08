@@ -1,7 +1,14 @@
 import { signalsRoutesTree } from '../app.routes';
 import type { RouteItem } from '../interfaces/route-item.interface';
 import { CAPITULO_DE_CONCEPTO } from './molecule-engine';
-import { ETAPAS_DEL_VIAJE, etapaDe, paginasDeEtapa, siguienteEtapa } from './viaje';
+import {
+  ETAPAS_DEL_VIAJE,
+  esElFin,
+  etapaDe,
+  finDelViaje,
+  paginasDeEtapa,
+  siguienteEtapa,
+} from './viaje';
 
 describe('el viaje', () => {
   it('cada capítulo del recorrido tiene su etapa, en el mismo orden', () => {
@@ -43,5 +50,14 @@ describe('el viaje', () => {
     expect(siguienteEtapa(0, subs)).toEqual({ concepto: 1, pagina: -1 });
     expect(siguienteEtapa(1, subs)).toEqual({ concepto: 3, pagina: -1 });
     expect(siguienteEtapa(3, subs)).toEqual({ concepto: 4, pagina: -1 });
+  });
+
+  it('después del cierre viene el fin, que es otro lugar: recargar no repite la revelación', () => {
+    const subs = [7, 3, 0, 2];
+    const cierre = siguienteEtapa(3, subs);
+    expect(esElFin(cierre, subs)).toBeFalse();
+    expect(finDelViaje(subs)).toEqual({ concepto: 4, pagina: 0 });
+    expect(esElFin(finDelViaje(subs), subs)).toBeTrue();
+    expect(esElFin({ concepto: 1, pagina: 0 }, subs)).toBeFalse();
   });
 });

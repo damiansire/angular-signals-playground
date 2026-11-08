@@ -451,7 +451,7 @@ describe('IntegradaVistaComponent', () => {
       fixture.destroy();
     });
 
-    it('al recargar sin link, el recorrido abre en el átomo donde quedó la partida', async () => {
+    it('al recargar sin link, la molécula no se abre aunque la partida quedó en ella', async () => {
       localStorage.setItem(
         CLAVE,
         JSON.stringify({
@@ -466,14 +466,13 @@ describe('IntegradaVistaComponent', () => {
       const fixture = await montar();
       const host: HTMLElement = fixture.nativeElement;
       await hastaElArranque(host);
-      // El átomo enfocado es el de la partida, no el primero: abrió donde había quedado.
-      const enfocado = (): number =>
-        [...host.querySelectorAll('#atoms .atom')].findIndex((a) =>
-          a.classList.contains('current'),
-        );
-      await hasta(() => enfocado() >= 0);
-
-      expect(enfocado()).toBe(9);
+      await new Promise((listo) => setTimeout(listo, 300));
+      // Sigue en la colina: la historia es una sola, y la molécula solo se abre con un link.
+      const enfocado = [...host.querySelectorAll('#atoms .atom')].findIndex((a) =>
+        a.classList.contains('current'),
+      );
+      expect(enfocado).not.toBe(9);
+      expect(location.search).not.toContain('nivel');
       fixture.destroy();
     });
 

@@ -43,9 +43,13 @@
     <span class="cine__rotulo" aria-hidden="true"
       >{{ etiqueta() }} <b>· {{ cinematica().titulo }}</b></span
     >
-    <button class="cine__saltar" type="button" (click)="saltar()">
-      Saltar <kbd aria-hidden="true">Esc</kbd>
-    </button>
+    @if (accionFinal(); as texto) {
+      <button class="cine__saltar" type="button" (click)="accion.emit()">{{ texto }}</button>
+    } @else {
+      <button class="cine__saltar" type="button" (click)="saltar()">
+        Saltar <kbd aria-hidden="true">Esc</kbd>
+      </button>
+    }
   </div>
 
   <div class="cine__escena">
@@ -100,8 +104,10 @@
         </div>
       }
     </div>
-    <button class="cine__seguir" type="button" (click)="avanzar()" aria-label="Siguiente línea">
-      <span aria-hidden="true">▸</span>
-    </button>
+    @if (!fotograma()) {
+      <button class="cine__seguir" type="button" (click)="avanzar()" aria-label="Siguiente línea">
+        <span aria-hidden="true">▸</span>
+      </button>
+    }
   </div>
 </div>
