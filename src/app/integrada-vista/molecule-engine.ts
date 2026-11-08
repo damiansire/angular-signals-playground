@@ -640,7 +640,7 @@ export function initMolecule(
     const orb = el('g', { class: 'orb' });
     orb.appendChild(el('circle', { class: 'halo', cx: 0, cy: 0, r: NUC + 34, stroke: accent }));
     // Un electrón por sub-nivel: el átomo MUESTRA cuántos sub-niveles tiene el concepto
-    // (Introducción = 4 → 4 electrones). Al bucear, estos mismos electrones se apagan y su rol
+    // (Introducción = 6 → 6 electrones). Al bucear, estos mismos electrones se apagan y su rol
     // pasa a los sub-dots numerados que orbitan la card (ver .suborbit): se leen como los mismos
     // electrones que salieron a orbitar afuera. Fallback a 1 para conceptos sin sub-niveles.
     const nO = Math.max(1, cc.subN);
