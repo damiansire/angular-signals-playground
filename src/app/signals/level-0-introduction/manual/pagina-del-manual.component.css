@@ -1,15 +1,29 @@
+/* La página va sobre la escena del prólogo, desenfocada detrás de su velo (como las lecciones del
+   viaje a Japón): la ley se lee suelta, en letra clara con sombra, y lo que se toca va en papel. Se
+   estira hasta el pie de la hoja: con el alto de su contenido, media pantalla quedaba vacía. */
 :host {
-  display: block;
-  color: #201d16;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  flex: 1 0 auto;
+  color: #fff8ec;
+  user-select: none;
+  -webkit-user-select: none;
 }
 
 /* A lo ancho, dos columnas que corren cada una por su cuenta: con una grilla de filas compartidas,
-   la escena (más alta que la ley) empujaba la demo y dejaba un hueco a la izquierda. */
+   la escena (más alta que la ley) empujaba la demo y dejaba un hueco a la izquierda. La página va
+   al medio del alto, con la escena alrededor; la que se llena (`llena`) lo ocupa entero. */
 .pm {
+  position: relative;
+  flex: 1 0 auto;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) clamp(19rem, 31%, 27rem);
-  align-items: start;
+  grid-template-columns: minmax(0, 1fr) clamp(19rem, 29%, 26rem);
+  align-content: center;
   gap: 1.25rem clamp(1.5rem, 2.6vw, 2.75rem);
+}
+.pm--llena {
+  align-content: stretch;
 }
 .pm-col {
   display: flex;
@@ -21,114 +35,195 @@
 .pm-cabeza {
   display: flex;
   flex-direction: column;
-  gap: 0.35rem;
+  gap: 0.3rem;
 }
 .pm-ley {
   margin: 0;
   font:
-    700 0.72rem / 1.2 'JetBrains Mono',
+    700 0.78rem / 1.2 'JetBrains Mono',
     'Cascadia Mono',
     Consolas,
     monospace;
-  letter-spacing: 0.18em;
+  letter-spacing: 0.2em;
   text-transform: uppercase;
-  color: #8a5a12;
+  color: #ffd27a;
+  text-shadow: 0 2px 0 rgb(25 8 40 / 75%);
 }
 .pm-titulo {
   margin: 0;
-  font-family: Georgia, 'Times New Roman', serif;
-  font-size: clamp(1.8rem, 2.9vw, 2.6rem);
-  font-weight: 400;
-  line-height: 1.08;
+  font-family: var(--font-editorial, Georgia, serif);
+  font-size: clamp(2rem, 3.1vw, 3rem);
+  font-weight: 600;
+  line-height: 1.05;
   letter-spacing: -0.01em;
-  color: #17140f;
+  color: #fff8ec;
   text-wrap: balance;
+  /* Dura y suave, las dos tintadas: se lee sobre cualquier parte de la escena. */
+  text-shadow:
+    0 4px 0 rgb(25 8 40 / 75%),
+    0 12px 34px rgb(25 8 40 / 55%);
 }
 
-/* El paso: el número y, al lado, qué hacer (y el botón que lo hace solo, si la página lo tiene). */
+/* Papel: lo que se toca va en tarjetas claras con el borde de tinta del manual. */
+.pm-mesa,
+.pm-paso--2,
+.pm-escena {
+  border: 3px solid #5d4a5e;
+  border-radius: 18px;
+  background: #fffaf2;
+  color: #2b2230;
+  box-shadow:
+    0 5px 0 rgb(30 34 62 / 22%),
+    0 22px 44px -18px rgb(6 3 14 / 70%);
+}
+
+/* La mesa: qué hacer arriba y la demo debajo. */
+.pm-mesa {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  min-height: 0;
+  padding: 0.9rem clamp(1rem, 1.6vw, 1.5rem) 1.2rem;
+}
+
+/* El paso: el número, qué hacer y el botón que lo hace solo. */
 .pm-paso {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
   gap: 0.6rem 0.85rem;
-  font: 600 1.05rem / 1.35 var(--font-display, system-ui, sans-serif);
-  color: #2b261d;
+  font: 600 1.08rem / 1.35 var(--font-display, system-ui, sans-serif);
+}
+/* Con el alto del botón aunque ya no esté: al terminar, "Mostrame" se va y la mesa no salta. */
+.pm-paso--1 {
+  min-height: 3.1rem;
+  padding-bottom: 0.85rem;
+  border-bottom: 1.5px dashed #d9cbb8;
 }
 .pm-num {
   flex: none;
   display: grid;
   place-items: center;
-  width: 1.85rem;
-  height: 1.85rem;
+  width: 1.9rem;
+  height: 1.9rem;
   border-radius: 999px;
   background: #ffd27a;
   box-shadow:
-    inset 0 0 0 1.5px #b8791f,
-    0 2px 0 #d9a24a;
+    inset 0 0 0 2px #5d4a5e,
+    0 2px 0 #5d4a5e;
   font:
-    800 0.92rem / 1 'JetBrains Mono',
+    800 0.95rem / 1 'JetBrains Mono',
     'Cascadia Mono',
     Consolas,
     monospace;
-  color: #3a2a0c;
+  color: #2b2230;
 }
-/* El desafío en su recuadro de papel, con el número arriba, a la altura de su rótulo. */
+
+/* "Mostrame": un cartelito de papel dorado, un poco torcido, como los del viaje. Se endereza al
+   pasarle por encima, y apretado se hunde en su sombra. Con tres ancestros le gana a la pastilla
+   oscura que la hoja le pone a todo botón de su pantalla (`.subhost button:not([class*='bg-'])`). */
+.pm .pm-paso .pm-mostrar {
+  margin-left: auto;
+  padding: 0.45rem 1rem 0.5rem;
+  border: 2px solid #5d4a5e;
+  border-radius: 10px;
+  outline: 1.4px dashed #b8791f;
+  outline-offset: -6px;
+  background: #ffd27a;
+  box-shadow: 3px 4px 0 rgb(43 34 48 / 22%);
+  rotate: -1.5deg;
+  font:
+    800 1rem / 1.2 'Baloo 2',
+    var(--font-display, system-ui, sans-serif);
+  letter-spacing: 0.01em;
+  color: #2b2230;
+  cursor: pointer;
+  transition:
+    rotate 0.2s,
+    translate 0.2s,
+    background-color 0.2s;
+}
+.pm .pm-paso .pm-mostrar:hover:not(:disabled) {
+  rotate: 0deg;
+  translate: 2px -2px;
+  background: #ffdc94;
+}
+.pm .pm-paso .pm-mostrar:active:not(:disabled) {
+  translate: 1px 2px;
+  box-shadow: 1px 2px 0 rgb(43 34 48 / 22%);
+}
+.pm .pm-paso .pm-mostrar:disabled {
+  cursor: default;
+  rotate: 0deg;
+  opacity: 0.75;
+}
+.pm .pm-paso .pm-mostrar:focus-visible {
+  outline: 3px solid #2b2230;
+  outline-offset: 2px;
+}
+
+.pm--llena .pm-mesa,
+.pm--llena .pm-demo {
+  flex: 1 0 auto;
+}
+.pm-demo {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+/* La ventanilla en su marco de papel, con lo que le pasa a la nave escrito abajo, como una foto. */
+.pm-escena {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  padding: 0.55rem 0.55rem 0.75rem;
+  rotate: 0.6deg;
+}
+.pm-nave {
+  margin: 0;
+  padding-inline: 0.35rem;
+  font: italic 600 clamp(1rem, 1.2vw, 1.12rem) / 1.3 var(--font-editorial, Georgia, serif);
+  color: #3b2f3c;
+  text-wrap: pretty;
+}
+
+/* El desafío pegado a la ventanilla: lo que se confirma va junto a lo que le pasó a la nave. */
 .pm-paso--2 {
   align-items: start;
   flex-wrap: nowrap;
-  padding: 0.9rem 1rem 1rem;
-  border: 1px solid #e3d9c3;
-  border-radius: 16px;
-  background: #fffdf7;
+  padding: 0.95rem 1rem 1rem;
 }
 .pm-desafio {
   flex: 1;
   min-width: 0;
 }
 
-.pm-demo {
-  min-width: 0;
-}
-
-/* La lámina: una ventanilla a la noche de la nave, con lo que la ley le hace a su pantalla. */
-.pm-escena {
-  margin: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 0.55rem;
-}
-.pm-nave {
-  margin: 0;
-  font: italic 600 clamp(0.98rem, 1.2vw, 1.1rem) / 1.3 var(--font-display, system-ui, sans-serif);
-  color: #3b342b;
-  text-wrap: pretty;
-}
-
-/* Entre 700 y 1099 la escena va al lado de la ley, chica, y la demo y el desafío abajo a lo ancho.
+/* Entre 700 y 1099 la escena va al lado de la ley, chica, y la mesa y el desafío abajo a lo ancho.
    Las columnas se disuelven para que cada pieza tome su lugar en la grilla. */
 @media (max-width: 1099px) {
   .pm {
     grid-template-columns: minmax(0, 1fr) clamp(12rem, 27vw, 15.5rem);
+    grid-template-rows: auto auto auto;
     grid-template-areas:
       'cabeza escena'
-      'paso1 escena'
-      'demo demo'
+      'mesa mesa'
       'paso2 paso2';
     gap: 1rem 1.5rem;
+  }
+  .pm--llena {
+    grid-template-rows: auto 1fr auto;
   }
   .pm-col {
     display: contents;
   }
   .pm-cabeza {
     grid-area: cabeza;
-    align-self: end;
+    align-self: center;
   }
-  .pm-paso--1 {
-    grid-area: paso1;
-    align-self: start;
-  }
-  .pm-demo {
-    grid-area: demo;
+  .pm-mesa {
+    grid-area: mesa;
   }
   .pm-escena {
     grid-area: escena;
@@ -140,9 +235,21 @@
 @media (max-width: 699px) {
   .pm {
     grid-template-columns: minmax(0, 1fr);
-    grid-template-areas: 'cabeza' 'escena' 'paso1' 'demo' 'paso2';
+    grid-template-rows: none;
+    grid-template-areas: 'cabeza' 'escena' 'mesa' 'paso2';
   }
   .pm-escena {
     max-width: 24rem;
+  }
+  .pm .pm-paso .pm-mostrar {
+    margin-left: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pm .pm-paso .pm-mostrar,
+  .pm-escena {
+    rotate: none;
+    transition: none;
   }
 }

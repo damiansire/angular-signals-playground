@@ -1,5 +1,6 @@
-<article class="pm">
-  <!-- Lo que se lee y se toca, de arriba hacia abajo: la ley, qué hacer y la demo. -->
+<article #marco class="pm" [class.pm--llena]="llena()">
+  <!-- Lo que se lee y se toca, de arriba hacia abajo: la ley y, en su mesa de papel, qué hacer y la
+       demo. La ley va suelta sobre la escena. -->
   <div class="pm-col pm-col--leer">
     <header class="pm-cabeza">
       @if (datos; as d) {
@@ -8,13 +9,20 @@
       }
     </header>
 
-    <!-- El mismo número que el desafío: primero se prueba, después se confirma. -->
-    <div class="pm-paso pm-paso--1">
-      <span class="pm-num" aria-hidden="true">1</span>
-      <ng-content select="[hacer]" />
-    </div>
+    <section class="pm-mesa">
+      <!-- El mismo número que el desafío: primero se prueba, después se confirma. -->
+      <div class="pm-paso pm-paso--1">
+        <span class="pm-num" aria-hidden="true">1</span>
+        <ng-content select="[hacer]" />
+        @if (guia() !== null || mostrando()) {
+          <button type="button" class="pm-mostrar" [disabled]="mostrando()" (click)="mostrar()">
+            <span aria-hidden="true">&#9654;</span> Mostrame
+          </button>
+        }
+      </div>
 
-    <div class="pm-demo"><ng-content select="[demo]" /></div>
+      <div class="pm-demo"><ng-content select="[demo]" /></div>
+    </section>
   </div>
 
   <!-- Lo que le pasa a la nave mientras tanto, y el desafío que lo confirma. -->
@@ -31,4 +39,6 @@
       <div class="pm-desafio"><ng-content select="[desafio]" /></div>
     </div>
   </div>
+
+  <app-mano-guia [punta]="punta()" />
 </article>
