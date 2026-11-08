@@ -9,8 +9,8 @@ import {
 } from './musica-del-presentimiento';
 
 /**
- * Pantalla de inicio: una mañana en la colina. Angie camina hasta el borde y se sienta a mirar a lo
- * lejos, y espera ahí. Al entrar se desarma en sus
+ * Pantalla de inicio: una mañana en la colina. Angie llega caminando desde la derecha hasta la piedra
+ * del centro, se sienta a mirar a lo lejos y espera ahí. Al entrar se desarma en sus
  * piezas, cada pieza se vuelve una estela de luz que sube, y el cielo se apaga en el universo donde
  * empieza el prólogo. Es la costura entre la landing clara y el prólogo oscuro: sin ella, el corte
  * de día a noche era un fundido sin motivo.
@@ -133,22 +133,43 @@ export function juncos(semilla: number, cantidad: number, lado: 1 | -1): Junco[]
 }
 
 /**
- * Dónde se sienta Angie, en unidades del dibujo a la derecha del centro: el borde de la meseta,
- * justo donde la colina empieza a caer. Más afuera la ladera pasa de 20° y sentada se resbalaría.
+ * De dónde arranca Angie, en unidades del dibujo a la derecha del centro: el borde de la meseta,
+ * justo donde la colina empieza a caer. Más afuera la ladera pasa de 20° y arrancaría torcida.
+ * Camina hasta la piedra, que está en el centro.
  */
-export const ASIENTO = 380;
+export const PARTIDA = 380;
 
 /**
- * Adónde llega de verdad. `libre` es lo que deja el borde de la pantalla: en una angosta, donde ella
- * ocupa casi todo el ancho, se sienta casi donde está.
+ * De dónde arranca de verdad. `libre` es lo que deja el borde de la pantalla: en una angosta, donde
+ * ella ocupa casi todo el ancho, ya está casi en la piedra.
  */
-export function asientoEnLaColina(libre: number): number {
-  return limitar(libre, 0, ASIENTO);
+export function partidaEnLaColina(libre: number): number {
+  return limitar(libre, 0, PARTIDA);
 }
 
 /** Cuánto baja el piso a `dx` del centro: lo que hay que bajarla para que siga pisando la colina. */
 export function caidaDeLaColina(dx: number, alto = alturaDeColina): number {
   return alto(ANCHO / 2 + dx) - alto(ANCHO / 2);
+}
+
+/**
+ * Cuánto bajarla parada o caminando en `dx`, con los pies a `medio` del centro de cada lado y el
+ * cuerpo girado `inclina` grados: hasta que el pie más bajo toque el piso. Con el piso bajo el centro
+ * de los pies, en la ladera el pie de abajo quedaba en el aire. El de arriba queda un poco delante
+ * del borde, y eso se lee como más cerca, no como hundido.
+ */
+export function bajadaParaPisar(
+  dx: number,
+  medio: number,
+  inclina: number,
+  alto = alturaDeColina,
+): number {
+  const giro = Math.sin((inclina * Math.PI) / 180) * medio;
+  return Math.max(
+    caidaDeLaColina(dx - medio, alto) + giro,
+    caidaDeLaColina(dx, alto),
+    caidaDeLaColina(dx + medio, alto) - giro,
+  );
 }
 
 /** La pendiente del piso a `dx` del centro, en grados (positivo: baja hacia la derecha). */
@@ -270,6 +291,8 @@ const T = {
   antesDeMirar: 700,
   antesDeCaminar: 1200,
   antesDeSentarse: 380,
+  /** Si tocaron para entrar en camino: lo que tarda en acomodarse antes de que le llegue la idea. */
+  acomodarse: 500,
   idea: 240,
   /** Lo que tarda cada pensamiento: "Ellos ya están aquí…" y después "La hora ha llegado…". */
   presentir: 2300,
@@ -292,6 +315,8 @@ const CADENCIA = 1.6;
 /** Cuánto de la pendiente acompaña su cuerpo: caminando apenas, sentada se acomoda a la ladera. */
 const INCLINA_CAMINANDO = 0.25;
 const INCLINA_SENTADA = 0.45;
+/** Del centro al borde de afuera de cada pie, en unidades del dibujo de Angie (1080 de lado). */
+const PIES_A_CADA_LADO = 110;
 
 const COLORES_DE_LUZ = ['#ff5fa8', '#ffc65c', '#ffffff', '#ff8ac9'];
 
@@ -303,15 +328,15 @@ export interface InicioAngie {
 
 /** Lo que la escena le pide al cuerpo de Angie. La escena la lleva; el paso y la pose son de ella. */
 export interface AngieDeLaColina {
-  caminar(fase: number, apertura?: number): void;
+  caminar(fase: number, apertura?: number, rumbo?: 1 | -1): void;
   sentarse(): void;
   pararse(): void;
 }
 
 /**
- * Le da vida a la escena ya pintada: Angie camina hasta el borde y se sienta, tocar el cielo o la
- * colina deja su rastro y la sacude (vía `emitirImpacto`, el mismo golpe que usa todo el recorrido),
- * y `despedir` corre la salida.
+ * Le da vida a la escena ya pintada: Angie camina hasta la piedra del centro y se sienta, tocar el
+ * cielo o la colina deja su rastro y la sacude (vía `emitirImpacto`, el mismo golpe que usa todo el
+ * recorrido), y `despedir` corre la salida.
  */
 export function initInicioAngie(host: HTMLElement, cuerpo?: AngieDeLaColina): InicioAngie {
   const encontrada = host.querySelector<HTMLElement>('.tusi__overlay');
@@ -323,6 +348,8 @@ export function initInicioAngie(host: HTMLElement, cuerpo?: AngieDeLaColina): In
   const luces = escena.querySelector<HTMLElement>('.ini__luces');
   const animaciones = new Set<Animation>();
   let cerrado = false;
+  /** Ya tocaron para entrar: la escena deja de responder aunque Angie siga caminando. */
+  let yendose = false;
   let musica: Musica | null = null;
   // Lo que se crea a mano no lleva el atributo de encapsulación de Angular: sin él, el CSS del
   // componente no lo alcanza y la luz quedaba como un span sin estilo.
@@ -337,7 +364,7 @@ export function initInicioAngie(host: HTMLElement, cuerpo?: AngieDeLaColina): In
   /** Dónde arrancó el último toque: un arrastre de Angie que termina en otro lado no es entrar. */
   let desde: Punto | null = null;
   const alTocar = (e: PointerEvent): void => {
-    if (e.button !== 0 || escena.classList.contains('ini--saliendo')) return;
+    if (e.button !== 0 || yendose) return;
     desde = { x: e.clientX, y: e.clientY };
     const material = (e.target as Element | null)?.closest<SVGElement>('[data-material]')?.dataset[
       'material'
@@ -368,8 +395,8 @@ export function initInicioAngie(host: HTMLElement, cuerpo?: AngieDeLaColina): In
   };
   escena.addEventListener('click', alClic);
 
-  // Al llegar, Angie mira hacia el borde y camina despacio hasta sentarse donde la colina empieza a
-  // caer. Va con `translate`/`rotate` sueltos porque la despedida anima el `transform` de este mismo
+  // Al llegar, Angie mira hacia la piedra y camina despacio desde la derecha hasta sentarse en ella.
+  // Va con `translate`/`rotate` sueltos porque la despedida anima el `transform` de este mismo
   // elemento.
   const motor = motorDeMuelles();
   const temporizadores = new Set<ReturnType<typeof setTimeout>>();
@@ -384,38 +411,46 @@ export function initInicioAngie(host: HTMLElement, cuerpo?: AngieDeLaColina): In
     Math.max(escena.clientWidth / ANCHO, escena.clientHeight / ALTO) || 1;
   /** Una unidad del dibujo de Angie (1080 de lado), en unidades del paisaje. */
   const deAngie = (): number => (angie ? angie.offsetWidth / 1080 / unidad() : 1);
-  const asiento = (): number =>
-    angie ? asientoEnLaColina(((escena.clientWidth - angie.offsetWidth) / 2 - 24) / unidad()) : 0;
-  const ubicarEn = (el: HTMLElement, x: number, inclinar: number): string => {
+  const partida = (): number =>
+    angie ? partidaEnLaColina(((escena.clientWidth - angie.offsetWidth) / 2 - 24) / unidad()) : 0;
+  /** `medio`: lo que se abren sus pies a cada lado, si está de pie; sentada apoya en la piedra. */
+  const ubicarEn = (el: HTMLElement, x: number, inclinar: number, medio = 0): string => {
     const u = unidad();
-    el.style.translate = `${(x * u).toFixed(1)}px ${(caidaDeLaColina(x) * u).toFixed(1)}px`;
-    const inclina = `${(pendienteDeLaColina(x) * inclinar).toFixed(2)}deg`;
+    const grados = pendienteDeLaColina(x) * inclinar;
+    const bajar = medio > 0 ? bajadaParaPisar(x, medio, grados) : caidaDeLaColina(x);
+    el.style.translate = `${(x * u).toFixed(1)}px ${(bajar * u).toFixed(1)}px`;
+    const inclina = `${grados.toFixed(2)}deg`;
     el.style.rotate = inclina;
     return inclina;
   };
-  /** La piedra está desde el principio en el asiento: Angie camina hacia ella. */
-  const ubicarPiedra = (): void => {
-    if (piedra) ubicarEn(piedra, asiento(), INCLINA_SENTADA);
-  };
-  ubicarPiedra();
+  // La piedra está en el centro desde el principio, con la inclinación que va a tener ella sentada.
+  if (piedra) ubicarEn(piedra, 0, INCLINA_SENTADA);
   const ubicar = (x: number, inclinar: number): void => {
     if (!angie) return;
-    const inclina = ubicarEn(angie, x, inclinar);
+    const dePie = inclinar === INCLINA_CAMINANDO;
+    const inclina = ubicarEn(angie, x, inclinar, dePie ? PIES_A_CADA_LADO * deAngie() : 0);
     // La nube del pensamiento la desinclina: un texto torcido se leía como un error.
     angie.style.setProperty('--inclina', inclina);
   };
+  // Mientras no arranca, espera parada en la partida, ya a la vista.
+  ubicar(partida(), INCLINA_CAMINANDO);
 
-  let paseo: { t: number; dura: number; hasta: number; pasos: number; apertura: number } | null =
+  /** Camina de `desde` (a la derecha) hasta la piedra, en 0. */
+  let paseo: { t: number; dura: number; desde: number; pasos: number; apertura: number } | null =
     null;
-  /** `en camino` va desde que gira la cabeza hasta que se sienta, pausa en el borde incluida. */
+  /** `en camino` va desde que gira la cabeza hasta que se sienta, pausa ante la piedra incluida. */
   let llegada: 'espera' | 'en camino' | 'sentada' = 'espera';
   let arranco = false;
-  const sentarse = (x: number): void => {
+  /** Lo que espera a que se siente: la despedida no arranca con ella en camino. */
+  const alSentarse = new Set<() => void>();
+  const sentarse = (): void => {
     paseo = null;
     llegada = 'sentada';
-    ubicar(x, INCLINA_SENTADA);
+    ubicar(0, INCLINA_SENTADA);
     escena.classList.add('ini--sentada');
     cuerpo?.sentarse();
+    alSentarse.forEach((ok) => ok());
+    alSentarse.clear();
   };
   const aLaVista = (): boolean => !escena.classList.contains('gone');
   const pasear = (dt: number): boolean => {
@@ -427,36 +462,35 @@ export function initInicioAngie(host: HTMLElement, cuerpo?: AngieDeLaColina): In
     // no es más bajo porque con pocos cuadros por segundo (una carga pesada) caminaba en cámara lenta.
     paseo.t += Math.min(dt, 0.25);
     const p = paseo.t / paseo.dura;
-    const x = paseo.hasta * avanceDelPaseo(p);
-    ubicar(x, INCLINA_CAMINANDO);
-    cuerpo?.caminar(0.5 + paseo.pasos * (x / paseo.hasta), paseo.apertura);
+    const hecho = avanceDelPaseo(p);
+    ubicar(paseo.desde * (1 - hecho), INCLINA_CAMINANDO);
+    cuerpo?.caminar(0.5 + paseo.pasos * hecho, paseo.apertura, -1);
     if (p < 1) return true;
     // Llega con las piernas juntas, se queda un instante y recién ahí se sienta.
-    const hasta = paseo.hasta;
     paseo = null;
-    luego(T.antesDeSentarse, () => sentarse(hasta));
+    luego(T.antesDeSentarse, sentarse);
     return false;
   };
   const sacarPaseo = motor.agregar(pasear);
   const arrancar = (): void => {
     if (!angie || cerrado || escena.classList.contains('ini--saliendo')) return;
-    const hasta = asiento();
+    const desde = partida();
     // La zancada del dibujo, pasada al paisaje: el pie apoyado barre justo lo que avanza el cuerpo.
     const largo = zancada() * deAngie();
     // Sin movimiento o sin lugar para un paso: ya sentada. La pausa de la vida de fondo no la frena:
     // el paseo es su llegada, no fondo, y con la pausa recordada aparecía en la piedra sin caminar.
-    if (sinMovimiento() || hasta < largo) {
-      sentarse(hasta);
+    if (sinMovimiento() || desde < largo) {
+      sentarse();
       return;
     }
-    const pasos = pasosDelPaseo(hasta, largo);
+    const pasos = pasosDelPaseo(desde, largo);
     arranco = true;
     paseo = {
       t: 0,
       dura: pasos / CADENCIA / (1 - RAMPA),
-      hasta,
+      desde,
       pasos,
-      apertura: aperturaPara(hasta / pasos / deAngie()),
+      apertura: aperturaPara(desde / pasos / deAngie()),
     };
     motor.despertar();
   };
@@ -468,8 +502,8 @@ export function initInicioAngie(host: HTMLElement, cuerpo?: AngieDeLaColina): In
     if (llegada !== 'espera' || cerrado || !aLaVista()) return;
     if (escena.classList.contains('ini--saliendo')) return;
     llegada = 'en camino';
-    // Primero gira la cabeza hacia el borde y después arranca: decide adónde va antes de ir.
-    luego(T.antesDeMirar, () => cuerpo?.caminar(0.5));
+    // Primero gira la cabeza hacia la piedra y después arranca: decide adónde va antes de ir.
+    luego(T.antesDeMirar, () => cuerpo?.caminar(0.5, undefined, -1));
     luego(T.antesDeCaminar, arrancar);
   };
   // Si la landing se va de vista caminando, el paseo espera (lo frena `pasear`) y sigue al volver.
@@ -484,7 +518,7 @@ export function initInicioAngie(host: HTMLElement, cuerpo?: AngieDeLaColina): In
     if (llegada !== 'en camino' || paseo) return;
     temporizadores.forEach(clearTimeout);
     temporizadores.clear();
-    if (arranco) sentarse(asiento());
+    if (arranco) sentarse();
     else {
       llegada = 'espera';
       cuerpo?.pararse();
@@ -492,15 +526,15 @@ export function initInicioAngie(host: HTMLElement, cuerpo?: AngieDeLaColina): In
   });
   vigia.observe(escena, { attributes: true, attributeFilter: ['class'] });
   llegar();
-  // Un cambio de tamaño cambia cuánto mide el camino en píxeles, no el camino: el paseo sigue hacia
-  // el asiento nuevo sin saltar, y sentada se reacomoda en él.
+  // Un cambio de tamaño cambia cuánto mide el camino en píxeles, no el camino: el paseo sigue desde
+  // la partida nueva sin saltar, y sentada se reacomoda en la piedra.
   const alRedimensionar = (): void => {
     if (escena.classList.contains('ini--saliendo')) return;
-    ubicarPiedra();
     if (paseo) {
-      paseo.hasta = Math.max(asiento(), 1);
-      paseo.apertura = aperturaPara(paseo.hasta / paseo.pasos / deAngie());
-    } else if (llegada === 'sentada') sentarse(asiento());
+      paseo.desde = Math.max(partida(), 1);
+      paseo.apertura = aperturaPara(paseo.desde / paseo.pasos / deAngie());
+    } else if (llegada === 'sentada') sentarse();
+    else if (!arranco) ubicar(partida(), INCLINA_CAMINANDO);
   };
   window.addEventListener('resize', alRedimensionar);
 
@@ -519,15 +553,24 @@ export function initInicioAngie(host: HTMLElement, cuerpo?: AngieDeLaColina): In
   const esperar = (ms: number): Promise<void> => new Promise((ok) => setTimeout(ok, ms));
 
   async function despedir(): Promise<void> {
+    if (yendose) return;
+    yendose = true;
+    // Si la tocan en camino, termina el paseo y se sienta: la idea le llega en la piedra. Frenarla
+    // donde estaba cortaba su llegada a la mitad.
+    if (llegada !== 'sentada') {
+      if (sinMovimiento()) sentarse();
+      else {
+        llegar();
+        await new Promise<void>((ok) => alSentarse.add(ok));
+        // Que termine de bajar a la piedra: la idea encendida a mitad de sentarse se perdía.
+        await esperar(T.acomodarse);
+        if (cerrado) return;
+      }
+    }
     escena.classList.add('ini--saliendo');
-    // Si la tocan en camino, se queda donde está, parada: la idea le llega ahí.
     temporizadores.forEach(clearTimeout);
     temporizadores.clear();
     vigia.disconnect();
-    if (llegada !== 'sentada') {
-      paseo = null;
-      cuerpo?.pararse();
-    }
     if (sinMovimiento() || !angie || !luces) return;
     // El toque abrió el audio: la música acompaña desde los pensamientos hasta que cae la noche.
     const salida = sonido().salida();
@@ -759,6 +802,9 @@ export function initInicioAngie(host: HTMLElement, cuerpo?: AngieDeLaColina): In
     despedir,
     dispose(): void {
       cerrado = true;
+      // Una despedida que esperaba a que se siente termina acá, sin quedar colgada.
+      alSentarse.forEach((ok) => ok());
+      alSentarse.clear();
       musica?.apagar();
       vigia.disconnect();
       escena.removeEventListener('pointerdown', alTocar);

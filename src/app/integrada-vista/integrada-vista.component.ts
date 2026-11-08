@@ -229,7 +229,7 @@ export class IntegradaVistaComponent {
     // verdad: si corriera detrás durante esos minutos, llegaría terminada y se comería su propio
     // premio, que es ver aparecer el círculo.
     const inicio = initInicioAngie(this.host, {
-      caminar: (fase, apertura) => this.angieInicio()?.caminar(fase, apertura),
+      caminar: (fase, apertura, rumbo) => this.angieInicio()?.caminar(fase, apertura, rumbo),
       sentarse: () => this.angieInicio()?.sentarse(),
       pararse: () => this.angieInicio()?.pararse(),
     });

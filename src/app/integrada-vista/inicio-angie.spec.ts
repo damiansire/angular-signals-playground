@@ -1,11 +1,11 @@
 import { IMPACTO } from '../libs/muelle';
 import {
   ANCHO,
-  ASIENTO,
+  PARTIDA,
   alturaDeColina,
-  asientoEnLaColina,
   avanceDelPaseo,
   azar,
+  bajadaParaPisar,
   caidaDeLaColina,
   caminoDeColina,
   dispersion,
@@ -15,6 +15,7 @@ import {
   initInicioAngie,
   juncos,
   matasDePasto,
+  partidaEnLaColina,
   pasosDelPaseo,
   pendienteDeLaColina,
 } from './inicio-angie';
@@ -63,26 +64,45 @@ describe('inicio-angie', () => {
     });
   });
 
-  describe('el paseo hasta el borde', () => {
-    it('se sienta donde la meseta empieza a caer, no en la ladera empinada', () => {
-      expect(caidaDeLaColina(ASIENTO)).toBeGreaterThan(20);
-      expect(caidaDeLaColina(ASIENTO)).toBeLessThan(60);
-      expect(pendienteDeLaColina(ASIENTO)).toBeGreaterThan(5);
-      expect(pendienteDeLaColina(ASIENTO)).toBeLessThan(22);
+  describe('el paseo hasta la piedra', () => {
+    it('arranca donde la meseta empieza a caer, no en la ladera empinada', () => {
+      expect(caidaDeLaColina(PARTIDA)).toBeGreaterThan(20);
+      expect(caidaDeLaColina(PARTIDA)).toBeLessThan(60);
+      expect(pendienteDeLaColina(PARTIDA)).toBeGreaterThan(5);
+      expect(pendienteDeLaColina(PARTIDA)).toBeLessThan(22);
     });
 
-    it('no pasa del borde de la meseta ni de lo que deja la pantalla', () => {
-      expect(asientoEnLaColina(5000)).toBe(ASIENTO);
-      expect(asientoEnLaColina(120)).toBe(120);
-      expect(asientoEnLaColina(-30)).toBe(0);
+    it('no arranca más allá del borde de la meseta ni de lo que deja la pantalla', () => {
+      expect(partidaEnLaColina(5000)).toBe(PARTIDA);
+      expect(partidaEnLaColina(120)).toBe(120);
+      expect(partidaEnLaColina(-30)).toBe(0);
     });
 
-    it('sigue pisando la colina: en el centro no baja y en el asiento baja con la ladera', () => {
+    it('sigue pisando la colina: en la piedra no baja y en la partida baja con la ladera', () => {
       expect(caidaDeLaColina(0)).toBe(0);
-      expect(caidaDeLaColina(ASIENTO)).toBeCloseTo(
-        alturaDeColina(ANCHO / 2 + ASIENTO) - alturaDeColina(ANCHO / 2),
+      expect(caidaDeLaColina(PARTIDA)).toBeCloseTo(
+        alturaDeColina(ANCHO / 2 + PARTIDA) - alturaDeColina(ANCHO / 2),
         6,
       );
+    });
+
+    it('en la ladera pisa con el pie de abajo: ninguno queda en el aire', () => {
+      const medio = 40;
+      const inclina = pendienteDeLaColina(PARTIDA) * 0.25;
+      const bajar = bajadaParaPisar(PARTIDA, medio, inclina);
+      const giro = Math.sin((inclina * Math.PI) / 180) * medio;
+      // Cuánto le falta a cada pie para tocar el piso: nunca positivo (en el aire), y uno en cero.
+      const aire = [
+        caidaDeLaColina(PARTIDA - medio) - (bajar - giro),
+        caidaDeLaColina(PARTIDA + medio) - (bajar + giro),
+      ];
+      expect(Math.max(...aire)).toBeCloseTo(0, 6);
+      expect(bajar).toBeGreaterThan(caidaDeLaColina(PARTIDA));
+    });
+
+    it('en el llano pisa igual que siempre', () => {
+      const llano = (): number => 790;
+      expect(bajadaParaPisar(100, 40, 0, llano)).toBe(0);
     });
 
     it('arranca y frena suave, sin volver atrás', () => {
@@ -309,23 +329,59 @@ describe('inicio-angie', () => {
         return { host, escena, angie };
       }
 
+      it('arranca a la derecha, ya a la vista, y camina hacia la izquierda', async () => {
+        const { host, angie } = caminando();
+        const rumbos: (number | undefined)[] = [];
+        const cuerpo = {
+          caminar: (_f: number, _a?: number, rumbo?: 1 | -1) => rumbos.push(rumbo),
+          sentarse: () => undefined,
+          pararse: () => undefined,
+        };
+        cerrar.push(initInicioAngie(host, cuerpo).dispose);
+        const partida = x(angie);
+        expect(partida).toBeGreaterThan(0);
+
+        await hasta(() => x(angie) < partida);
+
+        expect(x(angie)).toBeLessThan(partida);
+        expect(rumbos.length).toBeGreaterThan(0);
+        expect(rumbos.every((r) => r === -1)).toBeTrue();
+      });
+
+      it('si tocan para entrar en camino, sigue hasta la piedra antes de despedirse', async () => {
+        const { host, escena, angie } = caminando();
+        const inicio = initInicioAngie(host);
+        cerrar.push(inicio.dispose);
+        const partida = x(angie);
+        await hasta(() => x(angie) < partida);
+
+        void inicio.despedir();
+        const alTocar = x(angie);
+        await hasta(() => x(angie) < alTocar);
+
+        expect(x(angie)).toBeLessThan(alTocar);
+        expect(escena.classList).not.toContain('ini--saliendo');
+      });
+
       it('con la pausa de fondo recordada igual camina', async () => {
         const { host, escena, angie } = caminando();
         host.classList.add('fondo-en-pausa');
         cerrar.push(initInicioAngie(host).dispose);
+        const partida = x(angie);
 
-        await hasta(() => x(angie) > 0);
+        await hasta(() => x(angie) < partida);
         const primerTramo = x(angie);
-        await hasta(() => x(angie) > primerTramo);
+        await hasta(() => x(angie) < primerTramo);
 
-        expect(x(angie)).toBeGreaterThan(primerTramo);
+        expect(x(angie)).toBeLessThan(primerTramo);
         expect(escena.classList).not.toContain('ini--sentada');
       });
 
       it('si la landing se va de vista caminando, al volver sigue desde donde quedó', async () => {
         const { host, escena, angie } = caminando();
         cerrar.push(initInicioAngie(host).dispose);
-        await hasta(() => x(angie) > 0);
+        const partida = x(angie);
+        await hasta(() => x(angie) < partida);
 
         escena.classList.add('gone');
         await dormir(50);
@@ -335,8 +391,8 @@ describe('inicio-angie', () => {
         expect(escena.classList).not.toContain('ini--sentada');
 
         escena.classList.remove('gone');
-        await hasta(() => x(angie) > alIrse);
-        expect(x(angie)).toBeGreaterThan(alIrse);
+        await hasta(() => x(angie) < alIrse);
+        expect(x(angie)).toBeLessThan(alIrse);
         expect(escena.classList).not.toContain('ini--sentada');
       });
     });
