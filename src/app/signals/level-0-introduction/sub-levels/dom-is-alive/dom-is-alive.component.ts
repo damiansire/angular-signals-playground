@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, signal } from '@angular/core';
+import { Component, ChangeDetectionStrategy, computed, signal } from '@angular/core';
 import {
   DomMutation,
   DomNodeState,
@@ -11,6 +11,7 @@ import { PaginaDelManualComponent } from '../../manual/pagina-del-manual.compone
 import { EscenaVivoComponent } from '../../manual/escena-vivo.component';
 import { DOM_ALIVE_SYSTEM } from '../../introduction-systems';
 import { conCortes } from '../../../../libs/cortes-de-codigo';
+import { siguienteSinTocar } from '../../manual/guia.logica';
 
 @Component({
   selector: 'app-dom-is-alive',
@@ -30,11 +31,21 @@ export class DomIsAliveComponent {
   protected readonly lastTouched = signal<string | null>(null);
   // Se incrementa en cada corrida para re-disparar el "ping" del nodo aunque toques el mismo.
   protected readonly runId = signal(0);
+  private readonly corridas = signal<readonly string[]>([]);
+  /** La mano lleva por las tres líneas, de arriba hacia abajo. */
+  protected readonly guia = computed(() => {
+    const id = siguienteSinTocar(
+      this.mutations.map((m) => m.id),
+      this.corridas(),
+    );
+    return id === null ? null : `[data-guia="${id}"]`;
+  });
 
   protected run(mutation: DomMutation): void {
     this.dom.set(applyMutation(this.dom(), mutation));
     this.lastTouched.set(mutation.targetId);
     this.runId.update((n) => n + 1);
+    this.corridas.update((ids) => [...ids, mutation.id]);
   }
 
   protected reset(): void {

@@ -1,29 +1,23 @@
-<app-pagina-del-manual>
+<app-pagina-del-manual [guia]="guia()" [llena]="true">
   <p hacer class="htt-hacer">Tocá un tag del código.</p>
-  <button hacer class="htt-play" (click)="playParse()" [disabled]="parsePlaying()">
-    {{ parsePlaying() ? 'Leyendo…' : 'Leer el HTML' }}
-  </button>
 
-  <app-two-column-layout demo class="htt" title="">
+  <!-- El código y el árbol, uno al lado del otro y con el alto de la mesa: el árbol crece hacia el
+       código y cada tag tocado tira su conector hasta su nodo. -->
+  <div demo class="htt">
+    <app-code
+      class="htt-codigo"
+      textSize="text-xl"
+      (codeClick)="codeClickHandler($event)"
+      [htmlCode]="htmlCode"
+    ></app-code>
     <app-tree
+      class="htt-arbol"
       [nodesToShow]="nodesToShow()"
       [htmlCode]="htmlCode"
       [mirror]="true"
       (viewChanged)="followTick()"
-      right
     ></app-tree>
-    <app-code
-      textSize="text-xl"
-      (codeClick)="codeClickHandler($event)"
-      [htmlCode]="htmlCode"
-      left
-    ></app-code>
-    <svg
-      #overlay
-      overlay
-      class="pointer-events-none absolute inset-0 h-full w-full"
-      aria-hidden="true"
-    >
+    <svg #overlay class="htt-conectores" aria-hidden="true">
       @for (line of connectors(); track line.id) {
         <path
           class="connector"
@@ -38,7 +32,7 @@
         />
       }
     </svg>
-  </app-two-column-layout>
+  </div>
 
   <app-escena-arbol escena [reveladas]="reveladas()" [sano]="sano()" />
 

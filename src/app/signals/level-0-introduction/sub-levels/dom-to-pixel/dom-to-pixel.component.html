@@ -1,4 +1,4 @@
-<app-pagina-del-manual>
+<app-pagina-del-manual [guia]="guia()" [respiro]="1800">
   <p hacer class="dtp-hacer">Elegí qué cambiar.</p>
 
   <!-- Sin bajada: el pipeline apaga las etapas que el cambio no dispara, así que decirlo por
@@ -10,6 +10,7 @@
           class="dtp-btn"
           [class.dtp-active]="selected().kind === demo.kind"
           [attr.aria-pressed]="selected().kind === demo.kind"
+          [attr.data-guia]="demo.kind"
           (click)="pick(demo)"
         >
           {{ demo.label }}

@@ -34,7 +34,14 @@ export class OldChangeDetectionComponent {
   /** La última llamada, para la lámina: la de la demo o la del desafío. */
   protected readonly llamada = signal<Llamada | null>(null);
 
+  private readonly tocoUnaApi = signal(false);
+  /** Con una alcanza: cualquier API parcheada prende el árbol entero. */
+  protected readonly guia = computed(() =>
+    this.tocoUnaApi() ? null : `[data-guia="${this.patchedApis[0]}"]`,
+  );
+
   protected trigger(api: string): void {
+    this.tocoUnaApi.set(true);
     this.lastTrigger.set(api);
     this.swept.set(true);
     this.llamar(api, true);

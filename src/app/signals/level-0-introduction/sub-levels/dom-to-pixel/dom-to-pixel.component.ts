@@ -11,6 +11,7 @@ import { ManipulableSystemComponent } from '../../../../components-atom/manipula
 import { PaginaDelManualComponent } from '../../manual/pagina-del-manual.component';
 import { EscenaCostoComponent } from '../../manual/escena-costo.component';
 import { DOM_PIXEL_SYSTEM } from '../../introduction-systems';
+import { siguienteSinTocar } from '../../manual/guia.logica';
 
 interface MutationDemo {
   kind: MutationKind;
@@ -93,8 +94,16 @@ export class DomToPixelComponent {
     return `${fila(salto.desde)} / ${fila(salto.hasta) + 1}`;
   });
 
+  private readonly elegidos = signal<readonly MutationKind[]>([]);
+  /** La mano recorre los otros tres cambios, del más barato al más caro: el texto ya está elegido. */
+  protected readonly guia = computed(() => {
+    const kind = siguienteSinTocar(['transform', 'color', 'geometry'], this.elegidos());
+    return kind === null ? null : `[data-guia="${kind}"]`;
+  });
+
   protected pick(demo: MutationDemo): void {
     this.selected.set(demo);
+    this.elegidos.update((kinds) => [...kinds, demo.kind]);
   }
 
   protected stageOn(id: Station['id']): boolean {

@@ -1,4 +1,4 @@
-<app-pagina-del-manual>
+<app-pagina-del-manual [guia]="guia()" [respiro]="900">
   <p hacer class="msp-hacer">Sumá y mirá qué queda viejo.</p>
 
   <!-- Sin bajada: con el handler incompleto una de las tres vistas se marca "quedó viejo" sola.
@@ -17,6 +17,7 @@
         class="msp-tab"
         [class.msp-on]="handlerComplete()"
         [attr.aria-pressed]="handlerComplete()"
+        data-guia="completo"
         (click)="setComplete(true)"
       >
         handler completo
@@ -30,7 +31,9 @@
         >@for (r of renglones(); track $index) {<span class="msp-linea" [class]="r.clase" [innerHTML]="r.html"></span>}</pre>
 
         <div class="msp-actions">
-          <button class="msp-inc" (click)="increment()">increment()</button>
+          <button class="msp-inc" [attr.data-cuenta]="count()" (click)="increment()">
+            increment()
+          </button>
           <span class="msp-lines"
             >sync a mano <strong>{{ syncLines() }}</strong></span
           >

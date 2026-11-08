@@ -1,4 +1,4 @@
-<app-pagina-del-manual>
+<app-pagina-del-manual [guia]="guia()" [respiro]="700">
   <p hacer class="dia-hacer">Corré una línea.</p>
 
   <!-- Las líneas son botones con el querySelector a la vista, y el nodo que tocan parpadea. Correr
@@ -6,7 +6,7 @@
   <section demo class="dia">
     <div class="dia-console">
       @for (m of mutations; track m.id) {
-        <button class="dia-run" (click)="run(m)">
+        <button class="dia-run" [attr.data-guia]="m.id" (click)="run(m)">
           <span class="dia-run-icon" aria-hidden="true">▸</span>
           <code [innerHTML]="cortes(m.code)"></code>
         </button>

@@ -11,6 +11,7 @@ import { PaginaDelManualComponent } from '../../manual/pagina-del-manual.compone
 import { EscenaAManoComponent, type LugarDelPanel } from '../../manual/escena-a-mano.component';
 import { MANUAL_SYNC_SYSTEM } from '../../introduction-systems';
 import { conCortes } from '../../../../libs/cortes-de-codigo';
+import { siguienteSinTocar } from '../../manual/guia.logica';
 
 const GLIFOS: Record<SpotId, string> = { value: '#', mult2: '×2', mult3: '×3' };
 
@@ -78,12 +79,31 @@ export class ManualSyncPainComponent {
     })),
   );
 
+  /**
+   * La mano: dos sumas con el handler incompleto (una vista queda vieja), el completo, y una suma
+   * más con él (ya no queda ninguna). El botón lleva la cuenta, así cada suma es un toque distinto.
+   */
+  private readonly pasos = signal<readonly string[]>([]);
+  protected readonly guia = computed(() => {
+    const paso = siguienteSinTocar(['suma-1', 'suma-2', 'completo', 'suma-3'], this.pasos());
+    if (paso === null) return null;
+    return paso === 'completo'
+      ? '[data-guia="completo"]'
+      : `.msp-inc[data-cuenta="${this.count()}"]`;
+  });
+
   protected increment(): void {
     this.count.update((n) => n + 1);
+    const pasos = this.pasos();
+    const suma = this.handlerComplete()
+      ? 'suma-3'
+      : (siguienteSinTocar(['suma-1', 'suma-2'], pasos) ?? 'suma-2');
+    this.pasos.set([...pasos, suma]);
   }
 
   protected setComplete(complete: boolean): void {
     this.handlerComplete.set(complete);
+    if (complete) this.pasos.update((pasos) => [...pasos, 'completo']);
   }
 
   protected isStale(id: SpotId): boolean {

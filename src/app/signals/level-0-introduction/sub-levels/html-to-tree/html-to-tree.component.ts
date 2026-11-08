@@ -1,6 +1,5 @@
 import {
   Component,
-  DestroyRef,
   computed,
   ElementRef,
   effect,
@@ -12,13 +11,13 @@ import {
 import { CodeComponent } from '../../../../components-atom/code/code.component';
 import { CodeClick } from '../../../../components-atom/code/code.interface';
 import { TreeComponent } from '../../../../components/tree/tree.component';
-import { TwoColumnLayoutComponent } from '../../../../layouts/two-column-layout/two-column-layout.component';
 import { getLevelColor } from '../../../../components-draw/node-level-color';
 import { ManipulableSystemComponent } from '../../../../components-atom/manipulable-system/manipulable-system.component';
 import { HTML_TREE_SYSTEM } from '../../introduction-systems';
 import { PaginaDelManualComponent } from '../../manual/pagina-del-manual.component';
 import { EscenaArbolComponent } from '../../manual/escena-arbol.component';
 import { posicionesEnElDocumento } from '../../manual/escenas.logica';
+import { siguienteSinTocar } from '../../manual/guia.logica';
 
 interface ConnectorLine {
   id: string;
@@ -36,7 +35,6 @@ const FOLLOW_WINDOW_MS = 700;
     ManipulableSystemComponent,
     CodeComponent,
     TreeComponent,
-    TwoColumnLayoutComponent,
     PaginaDelManualComponent,
     EscenaArbolComponent,
   ],
@@ -48,8 +46,6 @@ export class HtmlToTreeComponent {
   readonly closingSystem = HTML_TREE_SYSTEM;
   private readonly hostElement: HTMLElement = inject(ElementRef).nativeElement;
   private readonly treeRef = viewChild(TreeComponent);
-  private parseTimer: ReturnType<typeof setTimeout> | null = null;
-  protected readonly parsePlaying = signal(false);
   private readonly overlay = viewChild<ElementRef<SVGSVGElement>>('overlay');
   readonly htmlCode = ` <main> 
      <section> 
@@ -72,6 +68,12 @@ export class HtmlToTreeComponent {
     ),
   );
   protected readonly sano = signal(false);
+  /** La mano señala el primer tag sin tocar, en el orden en que el parser lee el HTML. */
+  protected readonly guia = computed(() => {
+    const orden = (this.treeRef()?.nodesData() ?? []).map((node) => node.id);
+    const siguiente = siguienteSinTocar(orden, this.nodesToShow());
+    return siguiente === null ? null : `[data-el-id="${CSS.escape(siguiente)}"]`;
+  });
 
   constructor() {
     // Recálculo inmediato (no espera al próximo frame) más una ventana breve de
@@ -94,8 +96,6 @@ export class HtmlToTreeComponent {
       let rafId = requestAnimationFrame(loop);
       onCleanup(() => cancelAnimationFrame(rafId));
     });
-
-    inject(DestroyRef).onDestroy(() => this.stopParse());
   }
 
   codeClickHandler(event: CodeClick) {
@@ -110,63 +110,6 @@ export class HtmlToTreeComponent {
   }
   removeNode(id: string) {
     this.nodesToShow.update((currentNodes) => currentNodes.filter((node) => node !== id));
-  }
-
-  /** "Leer el HTML": revela los nodos en orden de documento, como si el parser recorriera el
-   *  texto. One-shot con timer (no rAF perpetuo); el cleanup lo corta si se desmonta a mitad. */
-  protected playParse(): void {
-    const steps = this.revealStepCount();
-    if (steps === 0) return;
-    this.stopParse();
-    this.revealTo(0);
-    this.parsePlaying.set(true);
-    let revealed = 0;
-    const tick = (): void => {
-      revealed++;
-      this.revealTo(revealed);
-      if (revealed < steps) {
-        this.parseTimer = setTimeout(tick, 320);
-      } else {
-        this.parseTimer = null;
-        this.parsePlaying.set(false);
-      }
-    };
-    this.parseTimer = setTimeout(tick, 320);
-  }
-
-  private stopParse(): void {
-    if (this.parseTimer !== null) {
-      clearTimeout(this.parseTimer);
-      this.parseTimer = null;
-    }
-    this.parsePlaying.set(false);
-  }
-
-  /** Total de tags revelables = nodos del árbol (en orden de documento). Lo usa `playParse` para
-   *  saber cuántos pasos revelar al "leer el HTML" de corrido. */
-  revealStepCount(): number {
-    return this.treeRef()?.nodesData().length ?? 0;
-  }
-
-  /**
-   * Deja revelados exactamente los primeros `n` tags (orden de documento), clickeando los que
-   * falten y des-clickeando los que sobren. Usa el click REAL sobre el elemento del código, así el
-   * efecto es idéntico a hacerlo a mano: resalta el tag, agrega/saca el nodo y su conector.
-   * Idempotente (sincroniza contra el estado actual), robusto ante clicks manuales previos.
-   */
-  revealTo(n: number): void {
-    const tree = this.treeRef();
-    if (!tree) return;
-    const ordered = tree.nodesData().map((node) => node.id);
-    const shown = new Set(this.nodesToShow());
-    ordered.forEach((id, i) => {
-      const wantShown = i < n;
-      if (wantShown === shown.has(id)) return;
-      const el = this.hostElement.querySelector<HTMLElement>(`[data-el-id="${CSS.escape(id)}"]`);
-      if (el) el.click();
-      else if (wantShown) this.addNode(id);
-      else this.removeNode(id);
-    });
   }
 
   protected followTick() {

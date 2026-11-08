@@ -1,4 +1,4 @@
-<app-pagina-del-manual>
+<app-pagina-del-manual [guia]="guia()">
   <p hacer class="ocd-hacer">Tocá una API.</p>
 
   <!-- Sin bajada: tocás una API parcheada y el árbol entero se prende. Eso ES "los reviso a
@@ -7,7 +7,7 @@
     <!-- El rótulo visible salía sobrando: el grupo ya se anuncia por su aria-label. -->
     <div class="ocd-apis" role="group" aria-label="APIs que Zone.js parchea">
       @for (api of patchedApis; track api) {
-        <button class="ocd-api" (click)="trigger(api)">{{ api }}</button>
+        <button class="ocd-api" [attr.data-guia]="api" (click)="trigger(api)">{{ api }}</button>
       }
     </div>
 

@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, signal } from '@angular/core';
+import { Component, ChangeDetectionStrategy, computed, signal } from '@angular/core';
 import {
   CD_NODES,
   CD_EDGES,
@@ -56,7 +56,12 @@ export class SignalsChangeDetectionComponent {
   /** El último cambio de valor, para la lámina: el de la demo o el del desafío. */
   protected readonly aviso = signal<Aviso | null>(null);
 
+  private readonly cambioUnaVez = signal(false);
+  /** Hasta el primer cambio: reiniciar no vuelve a traer la mano. */
+  protected readonly guia = computed(() => (this.cambioUnaVez() ? null : '.scd-change'));
+
   protected changeSignal(): void {
+    this.cambioUnaVez.set(true);
     this.changed.set(true);
     this.avisar(true);
   }

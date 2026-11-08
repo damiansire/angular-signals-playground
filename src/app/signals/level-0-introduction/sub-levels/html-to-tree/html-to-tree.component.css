@@ -30,35 +30,31 @@
   margin: 0;
 }
 
-/* Leer de corrido es la otra forma de hacer el paso: va al lado de la consigna, no suelto bajo el
-   título, donde no se sabía de qué era. */
-.htt-play {
-  font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
-  font-size: 0.85rem;
-  padding: 0.5rem 1rem;
-  border-radius: 0.6rem;
-  border: 1px solid #17140f;
-  background: #17140f;
-  color: #ffffff;
-  cursor: pointer;
-  transition:
-    opacity 0.15s,
-    transform 0.06s;
+/* El código a su ancho y el árbol con todo lo demás, los dos con el alto de la mesa. Los conectores
+   van encima de los dos, sin atrapar toques. */
+.htt {
+  position: relative;
+  flex: 1 0 auto;
+  display: grid;
+  grid-template-columns: minmax(0, auto) minmax(16rem, 1fr);
+  gap: clamp(1.5rem, 3vw, 3rem);
+  min-height: 18rem;
 }
-
-.htt-play:active {
-  transform: translateY(1px);
+.htt-codigo,
+.htt-arbol {
+  display: block;
+  min-width: 0;
 }
-
-/* Ocupado se ve ocupado y se lee: con 0.55 el "Leyendo…" quedaba a 2.8:1 sobre la escena. */
-.htt-play:disabled {
-  opacity: 0.7;
-  cursor: default;
+.htt-conectores {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
 }
-
-.htt-play:focus-visible {
-  /* Doble anillo: la tinta da el contraste sobre el crema y el acento queda por dentro. */
-  outline: 2px solid var(--focus-ink);
-  outline-offset: 2px;
-  box-shadow: 0 0 0 2px #e0a13a;
+@media (max-width: 699px) {
+  .htt {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }
