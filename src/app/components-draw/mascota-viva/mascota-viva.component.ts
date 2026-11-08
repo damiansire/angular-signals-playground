@@ -55,25 +55,28 @@ const PALABRAS = {
 };
 
 /**
- * Sentada, de perfil hacia la derecha: otro dibujo del cuerpo (`mv__perfil`), la gema girada con la
- * cara sobre la faceta de adelante, apoyada en el pasto y con las piernas estiradas ladera abajo.
- * Correr solo la cara sobre el cuerpo de frente la deformaba.
+ * Sentada, de perfil hacia la derecha: otro cuerpo (`mv__perfil`), la gema del modelo 3D oficial vista
+ * a 62°, con la cara 2D puesta sobre el visor en perspectiva, apoyada en el pasto y con las piernas
+ * estiradas ladera abajo. Correr la cara o girar el escudo plano la deformaban: de costado, la gema
+ * no es un escudo angosto.
  */
 const SENTADA_BAJA = 80;
 /** Cuánto gira cada pierna hacia adelante; la de atrás un poco menos, para que no se tapen. */
 const SENTADA_ESTIRA_L = 74;
 const SENTADA_ESTIRA_R = 84;
 /**
- * Las caderas van al borde de abajo de la faceta de adelante: de ahí salen las piernas, una detrás de
- * la otra. Más adentro, la gema las tapaba enteras.
+ * Las caderas van al borde de abajo de la gema de perfil: de ahí salen las piernas, una detrás de la
+ * otra. Más adentro, la gema las tapaba enteras.
  */
-const CADERA_L = { x: 270, y: 5 };
-const CADERA_R = { x: 40, y: 10 };
+const CADERA_L = { x: 55, y: 20 };
+const CADERA_R = { x: -150, y: 15 };
 /**
- * La cara de frente puesta sobre la faceta de adelante: angosta por el giro y con el lado de atrás
- * apenas más bajo, que es lo que la hace mirar hacia allá y no estar pegada encima.
+ * La cara 2D sobre el visor de la gema de perfil: la afín que lleva sus dos ojos y su boca a donde
+ * caen los del modelo 3D proyectado. Así se angosta y se tuerce con el visor, sin deformarse.
  */
-const CARA_DE_PERFIL = 'translate(712 596) skewY(-7) scale(0.56 0.96) translate(-556 -612)';
+const CARA_DE_PERFIL = 'matrix(0.4963 -0.1257 0.4052 1.1156 245.8946 10.8242)';
+/** El hombro del brazo cercano va al hueco del costado de la gema, no al del escudo de frente. */
+const HOMBRO_DE_PERFIL = 'translate(152 58)';
 
 type Postura = 'parada' | 'caminando' | 'sentada';
 
@@ -720,12 +723,13 @@ export class MascotaVivaComponent {
       `translate(${n(PIES_X + m.x.x + sentada * 90)} 930) scale(${n(1 - altura + aplastar * 0.5)} ${n(1 - altura * 0.6)}) translate(${-PIES_X} -930)`,
     );
     this.elSombra().nativeElement.style.opacity = n(1 - altura * 0.7);
-    set(this.elBrazoL(), `rotate(${n(m.brazoL.x + p.brazoL)} 286.7 557.42)`);
+    const hombro = perfil ? `${HOMBRO_DE_PERFIL} ` : '';
+    set(this.elBrazoL(), `${hombro}rotate(${n(m.brazoL.x + p.brazoL)} 286.7 557.42)`);
     set(this.elBrazoR(), `rotate(${n(m.brazoR.x + p.brazoR)} 828.71 623.84)`);
     set(this.elFoco(), `rotate(${n(m.foco.x)} 184 470)`);
     const cara = m.cara.x;
     const deCara = perfil ? `${CARA_DE_PERFIL} ` : '';
-    set(this.elCara(), `${deCara}translate(${n(cara * 0.5)} 0)`);
+    set(this.elCara(), `translate(${n(cara * 0.5)} 0)`);
     set(this.elRostro(), `${deCara}translate(${n(cara)} ${n(m.aplastar.x * 18)})`);
     set(this.elOjos(), `translate(${n(m.mirarX.x)} ${n(m.mirarY.x)})`);
     set(this.elCejaL(), `translate(0 ${n(m.cejas.x)}) rotate(${n(m.cejas.x * 0.5)} 463 547)`);

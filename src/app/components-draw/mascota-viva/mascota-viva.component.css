@@ -27,8 +27,8 @@
   fill: rgba(60, 22, 50, 0.22);
 }
 
-/* De frente o de perfil: dos dibujos y no uno deformado. `display` y no opacidad, para que la
-   despedida no desarme también las piezas del que no se ve. */
+/* De perfil cambia el cuerpo entero y el brazo de atrás queda tapado por la gema. `display` y no opacidad,
+   para que la despedida no desarme también las piezas que no se ven. */
 .mv__perfil,
 :host(.mv--perfil) .mv__frente {
   display: none;
