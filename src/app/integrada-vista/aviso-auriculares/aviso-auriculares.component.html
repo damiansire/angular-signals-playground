@@ -36,7 +36,11 @@
   <div class="aa__escena" aria-hidden="true">
     <div class="aa__halo"></div>
     <div class="aa__piso"></div>
-    <app-mascota-viva #angie class="aa__angie" [vidaPropia]="momento() === 'esperando'">
+    <app-mascota-viva
+      #angie
+      class="aa__angie"
+      [vidaPropia]="momento() === 'esperando' && !conSonido()"
+    >
       <!-- La vincha pasa por detrás de la cabeza y apoya en la punta de arriba. -->
       <svg:g mvDetras>
         <defs>
@@ -213,7 +217,13 @@
     <!-- No es un botón a la vista: es la invitación a tocar donde sea. Sigue siendo un botón para el
        teclado y el lector, que no tienen "cualquier lado". -->
     <button #seguir class="aa__seguir" type="button" [attr.aria-label]="llamado">
-      <span class="aa__toque" aria-hidden="true"><i></i><i></i></span>
+      <!-- El cursor hace click y la ola sale de ahí: es la causa de que la frase se mueva. -->
+      <span class="aa__raton" aria-hidden="true">
+        <i></i><i></i>
+        <svg viewBox="0 0 24 30">
+          <path d="M3 2V24L8.6 18.8L12.6 27.6L16.8 25.8L12.8 17.2H20.6Z" />
+        </svg>
+      </span>
       <span class="aa__frase" aria-hidden="true">
         @for (palabra of letras; track $index) {
           <span class="aa__palabra">

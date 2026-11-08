@@ -405,6 +405,35 @@
     translate: 0 -150px;
   }
 }
+/* Mientras espera, la música de sus auriculares se escapa en notas: una por compás, alternando la
+   copa, con el mismo pulso que su movida. Sin sonido no hay música. */
+:host(:not(.aa--probando, .aa--alejandose, .aa--mudo)) .aa__nota {
+  animation: aa-nota-escucha 4.8s ease-out infinite;
+}
+:host(:not(.aa--probando, .aa--alejandose, .aa--mudo)) .aa__notas--derecha .aa__nota {
+  animation-delay: 2.4s;
+}
+:host(:not(.aa--probando, .aa--alejandose, .aa--mudo)) .aa__nota:nth-child(2) {
+  animation-delay: 1.2s;
+}
+:host(:not(.aa--probando, .aa--alejandose, .aa--mudo)) .aa__notas--derecha .aa__nota:nth-child(2) {
+  animation-delay: 3.6s;
+}
+@keyframes aa-nota-escucha {
+  0% {
+    opacity: 0;
+    translate: 0 20px;
+  }
+  8% {
+    opacity: 0.75;
+  }
+  40%,
+  100% {
+    opacity: 0;
+    translate: 0 -120px;
+  }
+}
+
 /* Al final suenan los dos oídos: el halo se enciende con el acorde. */
 :host(.aa--ambos) .aa__halo {
   animation: aa-acorde 0.6s ease-out both;
@@ -424,7 +453,7 @@
 
 /* Peso alto y sombra tintada de noche, como el título de la mañana. */
 .aa__titulo {
-  margin: 0.4rem 0 0;
+  margin: clamp(0.5rem, 1.8vh, 1.1rem) 0 0;
   font-family: var(--font-display, system-ui, sans-serif);
   font-weight: 900;
   font-size: clamp(1.4rem, min(4.6vw, 5.4vh), 2.8rem);
@@ -457,7 +486,8 @@
 .aa__seguir {
   display: inline-block;
   max-width: 100%;
-  margin-top: 0.2rem;
+  /* Aire entre el título y la invitación: pegados se leían como un solo renglón partido. */
+  margin-top: clamp(0.6rem, 2.6vh, 1.6rem);
   padding: 0.35rem 0.8rem;
   border: 0;
   border-radius: 999px;
@@ -513,39 +543,80 @@
     color: #ffd46a;
   }
 }
-.aa__toque {
+/* El cursor hace click al empezar la vuelta de la ola, con el mismo período (2,6 s): la frase se
+   mueve porque él la tocó. Llega, aprieta, suelta dos anillos desde la punta y se aparta. */
+.aa__raton {
   position: relative;
   display: inline-block;
-  width: 0.9em;
-  height: 0.9em;
-  margin-right: 0.55em;
-  vertical-align: -0.08em;
+  width: 1.1em;
+  height: 1.4em;
+  margin-right: 0.5em;
+  vertical-align: -0.3em;
 }
-.aa__toque::before {
-  content: '';
-  position: absolute;
-  inset: 26%;
-  border-radius: 50%;
-  background: #ff5fa8;
-  box-shadow: 0 0 12px #ff5fa8;
-}
-.aa__toque i {
+.aa__raton svg {
   position: absolute;
   inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  transform-origin: 12% 8%;
+  animation: aa-click 2.6s cubic-bezier(0.34, 1.4, 0.64, 1) infinite;
+}
+.aa__raton path {
+  fill: #fff8ec;
+  stroke: #2b1b33;
+  stroke-width: 2.2;
+  stroke-linejoin: round;
+  filter: drop-shadow(0 2px 0 rgba(10, 12, 34, 0.7));
+}
+.aa__raton i {
+  position: absolute;
+  left: -0.35em;
+  top: -0.35em;
+  width: 0.8em;
+  height: 0.8em;
   border: 2px solid #ff8ac9;
   border-radius: 50%;
-  animation: aa-toque 1.6s ease-out infinite;
+  opacity: 0;
+  animation: aa-anillo 2.6s ease-out infinite;
 }
-.aa__toque i + i {
-  animation-delay: 0.8s;
+.aa__raton i + i {
+  animation-delay: 0.14s;
 }
-@keyframes aa-toque {
-  from {
-    scale: 0.4;
+@keyframes aa-click {
+  0% {
+    translate: 0 0;
+    scale: 1;
+  }
+  4% {
+    translate: 0 0;
+    scale: 0.78;
+  }
+  10% {
+    scale: 1;
+  }
+  45% {
+    translate: 0 0;
+  }
+  70% {
+    translate: 0.35em 0.3em;
+  }
+  100% {
+    translate: 0 0;
+  }
+}
+@keyframes aa-anillo {
+  0%,
+  3% {
+    scale: 0.3;
+    opacity: 0;
+  }
+  5% {
     opacity: 1;
   }
-  to {
-    scale: 2.1;
+  30%,
+  100% {
+    scale: 2.4;
     opacity: 0;
   }
 }
@@ -584,14 +655,16 @@
   .aa__onda,
   .aa__destello,
   .aa__letra-ola,
-  .aa__toque i,
+  .aa__raton svg,
+  .aa__raton i,
+  .aa__nota,
   .aa__parlante-ondas path {
     animation: none;
   }
   .aa__onda {
     opacity: 0.35;
   }
-  .aa__toque i {
+  .aa__raton i {
     opacity: 0;
   }
 }

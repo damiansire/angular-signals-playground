@@ -9,6 +9,7 @@ import {
   signal,
   viewChild,
 } from '@angular/core';
+import { TIEMPO_MS } from '../../components-draw/mascota-viva/escuchar';
 import { MascotaVivaComponent } from '../../components-draw/mascota-viva/mascota-viva.component';
 import { sinMovimiento } from '../../libs/muelle';
 import { sonido } from '../../libs/sonido';
@@ -108,7 +109,20 @@ export class AvisoAuricularesComponent {
     // El foco va a la invitación, así Enter alcanza; no si la landing arranca tapada (un deep-link).
     afterNextRender(() => {
       if (!this.host.closest('.gone')) this.seguir().nativeElement.focus({ preventScroll: true });
+      // El primer tiempo llega con el timer y no al montar: si la vista se va enseguida, no queda
+      // un cuadro pedido al motor.
+      this.luego(TIEMPO_MS, () => this.marcarTiempo(0));
     });
+  }
+
+  /**
+   * La música que Angie tiene en los auriculares mientras espera: un tiempo por vez, y ella lo
+   * sigue. Sin sonido no hay música, y vuelve a empezar el compás cuando el sonido vuelve.
+   */
+  private marcarTiempo(tiempo: number): void {
+    if (this.momento() !== 'esperando') return;
+    if (this.conSonido()) this.angie().escuchar(tiempo);
+    this.luego(TIEMPO_MS, () => this.marcarTiempo(this.conSonido() ? tiempo + 1 : 0));
   }
 
   /** Tocar en cualquier lado continúa: buscar un botón era tarea. Menos en el control de sonido. */
@@ -125,9 +139,13 @@ export class AvisoAuricularesComponent {
     if (this.momento() !== 'esperando') return;
     const prende = !this.conSonido();
     this.conSonido.set(prende);
-    // Con sonido salta de contenta; sin él, se le caen las cejas detrás de los lentes.
-    if (prende) this.angie().saltar(0.45);
-    else this.angie().inclinarse(1);
+    // Con sonido salta de contenta; sin él se le corta la música y se le caen las cejas.
+    if (prende) {
+      this.angie().saltar(0.45);
+    } else {
+      this.angie().dejarDeEscuchar();
+      this.angie().inclinarse(1);
+    }
   }
 
   private probar(): void {
@@ -140,6 +158,8 @@ export class AvisoAuricularesComponent {
       this.alejarse(true);
       return;
     }
+    // La prueba le saca su música: ahora escucha de qué lado suena.
+    this.angie().dejarDeEscuchar();
     this.momento.set('probando');
     const vuelca: Record<Lado, () => void> = {
       izquierda: () => this.angie().inclinarse(-1),
