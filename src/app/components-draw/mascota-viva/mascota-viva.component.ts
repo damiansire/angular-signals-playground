@@ -55,10 +55,10 @@ const PALABRAS = {
 };
 
 /**
- * Sentada, de perfil hacia la derecha: otro cuerpo (`mv__perfil`), la gema del modelo 3D oficial vista
- * a 62°, con la cara 2D puesta sobre el visor en perspectiva, apoyada en el pasto y con las piernas
- * estiradas ladera abajo. Correr la cara o girar el escudo plano la deformaban: de costado, la gema
- * no es un escudo angosto.
+ * Sentada, girada hacia la derecha: otro cuerpo (`mv__perfil`), la gema del modelo 3D oficial vista
+ * a 45°, con la cara 2D proyectada punto a punto sobre el visor curvo, apoyada en el pasto y con las
+ * piernas estiradas ladera abajo. Una sola afín para toda la cara la deformaba: el visor es curvo y,
+ * más girada, el ojo de atrás cae donde el visor ya da la espalda.
  */
 const SENTADA_BAJA = 80;
 /** Cuánto gira cada pierna hacia adelante; la de atrás un poco menos, para que no se tapen. */
@@ -70,11 +70,6 @@ const SENTADA_ESTIRA_R = 84;
  */
 const CADERA_L = { x: 55, y: 20 };
 const CADERA_R = { x: -150, y: 15 };
-/**
- * La cara 2D sobre el visor de la gema de perfil: la afín que lleva sus dos ojos y su boca a donde
- * caen los del modelo 3D proyectado. Así se angosta y se tuerce con el visor, sin deformarse.
- */
-const CARA_DE_PERFIL = 'matrix(0.4963 -0.1257 0.4052 1.1156 245.8946 10.8242)';
 /** El hombro del brazo cercano va al hueco del costado de la gema, no al del escudo de frente. */
 const HOMBRO_DE_PERFIL = 'translate(152 58)';
 
@@ -140,6 +135,7 @@ export class MascotaVivaComponent {
   private readonly elFoco = viewChild.required<ElementRef<SVGGElement>>('foco');
   private readonly elCara = viewChild.required<ElementRef<SVGGElement>>('cara');
   private readonly elRostro = viewChild.required<ElementRef<SVGGElement>>('rostro');
+  private readonly elRostroPerfil = viewChild.required<ElementRef<SVGGElement>>('rostroPerfil');
   private readonly elOjos = viewChild.required<ElementRef<SVGGElement>>('ojos');
   private readonly elCejaL = viewChild.required<ElementRef<SVGGElement>>('cejaL');
   private readonly elCejaR = viewChild.required<ElementRef<SVGGElement>>('cejaR');
@@ -728,9 +724,13 @@ export class MascotaVivaComponent {
     set(this.elBrazoR(), `rotate(${n(m.brazoR.x + p.brazoR)} 828.71 623.84)`);
     set(this.elFoco(), `rotate(${n(m.foco.x)} 184 470)`);
     const cara = m.cara.x;
-    const deCara = perfil ? `${CARA_DE_PERFIL} ` : '';
     set(this.elCara(), `translate(${n(cara * 0.5)} 0)`);
-    set(this.elRostro(), `${deCara}translate(${n(cara)} ${n(m.aplastar.x * 18)})`);
+    set(this.elRostro(), `translate(${n(cara)} ${n(m.aplastar.x * 18)})`);
+    // De perfil la cara ya viene proyectada sobre el visor: solo se asoma un poco hacia la mirada.
+    set(
+      this.elRostroPerfil(),
+      `translate(${n(cara * 0.3 + m.mirarX.x * 0.4)} ${n(m.mirarY.x * 0.5)})`,
+    );
     set(this.elOjos(), `translate(${n(m.mirarX.x)} ${n(m.mirarY.x)})`);
     set(this.elCejaL(), `translate(0 ${n(m.cejas.x)}) rotate(${n(m.cejas.x * 0.5)} 463 547)`);
     set(this.elCejaR(), `translate(0 ${n(m.cejas.x)}) rotate(${n(-m.cejas.x * 0.5)} 612 563)`);
