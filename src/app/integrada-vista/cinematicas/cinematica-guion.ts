@@ -74,7 +74,7 @@ export function lineasPara(cine: Cinematica, completo: boolean): readonly LineaC
  * las máquinas (antes el prólogo cambiaba de duración según hubiera voces en español).
  */
 export function relojDe(cine: Cinematica, completo: boolean): readonly LineaEnPantalla[] {
-  return armarReloj(lineasPara(cine, completo), false) as readonly LineaEnPantalla[];
+  return armarReloj(lineasPara(cine, completo)) as readonly LineaEnPantalla[];
 }
 
 export function duracionDe(reloj: readonly LineaEnPantalla[]): number {

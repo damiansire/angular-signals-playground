@@ -19,23 +19,18 @@ describe('ventanaDe', () => {
   it('le da más tiempo a la línea más larga', () => {
     const corta = { id: 'x', quien: 'cap' as const, txt: 'Sí.' };
     const larga = { id: 'y', quien: 'cap' as const, txt: 'Una frase considerablemente más larga.' };
-    expect(ventanaDe(larga, false)).toBeGreaterThan(ventanaDe(corta, false));
-  });
-
-  it('con voz dura más que leyendo, porque hablar es más lento', () => {
-    const larga = { id: 'y', quien: 'cap' as const, txt: 'Una frase considerablemente más larga.' };
-    expect(ventanaDe(larga, true)).toBeGreaterThan(ventanaDe(larga, false));
+    expect(ventanaDe(larga)).toBeGreaterThan(ventanaDe(corta));
   });
 
   it('nunca baja del mínimo, por corta que sea la línea', () => {
-    const minima = ventanaDe({ id: 'x', quien: 'cap', txt: 'No.' }, false);
+    const minima = ventanaDe({ id: 'x', quien: 'cap', txt: 'No.' });
     expect(minima).toBe(PRESUPUESTO.minimo + PRESUPUESTO.entra + PRESUPUESTO.sale);
   });
 
   // El bug: `dur` como valor fijo podía dejar una línea MÁS CORTA de lo que cuesta leerla.
   it('`dur` es un piso: alarga una línea pero no la acorta por debajo de lo legible', () => {
     const conDur = { id: 'x', quien: 'cap' as const, txt: 'Ah.', dur: 6000 };
-    expect(ventanaDe(conDur, false)).toBe(6000);
+    expect(ventanaDe(conDur)).toBe(6000);
 
     const largaConDurChico = {
       id: 'y',
@@ -43,72 +38,63 @@ describe('ventanaDe', () => {
       txt: 'Una frase larga que no entra en medio segundo por más que se lo pida.',
       dur: 500,
     };
-    expect(ventanaDe(largaConDurChico, false)).toBeGreaterThan(500);
+    expect(ventanaDe(largaConDurChico)).toBeGreaterThan(500);
   });
 });
 
 describe('armarReloj', () => {
   it('encadena las líneas en orden y sin pisarse', () => {
-    const reloj = armarReloj([CORTA, OTRA], false);
+    const reloj = armarReloj([CORTA, OTRA]);
     expect(reloj[1].t0).toBeGreaterThanOrEqual(reloj[0].t1);
   });
 
   it('deja el respiro entre turnos', () => {
-    const reloj = armarReloj([CORTA, OTRA], false);
+    const reloj = armarReloj([CORTA, OTRA]);
     expect(reloj[1].t0 - reloj[0].t1).toBe(PRESUPUESTO.respiro);
   });
 
   it('`hueco` abre silencio antes de la línea, además del respiro', () => {
-    const reloj = armarReloj([CORTA, { ...OTRA, hueco: 1000 }], false);
+    const reloj = armarReloj([CORTA, { ...OTRA, hueco: 1000 }]);
     expect(reloj[1].t0 - reloj[0].t1).toBe(PRESUPUESTO.respiro + 1000);
   });
 
   it('`pisa` arranca antes de que termine la anterior, sin sumar respiro', () => {
-    const reloj = armarReloj([CORTA, { ...OTRA, pisa: 500 }], false);
+    const reloj = armarReloj([CORTA, { ...OTRA, pisa: 500 }]);
     expect(reloj[0].t1 - reloj[1].t0).toBe(500);
   });
 
   it('`junto` arranca en el mismo instante que la anterior', () => {
-    const reloj = armarReloj([CORTA, { ...OTRA, junto: true }], false);
+    const reloj = armarReloj([CORTA, { ...OTRA, junto: true }]);
     expect(reloj[1].t0).toBe(reloj[0].t0);
   });
 
   it('después de dos juntas sigue desde la que termina más tarde', () => {
     const larga = { id: 'c', quien: 'naveB' as const, txt: 'Una frase bastante más larga.' };
-    const reloj = armarReloj([CORTA, { ...larga, junto: true }, OTRA], false);
+    const reloj = armarReloj([CORTA, { ...larga, junto: true }, OTRA]);
     expect(reloj[2].t0).toBe(Math.max(reloj[0].t1, reloj[1].t1) + PRESUPUESTO.respiro);
   });
 
   it('el guion real avanza siempre hacia adelante', () => {
-    for (const conVoz of [false, true]) {
-      const reloj = armarReloj(GUION, conVoz);
-      reloj.forEach((linea, i) => {
-        if (i === 0) return;
-        expect(linea.t0)
-          .withContext(`${linea.id} (voz: ${conVoz})`)
-          .toBeGreaterThanOrEqual(reloj[i - 1].t0);
-        expect(linea.t1).withContext(`${linea.id} (voz: ${conVoz})`).toBeGreaterThan(linea.t0);
-      });
-    }
-  });
-
-  it('el modo voz estira la escena entera', () => {
-    const leyendo = armarReloj(GUION, false);
-    const conVoz = armarReloj(GUION, true);
-    const ultima = GUION.length - 1;
-    expect(conVoz[ultima].t1).toBeGreaterThan(leyendo[ultima].t1);
+    const reloj = armarReloj(GUION);
+    reloj.forEach((linea, i) => {
+      if (i === 0) return;
+      expect(linea.t0)
+        .withContext(linea.id)
+        .toBeGreaterThanOrEqual(reloj[i - 1].t0);
+      expect(linea.t1).withContext(linea.id).toBeGreaterThan(linea.t0);
+    });
   });
 });
 
 describe('anclajesDe', () => {
   it('el zoom cae donde termina el grito: el salto ocurre cuando entran, no por reloj', () => {
-    const reloj = armarReloj(GUION, false);
+    const reloj = armarReloj(GUION);
     const grito = reloj.find((l) => l.id === 'anom-grito')!;
     expect(anclajesDe(reloj).zoom).toBe(grito.t1);
   });
 
   it('el choque cae SOBRE "¿quién eres?": el impacto es la respuesta a la pregunta', () => {
-    const reloj = armarReloj(GUION, false);
+    const reloj = armarReloj(GUION);
     const pregunta = reloj.find((l) => l.id === 'reclamo-quien-eres')!;
     const { choque } = anclajesDe(reloj);
     expect(choque).toBeGreaterThan(pregunta.t0);
@@ -116,7 +102,7 @@ describe('anclajesDe', () => {
   });
 
   it('el temblor arranca antes de que alguien pregunte qué pasa', () => {
-    const reloj = armarReloj(GUION, false);
+    const reloj = armarReloj(GUION);
     const alarma = reloj.find((l) => l.id === 'anom-que-pasa')!;
     const { temblor } = anclajesDe(reloj);
     expect(temblor).toBeGreaterThan(0);
@@ -124,7 +110,7 @@ describe('anclajesDe', () => {
   });
 
   it('la fusión cubre todo el diálogo de la voz y termina en el choque', () => {
-    const reloj = armarReloj(GUION, false);
+    const reloj = armarReloj(GUION);
     const { fusion, choque } = anclajesDe(reloj);
     expect(fusion).toBeLessThan(choque);
     const armonia = reloj.find((l) => l.id === 'voz-armonia')!;
@@ -133,31 +119,29 @@ describe('anclajesDe', () => {
   });
 
   it('los momentos van en el orden de la historia', () => {
-    for (const conVoz of [false, true]) {
-      const a = anclajesDe(armarReloj(GUION, conVoz));
-      const secuencia = [
-        a.temblor,
-        a.anomalia,
-        a.zoom,
-        a.caos,
-        a.fusion,
-        a.choque,
-        a.frase,
-        a.orden,
-        a.fin,
-      ];
-      secuencia.forEach((momento, i) => {
-        if (i === 0) return;
-        expect(momento)
-          .withContext(`momento ${i} (voz: ${conVoz})`)
-          .toBeGreaterThan(secuencia[i - 1]);
-      });
-    }
+    const a = anclajesDe(armarReloj(GUION));
+    const secuencia = [
+      a.temblor,
+      a.anomalia,
+      a.zoom,
+      a.caos,
+      a.fusion,
+      a.choque,
+      a.frase,
+      a.orden,
+      a.fin,
+    ];
+    secuencia.forEach((momento, i) => {
+      if (i === 0) return;
+      expect(momento)
+        .withContext(`momento ${i}`)
+        .toBeGreaterThan(secuencia[i - 1]);
+    });
   });
 
   it('avisa fuerte si un anclaje apunta a una línea que ya no existe', () => {
     const sinGrito = GUION.filter((l) => l.id !== 'anom-grito');
-    expect(() => anclajesDe(armarReloj(sinGrito, false))).toThrowError(/anom-grito/);
+    expect(() => anclajesDe(armarReloj(sinGrito))).toThrowError(/anom-grito/);
   });
 });
 
@@ -175,7 +159,7 @@ describe('el guion publicado', () => {
   // es una propiedad de la estructura. Lo que sí puede romperse a mano son las constantes.
   it('ninguna línea puede ir más rápido que el presupuesto, por larga que sea', () => {
     const larguisima: LineaGuion = { id: 'x', quien: 'cap', txt: 'x'.repeat(400), dur: 1200 };
-    const legible = ventanaDe(larguisima, false) - PRESUPUESTO.entra - PRESUPUESTO.sale;
+    const legible = ventanaDe(larguisima) - PRESUPUESTO.entra - PRESUPUESTO.sale;
     expect(largoDe(larguisima) / (legible / 1000)).toBeLessThanOrEqual(PRESUPUESTO.cps + 0.5);
   });
 
@@ -195,13 +179,13 @@ describe('el guion publicado', () => {
   });
 
   it('tiene una sola superposición, que es la interrupción de la exploradora', () => {
-    const reloj = armarReloj(GUION, false);
+    const reloj = armarReloj(GUION);
     const encimadas = reloj.filter((l, i) => i > 0 && l.t0 < reloj[i - 1].t1 && !l.junto);
     expect(encimadas.map((l) => l.id)).toEqual(['casa-apuren']);
   });
 
   it('las dos parejas que gritan a la vez arrancan exactamente juntas', () => {
-    const reloj = armarReloj(GUION, false);
+    const reloj = armarReloj(GUION);
     for (const id of ['dentro-esquiva-ya', 'reclamo-circulos']) {
       const i = reloj.findIndex((l) => l.id === id);
       expect(reloj[i].t0)
@@ -214,7 +198,7 @@ describe('el guion publicado', () => {
   // de su línea. Si la ventana queda corta, el director aprieta el paso hasta un mínimo y ahí empieza
   // a tirar las últimas sílabas: la frase se corta, y eso no se ve, se escucha.
   it('a ritmo de lectura, cada personaje dice su línea entera, sin perder sílabas', () => {
-    for (const linea of armarReloj(GUION, false)) {
+    for (const linea of armarReloj(GUION)) {
       const perfil = PERFILES[linea.quien];
       const entera = planDeBlips(linea.txt, Number.MAX_SAFE_INTEGER, perfil).length;
       const dicha = planDeBlips(linea.txt, linea.t1 - linea.t0, perfil).length;

@@ -42,13 +42,6 @@ export interface LineaEnReloj extends LineaGuion {
 export const PRESUPUESTO = {
   /** Caracteres por segundo leyendo. Por debajo del techo cómodo de subtitulado, que es 17. */
   cps: 16,
-  /**
-   * Ritmo del modo voz, que hoy solo ofrece el Estudio como ensayo. El prólogo del juego ya NO lo
-   * usa: desde que los personajes hablan con los blips del director de sonido (`libs/sonido.ts`),
-   * que se reparten en la ventana que les toque, corre siempre a ritmo de lectura y dura lo mismo
-   * en cualquier máquina. Nació midiendo la voz del sistema, que hablaba más lento que la lectura.
-   */
-  cpsVoz: 8.8,
   /** Una línea de dos palabras igual necesita registrarse antes de irse. */
   minimo: 950,
   entra: 280,
@@ -309,23 +302,20 @@ export function largoDe(linea: LineaGuion): number {
 }
 
 /**
- * Cuánto tiene que estar en pantalla una línea para poder seguirse sin apuro. `conVoz` es el modo
- * de ensayo del Estudio (ver `PRESUPUESTO.cpsVoz`); en el juego la voz ya no cambia el ritmo.
+ * Cuánto tiene que estar en pantalla una línea para poder seguirse sin apuro. Siempre a ritmo de
+ * lectura: los blips del director de sonido se reparten en la ventana que les toque, así que la voz
+ * no cambia el ritmo y el prólogo dura lo mismo en cualquier máquina.
  */
-export function ventanaDe(linea: LineaGuion, conVoz: boolean): number {
-  const cps = conVoz ? PRESUPUESTO.cpsVoz : PRESUPUESTO.cps;
-  const seguir = Math.max(PRESUPUESTO.minimo, Math.round((largoDe(linea) / cps) * 1000));
+export function ventanaDe(linea: LineaGuion): number {
+  const seguir = Math.max(
+    PRESUPUESTO.minimo,
+    Math.round((largoDe(linea) / PRESUPUESTO.cps) * 1000),
+  );
   return Math.max(linea.dur ?? 0, seguir + PRESUPUESTO.entra + PRESUPUESTO.sale);
 }
 
-/**
- * Encadena el guion en una sola pasada y devuelve cada línea con su ventana ya resuelta. Sin
- * `conVoz` va a ritmo de lectura, que es el único que usa el juego.
- */
-export function armarReloj(
-  guion: readonly LineaGuion[] = GUION,
-  conVoz = false,
-): readonly LineaEnReloj[] {
+/** Encadena el guion en una sola pasada y devuelve cada línea con su ventana ya resuelta. */
+export function armarReloj(guion: readonly LineaGuion[] = GUION): readonly LineaEnReloj[] {
   const reloj: LineaEnReloj[] = [];
   let cursor = ARRANQUE;
   guion.forEach((linea, i) => {
@@ -333,7 +323,7 @@ export function armarReloj(
     if (previa && !linea.junto && !linea.pisa) cursor += PRESUPUESTO.respiro;
     cursor += linea.hueco ?? 0;
     const t0 = linea.junto && previa ? previa.t0 : cursor - (linea.pisa ?? 0);
-    const t1 = t0 + ventanaDe(linea, conVoz);
+    const t1 = t0 + ventanaDe(linea);
     reloj.push({ ...linea, t0, t1 });
     cursor = Math.max(cursor, t1);
   });

@@ -458,7 +458,7 @@ export function initPrologoAnomalia(host: HTMLElement, opts: PrologoOpciones): (
   const vozEl = raiz.querySelector<HTMLElement>('.prologo__voz');
   const tituloEl = raiz.querySelector<HTMLElement>('.prologo__titulo');
 
-  const reloj: readonly LineaEnReloj[] = armarReloj(GUION, false);
+  const reloj: readonly LineaEnReloj[] = armarReloj(GUION);
   const T: Anclajes = anclajesDe(reloj);
   const M: Momentos = momentosDe(reloj);
   const linea = (id: string): LineaEnReloj => {
