@@ -52,6 +52,11 @@ export class ManipulableSystemComponent {
    */
   readonly ayuda = input(inject(AYUDA_DE_ANGIE));
   /**
+   * Suelto, sin card que lo cierre (el minijuego del prólogo), la barra es un banco de prueba: las
+   * lecturas en su franja y la acción como el botón principal, que es el paso que confirma.
+   */
+  readonly banco = input(false);
+  /**
    * Cada toque, con el estado que dejó. Quien muestra el desafío afuera de una card (el minijuego del
    * prólogo) arma con esto su propia ayuda: qué hizo el operador elegido.
    */
