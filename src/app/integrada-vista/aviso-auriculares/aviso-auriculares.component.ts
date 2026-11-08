@@ -39,8 +39,11 @@ const BOCA = { x: 526.58, y: 662 };
 const ENCAJA = 0.3;
 /** Cuándo, en la salida, Angie suelta el aire: con la bocanada ya cerrada sobre ella. */
 const SUSPIRA_EN = 0.5;
-/** De qué tan cerca viene la colina: el aviso es un primer plano de la escena. */
-const CERCA = 2.6;
+/**
+ * De qué tan cerca viene la colina: apenas, un paso de cámara. A 2,6× el navegador pintaba solo lo
+ * que se veía al arrancar y, al abrirse, la colina y Angie aparecían cortadas en rectángulos.
+ */
+const CERCA = 1.12;
 /** Hasta dónde se achica el aviso mientras se va: se pierde a lo lejos, no desaparece en su lugar. */
 const LEJOS = 0.3;
 

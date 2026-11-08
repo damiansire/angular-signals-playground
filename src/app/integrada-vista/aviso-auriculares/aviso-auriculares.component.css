@@ -26,36 +26,19 @@
   pointer-events: none;
 }
 
-/* La bocanada: un soplo redondo en la boca de Angie y tres nubes que suben de ella. Todo crece con
-   `--aa-aire`, así al cerrarse converge en la boca. Bordes blandos: es aire, no un recorte. */
+/* La bocanada: un círculo blando que se cierra en la boca de Angie, como el final de un dibujo
+   animado. Tapa del todo hasta `NUCLEO` (0,86) de `--aa-aire` y se desvanece hasta el borde. */
 @property --aa-aire {
   syntax: '<length>';
   inherits: false;
   initial-value: 0px;
 }
 :host(.aa--alejandose) {
-  --a: var(--aa-aire);
-  mask-image:
-    radial-gradient(
-      circle at calc(var(--aa-x) - var(--a) * 0.3) calc(var(--aa-y) - var(--a) * 0.32),
-      #000 calc(var(--a) * 0.42),
-      transparent calc(var(--a) * 0.56)
-    ),
-    radial-gradient(
-      circle at calc(var(--aa-x) + var(--a) * 0.32) calc(var(--aa-y) - var(--a) * 0.4),
-      #000 calc(var(--a) * 0.38),
-      transparent calc(var(--a) * 0.52)
-    ),
-    radial-gradient(
-      circle at var(--aa-x) calc(var(--aa-y) - var(--a) * 0.7),
-      #000 calc(var(--a) * 0.36),
-      transparent calc(var(--a) * 0.5)
-    ),
-    radial-gradient(
-      circle at var(--aa-x) var(--aa-y),
-      #000 calc(var(--a) * 0.2),
-      transparent calc(var(--a) * 0.26)
-    );
+  mask-image: radial-gradient(
+    circle at var(--aa-x) var(--aa-y),
+    #000 calc(var(--aa-aire) * 0.86),
+    transparent var(--aa-aire)
+  );
 }
 
 .aa__cielo,
@@ -565,6 +548,17 @@
     scale: 2.1;
     opacity: 0;
   }
+}
+
+/* Al irse, el texto se va primero: en el círculo que se cierra quedan la noche y Angie, no restos
+   de palabras sobre la cara de la Angie de la colina. */
+.aa__titulo,
+.aa__lado {
+  transition: opacity 0.45s ease-out;
+}
+:host(.aa--alejandose) .aa__titulo,
+:host(.aa--alejandose) .aa__lado {
+  opacity: 0;
 }
 
 /* En la prueba la invitación ya hizo lo suyo: se aparta para que se mire a Angie. */

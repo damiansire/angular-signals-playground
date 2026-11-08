@@ -1,5 +1,6 @@
 import {
   LLAMADO,
+  NUCLEO,
   aireQueCabe,
   aireQueCubre,
   caminoDelAire,
@@ -84,7 +85,7 @@ describe('aviso de auriculares', () => {
     // Una pantalla con la boca de Angie abajo y a la izquierda del centro, como en la colina.
     const [ancho, alto, x, y] = [1024, 768, 470, 500];
 
-    it('arranca tapando el aviso entero: el soplo de la boca llega a la esquina más lejana', () => {
+    it('arranca tapando el aviso entero: el círculo llega a la esquina más lejana', () => {
       const a = aireQueCubre(x, y, ancho, alto);
       const esquinas = [
         [0, 0],
@@ -92,15 +93,16 @@ describe('aviso de auriculares', () => {
         [0, alto],
         [ancho, alto],
       ];
-      for (const [ex, ey] of esquinas) expect(0.2 * a).toBeGreaterThan(Math.hypot(ex - x, ey - y));
+      for (const [ex, ey] of esquinas)
+        expect(NUCLEO * a).toBeGreaterThan(Math.hypot(ex - x, ey - y));
     });
 
     it('al encajar queda adentro del aviso: no asoma ningún borde recto', () => {
       const a = aireQueCabe(x, y, ancho, alto);
-      expect(x - 0.9 * a).toBeGreaterThanOrEqual(0);
-      expect(x + 0.9 * a).toBeLessThanOrEqual(ancho);
-      expect(y - 1.2 * a).toBeGreaterThanOrEqual(0);
-      expect(y + 0.26 * a).toBeLessThanOrEqual(alto);
+      expect(x - a).toBeGreaterThanOrEqual(0);
+      expect(x + a).toBeLessThanOrEqual(ancho);
+      expect(y - a).toBeGreaterThanOrEqual(0);
+      expect(y + a).toBeLessThanOrEqual(alto);
     });
 
     it('se cierra: encaja con menos aire del que tenía al arrancar', () => {

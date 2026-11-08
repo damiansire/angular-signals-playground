@@ -135,19 +135,22 @@ export function letrasDelLlamado(frase: string): LetraDelLlamado[][] {
     .map((palabra) => [...palabra].map((c) => ({ c, i: i++ })));
 }
 
-/*
- * La bocanada (ver el CSS del componente) son nubes que crecen con `--aa-aire` desde la boca, casi todas hacia
- * arriba: con aire `a` ocupa de `-0.9a` a `0.9a` a lo ancho y de `-1.2a` a `0.26a` a lo alto,
- * medido desde la boca, y tapa del todo un círculo de `0.2a` alrededor de ella.
+/**
+ * La bocanada (ver el CSS del componente) es un círculo blando centrado en la boca de Angie, que
+ * crece con `--aa-aire`: con aire `a` tapa del todo hasta `NUCLEO * a` y se desvanece hasta `a`. Un
+ * círculo que se cierra en la boca es el final de dibujo animado; las nubes oscuras que tenía antes
+ * se leían como el humo de una explosión.
  */
+export const NUCLEO = 0.86;
+
 /** El aire con el que la bocanada tapa el aviso entero: arranca sin que se note el recorte. */
 export function aireQueCubre(x: number, y: number, ancho: number, alto: number): number {
-  return (1.05 * Math.hypot(Math.max(x, ancho - x), Math.max(y, alto - y))) / 0.2;
+  return (1.02 * Math.hypot(Math.max(x, ancho - x), Math.max(y, alto - y))) / NUCLEO;
 }
 
 /** El aire más grande con el que la bocanada queda adentro del aviso, sin tocar sus bordes. */
 export function aireQueCabe(x: number, y: number, ancho: number, alto: number): number {
-  return 0.95 * Math.min(y / 1.2, (alto - y) / 0.26, x / 0.9, (ancho - x) / 0.9);
+  return 0.95 * Math.min(x, ancho - x, y, alto - y);
 }
 
 /**
