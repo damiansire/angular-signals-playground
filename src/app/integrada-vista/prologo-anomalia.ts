@@ -2,6 +2,7 @@ import { isDevMode } from '@angular/core';
 import { avanzarMuelle, crearMuelle, limitar, type Muelle } from '../libs/muelle';
 import { chispas, palabra } from '../libs/rastros';
 import { sonido } from '../libs/sonido';
+import { HUECOS_DEL_PROLOGO, type HuecoDelPrologo } from './operadores-del-prologo';
 import {
   GUION,
   PRESUPUESTO,
@@ -85,6 +86,16 @@ export interface PrologoOpciones {
    * con la URL ya borró el parámetro de la barra.
    */
   readonly desde?: string | null | undefined;
+  /**
+   * El minijuego de "¡Activen todos los operadores!". La historia se frena en la orden y espera a
+   * que se resuelva o se saltee; la escena sigue viva mientras tanto. Cada hueco que queda sano se
+   * avisa con `alArreglar`, y la nave de ese hueco dispara su operador. Sin esto, el prólogo corre
+   * de corrido.
+   */
+  readonly operadores?: (
+    huecos: readonly HuecoDelPrologo[],
+    alArreglar: (nave: number, operador: string) => void,
+  ) => Promise<void>;
 }
 
 const NS = 'http://www.w3.org/2000/svg';
@@ -1905,12 +1916,73 @@ export function initPrologoAnomalia(host: HTMLElement, opts: PrologoOpciones): (
   let tAhora = 0;
   let pausado = false;
 
+  /** Dónde espera la historia al minijuego: con la orden ya leída y antes de la ráfaga. */
+  const ESPERA_OPERADORES = M.rxjs - 100;
+  let operadores: 'antes' | 'jugando' | 'despues' = opts.operadores ? 'antes' : 'despues';
+
+  function pedirOperadores(): void {
+    operadores = 'jugando';
+    void opts.operadores?.(HUECOS_DEL_PROLOGO, arreglado).then(() => {
+      operadores = 'despues';
+    });
+  }
+
+  /**
+   * Un hueco sano se ve en la nave: dispara su operador como los de la ráfaga, con el mismo
+   * retroceso, y el disparo se apaga antes de llegar. El tirón contesta enseguida con un golpe:
+   * anda, pero la anomalía es más rápida. Va con su propio reloj porque la historia está quieta.
+   */
+  function arreglado(i: number, operador: string): void {
+    const n = flota[i];
+    if (!n || terminado) return;
+    const base = el(efectos, 'g', { transform: `translate(${r2(n.pos.x)} ${r2(n.pos.y)})` });
+    const bala = el(base, 'g');
+    el(bala, 'circle', { r: 26, fill: 'url(#pa-proyectil)' });
+    el(bala, 'circle', { r: 7, fill: '#ffffff' });
+    const rotulo = el(bala, 'text', {
+      x: 22,
+      y: -20,
+      'font-family': '"JetBrains Mono","Cascadia Mono",Consolas,monospace',
+      'font-size': 30,
+      'font-weight': 700,
+      fill: PALETAS[i].luz,
+      stroke: '#0b1630',
+      'stroke-width': 5,
+      'paint-order': 'stroke',
+    });
+    rotulo.textContent = operador;
+    const quitar = (): void => base.remove();
+    bala
+      .animate(
+        [
+          { transform: 'translate(70px, 0) scale(0.6)', opacity: 0 },
+          { transform: 'translate(150px, -6px) scale(1)', opacity: 1, offset: 0.18 },
+          { transform: 'translate(330px, -14px) scale(1)', opacity: 1, offset: 0.7 },
+          { transform: 'translate(400px, -18px) scale(0.5)', opacity: 0 },
+        ],
+        { duration: 1500, easing: 'cubic-bezier(0.2, 0.7, 0.4, 1)' },
+      )
+      .finished.then(quitar, quitar);
+    const p = aPantalla(n.pos);
+    chispas(raiz, p.x, p.y, PALETAS[i].luz, 10);
+    n.m.dx.v -= 260;
+    n.m.sq.v = Math.min(n.m.sq.v + 2.5, 6.5);
+    // Sin sonido de disparo: solo sonaría al acertar, y acertar es en silencio (ADR 0002).
+    luego(() => impacto(n.pos.x, n.pos.y, 0.6, 700), 420);
+  }
+
   function frame(ts: number, gen: number): void {
     if (gen !== generacion) return;
     // Tope de 80 ms: si la pestaña estuvo oculta, rAF vuelve con un salto enorme.
     const dt = anterior === null ? 0 : Math.min(80, ts - anterior);
     anterior = ts;
-    tAhora = Math.min(tAhora + dt * velocidad, T.fin);
+    let t = Math.min(tAhora + dt * velocidad, T.fin);
+    // Mientras se juega, la historia no avanza pero los muelles sí: las naves tiemblan y responden.
+    if (operadores !== 'despues' && t >= ESPERA_OPERADORES) {
+      t = ESPERA_OPERADORES;
+      if (operadores === 'antes') pedirOperadores();
+    }
+    tAhora = t;
     dibujar(tAhora, (dt * velocidad) / 1000);
     if (tAhora < T.fin) raf = requestAnimationFrame((t) => frame(t, gen));
     else terminar();
@@ -1933,6 +2005,8 @@ export function initPrologoAnomalia(host: HTMLElement, opts: PrologoOpciones): (
     dichas = new Set();
     anterior0 = flota.map(() => ({ x: 0, y: 0 }));
     tAhora = desde;
+    // Quien arranca más adelante para revisar una escena no tiene que pasar por el minijuego.
+    if (desde > ESPERA_OPERADORES) operadores = 'despues';
     despausar();
     if (sonido().activo()) sonido().desbloquear();
     anterior = null;

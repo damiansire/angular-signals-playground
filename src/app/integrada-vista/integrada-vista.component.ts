@@ -6,6 +6,7 @@ import {
   ElementRef,
   EnvironmentInjector,
   ErrorHandler,
+  Injector,
   Type,
   afterNextRender,
   createComponent,
@@ -34,6 +35,8 @@ import {
 } from './inicio-angie';
 import { initMundoQueResponde } from './mundo-que-responde';
 import { LO_QUE_DICE_EL_SOL, LO_QUE_RESPONDE_ANGIE } from './intercambio-del-sol';
+import type { HuecoDelPrologo } from './operadores-del-prologo';
+import { ManipulableSystemComponent } from '../components-atom/manipulable-system/manipulable-system.component';
 
 import { signalsRoutesTree } from '../app.routes';
 import { type RouteItem, type SubNivelDiferido } from '../interfaces/route-item.interface';
@@ -97,6 +100,7 @@ const PROLOGO_PEDIDO =
     BitacoraComponent,
     MascotaVivaComponent,
     AvisoAuricularesComponent,
+    ManipulableSystemComponent,
   ],
   templateUrl: './integrada-vista.component.html',
   styleUrls: [
@@ -113,6 +117,7 @@ const PROLOGO_PEDIDO =
 export class IntegradaVistaComponent {
   private readonly host = inject(ElementRef<HTMLElement>).nativeElement as HTMLElement;
   private readonly destroyRef = inject(DestroyRef);
+  private readonly injector = inject(Injector);
   private readonly env = inject(EnvironmentInjector);
   private readonly appRef = inject(ApplicationRef);
   private readonly location = inject(Location);
@@ -220,6 +225,67 @@ export class IntegradaVistaComponent {
   }
 
   /**
+   * El minijuego de operadores del prólogo. El motor frena la historia en la orden y pide
+   * `jugarOperadores` con sus huecos; esto muestra uno por nave y resuelve cuando se terminan,
+   * resueltos o salteados. Nunca traba: cada hueco se puede saltear (ADR 0002). Los huecos llegan
+   * desde el motor, que carga diferido: en el bundle inicial no los necesita nadie.
+   */
+  protected readonly huecos = signal<readonly HuecoDelPrologo[]>([]);
+  protected readonly hueco = signal<number | null>(null);
+  protected readonly huecoActual = computed(() => {
+    const i = this.hueco();
+    return i === null ? null : (this.huecos()[i] ?? null);
+  });
+  private avisarArreglo: ((nave: number, operador: string) => void) | null = null;
+  private terminarOperadores: (() => void) | null = null;
+  /** El respiro entre un hueco sano y el siguiente, para ver a la nave disparar. */
+  private respiroHueco: ReturnType<typeof setTimeout> | null = null;
+
+  private jugarOperadores(
+    huecos: readonly HuecoDelPrologo[],
+    alArreglar: (nave: number, operador: string) => void,
+  ): Promise<void> {
+    return new Promise((listo) => {
+      this.huecos.set(huecos);
+      this.avisarArreglo = alArreglar;
+      this.terminarOperadores = () => {
+        this.cortarRespiro();
+        this.hueco.set(null);
+        this.avisarArreglo = null;
+        this.terminarOperadores = null;
+        listo();
+      };
+      this.hueco.set(0);
+      // El foco va al panel: con teclado, la orden se atiende sin buscarla.
+      afterNextRender(() => this.host.querySelector<HTMLElement>('.prologo__operadores')?.focus(), {
+        injector: this.injector,
+      });
+    });
+  }
+
+  /** Sin cartel de acierto (ADR 0002): la respuesta es la nave que dispara su operador. */
+  protected alArreglarHueco(e: Event): void {
+    e.stopPropagation();
+    const h = this.huecoActual();
+    if (!h || this.respiroHueco) return;
+    this.avisarArreglo?.(h.nave, h.operador);
+    this.respiroHueco = setTimeout(() => this.siguienteHueco(), 1400);
+  }
+
+  protected siguienteHueco(): void {
+    this.cortarRespiro();
+    const i = this.hueco();
+    if (i === null) return;
+    if (i + 1 < this.huecos().length) this.hueco.set(i + 1);
+    else this.terminarOperadores?.();
+  }
+
+  private cortarRespiro(): void {
+    if (this.respiroHueco) clearTimeout(this.respiroHueco);
+    this.respiroHueco = null;
+  }
+
+  /**
    * El prólogo se pide recién al bajar de la colina: son 25 kB de escena que nadie ve en el
    * primer segundo, y el aviso de auriculares más la colina dan tiempo de sobra para traerlos.
    * Cada pedido invalida al anterior, así un pedido viejo que llega tarde no monta un segundo
@@ -235,7 +301,12 @@ export class IntegradaVistaComponent {
       ({ initPrologoAnomalia }) => {
         if (pedido !== this.pedidoPrologo) return;
         this.cerrarPrologo = initPrologoAnomalia(this.host, {
-          alTerminar,
+          // Saltar la intro en pleno minijuego también lo cierra.
+          alTerminar: () => {
+            this.terminarOperadores?.();
+            alTerminar();
+          },
+          operadores: (huecos, alArreglar) => this.jugarOperadores(huecos, alArreglar),
           alCambiarMascota: (viva) => this.angiePrologo.set(viva),
           desde: isDevMode() ? PROLOGO_PEDIDO : null,
         });
@@ -249,6 +320,7 @@ export class IntegradaVistaComponent {
   }
 
   constructor() {
+    this.destroyRef.onDestroy(() => this.cortarRespiro());
     afterNextRender(() => {
       try {
         this.arrancar();

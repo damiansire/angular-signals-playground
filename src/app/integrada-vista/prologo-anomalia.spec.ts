@@ -1,7 +1,7 @@
 import { sonido } from '../libs/sonido';
 import { initPrologoAnomalia } from './prologo-anomalia';
 import { GUION } from './prologo-guion';
-import { hasta } from './testing/cuadros';
+import { cuadrosFalsos, hasta } from './testing/cuadros';
 
 /** Un nodo de audio que acepta todo lo que el prólogo le hace y anota lo que importa. */
 function nodoFalso(contexto: unknown) {
@@ -326,6 +326,47 @@ describe('initPrologoAnomalia', () => {
       ocultarPestaña(false, oculta);
 
       expect(pausa.getAttribute('aria-pressed')).toBe('true');
+    });
+  });
+
+  describe('el minijuego de operadores', () => {
+    function conMinijuego(desde: string) {
+      const cuadros = cuadrosFalsos();
+      const host = hostCompleto();
+      hosts.push(host);
+      let resolver: () => void = () => undefined;
+      const pedido = jasmine
+        .createSpy('operadores')
+        .and.callFake(() => new Promise<void>((ok) => (resolver = ok)));
+      cerrar.push(
+        initPrologoAnomalia(host, { alTerminar: () => undefined, desde, operadores: pedido }),
+      );
+      const frase = (): string =>
+        [...host.querySelectorAll('.prologo__frase')].map((f) => f.textContent).join(' | ');
+      return { cuadros, pedido, frase, resolver: () => resolver() };
+    }
+
+    it('la historia espera en la orden del capitán hasta que se resuelve, y después sigue', async () => {
+      const m = conMinijuego('anom-atraidos');
+      m.cuadros.avanzar(400);
+      expect(m.pedido).toHaveBeenCalledTimes(1);
+      expect(m.frase()).toContain('Activen todos los operadores');
+
+      // Quince segundos de escena: la orden sigue ahí, nadie la apura.
+      m.cuadros.avanzar(1000);
+      expect(m.frase()).toContain('Activen todos los operadores');
+
+      m.resolver();
+      await new Promise((ok) => setTimeout(ok));
+      m.cuadros.avanzar(1000);
+      expect(m.frase()).not.toContain('Activen todos los operadores');
+      expect(m.pedido).toHaveBeenCalledTimes(1);
+    });
+
+    it('quien arranca después de la orden no pasa por el minijuego', () => {
+      const m = conMinijuego('anom-pipes');
+      m.cuadros.avanzar(400);
+      expect(m.pedido).not.toHaveBeenCalled();
     });
   });
 

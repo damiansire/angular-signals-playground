@@ -600,7 +600,7 @@
         <!-- Prólogo "la anomalía": la cinemática que enmarca el recorrido (ver prologo-anomalia.ts).
            Se destapa al tocar Entrar, porque ese click es el gesto que el navegador exige para
            dejar sonar, y al terminar le pasa la posta a la construcción de Tusi. -->
-        <div class="prologo" hidden>
+        <div class="prologo" [class.prologo--operadores]="hueco() !== null" hidden>
           <svg
             class="prologo__escena"
             role="img"
@@ -619,6 +619,30 @@
               <span class="prologo__quien"></span><span class="prologo__frase"></span>
             </p>
           </div>
+          <!-- "¡Activen todos los operadores!": cada nave tiene un hueco en su código. La historia
+               espera acá con la escena viva, y cada hueco se puede saltear. El desafío es el mismo
+               de los conceptos, y llega diferido: casi nadie lo necesita en el primer segundo. -->
+          @if (huecoActual(); as h) {
+            <section
+              class="prologo__operadores"
+              tabindex="-1"
+              aria-labelledby="prologo-hueco"
+              [attr.data-quien]="['cap', 'naveA', 'naveB'][h.nave]"
+              (sistema-establecido)="alArreglarHueco($event)"
+            >
+              <header class="prologo__op-cabeza">
+                <span class="prologo__quien prologo__quien--visible">{{ h.nombre }}</span>
+                <h2 id="prologo-hueco" class="prologo__op-titulo">{{ h.titulo }}</h2>
+                <span class="prologo__op-paso">{{ hueco()! + 1 }} de {{ huecos().length }}</span>
+              </header>
+              @defer (on immediate) {
+                <app-manipulable-system [system]="h.sistema" [ayuda]="false" />
+              }
+              <button type="button" class="prologo__op-saltar" (click)="siguienteHueco()">
+                Saltar &rarr;
+              </button>
+            </section>
+          }
           <p class="prologo__titulo" aria-hidden="true">Angular Signals</p>
           <div class="prologo__hud prologo__hud--controles">
             <button class="prologo__pause" type="button" aria-pressed="false">Pausa</button>
