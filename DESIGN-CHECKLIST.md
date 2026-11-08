@@ -580,16 +580,18 @@ entrar desarma a Angie en luz y se hace noche, la costura con el prólogo.
       el gesto que el navegador exige: suena la prueba de un oído al otro (`planDeLaPrueba`), la
       copa que suena golpea y Angie se vuelca hacia ese lado (`inclinarse`), y en el acorde salta.
       Después la CÁMARA SE ALEJA (`ALEJARSE_MS`) desde la BOCA de Angie en la piedra (punto fijo de
-      las dos escalas, sacado con `getScreenCTM` del dibujo): la noche era un suspiro suyo. La
-      colina viene de `CERCA` (2,6×); el aviso compensa esa escala (arranca en `1 / CERCA`, así el
-      primer cuadro no salta) y se cierra como una BOCANADA (máscara de nubes que crece con
-      `--aa-aire`) que vuelve a la boca mientras ella suspira (`suspirar`). Defecto resuelto: un
-      rectángulo con bordes redondeados que se achica se leía como una ventana, "muy cuadrado". Por
-      eso el aviso sigue del tamaño de la pantalla hasta `ENCAJA`, cuando la bocanada ya cabe
-      adentro (`aireQueCabe`): si se achica antes, asoman sus bordes rectos. El aire baja en escala
-      pareja (`caminoDelAire`): en línea recta casi todo el primer tramo pasaba tapado y la nube
-      aparecía de golpe. Probarlo con click real, pausando las animaciones (y reteniendo el timer
-      de `ALEJARSE_MS`, que si no esconde el aviso) para mirar cuadros a 0,5 / 0,75 / 1 / 1,25 s,
+      las dos escalas, sacado con `getScreenCTM` del dibujo): la noche era un suspiro suyo. El aviso
+      compensa la escala de la colina (arranca en `1 / CERCA`, así el primer cuadro no salta) y se
+      cierra en un CÍRCULO blando sobre la boca (máscara que crece con `--aa-aire`, el final de
+      dibujo animado) mientras ella suspira (`suspirar`); el texto se va primero. Defectos
+      resueltos: (1) un rectángulo con bordes redondeados que se achica se leía como una ventana,
+      "muy cuadrado"; (2) nubes oscuras sobre la cara se leían como el humo de una explosión; (3)
+      con la colina a 2,6× el navegador pintaba solo lo visible al arrancar y, al abrirse, la colina
+      y Angie salían CORTADAS en rectángulos: `CERCA` queda en 1,12. Los cuadros pausados NO
+      muestran (3), porque pausar le da tiempo a pintar: grabar en tiempo real con screencast por
+      CDP (Edge headless, click real) y mirar la hoja de cuadros. El aviso sigue del tamaño de la
+      pantalla hasta `ENCAJA`, cuando el círculo ya cabe adentro (`aireQueCabe`): si se achica
+      antes, asoman sus bordes rectos. El aire baja en escala pareja (`caminoDelAire`). Probarlo
       en escritorio y en 375 de ancho. Ojo: un click por `ref`
       de la herramienta hace scroll del overlay (`overflow: hidden` igual scrollea): no es un bug,
       repetir con click por coordenada. En el acorde final, ondas y notas usan otra animación: con
