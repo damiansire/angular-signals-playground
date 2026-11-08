@@ -220,6 +220,7 @@ describe('inicio-angie', () => {
             <rect data-material="pasto" y="150" width="400" height="150"/></svg>
           <div class="ini__angie"><button class="ini__foco" data-role="entrar"></button></div>
           <div class="ini__luces"></div>
+          <span class="ini__llamado"></span>
           <button class="ajuste"></button>
         </div>`;
       document.body.appendChild(host);
@@ -233,6 +234,12 @@ describe('inicio-angie', () => {
         escena.querySelector('[data-role="entrar"]')!.addEventListener('click', () => n++);
         return () => n;
       }
+      /** El llamado terminó de entrar: recién ahí se puede entrar. */
+      function llegaElLlamado(escena: HTMLElement): void {
+        escena
+          .querySelector('.ini__llamado')!
+          .dispatchEvent(new AnimationEvent('animationend', { bubbles: true }));
+      }
       function tocar(el: Element, desde: [number, number], hasta = desde): void {
         const op = { bubbles: true, button: 0 };
         el.dispatchEvent(
@@ -245,6 +252,19 @@ describe('inicio-angie', () => {
         const { host, escena } = montar();
         cerrar.push(initInicioAngie(host).dispose);
         const entradas = contarEntradas(escena);
+        llegaElLlamado(escena);
+        tocar(escena.querySelector('[data-material="cielo"]')!, [40, 40]);
+        expect(entradas()).toBe(1);
+      });
+
+      it('mientras el llamado va entrando, tocar no entra', () => {
+        const { host, escena } = montar();
+        cerrar.push(initInicioAngie(host).dispose);
+        const entradas = contarEntradas(escena);
+        tocar(escena.querySelector('[data-material="cielo"]')!, [40, 40]);
+        (escena.querySelector('[data-role="entrar"]') as HTMLButtonElement).click();
+        expect(entradas()).toBe(0);
+        llegaElLlamado(escena);
         tocar(escena.querySelector('[data-material="cielo"]')!, [40, 40]);
         expect(entradas()).toBe(1);
       });
@@ -253,6 +273,7 @@ describe('inicio-angie', () => {
         const { host, escena } = montar();
         cerrar.push(initInicioAngie(host).dispose);
         const entradas = contarEntradas(escena);
+        llegaElLlamado(escena);
         tocar(escena.querySelector('.ini__angie')!, [200, 200], [260, 120]);
         expect(entradas()).toBe(0);
       });
@@ -261,6 +282,7 @@ describe('inicio-angie', () => {
         const { host, escena } = montar();
         cerrar.push(initInicioAngie(host).dispose);
         const entradas = contarEntradas(escena);
+        llegaElLlamado(escena);
         tocar(escena.querySelector('.ajuste')!, [10, 10]);
         expect(entradas()).toBe(0);
       });

@@ -392,6 +392,22 @@ export function initInicioAngie(host: HTMLElement, cuerpo?: AngieDeLaColina): In
   };
   escena.addEventListener('click', alClic);
 
+  // Mientras la bajada y el llamado van entrando no se puede entrar: un toque a mitad cortaba la
+  // portada antes de terminar de leerla. Se frena en captura, antes del listener de la lamparita.
+  let listo = false;
+  const alLlegar = (e: AnimationEvent): void => {
+    if ((e.target as Element | null)?.classList?.contains('ini__llamado')) listo = true;
+  };
+  const frenarEntrada = (e: MouseEvent): void => {
+    if (listo || !(e.target as Element | null)?.closest('[data-role="entrar"], .ini__llamado')) {
+      return;
+    }
+    e.preventDefault();
+    e.stopImmediatePropagation();
+  };
+  escena.addEventListener('animationend', alLlegar);
+  escena.addEventListener('click', frenarEntrada, true);
+
   // Angie ya está sentada en la piedra del centro cuando se la ve: el aviso de auriculares se aleja
   // y la escena aparece con ella ahí. Va con `translate`/`rotate` sueltos porque la despedida anima
   // el `transform` de este mismo elemento.
@@ -725,6 +741,8 @@ export function initInicioAngie(host: HTMLElement, cuerpo?: AngieDeLaColina): In
     revelar(): void {
       if (cerrado || yendose || colina) return;
       escena.classList.add('ini--revelada');
+      // Sin movimiento el llamado ya está a la vista: no hay animación que esperar.
+      if (sinMovimiento()) listo = true;
       colina = tocarColina(() => sonido().salida());
     },
     despedir,
@@ -736,6 +754,8 @@ export function initInicioAngie(host: HTMLElement, cuerpo?: AngieDeLaColina): In
       soltarToque?.();
       escena.removeEventListener('pointerdown', alTocar);
       escena.removeEventListener('click', alClic);
+      escena.removeEventListener('animationend', alLlegar);
+      escena.removeEventListener('click', frenarEntrada, true);
       window.removeEventListener('resize', alRedimensionar);
       animaciones.forEach((a) => a.cancel());
       animaciones.clear();
