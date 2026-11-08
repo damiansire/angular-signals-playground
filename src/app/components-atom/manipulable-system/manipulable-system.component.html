@@ -49,6 +49,10 @@
       </ul>
     </div>
 
+    <!-- Quien muestra el desafío solo (el minijuego del prólogo) pone acá la meta: al lado del
+         número que da el código, se comparan sin leer. -->
+    <ng-content select="[msMeta]" />
+
     <button type="button" class="ms__act" (click)="press()">{{ system().action }}</button>
   </div>
 

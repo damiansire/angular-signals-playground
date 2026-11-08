@@ -21,6 +21,8 @@
    la escena real de atrás (#c3bdb1 en el peor caso), no contra el papel: #9a9284 daba 2.3:1 y
    #756d5e no llegaba a 4.5. */
 .ms__eyebrow {
+  /* La hoja del prólogo dice qué tocar con su propio renglón: el rótulo repetía lo mismo. */
+  display: var(--ms-rotulo, block);
   margin: 0;
   font-family: var(--font-mono, ui-monospace, monospace);
   font-size: 0.62rem;
