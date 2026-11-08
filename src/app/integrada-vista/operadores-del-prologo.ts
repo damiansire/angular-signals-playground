@@ -47,89 +47,105 @@ const opcion = (operadores: readonly string[], k: number, resto: string) => ({
   knob: K,
 });
 
-/** Cuánto corre el rumbo cada lectura que llega sin corregir. */
-const DERIVA = 12;
-const RUMBO = ['filter', 'tap', 'map'] as const;
+/**
+ * Los tres huecos se arreglan con los operadores más simples, `map`, `tap` y `filter`, y siempre se
+ * elige entre esos tres: el prólogo es antes de aprender nada, y con `scan` o `throttleTime` el
+ * hueco era adivinar un nombre. Cada uno pide exactamente lo que hace uno solo de los tres.
+ */
+
+/** Lo que entra en cada lectura: crece de a 10 para que se vea que el motor recibe el doble. */
+const PASO = 10;
+const DOBLE = ['tap', 'filter', 'map'] as const;
 
 /**
- * El rumbo: cada lectura del sensor llega corrida por la deriva y hay que restársela. `filter` usa
- * la cuenta para decidir si deja pasar la lectura, y `tap` la hace y la tira: las dos dejan pasar la
- * lectura sin corregir. Solo `map` manda la lectura corregida.
+ * Duplicar la velocidad: `map` manda al motor lo que devuelve la cuenta. `tap` hace la cuenta y la
+ * tira, y `filter` la usa para decidir si pasa (pasa, pero igual que entró): con los dos, al motor
+ * llega lo mismo que entra.
  */
-export const RUMBO_SYSTEM: ManipulableChallenge = {
-  knobs: hueco('el operador que corrige cada lectura'),
-  gauges: [{ id: 'desvio', label: 'desvío' }],
-  action: 'leer el sensor',
-  start: { desvio: 0 },
-  code: (k) => [
-    { text: 'const rumbo$ = lecturas$.pipe(' },
-    opcion(RUMBO, k[K], '((p) => p - deriva),'),
-    { text: ');' },
-    { text: 'nave.girar(rumbo$);' },
+export const DOBLE_SYSTEM: ManipulableChallenge = {
+  knobs: hueco('el operador que duplica la velocidad'),
+  gauges: [
+    { id: 'entra', label: 'entra' },
+    { id: 'motor', label: 'al motor' },
   ],
-  settle: (s: SystemState) => ({
-    desvio: RUMBO[s.knobs[K]] === 'map' ? 0 : DERIVA * s.actions,
-  }),
-  healthy: (s: SystemState) => s.actions >= 1 && s.values['desvio'] === 0,
-};
-
-/** Lo que suma cada encendido del motor. */
-const EMPUJE = 10;
-const VELOCIDAD = ['reduce', 'map', 'scan'] as const;
-
-/**
- * La velocidad: cada encendido del motor suma empuje. `reduce` acumula bien pero emite recién
- * cuando el flujo termina, y el motor no termina nunca. `map` no acumula: su segundo argumento es
- * el índice, así que da el empuje más el número de encendido. Solo `scan` emite la suma en cada
- * paso.
- */
-export const EMPUJE_SYSTEM: ManipulableChallenge = {
-  knobs: hueco('el operador que acumula el empuje'),
-  gauges: [{ id: 'velocidad', label: 'velocidad' }],
-  action: 'encender el motor',
-  start: { velocidad: 0 },
+  action: 'leer la velocidad',
+  start: { entra: 0, motor: 0 },
   code: (k) => [
-    { text: 'const velocidad$ = empuje$.pipe(' },
-    opcion(VELOCIDAD, k[K], '((vel, e) => vel + e, 0),'),
+    { text: 'const turbo$ = velocidad$.pipe(' },
+    opcion(DOBLE, k[K], '((v) => v * 2),'),
     { text: ');' },
-    { text: 'motor.acelerar(velocidad$);' },
+    { text: 'motor.acelerar(turbo$);' },
   ],
   settle: (s: SystemState) => {
-    const operador = VELOCIDAD[s.knobs[K]];
-    if (operador === 'scan') return { velocidad: EMPUJE * s.actions };
-    if (operador === 'map') return { velocidad: s.actions ? EMPUJE + s.actions - 1 : 0 };
-    return { velocidad: 0 };
+    const entra = PASO * s.actions;
+    return { entra, motor: DOBLE[s.knobs[K]] === 'map' ? entra * 2 : entra };
   },
-  // Con un solo encendido `map` también da 10: hacen falta dos para ver que no acumula.
-  healthy: (s: SystemState) => s.actions >= 2 && s.values['velocidad'] === EMPUJE * s.actions,
+  healthy: (s: SystemState) => s.actions >= 1 && s.values['motor'] === 2 * s.values['entra'],
 };
 
-/** Correcciones que caben en una ráfaga: dura 300 ms y se corrige una vez cada 100. */
-const POR_RAFAGA = 3;
-const SENSORES = ['debounceTime', 'bufferTime', 'throttleTime'] as const;
+const MIRAR = ['map', 'filter', 'tap'] as const;
 
 /**
- * Los sensores: adentro del tirón llegan lecturas cada 10 ms y no paran. `debounceTime` espera un
- * silencio que nunca llega, así que no corrige nada. `bufferTime` junta las lecturas en listas y
- * `corregir` espera un número: ninguna corrección sirve. Solo `throttleTime` deja pasar una lectura
- * cada 100 ms y descarta el resto.
+ * Ver la velocidad sin tocarla: `tap` la muestra en el panel y la deja pasar igual. Con `map` al
+ * motor llega lo que devuelve `mostrar`, que no devuelve nada, y con `filter` ese "nada" cuenta como
+ * falso y no pasa ninguna: el panel la muestra, pero el motor se queda sin velocidad.
  */
-export const SENSORES_SYSTEM: ManipulableChallenge = {
-  knobs: hueco('el operador que raciona las lecturas'),
-  gauges: [{ id: 'correcciones', label: 'correcciones' }],
-  action: 'recibir una ráfaga',
-  start: { correcciones: 0 },
-  code: (k) => [
-    { text: 'sensores$.pipe(' },
-    opcion(SENSORES, k[K], '(100),'),
-    { text: '  map(corregir),' },
-    { text: ').subscribe(nave.estabilizar);' },
+export const MIRAR_SYSTEM: ManipulableChallenge = {
+  knobs: hueco('el operador que muestra la velocidad'),
+  gauges: [
+    { id: 'panel', label: 'panel' },
+    { id: 'motor', label: 'al motor' },
   ],
-  settle: (s: SystemState) => ({
-    correcciones: SENSORES[s.knobs[K]] === 'throttleTime' ? POR_RAFAGA * s.actions : 0,
-  }),
+  action: 'leer la velocidad',
+  start: { panel: 0, motor: 0 },
+  code: (k) => [
+    { text: 'const vista$ = velocidad$.pipe(' },
+    opcion(MIRAR, k[K], '((v) => panel.mostrar(v)),'),
+    { text: ');' },
+    { text: 'motor.acelerar(vista$);' },
+  ],
+  settle: (s: SystemState) => {
+    const v = PASO * s.actions;
+    return { panel: v, motor: MIRAR[s.knobs[K]] === 'tap' ? v : 0 };
+  },
   healthy: (s: SystemState) =>
-    s.actions >= 1 && s.values['correcciones'] === POR_RAFAGA * s.actions,
+    s.actions >= 1 && s.values['motor'] === s.values['panel'] && s.values['panel'] > 0,
+};
+
+/** Cada carga trae nafta, agua y nafta: dos que sirven y una que hay que sacar. */
+const NAFTA_POR_CARGA = 2;
+const AGUA_POR_CARGA = 1;
+const LIMPIAR = ['tap', 'map', 'filter'] as const;
+
+/**
+ * Sacar el agua del combustible: `filter` deja pasar solo lo que no es agua. `tap` mira y deja
+ * pasar todo, agua incluida, y `map` cambia cada carga por la respuesta de la pregunta: al motor
+ * llegan `true` y `false`, que no son combustible.
+ */
+export const AGUA_SYSTEM: ManipulableChallenge = {
+  knobs: hueco('el operador que saca el agua'),
+  gauges: [
+    { id: 'nafta', label: 'nafta' },
+    { id: 'agua', label: 'agua' },
+  ],
+  action: 'cargar el tanque',
+  start: { nafta: 0, agua: 0 },
+  code: (k) => [
+    { text: 'const limpio$ = carga$.pipe(' },
+    opcion(LIMPIAR, k[K], "((c) => c !== 'agua'),"),
+    { text: ');' },
+    { text: 'motor.cargar(limpio$);' },
+  ],
+  settle: (s: SystemState) => {
+    const operador = LIMPIAR[s.knobs[K]];
+    if (operador === 'map') return { nafta: 0, agua: 0 };
+    return {
+      nafta: NAFTA_POR_CARGA * s.actions,
+      agua: operador === 'tap' ? AGUA_POR_CARGA * s.actions : 0,
+    };
+  },
+  healthy: (s: SystemState) =>
+    s.actions >= 1 && s.values['agua'] === 0 && s.values['nafta'] === NAFTA_POR_CARGA * s.actions,
 };
 
 /** En el orden en que se juegan, que es el de la flota: primero el capitán. */
@@ -137,49 +153,52 @@ export const HUECOS_DEL_PROLOGO: readonly HuecoDelPrologo[] = [
   {
     nave: 0,
     nombre: 'Capitán',
-    titulo: 'Corregir el rumbo',
+    titulo: 'Duplicar la velocidad',
     operador: 'map',
-    sistema: RUMBO_SYSTEM,
-    nombres: [{ codigo: 'p', es: 'cada lectura del sensor, torcida por la `deriva`' }],
-    encargo: 'Al timón tiene que llegar `p - deriva`.',
-    meta: '0 en cada lectura',
+    sistema: DOBLE_SYSTEM,
+    nombres: [
+      { codigo: 'v', es: 'la velocidad que entra' },
+      { codigo: 'v * 2', es: 'el doble' },
+    ],
+    encargo: 'Al motor tiene que llegar `v * 2`.',
+    meta: 'el doble',
     ayuda: { nave: 1, nombre: 'Nave A' },
     pistas: {
-      filter: '`filter` solo decide si la lectura pasa. Sale igual que entró.',
-      tap: '`tap` hace la cuenta y la tira. Al timón llega la lectura torcida.',
+      tap: '`tap` hace la cuenta y la tira. Al motor llega la misma velocidad.',
+      filter: '`filter` usa la cuenta para decidir si pasa. Pasa, pero igual que entró.',
     },
   },
   {
     nave: 1,
     nombre: 'Nave A',
-    titulo: 'Acumular el empuje',
-    operador: 'scan',
-    sistema: EMPUJE_SYSTEM,
-    nombres: [
-      { codigo: 'e', es: 'el empuje de cada encendido' },
-      { codigo: 'vel', es: 'lo que va sumado' },
-    ],
-    encargo: 'Tiene que crecer en cada encendido.',
-    meta: '10 → 20 → 30…',
+    titulo: 'Ver la velocidad',
+    operador: 'tap',
+    sistema: MIRAR_SYSTEM,
+    nombres: [{ codigo: 'panel.mostrar(v)', es: 'la pone en el panel, y no devuelve nada' }],
+    encargo: 'El panel la muestra y el motor la recibe igual.',
+    meta: 'los dos iguales',
     ayuda: { nave: 2, nombre: 'Nave B' },
     pistas: {
-      reduce: '`reduce` suma, pero avisa recién cuando el motor se apaga. Y no se apaga.',
-      map: '`map` no guarda nada: su segundo dato es el número de encendido.',
+      map: '`map` manda al motor lo que devuelve `mostrar`, y no devuelve nada.',
+      filter: '`filter` deja pasar si `mostrar` da verdadero, y no da nada: no pasa ninguna.',
     },
   },
   {
     nave: 2,
     nombre: 'Nave B',
-    titulo: 'Sensores saturados',
-    operador: 'throttleTime',
-    sistema: SENSORES_SYSTEM,
-    nombres: [{ codigo: 'sensores$', es: 'una lectura cada 10 ms, sin parar' }],
-    encargo: 'Hay que corregir una cada `100` ms y soltar el resto.',
-    meta: '3 por ráfaga',
+    titulo: 'Sacar el agua',
+    operador: 'filter',
+    sistema: AGUA_SYSTEM,
+    nombres: [
+      { codigo: 'c', es: 'lo que trae la carga: nafta o agua' },
+      { codigo: "c !== 'agua'", es: 'verdadero si no es agua' },
+    ],
+    encargo: 'Al motor tiene que llegar solo nafta.',
+    meta: 'agua 0',
     ayuda: { nave: 0, nombre: 'Capitán' },
     pistas: {
-      debounceTime: '`debounceTime` espera un silencio, y esta ráfaga no para nunca.',
-      bufferTime: '`bufferTime` arma listas, y `corregir` espera un número.',
+      tap: '`tap` mira la carga y la deja pasar entera, con agua y todo.',
+      map: '`map` cambia cada carga por la respuesta: al motor llegan `true` y `false`.',
     },
   },
 ];

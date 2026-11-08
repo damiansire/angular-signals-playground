@@ -112,10 +112,15 @@ describe('los huecos del minijuego de operadores', () => {
     });
   });
 
-  it('map con el índice no se confunde con acumular: dos encendidos ya lo delatan', () => {
-    const empuje = HUECOS_DEL_PROLOGO[1].sistema;
-    expect(healthOf(empuje, corrida(empuje, 1, 1))).toBe('idle');
-    expect(healthOf(empuje, corrida(empuje, 1, 2))).toBe('broken');
-    expect(healthOf(empuje, corrida(empuje, 2, 2))).toBe('healthy');
+  it('una sola carga ya delata a tap (pasa el agua) y a map (no llega nafta)', () => {
+    const agua = HUECOS_DEL_PROLOGO[2].sistema;
+    const [tap, map, filter] = [0, 1, 2].map((p) => corrida(agua, p, 1));
+    expect(tap.values['agua']).toBeGreaterThan(0);
+    expect(map.values['nafta']).toBe(0);
+    expect(healthOf(agua, filter)).toBe('healthy');
+  });
+
+  it('se arreglan con map, tap y filter, uno por nave', () => {
+    expect(HUECOS_DEL_PROLOGO.map((h) => h.operador)).toEqual(['map', 'tap', 'filter']);
   });
 });
