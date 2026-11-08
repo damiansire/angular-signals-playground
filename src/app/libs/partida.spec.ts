@@ -4,12 +4,14 @@ import {
   conCinematica,
   conEstablecido,
   conPrologo,
+  conPunto,
   conceptosEstablecidos,
   escribirPartida,
   guardarPartida,
   leerPartida,
   PARTIDA_VACIA,
   subsEstablecidos,
+  type Punto,
 } from './partida';
 
 /** La forma real del recorrido: 12 conceptos con su cantidad de sub-niveles. */
@@ -22,7 +24,12 @@ describe('partida', () => {
     p = conCinematica(p, 12);
     p = conPrologo(p);
     const leida = leerPartida(escribirPartida(p), SUBS);
-    expect(leida).toEqual({ establecidos: ['0/0', '3/1'], cinematicas: [12], prologo: true });
+    expect(leida).toEqual({
+      establecidos: ['0/0', '3/1'],
+      cinematicas: [12],
+      prologo: true,
+      punto: null,
+    });
   });
 
   it('sin nada guardado arranca vacía', () => {
@@ -52,6 +59,7 @@ describe('partida', () => {
       establecidos: ['0/0', '1/3', '11/0'],
       cinematicas: [0, 1],
       prologo: true,
+      punto: null,
     });
     const sinElCero = JSON.stringify({ v: 1, establecidos: ['0/0', '0/3'], cinematicas: [] });
     expect(leerPartida(sinElCero, SUBS).establecidos).toEqual([]);
@@ -72,6 +80,7 @@ describe('partida', () => {
       establecidos: ['3/1', '11/0'],
       cinematicas: [0, 12],
       prologo: false,
+      punto: null,
     });
   });
 
@@ -118,5 +127,44 @@ describe('partida', () => {
     expect(guardarPartida(almacen, p)).toBeTrue();
     expect(memoria.has(CLAVE_PARTIDA)).toBeTrue();
     expect(cargarPartida(almacen, SUBS)).toEqual(p);
+  });
+  describe('el punto donde quedó la historia', () => {
+    const leer = (punto: unknown): Punto | null =>
+      leerPartida(JSON.stringify({ v: 2, establecidos: [], cinematicas: [], punto }), SUBS).punto;
+
+    it('ida y vuelta para los tres lugares', () => {
+      const puntos: Punto[] = [
+        { lugar: 'prologo', linea: 'anom-manual' },
+        { lugar: 'construccion' },
+        { lugar: 'recorrido', concepto: 3, sub: -1 },
+        { lugar: 'recorrido', concepto: 1, sub: 6 },
+      ];
+      for (const punto of puntos) {
+        const p = conPunto(PARTIDA_VACIA, punto);
+        expect(leerPartida(escribirPartida(p), SUBS).punto).toEqual(punto);
+      }
+    });
+
+    it('una partida de antes, sin punto, arranca del principio', () => {
+      expect(leer(undefined)).toBeNull();
+    });
+
+    it('descarta un punto que no existe en el recorrido de hoy o no tiene forma', () => {
+      expect(leer({ lugar: 'recorrido', concepto: 12, sub: -1 })).toBeNull();
+      expect(leer({ lugar: 'recorrido', concepto: 1, sub: 7 })).toBeNull();
+      expect(leer({ lugar: 'recorrido', concepto: 1, sub: -2 })).toBeNull();
+      expect(leer({ lugar: 'recorrido', concepto: '1', sub: 0 })).toBeNull();
+      expect(leer({ lugar: 'prologo', linea: '<script>' })).toBeNull();
+      expect(leer({ lugar: 'prologo' })).toBeNull();
+      expect(leer({ lugar: 'luna' })).toBeNull();
+      expect(leer('construccion')).toBeNull();
+    });
+
+    it('volver al mismo punto no cambia la referencia, y otro sí', () => {
+      const p = conPunto(PARTIDA_VACIA, { lugar: 'recorrido', concepto: 2, sub: 0 });
+      expect(conPunto(p, { lugar: 'recorrido', concepto: 2, sub: 0 })).toBe(p);
+      expect(conPunto(p, { lugar: 'recorrido', concepto: 2, sub: 1 })).not.toBe(p);
+      expect(conPunto(p, null).punto).toBeNull();
+    });
   });
 });

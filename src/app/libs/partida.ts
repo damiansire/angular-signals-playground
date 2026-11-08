@@ -39,9 +39,26 @@ export interface Partida {
   readonly cinematicas: readonly number[];
   /** Ya vio el prólogo completo o lo salteó a propósito: la bitácora le ofrece volver a verlo. */
   readonly prologo: boolean;
+  /** Dónde quedó la historia: al recargar se sigue desde acá. `null` es el principio. */
+  readonly punto: Punto | null;
 }
 
-export const PARTIDA_VACIA: Partida = { establecidos: [], cinematicas: [], prologo: false };
+/**
+ * Un lugar de la historia continua desde donde se puede retomar. En el prólogo es la línea del
+ * guion que abre el tramo; después del prólogo, la construcción de Tusi; y en el recorrido, el
+ * átomo (`sub` -1) o el sub-nivel (desde 0) donde estaba.
+ */
+export type Punto =
+  | { readonly lugar: 'prologo'; readonly linea: string }
+  | { readonly lugar: 'construccion' }
+  | { readonly lugar: 'recorrido'; readonly concepto: number; readonly sub: number };
+
+export const PARTIDA_VACIA: Partida = {
+  establecidos: [],
+  cinematicas: [],
+  prologo: false,
+  punto: null,
+};
 
 /** Cuántas cinemáticas existen: una por concepto más el final. */
 const CINEMATICAS_MAX = 13;
@@ -91,7 +108,45 @@ export function leerPartida(crudo: string | null, subPorConcepto: readonly numbe
     establecidos: [...establecidos].sort(compararIds),
     cinematicas: [...cinematicas].sort((a, b) => a - b),
     prologo: dato['prologo'] === true,
+    punto: leerPunto(dato['punto'], subPorConcepto),
   };
+}
+
+/**
+ * Un punto que no encaja con la forma de hoy se descarta: retomar en un lugar que ya no existe
+ * dejaría la historia en el vacío, y empezar del principio no rompe nada. Si una migración corre
+ * conceptos o sub-niveles, el punto del recorrido se pierde igual que sus ids.
+ */
+function leerPunto(dato: unknown, subPorConcepto: readonly number[]): Punto | null {
+  if (!esObjeto(dato)) return null;
+  const lugar = dato['lugar'];
+  if (lugar === 'construccion') return { lugar };
+  if (lugar === 'prologo') {
+    const linea = dato['linea'];
+    return typeof linea === 'string' && /^[a-z0-9-]+$/.test(linea) ? { lugar, linea } : null;
+  }
+  if (lugar === 'recorrido') {
+    const concepto = dato['concepto'];
+    const sub = dato['sub'];
+    if (!Number.isInteger(concepto) || !Number.isInteger(sub)) return null;
+    const c = concepto as number;
+    const s = sub as number;
+    if (c < 0 || c >= subPorConcepto.length || s < -1 || s >= subPorConcepto[c]) return null;
+    return { lugar, concepto: c, sub: s };
+  }
+  return null;
+}
+
+export function mismoPunto(a: Punto | null, b: Punto | null): boolean {
+  if (a === null || b === null) return a === b;
+  if (a.lugar === 'prologo' && b.lugar === 'prologo') return a.linea === b.linea;
+  if (a.lugar === 'recorrido' && b.lugar === 'recorrido')
+    return a.concepto === b.concepto && a.sub === b.sub;
+  return a.lugar === b.lugar;
+}
+
+export function conPunto(partida: Partida, punto: Punto | null): Partida {
+  return mismoPunto(partida.punto, punto) ? partida : { ...partida, punto };
 }
 
 export function escribirPartida(partida: Partida): string {
