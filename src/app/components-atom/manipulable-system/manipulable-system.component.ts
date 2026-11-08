@@ -32,6 +32,11 @@ import {
 })
 export class ManipulableSystemComponent {
   readonly system = input.required<ManipulableChallenge>();
+  /**
+   * La pista al fallar la da Angie. En el prólogo todavía no puede intervenir (docs/historia), así
+   * que ahí el desafío se juega sin ella.
+   */
+  readonly ayuda = input(true);
 
   /** Arranca averiado, y vuelve a arrancar si se monta otro sistema en el mismo lugar. */
   private readonly state = linkedSignal(() => startOf(this.system()));

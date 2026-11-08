@@ -108,6 +108,14 @@ describe('ManipulableSystemComponent', () => {
       fixture.componentInstance.press();
       expect(pista(fixture)).toBeNull();
     });
+
+    it('sin ayuda (el prólogo, donde Angie todavía no interviene) no aparece ni al fallar', () => {
+      const fixture = crear();
+      fixture.componentRef.setInput('ayuda', false);
+      fixture.componentInstance.press();
+      expect(fixture.componentInstance.health()).toBe('broken');
+      expect(pista(fixture)).toBeNull();
+    });
   });
 
   it('la lectura sigue a la perilla', () => {

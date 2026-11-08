@@ -49,7 +49,7 @@
        acertar no hay nada: la lectura sana es la única respuesta. Tiene su propia región viva para
        que quien usa lector de pantalla también la escuche, una vez. -->
   <div class="ms__pista-zona" aria-live="polite">
-    @if (health() === 'broken') {
+    @if (ayuda() && health() === 'broken') {
       <p class="ms__pista">
         <img
           class="ms__pista-mascota"
