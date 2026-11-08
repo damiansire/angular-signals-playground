@@ -12,10 +12,10 @@
   background: linear-gradient(
     to bottom,
     #121732 0%,
-    #1f2a52 42%,
-    #3d3c68 70%,
-    #7a587a 88%,
-    #c98a86 100%
+    #1c2549 45%,
+    #2e3058 72%,
+    #4d4266 90%,
+    #6e5470 100%
   );
 }
 :host([hidden]) {
@@ -26,12 +26,59 @@
   pointer-events: none;
 }
 
+/* La bocanada: un soplo redondo en la boca de Angie y tres nubes que suben de ella. Todo crece con
+   `--aa-aire`, así al cerrarse converge en la boca. Bordes blandos: es aire, no un recorte. */
+@property --aa-aire {
+  syntax: '<length>';
+  inherits: false;
+  initial-value: 0px;
+}
+:host(.aa--alejandose) {
+  --a: var(--aa-aire);
+  mask-image:
+    radial-gradient(
+      circle at calc(var(--aa-x) - var(--a) * 0.3) calc(var(--aa-y) - var(--a) * 0.32),
+      #000 calc(var(--a) * 0.42),
+      transparent calc(var(--a) * 0.56)
+    ),
+    radial-gradient(
+      circle at calc(var(--aa-x) + var(--a) * 0.32) calc(var(--aa-y) - var(--a) * 0.4),
+      #000 calc(var(--a) * 0.38),
+      transparent calc(var(--a) * 0.52)
+    ),
+    radial-gradient(
+      circle at var(--aa-x) calc(var(--aa-y) - var(--a) * 0.7),
+      #000 calc(var(--a) * 0.36),
+      transparent calc(var(--a) * 0.5)
+    ),
+    radial-gradient(
+      circle at var(--aa-x) var(--aa-y),
+      #000 calc(var(--a) * 0.2),
+      transparent calc(var(--a) * 0.26)
+    );
+}
+
 .aa__cielo,
 .aa__estrellas {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
+}
+/* Un velo de noche encima del cielo: oscurece los bordes y el alba de abajo, así el color fuerte queda
+   en Angie y no en el fondo. */
+.aa__cielo::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(
+      ellipse 70% 62% at 50% 50%,
+      rgba(10, 12, 34, 0) 0%,
+      rgba(10, 12, 34, 0.25) 60%,
+      rgba(10, 12, 34, 0.7) 100%
+    ),
+    linear-gradient(to bottom, rgba(10, 12, 34, 0) 55%, rgba(10, 12, 34, 0.35) 100%);
 }
 .aa__estrella {
   fill: #fff8ec;
@@ -400,10 +447,24 @@
   font-size: clamp(1.4rem, min(4.6vw, 5.4vh), 2.8rem);
   line-height: 1.08;
   letter-spacing: -0.02em;
-  color: #fff8ec;
+  color: #f4ecf6;
   text-shadow:
     0 4px 0 rgba(10, 12, 34, 0.7),
     0 12px 30px rgba(10, 12, 34, 0.55);
+}
+/* Un solo acento, el rosa de Angie, en lo que hay que hacer. */
+.aa__clave {
+  font-style: normal;
+  color: #ff8ac9;
+}
+
+.aa__pie {
+  display: grid;
+  justify-items: center;
+  align-items: center;
+}
+.aa__pie > * {
+  grid-area: 1 / 1;
 }
 
 /* La invitación es texto, no un botón a la vista: una ola la recorre como si sonara, y el toque
@@ -422,19 +483,24 @@
   font-weight: 900;
   font-size: clamp(1.05rem, min(3.2vw, 3.6vh), 1.5rem);
   line-height: 1.2;
-  color: #ffd46a;
-  text-shadow:
-    0 3px 0 rgba(10, 12, 34, 0.7),
-    0 0 22px rgba(255, 190, 90, 0.45);
+  color: rgba(244, 236, 246, 0.78);
+  text-shadow: 0 3px 0 rgba(10, 12, 34, 0.7);
   cursor: pointer;
   transition:
     background 0.2s ease-out,
     opacity 0.25s ease-in;
 }
-/* El foco llega solo al cargar: un anillo alrededor del texto lo volvía un botón otra vez. */
+/* El foco llega solo al cargar: un anillo o un fondo alrededor del texto lo volvían un botón otra
+   vez. Una línea rosa debajo alcanza para el teclado. */
 .aa__seguir:focus-visible {
   outline: none;
-  background: rgba(255, 248, 236, 0.08);
+}
+.aa__frase {
+  padding-bottom: 0.12em;
+  border-bottom: 2px solid transparent;
+}
+.aa__seguir:focus-visible .aa__frase {
+  border-bottom-color: rgba(255, 138, 201, 0.45);
 }
 .aa__mudo:focus-visible {
   outline: 3px solid #fff8ec;
@@ -457,11 +523,11 @@
   28%,
   100% {
     translate: 0 0;
-    color: #ffd46a;
+    color: rgba(244, 236, 246, 0.78);
   }
   12% {
     translate: 0 -0.26em;
-    color: #fff8ec;
+    color: #ffd46a;
   }
 }
 .aa__toque {
@@ -510,7 +576,6 @@
   pointer-events: none;
 }
 .aa__lado {
-  min-height: 1.4em;
   margin: 0;
   font-family: var(--font-display, system-ui, sans-serif);
   font-weight: 800;

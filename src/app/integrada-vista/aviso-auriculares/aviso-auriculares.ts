@@ -134,3 +134,36 @@ export function letrasDelLlamado(frase: string): LetraDelLlamado[][] {
     .filter(Boolean)
     .map((palabra) => [...palabra].map((c) => ({ c, i: i++ })));
 }
+
+/*
+ * La bocanada (ver el CSS del componente) son nubes que crecen con `--aa-aire` desde la boca, casi todas hacia
+ * arriba: con aire `a` ocupa de `-0.9a` a `0.9a` a lo ancho y de `-1.2a` a `0.26a` a lo alto,
+ * medido desde la boca, y tapa del todo un círculo de `0.2a` alrededor de ella.
+ */
+/** El aire con el que la bocanada tapa el aviso entero: arranca sin que se note el recorte. */
+export function aireQueCubre(x: number, y: number, ancho: number, alto: number): number {
+  return (1.05 * Math.hypot(Math.max(x, ancho - x), Math.max(y, alto - y))) / 0.2;
+}
+
+/** El aire más grande con el que la bocanada queda adentro del aviso, sin tocar sus bordes. */
+export function aireQueCabe(x: number, y: number, ancho: number, alto: number): number {
+  return 0.95 * Math.min(y / 1.2, (alto - y) / 0.26, x / 0.9, (ancho - x) / 0.9);
+}
+
+/**
+ * Los cuadros clave del aire, como `[offset, aire]`: de tapar todo a encajar en `encaja`, y de ahí a
+ * cerrarse en la boca. El primer tramo va parejo en escala (cada paso achica lo mismo), así la nube
+ * se forma de a poco: en línea recta, casi todo ese tramo pasaba con la pantalla todavía tapada.
+ */
+export function caminoDelAire(
+  cubre: number,
+  cabe: number,
+  encaja: number,
+): readonly (readonly [number, number])[] {
+  const pasos = 4;
+  const formando = Array.from({ length: pasos }, (_, i): readonly [number, number] => [
+    (encaja * i) / pasos,
+    cubre * (cabe / cubre) ** (i / pasos),
+  ]);
+  return [...formando, [encaja, cabe], [encaja + (1 - encaja) * 0.5, cabe * 0.3], [1, 0]];
+}

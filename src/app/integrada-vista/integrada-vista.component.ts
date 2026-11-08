@@ -112,6 +112,11 @@ export class IntegradaVistaComponent {
   /** La de la colina: la escena la lleva hasta el borde, y el paso y la pose los pone ella. */
   private readonly angieInicio = viewChild('angieInicio', { read: MascotaVivaComponent });
 
+  /** La noche del aviso vuelve a su boca mientras la cámara se aleja: era un suspiro suyo. */
+  protected angieSuspira(): void {
+    this.angieInicio()?.suspirar();
+  }
+
   /** Angie en la colina se mueve sola hasta que la despedida la desarma: ahí manda la salida. */
   protected readonly angieEsperando = signal(true);
 

@@ -14,6 +14,9 @@ import { sinMovimiento } from '../../libs/muelle';
 import { sonido } from '../../libs/sonido';
 import {
   LLAMADO,
+  aireQueCabe,
+  aireQueCubre,
+  caminoDelAire,
   cuandoSeAbre,
   cuandoSuena,
   estrellasDelAlba,
@@ -26,7 +29,16 @@ import {
 type Momento = 'esperando' | 'probando' | 'alejandose' | 'listo';
 
 /** Lo que tarda la cámara en alejarse hasta la colina. */
-const ALEJARSE_MS = 1700;
+const ALEJARSE_MS = 2400;
+/** La boca de Angie, en el dibujo de la mascota: de ahí salió la noche, ahí vuelve. */
+const BOCA = { x: 526.58, y: 662 };
+/**
+ * Hasta acá de la salida el aviso sigue del tamaño de la pantalla mientras la bocanada se cierra: si
+ * se achicara antes, asomarían sus bordes rectos. De ahí en más, nube y cámara van juntas a la boca.
+ */
+const ENCAJA = 0.3;
+/** Cuándo, en la salida, Angie suelta el aire: con la bocanada ya cerrada sobre ella. */
+const SUSPIRA_EN = 0.5;
 /** De qué tan cerca viene la colina: el aviso es un primer plano de la escena. */
 const CERCA = 2.6;
 /** Hasta dónde se achica el aviso mientras se va: se pierde a lo lejos, no desaparece en su lugar. */
@@ -69,6 +81,8 @@ const LENTE_DERECHO =
 export class AvisoAuricularesComponent {
   /** Se eligió (con o sin sonido) y la cámara empieza a alejarse: la colina puede despertarse. */
   readonly elegido = output<boolean>();
+  /** La bocanada llega a la boca de Angie en la colina: que suspire. */
+  readonly suspiro = output<void>();
 
   protected readonly momento = signal<Momento>('esperando');
   /** El aviso recomienda el sonido: arranca prendido, y apagarlo es una elección explícita. */
@@ -144,9 +158,10 @@ export class AvisoAuricularesComponent {
   }
 
   /**
-   * La cámara se aleja: la colina (el contenedor del aviso) viene de muy cerca y se abre, y el aviso,
-   * que está delante, se achica más rápido y se pierde. El aviso compensa la escala de la colina
-   * (arranca en `1 / CERCA`), así en el primer cuadro no salta.
+   * La cámara se aleja desde la boca de Angie en la colina: la noche del aviso era un suspiro suyo.
+   * La colina viene de muy cerca y se abre con la boca como punto fijo; el aviso, delante, compensa
+   * esa escala (arranca en `1 / CERCA`, así no salta) y se cierra como una bocanada que vuelve a la
+   * boca mientras ella suelta el aire. Sin esquinas: un rectángulo que se achica era una ventana.
    */
   private alejarse(conSonido: boolean): void {
     this.elegido.emit(conSonido);
@@ -155,16 +170,21 @@ export class AvisoAuricularesComponent {
       this.momento.set('listo');
       return;
     }
+    const r = this.host.getBoundingClientRect();
+    const boca = this.bocaDeLaColina(escena) ?? {
+      x: r.left + r.width / 2,
+      y: r.top + r.height * 0.6,
+    };
+    const x = boca.x - r.left;
+    const y = boca.y - r.top;
+    const origen = `${x}px ${y}px`;
+    this.host.style.setProperty('--aa-x', `${x}px`);
+    this.host.style.setProperty('--aa-y', `${y}px`);
     this.momento.set('alejandose');
-    const r = escena.getBoundingClientRect();
-    const angie = escena.querySelector('.ini__angie')?.getBoundingClientRect();
-    // Hacia Angie en la piedra: el aviso era un primer plano de ella.
-    const origen = angie
-      ? `${angie.left + angie.width / 2 - r.left}px ${angie.top + angie.height * 0.5 - r.top}px`
-      : '50% 60%';
+    // Las tres animaciones comparten curva: así los cuadros clave caen en el mismo instante.
     const tiempo: KeyframeAnimationOptions = {
       duration: ALEJARSE_MS,
-      easing: 'cubic-bezier(0.55, 0, 0.15, 1)',
+      easing: 'cubic-bezier(0.45, 0, 0.2, 1)',
     };
     escena.animate(
       [
@@ -173,15 +193,37 @@ export class AvisoAuricularesComponent {
       ],
       tiempo,
     );
+    const colinaAlEncajar = CERCA - (CERCA - 1) * ENCAJA;
     this.host.animate(
       [
-        { scale: 1 / CERCA, transformOrigin: origen, opacity: 1, borderRadius: '0px' },
-        { opacity: 1, borderRadius: '48px', offset: 0.35 },
-        { scale: LEJOS, transformOrigin: origen, opacity: 0, borderRadius: '64px' },
+        { scale: 1 / CERCA, transformOrigin: origen, opacity: 1 },
+        { scale: 1 / colinaAlEncajar, transformOrigin: origen, offset: ENCAJA },
+        { opacity: 1, offset: 0.8 },
+        { scale: LEJOS, transformOrigin: origen, opacity: 0 },
       ],
       tiempo,
     );
+    this.host.animate(
+      [
+        ...caminoDelAire(
+          aireQueCubre(x, y, r.width, r.height),
+          aireQueCabe(x, y, r.width, r.height),
+          ENCAJA,
+        ).map(([offset, aire]) => ({ '--aa-aire': `${aire}px`, offset })),
+      ],
+      { ...tiempo, fill: 'forwards' },
+    );
+    this.luego(ALEJARSE_MS * SUSPIRA_EN, () => this.suspiro.emit());
     this.luego(ALEJARSE_MS, () => this.momento.set('listo'));
+  }
+
+  /** Dónde está la boca de Angie en la colina, en la pantalla, o nada si la colina no está. */
+  private bocaDeLaColina(escena: HTMLElement): { x: number; y: number } | null {
+    const dibujo = escena.querySelector<SVGSVGElement>('.ini__angie svg');
+    const m = dibujo?.getScreenCTM();
+    if (!m) return null;
+    const p = new DOMPoint(BOCA.x, BOCA.y).matrixTransform(m);
+    return { x: p.x, y: p.y };
   }
 
   private luego(ms: number, fn: () => void): void {

@@ -204,32 +204,38 @@
     </app-mascota-viva>
   </div>
 
-  <h2 id="aa-titulo" class="aa__titulo">Ponete auriculares y subí el volumen</h2>
-  <!-- No es un botón a la vista: es la invitación a tocar donde sea. Sigue siendo un botón para el
+  <h2 id="aa-titulo" class="aa__titulo">
+    Ponete <em class="aa__clave">auriculares</em> y subí el <em class="aa__clave">volumen</em>
+  </h2>
+  <!-- La invitación y el lado que suena comparten lugar: uno se va cuando llega el otro, y el bloque
+       no carga un renglón vacío que lo descentra. -->
+  <div class="aa__pie">
+    <!-- No es un botón a la vista: es la invitación a tocar donde sea. Sigue siendo un botón para el
        teclado y el lector, que no tienen "cualquier lado". -->
-  <button #seguir class="aa__seguir" type="button" [attr.aria-label]="llamado">
-    <span class="aa__toque" aria-hidden="true"><i></i><i></i></span>
-    <span class="aa__frase" aria-hidden="true">
-      @for (palabra of letras; track $index) {
-        <span class="aa__palabra">
-          @for (l of palabra; track $index) {
-            <span class="aa__letra-ola" [style.--i]="l.i">{{ l.c }}</span>
-          }
-        </span>
+    <button #seguir class="aa__seguir" type="button" [attr.aria-label]="llamado">
+      <span class="aa__toque" aria-hidden="true"><i></i><i></i></span>
+      <span class="aa__frase" aria-hidden="true">
+        @for (palabra of letras; track $index) {
+          <span class="aa__palabra">
+            @for (l of palabra; track $index) {
+              <span class="aa__letra-ola" [style.--i]="l.i">{{ l.c }}</span>
+            }
+          </span>
+        }
+      </span>
+    </button>
+    <p class="aa__lado" aria-live="polite">
+      @switch (suena()) {
+        @case ('izquierda') {
+          Izquierda…
+        }
+        @case ('derecha') {
+          …derecha
+        }
+        @case ('ambos') {
+          ¡Listo!
+        }
       }
-    </span>
-  </button>
-  <p class="aa__lado" aria-live="polite">
-    @switch (suena()) {
-      @case ('izquierda') {
-        Izquierda…
-      }
-      @case ('derecha') {
-        …derecha
-      }
-      @case ('ambos') {
-        ¡Listo!
-      }
-    }
-  </p>
+    </p>
+  </div>
 </div>

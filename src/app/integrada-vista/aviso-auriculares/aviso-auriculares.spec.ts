@@ -1,5 +1,8 @@
 import {
   LLAMADO,
+  aireQueCabe,
+  aireQueCubre,
+  caminoDelAire,
   PANEO,
   cuandoSeAbre,
   cuandoSuena,
@@ -74,6 +77,43 @@ describe('aviso de auriculares', () => {
 
     it('los espacios de más no dejan palabras vacías', () => {
       expect(letrasDelLlamado(' a  b ').length).toBe(2);
+    });
+  });
+
+  describe('la bocanada', () => {
+    // Una pantalla con la boca de Angie abajo y a la izquierda del centro, como en la colina.
+    const [ancho, alto, x, y] = [1024, 768, 470, 500];
+
+    it('arranca tapando el aviso entero: el soplo de la boca llega a la esquina más lejana', () => {
+      const a = aireQueCubre(x, y, ancho, alto);
+      const esquinas = [
+        [0, 0],
+        [ancho, 0],
+        [0, alto],
+        [ancho, alto],
+      ];
+      for (const [ex, ey] of esquinas) expect(0.2 * a).toBeGreaterThan(Math.hypot(ex - x, ey - y));
+    });
+
+    it('al encajar queda adentro del aviso: no asoma ningún borde recto', () => {
+      const a = aireQueCabe(x, y, ancho, alto);
+      expect(x - 0.9 * a).toBeGreaterThanOrEqual(0);
+      expect(x + 0.9 * a).toBeLessThanOrEqual(ancho);
+      expect(y - 1.2 * a).toBeGreaterThanOrEqual(0);
+      expect(y + 0.26 * a).toBeLessThanOrEqual(alto);
+    });
+
+    it('se cierra: encaja con menos aire del que tenía al arrancar', () => {
+      expect(aireQueCabe(x, y, ancho, alto)).toBeLessThan(aireQueCubre(x, y, ancho, alto));
+    });
+
+    it('el camino del aire baja siempre, encaja a tiempo y termina cerrado en la boca', () => {
+      const camino = caminoDelAire(4000, 400, 0.3);
+      const aires = camino.map(([, a]) => a);
+      expect(aires).toEqual([...aires].sort((a, b) => b - a));
+      expect(camino).toContain([0.3, 400]);
+      expect(camino[0]).toEqual([0, 4000]);
+      expect(camino.at(-1)).toEqual([1, 0]);
     });
   });
 });
