@@ -498,6 +498,18 @@ export class IntegradaVistaComponent {
   private darVueltaLaHoja(adelante: boolean, pantalla: HTMLElement): void {
     const papel = this.hojaQuePasa()?.nativeElement;
     if (!papel || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    // El libro de leyes no tiene hoja: va suelto sobre la escena, y una hoja de papel girando de
+    // borde a borde se veía como un fogonazo blanco. Ahí la página nueva entra deslizándose.
+    if (this.libro().concepto === undefined) {
+      pantalla.animate(
+        [
+          { opacity: 0, translate: `${adelante ? 48 : -48}px 0` },
+          { opacity: 1, translate: '0 0' },
+        ],
+        { duration: 420, easing: 'cubic-bezier(0.22, 1, 0.36, 1)', fill: 'backwards' },
+      );
+      return;
+    }
     const giro = adelante ? -100 : 100;
     papel.style.transformOrigin = adelante ? 'left center' : 'right center';
     papel.animate(

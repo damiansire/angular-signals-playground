@@ -141,12 +141,14 @@
   z-index: 4;
   background: #fcfbf5;
 }
+/* En tres columnas: "Anterior" a la izquierda solo si hay página antes, y "Siguiente" siempre a la
+   derecha, esté o no el otro. */
 .prologo__manual-pie {
   z-index: 4;
   position: sticky;
   bottom: -1rem;
-  display: flex;
-  justify-content: space-between;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
   align-items: center;
   margin: 1.25rem calc(-1 * clamp(1.1rem, 2.4vw, 2.2rem)) -1rem;
   padding: 0.7rem clamp(1.1rem, 2.4vw, 2.2rem);
@@ -162,12 +164,13 @@
   color: #1f1a14;
   cursor: pointer;
 }
-/* Apagado sin bajar de 3:1 contra el pie. */
-.prologo__manual-boton:disabled {
-  opacity: 0.65;
-  cursor: default;
+.prologo__manual-atras {
+  grid-column: 1;
+  justify-self: start;
 }
 .prologo__manual-boton--sigue {
+  grid-column: 3;
+  justify-self: end;
   border-color: #b8791f;
   background: #ffd27a;
 }
@@ -184,6 +187,7 @@
     monospace;
   letter-spacing: 0.08em;
   color: #6a6355;
+  grid-column: 2;
   pointer-events: none;
   opacity: 0;
   /* Keyframes propios: Angular renombra los de cada hoja de estilo, y los de las cards no llegan. */
@@ -219,6 +223,12 @@
 .manual-suelto .prologo__manual {
   inset: 1rem 0;
 }
+/* El libro no tiene papel propio: suelto, sobre el mapa crema, el velo gris dejaba leer el mapa a
+   través y "11 sin establecer" se pisaba con la cabecera. Va el cielo del prólogo, casi opaco. */
+.manual-suelto:has(.prologo__manual--libro) .prologo__velo {
+  background: radial-gradient(ellipse 80% 90% at 50% 45%, rgb(38 22 64 / 95%), rgb(14 8 30 / 97%));
+  backdrop-filter: blur(6px);
+}
 .prologo__manual-boton:focus-visible {
   outline: 3px solid #b8791f;
   outline-offset: 2px;
@@ -245,4 +255,162 @@
 /* La consigna de cada página va en el renglón de su número, sin el margen de un párrafo suelto. */
 .prologo__manual .subhost [hacer] {
   margin: 0;
+}
+
+/* El libro de leyes (el manual y el árbol de Signal Space) no es un rectángulo encima de la escena:
+   la hoja no tiene fondo, borde ni barras. La escena queda detrás, desenfocada y más oscura hacia
+   el medio, donde se lee; la cabecera y los botones van sueltos sobre ella, y lo que se toca es
+   papel (ver `app-pagina-del-manual`). Como las lecciones del viaje a Japón. */
+.prologo--manual .prologo__escena,
+.prologo--manual .prologo__mascot {
+  filter: blur(2.5px);
+}
+.prologo--manual .prologo__velo {
+  background: radial-gradient(
+    ellipse 62% 72% at 50% 52%,
+    rgb(14 8 30 / 74%),
+    rgb(14 8 30 / 56%) 62%,
+    rgb(14 8 30 / 40%)
+  );
+}
+.prologo__manual.prologo__manual--libro,
+.prologo__manual.prologo__manual--libro.card--dissolve {
+  inset: 4rem 0 0;
+  width: min(112rem, calc(100% - 3rem));
+  padding: 0 clamp(1rem, 2.4vw, 2.2rem);
+  border-top: 0;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+}
+.prologo__manual--libro .prologo__manual-cabeza {
+  margin-bottom: 0.5rem;
+  padding-bottom: 0;
+  border-bottom: 0;
+  background: none;
+}
+.prologo__manual--libro .prologo__manual-libro,
+.prologo__manual--libro .prologo__manual-paso {
+  color: #e9defa;
+  text-shadow: 0 2px 0 rgb(25 8 40 / 75%);
+}
+.prologo__manual--libro .prologo__manual-marca {
+  background: rgb(255 248 236 / 28%);
+}
+.prologo__manual--libro .prologo__manual-marca--leida {
+  background: #fff8ec;
+}
+.prologo__manual--libro .prologo__manual-marca--aca {
+  background: #ffd27a;
+  box-shadow: 0 0 10px rgb(255 210 122 / 60%);
+}
+/* El pie sin barra: los dos carteles flotan sobre la escena, en las esquinas de abajo. */
+.prologo__manual--libro .prologo__manual-pie {
+  bottom: 0;
+  margin: 0.25rem calc(-1 * clamp(1rem, 2.4vw, 2.2rem)) 0;
+  padding: 0.5rem clamp(1rem, 2.4vw, 2.2rem) 0.75rem;
+  border-top: 0;
+  background: none;
+  pointer-events: none;
+}
+/* Cartelitos de papel, un poco torcidos, con la línea punteada adentro: se enderezan al pasarles
+   por encima y se hunden en su sombra al apretarlos. */
+.prologo__manual--libro .prologo__manual-boton {
+  padding: 0.45rem 1rem 0.5rem;
+  border: 2px solid #5d4a5e;
+  border-radius: 10px;
+  outline: 1.4px dashed #c9b49a;
+  outline-offset: -6px;
+  background: #fffaf2;
+  box-shadow: 3px 4px 0 rgb(6 3 14 / 40%);
+  rotate: 1.5deg;
+  font:
+    800 1rem / 1.2 'Baloo 2',
+    var(--font-display, system-ui, sans-serif);
+  letter-spacing: 0.01em;
+  color: #2b2230;
+  pointer-events: auto;
+  transition:
+    rotate 0.2s,
+    translate 0.2s,
+    background-color 0.2s;
+}
+.prologo__manual--libro .prologo__manual-boton--sigue {
+  outline-color: #b8791f;
+  background: #ffd27a;
+  rotate: -1.5deg;
+}
+.prologo__manual--libro .prologo__manual-boton:hover {
+  rotate: 0deg;
+  translate: 0 -2px;
+}
+.prologo__manual--libro .prologo__manual-boton:active {
+  translate: 1px 2px;
+  box-shadow: 1px 2px 0 rgb(6 3 14 / 40%);
+}
+.prologo__manual--libro .prologo__manual-boton:focus-visible {
+  outline: 3px solid #fff8ec;
+  outline-offset: 3px;
+}
+/* La página se estira hasta el pie: cada eslabón entre la hoja y ella crece con el alto que queda. */
+.prologo__manual--libro .prologo__manual-cuerpo,
+.prologo__manual--libro .subhost,
+.prologo__manual--libro .subhost > * {
+  display: flex;
+  flex-direction: column;
+  flex: 1 0 auto;
+}
+@media (prefers-reduced-motion: reduce) {
+  .prologo__manual--libro .prologo__manual-boton {
+    rotate: none;
+    transition: none;
+  }
+}
+
+/* 0/1: el código y el árbol llegan hasta el fondo de la mesa. El editor es una pantalla pareja (la
+   armonización le saca el fondo y solo quedaban pintados los renglones), con el código al medio y
+   la letra que crece con el alto que hay. */
+.prologo__manual .subhost .htt-codigo > div {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  border: 3px solid #5d4a5e;
+  border-radius: 14px;
+  background: #1f2937;
+}
+.prologo__manual .subhost .htt-codigo .p-4 {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+/* A cada token: la armonización le pone su letra a todo `div` del código, no solo al renglón. El
+   renglón va más junto que en la molécula: a 1366×768 la hoja se pasaba del alto por 12 px. */
+.prologo__manual .subhost .htt-codigo .p-4 div {
+  font-size: clamp(0.9rem, 1.6vh, 1.2rem);
+}
+.prologo__manual .subhost .htt-codigo .p-4 > div {
+  padding-block: 0.2rem;
+}
+/* Vacío, el árbol dice dónde va a crecer, con la letra de los carteles. */
+.prologo__manual .subhost .htt-arbol .tree-hint {
+  font:
+    800 clamp(1rem, 1.4vw, 1.25rem) / 1.3 'Baloo 2',
+    var(--font-display, system-ui, sans-serif);
+  letter-spacing: 0.01em;
+  color: #8a7d66;
+}
+/* El lienzo de ECharts queda con el alto en px de la medición anterior: en el flujo, ese alto era
+   el mínimo de la grilla y la hoja nunca podía achicarse (a 1366×768 se pasaba). Va encima de su
+   recuadro, que es quien tiene el alto. */
+.prologo__manual .subhost .htt-arbol .tree-card {
+  height: 100%;
+  min-height: 17rem;
+}
+.prologo__manual .subhost .htt-arbol app-node-tree {
+  position: absolute;
+  inset: 0.5rem;
+}
+.prologo__manual .subhost .htt-arbol :is(.demo-chart, .tree-slot) {
+  height: 100%;
 }

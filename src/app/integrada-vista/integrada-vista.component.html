@@ -704,6 +704,7 @@
   <section
     #hojaDelManual
     class="prologo__manual card--dissolve"
+    [class.prologo__manual--libro]="libro().concepto === undefined"
     tabindex="-1"
     role="region"
     aria-labelledby="manual-ley"
@@ -748,11 +749,11 @@
       <div #hojaQuePasa class="prologo__manual-pasa" aria-hidden="true"></div>
     </div>
     <nav class="prologo__manual-pie" aria-label="Páginas del manual">
-      @if (paginas().length > 1) {
+      <!-- Solo si hay una página antes: en la primera, "Anterior" ofrecía volver a donde nunca se fue. -->
+      @if (pagina()! > 0) {
         <button
           type="button"
-          class="prologo__manual-boton"
-          [disabled]="pagina() === 0"
+          class="prologo__manual-boton prologo__manual-atras"
           (click)="pasarPagina(-1)"
         >
           &larr; Anterior
