@@ -2,7 +2,9 @@ import type { SalidaDeAudio } from '../libs/sonido';
 
 /**
  * La música de la despedida de Angie: tranquila, pero con algo que se viene. Suena desde el toque
- * (antes no se puede: el navegador abre el audio recién con un gesto) hasta que cae la noche.
+ * (antes no se puede: el navegador abre el audio recién con un gesto) hasta que cae la noche. Los
+ * pensamientos los pasa quien mira, con un toque: por eso no hay horario, sino un fondo que sigue y
+ * una fase por momento, que suena hasta que llega la siguiente.
  *
  * - Un fondo grave en re, quieto, que no cambia: la calma.
  * - Un acorde por pensamiento. "Ellos ya están aquí…" en re menor con novena: lo presiente.
@@ -26,17 +28,13 @@ export interface NotaDeMusica {
   readonly volumen: number;
 }
 
-/** Los tiempos de la despedida que la música acompaña, en segundos desde el toque. */
-export interface TiemposDelPresentimiento {
-  /** Cuando aparece "Ellos ya están aquí…". */
-  readonly presiente: number;
-  /** Cuando cambia a "La hora ha llegado…". */
-  readonly decide: number;
-  /** Cuando se termina de pensar y empieza a volverse luz. */
-  readonly seVuelveLuz: number;
-  /** Cuando ya es de noche y llega el prólogo: ahí la música ya se fue. */
-  readonly noche: number;
-}
+/** Los momentos de la despedida: los dos pensamientos y cuando se vuelve luz. */
+export type FaseDelPresentimiento = 'presiente' | 'decide' | 'luz';
+
+/** Si nadie toca, un pensamiento suena esto como mucho, en segundos: después se apaga solo. */
+export const SOSTENIDO = 180;
+/** Desde que se vuelve luz hasta que cae la noche y llega el prólogo, en segundos. */
+export const HASTA_LA_NOCHE = 5;
 
 const RE2 = 73.42;
 const LA2 = 110;
@@ -53,52 +51,67 @@ const SUBE = [440, 523.25, 587.33];
 /** Con las luces, hacia el sol. */
 const AL_SOL = [587.33, 659.25, 698.46, 880, 1174.66, 1318.51, 1760];
 
-/** Cuánto se pisan dos acordes seguidos: sin cruce, el cambio se oye como un corte. */
-const CRUCE = 0.6;
+type Nota = (desde: number, hz: number, dura: number, voz: VozDeMusica, volumen: number) => void;
 
-export function planDelPresentimiento(t: TiemposDelPresentimiento): readonly NotaDeMusica[] {
+function anotar(): { notas: NotaDeMusica[]; nota: Nota } {
   const notas: NotaDeMusica[] = [];
-  const nota = (
-    desde: number,
-    hz: number,
-    dura: number,
-    voz: VozDeMusica,
-    volumen: number,
-  ): void => {
+  const nota: Nota = (desde, hz, dura, voz, volumen) => {
     if (dura > 0) notas.push({ t: desde, hz, dura, voz, volumen });
   };
+  return { notas, nota };
+}
 
-  nota(0, RE2, t.noche, 'fondo', 0.06);
-  nota(0, LA2, t.noche, 'fondo', 0.035);
+/** El fondo grave, quieto: sigue igual de un pensamiento al otro, así el cambio no se oye como corte. */
+export function planDelFondo(dura: number): readonly NotaDeMusica[] {
+  const { notas, nota } = anotar();
+  nota(0, RE2, dura, 'fondo', 0.06);
+  nota(0, LA2, dura, 'fondo', 0.035);
+  return notas;
+}
 
-  const acorde = (hzs: readonly number[], desde: number, hasta: number): void =>
-    hzs.forEach((hz, i) => nota(desde, hz, hasta - desde, 'acorde', 0.03 - i * 0.003));
-  acorde(PRESIENTE, t.presiente, t.decide + CRUCE);
-  acorde(DECIDE, t.decide, t.seVuelveLuz + CRUCE);
-  acorde(SUSPENDIDA, t.seVuelveLuz, t.noche);
+const FASES: Readonly<
+  Record<
+    FaseDelPresentimiento,
+    {
+      acorde: readonly number[];
+      motivo: readonly number[];
+      entra: number;
+      paso: number;
+      vol: number;
+    }
+  >
+> = {
+  presiente: { acorde: PRESIENTE, motivo: BAJA, entra: 0.5, paso: 0.55, vol: 0.05 },
+  decide: { acorde: DECIDE, motivo: SUBE, entra: 0.4, paso: 0.5, vol: 0.05 },
+  luz: { acorde: SUSPENDIDA, motivo: AL_SOL, entra: 0.5, paso: 0.32, vol: 0.04 },
+};
 
-  // Cada motivo entra en su ventana: si un pensamiento dura poco, la caja toca menos notas.
-  const motivo = (
-    hzs: readonly number[],
-    desde: number,
-    hasta: number,
-    paso: number,
-    volumen: number,
-  ): void =>
-    hzs.forEach((hz, i) => {
-      const cuando = desde + i * paso;
-      if (cuando < hasta) nota(cuando, hz, 1.6, 'caja', volumen);
-    });
-  motivo(BAJA, t.presiente + 0.5, t.decide, 0.55, 0.05);
-  motivo(SUBE, t.decide + 0.4, t.seVuelveLuz, 0.5, 0.05);
-  motivo(AL_SOL, t.seVuelveLuz + 0.5, t.noche - 1, 0.32, 0.04);
-
+/**
+ * Lo que suena en un momento, desde que empieza: su acorde, sostenido `dura` segundos, y la cajita
+ * encima. Si el momento dura poco, la caja toca menos notas en vez de pisar el siguiente.
+ */
+export function planDeFase(
+  fase: FaseDelPresentimiento,
+  dura = fase === 'luz' ? HASTA_LA_NOCHE : SOSTENIDO,
+): readonly NotaDeMusica[] {
+  const { notas, nota } = anotar();
+  const f = FASES[fase];
+  f.acorde.forEach((hz, i) => nota(0, hz, dura, 'acorde', 0.03 - i * 0.003));
+  // Con las luces, la caja termina un segundo antes de la noche: que se apague con el cielo.
+  const hasta = fase === 'luz' ? dura - 1 : dura;
+  f.motivo.forEach((hz, i) => {
+    const cuando = f.entra + i * f.paso;
+    if (cuando < hasta) nota(cuando, hz, 1.6, 'caja', f.vol);
+  });
   return notas.sort((a, b) => a.t - b.t);
 }
 
 export interface Musica {
-  /** La baja de a poco y corta lo agendado: para cuando la despedida se interrumpe. */
-  apagar(): void;
+  /**
+   * La baja de a poco, en `sale` segundos, y corta lo agendado: al pasar de un pensamiento al otro,
+   * o cuando la despedida se interrumpe.
+   */
+  apagar(sale?: number): void;
 }
 
 /** Entradas y salidas de cada voz, en segundos: el fondo y los acordes entran como una marea. */
@@ -169,12 +182,12 @@ export function tocarPresentimiento(salida: SalidaDeAudio, plan: readonly NotaDe
     // Sin audio la despedida es la misma, en silencio.
   }
   return {
-    apagar() {
+    apagar(sale = 0.6) {
       try {
         const ahora = ctx.currentTime;
         maestro?.gain.setValueAtTime(maestro.gain.value, ahora);
-        maestro?.gain.linearRampToValueAtTime(0, ahora + 0.6);
-        for (const osc of osciladores) osc.stop(ahora + 0.7);
+        maestro?.gain.linearRampToValueAtTime(0, ahora + sale);
+        for (const osc of osciladores) osc.stop(ahora + sale + 0.1);
       } catch {
         // Ya estaba cortada.
       }

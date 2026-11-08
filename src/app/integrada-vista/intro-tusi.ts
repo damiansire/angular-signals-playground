@@ -440,8 +440,8 @@ export function initIntroTusi(host: HTMLElement, options: IntroTusiOptions = {})
       entrar();
       return;
     }
-    // Mientras dura la salida el overlay sigue puesto, pero ya no se puede volver a tocar.
-    overlay.inert = true;
+    // Mientras dura la salida el overlay sigue tocable: los pensamientos de Angie los pasa quien
+    // mira con un toque. Volver a entrar no se puede: `picked` ya lo cierra.
     void options.despedida().then(() => {
       if (!cerrado) entrar();
     });

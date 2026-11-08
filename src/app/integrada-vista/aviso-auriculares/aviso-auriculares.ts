@@ -116,3 +116,21 @@ export function estrellasDelAlba(semilla: number, cantidad: number): EstrellaDel
     retraso: +(r() * 4).toFixed(2),
   }));
 }
+
+/** Lo que invita a seguir: no es un botón a la vista, es la frase que dice que se toca en cualquier lado. */
+export const LLAMADO = 'Tocá en cualquier lado para continuar';
+
+export interface LetraDelLlamado {
+  readonly c: string;
+  /** Su lugar en la frase entera: la ola la recorre de punta a punta, sin reiniciar en cada palabra. */
+  readonly i: number;
+}
+
+/** La frase en palabras y letras, para que una ola la recorra. Las palabras no se cortan al bajar de renglón. */
+export function letrasDelLlamado(frase: string): LetraDelLlamado[][] {
+  let i = 0;
+  return frase
+    .split(' ')
+    .filter(Boolean)
+    .map((palabra) => [...palabra].map((c) => ({ c, i: i++ })));
+}

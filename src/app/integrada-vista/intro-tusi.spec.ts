@@ -174,13 +174,20 @@ describe('initIntroTusi', () => {
       expect(sonido().desbloquear).toHaveBeenCalled();
     });
 
-    it('el overlay espera a la salida, pero ya no se puede volver a tocar', () => {
-      const t = arrancar(() => new Promise<void>(() => undefined));
+    it('el overlay espera a la salida y sigue tocable, pero no se puede volver a entrar', () => {
+      let salidas = 0;
+      const t = arrancar(() => {
+        salidas++;
+        return new Promise<void>(() => undefined);
+      });
 
+      t.entrar.click();
       t.entrar.click();
 
       expect(t.overlay.classList.contains('gone')).toBeFalse();
-      expect(t.overlay.inert).toBeTrue();
+      // Los pensamientos de Angie se pasan tocando: inerte, el toque no llegaba.
+      expect(t.overlay.inert).toBeFalse();
+      expect(salidas).toBe(1);
       expect(t.gatillos.length).toBe(0);
     });
 

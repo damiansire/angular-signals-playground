@@ -1,8 +1,10 @@
 import {
+  LLAMADO,
   PANEO,
   cuandoSeAbre,
   cuandoSuena,
   estrellasDelAlba,
+  letrasDelLlamado,
   planDeLaPrueba,
 } from './aviso-auriculares';
 
@@ -54,6 +56,24 @@ describe('aviso de auriculares', () => {
         expect(e.y).toBeGreaterThanOrEqual(0);
         expect(e.y).toBeLessThanOrEqual(600);
       }
+    });
+  });
+
+  describe('el llamado', () => {
+    it('se arma de nuevo con las mismas letras, en palabras enteras', () => {
+      const palabras = letrasDelLlamado(LLAMADO);
+      expect(palabras.map((p) => p.map((l) => l.c).join('')).join(' ')).toBe(LLAMADO);
+    });
+
+    it('la ola recorre la frase entera: el índice sigue de una palabra a la otra', () => {
+      const indices = letrasDelLlamado('ab cd e')
+        .flat()
+        .map((l) => l.i);
+      expect(indices).toEqual([0, 1, 2, 3, 4]);
+    });
+
+    it('los espacios de más no dejan palabras vacías', () => {
+      expect(letrasDelLlamado(' a  b ').length).toBe(2);
     });
   });
 });

@@ -1,11 +1,8 @@
 import { IMPACTO } from '../libs/muelle';
 import {
   ANCHO,
-  PARTIDA,
   alturaDeColina,
-  avanceDelPaseo,
   azar,
-  bajadaParaPisar,
   caidaDeLaColina,
   caminoDeColina,
   dispersion,
@@ -15,11 +12,7 @@ import {
   initInicioAngie,
   juncos,
   matasDePasto,
-  partidaEnLaColina,
-  pasosDelPaseo,
-  pendienteDeLaColina,
 } from './inicio-angie';
-import { hasta } from './testing/cuadros';
 
 /**
  * La pantalla de inicio es dibujo, pero lo que la sostiene son cuentas: el paisaje sale con semilla
@@ -64,69 +57,13 @@ describe('inicio-angie', () => {
     });
   });
 
-  describe('el paseo hasta la piedra', () => {
-    it('arranca donde la meseta empieza a caer, no en la ladera empinada', () => {
-      expect(caidaDeLaColina(PARTIDA)).toBeGreaterThan(20);
-      expect(caidaDeLaColina(PARTIDA)).toBeLessThan(60);
-      expect(pendienteDeLaColina(PARTIDA)).toBeGreaterThan(5);
-      expect(pendienteDeLaColina(PARTIDA)).toBeLessThan(22);
-    });
-
-    it('no arranca más allá del borde de la meseta ni de lo que deja la pantalla', () => {
-      expect(partidaEnLaColina(5000)).toBe(PARTIDA);
-      expect(partidaEnLaColina(120)).toBe(120);
-      expect(partidaEnLaColina(-30)).toBe(0);
-    });
-
-    it('sigue pisando la colina: en la piedra no baja y en la partida baja con la ladera', () => {
+  describe('la piedra', () => {
+    it('está en el centro, donde la colina no baja', () => {
       expect(caidaDeLaColina(0)).toBe(0);
-      expect(caidaDeLaColina(PARTIDA)).toBeCloseTo(
-        alturaDeColina(ANCHO / 2 + PARTIDA) - alturaDeColina(ANCHO / 2),
+      expect(caidaDeLaColina(100)).toBeCloseTo(
+        alturaDeColina(ANCHO / 2 + 100) - alturaDeColina(ANCHO / 2),
         6,
       );
-    });
-
-    it('en la ladera pisa con el pie de abajo: ninguno queda en el aire', () => {
-      const medio = 40;
-      const inclina = pendienteDeLaColina(PARTIDA) * 0.25;
-      const bajar = bajadaParaPisar(PARTIDA, medio, inclina);
-      const giro = Math.sin((inclina * Math.PI) / 180) * medio;
-      // Cuánto le falta a cada pie para tocar el piso: nunca positivo (en el aire), y uno en cero.
-      const aire = [
-        caidaDeLaColina(PARTIDA - medio) - (bajar - giro),
-        caidaDeLaColina(PARTIDA + medio) - (bajar + giro),
-      ];
-      expect(Math.max(...aire)).toBeCloseTo(0, 6);
-      expect(bajar).toBeGreaterThan(caidaDeLaColina(PARTIDA));
-    });
-
-    it('en el llano pisa igual que siempre', () => {
-      const llano = (): number => 790;
-      expect(bajadaParaPisar(100, 40, 0, llano)).toBe(0);
-    });
-
-    it('arranca y frena suave, sin volver atrás', () => {
-      expect(avanceDelPaseo(0)).toBe(0);
-      expect(avanceDelPaseo(1)).toBeCloseTo(1, 9);
-      let antes = 0;
-      for (let p = 0.01; p <= 1; p += 0.01) {
-        expect(avanceDelPaseo(p)).withContext(`p = ${p}`).toBeGreaterThanOrEqual(antes);
-        antes = avanceDelPaseo(p);
-      }
-      // Lo que avanza en el primer y el último 5% es mucho menos que en un 5% del medio.
-      const medio = avanceDelPaseo(0.525) - avanceDelPaseo(0.475);
-      expect(avanceDelPaseo(0.05)).toBeLessThan(medio * 0.3);
-      expect(1 - avanceDelPaseo(0.95)).toBeLessThan(medio * 0.3);
-    });
-
-    it('da pasos enteros, al menos uno, con zancadas parecidas a las suyas', () => {
-      expect(pasosDelPaseo(380, 37)).toBe(10);
-      expect(pasosDelPaseo(10, 37)).toBe(1);
-      for (const distancia of [100, 237, 380]) {
-        const pasos = pasosDelPaseo(distancia, 37);
-        expect(Number.isInteger(pasos)).toBeTrue();
-        expect(Math.abs(distancia / pasos - 37)).toBeLessThan(37 / 2);
-      }
     });
   });
 
@@ -318,83 +255,15 @@ describe('inicio-angie', () => {
       expect(golpes).toEqual(['0.5', '0.3']);
     });
 
-    describe('camina hasta la piedra, nunca aparece en ella', () => {
-      const x = (el: HTMLElement): number => parseFloat(el.style.translate) || 0;
-      const dormir = (ms: number): Promise<void> => new Promise((r) => setTimeout(r, ms));
-      function caminando(): { host: HTMLElement; escena: HTMLElement; angie: HTMLElement } {
-        const { host, escena } = montar();
-        const angie = escena.querySelector<HTMLElement>('.ini__angie')!;
-        // Más angosta que la escena: si no, no le queda lugar para un paso y se sienta donde está.
-        angie.style.width = '100px';
-        return { host, escena, angie };
-      }
+    it('Angie ya está sentada en la piedra del centro, sin caminar hasta ella', () => {
+      const { host, escena } = montar();
+      const sentadas: (boolean | undefined)[] = [];
+      cerrar.push(initInicioAngie(host, { sentarse: (deUna) => sentadas.push(deUna) }).dispose);
 
-      it('arranca a la derecha, ya a la vista, y camina hacia la izquierda', async () => {
-        const { host, angie } = caminando();
-        const rumbos: (number | undefined)[] = [];
-        const cuerpo = {
-          caminar: (_f: number, _a?: number, rumbo?: 1 | -1) => rumbos.push(rumbo),
-          sentarse: () => undefined,
-          pararse: () => undefined,
-        };
-        cerrar.push(initInicioAngie(host, cuerpo).dispose);
-        const partida = x(angie);
-        expect(partida).toBeGreaterThan(0);
-
-        await hasta(() => x(angie) < partida);
-
-        expect(x(angie)).toBeLessThan(partida);
-        expect(rumbos.length).toBeGreaterThan(0);
-        expect(rumbos.every((r) => r === -1)).toBeTrue();
-      });
-
-      it('si tocan para entrar en camino, sigue hasta la piedra antes de despedirse', async () => {
-        const { host, escena, angie } = caminando();
-        const inicio = initInicioAngie(host);
-        cerrar.push(inicio.dispose);
-        const partida = x(angie);
-        await hasta(() => x(angie) < partida);
-
-        void inicio.despedir();
-        const alTocar = x(angie);
-        await hasta(() => x(angie) < alTocar);
-
-        expect(x(angie)).toBeLessThan(alTocar);
-        expect(escena.classList).not.toContain('ini--saliendo');
-      });
-
-      it('con la pausa de fondo recordada igual camina', async () => {
-        const { host, escena, angie } = caminando();
-        host.classList.add('fondo-en-pausa');
-        cerrar.push(initInicioAngie(host).dispose);
-        const partida = x(angie);
-
-        await hasta(() => x(angie) < partida);
-        const primerTramo = x(angie);
-        await hasta(() => x(angie) < primerTramo);
-
-        expect(x(angie)).toBeLessThan(primerTramo);
-        expect(escena.classList).not.toContain('ini--sentada');
-      });
-
-      it('si la landing se va de vista caminando, al volver sigue desde donde quedó', async () => {
-        const { host, escena, angie } = caminando();
-        cerrar.push(initInicioAngie(host).dispose);
-        const partida = x(angie);
-        await hasta(() => x(angie) < partida);
-
-        escena.classList.add('gone');
-        await dormir(50);
-        const alIrse = x(angie);
-        await dormir(250);
-        expect(x(angie)).toBe(alIrse);
-        expect(escena.classList).not.toContain('ini--sentada');
-
-        escena.classList.remove('gone');
-        await hasta(() => x(angie) < alIrse);
-        expect(x(angie)).toBeLessThan(alIrse);
-        expect(escena.classList).not.toContain('ini--sentada');
-      });
+      expect(parseFloat(escena.querySelector<HTMLElement>('.ini__angie')!.style.translate)).toBe(0);
+      expect(escena.classList).toContain('ini--sentada');
+      // De una: si bajara a la piedra a la vista, se leería como que recién llega.
+      expect(sentadas).toEqual([true]);
     });
 
     it('con movimiento reducido la salida termina enseguida, sin viaje', async () => {

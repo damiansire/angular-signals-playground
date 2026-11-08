@@ -505,6 +505,29 @@
 .ini__burbuja {
   display: grid;
 }
+/* Como en un diálogo de juego, el triangulito que late dice "tocá para seguir": los pensamientos
+   los pasa quien mira. Aparece con el último punto, cuando la frase ya se leyó. */
+.ini__burbuja::after {
+  content: '';
+  position: absolute;
+  right: 0.55em;
+  bottom: 0.2em;
+  width: 0.5em;
+  height: 0.38em;
+  background: #c8005d;
+  clip-path: polygon(0 0, 100% 0, 50% 100%);
+  opacity: 0;
+}
+.ini--piensa .ini__burbuja::after {
+  opacity: 1;
+  transition: opacity 0.2s ease-out 1.3s;
+  animation: ini-sigue 0.9s ease-in-out 1.3s infinite;
+}
+@keyframes ini-sigue {
+  50% {
+    translate: 0 0.16em;
+  }
+}
 .ini__frase {
   grid-area: 1 / 1;
   text-align: center;

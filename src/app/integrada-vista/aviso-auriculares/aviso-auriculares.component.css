@@ -1,5 +1,5 @@
-/* El telón de antes del amanecer: noche arriba, el alba tibia en el borde de abajo. Planos de atrás
-   hacia adelante: cielo, estrellas, alba, halo, auriculares, texto. */
+/* La noche de antes de la mañana. Planos de atrás hacia adelante: cielo, estrellas, halo, el piso de
+   luz, Angie con sus auriculares, texto. Al irse, la cámara se aleja (lo anima el componente). */
 :host {
   position: absolute;
   inset: 0;
@@ -17,14 +17,13 @@
     #7a587a 88%,
     #c98a86 100%
   );
-  /* Sube con aceleración, como un telón que se suelta: con ease-out se sentía un fundido. */
-  transition: translate 1.1s cubic-bezier(0.55, 0, 0.75, 0.2);
 }
 :host([hidden]) {
   display: none;
 }
-:host(.aa--abriendo) {
-  translate: 0 calc(-100% - 36vh);
+/* Mientras se aleja ya no se toca: un segundo toque no puede volver a elegir. */
+:host(.aa--alejandose) {
+  pointer-events: none;
 }
 
 .aa__cielo,
@@ -48,25 +47,90 @@
   }
 }
 
-/* El alba cuelga del borde de abajo, fuera del telón: al subir, barre la colina como luz que llega. */
-.aa__alba {
+/* ─── El sonido, arriba y aparte ──────────────────────────────────────────────────────────────── */
+
+.aa__mudo {
   position: absolute;
-  left: 0;
-  right: 0;
-  top: 100%;
-  height: 34vh;
-  background: linear-gradient(
-    to bottom,
-    #c98a86 0%,
-    rgba(255, 200, 150, 0.65) 30%,
-    rgba(255, 228, 190, 0.25) 65%,
-    rgba(255, 240, 220, 0) 100%
-  );
-  pointer-events: none;
+  top: 16px;
+  right: 16px;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.45rem 0.95rem 0.45rem 0.65rem;
+  border: 2px solid rgba(255, 248, 236, 0.3);
+  border-radius: 999px;
+  background: rgba(18, 23, 50, 0.5);
+  backdrop-filter: blur(6px);
+  color: #fff8ec;
+  font-family: var(--font-display, system-ui, sans-serif);
+  font-weight: 800;
+  font-size: 0.95rem;
+  line-height: 1;
+  cursor: pointer;
+  transition:
+    border-color 0.2s ease-out,
+    scale 0.15s ease-out,
+    opacity 0.25s ease-in;
 }
-:host(.aa--abriendo) {
+.aa__mudo:hover {
+  border-color: #ffd46a;
+}
+.aa__mudo:active {
+  scale: 0.94;
+}
+.aa__parlante {
+  width: 1.6rem;
+  height: auto;
   overflow: visible;
 }
+.aa__parlante-cuerpo {
+  fill: #ffd46a;
+  transition: fill 0.2s ease-out;
+}
+.aa__parlante-ondas {
+  stroke: #ffd46a;
+  stroke-width: 3.5;
+  transform-box: fill-box;
+  transform-origin: 0% 50%;
+  transition:
+    opacity 0.2s ease-out,
+    scale 0.25s cubic-bezier(0.34, 1.6, 0.64, 1);
+}
+.aa__parlante-ondas path {
+  animation: aa-late-chico 1.4s ease-in-out infinite;
+}
+.aa__parlante-ondas path + path {
+  animation-delay: 0.2s;
+}
+@keyframes aa-late-chico {
+  50% {
+    opacity: 0.35;
+  }
+}
+/* Apagado: las ondas se cierran y la cruz se dibuja, como un trazo y no como un ícono que cambia. */
+.aa__parlante-cruz {
+  stroke: #ff8ac9;
+  stroke-width: 3.5;
+  stroke-dasharray: 17;
+  stroke-dashoffset: 17;
+  transition: stroke-dashoffset 0.25s ease-out;
+}
+.aa__parlante-cruz path + path {
+  transition-delay: 0.1s;
+}
+:host(.aa--mudo) .aa__parlante-ondas {
+  opacity: 0;
+  scale: 0.3;
+}
+:host(.aa--mudo) .aa__parlante-cruz {
+  stroke-dashoffset: 0;
+}
+:host(.aa--mudo) .aa__parlante-cuerpo {
+  fill: rgba(255, 248, 236, 0.7);
+}
+
+/* ─── Angie ──────────────────────────────────────────────────────────────────────────────────── */
 
 .aa__centro {
   position: absolute;
@@ -75,19 +139,29 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: clamp(0.4rem, 1.6vh, 0.9rem);
+  gap: clamp(0.3rem, 1.4vh, 0.8rem);
   padding: 16px;
   text-align: center;
 }
 
-.aa__auris {
-  width: min(460px, 80vw, 46vh);
-  height: auto;
-  overflow: visible;
+/* El dibujo de Angie es un cuadrado con aire arriba y abajo: los márgenes negativos se lo comen,
+   así el texto queda cerca de sus pies. */
+.aa__escena {
+  position: relative;
+  width: min(400px, 76vw, 44vh);
+  aspect-ratio: 1;
+  margin: -6% 0 -2%;
 }
 .aa__halo {
-  transform-box: fill-box;
-  transform-origin: center;
+  position: absolute;
+  inset: 4%;
+  border-radius: 50%;
+  background: radial-gradient(
+    closest-side,
+    rgba(255, 138, 201, 0.32),
+    rgba(255, 95, 168, 0.12) 55%,
+    rgba(255, 95, 168, 0) 100%
+  );
   animation: aa-respira 3.2s ease-in-out infinite;
 }
 @keyframes aa-respira {
@@ -96,13 +170,18 @@
     opacity: 0.8;
   }
 }
-.aa__flota {
-  animation: aa-flota 2.6s ease-in-out infinite;
+/* Un charco de luz bajo sus pies: sin piso, flotaba en la noche. */
+.aa__piso {
+  position: absolute;
+  left: 22%;
+  right: 18%;
+  top: 80%;
+  height: 11%;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(255, 212, 106, 0.32), rgba(255, 212, 106, 0));
 }
-@keyframes aa-flota {
-  50% {
-    translate: 0 -8px;
-  }
+.aa__angie {
+  position: relative;
 }
 
 /* En espera las ondas laten de adentro hacia afuera, despacio: dicen "esto suena" sin hacer ruido. */
@@ -128,19 +207,47 @@
 
 .aa__copa {
   transform-box: fill-box;
-  transform-origin: 50% 100%;
+  transform-origin: 50% 50%;
+  transition: filter 0.3s ease-out;
 }
 .aa__letra {
   font-family: var(--font-display, system-ui, sans-serif);
   font-weight: 900;
-  font-size: 26px;
+  font-size: 56px;
   fill: #fff8ec;
-  fill-opacity: 0.85;
+  fill-opacity: 0.9;
   text-anchor: middle;
 }
 
+/* Sin sonido, los auriculares se apagan: copas sin color y sin ondas ni notas. */
+:host(.aa--mudo) .aa__copa {
+  filter: saturate(0.2) brightness(0.75);
+}
+:host(.aa--mudo) .aa__ondas,
+:host(.aa--mudo) .aa__halo {
+  opacity: 0;
+  transition: opacity 0.3s ease-out;
+}
+
+/* Un destello cruza los lentes de vez en cuando: lo que los hace de sol y no un antifaz. */
+.aa__destello {
+  animation: aa-destello 4.6s ease-in-out 1.2s infinite;
+  translate: -70px 0;
+}
+@keyframes aa-destello {
+  0%,
+  72% {
+    translate: -70px 0;
+  }
+  90%,
+  100% {
+    translate: 360px 0;
+  }
+}
+
 /* La prueba: la copa que suena se aplasta y estira como un parlante, sus ondas salen fuertes y sus
-   notas suben. La otra se queda quieta: es lo que deja ver de qué lado suena. */
+   notas suben. La otra se queda quieta: es lo que deja ver de qué lado suena. Angie se vuelca hacia
+   ese lado (lo hace el componente con sus muelles). */
 :host(.aa--probando) .aa__onda {
   animation: none;
 }
@@ -158,7 +265,7 @@
     scale: 1;
   }
   35% {
-    scale: 1.1 0.88;
+    scale: 1.12 0.86;
   }
   100% {
     scale: 1;
@@ -169,10 +276,22 @@
     scale: 1;
   }
   35% {
-    scale: 1.1 0.88;
+    scale: 1.12 0.86;
   }
   100% {
     scale: 1;
+  }
+}
+/* En el acorde final, el destello cruza de golpe: listo, suena. */
+:host(.aa--ambos) .aa__destello {
+  animation: aa-destello-2 0.5s ease-out both;
+}
+@keyframes aa-destello-2 {
+  from {
+    translate: -70px 0;
+  }
+  to {
+    translate: 360px 0;
   }
 }
 :host(.aa--izquierda) .aa__ondas--izquierda .aa__onda,
@@ -214,14 +333,6 @@
     opacity: 0;
   }
 }
-.aa__ondas--izquierda {
-  transform-box: fill-box;
-  transform-origin: 100% 50%;
-}
-.aa__ondas--derecha {
-  transform-box: fill-box;
-  transform-origin: 0% 50%;
-}
 
 .aa__nota {
   opacity: 0;
@@ -241,27 +352,27 @@
 @keyframes aa-nota {
   0% {
     opacity: 0;
-    translate: 0 10px;
+    translate: 0 20px;
   }
   20% {
     opacity: 1;
   }
   100% {
     opacity: 0;
-    translate: 0 -60px;
+    translate: 0 -150px;
   }
 }
 @keyframes aa-nota-2 {
   0% {
     opacity: 0;
-    translate: 0 10px;
+    translate: 0 20px;
   }
   20% {
     opacity: 1;
   }
   100% {
     opacity: 0;
-    translate: 0 -60px;
+    translate: 0 -150px;
   }
 }
 /* Al final suenan los dos oídos: el halo se enciende con el acorde. */
@@ -279,12 +390,14 @@
   }
 }
 
+/* ─── Texto ──────────────────────────────────────────────────────────────────────────────────── */
+
 /* Peso alto y sombra tintada de noche, como el título de la mañana. */
 .aa__titulo {
   margin: 0.4rem 0 0;
   font-family: var(--font-display, system-ui, sans-serif);
   font-weight: 900;
-  font-size: clamp(1.5rem, min(5vw, 6vh), 3rem);
+  font-size: clamp(1.4rem, min(4.6vw, 5.4vh), 2.8rem);
   line-height: 1.08;
   letter-spacing: -0.02em;
   color: #fff8ec;
@@ -292,48 +405,109 @@
     0 4px 0 rgba(10, 12, 34, 0.7),
     0 12px 30px rgba(10, 12, 34, 0.55);
 }
-.aa__activar {
-  margin-top: 0.4rem;
-  padding: 0.75rem 1.5rem;
+
+/* La invitación es texto, no un botón a la vista: una ola la recorre como si sonara, y el toque
+   que late adelante dice dónde va el dedo (en cualquier lado). */
+/* En línea y no en flex: en un celular la frase baja de renglón y el toque queda pegado a la
+   primera palabra, no solo a un costado. */
+.aa__seguir {
+  display: inline-block;
+  max-width: 100%;
+  margin-top: 0.2rem;
+  padding: 0.35rem 0.8rem;
   border: 0;
   border-radius: 999px;
+  background: none;
   font-family: var(--font-display, system-ui, sans-serif);
   font-weight: 900;
-  font-size: clamp(1rem, min(3vw, 3.4vh), 1.35rem);
-  color: #2b1b33;
-  background: #ffd46a;
-  box-shadow:
-    0 5px 0 #b8862a,
-    0 14px 30px rgba(255, 198, 92, 0.3);
+  font-size: clamp(1.05rem, min(3.2vw, 3.6vh), 1.5rem);
+  line-height: 1.2;
+  color: #ffd46a;
+  text-shadow:
+    0 3px 0 rgba(10, 12, 34, 0.7),
+    0 0 22px rgba(255, 190, 90, 0.45);
   cursor: pointer;
   transition:
-    translate 0.15s ease-out,
-    box-shadow 0.15s ease-out;
+    background 0.2s ease-out,
+    opacity 0.25s ease-in;
 }
-.aa__activar span {
-  color: #c8005d;
+/* El foco llega solo al cargar: un anillo alrededor del texto lo volvía un botón otra vez. */
+.aa__seguir:focus-visible {
+  outline: none;
+  background: rgba(255, 248, 236, 0.08);
 }
-.aa__activar:hover {
-  translate: 0 -2px;
-}
-.aa__activar:active {
-  translate: 0 4px;
-  box-shadow: 0 1px 0 #b8862a;
-}
-.aa__activar:focus-visible,
-.aa__sin:focus-visible {
+.aa__mudo:focus-visible {
   outline: 3px solid #fff8ec;
-  outline-offset: 4px;
+  outline-offset: 3px;
 }
-/* En la prueba el botón ya hizo lo suyo: se aparta para que se mire a los auriculares, y no vuelve
-   mientras sube el telón. */
-:host(.aa--probando) .aa__activar,
-:host(.aa--probando) .aa__sin,
-:host(.aa--abriendo) .aa__activar,
-:host(.aa--abriendo) .aa__sin {
+.aa__palabra {
+  display: inline-block;
+  white-space: nowrap;
+}
+.aa__palabra + .aa__palabra {
+  margin-left: 0.3em;
+}
+.aa__letra-ola {
+  display: inline-block;
+  animation: aa-ola 2.6s ease-in-out infinite;
+  animation-delay: calc(var(--i) * 45ms);
+}
+@keyframes aa-ola {
+  0%,
+  28%,
+  100% {
+    translate: 0 0;
+    color: #ffd46a;
+  }
+  12% {
+    translate: 0 -0.26em;
+    color: #fff8ec;
+  }
+}
+.aa__toque {
+  position: relative;
+  display: inline-block;
+  width: 0.9em;
+  height: 0.9em;
+  margin-right: 0.55em;
+  vertical-align: -0.08em;
+}
+.aa__toque::before {
+  content: '';
+  position: absolute;
+  inset: 26%;
+  border-radius: 50%;
+  background: #ff5fa8;
+  box-shadow: 0 0 12px #ff5fa8;
+}
+.aa__toque i {
+  position: absolute;
+  inset: 0;
+  border: 2px solid #ff8ac9;
+  border-radius: 50%;
+  animation: aa-toque 1.6s ease-out infinite;
+}
+.aa__toque i + i {
+  animation-delay: 0.8s;
+}
+@keyframes aa-toque {
+  from {
+    scale: 0.4;
+    opacity: 1;
+  }
+  to {
+    scale: 2.1;
+    opacity: 0;
+  }
+}
+
+/* En la prueba la invitación ya hizo lo suyo: se aparta para que se mire a Angie. */
+:host(.aa--probando) .aa__seguir,
+:host(.aa--probando) .aa__mudo,
+:host(.aa--alejandose) .aa__seguir,
+:host(.aa--alejandose) .aa__mudo {
   opacity: 0;
   pointer-events: none;
-  transition: opacity 0.25s ease-in;
 }
 .aa__lado {
   min-height: 1.4em;
@@ -343,34 +517,22 @@
   font-size: clamp(0.95rem, 2.6vh, 1.15rem);
   color: #ffd46a;
 }
-.aa__sin {
-  padding: 0.3rem 0.6rem;
-  border: 0;
-  background: none;
-  font: inherit;
-  font-weight: 700;
-  font-size: 0.95rem;
-  color: rgba(255, 248, 236, 0.78);
-  text-decoration: underline;
-  text-underline-offset: 3px;
-  cursor: pointer;
-}
-.aa__sin:hover {
-  color: #fff8ec;
-}
 
-/* Sin movimiento: el aviso y sus dos opciones siguen ahí; no hay bucles ni telón que sube. */
+/* Sin movimiento: el aviso y sus dos opciones siguen ahí, sin bucles ni cámara que se aleja. */
 @media (prefers-reduced-motion: reduce) {
-  :host {
-    transition: none;
-  }
   .aa__estrella,
   .aa__halo,
-  .aa__flota,
-  .aa__onda {
+  .aa__onda,
+  .aa__destello,
+  .aa__letra-ola,
+  .aa__toque i,
+  .aa__parlante-ondas path {
     animation: none;
   }
   .aa__onda {
     opacity: 0.35;
+  }
+  .aa__toque i {
+    opacity: 0;
   }
 }
