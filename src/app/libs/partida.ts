@@ -39,27 +39,46 @@ const MIGRACIONES: Readonly<Record<number, (l: Lugar) => Lugar | null>> = {
   2: sinLaIntroduccion,
 };
 
-/** El capítulo 0 era la Introducción: su cinemática se fue con ella. 12 es el final. */
-const CINEMATICAS = { primera: 1, ultima: 12 } as const;
+/**
+ * El capítulo 0 era la Introducción: su cinemática se fue con ella. 12 es el final y 13 la
+ * revelación, que va antes.
+ */
+const CINEMATICAS = { primera: 1, ultima: 13 } as const;
 
 export interface Partida {
   /** Sub-niveles establecidos como `"concepto/sub"`, ambos desde 0 (la URL usa sub desde 1). */
   readonly establecidos: readonly string[];
-  /** Cinemáticas ya vistas, por número de capítulo (del 1 al 11, y 12 es el final). */
+  /** Cinemáticas ya vistas, por número de capítulo (del 1 al 11; 12 es el final, 13 la revelación). */
   readonly cinematicas: readonly number[];
   /** Ya vio el prólogo completo o lo salteó a propósito: la bitácora le ofrece volver a verlo. */
   readonly prologo: boolean;
   /** Dónde quedó la historia: al recargar se sigue desde acá. `null` es el principio. */
   readonly punto: Punto | null;
+  /**
+   * Dónde quedó el viaje, aunque se haya salido al mapa: la bitácora lo sigue desde acá. `null` es
+   * el principio del viaje, o que ya se terminó.
+   */
+  readonly viaje: LugarDelViaje | null;
+}
+
+/**
+ * Un lugar del viaje: el concepto (la misma posición que los ids) y la página de su hoja, desde 0.
+ * La página -1 es la cinemática del capítulo, que va antes de sus páginas. El concepto que sigue al
+ * último, con la página -1, es el cierre: la revelación y el final.
+ */
+export interface LugarDelViaje {
+  readonly concepto: number;
+  readonly pagina: number;
 }
 
 /**
  * Un lugar de la historia continua desde donde se puede retomar. En el prólogo es la línea del
- * guion que abre el tramo; después del prólogo, la construcción de Tusi; y en el recorrido, el
- * átomo (`sub` -1) o el sub-nivel (desde 0) donde estaba.
+ * guion que abre el tramo; en el viaje, el lugar que dice `Partida.viaje`; después, la construcción
+ * de Tusi; y en el recorrido, el átomo (`sub` -1) o el sub-nivel (desde 0) donde estaba.
  */
 export type Punto =
   | { readonly lugar: 'prologo'; readonly linea: string }
+  | { readonly lugar: 'viaje' }
   | { readonly lugar: 'construccion' }
   | { readonly lugar: 'recorrido'; readonly concepto: number; readonly sub: number };
 
@@ -68,6 +87,7 @@ export const PARTIDA_VACIA: Partida = {
   cinematicas: [],
   prologo: false,
   punto: null,
+  viaje: null,
 };
 
 /**
@@ -119,6 +139,7 @@ export function leerPartida(crudo: string | null, subPorConcepto: readonly numbe
     cinematicas: [...cinematicas].sort((a, b) => a - b),
     prologo: dato['prologo'] === true,
     punto: leerPunto(dato['punto'], subPorConcepto, migrar),
+    viaje: leerViaje(dato['viaje'], subPorConcepto, migrar),
   };
 }
 
@@ -134,7 +155,7 @@ function leerPunto(
 ): Punto | null {
   if (!esObjeto(dato)) return null;
   const lugar = dato['lugar'];
-  if (lugar === 'construccion') return { lugar };
+  if (lugar === 'construccion' || lugar === 'viaje') return { lugar };
   if (lugar === 'prologo') {
     const linea = dato['linea'];
     return typeof linea === 'string' && /^[a-z0-9-]+$/.test(linea) ? { lugar, linea } : null;
@@ -150,6 +171,33 @@ function leerPunto(
     return { lugar, concepto: c, sub: s };
   }
   return null;
+}
+
+/** Lo mismo para el viaje: la página -1 (la cinemática) existe en todo concepto, y en el cierre. */
+function leerViaje(
+  dato: unknown,
+  subPorConcepto: readonly number[],
+  migrar: (l: Lugar) => Lugar | null,
+): LugarDelViaje | null {
+  if (!esObjeto(dato)) return null;
+  const concepto = dato['concepto'];
+  const pagina = dato['pagina'];
+  if (!Number.isInteger(concepto) || !Number.isInteger(pagina)) return null;
+  const l = migrar({ concepto: concepto as number, sub: pagina as number });
+  if (!l) return null;
+  const { concepto: c, sub: p } = l;
+  if (c === subPorConcepto.length && p === -1) return { concepto: c, pagina: p };
+  if (c < 0 || c >= subPorConcepto.length || p < -1 || p >= subPorConcepto[c]) return null;
+  return { concepto: c, pagina: p };
+}
+
+export function conViaje(partida: Partida, viaje: LugarDelViaje | null): Partida {
+  const antes = partida.viaje;
+  const igual =
+    antes === null || viaje === null
+      ? antes === viaje
+      : antes.concepto === viaje.concepto && antes.pagina === viaje.pagina;
+  return igual ? partida : { ...partida, viaje };
 }
 
 export function mismoPunto(a: Punto | null, b: Punto | null): boolean {

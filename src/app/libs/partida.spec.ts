@@ -5,6 +5,7 @@ import {
   conEstablecido,
   conPrologo,
   conPunto,
+  conViaje,
   conceptosEstablecidos,
   escribirPartida,
   guardarPartida,
@@ -29,6 +30,7 @@ describe('partida', () => {
       cinematicas: [12],
       prologo: true,
       punto: null,
+      viaje: null,
     });
   });
 
@@ -60,6 +62,7 @@ describe('partida', () => {
       cinematicas: [1],
       prologo: true,
       punto: null,
+      viaje: null,
     });
   });
 
@@ -76,6 +79,7 @@ describe('partida', () => {
       cinematicas: [1, 12],
       prologo: true,
       punto: { lugar: 'recorrido', concepto: 3, sub: 1 },
+      viaje: null,
     });
     const enLaIntro = JSON.stringify({
       v: 2,
@@ -104,14 +108,15 @@ describe('partida', () => {
     const crudo = JSON.stringify({
       v: 3,
       establecidos: ['10/0', '10/1', '11/0', '2/9', 'x/y', 7, '3/1', '3/1'],
-      cinematicas: [0, 1, 12, 13, -1, 2.5, 'tres'],
+      cinematicas: [0, 1, 12, 13, 14, -1, 2.5, 'tres'],
       prologo: 'si',
     });
     expect(leerPartida(crudo, SUBS)).toEqual({
       establecidos: ['3/1', '10/0'],
-      cinematicas: [1, 12],
+      cinematicas: [1, 12, 13],
       prologo: false,
       punto: null,
+      viaje: null,
     });
   });
 
@@ -169,6 +174,7 @@ describe('partida', () => {
         { lugar: 'construccion' },
         { lugar: 'recorrido', concepto: 3, sub: -1 },
         { lugar: 'recorrido', concepto: 0, sub: 6 },
+        { lugar: 'viaje' },
       ];
       for (const punto of puntos) {
         const p = conPunto(PARTIDA_VACIA, punto);
@@ -196,6 +202,53 @@ describe('partida', () => {
       expect(conPunto(p, { lugar: 'recorrido', concepto: 2, sub: 0 })).toBe(p);
       expect(conPunto(p, { lugar: 'recorrido', concepto: 2, sub: 1 })).not.toBe(p);
       expect(conPunto(p, null).punto).toBeNull();
+    });
+  });
+
+  describe('dónde quedó el viaje', () => {
+    const leer = (viaje: unknown): unknown =>
+      leerPartida(JSON.stringify({ v: 3, establecidos: [], cinematicas: [], viaje }), SUBS).viaje;
+
+    it('ida y vuelta: la cinemática de un capítulo (-1) y una de sus páginas', () => {
+      for (const viaje of [
+        { concepto: 0, pagina: -1 },
+        { concepto: 4, pagina: 1 },
+        { concepto: 10, pagina: 0 },
+        { concepto: 11, pagina: -1 },
+      ]) {
+        const p = conViaje(PARTIDA_VACIA, viaje);
+        expect(leerPartida(escribirPartida(p), SUBS).viaje).toEqual(viaje);
+      }
+    });
+
+    it('una partida de antes, sin viaje, lo empieza del principio', () => {
+      expect(leer(undefined)).toBeNull();
+    });
+
+    it('descarta un lugar que no existe en el viaje de hoy o no tiene forma', () => {
+      expect(leer({ concepto: 11, pagina: 0 })).toBeNull();
+      expect(leer({ concepto: 12, pagina: -1 })).toBeNull();
+      expect(leer({ concepto: 0, pagina: 7 })).toBeNull();
+      expect(leer({ concepto: 1, pagina: -2 })).toBeNull();
+      expect(leer({ concepto: '1', pagina: 0 })).toBeNull();
+      expect(leer('0/1')).toBeNull();
+    });
+
+    it('una partida de la versión 2 lo corre un concepto, como a los ids', () => {
+      const v2 = JSON.stringify({
+        v: 2,
+        establecidos: [],
+        cinematicas: [],
+        viaje: { concepto: 3, pagina: 0 },
+      });
+      expect(leerPartida(v2, SUBS).viaje).toEqual({ concepto: 2, pagina: 0 });
+    });
+
+    it('volver al mismo lugar no cambia la referencia, y otro sí', () => {
+      const p = conViaje(PARTIDA_VACIA, { concepto: 2, pagina: 0 });
+      expect(conViaje(p, { concepto: 2, pagina: 0 })).toBe(p);
+      expect(conViaje(p, { concepto: 2, pagina: 1 })).not.toBe(p);
+      expect(conViaje(p, null).viaje).toBeNull();
     });
   });
 });
