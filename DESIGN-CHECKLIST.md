@@ -533,10 +533,14 @@ entrar desarma a Angie en luz y se hace noche, la costura con el prólogo.
       (acelera y frena en el primer y el último 20%, con pasos enteros: empieza y termina con las
       piernas juntas, se queda un instante y recién ahí se sienta); sentarse de golpe (baja con un
       muelle de un solo rebote); sentada de frente (sentada es OTRO dibujo, `mv__perfil`: la gema
-      del modelo 3D oficial de la mascota vista a 62° hacia la derecha, vectorizada por tono de
-      faceta, con los huecos de brazos y piernas rellenos y la cara 2D llevada al visor con una
-      afín de ojos y boca; de frente y en cuclillas no miraba a lo lejos, y correr la cara o girar
-      el escudo plano la deformaban: dibujada a mano tampoco se leía como la misma gema. Cambia de dibujo a mitad de sentarse, y la despedida desarma
+      del modelo 3D oficial de la mascota vista a 45° hacia la derecha, vectorizada por tono de
+      faceta, con los huecos de brazos y piernas rellenos; de frente y en cuclillas no miraba a lo
+      lejos, y correr la cara o girar el escudo plano la deformaban: dibujada a mano tampoco se
+      leía como la misma gema. La cara 2D va proyectada PUNTO A PUNTO sobre el visor curvo y
+      recortada con su silueta: con una sola afín para toda la cara se veía deforme, porque a 62°
+      el ojo de atrás cae donde el visor ya da la espalda y la afín lo dejaba entero. Comparar
+      contra el render del modelo al mismo ángulo: a 62° queda un solo ojo y el borde corta la
+      boca; a 45° se ven los dos ojos y la sonrisa entera. Cambia de dibujo a mitad de sentarse, y la despedida desarma
       solo las piezas del que se ve: las apagadas miden cero y su luz nacía en la esquina);
       sentada flotando (la punta de la gema apoya en el pasto, las dos piernas salen por delante,
       estiradas ladera abajo); halo corrido (la entrada y el halo bajan con la lamparita, ~46%/55%
