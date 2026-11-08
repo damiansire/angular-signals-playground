@@ -85,10 +85,10 @@ Está hecho (2026-11-08), en `src/app/integrada-vista/operadores-del-prologo.ts`
 Los tres son los operadores más simples (`map`, `tap` y `filter`), con un encargo que se dice en
 una frase:
 
-| Nave    | Hueco                 | Código                                        | Opciones, la rota primero | Lecturas         |
-| ------- | --------------------- | --------------------------------------------- | ------------------------- | ---------------- |
-| Capitán | Duplicar la velocidad | `velocidad$.pipe(▢((v) => v * 2))`            | `tap` · `filter` · `map`  | entra · al motor |
-| Nave A  | Ver la velocidad      | `velocidad$.pipe(▢((v) => panel.mostrar(v)))` | `map` · `filter` · `tap`  | panel · al motor |
+| Nave    | Hueco                 | Código                                        | Opciones, la rota primero | Lecturas           |
+| ------- | --------------------- | --------------------------------------------- | ------------------------- | ------------------ |
+| Capitán | Duplicar la velocidad | `velocidad$.pipe(▢((v) => v * 2))`            | `tap` · `filter` · `map`  | entra · al motor   |
+| Nave A  | Ver la velocidad      | `velocidad$.pipe(▢((v) => panel.mostrar(v)))` | `map` · `filter` · `tap`  | panel · al motor   |
 | Nave B  | Sacar el agua         | `carga$.pipe(▢((c) => c === 'combustible'))`  | `tap` · `map` · `filter`  | combustible · agua |
 
 La historia se frena en la orden, con la escena viva, y espera. El hueco aparece en una hoja en el
