@@ -845,6 +845,127 @@
   opacity: 1;
   transition: opacity 0.18s ease-out calc(var(--d) - 300ms);
 }
+/* La charla con el sol, antes de pensar. La voz llega de lejos, así que su globo es más chico,
+   más transparente y de borde cortado, como las transmisiones de las cinemáticas; el de Angie es
+   un globo de diálogo, con pico y sin las burbujas de la nube, porque lo dice en voz alta. Los dos
+   se pasan con un toque, como los pensamientos, y llevan el mismo triangulito que lo avisa. */
+.ini__voz-sol,
+.ini__dice {
+  position: absolute;
+  margin: 0;
+  opacity: 0;
+  scale: 0.6;
+  pointer-events: none;
+  font-family: var(--font-display, system-ui, sans-serif);
+  line-height: 1.15;
+  text-align: center;
+  white-space: nowrap;
+  /* Si un renglón no entra, que se parta parejo: una palabra sola abajo se leía como un resto. */
+  text-wrap: balance;
+  transition:
+    opacity 0.16s ease-in,
+    scale 0.2s ease-in;
+}
+/* Cuelga abajo a la izquierda del sol, que siempre está arriba a la derecha: hacia el centro. */
+.ini__voz-sol {
+  right: 58%;
+  top: 74%;
+  padding: 0.45em 1em 0.5em;
+  border-radius: 1em;
+  background: rgba(255, 252, 240, 0.86);
+  border: 2px dashed #b4691c;
+  box-shadow: 0 6px 18px rgba(120, 70, 20, 0.16);
+  color: #4a3416;
+  font-weight: 700;
+  font-style: italic;
+  font-size: clamp(0.95rem, min(2.4cqh, 4.6cqw), 1.4rem);
+  /* En un celular el sol queda contra el borde: el globo baja de renglón en vez de salirse. */
+  width: max-content;
+  max-width: 76cqw;
+  white-space: normal;
+  transform-origin: 100% 0;
+}
+/* El pico apunta al sol: sin él, el globo flotaba en el cielo sin dueño. */
+.ini__voz-sol::before {
+  content: '';
+  position: absolute;
+  right: -0.55em;
+  top: -0.6em;
+  width: 1em;
+  height: 1em;
+  background: #b4691c;
+  clip-path: polygon(100% 0, 0 50%, 50% 100%);
+}
+.ini__dice {
+  --tinta: #2f5a4c;
+  left: 62%;
+  bottom: 100%;
+  translate: -62% -14%;
+  display: flex;
+  flex-direction: column;
+  padding: 0.55em 1.2em 0.6em;
+  border-radius: 1.1em;
+  background: #fffdf6;
+  border: 3px solid var(--tinta);
+  box-shadow: 0 8px 22px rgba(30, 60, 50, 0.2);
+  color: #22302a;
+  font-weight: 800;
+  font-size: max(0.95rem, min(calc(var(--w) * 0.06), 4.4cqw));
+  /* En un celular Angie ocupa casi todo el ancho y los dos renglones no entraban de corrido. */
+  width: max-content;
+  max-width: 92cqw;
+  white-space: normal;
+  transform-origin: 62% 100%;
+  rotate: calc(var(--inclina, 0deg) * -1);
+}
+/* El pico baja hacia su cabeza. */
+.ini__dice::before {
+  content: '';
+  position: absolute;
+  left: 60%;
+  top: 100%;
+  width: 1em;
+  height: 0.9em;
+  margin-top: -1px;
+  background: var(--tinta);
+  clip-path: polygon(0 0, 100% 0, 30% 100%);
+}
+.ini__dice::after {
+  content: '';
+  position: absolute;
+  left: calc(60% + 3px);
+  top: 100%;
+  width: calc(1em - 7px);
+  height: calc(0.9em - 5px);
+  margin-top: -3px;
+  background: #fffdf6;
+  clip-path: polygon(0 0, 100% 0, 30% 100%);
+}
+.ini__voz-sol::after,
+.ini__renglon-dicho:last-child::after {
+  content: '';
+  display: inline-block;
+  width: 0.5em;
+  height: 0.38em;
+  margin-left: 0.4em;
+  background: #c8005d;
+  clip-path: polygon(0 0, 100% 0, 50% 100%);
+  opacity: 0;
+}
+.ini--oye .ini__voz-sol,
+.ini--responde .ini__dice {
+  opacity: 1;
+  scale: 1;
+  transition:
+    opacity 0.14s ease-out,
+    scale 0.34s cubic-bezier(0.3, 1.6, 0.5, 1);
+}
+.ini--oye .ini__voz-sol::after,
+.ini--responde .ini__renglon-dicho:last-child::after {
+  opacity: 1;
+  transition: opacity 0.2s ease-out 1s;
+  animation: ini-sigue 0.9s ease-in-out 1s infinite;
+}
 .ini__ajustes {
   position: absolute;
   z-index: 6;

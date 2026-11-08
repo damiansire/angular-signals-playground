@@ -1,6 +1,7 @@
 import { emitirImpacto, sinMovimiento } from '../libs/muelle';
 import { chispas, onda } from '../libs/rastros';
-import { sonido } from '../libs/sonido';
+import { sonido, type Voz } from '../libs/sonido';
+import { LO_QUE_DICE_EL_SOL, LO_QUE_RESPONDE_ANGIE } from './intercambio-del-sol';
 import {
   HASTA_LA_NOCHE,
   SOSTENIDO,
@@ -285,9 +286,11 @@ function n(valor: number): string {
 const T = {
   idea: 240,
   /**
-   * Lo mínimo de cada pensamiento ("Ellos ya están aquí…" y "La hora ha llegado…"): lo que tarda en
-   * entrar la nube. Después espera el toque de quien mira.
+   * Lo mínimo de cada globo (la voz del sol, la respuesta de Angie y sus dos pensamientos): lo que
+   * tarda en entrar y leerse. Después espera el toque de quien mira.
    */
+  oir: 1100,
+  responder: 1500,
   presentir: 1200,
   pensar: 1000,
   decidir: 220,
@@ -338,6 +341,7 @@ export function initInicioAngie(host: HTMLElement, cuerpo?: AngieDeLaColina): In
   const angie = escena.querySelector<HTMLElement>('.ini__angie');
   const piedra = escena.querySelector<HTMLElement>('.ini__piedra');
   const luces = escena.querySelector<HTMLElement>('.ini__luces');
+  const dicho = escena.querySelector<HTMLElement>('.ini__dicho');
   const animaciones = new Set<Animation>();
   let cerrado = false;
   /** Ya tocaron para entrar: la escena deja de responder a los toques de entrar. */
@@ -460,6 +464,16 @@ export function initInicioAngie(host: HTMLElement, cuerpo?: AngieDeLaColina): In
   const pensamiento = (ms: number): Promise<unknown> =>
     Promise.all([esperar(ms), siguienteToque()]);
 
+  /** Cada globo se le dice también a quien escucha la pantalla: el dibujo está oculto. */
+  const contar = (texto: string): void => {
+    if (dicho) dicho.textContent = texto.replace(/\n/g, ' ');
+  };
+  /** Un globo hablado: lo cuenta y suena con los blips de quien lo dice, como en el prólogo. */
+  const decir = (quien: Voz, texto: string, ms: number): void => {
+    contar(texto);
+    sonido().hablar(quien, texto.replace(/\n/g, ' '), ms);
+  };
+
   /** Lo que suena: el fondo sigue, y cada momento trae su fase y apaga la anterior. */
   let fase: Musica | null = null;
   const sonar = (cual: FaseDelPresentimiento): void => {
@@ -494,14 +508,27 @@ export function initInicioAngie(host: HTMLElement, cuerpo?: AngieDeLaColina): In
     }
     await esperar(T.idea);
     if (cerrado) return;
+    // Desde el sol llega una voz, de lejos, y ella le contesta en voz alta. Es la charla que la
+    // tripulación tiene en la cabina, oída del otro lado: suena con la voz del capitán.
+    escena.classList.add('ini--oye');
+    decir('cap', LO_QUE_DICE_EL_SOL, T.oir);
+    await pensamiento(T.oir);
+    if (cerrado) return;
+    escena.classList.replace('ini--oye', 'ini--responde');
+    decir('mascota', LO_QUE_RESPONDE_ANGIE, T.responder);
+    await pensamiento(T.responder);
+    if (cerrado) return;
+    escena.classList.remove('ini--responde');
     // La luz se vuelve dorada antes de que caiga la noche: un día que se apaga de golpe no es un
     // atardecer, es un corte. Arranca con el pensamiento: "la hora" que llegó es la de este atardecer.
     escena.classList.add('ini--atardecer', 'ini--piensa');
     sonar('presiente');
+    contar('Ellos ya están aquí…');
     await pensamiento(T.presentir);
     if (cerrado) return;
     escena.classList.add('ini--piensa-2');
     sonar('decide');
+    contar('La hora ha llegado…');
     await pensamiento(T.pensar);
     if (cerrado) return;
     escena.classList.remove('ini--piensa', 'ini--piensa-2');

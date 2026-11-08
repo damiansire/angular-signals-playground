@@ -432,6 +432,9 @@
                   />
                 </g>
               </svg>
+              <!-- La voz que llega desde el sol, de lejos: el borde cortado es el de las
+                   transmisiones de las cinemáticas. -->
+              <p class="ini__voz-sol">{{ intercambio.sol }}</p>
             </div>
 
             <!-- La noche que llega con la despedida: es el mismo cielo del prólogo. -->
@@ -460,6 +463,12 @@
               <p class="ini__piensa" aria-hidden="true">
                 <span class="ini__rastro"></span>
                 <span class="ini__rastro"></span>
+                <!-- Antes de pensar le contesta al sol en voz alta: un globo de diálogo, no una nube. -->
+                <span class="ini__dice">
+                  @for (renglon of intercambio.angie; track $index) {
+                    <span class="ini__renglon-dicho">{{ renglon }}</span>
+                  }
+                </span>
                 <!-- Dos pensamientos en la misma nube: primero los presiente, después decide. -->
                 <span class="ini__burbuja"
                   ><span class="ini__frase"
@@ -473,6 +482,8 @@
                   ></span
                 >
               </p>
+              <!-- Lo que se dice y se piensa, para quien escucha la pantalla: los globos son dibujo. -->
+              <p class="ini__dicho sr-only" aria-live="polite"></p>
               <button
                 id="ini-foco"
                 class="ini__foco"

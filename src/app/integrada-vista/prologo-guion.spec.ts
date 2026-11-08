@@ -10,6 +10,7 @@ import {
   ventanaDe,
   type LineaGuion,
 } from './prologo-guion';
+import { LO_QUE_DICE_EL_SOL, LO_QUE_RESPONDE_ANGIE } from './intercambio-del-sol';
 
 /** Tres líneas mínimas para probar el encadenado sin arrastrar el guion entero. */
 const CORTA: LineaGuion = { id: 'a', quien: 'cap', txt: 'Hola.' };
@@ -204,5 +205,21 @@ describe('el guion publicado', () => {
       const dicha = planDeBlips(linea.txt, linea.t1 - linea.t0, perfil).length;
       expect(dicha).withContext(linea.id).toBe(entera);
     }
+  });
+});
+
+describe('la charla con el sol', () => {
+  // Es la misma charla que pasa en la colina, oída desde la cabina: si un lado cambia el texto, el
+  // bucle deja de cerrar.
+  it('en la cabina dice lo mismo que en la colina, y la respuesta sigue al capitán', () => {
+    const i = GUION.findIndex((l) => l.txt === LO_QUE_DICE_EL_SOL);
+    expect(GUION[i]?.quien).toBe('cap');
+    expect(GUION[i + 1]?.quien).toBe('voz');
+    expect(GUION[i + 1]?.txt).toBe(LO_QUE_RESPONDE_ANGIE);
+  });
+
+  it('se dice una sola vez de cada lado', () => {
+    expect(GUION.filter((l) => l.txt === LO_QUE_DICE_EL_SOL).length).toBe(1);
+    expect(GUION.filter((l) => l.txt === LO_QUE_RESPONDE_ANGIE).length).toBe(1);
   });
 });

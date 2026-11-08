@@ -15,6 +15,7 @@ import {
   juncos,
   matasDePasto,
 } from './inicio-angie';
+import { LO_QUE_DICE_EL_SOL, LO_QUE_RESPONDE_ANGIE } from './intercambio-del-sol';
 
 /**
  * La pantalla de inicio es dibujo, pero lo que la sostiene son cuentas: el paisaje sale con semilla
@@ -314,6 +315,42 @@ describe('inicio-angie', () => {
       expect(escena.classList).toContain('ini--saliendo');
       expect(escena.classList).not.toContain('ini--noche');
       expect(escena.querySelector('.ini__luces')!.children.length).toBe(0);
+    });
+
+    it('antes de pensar, el sol habla y ella contesta: cada globo espera un toque', async () => {
+      const { host, escena } = montar();
+      const dicho = document.createElement('p');
+      dicho.className = 'ini__dicho';
+      escena.appendChild(dicho);
+      const inicio = initInicioAngie(host);
+      cerrar.push(inicio.dispose);
+      const hasta = async (clase: string): Promise<void> => {
+        for (let i = 0; i < 60 && !escena.classList.contains(clase); i++) {
+          await new Promise((ok) => setTimeout(ok, 50));
+        }
+        expect(escena.classList).withContext(clase).toContain(clase);
+      };
+      const tocar = (): void => {
+        escena.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+      };
+
+      void inicio.despedir();
+      await hasta('ini--oye');
+      expect(dicho.textContent).toBe(LO_QUE_DICE_EL_SOL);
+      // Sin toque no sigue: los globos los pasa quien mira, no un reloj.
+      await new Promise((ok) => setTimeout(ok, 1400));
+      expect(escena.classList).not.toContain('ini--responde');
+
+      tocar();
+      await hasta('ini--responde');
+      expect(escena.classList).not.toContain('ini--oye');
+      expect(dicho.textContent).toBe(LO_QUE_RESPONDE_ANGIE.replace('\n', ' '));
+
+      await new Promise((ok) => setTimeout(ok, 1600));
+      tocar();
+      await hasta('ini--piensa');
+      expect(escena.classList).not.toContain('ini--responde');
+      expect(dicho.textContent).toBe('Ellos ya están aquí…');
     });
 
     it('cerrar a mitad de la salida no deja luces colgadas', async () => {

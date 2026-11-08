@@ -8,6 +8,8 @@
  * turno siguiente.
  */
 
+import { LO_QUE_DICE_EL_SOL, LO_QUE_RESPONDE_ANGIE } from './intercambio-del-sol';
+
 export type Hablante = 'cap' | 'naveA' | 'naveB' | 'nave4' | 'todos' | 'voz' | 'mascota';
 
 export interface LineaGuion {
@@ -185,15 +187,11 @@ export const GUION: readonly LineaGuion[] = [
     txt: 'Aunque intentemos escapar,\ncon tantas moléculas será imposible.',
   },
   // Cierra con la palabra que ella va a repetir: el corte deja de ser un corte porque lo escuchó.
-  { id: 'dentro-caotico', quien: 'cap', txt: 'Esto es demasiado caótico.' },
+  { id: 'dentro-caotico', quien: 'cap', txt: LO_QUE_DICE_EL_SOL },
 
   // ACTO 3 · la voz. Todavía no tiene cuerpo, y por eso "¿quién ha hablado?" se entiende solo.
-  {
-    id: 'voz-asi-que',
-    dur: 3200,
-    quien: 'voz',
-    txt: 'Así que caótico…',
-  },
+  // La misma respuesta que Angie le dio al sol en la colina: es esa charla, oída desde este lado.
+  { id: 'voz-supongo', quien: 'voz', txt: LO_QUE_RESPONDE_ANGIE },
   {
     id: 'react-escucharon',
     dur: 2400,
@@ -205,11 +203,6 @@ export const GUION: readonly LineaGuion[] = [
     dur: 2600,
     quien: 'naveB',
     txt: '¿Quién ha hablado?',
-  },
-  {
-    id: 'voz-perspectiva',
-    quien: 'voz',
-    txt: 'Supongo que desde su perspectiva,\nse puede interpretar como caos…',
   },
   // "Armonía" no es una metáfora: los puntos hacen movimiento armónico simple, y así está escrito
   // en `tusi-math`. La frase describe literalmente lo que la pantalla va a hacer.
@@ -364,7 +357,7 @@ export function anclajesDe(reloj: readonly LineaEnReloj[]): Anclajes {
     anomalia,
     zoom: en('anom-grito').t1,
     caos: en('dentro-vivos').t0,
-    fusion: en('voz-asi-que').t0,
+    fusion: en('voz-supongo').t0,
     choque: en('reclamo-quien-eres').t0 + 250,
     frase: en('frase-angulo').t0,
     orden,

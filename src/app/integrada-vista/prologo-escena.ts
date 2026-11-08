@@ -82,7 +82,7 @@ export function momentosDe(reloj: readonly LineaEnReloj[]): Momentos {
     bala: { t0: en('dentro-cuidado').t0 - 300, t1: en('dentro-cuidado').t0 + 1300 },
     lanza: en('dentro-escapemos').t0,
     frena: en('dentro-esquivar').t0,
-    voz: en('voz-asi-que').t0,
+    voz: en('voz-supongo').t0,
     tirados: tramo('leccion-tirados'),
     listos: tramo('leccion-listos'),
   };

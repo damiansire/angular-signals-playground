@@ -33,6 +33,7 @@ import {
   type InicioAngie,
 } from './inicio-angie';
 import { initMundoQueResponde } from './mundo-que-responde';
+import { LO_QUE_DICE_EL_SOL, LO_QUE_RESPONDE_ANGIE } from './intercambio-del-sol';
 
 import { signalsRoutesTree } from '../app.routes';
 import { type RouteItem, type SubNivelDiferido } from '../interfaces/route-item.interface';
@@ -146,6 +147,12 @@ export class IntegradaVistaComponent {
   protected readonly llamado = letrasDelTitulo(['Haz click para iniciar las aventuras'])[0];
   /** En una pantalla táctil no hay click: se toca. El CSS muestra la que corresponde. */
   protected readonly llamadoTactil = letrasDelTitulo(['Tocá para iniciar las aventuras'])[0];
+
+  /** Lo que se dicen el sol y Angie antes de que ella piense; la respuesta, en sus renglones. */
+  protected readonly intercambio = {
+    sol: LO_QUE_DICE_EL_SOL,
+    angie: LO_QUE_RESPONDE_ANGIE.split('\n'),
+  };
 
   /** Angie en la colina se mueve sola hasta que la despedida la desarma: ahí manda la salida. */
   protected readonly angieEsperando = signal(true);
