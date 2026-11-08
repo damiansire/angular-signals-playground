@@ -89,7 +89,7 @@ una frase:
 | ------- | --------------------- | --------------------------------------------- | ------------------------- | ---------------- |
 | Capitán | Duplicar la velocidad | `velocidad$.pipe(▢((v) => v * 2))`            | `tap` · `filter` · `map`  | entra · al motor |
 | Nave A  | Ver la velocidad      | `velocidad$.pipe(▢((v) => panel.mostrar(v)))` | `map` · `filter` · `tap`  | panel · al motor |
-| Nave B  | Sacar el agua         | `carga$.pipe(▢((c) => c !== 'agua'))`         | `tap` · `map` · `filter`  | nafta · agua     |
+| Nave B  | Sacar el agua         | `carga$.pipe(▢((c) => c === 'combustible'))`  | `tap` · `map` · `filter`  | combustible · agua |
 
 La historia se frena en la orden, con la escena viva, y espera. El hueco aparece en una hoja en el
 centro, sobre un velo, con la orden del capitán debajo. La hoja dice qué es cada nombre del código,

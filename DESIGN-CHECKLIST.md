@@ -757,7 +757,7 @@ Del minijuego de operadores (2026-11-08):
       oscuro sobre el espacio y no se leía. El disparo no suena: acertar es en silencio. Mientras
       dispara, el velo y la hoja se apartan (`prologo--disparo`): tapado, el único aviso del acierto
       pasaba detrás de la hoja.
-- [ ] La hoja dice qué hacer: qué es cada nombre del código (`v`, `c !== 'agua'`), qué tiene que
+- [ ] La hoja dice qué hacer: qué es cada nombre del código (`v`, `c === 'combustible'`), qué tiene que
       salir, la meta de la lectura y "Tocá el operador marcado". Sin esto el hueco era adivinar.
 - [ ] Los huecos se arreglan con `map`, `tap` y `filter`, uno por nave: los tres más simples, con
       un encargo que se dice en una frase (duplicar la velocidad, verla en el panel, sacar el agua).
