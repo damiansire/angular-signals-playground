@@ -532,13 +532,24 @@ entrar desarma a Angie en luz y se hace noche, la costura con el prólogo.
       al público (caminando mira hacia donde va y no sigue al mouse); arrancar o frenar en seco
       (acelera y frena en el primer y el último 20%, con pasos enteros: empieza y termina con las
       piernas juntas, se queda un instante y recién ahí se sienta); sentarse de golpe (baja con un
-      muelle de un solo rebote); sentada flotando (el escudo apoya en el pasto, las piernas en
-      escorzo y abiertas); pensativa muerta (respira, mira lejos, balancea los pies, sigue al mouse
+      muelle de un solo rebote); sentada de frente (sentada es OTRO dibujo, `mv__perfil`: la gema
+      girada hacia la derecha, costado en sombra atrás y faceta de adelante con la cara puesta en
+      perspectiva; de frente y en cuclillas no miraba a lo lejos, y correr solo la cara sobre el
+      cuerpo de frente la deformaba. Cambia de dibujo a mitad de sentarse, y la despedida desarma
+      solo las piezas del que se ve: las apagadas miden cero y su luz nacía en la esquina);
+      sentada flotando (la punta de la gema apoya en el pasto, las dos piernas salen por delante,
+      estiradas ladera abajo); halo corrido (la entrada y el halo bajan con la lamparita, ~-22%/33%
+      de su caja); pensativa muerta (respira, mira lejos, balancea los pies, sigue al mouse
       con la cara; nada de saltito, estirarse, saludar ni cambiar el peso). Medir con rAF dentro de
       la página la velocidad de cada pie a velocidad de crucero: el apoyado igual en los dos
       (~12 px/s de efecto de medir el centro del pie, no el apoyo) y el otro al doble del cuerpo.
-      En un ancho donde no entra un paso se sienta donde está. Con movimiento reducido, con la
-      pausa de fondo o al cambiar el tamaño queda sentada en su lugar, sin viaje. Si la tocan en
+      En un ancho donde no entra un paso se sienta donde está. Con movimiento reducido o con la
+      pausa de fondo queda sentada en su lugar, sin viaje. El paseo arranca cuando la landing SE
+      VE, no al cargar: con un deep-link (`?nivel=0`, la URL que queda al recargar después de
+      entrar) carga oculta, y al volver con la rueda ya estaba en el borde: un teletransporte.
+      Probarlo así, cargando con `?nivel=0` y volviendo con input real. Cambiar el tamaño a mitad
+      de camino reajusta el destino sin saltar, y el tope del `dt` (0,25 s) frena solo los saltos
+      de una pestaña que vuelve: con 0,05, a pocos cuadros por segundo caminaba en cámara lenta. Si la tocan en
       camino, se frena parada y piensa ahí. La nube del pensamiento baja con ella sentada y se
       desinclina (`--inclina`): torcida se leía como error. Va con `translate`/`rotate` sueltos,
       porque la despedida anima el `transform` del mismo elemento. Medir a Angie sentada contra
