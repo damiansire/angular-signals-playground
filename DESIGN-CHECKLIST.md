@@ -529,63 +529,33 @@ entrar desarma a Angie en luz y se hace noche, la costura con el prólogo.
       apenas arriba (±6-7°), el brillo del ojo abajo y una sonrisa chica cerrada. Con la "o" y
       una ceja levantada se leía preocupada; con las cejas a ±16-18° y los párpados más
       inclinados, triste. Mirarla con una lupa (la mascota clonada a 2000 px) Y a tamaño real.
-- [ ] Al llegar, Angie espera parada a la derecha, en el borde de la meseta (`PARTIDA`, donde la
-      colina empieza a caer, ~18° de pendiente), gira la cabeza hacia la izquierda, camina despacio
-      hasta la piedra del CENTRO y se sienta, pensativa, mirando al sol. Hacia la izquierda el paso
-      es el mismo en espejo (`posturaDePaso(…, rumbo = -1)`: piernas, brazos, inclinación, cara y
-      ojos), no el dibujo dado vuelta: la lamparita cambiaría de lado al sentarse. En la ladera pisa
-      con el pie de ABAJO (`bajadaParaPisar`): con el piso bajo el centro de los pies, el de abajo
-      quedaba ~10 px en el aire y entre el pasto se leía caminando en el aire. Medir la SUELA de
-      cada pie (punto del pie por la matriz de la pierna), no la caja de la pierna: la caja gira
-      desde la cadera y su centro se mueve la mitad que el pie, y eso parece patinar sin serlo. Antes se asomaba hacia el mouse sin caminar: corriéndose 300 unidades sin dar pasos se
-      deslizaba. Ahora da pasos de verdad, y lo que la arruinaría es:
-      patinar (la fase del paso sale de lo que avanzó; cada pierna barre según su largo, porque la
-      derecha nace 20 unidades más abajo y con la misma apertura patinaba; el pie apoyado barre a
-      ritmo parejo en x, no en ángulo); paso de robot (el cuerpo sube con las piernas juntas, se
-      inclina hacia adelante y cada brazo va a contratiempo de su pierna); ir de costado mirando
-      al público (caminando mira hacia donde va y no sigue al mouse); arrancar o frenar en seco
-      (acelera y frena en el primer y el último 20%, con pasos enteros: empieza y termina con las
-      piernas juntas, se queda un instante y recién ahí se sienta); sentarse de golpe (baja con un
-      muelle de un solo rebote); sentada que no se lee pensativa (de perfil, la gema del modelo 3D
-      con el visor hundido miraba a lo lejos pero no pensaba: sentada es de frente
-      (`mv--pensativa`), con la mano en el mentón (`mv__menton` reemplaza al brazo que cuelga),
-      una ceja arriba y la otra abajo (muelle `duda`), la boquita en "o" corrida hacia la mano,
-      la mirada al sol (`MIRA_AL_SOL`; mirando la lamparita se leía distraída) y las piernas
-      colgando del borde, balanceándose a destiempo. El cuerpo de perfil, `mv__perfil`, queda
-      apagado en el código (`SENTADA_DE_FRENTE`); si vuelve: la cara va proyectada PUNTO A PUNTO
-      sobre el visor curvo, porque con una sola afín el ojo de atrás quedaba entero donde el visor
-      ya da la espalda, y la despedida desarma solo las piezas que se ven: las apagadas miden cero
-      y su luz nacía en la esquina); sentada flotando o parada delante de la piedra (la piedra es
-      paisaje, `.ini__piedra`, con la misma caja que Angie y en el centro, con la inclinación que
-      va a tener ella sentada, debajo del atardecer para que se tiña con la colina; con una
-      piedra baja se leía parada delante: el cuerpo queda casi a altura de parada
-      (`SENTADA_EN_LA_PIEDRA`), las piernas se acortan (`COLGADA_ALARGA`) para que se vean las
-      pantorrillas con piedra debajo de los pies, y la sombra de contacto sube a la piedra y se
-      achica); halo corrido (la entrada y el halo siguen a la lamparita, `translate: 24% -4%`,
-      a 4 px o menos de ella a 800, 1280 y 1920); pensativa muerta (respira, mira lejos, balancea los pies, sigue al mouse
-      con la cara; nada de saltito, estirarse, saludar ni cambiar el peso). Medir con rAF dentro de
-      la página la velocidad de cada pie a velocidad de crucero: el apoyado igual en los dos
-      (~12 px/s de efecto de medir el centro del pie, no el apoyo) y el otro al doble del cuerpo.
-      En un ancho donde no entra un paso (celular) arranca casi en la piedra y se sienta ahí. Con movimiento reducido queda
-      sentada en su lugar, sin viaje. La pausa de fondo NO la frena: el paseo es su llegada, no
-      vida de fondo, y con la pausa recordada (`signals-pausa`) se quedaba parada 1,2 s y aparecía
-      en la piedra. Si la landing se va de vista caminando, el paseo espera y al volver sigue
-      desde donde quedó (sentarla ahí también era aparecer en la piedra). El paseo arranca cuando la landing SE
-      VE, no al cargar: con un deep-link (`?nivel=0`, la URL que queda al recargar después de
-      entrar) carga oculta, y al volver con la rueda ya estaba en el borde: un teletransporte.
-      Probarlo así, cargando con `?nivel=0` y volviendo con input real. Cambiar el tamaño a mitad
-      de camino reajusta el destino sin saltar, y el tope del `dt` (0,25 s) frena solo los saltos
-      de una pestaña que vuelve: con 0,05, a pocos cuadros por segundo caminaba en cámara lenta. Si la tocan en
-      camino, termina el paseo, se sienta, se acomoda (`T.acomodarse`) y recién ahí le llega la
-      idea: frenarla parada cortaba su llegada a la mitad. Probarlo con un click real a mitad de
-      camino. La nube del pensamiento baja con ella sentada y se
-      desinclina (`--inclina`): torcida se leía como error. Va con `translate`/`rotate` sueltos,
-      porque la despedida anima el `transform` del mismo elemento. Medir a Angie sentada y a la
-      piedra contra sol, fichas, título y llamado en los seis anchos: cero solapes y nada afuera.
-      Las piezas apagadas miden 0,0: filtrarlas antes de armar la caja de Angie.
+- [ ] Angie YA ESTÁ sentada en la piedra del CENTRO cuando aparece la colina: no camina hasta
+      ella (la caminata se sacó; `sentarse(deUna)` asienta los muelles sin animar la bajada, así no
+      se ve que recién llega). Sentada es de frente (`mv--pensativa`), mirando al sol
+      (`MIRA_AL_SOL`), con los brazos al costado y las piernas colgando del borde, balanceándose a
+      destiempo. NADA de mano en el mentón: le tapaba la cara (se sacó `mv__menton`). Lo que la
+      arruinaría: sentada flotando o parada delante de la piedra (la piedra es paisaje,
+      `.ini__piedra`, con la misma caja que Angie y en el centro, con la inclinación que tiene ella
+      sentada, debajo del atardecer para que se tiña con la colina; el cuerpo queda casi a altura
+      de parada (`SENTADA_EN_LA_PIEDRA`), las piernas se acortan (`COLGADA_ALARGA`) para que se
+      vean las pantorrillas con piedra debajo de los pies, y la sombra de contacto sube a la
+      piedra y se achica); halo corrido (la entrada y el halo siguen a la lamparita,
+      `translate: 24% -4%`); pensativa muerta (respira, mira lejos, balancea los pies, sigue al
+      mouse con la cara; nada de saltito, estirarse, saludar ni cambiar el peso). La nube del
+      pensamiento se desinclina (`--inclina`): torcida se leía como error. Va con
+      `translate`/`rotate` sueltos, porque la despedida anima el `transform` del mismo elemento.
+      Un cambio de tamaño la reacomoda en la piedra. Medir a Angie sentada y a la piedra contra
+      sol, fichas, título y llamado en los seis anchos: cero solapes y nada afuera. Las piezas
+      apagadas miden 0,0: filtrarlas antes de armar la caja de Angie.
 - [ ] Antes de desarmarse, Angie lo piensa en dos tiempos, en la misma nube y con el atardecer ya
       empezando: "Ellos ya están aquí…" (lo presiente, `T.presentir`) y después "La hora ha
-      llegado…" (lo decide, `T.pensar`). Las dos frases ocupan la misma celda y cruzan opacidad:
+      llegado…" (lo decide). Cada pensamiento lo pasa QUIEN MIRA con un click (o Enter/Espacio en
+      `document`), no un reloj; `T.presentir`/`T.pensar` son solo lo mínimo que tarda en entrar la
+      nube. Un triangulito que late abajo a la derecha de la nube (como en un diálogo de juego)
+      aparece con el último punto y dice "tocá para seguir". Sonido y pausa no pasan el
+      pensamiento. Por eso el overlay NO va `inert` durante la salida (inerte, el toque no
+      llegaba); volver a entrar lo cierra `picked`. La música va por fases (`planDeFase`): el fondo
+      sigue y cada pensamiento suena hasta el click siguiente. Las dos frases ocupan la misma celda y cruzan opacidad:
       la nube toma el ancho de la más larga y no salta al cambiar, y los puntos de la segunda
       empiezan recién cuando ella aparece. La nube va corrida a la izquierda (`-62%`; a 800 px
       la frase larga se salía 11 px) y un poco arriba (`-14%`; con Angie sentada la esquina
@@ -598,17 +568,29 @@ entrar desarma a Angie en luz y se hace noche, la costura con el prólogo.
       llamado en los seis anchos y en 800×737 (cero solapes, a 8 px o más del borde), con cuadros
       encadenados tras un click real. Con movimiento reducido no aparece.
 
-- [ ] Antes que nada, de noche, el aviso de auriculares (`app-aviso-auriculares`): su toque es el
-      gesto que el navegador exige para dejar sonar, así toda la intro llega con audio. Al
-      activar suena la prueba de un oído al otro (izquierda, derecha y el acorde en los dos) y
-      la copa que suena se enciende a la vez (`planDeLaPrueba`); después sube el telón con el
-      alba en el borde de abajo, y recién ahí la colina se inicia y Angie arranca a caminar: con
-      la colina corriendo debajo, el paseo se perdía entero. Tocar en cualquier lado activa;
-      "Seguir sin sonido" guarda la preferencia apagada y los botones de sonido lo reflejan.
-      Mientras sube el telón, los botones del aviso no vuelven a aparecer. Va diferido
-      (`@defer`, con un telón liso del mismo color de placeholder): en el bundle inicial se
-      pasaba del presupuesto. En el acorde final, ondas y notas usan otra animación: con el mismo
-      nombre, las del lado que ya había sonado no volvían a salir.
+- [ ] Antes que nada, de noche, el aviso de auriculares (`app-aviso-auriculares`): Angie en el
+      medio con los auriculares puestos (L y R) y lentes de sol, accesorios proyectados en su
+      propio dibujo (`mvDetras`, `mvCara`, `mvDelante` en `app-mascota-viva`) para que la sigan en
+      cada golpe; las cejas asoman por arriba del marco. No hay botón a la vista: la invitación es
+      texto ("Tocá en cualquier lado para continuar") con una ola que la recorre y un toque que
+      late; sigue siendo un `<button>` para teclado y lector, sin anillo de foco (el foco llega solo
+      al cargar y lo volvía botón). Arriba a la derecha, el control de sonido: apagado, las copas
+      pierden el color, las ondas se cierran y se dibuja la cruz; tocar en cualquier lado entonces
+      continúa sin sonido y los botones de sonido de la colina lo reflejan. Con sonido, su toque es
+      el gesto que el navegador exige: suena la prueba de un oído al otro (`planDeLaPrueba`), la
+      copa que suena golpea y Angie se vuelca hacia ese lado (`inclinarse`), y en el acorde salta.
+      Después la CÁMARA SE ALEJA (`ALEJARSE_MS`): la colina viene de `CERCA` (2,6×) hacia Angie en
+      la piedra, y el aviso, que compensa esa escala (arranca en `1 / CERCA`, así el primer cuadro
+      no salta), se achica a `LEJOS` con bordes redondeados y se desvanece. Probarlo con click real
+      y medir la escala cuadro a cuadro: la neta del aviso arranca en 1. Ojo: un click por `ref`
+      de la herramienta hace scroll del overlay (`overflow: hidden` igual scrollea): no es un bug,
+      repetir con click por coordenada. En el acorde final, ondas y notas usan otra animación: con
+      el mismo nombre, las del lado que ya había sonado no volvían a salir. Va diferido (`@defer`,
+      con un telón liso del mismo color de placeholder). En celular, la invitación va en línea (no
+      flex): en flex el toque quedaba solo a un costado del renglón partido.
+- [ ] Después de que las luces de Angie suben a las estrellas arranca SIEMPRE el prólogo de las
+      naves, aunque ya se haya visto: es la continuación de esa escena. Quien ya lo vio lo salta
+      con su botón.
 
 ## Overlays que tapan el recorrido (prólogo, modales a pantalla completa)
 
