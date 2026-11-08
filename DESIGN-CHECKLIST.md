@@ -533,13 +533,14 @@ entrar desarma a Angie en luz y se hace noche, la costura con el prólogo.
       (acelera y frena en el primer y el último 20%, con pasos enteros: empieza y termina con las
       piernas juntas, se queda un instante y recién ahí se sienta); sentarse de golpe (baja con un
       muelle de un solo rebote); sentada de frente (sentada es OTRO dibujo, `mv__perfil`: la gema
-      girada hacia la derecha, costado en sombra atrás y faceta de adelante con la cara puesta en
-      perspectiva; de frente y en cuclillas no miraba a lo lejos, y correr solo la cara sobre el
-      cuerpo de frente la deformaba. Cambia de dibujo a mitad de sentarse, y la despedida desarma
+      del modelo 3D oficial de la mascota vista a 62° hacia la derecha, vectorizada por tono de
+      faceta, con los huecos de brazos y piernas rellenos y la cara 2D llevada al visor con una
+      afín de ojos y boca; de frente y en cuclillas no miraba a lo lejos, y correr la cara o girar
+      el escudo plano la deformaban: dibujada a mano tampoco se leía como la misma gema. Cambia de dibujo a mitad de sentarse, y la despedida desarma
       solo las piezas del que se ve: las apagadas miden cero y su luz nacía en la esquina);
       sentada flotando (la punta de la gema apoya en el pasto, las dos piernas salen por delante,
-      estiradas ladera abajo); halo corrido (la entrada y el halo bajan con la lamparita, ~-22%/33%
-      de su caja); pensativa muerta (respira, mira lejos, balancea los pies, sigue al mouse
+      estiradas ladera abajo); halo corrido (la entrada y el halo bajan con la lamparita, ~46%/55%
+      de su caja, medido contra la lamparita a 800, 1280 y 1920); pensativa muerta (respira, mira lejos, balancea los pies, sigue al mouse
       con la cara; nada de saltito, estirarse, saludar ni cambiar el peso). Medir con rAF dentro de
       la página la velocidad de cada pie a velocidad de crucero: el apoyado igual en los dos
       (~12 px/s de efecto de medir el centro del pie, no el apoyo) y el otro al doble del cuerpo.
