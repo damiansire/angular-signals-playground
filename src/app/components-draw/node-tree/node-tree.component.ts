@@ -67,6 +67,11 @@ export class NodeTreeComponent {
         type: 'graph',
         symbol: 'roundRect',
         symbolSize: [NODE_SYMBOL_WIDTH, 32],
+        // ECharts encaja los CENTROS de los nodos en el lienzo: a zoom 1 las hojas de los costados
+        // quedaban cortadas contra el borde. Un poco más lejos, y los nodos con su tamaño de siempre
+        // (si no, se achican con el zoom). Con márgenes de caja, en cambio, deformaba los nodos.
+        zoom: 0.8,
+        nodeScaleRatio: 0,
         // Se arrastra, pero la rueda no hace zoom: el árbol vive en pantallas que scrollean (la
         // molécula, la hoja del manual), y con zoom la rueda encima del árbol no movía nada.
         roam: 'move',
