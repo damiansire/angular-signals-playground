@@ -10,6 +10,7 @@
       <button
         class="dtp-btn"
         [class.dtp-active]="selected().kind === demo.kind"
+        [attr.aria-pressed]="selected().kind === demo.kind"
         (click)="pick(demo)"
       >
         {{ demo.label }}

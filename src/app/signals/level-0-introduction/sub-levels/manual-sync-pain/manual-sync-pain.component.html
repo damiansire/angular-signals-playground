@@ -6,10 +6,20 @@
   </header>
 
   <div class="msp-toggle" role="group" aria-label="Versión del handler">
-    <button class="msp-tab" [class.msp-on]="!handlerComplete()" (click)="setComplete(false)">
+    <button
+      class="msp-tab"
+      [class.msp-on]="!handlerComplete()"
+      [attr.aria-pressed]="!handlerComplete()"
+      (click)="setComplete(false)"
+    >
       handler incompleto
     </button>
-    <button class="msp-tab" [class.msp-on]="handlerComplete()" (click)="setComplete(true)">
+    <button
+      class="msp-tab"
+      [class.msp-on]="handlerComplete()"
+      [attr.aria-pressed]="handlerComplete()"
+      (click)="setComplete(true)"
+    >
       handler completo
     </button>
   </div>
