@@ -4,6 +4,7 @@ import {
   computed,
   ElementRef,
   inject,
+  InjectionToken,
   input,
   linkedSignal,
   output,
@@ -20,6 +21,16 @@ import {
   turn,
 } from '../../libs/manipulable-challenge';
 import { tokensDeCodigo } from '../../libs/resaltado-de-codigo';
+
+/**
+ * Si Angie puede dar la pista al fallar. Quien monta pantallas enteras en un lugar de la historia
+ * donde ella todavía no interviene (el manual de a bordo del prólogo) lo provee en `false`: los
+ * desafíos de esas pantallas vienen adentro y no se les puede pasar `[ayuda]`.
+ */
+export const AYUDA_DE_ANGIE = new InjectionToken<boolean>('AYUDA_DE_ANGIE', {
+  providedIn: 'root',
+  factory: () => true,
+});
 
 /**
  * Cierre de un sub-nivel donde el código ES el control: el bloque arranca averiado, el usuario mueve
@@ -39,7 +50,7 @@ export class ManipulableSystemComponent {
    * La pista al fallar la da Angie. En el prólogo todavía no puede intervenir (docs/historia), así
    * que ahí el desafío se juega sin ella.
    */
-  readonly ayuda = input(true);
+  readonly ayuda = input(inject(AYUDA_DE_ANGIE));
   /**
    * Cada toque, con el estado que dejó. Quien muestra el desafío afuera de una card (el minijuego del
    * prólogo) arma con esto su propia ayuda: qué hizo el operador elegido.

@@ -1,6 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
-import { ManipulableSystemComponent } from './manipulable-system.component';
+import { AYUDA_DE_ANGIE, ManipulableSystemComponent } from './manipulable-system.component';
 import { ManipulableChallenge, SISTEMA_ESTABLECIDO } from '../../libs/manipulable-challenge';
 
 /**
@@ -112,6 +112,14 @@ describe('ManipulableSystemComponent', () => {
     it('sin ayuda (el prólogo, donde Angie todavía no interviene) no aparece ni al fallar', () => {
       const fixture = crear();
       fixture.componentRef.setInput('ayuda', false);
+      fixture.componentInstance.press();
+      expect(fixture.componentInstance.health()).toBe('broken');
+      expect(pista(fixture)).toBeNull();
+    });
+
+    it('quien monta la pantalla entera la apaga sin tocar el desafío: el manual de a bordo', () => {
+      TestBed.overrideProvider(AYUDA_DE_ANGIE, { useValue: false });
+      const fixture = crear();
       fixture.componentInstance.press();
       expect(fixture.componentInstance.health()).toBe('broken');
       expect(pista(fixture)).toBeNull();
