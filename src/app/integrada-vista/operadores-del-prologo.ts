@@ -145,7 +145,9 @@ export const AGUA_SYSTEM: ManipulableChallenge = {
     };
   },
   healthy: (s: SystemState) =>
-    s.actions >= 1 && s.values['agua'] === 0 && s.values['combustible'] === COMBUSTIBLE_POR_CARGA * s.actions,
+    s.actions >= 1 &&
+    s.values['agua'] === 0 &&
+    s.values['combustible'] === COMBUSTIBLE_POR_CARGA * s.actions,
 };
 
 /** En el orden en que se juegan, que es el de la flota: primero el capitán. */
