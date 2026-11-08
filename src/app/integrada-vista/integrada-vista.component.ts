@@ -39,6 +39,7 @@ import { LO_QUE_DICE_EL_SOL, LO_QUE_RESPONDE_ANGIE } from './intercambio-del-sol
 import type { HuecoDelPrologo } from './operadores-del-prologo';
 import { PAGINAS_DEL_MANUAL, pasoEnElManual, type PaginaDelManual } from './manual-de-a-bordo';
 import { HojaDelHuecoComponent } from './hoja-del-hueco/hoja-del-hueco.component';
+import { LaminaDelManualComponent } from './lamina-del-manual/lamina-del-manual.component';
 import { vigilarEstampado } from './estampado-tardio';
 import { AYUDA_DE_ANGIE } from '../components-atom/manipulable-system/manipulable-system.component';
 
@@ -106,6 +107,7 @@ const PROLOGO_PEDIDO =
     MascotaVivaComponent,
     AvisoAuricularesComponent,
     HojaDelHuecoComponent,
+    LaminaDelManualComponent,
   ],
   templateUrl: './integrada-vista.component.html',
   styleUrls: [
@@ -315,6 +317,9 @@ export class IntegradaVistaComponent {
   );
   private readonly hojaDelManual = viewChild<ElementRef<HTMLElement>>('hojaDelManual');
   private readonly pantallaDelManual = viewChild<ElementRef<HTMLElement>>('pantallaDelManual');
+  private readonly hojaQuePasa = viewChild<ElementRef<HTMLElement>>('hojaQuePasa');
+  /** La página que se veía antes: dice para qué lado se da vuelta la hoja. */
+  private paginaPrevia: number | null = null;
   private terminarManual: (() => void) | null = null;
 
   private leerManual(paginas: readonly PaginaDelManual[]): Promise<void> {
@@ -380,7 +385,13 @@ export class IntegradaVistaComponent {
     const pagina = this.paginaActual();
     const host = this.pantallaDelManual()?.nativeElement;
     const hoja = this.hojaDelManual()?.nativeElement;
-    if (!pagina || !host || !hoja) return;
+    if (!pagina || !host || !hoja) {
+      this.paginaPrevia = null;
+      return;
+    }
+    const i = this.pagina()!;
+    const previa = this.paginaPrevia;
+    this.paginaPrevia = i;
     // En el prólogo Angie todavía no interviene: los desafíos de las páginas van sin su pista.
     const montada = this.montarDiferido(host, pagina.cargar, pagina.ley, [
       { provide: AYUDA_DE_ANGIE, useValue: false },
@@ -389,11 +400,43 @@ export class IntegradaVistaComponent {
     // Cada página arranca arriba, y el foco va a la hoja: con teclado, se lee sin buscarla.
     hoja.scrollTop = 0;
     hoja.focus({ preventScroll: true });
+    if (previa !== null && previa !== i) this.darVueltaLaHoja(i > previa, host);
     onCleanup(() => {
       vigia?.();
       montada.dispose();
     });
   });
+
+  /**
+   * Pasar de página se ve como en un libro: una hoja de papel se levanta desde el lomo y deja ver la
+   * página nueva, que entra apenas corrida. Para adelante gira sobre el borde izquierdo; para atrás,
+   * sobre el derecho. Sin animación, la pantalla nueva reemplazaba a la vieja de golpe y no se
+   * notaba que había cambiado de página.
+   */
+  private darVueltaLaHoja(adelante: boolean, pantalla: HTMLElement): void {
+    const papel = this.hojaQuePasa()?.nativeElement;
+    if (!papel || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    const giro = adelante ? -100 : 100;
+    papel.style.transformOrigin = adelante ? 'left center' : 'right center';
+    papel.animate(
+      [
+        { opacity: 1, transform: 'perspective(2000px) rotateY(0deg)', filter: 'brightness(1)' },
+        {
+          opacity: 1,
+          transform: `perspective(2000px) rotateY(${giro}deg)`,
+          filter: 'brightness(0.82)',
+        },
+      ],
+      { duration: 620, easing: 'cubic-bezier(0.5, 0, 0.6, 1)' },
+    );
+    pantalla.animate(
+      [
+        { opacity: 0, translate: `${adelante ? 18 : -18}px 0` },
+        { opacity: 1, translate: '0 0' },
+      ],
+      { duration: 380, delay: 260, easing: 'ease-out', fill: 'backwards' },
+    );
+  }
 
   /**
    * El prólogo se pide recién al bajar de la colina: son 25 kB de escena que nadie ve en el

@@ -677,6 +677,16 @@
   >
     <header class="prologo__manual-cabeza">
       <span class="prologo__manual-libro">Manual de a bordo</span>
+      <!-- Las páginas como marcas del libro: cuánto falta se ve sin leer el número. -->
+      <span class="prologo__manual-marcas" aria-hidden="true">
+        @for (cada of paginas(); track cada.id; let i = $index) {
+          <span
+            class="prologo__manual-marca"
+            [class.prologo__manual-marca--leida]="i < pagina()!"
+            [class.prologo__manual-marca--aca]="i === pagina()"
+          ></span>
+        }
+      </span>
       <span class="prologo__manual-paso">{{ pagina()! + 1 }} de {{ paginas().length }}</span>
       <button
         type="button"
@@ -685,9 +695,20 @@
       >
         Cerrar &times;
       </button>
-      <h2 id="manual-en-la-nave" class="prologo__manual-nave">{{ p.enLaNave }}</h2>
     </header>
-    <div #pantallaDelManual class="subhost"></div>
+    <div class="prologo__manual-cuerpo">
+      <!-- La ley dibujada al lado de la pantalla que la demuestra, con lo que le dice a la nave. -->
+      <aside class="prologo__manual-lamina">
+        <span class="prologo__manual-ley">Ley {{ pagina()! + 1 }}</span>
+        @defer (on immediate) {
+          <app-lamina-del-manual class="prologo__manual-dibujo" [pagina]="p.id" />
+        }
+        <h2 id="manual-en-la-nave" class="prologo__manual-nave">{{ p.enLaNave }}</h2>
+      </aside>
+      <div #pantallaDelManual class="subhost"></div>
+      <!-- La hoja que se da vuelta al pasar de página: papel, sin contenido. -->
+      <div #hojaQuePasa class="prologo__manual-pasa" aria-hidden="true"></div>
+    </div>
     <nav class="prologo__manual-pie" aria-label="Páginas del manual">
       <button
         type="button"

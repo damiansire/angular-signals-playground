@@ -1,0 +1,124 @@
+@switch (pagina()) {
+  @case ('html-to-tree') {
+    <!-- Cada renglón del HTML se vuelve un nodo: el árbol se arma al leerlo. -->
+    <svg class="lam" viewBox="0 0 240 160" aria-hidden="true">
+      <rect class="lam-codigo" x="6" y="18" width="92" height="120" rx="12" />
+      <rect class="lam-linea lam-n0" x="18" y="38" width="44" height="9" rx="4.5" />
+      <rect class="lam-linea lam-n1" x="30" y="62" width="34" height="9" rx="4.5" />
+      <rect class="lam-linea lam-n2" x="30" y="86" width="50" height="9" rx="4.5" />
+      <rect class="lam-linea lam-n3" x="42" y="110" width="30" height="9" rx="4.5" />
+      <path class="lam-flecha" d="M106 78h20m-6-6 6 6-6 6" />
+      <path class="lam-rama lam-n1" pathLength="1" d="M182 36 154 84" />
+      <path class="lam-rama lam-n2" pathLength="1" d="M182 36 210 84" />
+      <path class="lam-rama lam-n3" pathLength="1" d="M210 84v46" />
+      <circle class="lam-nodo lam-n0" cx="182" cy="34" r="11" />
+      <circle class="lam-nodo lam-n1" cx="154" cy="86" r="11" />
+      <circle class="lam-nodo lam-n2" cx="210" cy="86" r="11" />
+      <circle class="lam-nodo lam-n3" cx="210" cy="132" r="9" />
+    </svg>
+  }
+  @case ('dom-is-alive') {
+    <!-- Tocan una hoja del árbol y la chispa llega a la pantalla, que cambia. -->
+    <svg class="lam" viewBox="0 0 240 160" aria-hidden="true">
+      <path class="lam-rama-fija" d="M44 40 22 96M44 40l24 56" />
+      <circle class="lam-nodo-fijo" cx="44" cy="38" r="10" />
+      <circle class="lam-nodo-fijo" cx="22" cy="98" r="10" />
+      <circle class="lam-vivo-anillo" cx="70" cy="98" r="10" />
+      <circle class="lam-vivo-hoja" cx="70" cy="98" r="10" />
+      <path class="lam-cable" d="M84 92 126 72" />
+      <circle class="lam-chispa" cx="84" cy="92" r="5" />
+      <rect class="lam-monitor" x="122" y="26" width="110" height="82" rx="10" />
+      <rect class="lam-pantalla" x="130" y="34" width="94" height="66" rx="5" />
+      <rect class="lam-vivo-barra" x="138" y="42" width="52" height="7" rx="3.5" />
+      <text class="lam-numero lam-vivo-antes" x="177" y="88">0</text>
+      <text class="lam-numero lam-vivo-despues" x="177" y="88">1</text>
+      <path class="lam-pie" d="M177 108v14m-18 4h36" />
+    </svg>
+  }
+  @case ('dom-to-pixel') {
+    <!-- Cambiar el color salta el layout y llega enseguida; cambiar el ancho pasa por todo y se
+         traba en el layout. -->
+    <svg class="lam" viewBox="12 30 216 106" aria-hidden="true">
+      <path class="lam-via" d="M18 118h206" />
+      <path class="lam-paso-entre" d="M66 63l5 5-5 5M118 63l5 5-5 5M170 63l5 5-5 5" />
+      <g class="lam-etapa lam-etapa-estilo">
+        <rect x="30" y="50" width="34" height="36" rx="8" />
+        <text class="lam-glifo" x="47" y="73">{{ '{ }' }}</text>
+      </g>
+      <g class="lam-etapa lam-etapa-layout">
+        <rect x="82" y="50" width="34" height="36" rx="8" />
+        <path class="lam-trazo" d="M90 58h18v20H90ZM99 58v20M90 68h18" />
+      </g>
+      <g class="lam-etapa lam-etapa-pintar">
+        <rect x="134" y="50" width="34" height="36" rx="8" />
+        <path class="lam-relleno" d="M151 58c5 6 8 10 8 13a8 8 0 0 1-16 0c0-3 3-7 8-13Z" />
+      </g>
+      <g class="lam-etapa lam-etapa-pixel">
+        <rect x="186" y="50" width="34" height="36" rx="8" />
+        <path
+          class="lam-relleno"
+          d="M193 57h6v6h-6ZM201 57h6v6h-6ZM209 57h6v6h-6ZM193 65h6v6h-6ZM201 65h6v6h-6ZM209 65h6v6h-6ZM193 73h6v6h-6ZM201 73h6v6h-6ZM209 73h6v6h-6Z"
+        />
+      </g>
+      <g class="lam-carga lam-carga-rapida">
+        <rect x="23" y="109" width="48" height="18" rx="9" />
+        <text x="47" y="122">color</text>
+      </g>
+      <g class="lam-carga lam-carga-lenta">
+        <rect x="23" y="109" width="48" height="18" rx="9" />
+        <text x="47" y="122">width</text>
+      </g>
+    </svg>
+  }
+  @case ('manual-sync-pain') {
+    <!-- El lápiz actualiza dos paneles y se va: el tercero se queda con el valor viejo. -->
+    <svg class="lam" viewBox="0 0 240 160" aria-hidden="true">
+      @for (x of [12, 90, 168]; track x; let i = $index) {
+        <g [class]="'lam-panel lam-panel-' + i">
+          <rect class="lam-panel-marco" [attr.x]="x" y="62" width="60" height="50" rx="9" />
+          <rect class="lam-panel-rotulo" [attr.x]="x + 10" y="70" width="24" height="5" rx="2.5" />
+          <text class="lam-valor lam-valor-viejo" [attr.x]="x + 30" y="102">40</text>
+          @if (i < 2) {
+            <text class="lam-valor lam-valor-nuevo" [attr.x]="x + 30" y="102">60</text>
+            <path class="lam-tilde" pathLength="1" [attr.d]="'M' + (x + 44) + ' 128l6 6 12-14'" />
+          }
+        </g>
+      }
+      <g class="lam-alerta">
+        <circle cx="226" cy="62" r="9" />
+        <path d="M226 57v6M226 67v.5" />
+      </g>
+      <g class="lam-lapiz">
+        <path class="lam-lapiz-cuerpo" d="M0 0 4-11 26-33 33-26 11-4Z" />
+        <path class="lam-lapiz-punta" d="M0 0 4-11 11-4Z" />
+        <path class="lam-lapiz-goma" d="M26-33 30-37a5 5 0 0 1 7 7l-4 4Z" />
+      </g>
+    </svg>
+  }
+  @case ('old-change-detection') {
+    <!-- Zone.js barre el árbol entero en cada vuelta, nodo por nodo; lo que pasa afuera de su zona
+         no lo ve nunca. -->
+    <svg class="lam" viewBox="0 0 240 160" aria-hidden="true">
+      <defs>
+        <clipPath id="lam-zona-recorte">
+          <rect x="10" y="12" width="152" height="136" rx="16" />
+        </clipPath>
+      </defs>
+      <rect class="lam-zona-fondo" x="10" y="12" width="152" height="136" rx="16" />
+      <g clip-path="url(#lam-zona-recorte)">
+        <rect class="lam-barrido" x="10" y="12" width="152" height="16" />
+      </g>
+      <rect class="lam-zona" x="10" y="12" width="152" height="136" rx="16" />
+      <text class="lam-zona-nombre" x="22" y="30">zone</text>
+      <path class="lam-rama-fija" d="M86 40 52 84M86 40l34 44M52 84l-20 40M52 84l20 40M120 84v40" />
+      <circle class="lam-revisa lam-r0" cx="86" cy="40" r="9" />
+      <circle class="lam-revisa lam-r1" cx="52" cy="84" r="9" />
+      <circle class="lam-revisa lam-r1" cx="120" cy="84" r="9" />
+      <circle class="lam-revisa lam-r2" cx="32" cy="126" r="9" />
+      <circle class="lam-revisa lam-r2" cx="72" cy="126" r="9" />
+      <circle class="lam-revisa lam-r2" cx="120" cy="126" r="9" />
+      <circle class="lam-afuera-onda" cx="206" cy="84" r="12" />
+      <circle class="lam-afuera" cx="206" cy="84" r="12" />
+    </svg>
+  }
+}
