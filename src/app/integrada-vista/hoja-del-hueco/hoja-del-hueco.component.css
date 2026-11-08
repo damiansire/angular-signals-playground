@@ -18,7 +18,7 @@
   left: 50%;
   top: var(--op-arriba);
   bottom: var(--op-abajo);
-  width: min(46rem, calc(100% - 2rem));
+  width: min(48rem, calc(100% - 2rem));
   height: fit-content;
   max-height: calc(100% - var(--op-arriba) - var(--op-abajo));
   margin-block: auto;
@@ -73,15 +73,74 @@
 
 .hoja__cabeza {
   display: grid;
-  grid-template-columns: 1fr auto;
+  grid-template-columns: auto 1fr auto;
   align-items: baseline;
-  gap: 0.2rem 1rem;
+  gap: 0.2rem 0.9rem;
+}
+/* El retrato de la nave que pide: flota y su fuego titila, como en la escena. */
+.hoja__retrato {
+  grid-row: 1 / 3;
+  align-self: center;
+  width: clamp(3.4rem, 5vw, 4.4rem);
+  overflow: visible;
+}
+.hoja__retrato-nave {
+  animation: hoja-flota 1.6s ease-in-out infinite alternate;
+}
+.hoja__casco {
+  fill: var(--quien);
+  stroke: #2b2620;
+  stroke-width: 1.6;
+}
+.hoja__aleta {
+  fill: color-mix(in srgb, var(--quien) 70%, #2b2620);
+  stroke: #2b2620;
+  stroke-width: 1.4;
+  stroke-linejoin: round;
+}
+.hoja__franja {
+  fill: none;
+  stroke: #fff8ec;
+  stroke-width: 2.2;
+  stroke-linecap: round;
+  opacity: 0.8;
+}
+.hoja__ventana {
+  fill: #33406b;
+  stroke: #2b2620;
+  stroke-width: 1.4;
+}
+.hoja__ojo {
+  fill: #fff;
+}
+.hoja__pupila {
+  fill: #1c1a2b;
+}
+.hoja__fuego {
+  fill: #ffad42;
+  transform-box: fill-box;
+  transform-origin: 100% 50%;
+  animation: hoja-fuego 0.18s ease-in-out infinite alternate;
+}
+.hoja__fuego-centro {
+  fill: #fff2c2;
+}
+@keyframes hoja-flota {
+  to {
+    translate: 0 -2.5px;
+    rotate: -2deg;
+  }
+}
+@keyframes hoja-fuego {
+  to {
+    scale: 0.7 0.85;
+  }
 }
 /* Sobre el papel, el nombre va en tinta: el color claro de la nave queda en el punto y en la franja,
    que son decoración y no tienen que leerse. */
 .hoja__quien {
   display: block;
-  grid-column: 1;
+  grid-column: 2;
   font:
     700 0.72rem / 1 'JetBrains Mono',
     'Cascadia Mono',
@@ -104,7 +163,7 @@
   vertical-align: 0.02em;
 }
 .hoja__paso {
-  grid-column: 2;
+  grid-column: 3;
   grid-row: 1;
   font:
     600 0.72rem / 1 'JetBrains Mono',
@@ -114,7 +173,7 @@
   color: #5b5246;
 }
 .hoja__titulo {
-  grid-column: 1 / -1;
+  grid-column: 2 / -1;
   margin: 0;
   /* El lugar de "Saltar", que va a su altura. */
   padding-right: 5.5rem;
@@ -128,13 +187,42 @@
   gap: 1rem;
   margin-top: 0.9rem;
 }
-@media (min-width: 1100px) {
+/* A media anchura los operadores van en su columna, a la derecha del encargo y el código: abajo, en
+   fila, empujaban la hoja a scrollear por dentro a 1024×700. El encargo se reparte en dos columnas
+   para no gastar alto. */
+@media (min-width: 760px) and (max-width: 1099.98px) {
   :host {
-    width: min(62rem, calc(100% - 2rem));
+    width: min(64rem, calc(100% - 2rem));
   }
   .hoja__cuerpo {
-    grid-template-columns: minmax(14rem, 18rem) 1fr;
-    gap: 1.5rem;
+    grid-template-columns: minmax(0, 1fr) minmax(14rem, 16rem);
+    column-gap: 1.2rem;
+    align-items: start;
+  }
+  .hoja__ops {
+    grid-column: 2;
+    grid-row: 1 / 3;
+  }
+}
+@media (min-width: 600px) and (max-width: 1099.98px) {
+  .hoja__brief {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    column-gap: 1rem;
+  }
+  .hoja__encargo {
+    padding: 0 0 0 1rem;
+    border-top: 0;
+    border-left: 1px dashed #cfc3a9;
+  }
+}
+/* A lo ancho: el encargo, el código y los operadores, en ese orden de lectura. */
+@media (min-width: 1100px) {
+  :host {
+    width: min(78rem, calc(100% - 2rem));
+  }
+  .hoja__cuerpo {
+    grid-template-columns: minmax(12rem, 15rem) minmax(0, 1fr) minmax(17rem, 20rem);
+    gap: 1.4rem;
     align-items: start;
   }
 }
@@ -153,10 +241,10 @@
 }
 /* Un nombre por renglón: el código a la izquierda, lo que significa a la derecha. */
 .hoja__nombre {
-  display: grid;
-  grid-template-columns: auto 1fr;
+  display: flex;
+  flex-wrap: wrap;
   align-items: baseline;
-  gap: 0.6rem;
+  gap: 0.2rem 0.6rem;
 }
 .hoja__nombre dt .hoja__codigo {
   font-size: 1.02em;
@@ -323,6 +411,429 @@ app-manipulable-system {
 @media (prefers-reduced-motion: reduce) {
   :host,
   .hoja__ayuda {
+    animation: none;
+  }
+}
+
+/* El bloque de juego mide la flecha y el óvalo contra sí mismo. */
+.hoja__juego {
+  position: relative;
+}
+/* El óvalo trazado a mano alrededor del operador: se dibuja de nuevo con cada operador. */
+.hoja__halo {
+  position: absolute;
+  pointer-events: none;
+  overflow: visible;
+}
+.hoja__halo path {
+  fill: none;
+  stroke: #d9480f;
+  stroke-width: 2.4;
+  stroke-linecap: round;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation:
+    hoja-traza 0.45s ease-out 0.1s forwards,
+    hoja-late 1.4s ease-in-out 0.6s infinite alternate;
+}
+/* La flecha vive en el renglón de abajo, que tiene aire a la derecha del cierre. Apunta al
+   operador desde abajo y a la derecha, sin tapar código. */
+.hoja__flecha {
+  position: absolute;
+  display: flex;
+  align-items: flex-end;
+  gap: 0.3rem;
+  pointer-events: none;
+  animation: hoja-senala 0.9s ease-in-out 0.6s infinite alternate;
+}
+.hoja__flecha svg {
+  width: 6.2rem;
+  height: auto;
+  overflow: visible;
+}
+.hoja__flecha path {
+  fill: none;
+  stroke: #d9480f;
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: hoja-traza 0.4s ease-out 0.15s forwards;
+}
+.hoja__flecha .hoja__flecha-punta {
+  animation-delay: 0.5s;
+}
+.hoja__flecha span {
+  margin-bottom: -0.2rem;
+  font:
+    800 1.05rem / 1 'Baloo 2',
+    var(--font-display, system-ui, sans-serif);
+  /* Más oscuro que el trazo: el naranja del óvalo daba 4.2:1 sobre el papel del código. */
+  color: #b93d0c;
+  white-space: nowrap;
+  opacity: 0;
+  animation: hoja-aparece 0.2s ease-out 0.55s forwards;
+}
+@keyframes hoja-traza {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+@keyframes hoja-late {
+  to {
+    opacity: 0.55;
+  }
+}
+@keyframes hoja-senala {
+  to {
+    translate: -5px -4px;
+  }
+}
+@keyframes hoja-aparece {
+  to {
+    opacity: 1;
+  }
+}
+
+/* Los tres operadores: cada uno con su dibujo, su nombre y qué hace. El puesto lleva el color de
+   la nave y dice "en el código". */
+.hoja__ops-rotulo {
+  margin: 0 0 0.5rem;
+  font:
+    700 0.68rem / 1.3 'JetBrains Mono',
+    'Cascadia Mono',
+    Consolas,
+    monospace;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #4d463b;
+}
+.hoja__ops-rotulo span {
+  letter-spacing: 0.04em;
+  text-transform: none;
+  font-weight: 500;
+}
+.hoja__ops ul {
+  display: grid;
+  gap: 0.55rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.hoja__op {
+  display: grid;
+  grid-template-columns: 6.6rem 1fr;
+  align-items: center;
+  gap: 0.6rem;
+  width: 100%;
+  padding: 0.5rem 0.6rem;
+  border: 2px solid transparent;
+  border-radius: 12px;
+  background: #f3ebda;
+  text-align: left;
+  color: #2b2620;
+  cursor: pointer;
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease,
+    translate 0.15s ease;
+}
+.hoja__op:hover {
+  background: #efe3c9;
+  translate: 0 -1px;
+}
+.hoja__op:focus-visible {
+  outline: 3px solid #b8791f;
+  outline-offset: 2px;
+}
+.hoja__op--puesto {
+  border-color: color-mix(in srgb, var(--quien) 55%, #2b2620);
+  background: #fffdf8;
+}
+.hoja__op-dibujo {
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+.hoja__op-texto {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.15rem 0.45rem;
+}
+.hoja__op-texto code {
+  font:
+    700 1.02rem / 1.1 'JetBrains Mono',
+    'Cascadia Mono',
+    Consolas,
+    monospace;
+  color: #1d5fa8;
+}
+.hoja__op-puesto {
+  padding: 0.05rem 0.4rem;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--quien) 45%, #fff);
+  font: 700 0.66rem / 1.4 var(--font-display, system-ui, sans-serif);
+  color: #2b2620;
+}
+.hoja__op-hace {
+  flex-basis: 100%;
+  font: 500 0.84rem / 1.3 var(--font-display, system-ui, sans-serif);
+  color: #3b342b;
+}
+
+/* Los dibujos de los operadores: tinta con tono, un acento por operador y un bucle lento. Lo que
+   se mueve es lo que el operador hace: el valor que sale distinto, el ojo que mira pasar, el agua
+   que rebota en el colador. */
+.op-cano {
+  fill: none;
+  stroke: #d9cdb4;
+  stroke-width: 4;
+  stroke-linecap: round;
+}
+.hoja__op-dibujo text {
+  font:
+    700 11px 'JetBrains Mono',
+    Consolas,
+    monospace;
+  text-anchor: middle;
+  fill: #fff;
+}
+.op-map-entra rect {
+  fill: #6b8fbf;
+}
+.op-map-sale rect {
+  fill: #1d5fa8;
+}
+.op-map-maquina {
+  fill: #2b4a74;
+  stroke: #1b2f4b;
+  stroke-width: 2;
+}
+.op-map-engranaje circle,
+.op-map-engranaje path {
+  fill: none;
+  stroke: #cfe0f6;
+  stroke-width: 2.4;
+  stroke-linecap: round;
+}
+.op-map-engranaje {
+  transform-box: fill-box;
+  transform-origin: 50% 50%;
+  animation: op-gira 2.4s linear infinite;
+}
+.op-map-entra {
+  animation: op-map-entra 2.4s ease-in infinite;
+}
+.op-map-sale {
+  animation: op-map-sale 2.4s ease-out infinite;
+}
+@keyframes op-gira {
+  to {
+    rotate: 360deg;
+  }
+}
+@keyframes op-map-entra {
+  0% {
+    translate: -6px 0;
+    opacity: 0;
+  }
+  12% {
+    opacity: 1;
+  }
+  45%,
+  100% {
+    translate: 34px 0;
+    opacity: 0;
+  }
+}
+@keyframes op-map-sale {
+  0%,
+  48% {
+    translate: -30px 0;
+    opacity: 0;
+  }
+  62% {
+    opacity: 1;
+  }
+  90% {
+    translate: 0 0;
+    opacity: 1;
+  }
+  100% {
+    translate: 4px 0;
+    opacity: 0;
+  }
+}
+.op-tap-valor rect {
+  fill: #2f6b4f;
+}
+.op-tap-valor {
+  animation: op-pasa 2.6s linear infinite;
+}
+.op-tap-ojo {
+  fill: #fffdf8;
+  stroke: #2b2620;
+  stroke-width: 2;
+}
+.op-tap-pupila {
+  fill: #2b2620;
+  animation: op-mira 2.6s linear infinite;
+}
+.op-tap-rayo {
+  stroke: #2f6b4f;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-dasharray: 2 3;
+  opacity: 0.7;
+  animation: op-mira 2.6s linear infinite;
+}
+@keyframes op-pasa {
+  from {
+    translate: 0 0;
+  }
+  to {
+    translate: 94px 0;
+  }
+}
+@keyframes op-mira {
+  0% {
+    translate: -8px 0;
+  }
+  50% {
+    translate: 0 0;
+  }
+  100% {
+    translate: 8px 0;
+  }
+}
+.op-filtro-red {
+  stroke: #7a5a3a;
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-dasharray: 3 3;
+}
+.op-gota {
+  opacity: 0;
+}
+.op-gota-nafta {
+  fill: #e08a1e;
+}
+.op-gota-agua {
+  fill: #4aa3df;
+  animation: op-gota-rebota 2.8s ease-in 0.7s infinite;
+}
+.op-gota-1 {
+  animation: op-gota-pasa 2.8s linear infinite;
+}
+.op-gota-2 {
+  animation: op-gota-pasa 2.8s linear 1.4s infinite;
+}
+@keyframes op-gota-pasa {
+  0% {
+    translate: 0 0;
+    opacity: 0;
+  }
+  8%,
+  85% {
+    opacity: 1;
+  }
+  100% {
+    translate: 100px 0;
+    opacity: 0;
+  }
+}
+/* El agua llega al colador, rebota hacia atrás y cae. */
+@keyframes op-gota-rebota {
+  0% {
+    translate: 0 0;
+    opacity: 0;
+  }
+  8% {
+    opacity: 1;
+  }
+  40% {
+    translate: 42px 0;
+  }
+  55% {
+    translate: 34px -6px;
+  }
+  80% {
+    translate: 30px 12px;
+    opacity: 1;
+  }
+  100% {
+    translate: 30px 16px;
+    opacity: 0;
+  }
+}
+
+/* En la columna de media anchura el dibujo se achica para dejarle renglón a la explicación. */
+@media (min-width: 760px) and (max-width: 1099.98px) {
+  .hoja__op {
+    grid-template-columns: 4.8rem 1fr;
+    gap: 0.5rem;
+  }
+}
+/* En una pantalla angosta los operadores van en fila, cada uno con el dibujo arriba. */
+@media (max-width: 759.98px) {
+  .hoja__cuerpo {
+    gap: 0.8rem;
+  }
+  .hoja__ops ul {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .hoja__op {
+    grid-template-columns: 1fr;
+    align-content: start;
+    height: 100%;
+  }
+  .hoja__op-dibujo {
+    max-width: 5rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hoja__retrato-nave,
+  .hoja__fuego,
+  .hoja__flecha,
+  .op-map-engranaje,
+  .op-tap-pupila,
+  .op-tap-rayo {
+    animation: none;
+  }
+  .hoja__halo path,
+  .hoja__flecha path {
+    animation: none;
+    stroke-dashoffset: 0;
+  }
+  .hoja__flecha span {
+    animation: none;
+    opacity: 1;
+  }
+  /* Quietos, cada dibujo muestra el momento que lo explica. */
+  .op-map-entra,
+  .op-map-sale,
+  .op-tap-valor,
+  .op-gota-1,
+  .op-gota-agua {
+    animation: none;
+    opacity: 1;
+  }
+  .op-map-entra {
+    opacity: 0;
+  }
+  .op-tap-valor {
+    translate: 40px 0;
+  }
+  .op-gota-1 {
+    translate: 76px 0;
+  }
+  .op-gota-agua {
+    translate: 40px 0;
+  }
+  .op-gota-2 {
     animation: none;
   }
 }

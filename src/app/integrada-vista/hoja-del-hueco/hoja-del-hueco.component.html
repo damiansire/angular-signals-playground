@@ -1,5 +1,24 @@
 @let h = hueco();
 <header class="hoja__cabeza">
+  <!-- El retrato de la nave que pide el arreglo, en su color: la hoja es suya. -->
+  <svg class="hoja__retrato" viewBox="0 0 64 40" aria-hidden="true">
+    <g class="hoja__retrato-nave">
+      <path class="hoja__fuego" d="M3 21c5-6 11-6 15-1-4 5-10 6-15 1Z" />
+      <path class="hoja__fuego-centro" d="M8 21c3-3 6-3 9-1-3 3-6 3-9 1Z" />
+      <path class="hoja__aleta" d="M24 13 19 3c6 0 11 4 14 8Z" />
+      <path class="hoja__aleta" d="M24 28 19 38c6 0 11-4 14-8Z" />
+      <path
+        class="hoja__casco"
+        d="M15 21c0-8 14-12 29-10 10 1 17 5 17 9 0 5-8 9-19 10-14 1-27-1-27-9Z"
+      />
+      <path class="hoja__franja" d="M17 23c10 2 26 2 42-1" />
+      <circle class="hoja__ventana" cx="45" cy="18" r="7" />
+      <circle class="hoja__ojo" cx="43" cy="18" r="2.6" />
+      <circle class="hoja__ojo" cx="48.5" cy="18" r="2.2" />
+      <circle class="hoja__pupila" cx="43.8" cy="18.3" r="1.2" />
+      <circle class="hoja__pupila" cx="49.1" cy="18.3" r="1" />
+    </g>
+  </svg>
   <span class="hoja__quien">{{ h.nombre }}</span>
   <h2 id="prologo-hueco" class="hoja__titulo">{{ h.titulo }}</h2>
   <span class="hoja__paso">{{ paso() }} de {{ total() }}</span>
@@ -41,10 +60,10 @@
       </span>
     </p>
   </section>
-  <section class="hoja__juego">
+  <section #juego class="hoja__juego">
     <p class="hoja__como">
       <span class="hoja__como-num" aria-hidden="true">→</span>
-      Tocá el operador subrayado para cambiarlo.
+      Tocá el operador marcado para cambiarlo.
     </p>
     <app-manipulable-system [system]="h.sistema" [ayuda]="false" (corrida)="corrida.set($event)">
       <!-- La meta al lado del número que da el código: se comparan sin leer. -->
@@ -53,6 +72,41 @@
         <b [textContent]="h.meta"></b>
       </p>
     </app-manipulable-system>
+    <!-- El óvalo marca EL token que se cambia, medido sobre el código real; se vuelve a trazar con
+         cada operador nuevo. La flecha está hasta el primer cambio. -->
+    @if (senal(); as s) {
+      <svg
+        class="hoja__halo"
+        aria-hidden="true"
+        viewBox="0 0 100 40"
+        preserveAspectRatio="none"
+        [style.left.px]="s.x - 8"
+        [style.top.px]="s.y - 4"
+        [style.width.px]="s.w + 16"
+        [style.height.px]="s.h + 8"
+      >
+        <path
+          #trazo
+          pathLength="1"
+          vector-effect="non-scaling-stroke"
+          d="M10 24C6 10 38 3 62 4c24 1 36 9 33 19-3 11-34 15-55 14C19 36 3 30 8 15"
+        />
+      </svg>
+      @if (conFlecha()) {
+        <div
+          class="hoja__flecha"
+          aria-hidden="true"
+          [style.left.px]="s.x + s.w * 0.55"
+          [style.top.px]="s.y + s.h + 3"
+        >
+          <svg viewBox="0 0 120 34">
+            <path pathLength="1" d="M114 30C84 33 34 31 7 6" />
+            <path pathLength="1" class="hoja__flecha-punta" d="M5 18 6 5l13 3" />
+          </svg>
+          <span>tocá acá</span>
+        </div>
+      }
+    }
     <!-- La ayuda la da otra nave: Angie todavía no puede intervenir, la tripulación sí. -->
     <div class="hoja__ayuda-zona" aria-live="polite">
       @if (pista(); as p) {
@@ -70,6 +124,88 @@
         </p>
       }
     </div>
+  </section>
+  <!-- Los tres operadores y qué hace cada uno: a prueba de adivinar. Tocar uno lo pone en el
+       hueco, igual que girar la perilla. -->
+  <section class="hoja__ops" aria-labelledby="hoja-ops">
+    <p id="hoja-ops" class="hoja__ops-rotulo">Operadores <span>· tocá uno para usarlo</span></p>
+    <ul>
+      @for (op of operadores; track op.nombre) {
+        <li>
+          <button
+            type="button"
+            class="hoja__op"
+            [class.hoja__op--puesto]="puesto() === op.nombre"
+            [attr.data-op]="op.nombre"
+            [attr.aria-pressed]="puesto() === op.nombre"
+            (click)="elegir(op.nombre)"
+          >
+            @switch (op.nombre) {
+              @case ('map') {
+                <!-- Un valor entra a la máquina y sale otro. -->
+                <svg class="hoja__op-dibujo" viewBox="0 8 120 44" aria-hidden="true">
+                  <path class="op-cano" d="M4 36h112" />
+                  <g class="op-map-entra">
+                    <rect x="6" y="28" width="24" height="16" rx="8" />
+                    <text x="18" y="40">10</text>
+                  </g>
+                  <g class="op-map-sale">
+                    <rect x="86" y="28" width="26" height="16" rx="8" />
+                    <text x="99" y="40">20</text>
+                  </g>
+                  <rect class="op-map-maquina" x="44" y="14" width="32" height="32" rx="7" />
+                  <g class="op-map-engranaje">
+                    <circle cx="60" cy="30" r="7" />
+                    <path
+                      d="M60 19v4M60 37v4M49 30h4M67 30h4M52 22l3 3M65 35l3 3M52 38l3-3M65 25l3-3"
+                    />
+                  </g>
+                </svg>
+              }
+              @case ('tap') {
+                <!-- Un ojo mira pasar el valor, que sigue igual. -->
+                <svg class="hoja__op-dibujo" viewBox="0 8 120 44" aria-hidden="true">
+                  <path class="op-cano" d="M4 40h112" />
+                  <g class="op-tap-valor">
+                    <rect x="2" y="32" width="24" height="16" rx="8" />
+                    <text x="14" y="44">10</text>
+                  </g>
+                  <path class="op-tap-ojo" d="M42 16c10-12 26-12 36 0-10 12-26 12-36 0Z" />
+                  <circle class="op-tap-pupila" cx="60" cy="16" r="4.5" />
+                  <path class="op-tap-rayo" d="M60 25v7" />
+                </svg>
+              }
+              @case ('filter') {
+                <!-- La nafta pasa el colador; el agua no. -->
+                <svg class="hoja__op-dibujo" viewBox="0 8 120 44" aria-hidden="true">
+                  <path class="op-cano" d="M4 36h112" />
+                  <path class="op-filtro-red" d="M62 12v34" />
+                  <path
+                    class="op-gota op-gota-nafta op-gota-1"
+                    d="M10 26c4 5 6 8 6 10a6 6 0 0 1-12 0c0-2 2-5 6-10Z"
+                  />
+                  <path
+                    class="op-gota op-gota-agua"
+                    d="M10 26c4 5 6 8 6 10a6 6 0 0 1-12 0c0-2 2-5 6-10Z"
+                  />
+                  <path
+                    class="op-gota op-gota-nafta op-gota-2"
+                    d="M10 26c4 5 6 8 6 10a6 6 0 0 1-12 0c0-2 2-5 6-10Z"
+                  />
+                </svg>
+              }
+            }
+            <span class="hoja__op-texto">
+              <code>{{ op.nombre }}</code>
+              @if (puesto() === op.nombre) {
+                <span class="hoja__op-puesto">en el código</span>
+              }
+              <span class="hoja__op-hace">{{ op.hace }}</span>
+            </span>
+          </button>
+        </li>
+      }
+    </ul>
   </section>
 </div>
 <button type="button" class="hoja__saltar" (click)="saltar.emit()">Saltar &rarr;</button>
