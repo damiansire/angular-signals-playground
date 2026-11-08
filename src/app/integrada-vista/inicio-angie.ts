@@ -291,8 +291,8 @@ const T = {
    */
   oir: 1100,
   responder: 1500,
-  /** El globo de la respuesta viajando al sol: lento como para seguirlo con la vista. */
-  enviar: 1150,
+  /** El globo de la respuesta condensándose en la luz que sube al sol. */
+  hacerseLuz: 380,
   presentir: 1200,
   pensar: 1000,
   decidir: 220,
@@ -493,45 +493,43 @@ export function initInicioAngie(host: HTMLElement, cuerpo?: AngieDeLaColina): In
   };
 
   /**
-   * La respuesta no se apaga donde la dijo: viaja al sol, que es de donde vino la voz. Así se lee
-   * como un mensaje que se manda y no como un globo que desaparece.
+   * La respuesta no se apaga donde la dijo: se vuelve luz y sube al sol, que es de donde vino la
+   * voz. Así se lee como un mensaje que se manda. El globo entero volando se veía raro: un cartel
+   * que cruza el cielo. Hecho luz es el mismo idioma de la despedida, que todavía no llegó.
    */
   const enviarAlSol = async (): Promise<void> => {
     const globo = escena.querySelector<HTMLElement>('.ini__dice');
     const sol = escena.querySelector<HTMLElement>('.ini__sol');
-    if (!globo || !sol || sinMovimiento()) return;
+    if (!globo || !sol || !luces || sinMovimiento()) return;
     const g = globo.getBoundingClientRect();
     const s = sol.getBoundingClientRect();
     const o = escena.getBoundingClientRect();
-    const dx = s.left + s.width / 2 - (g.left + g.width / 2);
-    const dy = s.top + s.height / 2 - (g.top + g.height / 2);
-    // Primero toma vuelo hacia arriba, después se curva al sol y se achica hasta un punto.
-    const vuelo = animar(
+    const desde = { x: g.left + g.width / 2 - o.left, y: g.top + g.height / 2 - o.top };
+    const hasta = { x: s.left + s.width / 2 - o.left, y: s.top + s.height / 2 - o.top };
+    // El globo se condensa en su centro mientras se carga de luz; del punto nace la luz.
+    animar(
       globo,
       [
-        { transformOrigin: '50% 50%', transform: 'translate(0, 0) scale(1)', opacity: 1 },
-        {
-          transform: `translate(${dx * 0.08}px, -2.2em) scale(0.96)`,
-          opacity: 1,
-          offset: 0.22,
-          easing: 'cubic-bezier(0.5, 0, 0.6, 1)',
-        },
-        { transform: `translate(${dx * 0.55}px, ${dy * 0.7 - 30}px) scale(0.5)`, opacity: 0.95 },
+        { transformOrigin: '50% 50%', transform: 'scale(1)', filter: 'brightness(1)', opacity: 1 },
         {
           transformOrigin: '50% 50%',
-          transform: `translate(${dx}px, ${dy}px) scale(0.06)`,
+          transform: 'scale(0.04)',
+          filter: 'brightness(2.2) drop-shadow(0 0 18px #ff8ac9)',
           opacity: 0,
         },
       ],
-      { duration: T.enviar, easing: 'ease-in' },
+      { duration: T.hacerseLuz, easing: 'cubic-bezier(0.6, 0, 0.8, 0.4)' },
     );
-    await vuelo;
+    await subirLuz(desde, hasta, '#ff8ac9', T.hacerseLuz * 0.55, 'ini__luz--mensaje');
     if (cerrado) return;
-    // El sol lo recibe: un latido de luz donde llegó.
-    const x = s.left + s.width / 2 - o.left;
-    const y = s.top + s.height / 2 - o.top;
-    onda(escena, x, y, 'rgba(255, 210, 110, 0.75)', s.width * 1.6);
-    chispas(escena, x, y, '#ffc65c', 8);
+    // El sol la recibe: late, y queda una onda donde llegó.
+    animar(sol, [{ scale: '1' }, { scale: '1.18' }, { scale: '1' }], {
+      duration: T.absorber * 1.4,
+      easing: 'ease-out',
+      fill: 'none',
+    });
+    onda(escena, hasta.x, hasta.y, 'rgba(255, 210, 110, 0.75)', s.width * 1.6);
+    chispas(escena, hasta.x, hasta.y, '#ffc65c', 8);
   };
 
   /** Lo que suena: el fondo sigue, y cada momento trae su fase y apaga la anterior. */
@@ -733,8 +731,14 @@ export function initInicioAngie(host: HTMLElement, cuerpo?: AngieDeLaColina): In
    * instante y recién ahí arranca: la estela crece con la velocidad, así que no existe antes del
    * viaje. Núcleo y estela van separados para que estirar la estela no aplaste el núcleo.
    */
-  function subirLuz(desde: Punto, hasta: Punto, color: string, retraso: number): Promise<void> {
-    const luz = crear('ini__luz');
+  function subirLuz(
+    desde: Punto,
+    hasta: Punto,
+    color: string,
+    retraso: number,
+    clase = '',
+  ): Promise<void> {
+    const luz = crear(`ini__luz ${clase}`.trim());
     const cola = crear('ini__cola');
     const nucleo = crear('ini__nucleo');
     luz.append(cola, nucleo);

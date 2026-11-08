@@ -1019,6 +1019,19 @@
   background: linear-gradient(to bottom, var(--luz), transparent);
   box-shadow: 0 0 12px 2px var(--luz);
 }
+/* La respuesta hecha luz es UNA sola, no una de muchas piezas: más grande, para seguirla con la
+   vista hasta el sol. Un punto del tamaño de las de la despedida se perdía en el cielo claro. */
+.ini__luz--mensaje .ini__nucleo {
+  left: -13px;
+  top: -13px;
+  width: 26px;
+  height: 26px;
+}
+.ini__luz--mensaje .ini__cola {
+  left: -5px;
+  width: 10px;
+  height: 170px;
+}
 .ini__destello {
   position: absolute;
   left: 50%;

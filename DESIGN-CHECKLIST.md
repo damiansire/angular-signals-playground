@@ -566,9 +566,11 @@ entrar desarma a Angie en luz y se hace noche, la costura con el prólogo.
       Un cambio de tamaño la reacomoda en la piedra. Medir a Angie sentada y a la piedra contra
       sol, fichas, título y llamado en los seis anchos: cero solapes y nada afuera. Las piezas
       apagadas miden 0,0: filtrarlas antes de armar la caja de Angie.
-- [ ] La respuesta de Angie no se apaga donde la dijo: al tocar, el globo toma vuelo, se curva y
-      se achica hasta entrar en el sol (`enviarAlSol`), que late al recibirla. Se lee como un
-      mensaje que se manda, de vuelta a donde vino la voz. Sin movimiento, no viaja.
+- [ ] La respuesta de Angie no se apaga donde la dijo: al tocar, el globo se condensa en un punto
+      y de ahí nace UNA luz (`subirLuz`, la de la despedida, más grande: `ini__luz--mensaje`) que
+      sube al sol, y el sol late al recibirla. Se lee como un mensaje que se manda. Defecto
+      resuelto: el globo entero cruzando el cielo se veía raro, un cartel volando. Sin movimiento,
+      no viaja.
 - [ ] No se entra mientras la portada todavía está entrando: el click se frena en captura hasta
       que el llamado termina su animación (`animationend` de `.ini__llamado`). Un toque a mitad de
       la bajada cortaba la portada sin terminar de leerla. Sin movimiento, se puede de entrada.
