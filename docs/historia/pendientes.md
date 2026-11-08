@@ -31,8 +31,8 @@ fecha y adónde fue. Los ids (H1, J1…) sirven para nombrarlos en una sesión (
   su voz, y el comentario en femenino.
 - **H10. El registro.** El prólogo tutea ("Sácanos de aquí", "si lo miras desde el ángulo
   correcto") y las cinemáticas usan voseo ("¿A ella le avisó y a vos no?", "Preguntá"). La interfaz
-  también mezcla ("Haz click" al lado de "Ponete auriculares"). Falta elegir uno para toda la
-  historia. **Propuesta:** voseo, como los docs y casi toda la interfaz.
+  mezclaba ("Haz click" al lado de "Ponete auriculares"); los dos llamados ya dicen "Hacé click".
+  Falta elegir uno para toda la historia. **Propuesta:** voseo, como los docs y casi toda la interfaz.
 
 ## Juego
 

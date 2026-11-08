@@ -498,7 +498,7 @@ entrar desarma a Angie en luz y se hace noche, la costura con el prólogo.
       renglón a 375 px y sin tocar los pies de Angie ni los interruptores.
 - [ ] Se entra tocando en cualquier lugar de la escena, no solo la lamparita: apuntarle a un foco
       chico era un examen de puntería. Arrastrar a Angie (más de 8 px entre bajar y soltar) no
-      entra, ni tocar un control. El llamado dice "Haz click para iniciar las aventuras", sin
+      entra, ni tocar un control. El llamado dice "Hacé click para iniciar las aventuras", sin
       nombrar la idea, y tiene vida: un cursor hace click al empezar cada vuelta de 2,6 s, la frase
       se mueve en ola detrás (causa y reacción) y la chispa del final salta cuando la ola llega.
       Defecto resuelto: "Tocá para entrar" solo parpadeaba en opacidad y se leía apagado. Llega
@@ -604,7 +604,7 @@ entrar desarma a Angie en luz y se hace noche, la costura con el prólogo.
       medio con los auriculares puestos (L y R) y lentes de sol, accesorios proyectados en su
       propio dibujo (`mvDetras`, `mvCara`, `mvDelante` en `app-mascota-viva`) para que la sigan en
       cada golpe; las cejas asoman por arriba del marco. No hay botón a la vista: la invitación es
-      texto ("Haz click en cualquier lado para continuar") con un cursor que hace click y una ola
+      texto ("Hacé click en cualquier lado para continuar") con un cursor que hace click y una ola
       que sale de ese click, separada del título con aire (pegados se leían como un renglón
       partido); sigue siendo un `<button>` para teclado y lector, sin anillo de foco (el foco llega solo
       al cargar y lo volvía botón). Arriba a la derecha, el control de sonido: apagado, las copas
@@ -636,6 +636,16 @@ entrar desarma a Angie en luz y se hace noche, la costura con el prólogo.
       alba (el rosado de abajo competía con Angie), el título es crema con un solo acento rosa en
       "auriculares" y "volumen", y la invitación va en crema suave con la ola en amarillo; el foco
       de teclado es una línea rosa debajo, no un fondo de pastilla que la volvía botón.
+- [ ] El cielo del aviso tiene planos, no solo puntos: lomas en silueta abajo (la de lejos con el
+      filo rosa del alba, debajo del velo), las estrellas más grandes brillan en cruz y cada 11 s
+      cruza una fugaz que termina antes de llegar a Angie. Defectos resueltos: (1) la mitad de abajo
+      era un vacío y la escena se leía como una calcomanía en el medio de la noche; (2) las lomas
+      recortadas (`slice`) perdían el filo en ventanas bajas: van estiradas (`none`, con el borde
+      `non-scaling-stroke`); (3) en un celular una cruz caía sobre el control de sonido: no hay
+      destellos en la franja de arriba (`y >= 110`). Medir el aire entre la invitación y la cresta
+      de lejos en 375×667, 800×737, 1280×600, 1600×610 y 1920×1080: siempre positivo (18 px el más
+      justo, en el celular). La invitación va en voseo como el título ("Hacé click", no "Haz
+      click"). Angie llega a `min(440px, 76vw, 48vh)`: en una pantalla ancha y baja quedaba chica.
 - [ ] Mientras espera, Angie ESCUCHA la música de sus auriculares (`escuchar`, pulso de
       `TIEMPO_MS` = 600 ms): cabecea en cada tiempo, se mece cada medio compás con la cabeza
       adelantada, marca el pulso con un pie y después con el otro, y le salen notas de las copas.
