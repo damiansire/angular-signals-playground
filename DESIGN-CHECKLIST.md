@@ -881,8 +881,10 @@ verificable con `/cine/<n>?cuadro=<beat>` (fotograma congelado) o `/cine/<n>` (r
       sigue donde estaba.
 - [ ] Saltable siempre (Esc o "Saltar") y avanzable como un RPG (Enter, espacio, → o el botón).
       Mientras corre, el recorrido de atrás no recibe teclas, rueda ni foco.
-- [ ] Se juega UNA vez por partida al llegar a la parada del capítulo; un deep-link a un
-      sub-nivel no se interrumpe; se vuelve a ver desde la bitácora.
+- [ ] Se juega cada vez que se llega a la parada del capítulo, aunque ya se haya visto (ADR
+      0004): una vez por partida parecía un bug, porque nada decía que ya se había gastado. Salir
+      de un sub-nivel al átomo del mismo capítulo no es llegar; un deep-link a un sub-nivel no se
+      interrumpe; se vuelve a ver desde la bitácora.
 - [ ] Como se abre sola, la pausa de la vida de fondo también la alcanza: con la pausa puesta
       se cuenta en modo quieto (el de reduced-motion), el diálogo sigue y hay cero animaciones
       corriendo en la escena.
