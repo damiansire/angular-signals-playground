@@ -15,27 +15,37 @@ export const CLAVE_PARTIDA = 'signals-cuaderno';
  * Si el formato cambia de manera incompatible, se sube. Una versión con migración se lee y se
  * traduce; una sin migración arranca de cero.
  */
-const VERSION = 2;
+const VERSION = 3;
 
 /**
- * Cómo se lee hoy un id guardado con una versión anterior, o `null` si eso ya no existe. En la 2
- * (2026-11-09) los sub-niveles 0/1 a 0/5 pasaron a ser las páginas del manual de a bordo del
- * prólogo: el viejo `0/5` es el `0/0` de hoy, y lo resuelto en las páginas no se marca en ningún
- * lado. Sin esto, un `0/0` viejo (el árbol de HTML) aparecía como resuelto en un desafío que nunca
- * se tocó.
+ * Cómo se lee hoy un lugar del recorrido guardado con una versión anterior, o `null` si eso ya no
+ * existe. Lo usan los ids establecidos y el punto donde quedó la historia.
+ *
+ * - En la 2 (2026-11-09) los sub-niveles 0/1 a 0/5 pasaron a ser las páginas del manual de a bordo
+ *   del prólogo: el viejo `0/5` es el `0/0` de la 2. Sin esto, un `0/0` viejo (el árbol de HTML)
+ *   aparecía como resuelto en un desafío que nunca se tocó.
+ * - En la 3 (2026-11-09) el último sub-nivel de la Introducción pasó a ser el árbol de Signal
+ *   Space, y la Introducción salió del recorrido: todo se corre un concepto para atrás. Lo resuelto
+ *   en la historia no se marca en ningún lado.
  */
-const MIGRACIONES: Readonly<Record<number, (id: string) => string | null>> = {
-  1: (id) => {
-    const par = parsearId(id);
-    if (!par || par.concepto !== 0) return id;
-    return par.sub === 5 ? idDe(0, 0) : null;
-  },
+interface Lugar {
+  readonly concepto: number;
+  readonly sub: number;
+}
+const sinLaIntroduccion = (l: Lugar): Lugar | null =>
+  l.concepto === 0 ? null : { concepto: l.concepto - 1, sub: l.sub };
+const MIGRACIONES: Readonly<Record<number, (l: Lugar) => Lugar | null>> = {
+  1: (l) => (l.concepto === 0 && l.sub !== 5 ? null : sinLaIntroduccion(l)),
+  2: sinLaIntroduccion,
 };
+
+/** El capítulo 0 era la Introducción: su cinemática se fue con ella. 12 es el final. */
+const CINEMATICAS = { primera: 1, ultima: 12 } as const;
 
 export interface Partida {
   /** Sub-niveles establecidos como `"concepto/sub"`, ambos desde 0 (la URL usa sub desde 1). */
   readonly establecidos: readonly string[];
-  /** Cinemáticas ya vistas, por número de capítulo (12 es el final). */
+  /** Cinemáticas ya vistas, por número de capítulo (del 1 al 11, y 12 es el final). */
   readonly cinematicas: readonly number[];
   /** Ya vio el prólogo completo o lo salteó a propósito: la bitácora le ofrece volver a verlo. */
   readonly prologo: boolean;
@@ -60,9 +70,6 @@ export const PARTIDA_VACIA: Partida = {
   punto: null,
 };
 
-/** Cuántas cinemáticas existen: una por concepto más el final. */
-const CINEMATICAS_MAX = 13;
-
 /**
  * Lee una partida guardada. `subPorConcepto[c]` es la cantidad de sub-niveles del concepto `c`:
  * es lo que dice qué ids son posibles, así una partida vieja de cuando había otros sub-niveles no
@@ -81,7 +88,7 @@ export function leerPartida(crudo: string | null, subPorConcepto: readonly numbe
   // `hasOwn`: un `v` como "constructor" no puede colarse como migración.
   const migrar =
     v === VERSION
-      ? (id: string): string | null => id
+      ? (l: Lugar): Lugar | null => l
       : typeof v === 'number' && Object.hasOwn(MIGRACIONES, v)
         ? MIGRACIONES[v]
         : null;
@@ -90,16 +97,19 @@ export function leerPartida(crudo: string | null, subPorConcepto: readonly numbe
   const establecidos = new Set<string>();
   for (const guardado of arreglo(dato['establecidos'])) {
     if (typeof guardado !== 'string') continue;
-    const id = migrar(guardado);
-    if (id === null) continue;
-    const par = parsearId(id);
+    const leido = parsearId(guardado);
+    const par = leido && migrar(leido);
     if (par && par.sub < (subPorConcepto[par.concepto] ?? 0))
       establecidos.add(idDe(par.concepto, par.sub));
   }
 
   const cinematicas = new Set<number>();
   for (const n of arreglo(dato['cinematicas'])) {
-    if (Number.isInteger(n) && (n as number) >= 0 && (n as number) < CINEMATICAS_MAX) {
+    if (
+      Number.isInteger(n) &&
+      (n as number) >= CINEMATICAS.primera &&
+      (n as number) <= CINEMATICAS.ultima
+    ) {
       cinematicas.add(n as number);
     }
   }
@@ -108,16 +118,20 @@ export function leerPartida(crudo: string | null, subPorConcepto: readonly numbe
     establecidos: [...establecidos].sort(compararIds),
     cinematicas: [...cinematicas].sort((a, b) => a - b),
     prologo: dato['prologo'] === true,
-    punto: leerPunto(dato['punto'], subPorConcepto),
+    punto: leerPunto(dato['punto'], subPorConcepto, migrar),
   };
 }
 
 /**
  * Un punto que no encaja con la forma de hoy se descarta: retomar en un lugar que ya no existe
  * dejaría la historia en el vacío, y empezar del principio no rompe nada. Si una migración corre
- * conceptos o sub-niveles, el punto del recorrido se pierde igual que sus ids.
+ * conceptos o sub-niveles, el punto del recorrido se traduce igual que sus ids.
  */
-function leerPunto(dato: unknown, subPorConcepto: readonly number[]): Punto | null {
+function leerPunto(
+  dato: unknown,
+  subPorConcepto: readonly number[],
+  migrar: (l: Lugar) => Lugar | null,
+): Punto | null {
   if (!esObjeto(dato)) return null;
   const lugar = dato['lugar'];
   if (lugar === 'construccion') return { lugar };
@@ -129,8 +143,9 @@ function leerPunto(dato: unknown, subPorConcepto: readonly number[]): Punto | nu
     const concepto = dato['concepto'];
     const sub = dato['sub'];
     if (!Number.isInteger(concepto) || !Number.isInteger(sub)) return null;
-    const c = concepto as number;
-    const s = sub as number;
+    const l = migrar({ concepto: concepto as number, sub: sub as number });
+    if (!l) return null;
+    const { concepto: c, sub: s } = l;
     if (c < 0 || c >= subPorConcepto.length || s < -1 || s >= subPorConcepto[c]) return null;
     return { lugar, concepto: c, sub: s };
   }
