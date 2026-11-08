@@ -35,6 +35,16 @@ describe('ManipulableSystemComponent', () => {
     return fixture;
   }
 
+  it('el banco de prueba es opt-in: en las cards la barra sigue como siempre', () => {
+    const fixture = crear();
+    const ms = (): HTMLElement => fixture.nativeElement.querySelector('.ms');
+    expect(ms().classList).not.toContain('ms--banco');
+
+    fixture.componentRef.setInput('banco', true);
+    fixture.detectChanges();
+    expect(ms().classList).toContain('ms--banco');
+  });
+
   it('arranca sin correr: ni averiado ni sano hasta accionarlo', () => {
     const c = crear().componentInstance;
     expect(c.health()).toBe('idle');

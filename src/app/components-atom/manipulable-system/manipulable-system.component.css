@@ -258,9 +258,57 @@
   box-shadow: 0 0 0 2px #eb9b3c;
 }
 
+/* El banco de prueba: lecturas, meta y acción en una franja propia, con la acción al final como
+   botón principal. Suelto en la hoja, el botón de contorno fino se leía como texto y nadie sabía
+   cómo confirmar. */
+.ms--banco .ms__bar {
+  align-items: center;
+  gap: 0.9rem 1.6rem;
+  max-width: none;
+  padding: 0.7rem 0.8rem 0.7rem 1.1rem;
+  border-radius: 14px;
+  background: #f1e8d6;
+}
+.ms.ms--banco .ms__bar .ms__act {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  margin-left: auto;
+  padding: 0.75rem 1.25rem 0.75rem 1rem;
+  border: 0;
+  border-radius: 12px;
+  background: #2b2620;
+  box-shadow: 0 3px 0 #0f0c09;
+  font: 700 0.98rem / 1 var(--font-display, system-ui, sans-serif);
+  color: #fffdf8;
+  transition:
+    translate 0.12s ease,
+    box-shadow 0.12s ease,
+    background 0.12s ease;
+}
+/* El triángulo de "probar": dice que el botón corre algo, sin sumar palabras. */
+.ms.ms--banco .ms__bar .ms__act::before {
+  content: '';
+  width: 0.62em;
+  height: 0.72em;
+  background: #ffd27a;
+  clip-path: polygon(0 0, 100% 50%, 0 100%);
+}
+.ms.ms--banco .ms__bar .ms__act:hover {
+  background: #3d352b;
+  color: #fffdf8;
+  translate: 0 -1px;
+  box-shadow: 0 4px 0 #0f0c09;
+}
+.ms.ms--banco .ms__bar .ms__act:active {
+  translate: 0 2px;
+  box-shadow: 0 1px 0 #0f0c09;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .ms .ms__code .ms__knob,
-  .ms__gauge {
+  .ms__gauge,
+  .ms.ms--banco .ms__bar .ms__act {
     transition: none;
   }
 }

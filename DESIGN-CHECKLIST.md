@@ -737,6 +737,10 @@ Del prólogo reconstruido en SVG (2026-11-08):
 - [ ] En la caja la frase corta sola, por su ancho: un `\n` a mano más el corte automático dejaba
       renglones de una palabra ("Rápido." solo, "inalcanzable" solo). Solo la voz y el grito, sin
       caja, declaran sus cortes; `malformado()` rechaza un `\n` en la caja.
+- [ ] La caja es casi opaca (96%; 97% sobre el papel del final): al 78% las líneas de la anomalía
+      y las moléculas cruzaban la frase. Sin `backdrop-filter`, que la escena no usa.
+- [ ] Angie habla con su rosa (#ff8ac9, el de la exploradora: es ella; #c2185b sobre papel). En
+      amarillo su nombre se confundía con el del capitán.
 - [ ] Un operador nombrado en la charla (`switchMap`) se ve como código: va entre comillas
       invertidas en el guion y el motor lo escribe en un `<code>` estampado con el atributo de
       encapsulación. Sin estampar, el `<code>` salía sin color.
@@ -790,22 +794,32 @@ Del minijuego de operadores (2026-11-08):
 - [ ] Con movimiento reducido el prólogo se termina solo, así que la hoja no aparece. Sus reglas
       de `prefers-reduced-motion` (dibujos quietos en el momento que los explica) quedan por si eso
       cambia.
-- [ ] Los nombres del código van uno por renglón (`nombres`), con el código a la izquierda, y lo
-      que tiene que salir en su propia frase, en un papel teñido con el color de la nave. En un solo
-      párrafo los nombres se perdían. La meta va en la barra del desafío (`msMeta`, proyectada), al
-      lado del número que da el código y con su misma gramática: comparar es mirar de un número al
-      otro. Debajo de la explicación quedaba lejos y se leía como una nota.
-- [ ] A 1100 px o más la hoja va en tres columnas (encargo | código | operadores). Entre 760 y
-      1099, en dos: los operadores en su columna a la derecha y el encargo repartido en dos. Abajo y
-      en fila empujaban la hoja a scrollear por dentro a 1024×700. Por debajo de 760, en una, con
-      los operadores en fila. Medida con input real a 1440×900, 1280×640, 1024×700, 820×1180 y
-      700×900, con la ayuda abierta: cero solapes con HUD y diálogo, sin scroll, consola limpia.
+- [ ] Lo que tiene que salir (`encargo`) va en una franja del color de la nave, de lado a lado
+      justo debajo del título, con la diana: es lo primero que se lee. En una columna al costado,
+      junto a los nombres, se perdía como una nota más. Los nombres del código (`nombres`) van en
+      fila arriba del bloque, como la leyenda de un plano. La meta corta va además en la barra del
+      desafío (`msMeta`, proyectada), al lado del número que da el código y con la misma diana:
+      comparar es mirar de un número al otro.
+- [ ] El desafío va con `[banco]="true"`: la barra es un banco de prueba (lecturas, meta y acción
+      en su franja) y la acción es el botón principal, oscuro, con un triángulo de "probar" y al
+      final del renglón. El botón de contorno fino se leía como texto y no se sabía cómo confirmar.
+- [ ] La hoja va en dos columnas desde 760 px (código y banco | operadores) y en una por debajo,
+      con los operadores en fila. Baja y ancha (`max-height: 720px`), la instrucción y la leyenda
+      comparten renglón: con la ayuda abierta, a 1280×640 la hoja scrolleaba 39 px por dentro. El
+      óvalo y la flecha quedan fuera de esa grilla porque se miden contra el bloque entero. Medida
+      con input real a 1440×900, 1280×640, 1024×700, 820×1180 y 700×900, con la ayuda abierta:
+      cero solapes con HUD y diálogo, sin scroll, el óvalo sobre el operador, consola limpia.
+- [ ] La hoja no deja seleccionar texto (`user-select: none`): es un tablero para tocar, y tocar la
+      perilla varias veces seguidas pintaba de azul medio renglón de código.
+- [ ] La Nave B pide `c === 'combustible'`: dice qué pasa, no qué se descarta. Con `nafta` y
+      `c !== 'agua'` había que leer una negación para entender el filtro.
 - [ ] En el prólogo Angie todavía no puede intervenir: el desafío va con `[ayuda]="false"` y no
       muestra su pista. La ayuda la da OTRA nave, solo con la corrida ya rota, y dice qué hizo el
       operador elegido, nunca cuál es el bueno (lo verifica `operadores-del-prologo.spec.ts`).
 - [ ] La hoja no alcanza las clases del desafío (estilos encapsulados): lo que cambia adentro va
-      por variables del átomo (`--ms-codigo`, `--ms-ancho`, `--ms-aire`, `--ms-renglon`). Una regla
-      `.prologo__operadores .ms__code` no aplicaba y nadie lo notaba.
+      por variables del átomo (`--ms-codigo`, `--ms-ancho`, `--ms-aire`, `--ms-renglon`) o por una
+      entrada suya (`banco`). Una regla `.prologo__operadores .ms__code` no aplicaba y nadie lo
+      notaba.
 - [ ] La hoja es su propio componente diferido (`hoja-del-hueco/`): plantilla, CSS, desafío y
       resaltador fuera del bundle inicial, que con la hoja adentro pasaba el presupuesto de 740 kB.
 - [ ] Los datos del minijuego viajan con el prólogo diferido (el motor se los pasa a la vista),
