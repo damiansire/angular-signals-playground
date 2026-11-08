@@ -388,10 +388,12 @@ export function initInicioAngie(host: HTMLElement, cuerpo?: AngieDeLaColina): In
 
   let paseo: { t: number; dura: number; hasta: number; pasos: number; apertura: number } | null =
     null;
-  let sentada = false;
+  /** `en camino` va desde que gira la cabeza hasta que se sienta, pausa en el borde incluida. */
+  let llegada: 'espera' | 'en camino' | 'sentada' = 'espera';
+  let arranco = false;
   const sentarse = (x: number): void => {
     paseo = null;
-    sentada = true;
+    llegada = 'sentada';
     ubicar(x, INCLINA_SENTADA);
     escena.classList.add('ini--sentada');
     cuerpo?.sentarse();
@@ -403,8 +405,9 @@ export function initInicioAngie(host: HTMLElement, cuerpo?: AngieDeLaColina): In
       sentarse(paseo.hasta);
       return false;
     }
-    // Una pestaña que vuelve trae un cuadro de segundos: el paseo no puede saltar de golpe.
-    paseo.t += Math.min(dt, 0.05);
+    // Una pestaña que vuelve trae un cuadro de segundos: el paseo no puede saltar de golpe. El tope
+    // no es más bajo porque con pocos cuadros por segundo (una carga pesada) caminaba en cámara lenta.
+    paseo.t += Math.min(dt, 0.25);
     const p = paseo.t / paseo.dura;
     const x = paseo.hasta * avanceDelPaseo(p);
     ubicar(x, INCLINA_CAMINANDO);
@@ -422,17 +425,14 @@ export function initInicioAngie(host: HTMLElement, cuerpo?: AngieDeLaColina): In
     const hasta = asiento();
     // La zancada del dibujo, pasada al paisaje: el pie apoyado barre justo lo que avanza el cuerpo.
     const largo = zancada() * deAngie();
-    // Sin movimiento, en pausa, sin la landing a la vista o sin lugar para un paso: ya sentada.
-    const quieta =
-      sinMovimiento() ||
-      escena.closest('.fondo-en-pausa') !== null ||
-      escena.classList.contains('gone') ||
-      hasta < largo;
+    // Sin movimiento, en pausa o sin lugar para un paso: ya sentada.
+    const quieta = sinMovimiento() || escena.closest('.fondo-en-pausa') !== null || hasta < largo;
     if (quieta) {
       sentarse(hasta);
       return;
     }
     const pasos = pasosDelPaseo(hasta, largo);
+    arranco = true;
     paseo = {
       t: 0,
       dura: pasos / CADENCIA / (1 - RAMPA),
@@ -442,15 +442,43 @@ export function initInicioAngie(host: HTMLElement, cuerpo?: AngieDeLaColina): In
     };
     motor.despertar();
   };
-  // Primero gira la cabeza hacia el borde y después arranca: decide adónde va antes de ir.
-  luego(T.antesDeMirar, () => {
-    if (!cerrado && !escena.classList.contains('ini--saliendo')) cuerpo?.caminar(0.5);
+  const aLaVista = (): boolean => !escena.classList.contains('gone');
+  /**
+   * El paseo arranca cuando la landing se ve, no al cargar: con un deep-link carga oculta, y al volver
+   * a ella Angie ya estaba en el borde, como si se hubiera teletransportado.
+   */
+  const llegar = (): void => {
+    if (llegada !== 'espera' || cerrado || !aLaVista()) return;
+    if (escena.classList.contains('ini--saliendo')) return;
+    llegada = 'en camino';
+    // Primero gira la cabeza hacia el borde y después arranca: decide adónde va antes de ir.
+    luego(T.antesDeMirar, () => cuerpo?.caminar(0.5));
+    luego(T.antesDeCaminar, arrancar);
+  };
+  // Si la landing se va de vista a mitad de camino, no camina para nadie: termina sentada. Si se va
+  // antes de arrancar, la llegada espera a la próxima vez que se vea.
+  const vigia = new MutationObserver(() => {
+    if (escena.classList.contains('ini--saliendo')) return;
+    if (aLaVista()) return llegar();
+    if (llegada !== 'en camino') return;
+    temporizadores.forEach(clearTimeout);
+    temporizadores.clear();
+    if (arranco) sentarse(paseo?.hasta ?? asiento());
+    else {
+      llegada = 'espera';
+      cuerpo?.pararse();
+    }
   });
-  luego(T.antesDeCaminar, arrancar);
-  // Al cambiar el tamaño, el asiento en píxeles ya no corresponde: queda sentada en el nuevo.
+  vigia.observe(escena, { attributes: true, attributeFilter: ['class'] });
+  llegar();
+  // Un cambio de tamaño cambia cuánto mide el camino en píxeles, no el camino: el paseo sigue hacia
+  // el asiento nuevo sin saltar, y sentada se reacomoda en él.
   const alRedimensionar = (): void => {
-    if (escena.classList.contains('ini--saliendo') || (!paseo && !sentada)) return;
-    sentarse(asiento());
+    if (escena.classList.contains('ini--saliendo')) return;
+    if (paseo) {
+      paseo.hasta = Math.max(asiento(), 1);
+      paseo.apertura = aperturaPara(paseo.hasta / paseo.pasos / deAngie());
+    } else if (llegada === 'sentada') sentarse(asiento());
   };
   window.addEventListener('resize', alRedimensionar);
 
@@ -473,7 +501,8 @@ export function initInicioAngie(host: HTMLElement, cuerpo?: AngieDeLaColina): In
     // Si la tocan en camino, se queda donde está, parada: la idea le llega ahí.
     temporizadores.forEach(clearTimeout);
     temporizadores.clear();
-    if (!sentada) {
+    vigia.disconnect();
+    if (llegada !== 'sentada') {
       paseo = null;
       cuerpo?.pararse();
     }
@@ -512,7 +541,11 @@ export function initInicioAngie(host: HTMLElement, cuerpo?: AngieDeLaColina): In
     );
     if (cerrado) return;
 
-    const piezas = [...angie.querySelectorAll<SVGGraphicsElement>('[data-pieza]')];
+    // Solo las del dibujo que se ve: sentada, el cuerpo de frente está apagado y sus piezas medirían
+    // cero, así que su luz nacería en la esquina de la pantalla.
+    const piezas = [...angie.querySelectorAll<SVGGraphicsElement>('[data-pieza]')].filter(
+      (p) => p.getBoundingClientRect().width > 0,
+    );
     const caja = angie.getBoundingClientRect();
     const origen = escena.getBoundingClientRect();
     const centro = { x: caja.left + caja.width / 2, y: caja.top + caja.height * 0.55 };
@@ -686,6 +719,7 @@ export function initInicioAngie(host: HTMLElement, cuerpo?: AngieDeLaColina): In
     despedir,
     dispose(): void {
       cerrado = true;
+      vigia.disconnect();
       escena.removeEventListener('pointerdown', alTocar);
       escena.removeEventListener('click', alClic);
       window.removeEventListener('resize', alRedimensionar);
