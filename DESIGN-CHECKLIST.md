@@ -309,9 +309,10 @@ puede alcanzar" son dos cosas distintas y hay que chequear las dos.
 - [ ] El HUD del prólogo son íconos de 44 px (pausa, sonido, pantalla completa; a la derecha, empezar
       de cero) con su nombre en `aria-label` y `title`, que cambia con el estado. No hay "Saltar
       intro" ni "Velocidad": el prólogo es el comienzo de la historia, no una intro que se saltea.
-- [ ] Con el manual abierto en el prólogo, su cabecera (el libro, las marcas, "1 de 5" y "Cerrar")
-      va en la fila del HUD, entre los íconos: una sola franja arriba. El HUD queda por encima de la
-      hoja para seguir a mano. Por debajo de 760 px el nombre del libro se va.
+- [ ] Con el manual abierto en el prólogo, la fila de arriba es solo del HUD (pausa, sonido,
+      pantalla completa, empezar de cero), por encima de la pantalla del libro. El libro, sus marcas
+      y "1 de 5" van debajo del título de la ley, adentro de la página: en la fila del HUD se
+      chocaban con los íconos.
 - [ ] "Empezar de cero" está en la barra, en el HUD del prólogo y en la colina, y pide un segundo
       toque que caduca. Su globo en la colina es corto: el largo tapaba el título a 1024×768, y el
       del "¿seguro?" se ve sin apuntar. Borrar recarga SIN la query.
@@ -891,28 +892,28 @@ Del minijuego de operadores (2026-11-08):
 - [ ] La hoja scrollea por dentro y se mueve con todo: rueda y dedo nativos (el prólogo corta su
       propagación ahí adentro, porque la rueda del recorrido está en un ancestro y en el borde movía
       la molécula), y ↑/↓, AvPág, Inicio, Fin y espacio a mano. Antes, solo arrastrando la barra.
-- [ ] Sin barra de sistema y con "más abajo" en el pie, que se apaga al final. Sus keyframes son
-      propios: Angular renombra los de cada hoja de estilo, y los de las cards no llegaban.
+- [ ] Sin barra de sistema. En el viaje, "más abajo" en el pie, que se apaga al final (sus keyframes
+      son propios: Angular renombra los de cada hoja de estilo). El libro de leyes no lo tiene: entra
+      entero.
 - [ ] Adentro del manual el espacio desplaza, no pausa: pausaba la historia, y al cerrar el manual
       quedaba congelada hasta tocar Continuar.
-- [ ] Escape cierra el manual y ←/→ pasan de página (en `document`: un botón de la pantalla que se
-      rehace deja el foco en el `body`). Al cerrar, el foco vuelve a Pausa, no al `body`.
+- [ ] ←/→ pasan de página (en `document`: un botón de la pantalla que se rehace deja el foco en el
+      `body`). Escape NO cierra: el libro es parte de la historia, no un cartel encima, y se sigue
+      hasta la última página. Al dejarlo, el foco vuelve a Pausa, no al `body`.
 - [ ] Angie no da pistas en el prólogo: el manual provee `AYUDA_DE_ANGIE` en `false`, porque los
       desafíos vienen adentro de cada pantalla y no se les puede pasar `[ayuda]`.
 - [ ] En la primera página no hay "← Anterior": apagado igual se leía como un camino que todavía
-      no se había abierto. `scroll-padding-bottom` deja lo tabulado arriba del pie sticky.
+      no se había abierto. Suelto desde la bitácora sí hay uno, "← Bitácora": vuelve a ella, y la
+      última página dice "Volver a la bitácora".
 - [ ] Medido a 1440×900, 1280×640 y 1024×700 con input real: sin choques con el HUD, sin desborde
       horizontal, pie siempre visible, nada sin estampar, la caja de diálogo escondida, y al cerrar
       sigue "Debería ser imposible…".
 - [ ] Se abre suelto desde la bitácora ("Manual de a bordo", siempre a la vista): la misma hoja en
       un `ng-template`, afuera del escenario y en el z 70 de la bitácora. En la historia sigue
       adentro del prólogo, porque la pantalla completa es la del prólogo. El escenario queda
-      `inert`, y al cerrar se prende antes de devolverle el foco a "Bitácora".
+      `inert`, y al volver se prende antes de devolverle el foco a "Bitácora", que se reabre.
 - [ ] Las teclas de leer las atiende la vista (`pasoEnElManual`, función pura), no el motor del
       prólogo: suelto, el motor no está, y sin `preventDefault` ↓ movía la molécula de atrás.
-- [ ] "Cerrar ×" en la cabeza, en su propia columna (`grid-area: 1 / 4`, después de las marcas y
-      el paso): con mouse, Escape no se adivina. Sin el área explícita caía en la primera columna y
-      se estiraba a lo ancho.
 - [ ] La hoja es una columna flex con el cuerpo estirado: en una página corta el pie flotaba a
       mitad de la hoja, con media hoja vacía debajo.
 - [ ] Cada página lee igual: la ley suelta sobre el cielo, y en papel "1 · qué hacer" con la demo,
@@ -990,26 +991,44 @@ Del minijuego de operadores (2026-11-08):
 - [ ] En cada escena, nada importante detrás de la nave: el planeta va arriba a la izquierda, el
       lápiz descansa adentro del cuadro y el rótulo "zone" cuelga de la cerca. Con movimiento
       reducido cada escena queda en el momento que explica, sin bucles.
-- [ ] Afuera del prólogo (el manual suelto y el viaje), la hoja va sobre el cielo del prólogo, casi
-      opaco, desenfocado y con estrellas: sin papel propio, el velo gris dejaba leer el mapa a
-      través y "11 sin establecer" se pisaba con la cabecera.
+- [ ] Afuera del prólogo (el manual suelto y el viaje), detrás de la hoja va el negro opaco de la
+      tele apagada: con un velo, el mapa se leía a través y "11 sin establecer" se pisaba con la
+      cabecera.
 - [ ] Pasar de página se ve: la página nueva entra deslizándose, con su título, desde el lado al
       que se va. La hoja de papel que giraba desde el lomo, sobre una hoja sin papel, era un
-      destello blanco a pantalla entera. Gira por DEBAJO de la cabeza y el pie: por
-      encima, con la perspectiva, tapaba "Siguiente" y "Cerrar" mientras giraba. Sin animación con
-      movimiento reducido.
-- [ ] Suelto, medido a 1280×640, 1024×700 y 600×800 con input real: rueda, teclas, Escape y el
-      botón; la molécula no se mueve mientras está abierto, y sí al cerrarlo.
+      destello blanco a pantalla entera. Sin animación con movimiento reducido.
+- [ ] Suelto, medido a 1280×640, 1024×700 y 600×800 con input real: rueda, teclas y los botones;
+      la molécula no se mueve mientras está abierto, y sí al volver a la bitácora.
 - [ ] Con las escenas, medido con input real en la historia a 1440×900 y 1280×640, suelto a
       1024×700 y 600×800, y suelto a 1440×900 con movimiento reducido (en la historia el prólogo
       se termina solo): sin solapes con el HUD y sin desborde horizontal en las cinco páginas.
 
 **El libro de leyes integrado a la pantalla** (el manual y Signal Space, `prologo__manual--libro`):
 
-- [ ] No es un rectángulo encima de la escena: la hoja no tiene fondo, borde ni barras; la escena
-      queda detrás, desenfocada y oscurecida hacia el medio, y la ley va suelta en Fraunces con
-      sombra tintada. Lo que se toca (la mesa, la escena, el desafío) es papel con borde de tinta.
-      La hoja del viaje habla igual (ADR 0010): ver "El viaje".
+- [ ] El libro es la pantalla de la nave, ENTERA (como la tele del viaje a Japón): no un modal
+      encima de la historia. Al "¡Rápido, el manual de a bordo!" la cámara se acerca a la escena y
+      todo queda negro; la pantalla se prende como una tele vieja (un punto, una raya de luz que
+      se abre, el fogonazo que se asienta) y adentro la página es el mundo: el cielo y la nave de
+      borde a borde, la ley arriba sobre ese cielo, y la consola como franja de abajo. El vidrio se
+      ve desde adentro: esquinas redondeadas y un reflejo que casi no se nota. Después de la última
+      página la pantalla se apaga (raya, punto) y la historia sigue con "Debería ser imposible…".
+      Anti-patrones: un velo o un desenfoque sobre el prólogo, una tarjeta con marco alrededor de la
+      página, una × o Escape que sale, scroll o "más abajo", botones encima del código, la cabeza
+      del libro en la fila del HUD, y un corte de cielo entre el prólogo y la página. La hoja del
+      viaje habla distinto (ADR 0010): ver "El viaje".
+- [ ] La tele se prende cuando la página ya está montada (`montarDiferido` avisa), y la primera
+      página se pide al abrir el prólogo: prendida antes, el fogonazo pasaba mientras la página
+      cargaba y se trababa un segundo. Si la página no llega en 4 s, se prende igual.
+- [ ] La tele recorta (`clip-path`), no achica: con `scale(0, …)` la nave de la ley 1 medía su
+      matriz al nacer y no tenía inversa (`NaveDelManual.mirar` tiraba). El blanco es la imagen
+      sobreexpuesta (`brightness`): pasando a blanco con `invert`, el medio era un velo gris.
+- [ ] "Anterior" y "Siguiente" van en la última fila de la consola (`pie` del token
+      `PAGINA_DEL_MANUAL`), nunca sobre el código ni en una franja sticky aparte. Son cartelitos de
+      papel: le ganan a la pastilla oscura global por especificidad.
+- [ ] Medido con input real en la historia a 1440×900 y suelto a 390×844: las páginas integradas
+      entran enteras, sin scroll, sin choque con el HUD y sin botón encima del código; Escape no
+      cierra; "← Bitácora" vuelve. Por debajo de 700 px el prólogo se saltea (por diseño), así que a
+      390 el libro se lee suelto.
 - [ ] La mano guía señala lo próximo que hay que tocar y amaga el toque hasta que alguien lo toca
       (cada página dice qué con `guia`, un selector). Antes "Clickeá un tag" no decía cuál y nadie
       empezaba. Entra 1,2 s después de la ley para no robarle la mirada.
