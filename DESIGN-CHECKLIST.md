@@ -1074,8 +1074,8 @@ Del minijuego de operadores (2026-11-08):
       mano mide lo que el guante, porque adentro de una caja de 0 el guante también medía 0.
 - [ ] "Mostrame" y los botones del pie le ganan a la pastilla oscura global de los botones de las
       pantallas (especificidad 0,4,1): con `.pm .pm-paso .pm-mostrar` y los selectores del libro.
-- [ ] Solo la demo que crece con el alto estira la mesa (`llena`, el árbol de la ley 1). Las de
-      tamaño fijo, estiradas, dejaban media mesa de papel vacía: van centradas en el alto.
+- [ ] En la forma de tres tarjetas (hoy solo el árbol de Signal Space) la demo va centrada en el
+      alto: estirada, dejaba media mesa de papel vacía. `llena` se fue con la ley 1 vieja.
 - [ ] El árbol va `position: absolute` en su recuadro: con su alto natural en el flujo, el mínimo de
       la grilla crecía y la hoja desbordaba 12 px a 1366×768.
 - [ ] El nodo aparece con el toque, no al final: el árbol es SVG armado por Angular. Con ECharts

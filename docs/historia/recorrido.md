@@ -79,7 +79,7 @@ Es el acto 1 hasta la orden del capitán: `anom-que-pasa`, `anom-sin-control`, `
 huecos cortos, uno por nave, para **completar el hueco** eligiendo el operador (J2).
 
 El minijuego reusa `ManipulableChallenge` (`src/app/libs/manipulable-challenge.ts`). El hueco es la
-perilla, las opciones son sus posiciones, y la primera es la rota, como en los 40 desafíos de hoy.
+perilla, las opciones son sus posiciones, y la primera es la rota, como en los 35 desafíos de perilla.
 Cada hueco entra en el `SHAPE` actual: una perilla, hasta dos lecturas y hasta seis renglones de
 código.
 
@@ -283,14 +283,15 @@ pisó. Angie ya no mira el sol con melancolía. "Este mundo también es casa." (
 | La tormenta             | 10/1 Debounce con RxJS · 10/2 Debounce a mano (effect + onCleanup) · 10/3 debounced() nativo                                                                                                       |
 | Quien lee, avisa        | 11/1 Change detection sin Zone.js                                                                                                                                                                  |
 
-Son 6 + 15 + 13 + 6 = 40. Los desafíos que quizá conviene mover o juntar están en
-[pendientes](./pendientes.md).
+Son 6 + 15 + 13 + 6 = 40. Las cinco leyes del manual llevan el desafío adentro de su página, sobre
+el mismo código que la demo; los otros 35 son de perilla (`*-systems.ts`). Los desafíos que quizá
+conviene mover o juntar están en [pendientes](./pendientes.md).
 
 ## Lo que se reusa y lo que se rehace
 
 | Se reusa                                                                      | Por qué                                                                  |
 | ----------------------------------------------------------------------------- | ------------------------------------------------------------------------ |
-| `libs/manipulable-challenge.ts`, los 12 `*-systems.ts` y su barrido de los 40 | Son la lógica de cada desafío, ya probada como función pura              |
+| `libs/manipulable-challenge.ts`, los 12 `*-systems.ts` y su barrido de los 35 | Son la lógica de cada desafío, ya probada como función pura              |
 | `libs/cd-tree.ts`                                                             | El árbol de las páginas 5 y 6 y de Quien lee, avisa                      |
 | `libs/partida.ts`                                                             | El guardado, con una versión nueva                                       |
 | `libs/sonido.ts`, `libs/resorte.ts`, `libs/muelle.ts`, `libs/rastros.ts`      | El sonido, los resortes, el reloj de muelles y los rastros de los toques |
