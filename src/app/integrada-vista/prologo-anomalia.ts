@@ -956,17 +956,60 @@ export function initPrologoAnomalia(host: HTMLElement, opts: PrologoOpciones): (
     'stroke-width': 1.6,
   });
   el(nubeHelado, 'circle', { cx: 9, cy: -54, r: 2.6, fill: '#fff', opacity: 0.5 });
-  // "Y yo quiero unas…": el globo empezado que la interrupción deja sin terminar.
-  const globoUnas = el(efectos, 'g', { opacity: 0 });
-  el(globoUnas, 'path', {
-    d: mancha(0, 0, 30, 5, 0.16),
+  // "Y yo quiero unas papas fritas…": el antojo de la nave A, en su globo como el helado de la B. La
+  // exploradora entra hablando encima y el globo se aplasta antes de terminar de flotar.
+  const globoPapas = el(efectos, 'g', { opacity: 0 });
+  for (const [x, y, r] of [
+    [-8, 30, 5],
+    [-2, 18, 8],
+  ] as const) {
+    el(globoPapas, 'circle', {
+      cx: x,
+      cy: y,
+      r,
+      fill: '#fffaf2',
+      stroke: TINTA,
+      'stroke-width': 2,
+    });
+  }
+  const nubePapas = el(globoPapas, 'g');
+  el(nubePapas, 'path', {
+    d: mancha(14, -34, 46, 3, 0.18),
     fill: '#fffaf2',
     stroke: TINTA,
-    'stroke-width': 2.2,
+    'stroke-width': 2.4,
   });
-  const puntitos = [-12, 0, 12].map((x) =>
-    el(globoUnas, 'circle', { cx: x, cy: 0, r: 4, fill: TINTA }),
-  );
+  // Los bastones asoman del cucurucho en abanico; el cucurucho va encima y los tapa abajo.
+  for (const [x, alto, giro] of [
+    [5, 30, -14],
+    [10, 34, -6],
+    [15, 36, 2],
+    [20, 33, 9],
+    [24, 29, 16],
+  ] as const) {
+    el(nubePapas, 'rect', {
+      x: x - 2.6,
+      y: -24 - alto,
+      width: 5.2,
+      height: alto,
+      rx: 1.6,
+      fill: '#ffd25e',
+      stroke: TINTA,
+      'stroke-width': 1.6,
+      transform: `rotate(${giro} ${x} -24)`,
+    });
+  }
+  el(nubePapas, 'path', {
+    d: 'M0 -30L28 -30 24 0 4 0Z',
+    fill: '#e8414f',
+    stroke: TINTA,
+    'stroke-width': 2,
+  });
+  el(nubePapas, 'path', {
+    d: mancha(14, -15, 6, 5, 0.1),
+    fill: '#fffaf2',
+    opacity: 0.85,
+  });
   const corazon = el(efectos, 'path', {
     d: 'M0 9C-16 -2-16 -15-6 -15C-2 -15 0 -11 0 -9C0 -11 2 -15 6 -15C16 -15 16 -2 0 9Z',
     fill: '#ff7a9c',
@@ -1389,19 +1432,18 @@ export function initPrologoAnomalia(host: HTMLElement, opts: PrologoOpciones): (
       });
     }
 
-    // "Y yo quiero unas…": tres puntitos que la interrupción deja a medias.
-    const qu = clamp01((t - M.unas.t0 - 300) / 260);
-    const corta = clamp01((t - M.vuelta.t0) / 200);
+    // Las papas fritas: entran con rebote como el helado y se aplastan con el mismo viento.
+    const qu = clamp01((t - M.unas.t0 - 250) / 320);
+    const corta = clamp01((t - revienta) / 200);
     if (qu > 0 && corta < 1 && a.pos.x > -500) {
-      fijar(globoUnas, {
+      const flotaA = Math.sin(t * 0.003 + 1) * 4;
+      const s = conRebote(qu, 2.2);
+      fijar(globoPapas, {
         opacity: r2(1 - corta),
-        transform: `translate(${r2(a.pos.x + 40)} ${r2(a.pos.y - 78)}) scale(${r2(conRebote(qu) * (1 - corta * 0.6))} ${r2(conRebote(qu) * (1 + corta * 0.5))})`,
+        transform: `translate(${r2(a.pos.x + 30)} ${r2(a.pos.y - 74 + flotaA)}) scale(${r2(s * (1 - corta * 0.6))} ${r2(s * (1 + corta * 0.5))})`,
       });
-      puntitos.forEach((p, k) => {
-        const salta = Math.max(0, Math.sin(t * 0.009 - k * 0.9)) * 4;
-        fijar(p, { cy: r2(-salta), opacity: t - M.unas.t0 > 500 + k * 380 ? 1 : 0 });
-      });
-    } else fijar(globoUnas, { opacity: 0 });
+      fijar(nubePapas, { transform: `rotate(${r2(Math.sin(t * 0.002 + 1) * 3)})` });
+    } else fijar(globoPapas, { opacity: 0 });
 
     // "No tengo control de los sistemas": la llama de la nave A tose humo.
     humos.forEach((h, k) => {

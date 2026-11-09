@@ -78,7 +78,7 @@ export const GUION: readonly LineaGuion[] = [
   { id: 'casa-helado', quien: 'naveB', txt: 'Yo quiero comer helado de chocolate.' },
   // Estas dos se PISAN, y es la única superposición del guion: la exploradora entra mientras el
   // otro todavía está hablando, que es lo que hace que se lea como una interrupción y no un turno.
-  { id: 'casa-unas', quien: 'naveA', txt: 'Y yo quiero unas…' },
+  { id: 'casa-unas', quien: 'naveA', txt: 'Y yo quiero unas papas fritas…' },
   {
     id: 'casa-apuren',
     pisa: 500,
