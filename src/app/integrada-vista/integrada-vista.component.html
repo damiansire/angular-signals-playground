@@ -705,6 +705,7 @@
     #hojaDelManual
     class="prologo__manual card--dissolve"
     [class.prologo__manual--libro]="libro().concepto === undefined"
+    [class.prologo__manual--viaje]="libro().concepto !== undefined"
     tabindex="-1"
     role="region"
     aria-labelledby="manual-ley"
@@ -738,15 +739,13 @@
         </button>
       }
     </header>
-    <div class="prologo__manual-cuerpo">
+    <div #cuerpoDelManual class="prologo__manual-cuerpo">
       <!-- La página del manual trae su ley, su lámina y su desafío (ver `app-pagina-del-manual`). Una
            pantalla del viaje no: en la molécula su nombre lo ponía la barra de arriba. -->
       @if (libro().concepto !== undefined) {
         <h2 class="prologo__manual-titulo" id="manual-ley">{{ p.ley }}</h2>
       }
       <div #pantallaDelManual class="subhost"></div>
-      <!-- La hoja que se da vuelta al pasar de página: papel, sin contenido. -->
-      <div #hojaQuePasa class="prologo__manual-pasa" aria-hidden="true"></div>
     </div>
     <nav class="prologo__manual-pie" aria-label="Páginas del manual">
       <!-- Solo si hay una página antes: en la primera, "Anterior" ofrecía volver a donde nunca se fue. -->

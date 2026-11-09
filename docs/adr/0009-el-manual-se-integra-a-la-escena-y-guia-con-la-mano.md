@@ -14,6 +14,8 @@ juego de Japón y que el manual se integre a la pantalla.
    oscurecida hacia el medio. La ley va suelta encima, y lo que se toca (la demo, la escena de la
    nave, el desafío) va en papel. Abierto suelto desde la bitácora, el fondo es el cielo del
    prólogo. La hoja del viaje (las etapas de cada capítulo) sigue siendo de papel: es otra pieza.
+   (Reemplazado por [0010](./0010-la-hoja-del-viaje-habla-como-el-libro-de-leyes.md): el viaje
+   también se integra.)
 2. **Cada página dice qué tocar y una mano lo señala.** La demo pasa un selector (`guia`), y la
    mano guía, un guante de papel animado con GSAP, apunta ahí y amaga el toque hasta que alguien lo
    toca. La lógica (qué sigue, dónde cae el dedo, cuándo parar) son funciones puras en
@@ -28,4 +30,4 @@ juego de Japón y que el manual se integre a la pantalla.
 
 - Una página nueva del manual tiene que decir su `guia`. Sin ella no hay mano ni "Mostrame".
 - "Leer el HTML", el reproductor del árbol de la ley 1, se va: "Mostrame" hace lo mismo con la mano.
-- Integrar también la hoja del viaje con este estilo es un cambio aparte.
+- Integrar también la hoja del viaje con este estilo es un cambio aparte (hecho en 0010).

@@ -361,7 +361,7 @@ export class IntegradaVistaComponent {
   );
   private readonly hojaDelManual = viewChild<ElementRef<HTMLElement>>('hojaDelManual');
   private readonly pantallaDelManual = viewChild<ElementRef<HTMLElement>>('pantallaDelManual');
-  private readonly hojaQuePasa = viewChild<ElementRef<HTMLElement>>('hojaQuePasa');
+  private readonly cuerpoDelManual = viewChild<ElementRef<HTMLElement>>('cuerpoDelManual');
   /** La página que se veía antes: dice para qué lado se da vuelta la hoja. */
   private paginaPrevia: number | null = null;
   /** Cierra la hoja: `true` si se leyó hasta el final, `false` si se cerró antes. */
@@ -482,7 +482,8 @@ export class IntegradaVistaComponent {
     // Cada página arranca arriba, y el foco va a la hoja: con teclado, se lee sin buscarla.
     hoja.scrollTop = 0;
     hoja.focus({ preventScroll: true });
-    if (previa !== null && previa !== i) this.darVueltaLaHoja(i > previa, host);
+    const cuerpo = this.cuerpoDelManual()?.nativeElement;
+    if (previa !== null && previa !== i && cuerpo) this.darVueltaLaHoja(i > previa, cuerpo);
     onCleanup(() => {
       vigia?.();
       montada.dispose();
@@ -490,45 +491,19 @@ export class IntegradaVistaComponent {
   });
 
   /**
-   * Pasar de página se ve como en un libro: una hoja de papel se levanta desde el lomo y deja ver la
-   * página nueva, que entra apenas corrida. Para adelante gira sobre el borde izquierdo; para atrás,
-   * sobre el derecho. Sin animación, la pantalla nueva reemplazaba a la vieja de golpe y no se
-   * notaba que había cambiado de página.
+   * Pasar de página se ve: la página nueva entra deslizándose desde el lado al que se va, con su
+   * título. Sin animación, la pantalla nueva reemplazaba a la vieja de golpe y no se notaba que había
+   * cambiado. Antes giraba una hoja de papel desde el lomo, pero la hoja ya no es de papel: sobre el
+   * cielo, el papel girando de borde a borde se veía como un fogonazo blanco.
    */
-  private darVueltaLaHoja(adelante: boolean, pantalla: HTMLElement): void {
-    const papel = this.hojaQuePasa()?.nativeElement;
-    if (!papel || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-    // El libro de leyes no tiene hoja: va suelto sobre la escena, y una hoja de papel girando de
-    // borde a borde se veía como un fogonazo blanco. Ahí la página nueva entra deslizándose.
-    if (this.libro().concepto === undefined) {
-      pantalla.animate(
-        [
-          { opacity: 0, translate: `${adelante ? 48 : -48}px 0` },
-          { opacity: 1, translate: '0 0' },
-        ],
-        { duration: 420, easing: 'cubic-bezier(0.22, 1, 0.36, 1)', fill: 'backwards' },
-      );
-      return;
-    }
-    const giro = adelante ? -100 : 100;
-    papel.style.transformOrigin = adelante ? 'left center' : 'right center';
-    papel.animate(
+  private darVueltaLaHoja(adelante: boolean, cuerpo: HTMLElement): void {
+    if (sinMovimiento()) return;
+    cuerpo.animate(
       [
-        { opacity: 1, transform: 'perspective(2000px) rotateY(0deg)', filter: 'brightness(1)' },
-        {
-          opacity: 1,
-          transform: `perspective(2000px) rotateY(${giro}deg)`,
-          filter: 'brightness(0.82)',
-        },
-      ],
-      { duration: 620, easing: 'cubic-bezier(0.5, 0, 0.6, 1)' },
-    );
-    pantalla.animate(
-      [
-        { opacity: 0, translate: `${adelante ? 18 : -18}px 0` },
+        { opacity: 0, translate: `${adelante ? 48 : -48}px 0` },
         { opacity: 1, translate: '0 0' },
       ],
-      { duration: 380, delay: 260, easing: 'ease-out', fill: 'backwards' },
+      { duration: 420, easing: 'cubic-bezier(0.22, 1, 0.36, 1)', fill: 'backwards' },
     );
   }
 

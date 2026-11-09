@@ -1,19 +1,17 @@
-/* El manual de a bordo: la hoja de papel del recorrido, ahora en la cabina. Ocupa todo lo que deja
-   el HUD porque cada página es una pantalla entera, y la caja de diálogo se esconde: la orden ya se
-   leyó, y debajo de la hoja solo asomaba cortada. Cada página se ordena sola (ley, qué hacer, demo,
-   lámina y desafío: ver `app-pagina-del-manual`); la hoja pone el libro alrededor. */
+/* La hoja donde se lee: el libro de leyes del prólogo y las etapas del viaje. No es un rectángulo
+   encima de la escena: no tiene fondo, borde ni barras. La cabecera, el título y los botones van
+   sueltos sobre el cielo, y lo que se toca es papel con el borde de tinta del manual. Ocupa todo
+   lo que deja el HUD porque cada página es una pantalla entera, y la caja de diálogo se esconde:
+   la orden ya se leyó. */
 .prologo__manual {
   position: absolute;
   z-index: 5;
-  inset: 4.25rem 0 1rem;
-  width: min(76rem, calc(100% - 2rem));
+  inset: 4rem 0 0;
+  width: min(112rem, calc(100% - 3rem));
   margin-inline: auto;
   overflow: auto;
-  padding: 1.1rem clamp(1.1rem, 2.4vw, 2.2rem) 1rem;
-  border-top: 6px solid #ffd27a;
-  border-radius: 18px;
-  color: #201d16;
-  box-shadow: 0 24px 60px rgb(10 4 20 / 65%);
+  padding: 0 clamp(1rem, 2.4vw, 2.2rem);
+  color: #fff8ec;
   /* Es un juego que se toca: tocar el código o un botón varias veces no pinta de azul la hoja. */
   user-select: none;
   -webkit-user-select: none;
@@ -36,11 +34,9 @@
 .prologo__manual::-webkit-scrollbar {
   display: none;
 }
-/* Más ancha a lo ancho, sin tapar los botones de la colina del costado izquierdo. */
-@media (min-width: 1100px) {
-  .prologo__manual {
-    width: min(84rem, calc(100% - 10rem));
-  }
+/* `card--dissolve` trae la armonización de las pantallas; el fondo, que también trae, no va. */
+.prologo__manual.card--dissolve {
+  background: none;
 }
 /* La armonización corre el contenido 1.5rem para salvar la espina de la molécula. Acá no hay espina,
    y el corrimiento dejaba dos bordes izquierdos en la hoja. */
@@ -51,10 +47,6 @@
    ocupa la hoja entera: con el tope quedaba una franja vacía a la derecha. */
 .prologo__manual.card--dissolve .subhost > * > app-pagina-del-manual {
   max-width: none;
-}
-/* `card--dissolve` trae la armonización de las pantallas, y también un fondo transparente. */
-.prologo__manual.card--dissolve {
-  background: linear-gradient(180deg, #fcfbf5, #f5f2e8);
 }
 .prologo__manual:focus {
   outline: none;
@@ -67,11 +59,21 @@
   grid-template-columns: auto 1fr auto auto;
   align-items: center;
   gap: 0.15rem 1rem;
-  margin-bottom: 1.1rem;
-  padding-bottom: 0.75rem;
-  border-bottom: 1px solid #e6dfcf;
+  margin-bottom: 0.5rem;
 }
-/* Las marcas del libro: las leídas en tinta, la de ahora más larga y en el dorado del manual. */
+.prologo__manual-libro,
+.prologo__manual-paso {
+  font:
+    700 0.72rem / 1 'JetBrains Mono',
+    'Cascadia Mono',
+    Consolas,
+    monospace;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #e9defa;
+  text-shadow: 0 2px 0 rgb(25 8 40 / 75%);
+}
+/* Las marcas del libro: las leídas en papel, la de ahora más larga y en el dorado del manual. */
 .prologo__manual-marcas {
   display: flex;
   gap: 0.35rem;
@@ -80,17 +82,18 @@
   width: 0.55rem;
   height: 0.55rem;
   border-radius: 999px;
-  background: #ddd3bf;
+  background: rgb(255 248 236 / 28%);
   transition:
     width 0.3s ease,
     background 0.3s ease;
 }
 .prologo__manual-marca--leida {
-  background: #8a7d66;
+  background: #fff8ec;
 }
 .prologo__manual-marca--aca {
   width: 1.6rem;
-  background: #e0a63a;
+  background: #ffd27a;
+  box-shadow: 0 0 10px rgb(255 210 122 / 60%);
 }
 /* El cuerpo se estira hasta el pie; la página adentro decide sus columnas. */
 .prologo__manual-cuerpo {
@@ -102,67 +105,53 @@
 .prologo__manual app-concept-card {
   bottom: 5.5rem;
 }
-/* El nombre de la pantalla, en una etapa del viaje: con la letra de la ley del manual. */
-.prologo__manual-titulo {
-  margin: 0.4rem 0 1.4rem;
-  font:
-    400 clamp(1.6rem, 2.6vw, 2.3rem) / 1.08 Georgia,
-    'Times New Roman',
-    serif;
-  color: #17140f;
-  text-wrap: balance;
-}
-/* La hoja que se da vuelta: papel con su sombra de lomo, encima del cuerpo mientras gira. */
-.prologo__manual-pasa {
-  position: absolute;
-  z-index: 3;
-  inset: 0;
-  border-radius: 12px;
-  background: linear-gradient(90deg, #ebe4d3, #fcfbf5 18%, #f7f3ea 82%, #e6dfcd);
-  box-shadow: 0 12px 30px rgb(43 38 32 / 22%);
-  opacity: 0;
-  pointer-events: none;
-  backface-visibility: hidden;
-}
-.prologo__manual-libro,
-.prologo__manual-paso {
-  font:
-    700 0.72rem / 1 'JetBrains Mono',
-    'Cascadia Mono',
-    Consolas,
-    monospace;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: #5b5246;
-}
-/* La cabeza y el pie quedan encima de la hoja que se da vuelta: es el marco del libro. */
-.prologo__manual-cabeza {
-  position: relative;
-  z-index: 4;
-  background: #fcfbf5;
-}
 /* En tres columnas: "Anterior" a la izquierda solo si hay página antes, y "Siguiente" siempre a la
-   derecha, esté o no el otro. */
+   derecha, esté o no el otro. Sin barra: los dos carteles flotan en las esquinas de abajo. */
 .prologo__manual-pie {
   z-index: 4;
   position: sticky;
-  bottom: -1rem;
+  bottom: 0;
   display: grid;
   grid-template-columns: 1fr auto 1fr;
   align-items: center;
-  margin: 1.25rem calc(-1 * clamp(1.1rem, 2.4vw, 2.2rem)) -1rem;
-  padding: 0.7rem clamp(1.1rem, 2.4vw, 2.2rem);
-  border-top: 1px solid #e6dfcf;
-  background: #f5f2e8;
+  margin: 0.25rem calc(-1 * clamp(1rem, 2.4vw, 2.2rem)) 0;
+  padding: 0.5rem clamp(1rem, 2.4vw, 2.2rem) 0.75rem;
+  pointer-events: none;
 }
+/* Cartelitos de papel, un poco torcidos, con la línea punteada adentro: se enderezan al pasarles
+   por encima y se hunden en su sombra al apretarlos. */
 .prologo__manual-boton {
-  padding: 0.5rem 0.9rem;
-  border: 1px solid #d9cfba;
+  padding: 0.45rem 1rem 0.5rem;
+  border: 2px solid #5d4a5e;
   border-radius: 10px;
-  background: #fffdf7;
-  font: 600 0.9rem / 1 var(--font-display, system-ui, sans-serif);
-  color: #1f1a14;
+  outline: 1.4px dashed #c9b49a;
+  outline-offset: -6px;
+  background: #fffaf2;
+  box-shadow: 3px 4px 0 rgb(6 3 14 / 40%);
+  rotate: 1.5deg;
+  font:
+    800 1rem / 1.2 'Baloo 2',
+    var(--font-display, system-ui, sans-serif);
+  letter-spacing: 0.01em;
+  color: #2b2230;
   cursor: pointer;
+  pointer-events: auto;
+  transition:
+    rotate 0.2s,
+    translate 0.2s,
+    background-color 0.2s;
+}
+.prologo__manual-boton:hover {
+  rotate: 0deg;
+  translate: 0 -2px;
+}
+.prologo__manual-boton:active {
+  translate: 1px 2px;
+  box-shadow: 1px 2px 0 rgb(6 3 14 / 40%);
+}
+.prologo__manual-boton:focus-visible {
+  outline: 3px solid #fff8ec;
+  outline-offset: 3px;
 }
 .prologo__manual-atras {
   grid-column: 1;
@@ -171,8 +160,9 @@
 .prologo__manual-boton--sigue {
   grid-column: 3;
   justify-self: end;
-  border-color: #b8791f;
+  outline-color: #b8791f;
   background: #ffd27a;
+  rotate: -1.5deg;
 }
 /* Como el de las cards: sigue al scroll de la hoja y se apaga al llegar al final. */
 .prologo__manual-abajo {
@@ -210,28 +200,36 @@
   padding: 0.35rem 0.7rem;
   font-size: 0.82rem;
 }
-/* Abierto desde la bitácora, sin la escena: va afuera del escenario y a la altura de ella. Sin el HUD
-   del prólogo arriba, la hoja aprovecha el alto entero. */
+@media (prefers-reduced-motion: reduce) {
+  .prologo__manual-boton {
+    rotate: none;
+    transition: none;
+  }
+}
+
+/* Abierto afuera del prólogo (el manual desde la bitácora, y cada etapa del viaje): va afuera del
+   escenario y a la altura de la bitácora, sin el HUD arriba. Detrás no está la escena del prólogo
+   sino el mapa crema: un velo gris lo dejaba leer a través, y "11 sin establecer" se pisaba con la
+   cabecera. Va el cielo del prólogo, casi opaco y con sus estrellas. */
 .manual-suelto {
   position: fixed;
   inset: 0;
   z-index: 70;
 }
 .manual-suelto .prologo__velo {
-  background: rgb(6 3 14 / 72%);
-}
-.manual-suelto .prologo__manual {
-  inset: 1rem 0;
-}
-/* El libro no tiene papel propio: suelto, sobre el mapa crema, el velo gris dejaba leer el mapa a
-   través y "11 sin establecer" se pisaba con la cabecera. Va el cielo del prólogo, casi opaco. */
-.manual-suelto:has(.prologo__manual--libro) .prologo__velo {
-  background: radial-gradient(ellipse 80% 90% at 50% 45%, rgb(38 22 64 / 95%), rgb(14 8 30 / 97%));
+  background:
+    radial-gradient(1.5px 1.5px at 12% 18%, rgb(255 248 236 / 80%), transparent),
+    radial-gradient(1px 1px at 27% 72%, rgb(255 248 236 / 70%), transparent),
+    radial-gradient(1.5px 1.5px at 46% 9%, rgb(255 248 236 / 60%), transparent),
+    radial-gradient(1px 1px at 63% 84%, rgb(255 248 236 / 70%), transparent),
+    radial-gradient(2px 2px at 78% 31%, rgb(255 210 122 / 70%), transparent),
+    radial-gradient(1px 1px at 91% 66%, rgb(255 248 236 / 60%), transparent),
+    radial-gradient(1.5px 1.5px at 6% 88%, rgb(255 248 236 / 50%), transparent),
+    radial-gradient(ellipse 80% 90% at 50% 45%, rgb(38 22 64 / 96%), rgb(14 8 30 / 98%));
   backdrop-filter: blur(6px);
 }
-.prologo__manual-boton:focus-visible {
-  outline: 3px solid #b8791f;
-  outline-offset: 2px;
+.manual-suelto .prologo__manual {
+  inset: 1.5rem 0 0;
 }
 
 /* Lo que la hoja ajusta de las pantallas que monta (las alcanza por el estampado). */
@@ -257,10 +255,8 @@
   margin: 0;
 }
 
-/* El libro de leyes (el manual y el árbol de Signal Space) no es un rectángulo encima de la escena:
-   la hoja no tiene fondo, borde ni barras. La escena queda detrás, desenfocada y más oscura hacia
-   el medio, donde se lee; la cabecera y los botones van sueltos sobre ella, y lo que se toca es
-   papel (ver `app-pagina-del-manual`). Como las lecciones del viaje a Japón. */
+/* El libro de leyes (el manual y el árbol de Signal Space), en el prólogo: la escena queda detrás,
+   desenfocada y más oscura hacia el medio, donde se lee. Como las lecciones del viaje a Japón. */
 .prologo--manual .prologo__escena,
 .prologo--manual .prologo__mascot {
   filter: blur(2.5px);
@@ -273,85 +269,6 @@
     rgb(14 8 30 / 40%)
   );
 }
-.prologo__manual.prologo__manual--libro,
-.prologo__manual.prologo__manual--libro.card--dissolve {
-  inset: 4rem 0 0;
-  width: min(112rem, calc(100% - 3rem));
-  padding: 0 clamp(1rem, 2.4vw, 2.2rem);
-  border-top: 0;
-  border-radius: 0;
-  background: none;
-  box-shadow: none;
-}
-.prologo__manual--libro .prologo__manual-cabeza {
-  margin-bottom: 0.5rem;
-  padding-bottom: 0;
-  border-bottom: 0;
-  background: none;
-}
-.prologo__manual--libro .prologo__manual-libro,
-.prologo__manual--libro .prologo__manual-paso {
-  color: #e9defa;
-  text-shadow: 0 2px 0 rgb(25 8 40 / 75%);
-}
-.prologo__manual--libro .prologo__manual-marca {
-  background: rgb(255 248 236 / 28%);
-}
-.prologo__manual--libro .prologo__manual-marca--leida {
-  background: #fff8ec;
-}
-.prologo__manual--libro .prologo__manual-marca--aca {
-  background: #ffd27a;
-  box-shadow: 0 0 10px rgb(255 210 122 / 60%);
-}
-/* El pie sin barra: los dos carteles flotan sobre la escena, en las esquinas de abajo. */
-.prologo__manual--libro .prologo__manual-pie {
-  bottom: 0;
-  margin: 0.25rem calc(-1 * clamp(1rem, 2.4vw, 2.2rem)) 0;
-  padding: 0.5rem clamp(1rem, 2.4vw, 2.2rem) 0.75rem;
-  border-top: 0;
-  background: none;
-  pointer-events: none;
-}
-/* Cartelitos de papel, un poco torcidos, con la línea punteada adentro: se enderezan al pasarles
-   por encima y se hunden en su sombra al apretarlos. */
-.prologo__manual--libro .prologo__manual-boton {
-  padding: 0.45rem 1rem 0.5rem;
-  border: 2px solid #5d4a5e;
-  border-radius: 10px;
-  outline: 1.4px dashed #c9b49a;
-  outline-offset: -6px;
-  background: #fffaf2;
-  box-shadow: 3px 4px 0 rgb(6 3 14 / 40%);
-  rotate: 1.5deg;
-  font:
-    800 1rem / 1.2 'Baloo 2',
-    var(--font-display, system-ui, sans-serif);
-  letter-spacing: 0.01em;
-  color: #2b2230;
-  pointer-events: auto;
-  transition:
-    rotate 0.2s,
-    translate 0.2s,
-    background-color 0.2s;
-}
-.prologo__manual--libro .prologo__manual-boton--sigue {
-  outline-color: #b8791f;
-  background: #ffd27a;
-  rotate: -1.5deg;
-}
-.prologo__manual--libro .prologo__manual-boton:hover {
-  rotate: 0deg;
-  translate: 0 -2px;
-}
-.prologo__manual--libro .prologo__manual-boton:active {
-  translate: 1px 2px;
-  box-shadow: 1px 2px 0 rgb(6 3 14 / 40%);
-}
-.prologo__manual--libro .prologo__manual-boton:focus-visible {
-  outline: 3px solid #fff8ec;
-  outline-offset: 3px;
-}
 /* La página se estira hasta el pie: cada eslabón entre la hoja y ella crece con el alto que queda. */
 .prologo__manual--libro .prologo__manual-cuerpo,
 .prologo__manual--libro .subhost,
@@ -360,11 +277,52 @@
   flex-direction: column;
   flex: 1 0 auto;
 }
-@media (prefers-reduced-motion: reduce) {
-  .prologo__manual--libro .prologo__manual-boton {
-    rotate: none;
-    transition: none;
-  }
+
+/* Una etapa del viaje: el nombre de la pantalla suelto sobre el cielo, con la letra de la ley, y la
+   pantalla entera en una tarjeta de papel. En el medio del alto cuando es corta: arriba, con el
+   resto vacío, parecía que faltaba algo. */
+.prologo__manual.prologo__manual--viaje {
+  width: min(84rem, calc(100% - 3rem));
+}
+.prologo__manual--viaje .prologo__manual-cuerpo {
+  display: flex;
+  flex-direction: column;
+  justify-content: safe center;
+  padding-bottom: 0.5rem;
+}
+.prologo__manual-titulo {
+  margin: 0.25rem 0 1rem;
+  font-family: var(--font-editorial, Georgia, serif);
+  font-size: clamp(2rem, 3.1vw, 3rem);
+  font-weight: 600;
+  line-height: 1.05;
+  letter-spacing: -0.01em;
+  color: #fff8ec;
+  text-wrap: balance;
+  /* Dura y suave, las dos tintadas: se lee sobre cualquier parte del cielo. */
+  text-shadow:
+    0 4px 0 rgb(25 8 40 / 75%),
+    0 12px 34px rgb(25 8 40 / 55%);
+}
+.prologo__manual--viaje .subhost {
+  padding: clamp(1rem, 2vw, 1.8rem) clamp(1.1rem, 2.2vw, 2.2rem);
+  border: 3px solid #5d4a5e;
+  border-radius: 18px;
+  background: #fffaf2;
+  color: #2b2230;
+  box-shadow:
+    0 5px 0 rgb(30 34 62 / 22%),
+    0 22px 44px -18px rgb(6 3 14 / 70%);
+}
+/* El desafío, en su recuadro dentro del papel: la raya de arriba era para cerrar una card larga de la
+   molécula, y en la hoja lo dejaba flotando debajo de un renglón. */
+.prologo__manual.prologo__manual--viaje .subhost app-manipulable-system {
+  max-width: none;
+  margin-top: 1.5rem;
+  padding: 1rem 1.2rem 1.1rem;
+  border: 2px dashed #c9b49a;
+  border-radius: 14px;
+  background: #f6eedf;
 }
 
 /* 0/1: el código y el árbol llegan hasta el fondo de la mesa. El editor es una pantalla pareja (la
