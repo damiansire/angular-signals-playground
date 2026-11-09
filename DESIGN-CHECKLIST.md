@@ -972,8 +972,10 @@ Del minijuego de operadores (2026-11-08):
       más cara a la más barata (`left`, `textContent`, `color`, `transform`): la mano alterna el
       hueco y "correr" para que se vean las cuatro, y se resuelve recién al correr `transform`.
       Rótulos de 13.5 unidades o más y, por debajo de 560 px de escena, el `viewBox` encuadra la
-      nave y su pantalla (`cieloAngosto`): con el cielo de sobra, a 390 px la escena quedaba a
-      0.69 y "capas caras" en 8 px; encuadrada, a 0.82, el más chico llega a 11 px. Las cajas de
+      nave con su fuego y su pantalla (`cieloAngosto`): con el cielo de sobra, a 390 px la escena
+      quedaba a 0.69 y "capas caras" en 8 px; encuadrada, a 0.99, el más chico va en 13 px. En
+      angosto el código va más apretado y la página entera entra sin scroll: medido en el libro a
+      1440×900 y 390×844, con "correr" y "Siguiente página" a la vista. Las cajas de
       texto no se tocan (`getBoundingClientRect` entre todos los rótulos de la pantalla): con
       filas cada 34 unidades "capas caras" pisaba a layout y a paint, y "barato" quedaba pegado a
       "style"; la fila de DOM baja hasta despegarse del brillo del vidrio.
