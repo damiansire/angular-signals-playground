@@ -16,12 +16,14 @@ import { sonido } from '../../libs/sonido';
 import {
   LLAMADO,
   LLAMADO_TACTIL,
+  VIAJE_MS,
   aireQueCabe,
   aireQueCubre,
-  caminoDelAire,
+  cuadroDelViaje,
   cuandoSeAbre,
   cuandoSuena,
   estrellasDelAlba,
+  profundidadDelViaje,
   letrasDelLlamado,
   planDeLaPrueba,
   tocarPrueba,
@@ -29,25 +31,6 @@ import {
 } from './aviso-auriculares';
 
 type Momento = 'esperando' | 'probando' | 'alejandose' | 'listo';
-
-/** Lo que tarda la cámara en alejarse hasta la colina. */
-const ALEJARSE_MS = 2400;
-/** La boca de Angie, en el dibujo de la mascota: de ahí salió la noche, ahí vuelve. */
-const BOCA = { x: 526.58, y: 662 };
-/**
- * Hasta acá de la salida el aviso sigue del tamaño de la pantalla mientras la bocanada se cierra: si
- * se achicara antes, asomarían sus bordes rectos. De ahí en más, nube y cámara van juntas a la boca.
- */
-const ENCAJA = 0.3;
-/** Cuándo, en la salida, Angie suelta el aire: con la bocanada ya cerrada sobre ella. */
-const SUSPIRA_EN = 0.5;
-/**
- * De qué tan cerca viene la colina: apenas, un paso de cámara. A 2,6× el navegador pintaba solo lo
- * que se veía al arrancar y, al abrirse, la colina y Angie aparecían cortadas en rectángulos.
- */
-const CERCA = 1.12;
-/** Hasta dónde se achica el aviso mientras se va: se pierde a lo lejos, no desaparece en su lugar. */
-const LEJOS = 0.3;
 
 /** Los lentes de sol, en el plano de la cara: centrados entre los ojos, uno en espejo del otro. */
 const LENTE_IZQUIERDO =
@@ -86,8 +69,10 @@ const LENTE_DERECHO =
 export class AvisoAuricularesComponent {
   /** Se eligió (con o sin sonido) y la cámara empieza a alejarse: la colina puede despertarse. */
   readonly elegido = output<boolean>();
-  /** La bocanada llega a la boca de Angie en la colina: que suspire. */
-  readonly suspiro = output<void>();
+  /** La boca de Angie en la colina: abierta mientras el aviso viaja hacia ella, y la cierra al llegar. */
+  readonly boca = output<boolean>();
+  /** La cámara llegó a la colina: recién ahí entra su título, que de cerca se vería gigante. */
+  readonly llego = output<void>();
 
   protected readonly momento = signal<Momento>('esperando');
   /** El aviso recomienda el sonido: arranca prendido, y apagarlo es una elección explícita. */
@@ -108,9 +93,13 @@ export class AvisoAuricularesComponent {
   private readonly angie = viewChild.required(MascotaVivaComponent);
   private readonly host: HTMLElement = inject(ElementRef<HTMLElement>).nativeElement;
   private readonly temporizadores = new Set<ReturnType<typeof setTimeout>>();
+  private cuadro = 0;
 
   constructor() {
-    inject(DestroyRef).onDestroy(() => this.temporizadores.forEach(clearTimeout));
+    inject(DestroyRef).onDestroy(() => {
+      this.temporizadores.forEach(clearTimeout);
+      cancelAnimationFrame(this.cuadro);
+    });
     // El foco va a la invitación, así Enter alcanza; no si la landing arranca tapada (un deep-link).
     afterNextRender(() => {
       if (!this.host.closest('.gone')) this.seguir().nativeElement.focus({ preventScroll: true });
@@ -186,72 +175,88 @@ export class AvisoAuricularesComponent {
   }
 
   /**
-   * La cámara se aleja desde la boca de Angie en la colina: la noche del aviso era un suspiro suyo.
-   * La colina viene de muy cerca y se abre con la boca como punto fijo; el aviso, delante, compensa
-   * esa escala (arranca en `1 / CERCA`, así no salta) y se cierra como una bocanada que vuelve a la
-   * boca mientras ella suelta el aire. Sin esquinas: un rectángulo que se achica era una ventana.
+   * La cámara se aleja desde la boca de Angie en la colina, como en Powers of Ten: la noche del aviso
+   * era un suspiro suyo. Primero el aviso se cierra en un circulito delante de su boca, enorme y
+   * abierta; después la cámara se aleja a la cara, a Angie en la piedra y a la colina entera; al final
+   * el circulito entra y la boca se cierra. Va cuadro a cuadro desde acá y no con una animación del
+   * navegador: animada por el compositor, la colina agrandada se pintaba una sola vez y, al
+   * alejarse, aparecía cortada en rectángulos. Cada cuadro cambia la escala y el navegador la
+   * vuelve a dibujar.
    */
   private alejarse(conSonido: boolean): void {
     this.elegido.emit(conSonido);
     const escena = this.host.parentElement;
     if (sinMovimiento() || !escena) {
       this.momento.set('listo');
+      this.llego.emit();
       return;
     }
     const r = this.host.getBoundingClientRect();
-    const boca = this.bocaDeLaColina(escena) ?? {
-      x: r.left + r.width / 2,
-      y: r.top + r.height * 0.6,
-    };
-    const x = boca.x - r.left;
-    const y = boca.y - r.top;
-    const origen = `${x}px ${y}px`;
-    this.host.style.setProperty('--aa-x', `${x}px`);
-    this.host.style.setProperty('--aa-y', `${y}px`);
-    this.momento.set('alejandose');
-    // Las tres animaciones comparten curva: así los cuadros clave caen en el mismo instante.
-    const tiempo: KeyframeAnimationOptions = {
-      duration: ALEJARSE_MS,
-      easing: 'cubic-bezier(0.45, 0, 0.2, 1)',
-    };
-    escena.animate(
-      [
-        { scale: CERCA, transformOrigin: origen },
-        { scale: 1, transformOrigin: origen },
-      ],
-      tiempo,
+    // Primero la abre: la "o" es lo que se mide, y lo que la cámara sigue.
+    this.boca.emit(true);
+    // La de frente: la del perfil también existe, apagada, y mide cero.
+    const laO = [...escena.querySelectorAll<SVGGraphicsElement>('.ini__angie .mv__boca-o')].find(
+      (o) => o.getBoundingClientRect().width > 0,
     );
-    const colinaAlEncajar = CERCA - (CERCA - 1) * ENCAJA;
-    this.host.animate(
-      [
-        { scale: 1 / CERCA, transformOrigin: origen, opacity: 1 },
-        { scale: 1 / colinaAlEncajar, transformOrigin: origen, offset: ENCAJA },
-        { opacity: 1, offset: 0.8 },
-        { scale: LEJOS, transformOrigin: origen, opacity: 0 },
-      ],
-      tiempo,
-    );
-    this.host.animate(
-      [
-        ...caminoDelAire(
-          aireQueCubre(x, y, r.width, r.height),
-          aireQueCabe(x, y, r.width, r.height),
-          ENCAJA,
-        ).map(([offset, aire]) => ({ '--aa-aire': `${aire}px`, offset })),
-      ],
-      { ...tiempo, fill: 'forwards' },
-    );
-    this.luego(ALEJARSE_MS * SUSPIRA_EN, () => this.suspiro.emit());
-    this.luego(ALEJARSE_MS, () => this.momento.set('listo'));
-  }
+    const medida = laO?.getBoundingClientRect();
+    let boca =
+      medida && medida.width > 0
+        ? { x: medida.left + medida.width / 2 - r.left, y: medida.top + medida.height / 2 - r.top }
+        : { x: r.width / 2, y: r.height * 0.6 };
+    const profundidad = profundidadDelViaje(medida?.height ?? 20, r.width, r.height);
+    const cubre = aireQueCubre(boca.x, boca.y, r.width, r.height);
+    const cabe = aireQueCabe(boca.x, boca.y, r.width, r.height);
 
-  /** Dónde está la boca de Angie en la colina, en la pantalla, o nada si la colina no está. */
-  private bocaDeLaColina(escena: HTMLElement): { x: number; y: number } | null {
-    const dibujo = escena.querySelector<SVGSVGElement>('.ini__angie svg');
-    const m = dibujo?.getScreenCTM();
-    if (!m) return null;
-    const p = new DOMPoint(BOCA.x, BOCA.y).matrixTransform(m);
-    return { x: p.x, y: p.y };
+    /**
+     * La cámara sigue a la boca: la cara de Angie se mueve sola, y a 40 aumentos dos píxeles de su
+     * vaivén dejaban el circulito al costado. Con la boca como punto fijo de la escala, queda donde
+     * estaría sin acercar, y lo que se mueve es apenas lo que se mueve ella.
+     */
+    const seguirLaBoca = (escala: number): void => {
+      const b = laO?.getBoundingClientRect();
+      if (b && b.width > 0) {
+        // Lo medido viene con la escala de este cuadro alrededor de la boca anterior: se deshace.
+        const mx = b.left + b.width / 2 - r.left;
+        const my = b.top + b.height / 2 - r.top;
+        boca = { x: boca.x + (mx - boca.x) / escala, y: boca.y + (my - boca.y) / escala };
+      }
+      const origen = `${boca.x}px ${boca.y}px`;
+      escena.style.transformOrigin = origen;
+      this.host.style.transformOrigin = origen;
+      this.host.style.setProperty('--aa-x', `${boca.x}px`);
+      this.host.style.setProperty('--aa-y', `${boca.y}px`);
+    };
+
+    let boquiabierta = true;
+    let escala = 1;
+    let cero = 0;
+    const pintar = (ahora: number): void => {
+      const t = ahora - cero;
+      const c = cuadroDelViaje(t, profundidad, cubre, cabe);
+      seguirLaBoca(escala);
+      escala = c.colina;
+      escena.style.scale = `${c.colina}`;
+      this.host.style.scale = `${c.aviso}`;
+      this.host.style.setProperty('--aa-aire', `${c.aire}px`);
+      if (boquiabierta && !c.bocaAbierta) {
+        boquiabierta = false;
+        this.boca.emit(false);
+      }
+      if (t < VIAJE_MS) {
+        this.cuadro = requestAnimationFrame(pintar);
+        return;
+      }
+      for (const el of [escena, this.host]) {
+        el.style.removeProperty('scale');
+        el.style.removeProperty('transform-origin');
+      }
+      this.momento.set('listo');
+      this.llego.emit();
+    };
+    // El primer cuadro va ya, junto con la máscara: sin aire, el aviso desaparecía un cuadro.
+    cero = performance.now();
+    pintar(cero);
+    this.momento.set('alejandose');
   }
 
   private luego(ms: number, fn: () => void): void {

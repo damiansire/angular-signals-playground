@@ -155,20 +155,97 @@ export function aireQueCabe(x: number, y: number, ancho: number, alto: number): 
   return 0.95 * Math.min(x, ancho - x, y, alto - y);
 }
 
+// ─── El viaje de la cámara, de la boca a la colina ─────────────────────────────────────────────
+
 /**
- * Los cuadros clave del aire, como `[offset, aire]`: de tapar todo a encajar en `encaja`, y de ahí a
- * cerrarse en la boca. El primer tramo va parejo en escala (cada paso achica lo mismo), así la nube
- * se forma de a poco: en línea recta, casi todo ese tramo pasaba con la pantalla todavía tapada.
+ * Los tres tramos del viaje, en ms. Primero la bocanada: el aviso se cierra en un circulito delante
+ * de la boca de Angie, que se ve enorme detrás. Después la cámara se aleja, de la boca a la cara, a
+ * Angie en la piedra y a la colina entera. Al final el circulito entra y la boca se cierra.
  */
-export function caminoDelAire(
+export const BOCANADA_MS = 1100;
+export const ALEJARSE_MS = 3300;
+export const TRAGA_MS = 450;
+export const VIAJE_MS = BOCANADA_MS + ALEJARSE_MS + TRAGA_MS;
+
+/** Hasta acá de la bocanada el aviso sigue del tamaño de la pantalla: el círculo se cierra adentro. */
+const ENCAJA = 0.45;
+/** Cuánto se achica el aviso dentro del circulito: lo bastante para que no se lea su texto. */
+export const CHICO = 0.15;
+/**
+ * Cuánto se resiste el circulito a achicarse con el mundo (de 0 a 1): con 0 se perdía en un píxel
+ * antes de ver la cara; con esto llega a la colina como un punto que todavía se ve.
+ */
+const PERSISTE = 0.35;
+
+/** Lo que muestra la cámara en un instante del viaje. */
+export interface CuadroDelViaje {
+  /** La escala de la colina, con la boca como punto fijo: de `profundidad` a 1. */
+  readonly colina: number;
+  /** La escala del aviso dentro de la colina (su escala en pantalla es `colina * aviso`). */
+  readonly aviso: number;
+  /** El radio de la bocanada, en px del aviso. */
+  readonly aire: number;
+  /** La boca de Angie, abierta hasta que el circulito llega. */
+  readonly bocaAbierta: boolean;
+}
+
+/** Entra y sale suave: la cámara no arranca ni frena de golpe. */
+const suave = (v: number): number => 0.5 - 0.5 * Math.cos(Math.PI * v);
+const entre01 = (v: number): number => Math.min(1, Math.max(0, v));
+
+/**
+ * El cuadro del viaje en el ms `t`. Como en Powers of Ten, la cámara se aleja en escala: cada tramo
+ * de tiempo divide la escala por lo mismo, así la boca, la cara, Angie y la colina duran parecido. En
+ * línea recta, la boca pasaba en un parpadeo y la colina se arrastraba.
+ *
+ * `profundidad` es de qué tan cerca arranca la colina; `cubre` y `cabe`, el aire que tapa el aviso
+ * entero y el que entra justo adentro (`aireQueCubre`, `aireQueCabe`).
+ */
+export function cuadroDelViaje(
+  t: number,
+  profundidad: number,
   cubre: number,
   cabe: number,
-  encaja: number,
-): readonly (readonly [number, number])[] {
-  const pasos = 4;
-  const formando = Array.from({ length: pasos }, (_, i): readonly [number, number] => [
-    (encaja * i) / pasos,
-    cubre * (cabe / cubre) ** (i / pasos),
-  ]);
-  return [...formando, [encaja, cabe], [encaja + (1 - encaja) * 0.5, cabe * 0.3], [1, 0]];
+): CuadroDelViaje {
+  const S0 = profundidad;
+  if (t < BOCANADA_MS) {
+    const u = entre01(t / BOCANADA_MS);
+    if (u < ENCAJA) {
+      // Parejo en escala: en línea recta casi todo el tramo pasaba con la pantalla tapada.
+      return {
+        colina: S0,
+        aviso: 1 / S0,
+        aire: cubre * (cabe / cubre) ** (u / ENCAJA),
+        bocaAbierta: true,
+      };
+    }
+    const v = suave((u - ENCAJA) / (1 - ENCAJA));
+    return { colina: S0, aviso: CHICO ** v / S0, aire: cabe, bocaAbierta: true };
+  }
+  if (t < BOCANADA_MS + ALEJARSE_MS) {
+    const v = entre01((t - BOCANADA_MS) / ALEJARSE_MS);
+    // Casi todo parejo en escala, con un poco de arranque y llegada suaves.
+    const p = 0.55 * v + 0.45 * suave(v);
+    const colina = S0 ** (1 - p);
+    return {
+      colina,
+      aviso: (CHICO * (colina / S0) ** PERSISTE) / colina,
+      aire: cabe,
+      bocaAbierta: true,
+    };
+  }
+  const w = entre01((t - BOCANADA_MS - ALEJARSE_MS) / TRAGA_MS);
+  // El circulito entra en la boca: se achica acelerando, como algo que se traga.
+  const llegada = CHICO * S0 ** -PERSISTE;
+  return { colina: 1, aviso: llegada * (1 - w * w), aire: cabe, bocaAbierta: w < 0.7 };
+}
+
+/**
+ * De qué tan cerca arranca la colina: con la boca de Angie ocupando la mitad del lado corto de la
+ * pantalla. `bocaPx` es lo que mide su boca abierta en la colina, sin acercar. Con un tope: más de
+ * 60 aumentos ya no muestra nada más que rosa.
+ */
+export function profundidadDelViaje(bocaPx: number, ancho: number, alto: number): number {
+  const s = (0.5 * Math.min(ancho, alto)) / Math.max(bocaPx, 1);
+  return Math.min(60, Math.max(6, s));
 }

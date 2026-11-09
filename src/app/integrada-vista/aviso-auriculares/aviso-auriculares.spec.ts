@@ -1,9 +1,15 @@
 import {
   LLAMADO,
   NUCLEO,
+  ALEJARSE_MS,
+  BOCANADA_MS,
+  CHICO,
+  VIAJE_MS,
   aireQueCabe,
   aireQueCubre,
-  caminoDelAire,
+  cuadroDelViaje,
+  profundidadDelViaje,
+  type CuadroDelViaje,
   PANEO,
   cuandoSeAbre,
   cuandoSuena,
@@ -108,14 +114,71 @@ describe('aviso de auriculares', () => {
     it('se cierra: encaja con menos aire del que tenía al arrancar', () => {
       expect(aireQueCabe(x, y, ancho, alto)).toBeLessThan(aireQueCubre(x, y, ancho, alto));
     });
+  });
+});
 
-    it('el camino del aire baja siempre, encaja a tiempo y termina cerrado en la boca', () => {
-      const camino = caminoDelAire(4000, 400, 0.3);
-      const aires = camino.map(([, a]) => a);
-      expect(aires).toEqual([...aires].sort((a, b) => b - a));
-      expect(camino).toContain([0.3, 400]);
-      expect(camino[0]).toEqual([0, 4000]);
-      expect(camino.at(-1)).toEqual([1, 0]);
-    });
+describe('el viaje de la cámara, de la boca a la colina', () => {
+  const S0 = 40;
+  const cubre = 2000;
+  const cabe = 300;
+  const en = (t: number) => cuadroDelViaje(t, S0, cubre, cabe);
+  const enPantalla = (c: CuadroDelViaje) => c.colina * c.aviso;
+
+  it('arranca con el aviso entero y del tamaño de la pantalla, y la colina de muy cerca', () => {
+    const c = en(0);
+    expect(c.colina).toBe(S0);
+    expect(enPantalla(c)).toBeCloseTo(1, 6);
+    expect(c.aire).toBe(cubre);
+    expect(c.bocaAbierta).toBeTrue();
+  });
+
+  it('el aviso no se achica hasta que la bocanada cabe adentro: no asoman sus bordes', () => {
+    for (let t = 0; t < BOCANADA_MS; t += 20) {
+      const c = en(t);
+      if (enPantalla(c) < 0.999) expect(c.aire).toBe(cabe);
+    }
+  });
+
+  it('termina la bocanada como un circulito, con el aviso ilegible', () => {
+    const c = en(BOCANADA_MS);
+    expect(enPantalla(c)).toBeCloseTo(CHICO, 3);
+    expect(c.colina).toBeCloseTo(S0, 3);
+  });
+
+  it('la cámara solo se aleja, y llega a la colina sin saltos', () => {
+    let antes = Infinity;
+    for (let t = 0; t <= VIAJE_MS; t += 10) {
+      const c = en(t);
+      expect(c.colina).toBeLessThanOrEqual(antes + 1e-9);
+      antes = c.colina;
+    }
+    expect(en(BOCANADA_MS + ALEJARSE_MS - 1).colina).toBeCloseTo(1, 1);
+    expect(en(VIAJE_MS).colina).toBe(1);
+  });
+
+  it('como en Powers of Ten: a mitad de camino, tiempos iguales dividen la escala por lo mismo', () => {
+    const t = (f: number) => BOCANADA_MS + ALEJARSE_MS * f;
+    const r1 = en(t(0.4)).colina / en(t(0.5)).colina;
+    const r2 = en(t(0.5)).colina / en(t(0.6)).colina;
+    expect(r1).toBeCloseTo(r2, 1);
+    expect(r1).toBeGreaterThan(1.2);
+  });
+
+  it('el circulito se achica más despacio que el mundo: llega a la colina todavía visible', () => {
+    const llegando = en(BOCANADA_MS + ALEJARSE_MS);
+    expect(enPantalla(llegando)).toBeGreaterThan(1 / S0);
+    expect(enPantalla(llegando)).toBeLessThan(CHICO);
+  });
+
+  it('la boca queda abierta todo el viaje y se cierra cuando el circulito entra', () => {
+    for (let t = 0; t < BOCANADA_MS + ALEJARSE_MS; t += 50) expect(en(t).bocaAbierta).toBeTrue();
+    expect(en(VIAJE_MS).bocaAbierta).toBeFalse();
+    expect(en(VIAJE_MS).aviso).toBe(0);
+  });
+
+  it('la profundidad pone la boca en media pantalla, con tope', () => {
+    expect(profundidadDelViaje(10, 1440, 900)).toBe(45);
+    expect(profundidadDelViaje(1, 1440, 900)).toBe(60);
+    expect(profundidadDelViaje(200, 1440, 900)).toBe(6);
   });
 });
