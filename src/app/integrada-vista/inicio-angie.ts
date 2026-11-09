@@ -12,6 +12,7 @@ import {
   type Musica,
 } from './musica-del-presentimiento';
 import { tocarColina } from './musica-de-la-colina';
+import { planDeLaRadio, tocarRadio } from './ruido-de-radio';
 
 /**
  * Pantalla de inicio: una mañana en la colina. Angie está sentada en la piedra del centro, mirando
@@ -201,6 +202,37 @@ export function letrasDelTitulo(
   );
 }
 
+/**
+ * Lo que tarda cada letra de un globo en aparecer, en ms: los globos se escriben de a una letra,
+ * como los diálogos de un RPG. El CSS lo toma de acá (`--tecla`) y la espera de cada globo también.
+ */
+export const TECLA_MS = 38;
+
+/** Un globo escrito de a una letra: sus renglones en palabras y letras, y cuántas letras tiene. */
+export interface Dicho {
+  readonly renglones: PalabraDelTitulo[][];
+  readonly letras: number;
+}
+
+/** `\n` corta el renglón. La cuenta de letras sigue de un renglón al otro, como en el título. */
+export function letrasDelDicho(texto: string): Dicho {
+  const renglones = letrasDelTitulo(texto.split('\n'));
+  const letras = renglones.flat().reduce((n, p) => n + p.letras.length, 0);
+  return { renglones, letras };
+}
+
+/** Lo que piensa: primero lo presiente, con la radio; después de hablar con el sol, decide. */
+export const LO_QUE_PRESIENTE = 'Así que… Ellos ya están aquí';
+export const LO_QUE_DECIDE = 'Así que… La hora ha llegado';
+
+/**
+ * Lo mínimo que un globo se queda antes de aceptar el toque: lo que tarda en escribirse y un respiro
+ * para leer el final. Nunca menos que `piso`, el mínimo de antes, pensado para un globo corto.
+ */
+export function loQueTardaEnEscribirse(texto: string, piso: number): number {
+  return Math.max(piso, letrasDelDicho(texto).letras * TECLA_MS + 500);
+}
+
 export interface RayoDelSol {
   /** En grados, desde arriba y en el sentido del reloj. */
   readonly angulo: number;
@@ -285,6 +317,8 @@ function n(valor: number): string {
  */
 const T = {
   idea: 240,
+  /** La radio sola, antes del primer pensamiento: el toque prende una radio, no un diálogo. */
+  sintonizar: 1100,
   /**
    * Lo mínimo de cada globo (la voz del sol, la respuesta de Angie y sus dos pensamientos): lo que
    * tarda en entrar y leerse. Después espera el toque de quien mira.
@@ -328,6 +362,8 @@ export interface InicioAngie {
 export interface AngieDeLaColina {
   /** `deUna`: ya sentada, sin la bajada. */
   sentarse(deUna?: boolean): void;
+  /** Sonríe: la cara de quien ya decidió. */
+  sonreir?(): void;
 }
 
 /**
@@ -350,6 +386,7 @@ export function initInicioAngie(host: HTMLElement, cuerpo?: AngieDeLaColina): In
   let yendose = false;
   let musica: Musica | null = null;
   let colina: Musica | null = null;
+  let radio: Musica | null = null;
   // Lo que se crea a mano no lleva el atributo de encapsulación de Angular: sin él, el CSS del
   // componente no lo alcanza y la luz quedaba como un span sin estilo.
   const enc = escena.getAttributeNames().find((a) => a.startsWith('_ngcontent'));
@@ -486,10 +523,13 @@ export function initInicioAngie(host: HTMLElement, cuerpo?: AngieDeLaColina): In
   const contar = (texto: string): void => {
     if (dicho) dicho.textContent = texto.replace(/\n/g, ' ');
   };
-  /** Un globo hablado: lo cuenta y suena con los blips de quien lo dice, como en el prólogo. */
-  const decir = (quien: Voz, texto: string, ms: number): void => {
+  /**
+   * Un globo hablado: lo cuenta y suena con los blips de quien lo dice, como en el prólogo. Los
+   * blips duran lo que tarda en escribirse: suena mientras aparece.
+   */
+  const decir = (quien: Voz, texto: string): void => {
     contar(texto);
-    sonido().hablar(quien, texto.replace(/\n/g, ' '), ms);
+    sonido().hablar(quien, texto.replace(/\n/g, ' '), letrasDelDicho(texto).letras * TECLA_MS);
   };
 
   /**
@@ -566,30 +606,42 @@ export function initInicioAngie(host: HTMLElement, cuerpo?: AngieDeLaColina): In
     }
     await esperar(T.idea);
     if (cerrado) return;
-    // Desde el sol llega una voz, de lejos, y ella le contesta en voz alta. Es la charla que la
+    // Primero se cruza una radio: estática y ondas que salen del sol, una señal que todavía no se
+    // entiende. Ella la oye antes que nadie y lo presiente.
+    escena.classList.add('ini--radio');
+    const salidaDeRadio = sonido().salida();
+    radio = salidaDeRadio ? tocarRadio(salidaDeRadio, planDeLaRadio()) : null;
+    await esperar(T.sintonizar);
+    if (cerrado) return;
+    escena.classList.add('ini--piensa');
+    sonar('presiente');
+    contar(`${LO_QUE_PRESIENTE}…`);
+    await pensamiento(loQueTardaEnEscribirse(LO_QUE_PRESIENTE, T.presentir));
+    if (cerrado) return;
+    // La señal entra: la estática se va y la voz del sol llega limpia. Es la charla que la
     // tripulación tiene en la cabina, oída del otro lado: suena con la voz del capitán.
-    escena.classList.add('ini--oye');
-    decir('cap', LO_QUE_DICE_EL_SOL, T.oir);
-    await pensamiento(T.oir);
+    escena.classList.remove('ini--piensa');
+    escena.classList.replace('ini--radio', 'ini--oye');
+    radio?.apagar(0.5);
+    radio = null;
+    decir('cap', LO_QUE_DICE_EL_SOL);
+    await pensamiento(loQueTardaEnEscribirse(LO_QUE_DICE_EL_SOL, T.oir));
     if (cerrado) return;
     escena.classList.replace('ini--oye', 'ini--responde');
-    decir('mascota', LO_QUE_RESPONDE_ANGIE, T.responder);
-    await pensamiento(T.responder);
+    decir('mascota', LO_QUE_RESPONDE_ANGIE);
+    await pensamiento(loQueTardaEnEscribirse(LO_QUE_RESPONDE_ANGIE, T.responder));
     if (cerrado) return;
     await enviarAlSol();
     if (cerrado) return;
     escena.classList.remove('ini--responde');
     // La luz se vuelve dorada antes de que caiga la noche: un día que se apaga de golpe no es un
-    // atardecer, es un corte. Arranca con el pensamiento: "la hora" que llegó es la de este atardecer.
-    escena.classList.add('ini--atardecer', 'ini--piensa');
-    sonar('presiente');
-    contar('Así que… Ellos ya están aquí…');
-    await pensamiento(T.presentir);
-    if (cerrado) return;
-    escena.classList.add('ini--piensa-2');
+    // atardecer, es un corte. Arranca con la decisión: "la hora" que llegó es la de este atardecer,
+    // y la dice sonriendo.
+    escena.classList.add('ini--atardecer', 'ini--piensa', 'ini--piensa-2');
+    cuerpo?.sonreir?.();
     sonar('decide');
-    contar('Entonces… La hora ha llegado…');
-    await pensamiento(T.pensar);
+    contar(`${LO_QUE_DECIDE}…`);
+    await pensamiento(loQueTardaEnEscribirse(LO_QUE_DECIDE, T.pensar));
     if (cerrado) return;
     escena.classList.remove('ini--piensa', 'ini--piensa-2');
     sonar('luz');
@@ -801,6 +853,7 @@ export function initInicioAngie(host: HTMLElement, cuerpo?: AngieDeLaColina): In
       colina?.apagar();
       musica?.apagar();
       fase?.apagar();
+      radio?.apagar(0.2);
       soltarToque?.();
       escena.removeEventListener('pointerdown', alTocar);
       escena.removeEventListener('click', alClic);

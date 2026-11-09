@@ -30,8 +30,12 @@ import {
   floresDeLadera,
   initInicioAngie,
   juncos,
+  letrasDelDicho,
   letrasDelTitulo,
+  LO_QUE_DECIDE,
+  LO_QUE_PRESIENTE,
   matasDePasto,
+  TECLA_MS,
   rayosDelSol,
   type InicioAngie,
 } from './inicio-angie';
@@ -198,11 +202,14 @@ export class IntegradaVistaComponent {
   /** En una pantalla táctil no hay click: se toca. El CSS muestra la que corresponde. */
   protected readonly llamadoTactil = letrasDelTitulo(['Tocá para iniciar las aventuras'])[0];
 
-  /** Lo que se dicen el sol y Angie antes de que ella piense; la respuesta, en sus renglones. */
+  /** Lo que se dicen el sol y Angie y lo que ella piensa, en letras: los globos se escriben de a una. */
   protected readonly intercambio = {
-    sol: LO_QUE_DICE_EL_SOL,
-    angie: LO_QUE_RESPONDE_ANGIE.split('\n'),
+    sol: letrasDelDicho(LO_QUE_DICE_EL_SOL),
+    angie: letrasDelDicho(LO_QUE_RESPONDE_ANGIE),
+    /** Los dos pensamientos en la misma nube, en el orden en que los piensa. */
+    piensa: [letrasDelDicho(LO_QUE_PRESIENTE), letrasDelDicho(LO_QUE_DECIDE)],
   };
+  protected readonly tecla = `${TECLA_MS}ms`;
 
   /** Angie en la colina se mueve sola hasta que la despedida la desarma: ahí manda la salida. */
   protected readonly angieEsperando = signal(true);
@@ -613,6 +620,7 @@ export class IntegradaVistaComponent {
     // alejarse el aviso, la escena aparece con ella ahí.
     const inicio = initInicioAngie(this.host, {
       sentarse: (deUna) => this.angieInicio()?.sentarse(deUna),
+      sonreir: () => this.angieInicio()?.sonreir(),
     });
     this.inicio = inicio;
     this.destroyRef.onDestroy(() => inicio.dispose());

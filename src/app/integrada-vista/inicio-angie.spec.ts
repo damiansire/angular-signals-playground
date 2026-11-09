@@ -10,10 +10,13 @@ import {
   estrellas,
   floresDeLadera,
   initInicioAngie,
+  letrasDelDicho,
   letrasDelTitulo,
+  loQueTardaEnEscribirse,
   rayosDelSol,
   juncos,
   matasDePasto,
+  TECLA_MS,
 } from './inicio-angie';
 import { LO_QUE_DICE_EL_SOL, LO_QUE_RESPONDE_ANGIE } from './intercambio-del-sol';
 
@@ -36,6 +39,23 @@ describe('inicio-angie', () => {
       const serie = Array.from({ length: 50 }, () => a());
       expect(serie).not.toEqual(Array.from({ length: 50 }, () => b()));
       expect(serie.every((v) => v >= 0 && v < 1)).toBeTrue();
+    });
+  });
+
+  describe('los globos escritos de a una letra', () => {
+    it('la respuesta sigue la cuenta de un renglón al otro y no pierde letras', () => {
+      const dicho = letrasDelDicho(LO_QUE_RESPONDE_ANGIE);
+      expect(dicho.renglones.length).toBe(2);
+      const indices = dicho.renglones.flat().flatMap((p) => p.letras.map((l) => l.i));
+      expect(indices).toEqual(indices.map((_, k) => k));
+      expect(dicho.letras).toBe(indices.length);
+      expect(dicho.letras).toBe(LO_QUE_RESPONDE_ANGIE.replace(/\s/g, '').length);
+    });
+
+    it('un globo espera a terminar de escribirse, y nunca menos que su mínimo', () => {
+      const largo = loQueTardaEnEscribirse(LO_QUE_RESPONDE_ANGIE, 100);
+      expect(largo).toBeGreaterThan(letrasDelDicho(LO_QUE_RESPONDE_ANGIE).letras * TECLA_MS);
+      expect(loQueTardaEnEscribirse('Hola', 1100)).toBe(1100);
     });
   });
 
@@ -339,12 +359,16 @@ describe('inicio-angie', () => {
       expect(escena.querySelector('.ini__luces')!.children.length).toBe(0);
     });
 
-    it('antes de pensar, el sol habla y ella contesta: cada globo espera un toque', async () => {
+    it('primero la radio y el presentimiento, después el sol, la respuesta y la decisión sonriendo', async () => {
       const { host, escena } = montar();
       const dicho = document.createElement('p');
       dicho.className = 'ini__dicho';
       escena.appendChild(dicho);
-      const inicio = initInicioAngie(host);
+      const sonrisas: number[] = [];
+      const inicio = initInicioAngie(host, {
+        sentarse: () => undefined,
+        sonreir: () => sonrisas.push(Date.now()),
+      });
       cerrar.push(inicio.dispose);
       const hasta = async (clase: string): Promise<void> => {
         for (let i = 0; i < 60 && !escena.classList.contains(clase); i++) {
@@ -357,23 +381,38 @@ describe('inicio-angie', () => {
       };
 
       void inicio.despedir();
-      await hasta('ini--oye');
-      expect(dicho.textContent).toBe(LO_QUE_DICE_EL_SOL);
+      await hasta('ini--radio');
+      expect(escena.classList).not.toContain('ini--piensa');
+      await hasta('ini--piensa');
+      expect(escena.classList).toContain('ini--radio');
+      expect(escena.classList).not.toContain('ini--piensa-2');
+      expect(dicho.textContent).toBe('Así que… Ellos ya están aquí…');
       // Sin toque no sigue: los globos los pasa quien mira, no un reloj.
       await new Promise((ok) => setTimeout(ok, 1400));
-      expect(escena.classList).not.toContain('ini--responde');
+      expect(escena.classList).not.toContain('ini--oye');
 
+      tocar();
+      await hasta('ini--oye');
+      expect(escena.classList).not.toContain('ini--radio');
+      expect(escena.classList).not.toContain('ini--piensa');
+      expect(dicho.textContent).toBe(LO_QUE_DICE_EL_SOL);
+
+      await new Promise((ok) => setTimeout(ok, 1200));
       tocar();
       await hasta('ini--responde');
       expect(escena.classList).not.toContain('ini--oye');
       expect(dicho.textContent).toBe(LO_QUE_RESPONDE_ANGIE.replace('\n', ' '));
+      expect(sonrisas).toEqual([]);
 
       await new Promise((ok) => setTimeout(ok, 1600));
       tocar();
-      await hasta('ini--piensa');
+      await hasta('ini--piensa-2');
+      expect(escena.classList).toContain('ini--piensa');
       expect(escena.classList).not.toContain('ini--responde');
-      expect(dicho.textContent).toBe('Así que… Ellos ya están aquí…');
-    });
+      expect(dicho.textContent).toBe('Así que… La hora ha llegado…');
+      expect(sonrisas.length).toBe(1);
+      // Son cuatro globos con sus mínimos de lectura: más que los 5 s que jasmine da por defecto.
+    }, 12000);
 
     it('cerrar a mitad de la salida no deja luces colgadas', async () => {
       const { host, escena } = montar();

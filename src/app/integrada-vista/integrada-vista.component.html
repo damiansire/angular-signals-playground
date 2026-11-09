@@ -440,9 +440,16 @@
                   />
                 </g>
               </svg>
+              <!-- Las ondas de radio que salen del sol antes de que su voz se entienda. Van debajo
+                   del globo: encima, un anillo le cruzaba la frase. -->
+              <span class="ini__radio"><i></i><i></i><i></i><i></i></span>
               <!-- La voz que llega desde el sol, de lejos: el borde cortado es el de las
                    transmisiones de las cinemáticas. -->
-              <p class="ini__voz-sol">{{ intercambio.sol }}</p>
+              <p class="ini__voz-sol" [style.--tecla]="tecla" [style.--n]="intercambio.sol.letras">
+                <ng-container
+                  *ngTemplateOutlet="escrito; context: { $implicit: intercambio.sol.renglones[0] }"
+                />
+              </p>
             </div>
 
             <!-- La noche que llega con la despedida: es el mismo cielo del prólogo. -->
@@ -472,24 +479,45 @@
                 <span class="ini__rastro"></span>
                 <span class="ini__rastro"></span>
                 <!-- Antes de pensar le contesta al sol en voz alta: un globo de diálogo, no una nube. -->
-                <span class="ini__dice">
-                  @for (renglon of intercambio.angie; track $index) {
-                    <span class="ini__renglon-dicho">{{ renglon }}</span>
+                <span
+                  class="ini__dice"
+                  [style.--tecla]="tecla"
+                  [style.--n]="intercambio.angie.letras"
+                >
+                  @for (renglon of intercambio.angie.renglones; track $index) {
+                    <span class="ini__renglon-dicho">
+                      <ng-container *ngTemplateOutlet="escrito; context: { $implicit: renglon }" />
+                    </span>
                   }
                 </span>
-                <!-- Dos pensamientos en la misma nube: primero los presiente, después decide. -->
-                <span class="ini__burbuja"
-                  ><span class="ini__frase"
-                    >Así que… Ellos ya están aquí<span class="ini__puntos"
-                      ><i>.</i><i>.</i><i>.</i></span
-                    ></span
-                  ><span class="ini__frase"
-                    >Entonces… La hora ha llegado<span class="ini__puntos"
-                      ><i>.</i><i>.</i><i>.</i></span
-                    ></span
-                  ></span
+                <!-- Dos pensamientos en la misma nube: primero los presiente (mientras suena la radio),
+                     y después de hablar con el sol, decide. -->
+                <span
+                  class="ini__burbuja"
+                  [style.--tecla]="tecla"
+                  [style.--n1]="intercambio.piensa[0].letras"
+                  [style.--n2]="intercambio.piensa[1].letras"
                 >
+                  @for (frase of intercambio.piensa; track $index) {
+                    <span class="ini__frase">
+                      <ng-container
+                        *ngTemplateOutlet="escrito; context: { $implicit: frase.renglones[0] }"
+                      /><span class="ini__puntos"><i>.</i><i>.</i><i>.</i></span>
+                    </span>
+                  }
+                </span>
               </p>
+              <!-- Un renglón de un globo, de a una letra como los diálogos de un RPG. Las palabras
+                   no se parten al bajar de renglón. -->
+              <ng-template #escrito let-renglon>
+                @for (palabra of renglon; track $index) {
+                  <span class="ini__escrita">
+                    @for (l of palabra.letras; track $index) {
+                      <span class="ini__tecla" [style.--i]="l.i">{{ l.c }}</span>
+                    }
+                  </span>
+                }
+              </ng-template>
               <!-- Lo que se dice y se piensa, para quien escucha la pantalla: los globos son dibujo. -->
               <p class="ini__dicho sr-only" aria-live="polite"></p>
               <button
