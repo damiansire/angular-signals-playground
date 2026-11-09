@@ -10,11 +10,16 @@ export const ALTO = 260;
  * El cielo de la lámina cuando es el escenario de la página integrada: la misma nave y la misma
  * pantalla en el medio, con cielo de sobra alrededor. La escena lo llena con `xMidYMid slice`, así
  * que la ventanilla puede tener cualquier proporción entre 4:3 y 3.5:1 sin recortar lo que
- * importa. Su centro es el de la nave, su pantalla y lo que descansa debajo (y 18 a 240), no el de
- * la lámina: centrado en la lámina, una ventanilla apaisada le cortaba el borde de arriba a la
+ * importa: hasta 228 de alto alrededor del centro. El centro es el de lo que la lámina dibuja, no
+ * el de la lámina: centrada en la lámina, una ventanilla apaisada le cortaba el borde de arriba a la
  * pantalla.
  */
-export const CIELO_DEL_ESCENARIO = '-200 -41 800 340';
+export function cieloCentradoEn(y: number): string {
+  return `-200 ${y - 170} 800 340`;
+}
+
+/** El de la mayoría: la nave, su pantalla y lo que descansa debajo (y 18 a 240). */
+export const CIELO_DEL_ESCENARIO = cieloCentradoEn(129);
 
 /** Dónde vive la pantalla de la nave en cada lámina: a la derecha, proyectada desde la nariz. */
 export const PANTALLA = { x: 214, y: 26, ancho: 174, alto: 178 } as const;
