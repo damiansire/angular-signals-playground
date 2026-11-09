@@ -1,8 +1,8 @@
 <app-pagina-del-manual [guia]="guia()" [llena]="true">
   <p hacer class="htt-hacer">Tocá un tag del código.</p>
 
-  <!-- El código y el árbol, uno al lado del otro y con el alto de la mesa: el árbol crece hacia el
-       código y cada tag tocado tira su conector hasta su nodo. -->
+  <!-- El código y el árbol, uno al lado del otro y con el alto de la mesa: cada tag tocado tira su
+       conector hasta su nodo, que queda en el mismo orden vertical que el código. -->
   <div demo class="htt">
     <app-code
       class="htt-codigo"
@@ -10,13 +10,7 @@
       (codeClick)="codeClickHandler($event)"
       [htmlCode]="htmlCode"
     ></app-code>
-    <app-tree
-      class="htt-arbol"
-      [nodesToShow]="nodesToShow()"
-      [htmlCode]="htmlCode"
-      [mirror]="true"
-      (viewChanged)="followTick()"
-    ></app-tree>
+    <app-tree class="htt-arbol" [nodesToShow]="nodesToShow()" [htmlCode]="htmlCode"></app-tree>
     <svg #overlay class="htt-conectores" aria-hidden="true">
       @for (line of connectors(); track line.id) {
         <path

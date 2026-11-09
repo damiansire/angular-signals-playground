@@ -1,6 +1,7 @@
 import {
   Component,
   computed,
+  DestroyRef,
   ElementRef,
   effect,
   inject,
@@ -24,10 +25,6 @@ interface ConnectorLine {
   path: string;
   color: string;
 }
-
-// Cuánto dura la persecución cuadro a cuadro tras un cambio: cubre la animación de
-// entrada/salida del nodo en el árbol (ver animationDurationUpdate en NodeTreeComponent).
-const FOLLOW_WINDOW_MS = 700;
 
 @Component({
   selector: 'app-html-to-tree',
@@ -76,26 +73,16 @@ export class HtmlToTreeComponent {
   });
 
   constructor() {
-    // Recálculo inmediato (no espera al próximo frame) más una ventana breve de
-    // seguimiento cuadro a cuadro: el árbol anima al agregar/sacar un nodo (echarts),
-    // así que la flecha no puede calcularse una sola vez tras el render. La ventana se
-    // autolimita (no queda un rAF corriendo para siempre) — el roam del usuario se cubre
-    // aparte, vía el evento `viewChanged` del árbol.
-    effect((onCleanup) => {
-      if (this.nodesToShow().length === 0) {
-        this.connectors.set([]);
-        return;
-      }
+    // El conector se calcula una vez por toque: el árbol ya sabe dónde va a quedar cada nodo, así
+    // que no hace falta perseguirlo cuadro a cuadro mientras entra. Solo se recalcula si la mesa
+    // cambia de tamaño.
+    effect(() => {
+      this.nodesToShow();
       this.followTick();
-
-      const deadline = performance.now() + FOLLOW_WINDOW_MS;
-      const loop = (): void => {
-        this.followTick();
-        if (performance.now() < deadline) rafId = requestAnimationFrame(loop);
-      };
-      let rafId = requestAnimationFrame(loop);
-      onCleanup(() => cancelAnimationFrame(rafId));
     });
+    const observer = new ResizeObserver(() => this.followTick());
+    observer.observe(this.hostElement);
+    inject(DestroyRef).onDestroy(() => observer.disconnect());
   }
 
   codeClickHandler(event: CodeClick) {
@@ -131,10 +118,16 @@ export class HtmlToTreeComponent {
       if (!treePos || !codeEl || !node) {
         return;
       }
+      // Sale del final del elemento en el renglón de su apertura (`</h2>` en `<h2> Intro </h2>`),
+      // no del tag: si no, la línea cruzaba el texto que el mismo toque acaba de marcar.
+      const delElemento = codeEl.parentElement?.querySelectorAll<HTMLElement>(
+        `[data-el-dueno="${CSS.escape(id)}"]`,
+      );
+      const finEl = delElemento?.[delElemento.length - 1] ?? codeEl;
       const codeRect = codeEl.getBoundingClientRect();
       const x1 = treePos.x - hostRect.left;
       const y1 = treePos.y - hostRect.top;
-      const x2 = codeRect.right - hostRect.left;
+      const x2 = finEl.getBoundingClientRect().right - hostRect.left;
       const y2 = codeRect.top + codeRect.height / 2 - hostRect.top;
       const midX = (x1 + x2) / 2;
 
