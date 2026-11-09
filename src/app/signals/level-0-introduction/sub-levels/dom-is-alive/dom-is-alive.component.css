@@ -1,176 +1,128 @@
-/* Clases con prefijo `dia-`: este componente se embebe en la vista integrada, que estampa
-   su propio atributo de encapsulación; sin prefijo, clases del motor de la molécula pisan
-   las nuestras. */
+/* Clases con prefijo `dia-`: se embebe en la vista integrada, que estampa su encapsulación; sin
+   prefijo, las clases del motor de la molécula pisarían las nuestras. Va en la consola de la nave:
+   la misma paleta que su pantalla (vidrio violeta, borde lila, texto claro), como las leyes 4 y 5. */
 :host {
   display: block;
-  color: #1c1e24;
 }
 
 .dia {
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
-}
-
-.dia-hacer {
-  margin: 0;
-}
-
-/* Los nodos y el botón de reiniciarlos, en una fila: reiniciar es de los nodos, no de la página. */
-.dia-fila {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
   gap: 1rem 1.5rem;
 }
 
-/* Consola: cada línea de JS es un botón que corre la mutación. */
-.dia-console {
+.dia-codigo {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
-  align-items: flex-start;
+  padding: 0.85rem 1.1rem;
+  border: 1.5px solid #5b4a96;
+  border-radius: 12px;
+  background: #1c1434;
+  font:
+    500 clamp(0.85rem, 1vw, 1rem) / 1.65 'JetBrains Mono',
+    'Cascadia Mono',
+    Consolas,
+    monospace;
+  color: #f2ecff;
+  overflow-wrap: break-word;
 }
 
-.dia-run {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.6rem;
-  max-width: 100%;
-  padding: 0.55rem 0.9rem;
-  border-radius: 0.6rem;
-  border: 1px solid #2b2822;
-  background: #14120e;
-  color: #f0ede4;
-  cursor: pointer;
-  text-align: left;
-  transition:
-    border-color 0.15s,
-    transform 0.06s;
+/* Un renglón por bloque con sangría colgante: la continuación de un renglón largo arranca
+   corrida, no en la columna 0 como si fuera otra sentencia. */
+.dia-linea {
+  display: block;
+  padding-left: 4ch;
+  text-indent: -4ch;
 }
 
-.dia-run:hover {
-  border-color: #6ac48f;
-}
-
-.dia-run:active {
-  transform: translateY(1px);
-}
-
-.dia-run:focus-visible {
-  /* Doble anillo: la tinta da el contraste sobre el crema y el acento queda por dentro. */
-  outline: 2px solid var(--focus-ink);
-  outline-offset: 2px;
-  box-shadow: 0 0 0 2px #6ac48f;
-}
-
-.dia-run-icon {
-  color: #6ac48f;
-  font-size: 0.8rem;
-}
-
-/* Envuelve en vez de scrollear: embebido en el recorrido la barra queda oculta, y en angosto
-   "document.querySelector('#count').textContent" se cortaba en "('#c" sin que nada lo avisara. */
-.dia-run code {
-  min-width: 0;
-  font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
-  font-size: 0.8rem;
-  overflow-wrap: anywhere;
-}
-
-/* El "DOM" vivo: los nodos y su valor actual. */
-.dia-dom {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 1rem;
-}
-
-.dia-node {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  gap: 0.3rem;
-  min-width: 9rem;
-  padding: 0.9rem 1.1rem;
-  border-radius: 0.75rem;
-  border: 1.5px solid #dcd6ca;
-  background: rgba(255, 255, 255, 0.55);
-  transition:
-    border-color 0.3s,
-    background 0.3s;
-}
-
-.dia-node.dia-touched {
-  border-color: #2563eb;
-  background: #eef3ff;
-}
-
-.dia-node-sel {
-  font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
-  font-size: 0.75rem;
-  color: #8a8172;
-}
-
-.dia-node.dia-touched .dia-node-sel {
-  color: #2563eb;
-}
-
-.dia-node-val {
-  font-family: Georgia, 'Times New Roman', serif;
-  font-size: 1.6rem;
-  line-height: 1.1;
-  color: #17140f;
-}
-
-/* Ping one-shot en el nodo tocado (sin loop perpetuo). */
-.dia-ping {
-  position: absolute;
-  inset: -5px;
-  border-radius: 0.9rem;
-  border: 2px solid #2563eb;
-  pointer-events: none;
-  animation: dia-ping 0.6s ease-out forwards;
-}
-
-@keyframes dia-ping {
-  from {
-    transform: scale(0.92);
-    opacity: 0.8;
-  }
-  to {
-    transform: scale(1.22);
-    opacity: 0;
-  }
-}
-
-.dia-reset {
-  align-self: flex-start;
+/* El hueco es el renglón del título; lo que se cambia es su selector, en dorado y subrayado como
+   los tokens de los desafíos, y en verde cuando encuentra el nodo. Sale por los costados lo mismo
+   que su relleno, así su texto arranca en la columna de los otros renglones. Tres clases más el
+   elemento: le gana a la pastilla oscura que la hoja le pone a todo botón. */
+.dia .dia-codigo button.dia-hueco {
+  display: block;
+  width: calc(100% + 0.8rem);
+  margin: 0.1rem -0.4rem;
+  padding: 0.1rem 0.4rem;
+  border: 0;
+  border-radius: 6px;
+  background: rgb(255 210 122 / 8%);
   font: inherit;
-  font-size: 0.85rem;
-  padding: 0.4rem 0.85rem;
-  border-radius: 0.5rem;
-  border: 1px solid #cfc9bd;
-  background: transparent;
-  color: #5c5648;
+  text-align: left;
+  color: inherit;
   cursor: pointer;
-  transition: border-color 0.15s;
+  transition: background-color 0.15s;
 }
-
-.dia-reset:hover {
-  border-color: #8a8172;
+.dia .dia-codigo button.dia-hueco:hover {
+  background: rgb(255 210 122 / 16%);
 }
-
-.dia-reset:focus-visible {
-  outline: 2px solid #2563eb;
+.dia .dia-codigo button.dia-hueco:focus-visible {
+  outline: 2px solid #ffd27a;
   outline-offset: 2px;
+}
+.dia-sel {
+  color: #ffd27a;
+  text-decoration: underline dashed 1.5px;
+  text-underline-offset: 0.3em;
+}
+.dia .dia-codigo button.dia-hueco.dia-hueco--encuentra {
+  background: rgb(106 209 154 / 10%);
+}
+.dia-hueco--encuentra .dia-sel {
+  color: #8be0b3;
+}
+
+/* Lo que devolvió la línea, como lo imprime la consola del navegador. En una pieza: partido, el
+   "//" quedaba solo al final del renglón. */
+.dia-null {
+  margin-left: 1ch;
+  white-space: nowrap;
+  color: #ff8ac9;
+}
+
+/* La corrida: el botón dorado de la consola, con su sombra de tinta. */
+.dia .dia-mando button.dia-correr {
+  padding: 0.7rem 1.4rem;
+  border: 2px solid #2b1b33;
+  border-radius: 999px;
+  background: #ffd27a;
+  box-shadow: 0 4px 0 #2b1b33;
+  font:
+    700 1.05rem / 1.2 'JetBrains Mono',
+    'Cascadia Mono',
+    Consolas,
+    monospace;
+  color: #2b1b33;
+  cursor: pointer;
+  transition:
+    translate 0.08s,
+    box-shadow 0.08s,
+    background-color 0.15s;
+}
+.dia .dia-mando button.dia-correr:hover {
+  background: #ffdc94;
+}
+.dia .dia-mando button.dia-correr:active {
+  translate: 0 3px;
+  box-shadow: 0 1px 0 #2b1b33;
+}
+.dia .dia-mando button.dia-correr:focus-visible {
+  outline: 3px solid #fff8ec;
+  outline-offset: 3px;
+}
+
+/* Muy angosto, o con la consola al lado de la escena (ancha y baja, ver `pagina-del-manual`), la
+   corrida va debajo del código. */
+@media (max-width: 479px), (min-width: 1100px) and (max-height: 800px) {
+  .dia {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .dia-node {
+  .dia .dia-codigo button.dia-hueco,
+  .dia .dia-mando button.dia-correr {
     transition: none;
-  }
-  .dia-ping {
-    animation: none;
-    display: none;
   }
 }

@@ -1,47 +1,53 @@
-<app-pagina-del-manual [guia]="guia()" [respiro]="700">
-  <p hacer class="dia-hacer">Corré una línea.</p>
+<app-pagina-del-manual
+  [guia]="guia()"
+  [respiro]="2200"
+  [integrada]="true"
+  [paso]="paso()"
+  [resuelta]="sano()"
+>
+  <p hacer>Corré.</p>
+  <!-- Nombra el selector que dio null, tal como está en el código: el que hay que tocar. -->
+  <p arreglo>
+    Cambiá <code>'{{ fallido() }}'</code>.
+  </p>
 
-  <!-- Las líneas son botones con el querySelector a la vista, y el nodo que tocan parpadea. Correr
-       una y mirar es la explicación. -->
-  <section demo class="dia">
-    <div class="dia-console">
-      @for (m of mutations; track m.id) {
-        <button class="dia-run" [attr.data-guia]="m.id" (click)="run(m)">
-          <span class="dia-run-icon" aria-hidden="true">▸</span>
-          <code [innerHTML]="cortes(m.code)"></code>
-        </button>
+  <app-escena-vivo escena [nodos]="dom()" [corrida]="corrida()" [sano]="sano()" />
+
+  <!-- Los nodos se ven una sola vez, en la pantalla de la nave. Acá va lo que se toca: las tres
+       líneas, con el selector del título como hueco, y la corrida. -->
+  <section consola class="dia">
+    <div class="dia-codigo" role="group" aria-label="Las líneas que cambian los nodos">
+      @for (r of fijas; track $index) {
+        <span class="dia-linea" [innerHTML]="r"></span>
       }
+      <button
+        type="button"
+        class="dia-hueco"
+        [class.dia-hueco--encuentra]="encuentra()"
+        [attr.aria-label]="'Cambiar el selector: ' + selector()"
+        (click)="cambiarSelector()"
+      >
+        <!-- La mano señala el selector, no la punta del renglón: lo que se cambia es eso. -->
+        <span class="dia-linea"
+          ><span [innerHTML]="antesDelSelector"></span
+          ><span class="dia-sel" data-guia="selector">'{{ selector() }}'</span
+          ><span [innerHTML]="despuesDelSelector"></span>
+          @if (dioNull()) {
+            <span class="dia-null">// null</span>
+          }
+        </span>
+      </button>
     </div>
 
-    <div class="dia-fila">
-      <div class="dia-dom" role="group" aria-label="Nodos del DOM">
-        @for (node of dom(); track node.id) {
-          <div class="dia-node" [class.dia-touched]="isTouched(node.id)">
-            <span class="dia-node-sel">{{ node.selector }}</span>
-            <span class="dia-node-val">{{ node.text }}</span>
-            @if (isTouched(node.id)) {
-              @for (r of [runId()]; track r) {
-                <span class="dia-ping" aria-hidden="true"></span>
-              }
-            }
-          </div>
-        }
-      </div>
-      <button class="dia-reset" (click)="reset()">Reiniciar el DOM</button>
+    <div class="dia-mando">
+      <button
+        type="button"
+        class="dia-correr"
+        [attr.data-cuenta]="cuenta()"
+        (click)="correrCodigo()"
+      >
+        &#9654; correr
+      </button>
     </div>
   </section>
-
-  <app-escena-vivo
-    escena
-    [nodos]="dom()"
-    [corrida]="runId()"
-    [tocado]="lastTouched()"
-    [sano]="sano()"
-  />
-
-  <app-manipulable-system
-    desafio
-    [system]="closingSystem"
-    (corrida)="sano.set($event.salud === 'healthy')"
-  />
 </app-pagina-del-manual>
