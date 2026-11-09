@@ -657,31 +657,34 @@ entrar desarma a Angie en luz y se hace noche, la costura con el prólogo.
       el gesto que el navegador exige: suena la prueba de un oído al otro (`planDeLaPrueba`), la
       copa que suena golpea y Angie se vuelca hacia ese lado (`inclinarse`), y en el acorde salta.
       Después la CÁMARA SE ALEJA como en Powers of Ten (2026-11-09, `cuadroDelViaje`): la noche
-      era un suspiro de Angie y vuelve a su boca. Tres tramos: (a) la BOCANADA (`BOCANADA_MS`): el
-      aviso se cierra en un círculo blando (máscara con `--aa-aire`) hasta caber adentro
-      (`aireQueCabe`, si se achica antes asoman sus bordes rectos), después se va parejo en escala
-      hasta CERO adentro de la boca enorme y abierta en "o" de la Angie de la colina
-      (`abrirLaBoca`), y la pantalla queda un rato toda del color de la boca, quieta; el texto se
-      va primero; (b) la cámara se ALEJA
-      (`ALEJARSE_MS`) de la boca a la cara, a Angie en la piedra y a la colina entera, en escala
-      pareja (cada tramo de tiempo divide la escala por lo mismo); arranca desde ADENTRO de la
-      boca, con toda la pantalla del color de la "o" (#940054) (`profundidadDesdeLaBoca`: las cuatro esquinas, en el dibujo de la "o", caen adentro
-      con margen ×2, tope 400); después asoma el borde de la "o", la cara, Angie y la colina; (c)
-      TRAGA (`TRAGA_MS`): al llegar, la boca se cierra con un trago. El título de la colina
-      entra recién al llegar (`llego`): antes se vería gigante. Lo que NO puede pasar
-      (anti-patrones): un zoom en línea recta (la boca pasaba en un parpadeo y la colina se
-      arrastraba); la colina en RECTÁNGULOS (animada por el compositor, el navegador la pintaba
-      una sola vez a la escala del arranque: por eso va cuadro a cuadro con
-      `requestAnimationFrame`, y cada cuadro se vuelve a dibujar); el aviso al costado de la
-      boca (la cara se mueve sola y a 40× dos píxeles se notan: la cámara SIGUE a la "o" visible
-      cada cuadro; la del perfil también existe, apagada, y mide cero); un cuadro sin aviso al
-      arrancar (el primero se pinta antes de prender la máscara); texto del aviso legible mientras
-      se va; un PUNTO que queda en el medio de la boca y viaja hasta la colina (se leía como algo
-      nuevo: el aviso termina en cero antes de que la cámara se aleje); cortes entre tramos; más de unos 6 s; arrancar con la cara a la vista (con la
-      boca medida por su caja de pantalla, girada y estirada por el muelle, asomaba medio borde
-      de la "o"; y la "o" se pinta más angosta que su geometría a cientos de aumentos: de ahí el
-      margen); el aviso de vuelta entero un cuadro al llegar (queda en escala 0 hasta que
-      `listo` lo oculta). Defectos viejos que siguen valiendo: un
+      era lo que Angie miraba, y se va adentro de su OJO. Dos tramos: (a) el CIERRE
+      (`SE_CIERRA_MS`): el aviso se cierra en un círculo blando (máscara con `--aa-aire`) hasta
+      caber adentro (`aireQueCabe`, si se achica antes asoman sus bordes rectos), después se va
+      parejo en escala hasta CERO, y la pantalla queda un rato toda del negro del ojo (#0f0f11),
+      quieta; el texto se va primero; (b) la cámara se ALEJA (`ALEJARSE_MS`) del ojo a la cara, a
+      Angie en la piedra y a la colina entera, en escala pareja (cada tramo de tiempo divide la
+      escala por lo mismo); arranca desde ADENTRO del ojo izquierdo (`MANCHA`, el negro lejos del
+      párpado, del borde y del brillo pensativo; `profundidadDesdeElOjo`: las cuatro esquinas, en
+      el dibujo del ojo, caen adentro con margen ×2, tope 900); después asoma el borde del ojo, su
+      brillo, la cara, Angie y la colina. La BOCA queda cerrada todo el viaje, como siempre, y
+      Angie no parpadea mientras dura (`sinParpadear`). El título de la colina entra recién al
+      llegar (`llego`): antes se vería gigante. Lo que NO puede pasar (anti-patrones): un zoom en
+      línea recta (el ojo pasaba en un parpadeo y la colina se arrastraba); la colina en
+      RECTÁNGULOS (animada por el compositor, el navegador la pintaba una sola vez a la escala del
+      arranque: por eso va cuadro a cuadro con `requestAnimationFrame`, y cada cuadro se vuelve a
+      dibujar); el negro corrido (la cara se mueve sola y a cientos de aumentos dos píxeles se
+      notan: la cámara SIGUE al punto del ojo cada cuadro, con su matriz de pantalla; los ojos del
+      perfil también existen, apagados, y miden cero); un PARPADEO en el viaje (abría la pantalla
+      negra de golpe); un cuadro sin aviso al arrancar (el primero se pinta antes de prender la
+      máscara); texto del aviso legible mientras se va; un PUNTO que queda en el medio y viaja
+      hasta la colina (se leía como algo nuevo: el aviso termina en cero antes de que la cámara se
+      aleje); cortes entre tramos; más de unos 6 s; arrancar con la cara a la vista (medida por su
+      caja de pantalla, una figura girada y estirada por los muelles dejaba un borde a la vista; y
+      a cientos de aumentos se pinta más angosta que su geometría: de ahí el margen); el aviso de
+      vuelta entero un cuadro al llegar (queda en escala 0 hasta que `listo` lo oculta). Antes
+      arrancaba en la boca abierta, de #940054: lo que se iba era oscuro y se leía como algo ajeno
+      a la boca; en el negro del ojo, la noche y el ojo son del mismo color. Defectos viejos que
+      siguen valiendo: un
       rectángulo que se achica se leía como una ventana; nubes oscuras sobre la cara, como humo
       de explosión. Los cuadros pausados NO muestran los rectángulos, porque pausar le da tiempo
       a pintar: grabar en tiempo real con screencast por CDP (Edge headless, click real) y mirar
