@@ -8,7 +8,6 @@ import {
   SystemState,
   turn,
 } from './manipulable-challenge';
-import * as nivel0 from '../signals/level-0-introduction/introduction-systems';
 import * as nivel1 from '../signals/level-1-interaction-with-signals/signals-systems';
 import * as nivel2 from '../signals/level-2-computed-signals/computed-systems';
 import * as nivel3 from '../signals/level-3-effect/effect-systems';
@@ -22,7 +21,7 @@ import * as nivel10 from '../signals/level-10-debounced/debounce-systems';
 import * as nivel11 from '../signals/level-11-zoneless/zoneless-systems';
 
 /**
- * Barrido de los 35 cierres contra la regla de la corrida: mover la perilla es cambiar el código, y
+ * Barrido de los 34 cierres contra la regla de la corrida: mover la perilla es cambiar el código, y
  * eso arranca una corrida nueva. El bug que esto cuida no rompía nada a la vista: accionabas con el
  * código roto, girabas al sano, y las lecturas pasaban a sanas como si las acciones viejas hubieran
  * corrido con el código nuevo. Los 37 lo tenían, porque cada settle se escribe a mano y ninguno
@@ -32,7 +31,6 @@ import * as nivel11 from '../signals/level-11-zoneless/zoneless-systems';
 // Por módulo y con el archivo en el nombre: esparcir todo en un solo objeto pisaba en silencio a
 // dos sistemas que se exportaran con el mismo nombre desde niveles distintos.
 const MODULOS: Readonly<Record<string, Readonly<Record<string, unknown>>>> = {
-  'nivel 0': nivel0,
   'nivel 1': nivel1,
   'nivel 2': nivel2,
   'nivel 3': nivel3,
@@ -121,11 +119,11 @@ function alcanzables(sistema: ManipulableChallenge, pasos: number): readonly Sys
   return [...vistos.values()];
 }
 
-describe('barrido de los 35 sistemas: cambiar el código arranca otra corrida', () => {
+describe('barrido de los 34 sistemas: cambiar el código arranca otra corrida', () => {
   // Contar lo barrido: un módulo que deja de exportar, o un sistema que cambia de forma, no puede
   // achicar el barrido sin que nadie se entere.
-  it('barre los 35, sin perder ninguno en el camino', () => {
-    expect(SISTEMAS.length).toBe(35);
+  it('barre los 34, sin perder ninguno en el camino', () => {
+    expect(SISTEMAS.length).toBe(34);
   });
 
   SISTEMAS.forEach(([nombre, sistema]) => {

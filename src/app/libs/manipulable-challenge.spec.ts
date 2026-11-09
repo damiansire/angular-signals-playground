@@ -18,7 +18,6 @@ import {
   CUSTOM_EQUAL_SYSTEM,
   REFERENCE_EQUALITY_SYSTEM,
 } from '../signals/level-4-signal-equality-functions/equality-systems';
-import * as intro from '../signals/level-0-introduction/introduction-systems';
 import * as uno from '../signals/level-1-interaction-with-signals/signals-systems';
 import * as dos from '../signals/level-2-computed-signals/computed-systems';
 import * as cinco from '../signals/level-5-linked-signal/linked-systems';
@@ -269,7 +268,6 @@ describe('sistemas publicados', () => {
     ['4/1 igualdad por referencia', REFERENCE_EQUALITY_SYSTEM],
     ['4/2 equal propio', CUSTOM_EQUAL_SYSTEM],
     ...Object.entries({
-      ...intro,
       ...uno,
       ...dos,
       ...cinco,
