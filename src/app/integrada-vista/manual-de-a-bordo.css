@@ -233,14 +233,6 @@
 
 /* Lo que la hoja ajusta de las pantallas que monta (las alcanza por el estampado). */
 
-/* 0/1: el lugar del árbol es un escenario a la vista, no un hueco con una frase suelta. */
-.prologo__manual .subhost .tree-card {
-  border: 1.5px dashed #d6c9ab;
-  border-radius: 16px;
-  background-color: #fffdf6;
-  box-shadow: none;
-}
-
 /* El desafío va en su recuadro, con su número: la regla de arriba y el aire del átomo son para
    cerrar una card larga, y acá separaban el número de su rótulo. */
 .prologo__manual .subhost [desafio] {
@@ -312,50 +304,6 @@
   border: 2px dashed #c9b49a;
   border-radius: 14px;
   background: #f6eedf;
-}
-
-/* 0/1: el código y el árbol llegan hasta el fondo de la mesa. El editor es una pantalla pareja (la
-   armonización le saca el fondo y solo quedaban pintados los renglones), con el código al medio y
-   la letra que crece con el alto que hay. */
-.prologo__manual .subhost .htt-codigo > div {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-  border: 3px solid #5d4a5e;
-  border-radius: 14px;
-  background: #1f2937;
-}
-.prologo__manual .subhost .htt-codigo .p-4 {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-}
-/* A cada token: la armonización le pone su letra a todo `div` del código, no solo al renglón. El
-   renglón va más junto que en la molécula: a 1366×768 la hoja se pasaba del alto por 12 px. */
-.prologo__manual .subhost .htt-codigo .p-4 div {
-  font-size: clamp(0.9rem, 1.6vh, 1.2rem);
-}
-.prologo__manual .subhost .htt-codigo .p-4 > div {
-  padding-block: 0.2rem;
-}
-/* Vacío, el árbol dice dónde va a crecer, con la letra de los carteles. */
-.prologo__manual .subhost .htt-arbol .tree-hint {
-  font:
-    800 clamp(1rem, 1.4vw, 1.25rem) / 1.3 'Baloo 2',
-    var(--font-display, system-ui, sans-serif);
-  letter-spacing: 0.01em;
-  color: #8a7d66;
-}
-/* El árbol va encima de su recuadro, que es quien tiene el alto: en el flujo, su alto natural sería
-   el mínimo de la grilla y la hoja no podría achicarse (a 1366×768 se pasaba). */
-.prologo__manual .subhost .htt-arbol .tree-card {
-  height: 100%;
-  min-height: 17rem;
-}
-.prologo__manual .subhost .htt-arbol app-node-tree {
-  position: absolute;
-  inset: 0.5rem;
 }
 
 /* ── El libro de leyes: la pantalla de la nave, entera ─────────────────────────────────────────
