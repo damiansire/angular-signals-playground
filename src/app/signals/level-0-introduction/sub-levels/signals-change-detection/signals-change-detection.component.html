@@ -1,64 +1,41 @@
-<app-pagina-del-manual [guia]="guia()">
-  <p hacer class="scd-hacer">Cambiá el valor.</p>
+<app-pagina-del-manual
+  [guia]="guia()"
+  [respiro]="1600"
+  [integrada]="true"
+  [paso]="paso()"
+  [resuelta]="sano()"
+>
+  <p hacer>Corré.</p>
+  <p arreglo>Hacelo signal.</p>
 
-  <!-- Sin bajada: al cambiar el signal se prenden dos nodos y el resto del árbol se poda a la
-       vista. La comparación contra Zone.js queda como dos números, no como una frase. -->
-  <section demo class="scd">
-    <div class="scd-actions">
-      <button class="scd-change" (click)="changeSignal()">count.set(1)</button>
-      <button class="scd-reset" (click)="reset()">Reiniciar</button>
+  <app-escena-signal escena [aviso]="aviso()" [valor]="arbol().total" [sano]="sano()" />
+
+  <!-- El árbol y cuántos nodos se revisaron se ven una sola vez, en la pantalla de la nave. Acá va
+       lo que se toca: el código, con la declaración como hueco, y la corrida. -->
+  <section consola class="scd">
+    <div class="scd-codigo" role="group" aria-label="El código que cambia el valor">
+      <button
+        type="button"
+        class="scd-hueco"
+        [class.scd-hueco--signal]="declaracion().esSignal"
+        [attr.aria-label]="'Cambiar la declaración: ' + declaracion().renglon"
+        data-guia="declaracion"
+        (click)="cambiarDeclaracion()"
+      >
+        <span class="scd-linea" [innerHTML]="renglonDeLaDeclaracion()"></span>
+      </button>
+      <span class="scd-linea" [innerHTML]="escritura()"></span>
     </div>
 
-    <div class="scd-stage">
-      <svg
-        class="scd-tree"
-        viewBox="0 0 340 240"
-        role="img"
-        aria-label="Árbol DOM: con signals solo se re-chequean los nodos dependientes"
+    <div class="scd-mando">
+      <button
+        type="button"
+        class="scd-correr"
+        [attr.data-cuenta]="arbol().total"
+        (click)="correrCodigo()"
       >
-        @for (path of edgePaths; track path) {
-          <path class="scd-edge" [attr.d]="path" />
-        }
-        @for (node of nodes; track node.id) {
-          <g
-            class="scd-node"
-            [class.scd-lit]="changed() && isDependent(node.id)"
-            [class.scd-pruned]="changed() && !isDependent(node.id)"
-          >
-            <rect
-              [attr.x]="node.left"
-              [attr.y]="node.top"
-              [attr.width]="node.width"
-              [attr.height]="nodeHeight"
-              [attr.rx]="nodeHeight / 2"
-            />
-            <text [attr.x]="node.x" [attr.y]="node.y + 4" text-anchor="middle">
-              {{ node.label }}
-            </text>
-          </g>
-        }
-      </svg>
-
-      <div class="scd-readout">
-        <p class="scd-count">
-          re-chequeados
-          <strong>{{ changed() ? recheckedSignals : 0 }} / {{ recheckedZone }}</strong>
-        </p>
-        @if (changed()) {
-          <p class="scd-contrast">
-            <span
-              >Zone.js <strong>{{ recheckedZone }}</strong></span
-            >
-            <span
-              >signal <strong>{{ recheckedSignals }}</strong></span
-            >
-          </p>
-        }
-      </div>
+        &#9654; correr
+      </button>
     </div>
   </section>
-
-  <app-escena-signal escena [aviso]="aviso()" [enterados]="changed()" [sano]="sano()" />
-
-  <app-manipulable-system desafio [system]="closingSystem" (corrida)="alCorrerElDesafio($event)" />
 </app-pagina-del-manual>

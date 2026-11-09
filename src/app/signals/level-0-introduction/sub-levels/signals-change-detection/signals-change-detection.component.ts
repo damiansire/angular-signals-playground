@@ -1,90 +1,66 @@
 import { Component, ChangeDetectionStrategy, computed, signal } from '@angular/core';
 import {
-  CD_NODES,
-  CD_EDGES,
-  SIGNAL_DEPENDENTS,
-  recheckedBySignals,
-  recheckedByZone,
-} from '../../../../libs/cd-tree';
-import { ManipulableSystemComponent } from '../../../../components-atom/manipulable-system/manipulable-system.component';
-import type { Health, SystemState } from '../../../../libs/manipulable-challenge';
+  ARBOL_INICIAL,
+  DECLARACIONES,
+  type Declaracion,
+  type EstadoDelArbol,
+  barrioTodo,
+  correr,
+  siguienteDeclaracion,
+} from './signals-change-detection.data';
 import { PaginaDelManualComponent } from '../../manual/pagina-del-manual.component';
 import { EscenaSignalComponent, type Aviso } from '../../manual/escena-signal.component';
-import { SIGNAL_NOTIFY_SYSTEM } from '../../introduction-systems';
+import { conCortes } from '../../../../libs/cortes-de-codigo';
 
 /**
- * Cada nodo es una pastilla que crece con su rótulo: con un círculo fijo de 30px, 'section' y
- * 'article' (unos 50px a 12px monoespaciada) se salían del nodo. El ancho por carácter toma la
- * monoespaciada más ancha de la pila (Menlo, 7.2px) con margen, así ninguna fuente lo desborda.
+ * La ley 6 en una sola pieza: la nave, el árbol de su pantalla y la caja del valor son la demo, y
+ * la consola tiene el código que lo cambia, con la declaración como hueco. Probar es correrlo con
+ * una variable común: nadie sabe quién la lee y se barre el árbol entero, como en casa. Arreglar es
+ * declararla como signal y volver a correr: se enteran solo los dos nodos que la leen.
  */
-const NODE_HEIGHT = 30;
-const CHAR_WIDTH = 7.4;
-const LABEL_PADDING = 7;
-
-function pillWidth(label: string): number {
-  return Math.max(NODE_HEIGHT, label.length * CHAR_WIDTH + 2 * LABEL_PADDING);
-}
-
 @Component({
   selector: 'app-signals-change-detection',
   templateUrl: './signals-change-detection.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ManipulableSystemComponent, PaginaDelManualComponent, EscenaSignalComponent],
+  imports: [PaginaDelManualComponent, EscenaSignalComponent],
   styleUrl: './signals-change-detection.component.css',
 })
 export class SignalsChangeDetectionComponent {
-  readonly closingSystem = SIGNAL_NOTIFY_SYSTEM;
-  protected readonly nodeHeight = NODE_HEIGHT;
-  protected readonly nodes = CD_NODES.map((node) => {
-    const width = pillWidth(node.label);
-    return { ...node, width, left: node.x - width / 2, top: node.y - NODE_HEIGHT / 2 };
-  });
-  private readonly dependents = new Set(SIGNAL_DEPENDENTS);
-  protected readonly recheckedSignals = recheckedBySignals();
-  protected readonly recheckedZone = recheckedByZone();
-
-  protected readonly changed = signal(false);
-
-  protected readonly edgePaths = CD_EDGES.map((edge) => {
-    const from = CD_NODES.find((n) => n.id === edge.from)!;
-    const to = CD_NODES.find((n) => n.id === edge.to)!;
-    return `M${from.x},${from.y} L${to.x},${to.y}`;
-  });
-
-  /** El desafío quedó sano: la lámina festeja. */
-  protected readonly sano = signal(false);
-  /** El último cambio de valor, para la lámina: el de la demo o el del desafío. */
+  protected readonly declaracion = signal<Declaracion>(DECLARACIONES[0]);
+  protected readonly arbol = signal<EstadoDelArbol>(ARBOL_INICIAL);
+  /** Ya se vio el barrido entero: el paso de arreglar se prende. */
+  private readonly vioElBarrido = signal(false);
+  /** El último cambio de valor, para la lámina; `n` sube con cada corrida. */
   protected readonly aviso = signal<Aviso | null>(null);
 
-  private readonly cambioUnaVez = signal(false);
-  /** Hasta el primer cambio: reiniciar no vuelve a traer la mano. */
-  protected readonly guia = computed(() => (this.cambioUnaVez() ? null : '.scd-change'));
+  protected readonly renglonDeLaDeclaracion = computed(() => conCortes(this.declaracion().renglon));
+  protected readonly escritura = computed(() => conCortes(this.declaracion().escritura));
 
-  protected changeSignal(): void {
-    this.cambioUnaVez.set(true);
-    this.changed.set(true);
-    this.avisar(true);
-  }
+  /** La última corrida fue con el signal, y el hueco sigue en el signal. */
+  protected readonly sano = computed(
+    () => this.aviso()?.signal === true && this.declaracion().esSignal,
+  );
+  protected readonly paso = computed<1 | 2>(() => (this.vioElBarrido() ? 2 : 1));
 
   /**
-   * En el desafío, cada vez que se cambia el valor la lámina lo cuenta: con `signal` se enteran los
-   * dos que leen, con un `let` alguien barre el árbol entero. Girar la perilla no cambia nada.
+   * La mano dice lo mismo que los pasos: correr, el hueco mientras no sea un signal, y correr otra
+   * vez. El botón lleva las corridas, así cada una es un toque distinto.
    */
-  protected alCorrerElDesafio({ estado, salud }: { estado: SystemState; salud: Health }): void {
-    this.sano.set(salud === 'healthy');
-    if (estado.actions > 0) this.avisar(estado.values['revisados'] === 2);
+  protected readonly guia = computed(() => {
+    if (this.sano()) return null;
+    if (this.vioElBarrido() && !this.declaracion().esSignal) return '[data-guia="declaracion"]';
+    return `.scd-correr[data-cuenta="${this.arbol().total}"]`;
+  });
+
+  protected correrCodigo(): void {
+    const declaracion = this.declaracion();
+    this.arbol.update((a) => correr(a, declaracion));
+    if (barrioTodo(this.arbol())) this.vioElBarrido.set(true);
+    this.aviso.update((antes) => ({ n: (antes?.n ?? 0) + 1, signal: declaracion.esSignal }));
   }
 
-  private avisar(esSignal: boolean): void {
-    this.aviso.update((antes) => ({ n: (antes?.n ?? 0) + 1, signal: esSignal }));
-  }
-
-  protected reset(): void {
-    this.changed.set(false);
-  }
-
-  /** Un nodo se re-chequea SOLO si lee el signal que cambió. */
-  protected isDependent(id: string): boolean {
-    return this.dependents.has(id);
+  /** El hueco alterna entre la variable común y el signal. */
+  protected cambiarDeclaracion(): void {
+    this.declaracion.update(siguienteDeclaracion);
   }
 }

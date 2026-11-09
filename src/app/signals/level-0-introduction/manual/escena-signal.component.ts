@@ -1,8 +1,19 @@
-import { ChangeDetectionStrategy, Component, effect, input } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  DestroyRef,
+  afterNextRender,
+  computed,
+  effect,
+  inject,
+  input,
+  signal,
+} from '@angular/core';
 import { gsap } from 'gsap';
 import { CD_EDGES, CD_NODES, SIGNAL_DEPENDENTS } from '../../../libs/cd-tree';
-import { EscenaDelManual, chispas, pintarPantalla } from './escena-del-manual';
+import { CIELO_DEL_ESCENARIO, EscenaDelManual, chispas, pintarPantalla } from './escena-del-manual';
 import { PALETA, el } from './nave-del-manual';
+import { cieloAngosto } from './escenas.logica';
 
 /** Un cambio de valor; `n` sube con cada uno, aunque el modo se repita. */
 export interface Aviso {
@@ -14,30 +25,43 @@ export interface Aviso {
 const NARIZ = { x: 182, y: 148 };
 /** La caja del valor, abajo y entre la nave y su pantalla: de ahí salen los hilos de lectura. */
 const CAJA = { x: 150, y: 218 };
+/**
+ * El árbol de la demo, en la pantalla de la nave, corrido hacia abajo: arriba va la lectura. Los
+ * hilos entran a los nodos desde abajo, así que la lectura abajo los cruzaba.
+ */
 const aPantalla = (x: number, y: number): { x: number; y: number } => ({
   x: 232 + (x - 50) * 0.56,
-  y: 62 + (y - 40) * 0.72,
+  y: 80 + (y - 40) * 0.53,
 });
+const LECTURA = { x: 222, y: 38, ancho: 158, alto: 26 } as const;
 const APAGADO = '#3e3170';
 const ENTERADO = '#7fdcae';
+/** Revisado por el barrido de casa: se nota que pasó por ahí, pero no es la luz de un aviso. */
+const BARRIDO = '#b0508f';
+const TOTAL_DE_NODOS = CD_NODES.length;
+/**
+ * El cielo se pinta más alto que el del escenario: a 390 px la consola es corta y la ventanilla queda
+ * más alta que ancha. Con el de 340, encuadrar la nave dejaba franjas sin pintar, y sin encuadrar el
+ * recorte le comía a la pantalla el último `<p>` y la cuenta de revisados.
+ */
+const ALTO_PINTADO = 520;
+const CIELO_PINTADO = `-200 ${129 - ALTO_PINTADO / 2} 800 ${ALTO_PINTADO}`;
 
 /**
- * Lámina de la ley 6, la primera de Signal Space: ya no hay cerca de Zone.js. El valor es una caja
- * ámbar con un hilo hasta cada nodo que lo lee. Al cambiar, el aviso viaja solo por esos hilos y
- * se encienden los dos `<p>`; el resto del árbol ni se mueve. Si el valor no es un signal, vuelve
- * la costumbre de casa: alguien barre el árbol entero, y la nave lo nota.
+ * Lámina de la ley 6, que es el escenario de su página: ya no hay cerca de Zone.js. El valor es una
+ * caja ámbar con un hilo hasta cada nodo que lo lee, y la lectura de arriba de la pantalla cuenta
+ * cuántos nodos se revisaron. Si el valor es un signal, el aviso viaja solo por esos hilos y se
+ * encienden los dos `<p>`; el resto del árbol ni se mueve. Si no, vuelve la costumbre de casa:
+ * alguien barre el árbol entero, y la nave lo nota.
  */
 @Component({
   selector: 'app-escena-signal',
   template: `<svg
     class="esc"
-    viewBox="0 0 400 260"
+    [attr.viewBox]="cielo()"
+    preserveAspectRatio="xMidYMid slice"
     role="img"
-    [attr.aria-label]="
-      enterados()
-        ? 'Solo los dos nodos que leen el valor se enteraron'
-        : 'El árbol de la pantalla y los hilos de quien lee el valor'
-    "
+    [attr.aria-label]="descripcion()"
   >
     <g data-nave transform="translate(112 150) scale(1.05)"></g>
   </svg>`,
@@ -46,31 +70,56 @@ const ENTERADO = '#7fdcae';
 })
 export class EscenaSignalComponent extends EscenaDelManual {
   readonly aviso = input<Aviso | null>(null);
-  readonly enterados = input(false);
+  /** El valor de `total`, en la caja. */
+  readonly valor = input(0);
   readonly sano = input(false);
 
   protected readonly semilla = 61;
+  /**
+   * El primer cuadro va con el cielo alto, que es el que se pinta; después, en angosto, encuadra la
+   * nave y su pantalla, y si no, el cielo de sobra del escenario.
+   */
+  protected readonly cielo = signal(CIELO_PINTADO);
+  private readonly revisados = computed(() => {
+    const aviso = this.aviso();
+    return aviso ? (aviso.signal ? SIGNAL_DEPENDENTS.length : TOTAL_DE_NODOS) : 0;
+  });
+  protected readonly descripcion = computed(
+    () =>
+      `Pantalla de la nave: total ${this.valor()}, ` +
+      `${this.revisados()} de ${TOTAL_DE_NODOS} nodos revisados`,
+  );
   private nodos = new Map<string, { circulo: SVGCircleElement; depth: number }>();
   private hilos: SVGPathElement[] = [];
   private caja: SVGGElement | null = null;
-  private valor: SVGTextElement | null = null;
+  private valorEnLaCaja: SVGTextElement | null = null;
   private capa: SVGGElement | null = null;
+  private lectura: { caja: SVGRectElement; cuenta: SVGTextElement } | null = null;
   private visto = 0;
 
   constructor() {
     super();
+    // Corre después de `armar`, que ya pintó el cielo alto: el `viewBox` que siga cae adentro.
+    const destruir = inject(DestroyRef);
+    afterNextRender(() => {
+      const observador = new ResizeObserver(([caja]) => {
+        const { width, height } = caja.contentRect;
+        this.cielo.set(cieloAngosto(width, height, ALTO_PINTADO) ?? CIELO_DEL_ESCENARIO);
+      });
+      observador.observe(this.host);
+      destruir.onDestroy(() => observador.disconnect());
+    });
     effect(() => {
       const aviso = this.aviso();
-      const enterados = this.enterados();
+      const valor = this.valor();
       if (!this.lista) return;
       this.reaccion(() => {
-        if (aviso && aviso.n !== this.visto) {
-          this.visto = aviso.n;
-          if (aviso.signal) this.avisar(aviso.n);
-          else this.barrerComoEnCasa();
-        } else if (!enterados) {
-          this.apagar();
-        }
+        if (this.valorEnLaCaja) this.valorEnLaCaja.textContent = String(valor);
+        if (!aviso || aviso.n === this.visto) return;
+        this.visto = aviso.n;
+        this.leer(aviso);
+        if (aviso.signal) this.avisar();
+        else this.barrerComoEnCasa();
       });
     });
     effect(() => {
@@ -80,6 +129,7 @@ export class EscenaSignalComponent extends EscenaDelManual {
 
   protected armar(svg: SVGSVGElement): void {
     const pantalla = pintarPantalla(svg, NARIZ);
+    this.armarLectura(pantalla);
     const ramas = el(pantalla, 'g', { stroke: '#6c5ca8', 'stroke-width': 2 });
     for (const e of CD_EDGES) {
       const a = CD_NODES.find((n) => n.id === e.from)!;
@@ -137,7 +187,7 @@ export class EscenaSignalComponent extends EscenaDelManual {
       'stroke-width': 2,
     });
     el(this.caja, 'rect', { x: -12, y: -12, width: 24, height: 7, rx: 3.5, fill: PALETA.luz });
-    this.valor = el(this.caja, 'text', {
+    this.valorEnLaCaja = el(this.caja, 'text', {
       y: 9,
       'text-anchor': 'middle',
       'font-family': "'JetBrains Mono', Consolas, monospace",
@@ -145,11 +195,14 @@ export class EscenaSignalComponent extends EscenaDelManual {
       'font-weight': 800,
       fill: PALETA.tinta,
     });
-    this.valor.textContent = '0';
+    this.valorEnLaCaja.textContent = String(this.valor());
 
     this.capa = el(svg, 'g', { 'pointer-events': 'none' });
-    this.visto = this.aviso()?.n ?? 0;
-    if (this.enterados()) this.encenderLectores(0);
+    const aviso = this.aviso();
+    this.visto = aviso?.n ?? 0;
+    this.leer(aviso, 0);
+    if (aviso?.signal) this.pintarLectores(0);
+    else if (aviso) this.pintarBarrido(0);
     if (!this.quieta) {
       for (const hilo of this.hilos) {
         gsap.to(hilo, { strokeDashoffset: -16, duration: 1.4, ease: 'none', repeat: -1 });
@@ -157,59 +210,87 @@ export class EscenaSignalComponent extends EscenaDelManual {
     }
   }
 
-  private encenderLectores(t: number): void {
-    for (const id of SIGNAL_DEPENDENTS) {
-      const nodo = this.nodos.get(id);
-      if (!nodo) continue;
-      gsap.fromTo(
-        nodo.circulo,
-        { attr: { fill: PALETA.luz, r: t ? 13 : 9 } },
-        {
-          attr: { fill: ENTERADO, r: 9 },
-          duration: 0.45 * t,
-          ease: 'back.out(2)',
-          overwrite: 'auto',
-        },
-      );
-    }
+  /** La lectura de arriba de la pantalla: cuántos nodos revisó el último cambio. */
+  private armarLectura(pantalla: SVGGElement): void {
+    const { x, y, ancho, alto } = LECTURA;
+    const mono = "'JetBrains Mono', Consolas, monospace";
+    const caja = el(pantalla, 'rect', {
+      x,
+      y,
+      width: ancho,
+      height: alto,
+      rx: 8,
+      fill: '#2f2556',
+      stroke: '#5b4a96',
+      'stroke-width': 1.4,
+    });
+    const rotulo = el(pantalla, 'text', {
+      x: x + 10,
+      y: y + 17,
+      'font-family': mono,
+      'font-size': 11.5,
+      'font-weight': 700,
+      fill: '#b9aee0',
+    });
+    rotulo.textContent = 'revisados';
+    const cuenta = el(pantalla, 'text', {
+      x: x + ancho - 10,
+      y: y + 18,
+      'text-anchor': 'end',
+      'font-family': 'Georgia, serif',
+      'font-size': 16,
+      fill: '#f2ecff',
+    });
+    this.lectura = { caja, cuenta };
   }
 
-  private apagar(): void {
-    for (const { circulo } of this.nodos.values()) {
+  private leer(aviso: Aviso | null, t = this.quieta ? 0 : 0.25): void {
+    const lectura = this.lectura;
+    if (!lectura) return;
+    const revisados = aviso ? (aviso.signal ? SIGNAL_DEPENDENTS.length : TOTAL_DE_NODOS) : 0;
+    lectura.cuenta.textContent = `${revisados}/${TOTAL_DE_NODOS}`;
+    const barrido = aviso !== null && !aviso.signal;
+    gsap.to(lectura.caja, {
+      attr: {
+        stroke: barrido ? '#ff7676' : aviso ? ENTERADO : '#5b4a96',
+        fill: barrido ? '#4a2440' : '#2f2556',
+      },
+      duration: t,
+      overwrite: 'auto',
+    });
+    gsap.to(lectura.cuenta, {
+      attr: { fill: barrido ? '#ffb3b3' : aviso ? ENTERADO : '#f2ecff' },
+      duration: t,
+      overwrite: 'auto',
+    });
+  }
+
+  /** Los dos lectores encendidos y el resto apagado: lo que deja un aviso. */
+  private pintarLectores(t: number): void {
+    for (const [id, { circulo }] of this.nodos) {
+      const lee = SIGNAL_DEPENDENTS.includes(id);
+      if (lee && t) continue;
       gsap.to(circulo, {
-        attr: { fill: APAGADO, r: 9 },
-        duration: this.quieta ? 0 : 0.25,
+        attr: { fill: lee ? ENTERADO : APAGADO, r: 9 },
+        duration: 0.25 * t,
         overwrite: 'auto',
       });
     }
-    if (this.valor) this.valor.textContent = '0';
-    this.nave?.animo('tranquila');
-    this.nave?.mirar(300, 110);
   }
 
   /** El valor cambia: la caja salta, el aviso corre por los dos hilos y se encienden sus lectores. */
-  private avisar(n: number): void {
+  private avisar(): void {
     const nave = this.nave;
-    if (this.valor) this.valor.textContent = String(n);
     nave?.animo('atenta');
     nave?.mirar(CAJA.x, CAJA.y);
     if (this.quieta || !this.caja || !this.capa) {
-      this.encenderLectores(0);
+      this.pintarLectores(0);
       nave?.animo('contenta');
       return;
     }
-    // Anticipación, golpe y rebote más chico: el valor se nota antes de que salga el aviso.
-    gsap
-      .timeline()
-      .to(this.caja, {
-        scaleY: 0.82,
-        scaleX: 1.12,
-        transformOrigin: '50% 100%',
-        duration: 0.1,
-        ease: 'power2.in',
-      })
-      .to(this.caja, { scaleY: 1.12, scaleX: 0.92, duration: 0.14, ease: 'power2.out' })
-      .to(this.caja, { scaleY: 1, scaleX: 1, duration: 0.3, ease: 'back.out(2.5)' });
+    // Lo que barrió la corrida de antes se apaga: esta vez nadie más se entera.
+    this.pintarLectores(1);
+    this.saltarLaCaja();
 
     const capa = this.capa;
     this.hilos.forEach((hilo, i) => {
@@ -253,24 +334,48 @@ export class EscenaSignalComponent extends EscenaDelManual {
     });
   }
 
-  /** El valor no es un signal: nadie sabe quién lo lee, así que se revisa todo, como en casa. */
-  private barrerComoEnCasa(): void {
-    const nave = this.nave;
-    nave?.animo('preocupada');
+  /** Anticipación, golpe y rebote más chico: el valor se nota antes de que salga el aviso. */
+  private saltarLaCaja(): void {
+    if (!this.caja) return;
+    gsap
+      .timeline()
+      .to(this.caja, {
+        scaleY: 0.82,
+        scaleX: 1.12,
+        transformOrigin: '50% 100%',
+        duration: 0.1,
+        ease: 'power2.in',
+      })
+      .to(this.caja, { scaleY: 1.12, scaleX: 0.92, duration: 0.14, ease: 'power2.out' })
+      .to(this.caja, { scaleY: 1, scaleX: 1, duration: 0.3, ease: 'back.out(2.5)' });
+  }
+
+  /** El árbol entero marcado como revisado: lo que deja el barrido de casa. */
+  private pintarBarrido(t: number): void {
     for (const { circulo, depth } of this.nodos.values()) {
       gsap.fromTo(
         circulo,
-        { attr: { fill: '#ff8ac9' } },
+        { attr: { fill: t ? '#ff8ac9' : BARRIDO, r: 9 } },
         {
-          attr: { fill: APAGADO },
-          duration: this.quieta ? 0 : 0.5,
-          delay: this.quieta ? 0 : 0.1 + depth * 0.16,
+          attr: { fill: BARRIDO },
+          duration: 0.5 * t,
+          delay: (0.1 + depth * 0.16) * t,
           ease: 'power1.out',
           overwrite: 'auto',
         },
       );
     }
-    if (!this.quieta) nave?.trabarse(5);
+  }
+
+  /** El valor no es un signal: nadie sabe quién lo lee, así que se revisa todo, como en casa. */
+  private barrerComoEnCasa(): void {
+    const nave = this.nave;
+    nave?.animo('preocupada');
+    nave?.mirar(300, 120);
+    this.pintarBarrido(this.quieta ? 0 : 1);
+    if (this.quieta) return;
+    this.saltarLaCaja();
+    nave?.trabarse(5);
   }
 
   private festejar(): void {

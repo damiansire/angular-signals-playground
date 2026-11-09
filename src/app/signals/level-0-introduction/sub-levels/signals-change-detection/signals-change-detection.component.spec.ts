@@ -1,11 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { SignalsChangeDetectionComponent } from './signals-change-detection.component';
-import { malformed } from '../../../../libs/manipulable-challenge';
-import { SIGNAL_NOTIFY_SYSTEM } from '../../introduction-systems';
 
 describe('SignalsChangeDetectionComponent', () => {
   let fixture: ComponentFixture<SignalsChangeDetectionComponent>;
   let el: HTMLElement;
+
+  const click = (selector: string) => {
+    (el.querySelector(selector) as HTMLButtonElement).click();
+    fixture.detectChanges();
+  };
+  const etapas = () => [...el.querySelectorAll('.pm-etapa')];
+  const pantalla = () =>
+    el.querySelector('app-escena-signal svg')?.getAttribute('aria-label') ?? '';
+  const codigo = () => el.querySelector('.scd-codigo')?.textContent ?? '';
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
@@ -16,85 +23,57 @@ describe('SignalsChangeDetectionComponent', () => {
     fixture.detectChanges();
   });
 
-  it('se crea', () => {
-    expect(fixture.componentInstance).toBeTruthy();
+  it('es una sola pieza: escena, consola y sin desafío aparte', () => {
+    expect(el.querySelector('.pm-escenario app-escena-signal')).not.toBeNull();
+    expect(el.querySelector('.pm-consola .scd-codigo')).not.toBeNull();
+    expect(el.querySelector('app-manipulable-system')).toBeNull();
   });
 
-  it('al inicio ningún nodo está encendido ni podado', () => {
-    expect(el.querySelectorAll('.scd-node').length).toBe(7);
-    expect(el.querySelectorAll('.scd-node.scd-lit').length).toBe(0);
-    expect(el.querySelectorAll('.scd-node.scd-pruned').length).toBe(0);
+  it('arranca con una variable común, y el hueco la vuelve signal con su escritura', () => {
+    expect(codigo()).toContain('let total = 0;');
+    expect(codigo()).toContain('total++;');
+    click('.scd-hueco');
+    expect(codigo()).toContain('const total = signal(0);');
+    expect(codigo()).toContain('total.update((t) => t + 1);');
+    expect(el.querySelector('.scd-hueco')?.classList).toContain('scd-hueco--signal');
   });
 
-  it('cambiar el signal re-chequea solo los dependientes y poda el resto', () => {
-    (el.querySelector('.scd-change') as HTMLButtonElement).click();
-    fixture.detectChanges();
-    expect(el.querySelectorAll('.scd-node.scd-lit').length).toBe(2);
-    expect(el.querySelectorAll('.scd-node.scd-pruned').length).toBe(5);
-    expect(el.querySelector('.scd-count strong')!.textContent).toContain('2 / 7');
+  it('con la variable común, se revisa el árbol entero y se prende el paso de arreglar', () => {
+    expect(pantalla()).toContain('0 de 7 nodos revisados');
+    click('.scd-correr');
+    expect(pantalla()).toContain('total 1,');
+    expect(pantalla()).toContain('7 de 7 nodos revisados');
+    expect(etapas()[0].classList).toContain('pm-etapa--hecho');
+    expect(etapas()[1].classList).toContain('pm-etapa--ahora');
   });
 
-  // Se mide lo dibujado y no el ancho calculado: el defecto era que el texto real se salía del
-  // nodo, y solo el browser sabe cuánto ocupa la fuente que terminó usando.
-  describe('cada rótulo entra en su nodo', () => {
-    const cajas = () =>
-      Array.from(el.querySelectorAll('.scd-node')).map((node) => ({
-        rotulo: node.querySelector('text')!.textContent!.trim(),
-        texto: node.querySelector('text')!.getBoundingClientRect(),
-        forma: node.querySelector('rect')!.getBoundingClientRect(),
-      }));
-
-    const adentro = () => {
-      for (const { rotulo, texto, forma } of cajas()) {
-        expect(texto.left).withContext(`${rotulo} por izquierda`).toBeGreaterThan(forma.left);
-        expect(texto.right).withContext(`${rotulo} por derecha`).toBeLessThan(forma.right);
-      }
-    };
-
-    it('en reposo', () => {
-      expect(cajas().length).toBe(7);
-      adentro();
-    });
-
-    it('encendido, que pasa el rótulo a negrita', () => {
-      (el.querySelector('.scd-change') as HTMLButtonElement).click();
-      fixture.detectChanges();
-      adentro();
-    });
-
-    it('ningún nodo pisa a otro', () => {
-      const formas = cajas();
-      for (const a of formas) {
-        for (const b of formas) {
-          if (a === b) continue;
-          const pisa =
-            a.forma.left < b.forma.right &&
-            b.forma.left < a.forma.right &&
-            a.forma.top < b.forma.bottom &&
-            b.forma.top < a.forma.bottom;
-          expect(pisa).withContext(`${a.rotulo} contra ${b.rotulo}`).toBeFalse();
-        }
-      }
-    });
-  });
-});
-
-describe('desafío 0/6 · el signal avisa quién lo lee', () => {
-  const codigo = (posicion: number) =>
-    SIGNAL_NOTIFY_SYSTEM.code({ perilla: posicion }).map((line) => line.text);
-
-  it('sigue bien armado', () => {
-    expect(malformed(SIGNAL_NOTIFY_SYSTEM)).toEqual([]);
+  it('con el signal, se enteran solo los dos que lo leen y se resuelve', () => {
+    click('.scd-correr');
+    click('.scd-hueco');
+    expect(etapas()[1].classList).not.toContain('pm-etapa--hecho');
+    click('.scd-correr');
+    expect(pantalla()).toContain('total 2,');
+    expect(pantalla()).toContain('2 de 7 nodos revisados');
+    expect(etapas()[1].classList).toContain('pm-etapa--hecho');
   });
 
-  // La avería tiene que ser código que alguien escribiría: con `let`, un number no tiene .set.
-  it('con una variable común, la escritura es una asignación', () => {
-    expect(codigo(0)).toContain('total = 42;');
-    expect(codigo(0).some((line) => line.includes('.set('))).toBeFalse();
+  it('volver a la variable común deja de estar resuelta', () => {
+    click('.scd-hueco');
+    click('.scd-correr');
+    expect(etapas()[1].classList).toContain('pm-etapa--hecho');
+    click('.scd-hueco');
+    expect(etapas()[1].classList).not.toContain('pm-etapa--hecho');
   });
 
-  it('con el signal, la escritura pasa por set', () => {
-    expect(codigo(1)).toContain('total.set(42);');
-    expect(codigo(1)).not.toContain('total = 42;');
+  it('la mano dice lo mismo que los pasos: correr, el hueco, correr', () => {
+    const mano = () =>
+      (fixture.componentInstance as unknown as { guia: () => string | null }).guia();
+    expect(mano()).toBe('.scd-correr[data-cuenta="0"]');
+    click('.scd-correr');
+    expect(mano()).toBe('[data-guia="declaracion"]');
+    click('.scd-hueco');
+    expect(mano()).toBe('.scd-correr[data-cuenta="1"]');
+    click('.scd-correr');
+    expect(mano()).toBeNull();
   });
 });
