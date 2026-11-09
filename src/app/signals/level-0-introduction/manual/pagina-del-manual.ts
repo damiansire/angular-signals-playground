@@ -1,4 +1,4 @@
-import { InjectionToken } from '@angular/core';
+import { InjectionToken, type TemplateRef } from '@angular/core';
 
 /**
  * Lo que el manual de a bordo le dice a la página que monta: en qué número va y qué ley enseña. Las
@@ -10,6 +10,13 @@ export interface DatosDeLaPagina {
   readonly numero: number;
   readonly ley: string;
   readonly enLaNave: string;
+  /**
+   * Cuando la página es la pantalla entera (el libro de leyes): las marcas del libro van debajo del
+   * título y los botones de página adentro de la consola, nunca sobre el código ni en la fila de la
+   * barra. Sin esto, la página va en una hoja que pone los suyos.
+   */
+  readonly marcas?: TemplateRef<unknown>;
+  readonly pie?: TemplateRef<unknown>;
 }
 
 export const PAGINA_DEL_MANUAL = new InjectionToken<DatosDeLaPagina>('PAGINA_DEL_MANUAL');

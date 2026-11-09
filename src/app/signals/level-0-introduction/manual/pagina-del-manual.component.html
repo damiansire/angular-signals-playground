@@ -7,8 +7,16 @@
     @if (datos; as d) {
       <p class="pm-ley">Ley {{ d.numero }}</p>
       <h2 class="pm-titulo" id="manual-ley">{{ d.ley }}</h2>
+      @if (d.marcas) {
+        <ng-container [ngTemplateOutlet]="d.marcas" />
+      }
     }
   </header>
+</ng-template>
+<ng-template #pie>
+  @if (datos?.pie; as p) {
+    <ng-container [ngTemplateOutlet]="p" />
+  }
 </ng-template>
 <ng-template #mostrame>
   @if (guia() !== null || mostrando()) {
@@ -52,6 +60,7 @@
           <li class="pm-etapas-boton"><ng-container [ngTemplateOutlet]="mostrame" /></li>
         </ol>
         <ng-content select="[consola]" />
+        <ng-container [ngTemplateOutlet]="pie" />
       </div>
     </section>
   } @else {
@@ -85,6 +94,10 @@
         <div class="pm-desafio"><ng-content select="[desafio]" /></div>
       </div>
     </div>
+  }
+
+  @if (!integrada() && datos?.pie) {
+    <div class="pm-pie-suelto"><ng-container [ngTemplateOutlet]="pie" /></div>
   }
 
   <app-mano-guia [punta]="punta()" />

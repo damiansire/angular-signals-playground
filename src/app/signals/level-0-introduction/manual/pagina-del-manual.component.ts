@@ -33,6 +33,7 @@ const TOPE_DE_TOQUES = 16;
   templateUrl: './pagina-del-manual.component.html',
   styleUrl: './pagina-del-manual.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  host: { '[class.pm-entera]': '!!datos?.pie' },
 })
 export class PaginaDelManualComponent {
   protected readonly datos = inject(PAGINA_DEL_MANUAL, { optional: true });

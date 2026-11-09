@@ -1,6 +1,5 @@
-/* La página va sobre la escena del prólogo, desenfocada detrás de su velo (como las lecciones del
-   viaje a Japón): la ley se lee suelta, en letra clara con sombra, y lo que se toca va en papel. Se
-   estira hasta el pie de la hoja: con el alto de su contenido, media pantalla quedaba vacía. */
+/* La ley se lee suelta, en letra clara con sombra, y lo que se toca va en papel. Se estira hasta el
+   pie de la hoja: con el alto de su contenido, media pantalla quedaba vacía. */
 :host {
   position: relative;
   display: flex;
@@ -383,4 +382,51 @@
     rotate: none;
     transition: none;
   }
+}
+
+/* ── La página como pantalla entera (el libro de leyes) ───────────────────────────────────────
+   Adentro de la pantalla de la nave no hay tarjeta: el cielo y la nave son el mundo, de borde a
+   borde, y la consola es la franja de abajo. La ley va arriba, debajo de la barra del juego, sobre
+   el mismo cielo; la ventanilla toma lo que queda. Con un marco redondeado se veía un modal. */
+:host(.pm-entera) .pm.pm--integrada {
+  gap: 0;
+}
+:host(.pm-entera) .pm--integrada .pm-cabeza {
+  position: relative;
+  z-index: 1;
+  padding: 0 clamp(1rem, 2.4vw, 2.2rem) 0.4rem;
+}
+:host(.pm-entera) .pm-escenario {
+  border-radius: 0;
+  box-shadow: none;
+  background: none;
+}
+/* Sin alto propio: la ventanilla es el hueco entre la ley y la consola. Su borde de arriba se funde
+   con el cielo de la ley, que es el del primer tono de la escena. */
+:host(.pm-entera) .pm-ventana {
+  min-height: 11rem;
+  aspect-ratio: auto;
+}
+:host(.pm-entera) .pm-ventana::after {
+  content: '';
+  position: absolute;
+  inset: 0 0 auto;
+  height: 3rem;
+  background: linear-gradient(#130d2b, rgb(19 13 43 / 0%));
+  pointer-events: none;
+}
+:host(.pm-entera) .pm-consola {
+  padding-bottom: 0.85rem;
+}
+@media (min-width: 1100px) and (max-height: 800px) {
+  :host(.pm-entera) .pm-ventana {
+    min-height: 0;
+  }
+}
+:host(.pm-entera) .pm-pie-suelto {
+  grid-column: 1 / -1;
+}
+/* La forma de tres tarjetas, mientras quede alguna, con su aire a los costados y abajo. */
+:host(.pm-entera) .pm:not(.pm--integrada) {
+  padding: 0 clamp(1rem, 2.4vw, 2.2rem) 1rem;
 }
