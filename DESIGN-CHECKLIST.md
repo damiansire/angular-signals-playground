@@ -662,9 +662,11 @@ entrar desarma a Angie en luz y se hace noche, la costura con el prólogo.
       copa que suena golpea y Angie se vuelca hacia ese lado (`inclinarse`), y en el acorde salta.
       Después la CÁMARA SE ALEJA como en Powers of Ten (2026-11-09, `cuadroDelViaje`): la noche
       era lo que Angie miraba, y se va adentro de su OJO. Dos tramos: (a) el CIERRE
-      (`SE_CIERRA_MS`): el aviso se cierra en un círculo blando (máscara con `--aa-aire`) hasta
-      caber adentro (`aireQueCabe`, si se achica antes asoman sus bordes rectos), después se va
-      parejo en escala hasta CERO en el negro del ojo (#0f0f11); el texto se va primero; (b) la cámara se ALEJA (`ALEJARSE_MS`) del ojo a la cara, a
+      (`SE_CIERRA_MS`): el aviso SE ACHICA DESDE EL PRIMER CUADRO, despacio al principio en
+      escala (`v = u²`), hasta CERO en el negro del ojo (#0f0f11), y mientras se achica su borde se
+      redondea en un círculo blando (máscara con `--aa-aire`) hasta el que cabe adentro
+      (`aireQueCabe`); el negro aparece ALREDEDOR porque el aviso se aleja; el texto se va
+      primero; (b) la cámara se ALEJA (`ALEJARSE_MS`) del ojo a la cara, a
       Angie en la piedra y a la colina entera, en escala pareja (cada tramo de tiempo divide la
       escala por lo mismo); arranca desde ADENTRO del ojo izquierdo (`MANCHA`, el negro lejos del
       párpado, del borde y del brillo pensativo; `profundidadDesdeElOjo`: las cuatro esquinas, en
@@ -673,7 +675,12 @@ entrar desarma a Angie en luz y se hace noche, la costura con el prólogo.
       negra apenas un tercio de segundo; después asoma el borde del ojo, su
       brillo, la cara, Angie y la colina. La BOCA queda cerrada todo el viaje, como siempre, y
       Angie no parpadea mientras dura (`sinParpadear`). El título de la colina entra recién al
-      llegar (`llego`): antes se vería gigante. Lo que NO puede pasar (anti-patrones): un zoom en
+      llegar (`llego`): antes se vería gigante. Lo que NO puede pasar (anti-patrones): un IRIS
+      NEGRO que se cierra hacia el medio sobre el aviso quieto (2026-11-09, Damian: "no se hace
+      realmente un zoom out", se lee como que lo negro tapa, no como alejarse); el aviso que se
+      achica parejo en escala hasta 0,004 en un segundo (cada 140 ms la mitad: a los 200 ms ya iba
+      por un tercio y se leía como un salto; por eso arranca despacio, a los 300 ms sigue arriba
+      de 0,6); un zoom en
       línea recta (el ojo pasaba en un parpadeo y la colina se arrastraba); la colina en
       RECTÁNGULOS (animada por el compositor, el navegador la pintaba una sola vez a la escala del
       arranque: por eso va cuadro a cuadro con `requestAnimationFrame`, y cada cuadro se vuelve a
