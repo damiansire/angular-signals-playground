@@ -37,7 +37,7 @@
   "src/app/signals/level-0-introduction/sub-levels/html-to-tree/html-to-tree.component.html": 5,
   "src/app/signals/level-0-introduction/sub-levels/old-change-detection/old-change-detection.component.html": 4,
   "src/app/signals/level-3-effect/sub-levels/5-effect-destroy/component-destroy/component-destroy.component.html": 6,
-  "src/app/signals/level-0-introduction/sub-levels/dom-is-alive/dom-is-alive.component.html": 3,
+  "src/app/signals/level-0-introduction/sub-levels/dom-is-alive/dom-is-alive.component.html": 2,
   "src/app/signals/level-7-signal-io/sub-levels/1-input-output/counter-input/counter-input.component.html": 0,
   "src/app/signals/level-7-signal-io/sub-levels/2-model/rating/rating.component.html": 0
 }
