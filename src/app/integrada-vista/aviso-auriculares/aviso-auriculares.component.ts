@@ -177,9 +177,9 @@ export class AvisoAuricularesComponent {
 
   /**
    * La cámara se aleja desde la boca de Angie en la colina, como en Powers of Ten: la noche del aviso
-   * era un suspiro suyo. Primero el aviso se cierra en un circulito delante de su boca, enorme y
-   * abierta; después la cámara se aleja a la cara, a Angie en la piedra y a la colina entera; al final
-   * el circulito entra y la boca se cierra. Va cuadro a cuadro desde acá y no con una animación del
+   * era un suspiro suyo. Primero el aviso se cierra en un círculo y se va hasta desaparecer adentro
+   * de su boca, enorme y abierta, que queda ocupando toda la pantalla; después la cámara se aleja a
+   * la cara, a Angie en la piedra y a la colina entera; al final la boca se cierra con un trago. Va cuadro a cuadro desde acá y no con una animación del
    * navegador: animada por el compositor, la colina agrandada se pintaba una sola vez y, al
    * alejarse, aparecía cortada en rectángulos. Cada cuadro cambia la escala y el navegador la
    * vuelve a dibujar.
@@ -224,7 +224,7 @@ export class AvisoAuricularesComponent {
 
     /**
      * La cámara sigue a la boca: la cara de Angie se mueve sola, y a 40 aumentos dos píxeles de su
-     * vaivén dejaban el circulito al costado. Con la boca como punto fijo de la escala, queda donde
+     * vaivén dejaban el aviso al costado de la boca. Con la boca como punto fijo de la escala, queda donde
      * estaría sin acercar, y lo que se mueve es apenas lo que se mueve ella.
      */
     const seguirLaBoca = (escala: number): void => {

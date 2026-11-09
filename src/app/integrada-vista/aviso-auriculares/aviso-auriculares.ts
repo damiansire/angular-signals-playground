@@ -158,27 +158,25 @@ export function aireQueCabe(x: number, y: number, ancho: number, alto: number): 
 // ─── El viaje de la cámara, de la boca a la colina ─────────────────────────────────────────────
 
 /**
- * Los tres tramos del viaje, en ms. Primero la bocanada: el aviso se cierra en un circulito delante
- * de la boca de Angie, que se ve enorme detrás. Después la cámara se aleja, de la boca a la cara, a
- * Angie en la piedra y a la colina entera. Al final el circulito entra y la boca se cierra.
+ * Los tres tramos del viaje, en ms. Primero la bocanada: el aviso se cierra en un círculo, se va
+ * lejos hasta desaparecer y la pantalla queda toda del color de la boca abierta de Angie. Después la
+ * cámara se aleja, de la boca a la cara, a Angie en la piedra y a la colina entera. Al final la boca
+ * se cierra con un trago.
  */
-export const BOCANADA_MS = 1300;
+export const BOCANADA_MS = 1600;
 export const ALEJARSE_MS = 4200;
 export const TRAGA_MS = 450;
 export const VIAJE_MS = BOCANADA_MS + ALEJARSE_MS + TRAGA_MS;
 
 /** Hasta acá de la bocanada el aviso sigue del tamaño de la pantalla: el círculo se cierra adentro. */
-const ENCAJA = 0.45;
+const ENCAJA = 0.35;
 /**
- * Cuánto se achica el aviso: se va lejos, a un puntito, y la pantalla queda toda del color de la
- * boca abierta. Con más, quedaba un círculo grande y no se leía que se iba.
+ * Desde acá de la bocanada el aviso ya no está y la pantalla es toda boca, quieta, antes de que la
+ * cámara se aleje. Un puntito que quedaba (y seguía hasta la colina) se leía como algo nuevo.
  */
-export const CHICO = 0.07;
-/**
- * Cuánto se resiste el circulito a achicarse con el mundo (de 0 a 1): con 0 se perdía en un píxel
- * antes de ver la cara; con esto llega a la colina como un punto que todavía se ve.
- */
-const PERSISTE = 0.25;
+const DESAPARECE = 0.8;
+/** Hasta dónde se va en escala antes de cerrarse en cero: parejo, como algo que se aleja. */
+const LEJOS = 0.004;
 
 /** Lo que muestra la cámara en un instante del viaje. */
 export interface CuadroDelViaje {
@@ -188,7 +186,7 @@ export interface CuadroDelViaje {
   readonly aviso: number;
   /** El radio de la bocanada, en px del aviso. */
   readonly aire: number;
-  /** La boca de Angie, abierta hasta que el circulito llega. */
+  /** La boca de Angie, abierta hasta llegar a la colina. */
   readonly bocaAbierta: boolean;
 }
 
@@ -222,25 +220,18 @@ export function cuadroDelViaje(
         bocaAbierta: true,
       };
     }
-    const v = suave((u - ENCAJA) / (1 - ENCAJA));
-    return { colina: S0, aviso: CHICO ** v / S0, aire: cabe, bocaAbierta: true };
+    // Se va parejo en escala y el último tramo se cierra en cero: no queda ningún punto.
+    const v = suave(entre01((u - ENCAJA) / (DESAPARECE - ENCAJA)));
+    return { colina: S0, aviso: ((1 - v) * LEJOS ** v) / S0, aire: cabe, bocaAbierta: true };
   }
   if (t < BOCANADA_MS + ALEJARSE_MS) {
     const v = entre01((t - BOCANADA_MS) / ALEJARSE_MS);
     // Casi todo parejo en escala, con un poco de arranque y llegada suaves.
     const p = 0.55 * v + 0.45 * suave(v);
-    const colina = S0 ** (1 - p);
-    return {
-      colina,
-      aviso: (CHICO * (colina / S0) ** PERSISTE) / colina,
-      aire: cabe,
-      bocaAbierta: true,
-    };
+    return { colina: S0 ** (1 - p), aviso: 0, aire: cabe, bocaAbierta: true };
   }
   const w = entre01((t - BOCANADA_MS - ALEJARSE_MS) / TRAGA_MS);
-  // El circulito entra en la boca: se achica acelerando, como algo que se traga.
-  const llegada = CHICO * S0 ** -PERSISTE;
-  return { colina: 1, aviso: llegada * (1 - w * w), aire: cabe, bocaAbierta: w < 0.7 };
+  return { colina: 1, aviso: 0, aire: cabe, bocaAbierta: w < 0.3 };
 }
 
 /**

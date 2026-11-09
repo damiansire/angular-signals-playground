@@ -3,7 +3,6 @@ import {
   NUCLEO,
   ALEJARSE_MS,
   BOCANADA_MS,
-  CHICO,
   VIAJE_MS,
   aireQueCabe,
   aireQueCubre,
@@ -140,10 +139,19 @@ describe('el viaje de la cámara, de la boca a la colina', () => {
     }
   });
 
-  it('termina la bocanada como un circulito, con el aviso ilegible', () => {
-    const c = en(BOCANADA_MS);
-    expect(enPantalla(c)).toBeCloseTo(CHICO, 3);
-    expect(c.colina).toBeCloseTo(S0, 3);
+  it('el aviso se achica sin crecer nunca y termina en cero: la pantalla queda toda boca', () => {
+    let antes = Infinity;
+    for (let t = 0; t <= BOCANADA_MS; t += 10) {
+      expect(enPantalla(en(t))).toBeLessThanOrEqual(antes + 1e-12);
+      antes = enPantalla(en(t));
+    }
+    // Quieta un rato con la pantalla toda boca, antes de que la cámara se aleje.
+    for (let t = BOCANADA_MS * 0.8; t < BOCANADA_MS; t += 10) expect(en(t).aviso).toBe(0);
+    expect(en(BOCANADA_MS - 1).colina).toBe(S0);
+  });
+
+  it('mientras la cámara se aleja no queda ningún punto del aviso', () => {
+    for (let t = BOCANADA_MS; t <= VIAJE_MS; t += 25) expect(en(t).aviso).toBe(0);
   });
 
   it('la cámara solo se aleja, y llega a la colina sin saltos', () => {
@@ -165,16 +173,9 @@ describe('el viaje de la cámara, de la boca a la colina', () => {
     expect(r1).toBeGreaterThan(1.2);
   });
 
-  it('el circulito se achica más despacio que el mundo: llega a la colina todavía visible', () => {
-    const llegando = en(BOCANADA_MS + ALEJARSE_MS);
-    expect(enPantalla(llegando)).toBeGreaterThan(CHICO / S0);
-    expect(enPantalla(llegando)).toBeLessThan(CHICO);
-  });
-
-  it('la boca queda abierta todo el viaje y se cierra cuando el circulito entra', () => {
+  it('la boca queda abierta todo el viaje y se cierra al llegar a la colina', () => {
     for (let t = 0; t < BOCANADA_MS + ALEJARSE_MS; t += 50) expect(en(t).bocaAbierta).toBeTrue();
     expect(en(VIAJE_MS).bocaAbierta).toBeFalse();
-    expect(en(VIAJE_MS).aviso).toBe(0);
   });
 
   it('arranca desde adentro de la boca: las esquinas de la pantalla caen dentro de la "o"', () => {
