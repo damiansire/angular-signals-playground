@@ -117,9 +117,11 @@ export class EscenaSignalComponent extends EscenaDelManual {
         if (this.valorEnLaCaja) this.valorEnLaCaja.textContent = String(valor);
         if (!aviso || aviso.n === this.visto) return;
         this.visto = aviso.n;
-        this.leer(aviso);
         if (aviso.signal) this.avisar();
         else this.barrerComoEnCasa();
+        // La cuenta cambia cuando el aviso llega a los lectores o el barrido termina, no antes.
+        if (this.quieta) this.leer(aviso);
+        else gsap.delayedCall(aviso.signal ? 0.8 : 0.55, () => this.leer(aviso));
       });
     });
     effect(() => {
