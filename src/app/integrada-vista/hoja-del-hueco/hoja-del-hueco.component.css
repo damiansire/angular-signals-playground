@@ -267,24 +267,6 @@
   height: 1.15em;
   stroke-width: 2.6;
 }
-.hoja__como {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  margin: 0;
-  font: 600 0.95rem / 1.3 var(--font-display, system-ui, sans-serif);
-  color: #3b342b;
-}
-.hoja__como-num {
-  display: grid;
-  place-items: center;
-  width: 1.5rem;
-  height: 1.5rem;
-  border-radius: 50%;
-  background: #f1dfb8;
-  font-size: 0.85rem;
-  color: #8a5a12;
-}
 /* La meta, proyectada en la barra del desafío: la misma gramática que la lectura (rótulo arriba,
    número abajo), en verde, y separada por una raya. Comparar es mirar de un número al otro. */
 .hoja__meta {
@@ -400,25 +382,6 @@ app-manipulable-system {
   }
   app-manipulable-system {
     margin-top: 0.5rem;
-  }
-}
-
-/* Baja y ancha, la instrucción y la leyenda comparten renglón: con la ayuda abierta, a 1280×640 la
-   hoja scrolleaba por dentro. El óvalo y la flecha quedan fuera de la grilla: se miden contra el
-   bloque entero. */
-@media (max-height: 720px) and (min-width: 760px) {
-  .hoja__juego {
-    display: grid;
-    grid-template-columns: auto minmax(0, 1fr);
-    align-items: center;
-    column-gap: 1.4rem;
-  }
-  .hoja__juego > :not(.hoja__como, .hoja__nombres, .hoja__halo, .hoja__flecha) {
-    grid-column: 1 / -1;
-  }
-  .hoja__nombres {
-    justify-content: flex-end;
-    margin-top: 0;
   }
 }
 
