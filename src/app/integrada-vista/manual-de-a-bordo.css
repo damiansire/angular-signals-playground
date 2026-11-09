@@ -233,14 +233,6 @@
 
 /* Lo que la hoja ajusta de las pantallas que monta (las alcanza por el estampado). */
 
-/* El desafío va en su recuadro, con su número: la regla de arriba y el aire del átomo son para
-   cerrar una card larga, y acá separaban el número de su rótulo. */
-.prologo__manual .subhost [desafio] {
-  margin-top: 0;
-  padding: 0;
-  border-top: 0;
-}
-
 /* La consigna de cada página va en el renglón de su número, sin el margen de un párrafo suelto. */
 .prologo__manual .subhost [hacer] {
   margin: 0;
