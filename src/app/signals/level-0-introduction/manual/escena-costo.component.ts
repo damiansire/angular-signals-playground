@@ -13,6 +13,7 @@ import {
   EscenaDelManual,
   alCambiarDeTamano,
   chispas,
+  cieloCentradoEn,
   pintarPantalla,
 } from './escena-del-manual';
 import { PALETA, azar, el } from './nave-del-manual';
@@ -27,6 +28,11 @@ export interface CorridaDelCuadro {
 
 const NARIZ = { x: 182, y: 148 };
 const MONO = "'JetBrains Mono', Consolas, monospace";
+/**
+ * El cielo se pinta más alto que el del escenario: a 390 px la ventanilla mide 390×360, y con el de
+ * 340 el encuadre angosto se rendía y el recorte le cortaba el marco a la pantalla y el fuego a la nave.
+ */
+const ALTO_PINTADO = 520;
 /**
  * El pipeline en vertical, en la pantalla de la nave: una fila por estación. Los rótulos van más
  * grandes que en las otras pantallas (13.5 unidades el más chico): en un teléfono la escena se
@@ -73,8 +79,11 @@ export class EscenaCostoComponent extends EscenaDelManual {
   readonly sano = input(false);
 
   protected readonly semilla = 37;
-  /** En angosto, encuadra la nave y su pantalla; si no, el cielo de sobra del escenario. */
-  protected readonly cielo = signal(CIELO_DEL_ESCENARIO);
+  /**
+   * En angosto, encuadra la nave y su pantalla; si no, el cielo de sobra del escenario. El primer
+   * cuadro va con el cielo alto, que es el que se pinta.
+   */
+  protected readonly cielo = signal(cieloCentradoEn(129, ALTO_PINTADO));
   protected readonly descripcion = computed(() => {
     const c = this.corrida();
     if (!c) return 'Pantalla de la nave: el pipeline de render, quieto';
@@ -94,9 +103,11 @@ export class EscenaCostoComponent extends EscenaDelManual {
 
   constructor() {
     super();
-    // El cielo se pinta con el `viewBox` ancho, que contiene al angosto: cambiarlo no deja huecos.
+    // El cielo se pinta con el `viewBox` alto, que contiene al angosto: cambiarlo no deja huecos.
     alCambiarDeTamano(this.host, (ancho, alto) =>
-      this.cielo.set(cieloAngosto(ancho, alto) ?? CIELO_DEL_ESCENARIO),
+      this.cielo.set(
+        cieloAngosto(ancho, alto, { altoDelCielo: ALTO_PINTADO }) ?? CIELO_DEL_ESCENARIO,
+      ),
     );
     effect(() => {
       const corrida = this.corrida();
