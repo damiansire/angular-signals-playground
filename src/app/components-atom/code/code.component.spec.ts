@@ -77,6 +77,37 @@ describe('CodeComponent', () => {
     expect(events.map((e) => e.action)).toEqual(['Select', 'Deselect', 'Select']);
   });
 
+  it('tocar el tag marca el elemento entero: apertura, texto y cierre', () => {
+    fixture.componentRef.setInput('htmlCode', '<main>\n  <h2> Introduction </h2>\n</main>');
+    fixture.detectChanges();
+
+    const linea = component.codeLines()[1];
+    const h2 = linea.elements!.find((e) => e.id === 'h2-1')!;
+    component.onElementClick(linea, h2);
+    fixture.detectChanges();
+
+    const marcados = Array.from<HTMLElement>(
+      fixture.nativeElement.querySelectorAll('.bg-green-700'),
+    ).map((el) => el.textContent!.trim());
+    expect(marcados).toEqual(['<h2>', 'Introduction', '</h2>']);
+  });
+
+  it('tocar el texto o el cierre alterna su elemento y emite el id del nodo', () => {
+    const events: CodeClick[] = [];
+    component.codeClick.subscribe((e) => events.push(e));
+    fixture.componentRef.setInput('htmlCode', '<p>hola</p>');
+    fixture.detectChanges();
+
+    const linea = component.codeLines()[0];
+    const [, texto, cierre] = linea.elements!;
+    component.onElementClick(linea, texto);
+    component.onElementClick(linea, cierre);
+    expect(events).toEqual([
+      { target: 'Element', action: 'Select', id: 'p-1' },
+      { target: 'Element', action: 'Deselect', id: 'p-1' },
+    ]);
+  });
+
   it('parseCode marca reservedWord en los tags', () => {
     const lines = component.parseCode('<div>texto</div>');
     const elements = lines[0].elements ?? [];

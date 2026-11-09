@@ -8,7 +8,13 @@ import {
 } from '@angular/core';
 import { outputFromObservable, toObservable } from '@angular/core/rxjs-interop';
 import { CodeLine, CodeLineElement } from '../component-atom.interface';
-import { isTag, spliteInTags, HtmlIdGeneratorService, isNodeId } from '../../libs/code-parser';
+import {
+  isTag,
+  spliteInTags,
+  HtmlIdGeneratorService,
+  isNodeId,
+  duenosDeTokens,
+} from '../../libs/code-parser';
 import { conCortes } from '../../libs/cortes-de-codigo';
 import { TailwindTextSize } from '../../interfaces/tailwind-css.interface';
 import { CodeClick } from './code.interface';
@@ -39,6 +45,12 @@ export class CodeComponent {
   // Las lineas visibles parten del parseo pero deben poder mutar con los clicks,
   // por eso es un linkedSignal (no un effect que propaga estado).
   codeLines = linkedSignal<CodeLine[]>(() => this.parsedLines());
+  /** Los nodos marcados en modo `Element`. Se marca el ELEMENTO, no el token: `<h2> Introduction
+   *  </h2>` es un nodo con su texto adentro, y marcar solo la apertura lo leía como tres cosas. */
+  readonly marcados = linkedSignal<ReadonlySet<string>>(() => {
+    this.parsedLines();
+    return new Set();
+  });
   // htmlParsed se deriva del parseo en vez de emitirse dentro de un effect.
   readonly htmlParsed = outputFromObservable(toObservable(this.parsedLines));
   characterIndentSize = 12;
@@ -109,6 +121,29 @@ export class CodeComponent {
     return this.selectBy() === 'Element' && isNodeId(element.id ?? '');
   }
 
+  /** Tocar cualquier parte del elemento lo marca: su texto y su cierre también son blanco. */
+  isElementClickable(element: CodeLineElement): boolean {
+    return this.selectBy() === 'Element' && Boolean(element.dueno);
+  }
+
+  estaMarcado(element: CodeLineElement): boolean {
+    return Boolean(element.dueno) && this.marcados().has(element.dueno!);
+  }
+
+  /** Los tokens marcados seguidos de un mismo elemento se leen como UNA marca: sin esquinas
+   *  redondeadas donde se tocan. */
+  pegadoAlAnterior(item: CodeLine, i: number): boolean {
+    return this.mismoMarcado(item.elements?.[i], item.elements?.[i - 1]);
+  }
+
+  pegadoAlSiguiente(item: CodeLine, i: number): boolean {
+    return this.mismoMarcado(item.elements?.[i], item.elements?.[i + 1]);
+  }
+
+  private mismoMarcado(a?: CodeLineElement, b?: CodeLineElement): boolean {
+    return !!a && !!b && a.dueno === b.dueno && this.estaMarcado(a);
+  }
+
   parseCode(code: string): CodeLine[] {
     const htmlIdGenerator = new HtmlIdGeneratorService();
     const parsedCode = [];
@@ -136,6 +171,10 @@ export class CodeComponent {
       parsedCode.push(newElement);
     }
 
+    const tokens = parsedCode.flatMap((line) => line.elements ?? []);
+    duenosDeTokens(tokens.map((token) => token.text)).forEach((dueno, i) => {
+      tokens[i].dueno = dueno;
+    });
     return parsedCode;
   }
 
@@ -159,38 +198,26 @@ export class CodeComponent {
     this.codeClick.emit(codeClick$);
   }
 
-  onElementClick(codeLine: CodeLine, clickedItem: CodeLineElement) {
-    const actual =
-      this.codeLines()
-        .find((item) => item.id === codeLine.id)
-        ?.elements?.find((element) => element.id === clickedItem.id) ?? clickedItem;
-    const isSelect = !actual.selected;
-    // Un token que no produce nodo no tiene nada que revelar en el árbol: seleccionarlo emitía un
-    // id que ningún nodo matchea, o sea un click que no hacía nada.
-    if (!isNodeId(clickedItem.id)) {
+  onElementClick(_codeLine: CodeLine, clickedItem: CodeLineElement) {
+    const dueno = clickedItem.dueno;
+    // Un token sin nodo no tiene nada que revelar en el árbol.
+    if (!dueno || !isNodeId(dueno)) {
       return;
     }
-    const updatedCodeLines = this.codeLines().map((item) => {
-      if (item.id !== codeLine.id) {
-        return item;
-      }
-      if (item.elements) {
-        const elementsInLine = item.elements.map((lineElement) =>
-          lineElement.id === clickedItem.id ? { ...actual, selected: isSelect } : lineElement,
-        );
-
-        return { ...item, elements: elementsInLine };
-      }
-      return item;
+    // El estado se lee del signal, no del objeto del template: con clicks rápidos la vista todavía
+    // no se rehízo y cada click volvía a emitir 'Select'.
+    const isSelect = !this.marcados().has(dueno);
+    this.marcados.update((actuales) => {
+      const siguientes = new Set(actuales);
+      if (isSelect) siguientes.add(dueno);
+      else siguientes.delete(dueno);
+      return siguientes;
     });
 
-    this.codeLines.set(updatedCodeLines);
-
-    //TODO: When remove deprecated element, remove || ""
     const codeClick$: CodeClick = {
       target: 'Element',
       action: isSelect ? 'Select' : 'Deselect',
-      id: clickedItem.id || '',
+      id: dueno,
     };
     this.codeClick.emit(codeClick$);
   }

@@ -32,12 +32,15 @@
           (keyup.enter)="selectBy() === 'Line' ? onLineClick(item) : null"
         >
           <div [style.paddingLeft.px]="(item.indent || 0) * characterIndentSize"></div>
-          @for (element of item.elements; track $index) {
+          @for (element of item.elements; track $index; let i = $index) {
             <div
               [attr.data-el-id]="element.id"
-              [class.bg-green-700]="element.selected"
+              [attr.data-el-dueno]="element.dueno"
+              [class.bg-green-700]="estaMarcado(element)"
+              [class.rounded-l-none]="pegadoAlAnterior(item, i)"
+              [class.rounded-r-none]="pegadoAlSiguiente(item, i)"
               class="rounded px-0.5 transition-colors"
-              [class.cursor-pointer]="isElementInteractive(element)"
+              [class.cursor-pointer]="isElementClickable(element)"
               [attr.tabindex]="isElementInteractive(element) ? 0 : null"
               [attr.role]="isElementInteractive(element) ? 'button' : null"
               (click)="selectBy() === 'Element' ? onElementClick(item, element) : null"
