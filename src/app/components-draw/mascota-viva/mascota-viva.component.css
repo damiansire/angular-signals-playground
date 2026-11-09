@@ -214,6 +214,17 @@
 :host(.mv--viva) .mv__boca-o {
   display: none;
 }
+/* Sonriendo, la sonrisa gana sobre la boca de la postura: la "o" sin vida propia y la boca chica
+   pensativa con ella. */
+:host(.mv--sonrie) .mv__sonrisa,
+:host(.mv--sonrie) .mv__rubor,
+:host(.mv--viva.mv--pensativa.mv--sonrie) .mv__sonrisa {
+  display: inline;
+}
+:host(.mv--sonrie) .mv__boca-o,
+:host(.mv--viva.mv--pensativa.mv--sonrie) .mv__boca-pena {
+  display: none;
+}
 
 .mv__espirales {
   display: none;

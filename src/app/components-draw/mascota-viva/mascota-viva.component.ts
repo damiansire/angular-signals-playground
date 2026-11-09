@@ -311,6 +311,18 @@ export class MascotaVivaComponent {
   }
 
   /**
+   * Sonríe aunque esté pensativa: la sonrisa le gana a la boca chica y a la "o". Es la cara de quien
+   * ya decidió. `false` la devuelve a la boca de su postura.
+   */
+  sonreir(si = true): void {
+    this.host.classList.toggle('mv--sonrie', si);
+    if (!si || sinMovimiento() || this.agarre) return;
+    this.m.boca.v += 10;
+    this.m.cejas.v -= 140;
+    this.despertar();
+  }
+
+  /**
    * Un tiempo de la música que oye en los auriculares (`tiempo` cuenta desde que empezó). Quien
    * tiene la música lleva el pulso; ella solo lo sigue, con sus muelles.
    */
