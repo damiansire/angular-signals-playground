@@ -663,8 +663,11 @@ entrar desarma a Angie en luz y se hace noche, la costura con el prólogo.
       un circulito con la noche en miniatura, delante de la boca enorme y abierta en "o" de la
       Angie de la colina (`abrirLaBoca`); el texto se va primero; (b) la cámara se ALEJA
       (`ALEJARSE_MS`) de la boca a la cara, a Angie en la piedra y a la colina entera, en escala
-      pareja (cada tramo de tiempo divide la escala por lo mismo); arranca de
-      `profundidadDelViaje` (la boca en media pantalla, tope 60); el circulito se achica más
+      pareja (cada tramo de tiempo divide la escala por lo mismo); arranca desde ADENTRO de la
+      boca, con toda la pantalla del color de la "o" (#940054) y el aviso como un punto en el
+      medio (`profundidadDesdeLaBoca`: las cuatro esquinas, en el dibujo de la "o", caen adentro
+      con margen ×2, tope 400); después asoma el borde de la "o", la cara, Angie y la colina; el
+      circulito se achica más
       despacio que el mundo (`PERSISTE`) y llega a la colina todavía visible; (c) TRAGA
       (`TRAGA_MS`): el circulito entra y la boca se cierra con un trago. El título de la colina
       entra recién al llegar (`llego`): antes se vería gigante. Lo que NO puede pasar
@@ -675,7 +678,11 @@ entrar desarma a Angie en luz y se hace noche, la costura con el prólogo.
       boca (la cara se mueve sola y a 40× dos píxeles se notan: la cámara SIGUE a la "o" visible
       cada cuadro; la del perfil también existe, apagada, y mide cero); un cuadro sin aviso al
       arrancar (el primero se pinta antes de prender la máscara); texto del aviso legible en el
-      circulito; cortes entre tramos; más de unos 5 s. Defectos viejos que siguen valiendo: un
+      circulito; cortes entre tramos; más de unos 6 s; arrancar con la cara a la vista (con la
+      boca medida por su caja de pantalla, girada y estirada por el muelle, asomaba medio borde
+      de la "o"; y la "o" se pinta más angosta que su geometría a cientos de aumentos: de ahí el
+      margen); el aviso de vuelta entero un cuadro al llegar (queda en escala 0 hasta que
+      `listo` lo oculta). Defectos viejos que siguen valiendo: un
       rectángulo que se achica se leía como una ventana; nubes oscuras sobre la cara, como humo
       de explosión. Los cuadros pausados NO muestran los rectángulos, porque pausar le da tiempo
       a pintar: grabar en tiempo real con screencast por CDP (Edge headless, click real) y mirar
