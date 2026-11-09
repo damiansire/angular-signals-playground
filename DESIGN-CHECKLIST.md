@@ -944,6 +944,14 @@ Del minijuego de operadores (2026-11-08):
       cortaba el borde de arriba a la pantalla. A 1100 px de ancho o más y 800 o menos de alto, la
       consola va al costado: apiladas no entraban, y `increment()` quedaba debajo del pie. Ahí la
       escena se lleva la parte más ancha: más angosta que 1.3:1, el recorte le cortaba el fuego.
+- [ ] Por debajo de 560 px de escena, la lámina encuadra lo suyo (`cieloAngosto` con su franja:
+      la nave y su pantalla, o en la ley 5 la cerca con la anomalía y el fuego) sobre un cielo
+      PINTADO de 520 (`cieloCentradoEn(y, 520)`): a 390 las ventanillas de las leyes 3, 5 y 6 son
+      casi cuadradas o más altas que anchas, el cielo de 340 no alcanzaba, el encuadre se rendía y
+      el recorte se comía el borde derecho de la pantalla (la 3, 8 px de marco; la 5, la cerca y el
+      "0/7"; la 6, el último `<p>`). Medido con `getBoundingClientRect` de cada forma de la lámina
+      contra la caja del SVG, antes y después de correr: nada afuera salvo la punta del fuego de la
+      3 y la 6, que se desvanece.
 - [ ] El subrayado del hueco no toma la sangría: va como espacio del botón, no del texto.
 - [ ] La ley 5 en el escenario: la anomalía va AFUERA de la cerca, a la izquierda, y el punto que
       pasa por afuera viaja por debajo de la cerca hasta ella; dentro de la cerca solo quedaba
