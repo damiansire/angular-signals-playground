@@ -1,4 +1,9 @@
-import { cuadrosDelCosto, posicionesEnElDocumento, saltosDelPaisaje } from './escenas.logica';
+import {
+  ESCENA_ANGOSTA,
+  cieloAngosto,
+  posicionesEnElDocumento,
+  saltosDelPaisaje,
+} from './escenas.logica';
 
 describe('escenas del manual', () => {
   describe('posicionesEnElDocumento', () => {
@@ -17,27 +22,28 @@ describe('escenas del manual', () => {
     });
   });
 
-  describe('cuadrosDelCosto', () => {
-    const pasados = (costo: Parameters<typeof cuadrosDelCosto>[0]): number =>
-      cuadrosDelCosto(costo, 15).filter((c) => c > 1).length;
-
-    it('barato nunca se pasa del cuadro', () => {
-      expect(pasados('barato')).toBe(0);
-    });
-
-    it('medio se pasa a veces, y caro casi siempre', () => {
-      expect(pasados('medio')).toBeGreaterThan(0);
-      expect(pasados('caro')).toBeGreaterThan(pasados('medio'));
-      expect(pasados('caro')).toBe(15);
-    });
-
-    it('sale igual cada vez', () => {
-      expect(cuadrosDelCosto('medio', 8)).toEqual(cuadrosDelCosto('medio', 8));
-    });
-  });
-
   it('el paisaje va de corrido solo con el cambio barato, y a más tirones cuanto más cuesta', () => {
     expect(saltosDelPaisaje('barato')).toBe(0);
     expect(saltosDelPaisaje('caro')).toBeLessThan(saltosDelPaisaje('medio'));
+  });
+});
+
+describe('cieloAngosto', () => {
+  it('ancha, la escena usa el cielo de siempre', () => {
+    expect(cieloAngosto(1200, 450)).toBeNull();
+    expect(cieloAngosto(ESCENA_ANGOSTA, 420)).toBeNull();
+  });
+
+  it('angosta, encuadra la nave y su pantalla con el alto de la ventanilla', () => {
+    // La ventanilla 4:3 de un teléfono de 390 px.
+    expect(cieloAngosto(314, 235.5)).toBe('22 -11.0 376 282.0');
+  });
+
+  it('más alta que el cielo, vuelve al de siempre en vez de dejar franjas sin pintar', () => {
+    expect(cieloAngosto(300, 400)).toBeNull();
+  });
+
+  it('sin medida todavía, el de siempre', () => {
+    expect(cieloAngosto(0, 0)).toBeNull();
   });
 });

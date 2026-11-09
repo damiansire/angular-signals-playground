@@ -32,7 +32,7 @@
   "src/app/signals/level-1-interaction-with-signals/sub-levels/2-update-signal/update-signal.component.html": 22,
   "src/app/signals/level-3-effect/sub-levels/2-interval-when-is-destroy/destroy-box/destroy-box.component.html": 18,
   "src/app/signals/level-0-introduction/sub-levels/manual-sync-pain/manual-sync-pain.component.html": 11,
-  "src/app/signals/level-0-introduction/sub-levels/dom-to-pixel/dom-to-pixel.component.html": 7,
+  "src/app/signals/level-0-introduction/sub-levels/dom-to-pixel/dom-to-pixel.component.html": 4,
   "src/app/signals/level-0-introduction/sub-levels/signals-change-detection/signals-change-detection.component.html": 9,
   "src/app/signals/level-0-introduction/sub-levels/html-to-tree/html-to-tree.component.html": 5,
   "src/app/signals/level-0-introduction/sub-levels/old-change-detection/old-change-detection.component.html": 4,

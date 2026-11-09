@@ -3,71 +3,78 @@ import { DomToPixelComponent } from './dom-to-pixel.component';
 
 describe('DomToPixelComponent', () => {
   let fixture: ComponentFixture<DomToPixelComponent>;
-  let component: DomToPixelComponent;
+  let el: HTMLElement;
+
+  const click = (selector: string) => {
+    (el.querySelector(selector) as HTMLButtonElement).click();
+    fixture.detectChanges();
+  };
+  const hueco = () => el.querySelector('.dtp-hueco');
+  const etapas = () => [...el.querySelectorAll('.pm-etapa')];
+  const pantalla = () => el.querySelector('app-escena-costo svg')?.getAttribute('aria-label') ?? '';
+  const mano = () => (fixture.componentInstance as unknown as { guia: () => string | null }).guia();
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({ imports: [DomToPixelComponent] }).compileComponents();
     fixture = TestBed.createComponent(DomToPixelComponent);
-    component = fixture.componentInstance;
+    el = fixture.nativeElement as HTMLElement;
     fixture.detectChanges();
   });
 
-  it('se crea', () => {
-    expect(component).toBeTruthy();
+  it('es una sola pieza: escena, consola y sin desafío aparte', () => {
+    expect(el.querySelector('.pm-escenario app-escena-costo')).not.toBeNull();
+    expect(el.querySelector('.pm-consola .dtp-codigo')).not.toBeNull();
+    expect(el.querySelector('app-manipulable-system')).toBeNull();
   });
 
-  it('dibuja las cinco estaciones del pipeline', () => {
-    const stations = fixture.nativeElement.querySelectorAll('.dtp-pipe .dtp-station');
-    expect(stations.length).toBe(5);
+  it('arranca moviendo la nave con left, y el hueco rota la propiedad', () => {
+    expect(hueco()?.textContent).toContain('style.left');
+    click('.dtp-hueco');
+    expect(hueco()?.textContent).toContain('textContent');
+    expect(hueco()?.classList).not.toContain('dtp-hueco--barato');
   });
 
-  it('marca DOM como la fuente', () => {
-    const source = fixture.nativeElement.querySelectorAll('.dtp-station.dtp-source');
-    expect(source.length).toBe(1);
+  it('antes de correr, la pantalla muestra el pipeline quieto', () => {
+    expect(pantalla()).toContain('quieto');
   });
 
-  it('por defecto (cambiar texto) enciende las 4 etapas posteriores al DOM', () => {
-    const on = fixture.nativeElement.querySelectorAll('.dtp-station.dtp-on');
-    expect(on.length).toBe(4);
+  it('con left, el cuadro pasa por layout y paint: caro, y se prende el arreglo', () => {
+    click('.dtp-correr');
+    expect(pantalla()).toContain('left pasa por style, layout, paint, composite');
+    expect(pantalla()).toContain('caro');
+    expect(etapas()[0].classList).toContain('pm-etapa--hecho');
+    expect(etapas()[1].classList).toContain('pm-etapa--ahora');
   });
 
-  describe('pipeline vertical (angosto)', () => {
-    const elegir = (rotulo: string): void => {
-      const botones: HTMLButtonElement[] = [...fixture.nativeElement.querySelectorAll('.dtp-btn')];
-      botones.find((b) => b.textContent?.trim() === rotulo)!.click();
-      fixture.detectChanges();
-    };
-    const salto = (): HTMLElement | null => fixture.nativeElement.querySelector('.dtp-vhop');
+  it('con transform salta las capas caras y se resuelve recién al correr', () => {
+    click('.dtp-correr');
+    click('.dtp-hueco');
+    click('.dtp-hueco');
+    click('.dtp-hueco');
+    expect(hueco()?.classList).toContain('dtp-hueco--barato');
+    expect(etapas()[1].classList).not.toContain('pm-etapa--hecho');
+    click('.dtp-correr');
+    expect(pantalla()).toContain('transform pasa por style, composite');
+    expect(pantalla()).toContain('barato');
+    expect(etapas()[1].classList).toContain('pm-etapa--hecho');
+  });
 
-    it('tiene las mismas cinco estaciones, con DOM como fuente', () => {
-      const estaciones = fixture.nativeElement.querySelectorAll('.dtp-vpipe .dtp-vst');
-      expect(estaciones.length).toBe(5);
-      expect(estaciones[0].classList).toContain('dtp-source');
-    });
-
-    it('cambiar el texto recorre la cadena entera: sin salto y todos los tramos llenos', () => {
-      expect(salto()).toBeNull();
-      expect(fixture.nativeElement.querySelectorAll('.dtp-vst--directo').length).toBe(4);
-    });
-
-    it('transform salta de style a composite: el arco abarca de la fila 2 a la 5', () => {
-      elegir('Mover con transform');
-      expect(salto()?.style.gridRow).toBe('2 / 6');
-      expect(fixture.nativeElement.querySelectorAll('.dtp-vpipe .dtp-skip').length).toBe(2);
-    });
-
-    it('color salta solo layout: el arco va de style a paint', () => {
-      elegir('Cambiar color');
-      expect(salto()?.style.gridRow).toBe('2 / 5');
-    });
-
-    it('el flujo se dibuja en orden: el arco toma su turno entre los tramos', () => {
-      elegir('Cambiar color');
-      const estaciones: HTMLElement[] = [...fixture.nativeElement.querySelectorAll('.dtp-vst')];
-      expect(estaciones[0].style.getPropertyValue('--d')).toBe('0s');
-      expect(salto()?.style.getPropertyValue('--d')).toBe('0.14s');
-      // paint -> composite espera a que termine el arco (0.14 + 0.4).
-      expect(estaciones[3].style.getPropertyValue('--d')).toBe('0.54s');
-    });
+  it('la mano dice lo mismo que los pasos: correr y el hueco, hasta transform', () => {
+    const toques: string[] = [];
+    for (let i = 0; i < 10 && mano() !== null; i++) {
+      const sigue = mano()!;
+      toques.push(sigue);
+      click(sigue);
+    }
+    expect(toques).toEqual([
+      '.dtp-correr[data-cuenta="0"]',
+      '[data-guia="propiedad"]',
+      '.dtp-correr[data-cuenta="1"]',
+      '[data-guia="propiedad"]',
+      '.dtp-correr[data-cuenta="2"]',
+      '[data-guia="propiedad"]',
+      '.dtp-correr[data-cuenta="3"]',
+    ]);
+    expect(mano()).toBeNull();
   });
 });

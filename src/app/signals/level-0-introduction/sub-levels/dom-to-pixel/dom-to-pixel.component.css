@@ -1,404 +1,130 @@
-/* Clases con prefijo `dtp-`: este componente se embebe en la vista integrada, que estampa
-   su propio atributo de encapsulación. Sin prefijo, clases del motor de la molécula
-   (`stage`, `content`…) pisan las nuestras. */
+/* Clases con prefijo `dtp-`: se embebe en la vista integrada, que estampa su enc; sin prefijo,
+   las clases del motor de la molécula pisarían las nuestras. Va en la consola de la nave: la misma
+   paleta que su pantalla (vidrio violeta, borde lila, texto claro), como las leyes 4 y 5. */
 :host {
   display: block;
-  color: #1c1e24;
 }
 
 .dtp {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 1rem 1.5rem;
+}
+
+.dtp-codigo {
   display: flex;
   flex-direction: column;
-  gap: 1.6rem;
-  /* El diagrama se elige por el ancho que le toca, no por el de la pantalla: embebido, la card
-     y la espina se comen un pedazo distinto en cada ancho. */
-  container-type: inline-size;
+  padding: 0.85rem 1.1rem;
+  border: 1.5px solid #5b4a96;
+  border-radius: 12px;
+  background: #1c1434;
+  font:
+    500 clamp(0.85rem, 1vw, 1rem) / 1.65 'JetBrains Mono',
+    'Cascadia Mono',
+    Consolas,
+    monospace;
+  color: #f2ecff;
+  overflow-wrap: break-word;
 }
 
-/* Selector de mutación. */
-.dtp-controls {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.55rem;
+/* Un renglón por bloque con sangría colgante: la continuación de un renglón largo arranca
+   corrida, no en la columna 0 como si fuera otra sentencia. */
+.dtp-linea {
+  display: block;
+  padding-left: 4ch;
+  text-indent: -4ch;
 }
 
-.dtp-btn {
+/* El hueco: la propiedad que toca el cuadro, en dorado y subrayada como los tokens de los
+   desafíos; con la barata, en verde. La sangría del renglón va como espacio del botón y no del
+   texto, así el subrayado no la toma. Tres clases más el elemento: le gana a la pastilla oscura
+   que la hoja le pone a todo botón (`.subhost button:not([class*='bg-'])`). */
+.dtp .dtp-codigo button.dtp-hueco {
+  display: block;
+  width: 100%;
+  margin: 0.1rem 0;
+  padding: 0.1rem 0.4rem 0.1rem 2ch;
+  border: 0;
+  border-radius: 6px;
+  background: rgb(255 210 122 / 8%);
   font: inherit;
-  font-size: 0.95rem;
-  line-height: 1.2;
-  height: auto;
-  padding: 0.5rem 1rem;
-  border-radius: 0.6rem;
-  border: 1px solid #d6dbe2;
-  background: #ffffff;
-  color: #374151;
-  box-shadow: none;
+  text-align: left;
+  color: #ffd27a;
+  cursor: pointer;
+  transition: background-color 0.15s;
+}
+.dtp .dtp-codigo button.dtp-hueco .dtp-linea {
+  text-decoration: underline dashed 1.5px;
+  text-underline-offset: 0.3em;
+}
+.dtp .dtp-codigo button.dtp-hueco:hover {
+  background: rgb(255 210 122 / 16%);
+}
+.dtp .dtp-codigo button.dtp-hueco.dtp-hueco--barato {
+  background: rgb(106 209 154 / 10%);
+  color: #8be0b3;
+}
+.dtp .dtp-codigo button.dtp-hueco:focus-visible {
+  outline: 2px solid #ffd27a;
+  outline-offset: 2px;
+}
+
+/* La corrida: el botón dorado de la consola, con su sombra de tinta. */
+.dtp .dtp-mando button.dtp-correr {
+  padding: 0.7rem 1.4rem;
+  border: 2px solid #2b1b33;
+  border-radius: 999px;
+  background: #ffd27a;
+  box-shadow: 0 4px 0 #2b1b33;
+  font:
+    700 1.05rem / 1.2 'JetBrains Mono',
+    'Cascadia Mono',
+    Consolas,
+    monospace;
+  color: #2b1b33;
   cursor: pointer;
   transition:
-    opacity 0.15s,
-    outline-color 0.15s;
+    translate 0.08s,
+    box-shadow 0.08s,
+    background-color 0.15s;
+}
+.dtp .dtp-mando button.dtp-correr:hover {
+  background: #ffdc94;
+}
+.dtp .dtp-mando button.dtp-correr:active {
+  translate: 0 3px;
+  box-shadow: 0 1px 0 #2b1b33;
+}
+.dtp .dtp-mando button.dtp-correr:focus-visible {
+  outline: 3px solid #fff8ec;
+  outline-offset: 3px;
 }
 
-/* En la molécula, el card impone su propio fondo oscuro a los botones (mayor especificidad).
-   Diferenciamos el activo con propiedades que ESA regla no toca: `outline` y `opacity`. Con 0.5 el
-   rótulo del no elegido quedaba a 2.8:1 contra la escena; con 0.75 se sigue viendo apagado y llega. */
-.dtp-btn:not(.dtp-active) {
-  opacity: 0.75;
-}
-
-.dtp-btn.dtp-active {
-  border-color: #17140f;
-  background: #17140f;
-  color: #ffffff;
-  font-weight: 600;
-  outline: 2px solid #e0a13a;
-  outline-offset: 2px;
-}
-
-.dtp-btn:focus-visible {
-  outline: 2px solid #2563eb;
-  outline-offset: 2px;
-}
-
-.dtp-code {
-  align-self: flex-start;
-  font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
-  font-size: 0.8rem;
-  background: #14120e;
-  color: #f0ede4;
-  padding: 0.5rem 0.85rem;
-  border-radius: 0.5rem;
-  max-width: 100%;
-  overflow-x: auto;
-}
-
-/* Pipeline héroe. */
-.dtp-pipe {
-  width: 100%;
-  height: auto;
-  overflow: visible;
-}
-
-.dtp-rail {
-  fill: none;
-  stroke: #ddd8cd;
-  stroke-width: 3;
-  stroke-linecap: round;
-}
-
-.dtp-flow {
-  fill: none;
-  stroke-width: 6;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-  stroke-dasharray: 100;
-  stroke-dashoffset: 100;
-  animation: dtp-draw 0.75s cubic-bezier(0.4, 0, 0.2, 1) forwards;
-}
-
-@keyframes dtp-draw {
-  to {
-    stroke-dashoffset: 0;
+/* Muy angosto, o con la consola al lado de la escena (ancha y baja, ver `pagina-del-manual`), la
+   corrida va debajo del código. A 600 px sigue al lado: el código es corto, y debajo empujaba la
+   consola 10 px por debajo del pie. */
+@media (max-width: 479px), (min-width: 1100px) and (max-height: 800px) {
+  .dtp {
+    grid-template-columns: minmax(0, 1fr);
   }
 }
 
-/* Pulso que recorre el flujo una sola vez al elegir (no hay loop perpetuo: motion en la
-   interacción, no ambiente, para no dejar un rAF/animación corriendo siempre). */
-.dtp-pulse {
-  offset-distance: 0%;
-  offset-rotate: 0deg;
-  opacity: 0;
-  animation: dtp-travel 0.75s cubic-bezier(0.4, 0, 0.2, 1) forwards;
-}
-
-@keyframes dtp-travel {
-  0% {
-    offset-distance: 0%;
-    opacity: 0;
+/* En un teléfono la página entera entra en el alto, sin scroll: el código va más apretado, y así
+   `requestAnimationFrame(cuadro);` entra en un renglón. */
+@media (max-width: 479px) {
+  .dtp {
+    gap: 0.75rem;
   }
-  15% {
-    opacity: 0.9;
+  .dtp-codigo {
+    padding: 0.6rem 0.75rem;
+    font-size: 0.8rem;
   }
-  85% {
-    opacity: 0.9;
-  }
-  100% {
-    offset-distance: 100%;
-    opacity: 0;
-  }
-}
-
-.dtp-zone {
-  fill: rgba(217, 38, 38, 0.055);
-  stroke: rgba(217, 38, 38, 0.22);
-  stroke-width: 1.5;
-  stroke-dasharray: 4 5;
-}
-
-/* Ladrillo oscuro: #b5544a quedaba a 1.5-2.5:1 sobre la escena gris del concepto. */
-.dtp-zone-label {
-  fill: #7f2219;
-  font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
-  /* 16 unidades: en el corte (720 px) queda en ~11.5 px reales; con 13 quedaba en 9.4. */
-  font-size: 16px;
-  letter-spacing: 0.04em;
-}
-
-.dtp-station circle {
-  transition:
-    fill 0.3s,
-    stroke 0.3s;
-}
-
-.dtp-station-label {
-  font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
-  font-size: 16px;
-}
-
-.dtp-station.dtp-source circle {
-  fill: #eef3ff;
-  stroke: #2563eb;
-  stroke-width: 2.5;
-}
-
-/* El rótulo va un azul más hondo que el aro (#2563eb daba 2.4:1 como texto). */
-.dtp-station.dtp-source .dtp-station-label {
-  fill: #1e40af;
-  font-weight: 700;
-}
-
-.dtp-station.dtp-on circle {
-  fill: #17140f;
-  stroke: #17140f;
-  stroke-width: 2;
-}
-
-.dtp-station.dtp-on .dtp-station-label {
-  fill: #17140f;
-  font-weight: 700;
-}
-
-.dtp-station.dtp-skip circle {
-  fill: #ffffff;
-  stroke: #cfc9bd;
-  stroke-width: 2;
-  stroke-dasharray: 3 3;
-}
-
-/* Salteada se ve salteada (tachada, sin negrita) y se lee: #a99f8e quedaba a 1.6:1 sobre la
-   escena, justo en el caso que el sub-nivel enseña (transform saltea layout y paint); sobre el
-   tinte de la zona cara hace falta este tono para pasar 3:1. */
-.dtp-station.dtp-skip .dtp-station-label {
-  fill: #4f493d;
-  text-decoration: line-through;
-}
-
-/* Pipeline vertical, para cuando el SVG no entra: por debajo de 720 px de ancho sus rótulos
-   bajan de 11 px (a 375 quedaban en 4). Mismas estaciones y estados, en una grilla de cinco
-   filas: el punto en la primera columna y el rótulo al lado. La primera columna deja un carril a
-   la izquierda para el arco del salto, afuera de la zona cara: pegado a su borde se leía como un
-   corchete que agrupa y no como un desvío. Alto de fila: con 2.6rem, a 768 px la card pasaba a
-   scrollear. Ancho tope: estirado a 600-700 px, la banda de la zona quedaba lejos de lo que
-   nombra. */
-.dtp-vpipe {
-  --fila: 2.3rem;
-  --carril: 3.2rem;
-  display: none;
-  /* width y no max-width: en angosto la vista integrada fija max-width: 100% a todo con más peso. */
-  width: min(100%, 22rem);
-}
-
-@container (max-width: 719px) {
-  /* `.dtp` adelante: `.dtp-cost` se declara más abajo con display: flex y ganaba por orden. */
-  .dtp .dtp-pipe,
-  .dtp .dtp-cost {
-    display: none;
-  }
-  .dtp-vpipe {
-    display: grid;
-    grid-template-columns: var(--carril) minmax(0, 1fr);
-    grid-template-rows: repeat(5, var(--fila));
-  }
-}
-
-/* La zona cara, detrás de layout y paint, desde un poco antes de los puntos. */
-.dtp-vzone {
-  grid-column: 1 / -1;
-  grid-row: 3 / 5;
-  margin-left: 0.85rem;
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  padding-right: 0.8rem;
-  border: 1.5px dashed rgba(217, 38, 38, 0.3);
-  border-radius: 0.8rem;
-  background: rgba(217, 38, 38, 0.055);
-}
-
-.dtp-vzone > span {
-  font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
-  font-size: 0.78rem;
-  letter-spacing: 0.04em;
-  color: #7f2219;
-}
-
-/* El salto: el arco por el carril, del centro del punto de partida al de llegada (media fila
-   adentro arriba y abajo). Se revela de arriba hacia abajo en su turno del dibujo. */
-.dtp-vhop {
-  grid-column: 1;
-  justify-self: start;
-  width: calc(var(--carril) / 2 - 0.15rem);
-  margin: calc(var(--fila) / 2) 0 calc(var(--fila) / 2) 0.15rem;
-  border: 3px solid var(--flujo);
-  border-right: none;
-  border-radius: 1rem 0 0 1rem;
-  animation: dtp-vsalto 0.4s cubic-bezier(0.4, 0, 0.2, 1) var(--d, 0s) both;
-}
-
-/* El `to` explícito no es redundante: sin él termina en `none`, que no interpola con `inset()`, y
-   el arco aparecía de golpe a mitad de la animación. */
-@keyframes dtp-vsalto {
-  from {
-    clip-path: inset(0 0 100% 0);
-  }
-  to {
-    clip-path: inset(0 0 0 0);
-  }
-}
-
-.dtp-vst {
-  grid-column: 1 / -1;
-  position: relative;
-  display: flex;
-  align-items: center;
-}
-
-.dtp-vdot {
-  position: relative;
-  z-index: 1;
-  flex: none;
-  width: 1.05rem;
-  height: 1.05rem;
-  margin-inline: calc((var(--carril) - 1.05rem) / 2);
-  border: 2px solid #cfc9bd;
-  border-radius: 50%;
-  background: #ffffff;
-  transition:
-    background-color 0.3s,
-    border-color 0.3s;
-}
-
-.dtp-vlabel {
-  font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
-  font-size: 0.95rem;
-  color: #17140f;
-}
-
-/* El tramo hasta la siguiente estación: lleno con el color del costo si el flujo lo recorre,
-   punteado si queda debajo del salto. */
-.dtp-vst:not(.dtp-vst--ultima)::after {
-  content: '';
-  position: absolute;
-  top: 50%;
-  left: calc(var(--carril) / 2 - 1.5px);
-  width: 3px;
-  height: var(--fila);
-  background: repeating-linear-gradient(to bottom, #cfc9bd 0 4px, transparent 4px 8px);
-}
-
-/* Dos clases: con una sola le ganaba la regla de arriba (el `:not()` suma especificidad). El
-   tramo crece de arriba hacia abajo en su turno: el flujo se dibuja, como en el SVG. */
-.dtp-vst.dtp-vst--directo::after {
-  background: var(--flujo);
-  transform-origin: top;
-  animation: dtp-vtramo 0.14s linear var(--d, 0s) both;
-}
-
-@keyframes dtp-vtramo {
-  from {
-    transform: scaleY(0);
-  }
-}
-
-.dtp-vst.dtp-source .dtp-vdot {
-  border: 2.5px solid #2563eb;
-  background: #eef3ff;
-}
-
-.dtp-vst.dtp-source .dtp-vlabel {
-  color: #1e40af;
-  font-weight: 700;
-}
-
-.dtp-vst.dtp-on .dtp-vdot {
-  border-color: #17140f;
-  background: #17140f;
-}
-
-.dtp-vst.dtp-on .dtp-vlabel {
-  font-weight: 700;
-}
-
-/* Salteada: aro hueco y claro. Punteado, a este tamaño el borde se dibujaba como una estrellita. */
-.dtp-vst.dtp-skip .dtp-vdot {
-  border-color: #b8b0a2;
-  background: #ffffff;
-}
-
-.dtp-vst.dtp-skip .dtp-vlabel {
-  color: #4f493d;
-  text-decoration: line-through;
-}
-
-/* La respuesta, al lado de DOM y style: abajo del vertical, en un teléfono bajo quedaba fuera de
-   la vista. */
-.dtp-vcosto {
-  grid-column: 2;
-  grid-row: 1 / 3;
-  justify-self: end;
-  align-self: center;
-  margin: 0;
-  font-family: Georgia, 'Times New Roman', serif;
-  font-weight: 700;
-  font-style: italic;
-  font-size: 1.7rem;
-  line-height: 1;
-}
-
-/* Lectura del costo. */
-.dtp-cost {
-  margin: 0;
-  display: flex;
-  align-items: baseline;
-  flex-wrap: wrap;
-  gap: 0.6rem;
-  font-size: 1rem;
-  color: #5c5648;
-}
-
-.dtp-cost-word {
-  font-family: Georgia, 'Times New Roman', serif;
-  font-weight: 700;
-  font-style: italic;
-  font-size: clamp(1.5rem, 2.6vw, 2.1rem);
-  line-height: 1;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .dtp-flow {
-    animation: none;
-    stroke-dashoffset: 0;
-  }
-  .dtp-station circle,
-  .dtp-vdot {
+  .dtp .dtp-codigo button.dtp-hueco,
+  .dtp .dtp-mando button.dtp-correr {
     transition: none;
-  }
-  .dtp-vhop,
-  .dtp-vst.dtp-vst--directo::after {
-    animation: none;
-  }
-  .dtp-pulse {
-    animation: none;
-    display: none;
   }
 }

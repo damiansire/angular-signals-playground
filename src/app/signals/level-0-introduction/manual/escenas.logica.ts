@@ -21,30 +21,31 @@ export function posicionesEnElDocumento(
 
 export type Costo = 'barato' | 'medio' | 'caro';
 
-/** Ruido con semilla, el mismo cada vez: la lámina no cambia entre una carga y otra. */
-function ruido(k: number): number {
-  const x = Math.sin(k * 91.7 + 17.3) * 43758.5453;
-  return x - Math.floor(x);
-}
-
-/**
- * Cuánto tarda cada uno de los últimos `n` cuadros, en múltiplos del presupuesto de un cuadro
- * (16 ms = 1). Barato entra siempre; medio roza el límite y a veces se pasa; caro se pasa casi
- * siempre, con picos. Lo que se pasa de 1 es un cuadro que la pantalla no llegó a mostrar.
- */
-export function cuadrosDelCosto(costo: Costo, n: number): number[] {
-  return Array.from({ length: n }, (_, i) => {
-    const r = ruido(i);
-    if (costo === 'barato') return 0.25 + r * 0.3;
-    if (costo === 'medio') return i % 5 === 3 ? 1.15 + r * 0.2 : 0.55 + r * 0.35;
-    return i % 3 === 1 ? 1.6 + r * 0.35 : 1.05 + r * 0.4;
-  });
-}
-
 /**
  * En cuántos saltos recorre el paisaje una vuelta: 0 es de corrido. Cuanto más cuesta el cambio,
  * menos cuadros llegan a la pantalla, y lo que se mueve avanza a los tirones.
  */
 export function saltosDelPaisaje(costo: Costo): number {
   return costo === 'barato' ? 0 : costo === 'medio' ? 14 : 5;
+}
+
+/** Lo que una escena no puede recortar: la nave y su pantalla, con su marco y su haz. */
+const LO_QUE_IMPORTA = { x: 22, ancho: 376, centro: 130 } as const;
+/** El cielo entero del escenario mide 340 de alto: más alto, quedaría sin pintar. */
+const ALTO_DEL_CIELO = 340;
+/** Por debajo de este ancho (px) la escena encuadra la nave y su pantalla, sin cielo de sobra. */
+export const ESCENA_ANGOSTA = 560;
+
+/**
+ * El `viewBox` de una escena angosta: justo el ancho de la nave y su pantalla, y el alto que pida la
+ * ventanilla. Con el cielo de sobra del escenario, a 390 px la escena quedaba a 0.69 y los rótulos
+ * de la pantalla en 8 px; encuadrada, a 0.84. `null` es "el de siempre": ancha, o tan alta que el
+ * cielo no la cubriría.
+ */
+export function cieloAngosto(ancho: number, alto: number): string | null {
+  if (ancho <= 0 || alto <= 0 || ancho >= ESCENA_ANGOSTA) return null;
+  const h = (LO_QUE_IMPORTA.ancho * alto) / ancho;
+  if (h > ALTO_DEL_CIELO) return null;
+  const y = LO_QUE_IMPORTA.centro - h / 2;
+  return `${LO_QUE_IMPORTA.x} ${y.toFixed(1)} ${LO_QUE_IMPORTA.ancho} ${h.toFixed(1)}`;
 }
