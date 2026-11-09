@@ -5,7 +5,9 @@
 This is a static, client-side teaching playground published to GitHub Pages. It
 has no backend, no accounts, no authentication and no user data: everything runs
 in your browser, and the only thing it persists is a cart demo's quantities in
-`localStorage`. That keeps the realistic attack surface small, and worth being
+`localStorage`. The published site counts visits with GoatCounter's image pixel
+(the route and the referrer; no cookies and no third-party script). That keeps
+the realistic attack surface small, and worth being
 explicit about rather than implying more than there is.
 
 What is still worth reporting:
