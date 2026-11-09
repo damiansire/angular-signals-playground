@@ -1,8 +1,4 @@
-<!-- Cada pieza se proyecta una sola vez y la forma decide dónde va: la misma `ng-content` en las dos
-     ramas del `@if` dejaba vacía a una de ellas. -->
-<ng-template #hacer><ng-content select="[hacer]" /></ng-template>
-<ng-template #escena><ng-content select="[escena]" /></ng-template>
-<ng-template #cabeza>
+<article #marco class="pm">
   <header class="pm-cabeza">
     @if (datos; as d) {
       <p class="pm-ley">Ley {{ d.numero }}</p>
@@ -12,93 +8,49 @@
       }
     }
   </header>
-</ng-template>
-<ng-template #pie>
-  @if (datos?.pie; as p) {
-    <ng-container [ngTemplateOutlet]="p" />
-  }
-</ng-template>
-<ng-template #mostrame>
-  @if (guia() !== null || mostrando()) {
-    <button type="button" class="pm-mostrar" [disabled]="mostrando()" (click)="mostrar()">
-      <span aria-hidden="true">&#9654;</span> Mostrame
-    </button>
-  }
-</ng-template>
 
-<article #marco class="pm" [class.pm--integrada]="integrada()">
-  @if (integrada()) {
-    <ng-container [ngTemplateOutlet]="cabeza" />
-    <!-- Una sola pieza: la nave es el escenario y su pantalla muestra lo que pasa; abajo, su
-         consola, con lo que se toca. Probar y arreglar son dos pasos de la misma consola. -->
-    <section class="pm-escenario">
-      <figure class="pm-ventana">
-        <ng-container [ngTemplateOutlet]="escena" />
-        @if (datos; as d) {
-          <figcaption class="pm-nave">{{ d.enLaNave }}</figcaption>
-        }
-      </figure>
+  <!-- Una sola pieza: la nave es el escenario y su pantalla muestra lo que pasa; abajo, su consola,
+       con lo que se toca. Probar y arreglar son dos pasos de la misma consola. -->
+  <section class="pm-escenario">
+    <figure class="pm-ventana">
+      <ng-content select="[escena]" />
+      @if (datos; as d) {
+        <figcaption class="pm-nave">{{ d.enLaNave }}</figcaption>
+      }
+    </figure>
 
-      <div class="pm-consola">
-        <ol class="pm-etapas">
-          <li
-            class="pm-etapa"
-            [class.pm-etapa--ahora]="paso() === 1 && !resuelta()"
-            [class.pm-etapa--hecho]="paso() > 1 || resuelta()"
-          >
-            <span class="pm-num" aria-hidden="true">1</span>
-            <ng-container [ngTemplateOutlet]="hacer" />
-          </li>
-          <li
-            class="pm-etapa"
-            [class.pm-etapa--ahora]="paso() === 2 && !resuelta()"
-            [class.pm-etapa--hecho]="resuelta()"
-          >
-            <span class="pm-num" aria-hidden="true">2</span>
-            <ng-content select="[arreglo]" />
-          </li>
-          <li class="pm-etapas-boton"><ng-container [ngTemplateOutlet]="mostrame" /></li>
-        </ol>
-        <ng-content select="[consola]" />
-        <ng-container [ngTemplateOutlet]="pie" />
-      </div>
-    </section>
-  } @else {
-    <!-- Lo que se lee y se toca, de arriba hacia abajo: la ley y, en su mesa de papel, qué hacer y
-         la demo. La ley va suelta sobre la escena. -->
-    <div class="pm-col pm-col--leer">
-      <ng-container [ngTemplateOutlet]="cabeza" />
-      <section class="pm-mesa">
-        <!-- El mismo número que el desafío: primero se prueba, después se confirma. -->
-        <div class="pm-paso pm-paso--1">
+    <div class="pm-consola">
+      <ol class="pm-etapas">
+        <li
+          class="pm-etapa"
+          [class.pm-etapa--ahora]="paso() === 1 && !resuelta()"
+          [class.pm-etapa--hecho]="paso() > 1 || resuelta()"
+        >
           <span class="pm-num" aria-hidden="true">1</span>
-          <ng-container [ngTemplateOutlet]="hacer" />
-          <ng-container [ngTemplateOutlet]="mostrame" />
-        </div>
-
-        <div class="pm-demo"><ng-content select="[demo]" /></div>
-      </section>
+          <ng-content select="[hacer]" />
+        </li>
+        <li
+          class="pm-etapa"
+          [class.pm-etapa--ahora]="paso() === 2 && !resuelta()"
+          [class.pm-etapa--hecho]="resuelta()"
+        >
+          <span class="pm-num" aria-hidden="true">2</span>
+          <ng-content select="[arreglo]" />
+        </li>
+        <li class="pm-etapas-boton">
+          @if (guia() !== null || mostrando()) {
+            <button type="button" class="pm-mostrar" [disabled]="mostrando()" (click)="mostrar()">
+              <span aria-hidden="true">&#9654;</span> Mostrame
+            </button>
+          }
+        </li>
+      </ol>
+      <ng-content select="[consola]" />
+      @if (datos?.pie; as p) {
+        <ng-container [ngTemplateOutlet]="p" />
+      }
     </div>
-
-    <!-- Lo que le pasa a la nave mientras tanto, y el desafío que lo confirma. -->
-    <div class="pm-col pm-col--nave">
-      <figure class="pm-escena">
-        <ng-container [ngTemplateOutlet]="escena" />
-        @if (datos; as d) {
-          <figcaption class="pm-nave">{{ d.enLaNave }}</figcaption>
-        }
-      </figure>
-
-      <div class="pm-paso pm-paso--2">
-        <span class="pm-num" aria-hidden="true">2</span>
-        <div class="pm-desafio"><ng-content select="[desafio]" /></div>
-      </div>
-    </div>
-  }
-
-  @if (!integrada() && datos?.pie) {
-    <div class="pm-pie-suelto"><ng-container [ngTemplateOutlet]="pie" /></div>
-  }
+  </section>
 
   <app-mano-guia [punta]="punta()" />
 </article>

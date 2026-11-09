@@ -20,9 +20,9 @@ import { puntaDeLaMano, sigueMostrando } from './guia.logica';
 const TOPE_DE_TOQUES = 16;
 
 /**
- * Una página del manual de a bordo, siempre en el mismo orden de lectura: la ley, qué hacer, la demo
- * y el desafío. La escena de la nave va al costado, a la altura de la ley, y reacciona a lo que se
- * toca en la demo: así se lee qué le pasa a la nave sin otra frase.
+ * Una página del manual de a bordo, en una sola pieza: la ley arriba, la escena de la nave como
+ * escenario (`[escena]`), con su pantalla mostrando lo que pasa, y abajo su consola (`[consola]`)
+ * con los dos pasos sobre el mismo código, probar (`[hacer]`) y arreglar (`[arreglo]`).
  *
  * La demo dice qué hay que tocar (`guia`, un selector adentro de la página) y la mano lo señala;
  * "Mostrame" lo toca por quien no se anima, con la misma mano.
@@ -39,12 +39,6 @@ export class PaginaDelManualComponent {
   protected readonly datos = inject(PAGINA_DEL_MANUAL, { optional: true });
   /** Lo próximo que hay que tocar en la demo; `null` cuando ya no hace falta guiar. */
   readonly guia = input<string | null>(null);
-  /**
-   * La página en una sola pieza: la escena de la nave es el escenario, su pantalla muestra lo que
-   * pasa, y abajo va su consola (`[consola]`) con los dos pasos, probar (`[hacer]`) y arreglar
-   * (`[arreglo]`). Sin esto, la demo, la escena y el desafío van en tres tarjetas.
-   */
-  readonly integrada = input(false);
   /** En qué paso de la consola va la página: el otro queda apagado. */
   readonly paso = input<1 | 2>(1);
   /** El arreglo funcionó: los dos pasos quedan hechos. */

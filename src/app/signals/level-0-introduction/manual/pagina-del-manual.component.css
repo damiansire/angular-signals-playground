@@ -1,5 +1,5 @@
-/* La ley se lee suelta, en letra clara con sombra, y lo que se toca va en papel. Se estira hasta el
-   pie de la hoja: con el alto de su contenido, media pantalla quedaba vacía. */
+/* La ley se lee suelta, en letra clara con sombra. Se estira hasta el pie de la hoja: con el alto de
+   su contenido, media pantalla quedaba vacía. */
 :host {
   position: relative;
   display: flex;
@@ -10,22 +10,16 @@
   -webkit-user-select: none;
 }
 
-/* A lo ancho, dos columnas que corren cada una por su cuenta: con una grilla de filas compartidas,
-   la escena (más alta que la ley) empujaba la demo y dejaba un hueco a la izquierda. La página va
-   al medio del alto, con la escena alrededor. */
+/* ── Una sola pieza ───────────────────────────────────────────────────────────────────────────
+   La nave es el escenario y su pantalla muestra lo que pasa; abajo, la consola de la nave con lo
+   que se toca. Todo en la paleta de esa pantalla (vidrio violeta, filas con borde lila): en papel,
+   la demo, la escena y el desafío se leían como tres tarjetas sueltas que repetían los números. */
 .pm {
   position: relative;
   flex: 1 0 auto;
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) clamp(19rem, 29%, 26rem);
-  align-content: center;
-  gap: 1.25rem clamp(1.5rem, 2.6vw, 2.75rem);
-}
-.pm-col {
   display: flex;
   flex-direction: column;
-  min-width: 0;
-  gap: 1.1rem;
+  gap: 1rem;
 }
 
 .pm-cabeza {
@@ -60,42 +54,6 @@
     0 12px 34px rgb(25 8 40 / 55%);
 }
 
-/* Papel: lo que se toca va en tarjetas claras con el borde de tinta del manual. */
-.pm-mesa,
-.pm-paso--2,
-.pm-escena {
-  border: 3px solid #5d4a5e;
-  border-radius: 18px;
-  background: #fffaf2;
-  color: #2b2230;
-  box-shadow:
-    0 5px 0 rgb(30 34 62 / 22%),
-    0 22px 44px -18px rgb(6 3 14 / 70%);
-}
-
-/* La mesa: qué hacer arriba y la demo debajo. */
-.pm-mesa {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  min-height: 0;
-  padding: 0.9rem clamp(1rem, 1.6vw, 1.5rem) 1.2rem;
-}
-
-/* El paso: el número, qué hacer y el botón que lo hace solo. */
-.pm-paso {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 0.6rem 0.85rem;
-  font: 600 1.08rem / 1.35 var(--font-display, system-ui, sans-serif);
-}
-/* Con el alto del botón aunque ya no esté: al terminar, "Mostrame" se va y la mesa no salta. */
-.pm-paso--1 {
-  min-height: 3.1rem;
-  padding-bottom: 0.85rem;
-  border-bottom: 1.5px dashed #d9cbb8;
-}
 .pm-num {
   flex: none;
   display: grid;
@@ -116,9 +74,9 @@
 }
 
 /* "Mostrame": un cartelito de papel dorado, un poco torcido, como los del viaje. Se endereza al
-   pasarle por encima, y apretado se hunde en su sombra. Con tres ancestros le gana a la pastilla
+   pasarle por encima, y apretado se hunde en su sombra. Con tres clases le gana a la pastilla
    oscura que la hoja le pone a todo botón de su pantalla (`.subhost button:not([class*='bg-'])`). */
-.pm :is(.pm-paso, .pm-etapas) .pm-mostrar {
+.pm .pm-etapas .pm-mostrar {
   margin-left: auto;
   padding: 0.45rem 1rem 0.5rem;
   border: 2px solid #5d4a5e;
@@ -139,72 +97,25 @@
     translate 0.2s,
     background-color 0.2s;
 }
-.pm :is(.pm-paso, .pm-etapas) .pm-mostrar:hover:not(:disabled) {
+.pm .pm-etapas .pm-mostrar:hover:not(:disabled) {
   rotate: 0deg;
   translate: 2px -2px;
   background: #ffdc94;
 }
-.pm :is(.pm-paso, .pm-etapas) .pm-mostrar:active:not(:disabled) {
+.pm .pm-etapas .pm-mostrar:active:not(:disabled) {
   translate: 1px 2px;
   box-shadow: 1px 2px 0 rgb(43 34 48 / 22%);
 }
-.pm :is(.pm-paso, .pm-etapas) .pm-mostrar:disabled {
+.pm .pm-etapas .pm-mostrar:disabled {
   cursor: default;
   rotate: 0deg;
   opacity: 0.75;
 }
-.pm :is(.pm-paso, .pm-etapas) .pm-mostrar:focus-visible {
+.pm .pm-etapas .pm-mostrar:focus-visible {
   outline: 3px solid #2b2230;
   outline-offset: 2px;
 }
 
-.pm-demo {
-  display: flex;
-  flex-direction: column;
-  min-width: 0;
-}
-
-/* La ventanilla en su marco de papel, con lo que le pasa a la nave escrito abajo, como una foto. */
-.pm-escena {
-  margin: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 0.6rem;
-  padding: 0.55rem 0.55rem 0.75rem;
-  rotate: 0.6deg;
-}
-.pm-nave {
-  margin: 0;
-  padding-inline: 0.35rem;
-  font: italic 600 clamp(1rem, 1.2vw, 1.12rem) / 1.3 var(--font-editorial, Georgia, serif);
-  color: #3b2f3c;
-  text-wrap: pretty;
-}
-
-/* El desafío pegado a la ventanilla: lo que se confirma va junto a lo que le pasó a la nave. */
-.pm-paso--2 {
-  align-items: start;
-  flex-wrap: nowrap;
-  padding: 0.95rem 1rem 1rem;
-}
-.pm-desafio {
-  flex: 1;
-  min-width: 0;
-}
-
-/* ── La página integrada: una sola pieza ──────────────────────────────────────────────────────
-   La nave es el escenario y su pantalla muestra lo que pasa; abajo, la consola de la nave con lo
-   que se toca. Todo en la paleta de esa pantalla (vidrio violeta, filas con borde lila): en papel,
-   la demo, la escena y el desafío se leían como tres tarjetas sueltas que repetían los números. */
-.pm.pm--integrada {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-/* A lo ancho y a la izquierda en cualquier ancho: entre 700 y 1099 la regla de la grilla la centra. */
-.pm.pm--integrada .pm-cabeza {
-  align-self: stretch;
-}
 .pm-escenario {
   flex: 1 0 auto;
   display: flex;
@@ -229,13 +140,16 @@
   min-height: max(clamp(15rem, 40vh, 30rem), 28.5cqi);
   margin: 0;
 }
+/* Lo que le pasa a la nave, escrito abajo a la izquierda, sobre el cielo. */
 .pm-ventana .pm-nave {
   position: absolute;
   inset: auto auto 0.85rem 1.1rem;
   max-width: min(26rem, 40%);
+  margin: 0;
   padding: 0;
   font: italic 600 clamp(1rem, 1.25vw, 1.2rem) / 1.3 var(--font-editorial, Georgia, serif);
   color: #f2ecff;
+  text-wrap: pretty;
   text-shadow: 0 2px 8px rgb(11 6 24 / 90%);
   pointer-events: none;
 }
@@ -315,35 +229,6 @@
   }
 }
 
-/* Entre 700 y 1099 la escena va al lado de la ley, chica, y la mesa y el desafío abajo a lo ancho.
-   Las columnas se disuelven para que cada pieza tome su lugar en la grilla. */
-@media (max-width: 1099px) {
-  .pm {
-    grid-template-columns: minmax(0, 1fr) clamp(12rem, 27vw, 15.5rem);
-    grid-template-rows: auto auto auto;
-    grid-template-areas:
-      'cabeza escena'
-      'mesa mesa'
-      'paso2 paso2';
-    gap: 1rem 1.5rem;
-  }
-  .pm-col {
-    display: contents;
-  }
-  .pm-cabeza {
-    grid-area: cabeza;
-    align-self: center;
-  }
-  .pm-mesa {
-    grid-area: mesa;
-  }
-  .pm-escena {
-    grid-area: escena;
-  }
-  .pm-paso--2 {
-    grid-area: paso2;
-  }
-}
 @media (max-width: 699px) {
   .pm-ventana {
     min-height: 0;
@@ -353,22 +238,13 @@
     max-width: none;
     inset-inline-end: 1.1rem;
   }
-  .pm {
-    grid-template-columns: minmax(0, 1fr);
-    grid-template-rows: none;
-    grid-template-areas: 'cabeza' 'escena' 'mesa' 'paso2';
-  }
-  .pm-escena {
-    max-width: 24rem;
-  }
-  .pm :is(.pm-paso, .pm-etapas) .pm-mostrar {
+  .pm .pm-etapas .pm-mostrar {
     margin-left: 0;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .pm :is(.pm-paso, .pm-etapas) .pm-mostrar,
-  .pm-escena {
+  .pm .pm-etapas .pm-mostrar {
     rotate: none;
     transition: none;
   }
@@ -378,10 +254,10 @@
    Adentro de la pantalla de la nave no hay tarjeta: el cielo y la nave son el mundo, de borde a
    borde, y la consola es la franja de abajo. La ley va arriba, debajo de la barra del juego, sobre
    el mismo cielo; la ventanilla toma lo que queda. Con un marco redondeado se veía un modal. */
-:host(.pm-entera) .pm.pm--integrada {
+:host(.pm-entera) .pm {
   gap: 0;
 }
-:host(.pm-entera) .pm--integrada .pm-cabeza {
+:host(.pm-entera) .pm-cabeza {
   position: relative;
   z-index: 1;
   padding: 0 clamp(1rem, 2.4vw, 2.2rem) 0.4rem;
@@ -412,11 +288,4 @@
   :host(.pm-entera) .pm-ventana {
     min-height: 0;
   }
-}
-:host(.pm-entera) .pm-pie-suelto {
-  grid-column: 1 / -1;
-}
-/* La forma de tres tarjetas, mientras quede alguna, con su aire a los costados y abajo. */
-:host(.pm-entera) .pm:not(.pm--integrada) {
-  padding: 0 clamp(1rem, 2.4vw, 2.2rem) 1rem;
 }
