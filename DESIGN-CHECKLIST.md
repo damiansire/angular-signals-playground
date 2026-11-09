@@ -660,12 +660,13 @@ entrar desarma a Angie en luz y se hace noche, la costura con el prólogo.
       era lo que Angie miraba, y se va adentro de su OJO. Dos tramos: (a) el CIERRE
       (`SE_CIERRA_MS`): el aviso se cierra en un círculo blando (máscara con `--aa-aire`) hasta
       caber adentro (`aireQueCabe`, si se achica antes asoman sus bordes rectos), después se va
-      parejo en escala hasta CERO, y la pantalla queda un rato toda del negro del ojo (#0f0f11),
-      quieta; el texto se va primero; (b) la cámara se ALEJA (`ALEJARSE_MS`) del ojo a la cara, a
+      parejo en escala hasta CERO en el negro del ojo (#0f0f11); el texto se va primero; (b) la cámara se ALEJA (`ALEJARSE_MS`) del ojo a la cara, a
       Angie en la piedra y a la colina entera, en escala pareja (cada tramo de tiempo divide la
       escala por lo mismo); arranca desde ADENTRO del ojo izquierdo (`MANCHA`, el negro lejos del
       párpado, del borde y del brillo pensativo; `profundidadDesdeElOjo`: las cuatro esquinas, en
-      el dibujo del ojo, caen adentro con margen ×2, tope 900); después asoma el borde del ojo, su
+      el dibujo del ojo, caen adentro con margen ×1,2, tope 900); los dos tramos se pisan: la
+      cámara arranca (`SE_ALEJA_DESDE_MS`) cuando el aviso ya es una mota, y la pantalla queda toda
+      negra apenas un tercio de segundo; después asoma el borde del ojo, su
       brillo, la cara, Angie y la colina. La BOCA queda cerrada todo el viaje, como siempre, y
       Angie no parpadea mientras dura (`sinParpadear`). El título de la colina entra recién al
       llegar (`llego`): antes se vería gigante. Lo que NO puede pasar (anti-patrones): un zoom en
@@ -678,7 +679,8 @@ entrar desarma a Angie en luz y se hace noche, la costura con el prólogo.
       negra de golpe); un cuadro sin aviso al arrancar (el primero se pinta antes de prender la
       máscara); texto del aviso legible mientras se va; un PUNTO que queda en el medio y viaja
       hasta la colina (se leía como algo nuevo: el aviso termina en cero antes de que la cámara se
-      aleje); cortes entre tramos; más de unos 6 s; arrancar con la cara a la vista (medida por su
+      aleje); la pantalla NEGRA más de medio segundo (uno detrás del otro y con margen ×2, quedaba
+      un segundo y medio: se leía como que se había colgado); cortes entre tramos; más de unos 6 s; arrancar con la cara a la vista (medida por su
       caja de pantalla, una figura girada y estirada por los muelles dejaba un borde a la vista; y
       a cientos de aumentos se pinta más angosta que su geometría: de ahí el margen); el aviso de
       vuelta entero un cuadro al llegar (queda en escala 0 hasta que `listo` lo oculta). Antes
