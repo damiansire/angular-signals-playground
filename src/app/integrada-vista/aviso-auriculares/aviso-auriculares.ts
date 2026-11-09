@@ -158,19 +158,19 @@ export function aireQueCabe(x: number, y: number, ancho: number, alto: number): 
 // ─── El viaje de la cámara, del ojo de Angie a la colina ───────────────────────────────────────
 
 /**
- * Los dos tramos del viaje, en ms. Primero el aviso se cierra en un círculo y se va lejos, adentro
- * del ojo de Angie, hasta desaparecer: la noche era lo que ella miraba, y la pantalla queda toda del
+ * Los dos tramos del viaje, en ms. Primero el aviso se aleja, adentro del ojo de Angie, y mientras
+ * se achica se redondea en un círculo, hasta desaparecer: la noche era lo que ella miraba, y la pantalla queda toda del
  * negro de su ojo. Después la cámara se aleja, del ojo a la cara, a Angie en la piedra y a la colina
  * entera. Se pisan un poco: la cámara arranca cuando el aviso ya es una mota. Uno detrás del otro, la
  * pantalla quedaba un segundo y medio toda negra.
  */
-export const SE_CIERRA_MS = 1100;
+export const SE_CIERRA_MS = 1700;
 export const ALEJARSE_MS = 4200;
-export const SE_ALEJA_DESDE_MS = SE_CIERRA_MS - 250;
+export const SE_ALEJA_DESDE_MS = SE_CIERRA_MS - 300;
 export const VIAJE_MS = SE_ALEJA_DESDE_MS + ALEJARSE_MS;
 
-/** Hasta acá del cierre el aviso sigue del tamaño de la pantalla: el círculo se cierra adentro. */
-const ENCAJA = 0.35;
+/** Hasta acá del cierre el borde se redondea: de la pantalla entera al círculo que cabe adentro. */
+const REDONDEA = 0.4;
 /** Hasta dónde se va en escala antes de cerrarse en cero: parejo, como algo que se aleja. */
 const LEJOS = 0.004;
 
@@ -206,13 +206,15 @@ export function cuadroDelViaje(
   const colina = colinaEn(t, S0);
   if (t >= SE_CIERRA_MS) return { colina, aviso: 0, aire: cabe };
   const u = entre01(t / SE_CIERRA_MS);
-  if (u < ENCAJA) {
-    // Parejo en escala: en línea recta casi todo el tramo pasaba con la pantalla tapada.
-    return { colina, aviso: 1 / colina, aire: cubre * (cabe / cubre) ** (u / ENCAJA) };
-  }
-  // Se va parejo en escala y al final se cierra en cero: no queda ningún punto.
-  const v = suave((u - ENCAJA) / (1 - ENCAJA));
-  return { colina, aviso: ((1 - v) * LEJOS ** v) / colina, aire: cabe };
+  // Se aleja desde el primer cuadro y al final se cierra en cero: no queda ningún punto. El negro del
+  // ojo aparece alrededor porque el aviso se achica, no porque lo tape: quieto mientras el círculo se
+  // cerraba encima, el negro avanzaba hacia el medio y no se leía alejarse. Arranca despacio en
+  // escala: parejo, a los 200 ms ya iba por un tercio y se leía como un salto, no como alejarse.
+  const v = u * u;
+  // El borde se redondea mientras se aleja, parejo en escala: en línea recta casi todo el tramo
+  // seguía siendo el rectángulo de la pantalla.
+  const aire = cubre * (cabe / cubre) ** Math.min(1, u / REDONDEA);
+  return { colina, aviso: ((1 - v) * LEJOS ** v) / colina, aire };
 }
 
 /** La escala de la colina: quieta en la profundidad hasta que arranca, y después se aleja. */

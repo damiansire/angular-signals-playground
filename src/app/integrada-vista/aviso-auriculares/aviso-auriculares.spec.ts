@@ -132,11 +132,28 @@ describe('el viaje de la cámara, del ojo de Angie a la colina', () => {
     expect(c.aire).toBe(cubre);
   });
 
-  it('el aviso no se achica hasta que el círculo cabe adentro: no asoman sus bordes', () => {
-    for (let t = 0; t < SE_CIERRA_MS; t += 20) {
-      const c = en(t);
-      if (enPantalla(c) < 0.999) expect(c.aire).toBe(cabe);
+  it('se aleja desde el primer cuadro: no es un círculo negro que se cierra sobre el aviso quieto', () => {
+    expect(enPantalla(en(16))).toBeLessThan(1);
+    expect(enPantalla(en(200))).toBeLessThan(0.95);
+    // Cuando el borde termina de redondearse, el aviso ya va por menos de la mitad de su tamaño.
+    const redondo = [...Array(SE_CIERRA_MS / 10).keys()]
+      .map((i) => i * 10)
+      .find((t) => en(t).aire === cabe)!;
+    expect(enPantalla(en(redondo))).toBeLessThan(0.5);
+  });
+
+  it('se aleja despacio al principio: no es un salto a la mitad en un parpadeo', () => {
+    expect(enPantalla(en(300))).toBeGreaterThan(0.6);
+    expect(enPantalla(en(SE_CIERRA_MS / 2))).toBeGreaterThan(0.15);
+  });
+
+  it('el borde se redondea sin volver atrás: de la pantalla entera al círculo que cabe', () => {
+    let antes = Infinity;
+    for (let t = 0; t <= SE_CIERRA_MS; t += 10) {
+      expect(en(t).aire).toBeLessThanOrEqual(antes);
+      antes = en(t).aire;
     }
+    expect(en(SE_CIERRA_MS).aire).toBe(cabe);
   });
 
   it('el aviso se achica sin crecer nunca y termina en cero: la pantalla queda toda ojo', () => {
