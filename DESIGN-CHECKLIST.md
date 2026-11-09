@@ -922,7 +922,7 @@ Del minijuego de operadores (2026-11-08):
       raya y la mitad de abajo de la hoja, vacía. A 1100 px o más: dos columnas (leer | la nave y
       el desafío); entre 700 y 1099, la escena al lado del título y la demo y el desafío a lo ancho;
       por debajo, una sola columna.
-- [ ] La página integrada (`[integrada]`, por ahora las leyes 4 y 5) es UNA pieza: la escena de la nave es
+- [ ] La página integrada (`[integrada]`, por ahora las leyes 2, 4 y 5) es UNA pieza: la escena de la nave es
       el escenario y su pantalla muestra los números, una sola vez; abajo, la consola de la nave, en
       la paleta de su pantalla (vidrio `#1c1434`, borde `#5b4a96`, texto `#f2ecff`). Antes, la demo
       en papel repetía los números del panel y el desafío usaba otro código (`badge`, `total`): tres
@@ -948,6 +948,18 @@ Del minijuego de operadores (2026-11-08):
       480 px): debajo, la consola pasaba 10 px el pie, "correr" quedaba tapado por "Anterior" y al
       bajar el HUD pisaba "LEY 5". La caja de la nave incluye la antena: el choque con la anomalía
       se mide contra cada forma de la nave, no contra esa caja.
+- [ ] La ley 2 en el escenario: la pantalla de la nave es el DOM, una sola vez, con tres
+      instrumentos rotulados con el selector que los busca (`h1`, `#count`, `#status`). La consola
+      tiene las tres líneas, y el hueco es el selector de la del título (`'#titulo'`, `h1`,
+      `.titulo`). Cada línea sale de la nariz como una ficha con su selector y va al instrumento de
+      ese rótulo; la que no encuentra nodo busca por la pantalla, se vuelve `null` y cae debajo, a la
+      derecha, donde queda hasta la próxima corrida, y su renglón dice `// null`. En el medio, a
+      390 px la ficha caída pisaba la leyenda. Antes el desafío usaba otro código
+      (`<h2 class='titulo'>`) y no se entendía, la caja de nodos en papel se achicaba después de los
+      clicks y la nave era una lámina al costado. La mano señala el selector, no la punta del
+      renglón, y el paso 2 nombra el selector que dio `null`: con "Cambiá el querySelector." el paso
+      no entraba en la fila de "Mostrame" a 600 px, y la consola bajaba un renglón más. A 600×800 la
+      hoja baja 48 px (la ley 4, 121), con "correr" a la vista desde el arranque.
 - [ ] La ley va a la izquierda también entre 700 y 1099: la regla de la grilla la centraba.
 - [ ] Integrada, medido con input real a 1920×1080, 1440×900, 1366×768 (entra sin scroll),
       1280×640 (consola al costado) y 1024×700, y a 600×800: sin desborde horizontal, sin choques
