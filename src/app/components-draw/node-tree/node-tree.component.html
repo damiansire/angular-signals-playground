@@ -1,10 +1,26 @@
-<div
-  echarts
-  [options]="chartOption()"
-  [initOpts]="INIT_OPTS"
-  class="demo-chart"
-  (chartInit)="onChartInit($event)"
-  (chartRendered)="emitViewChanged()"
-  (chartFinished)="emitViewChanged()"
-  (chartGraphRoam)="emitViewChanged()"
-></div>
+<svg
+  #lienzo
+  class="arbol"
+  role="img"
+  [attr.aria-label]="descripcion()"
+  [attr.viewBox]="'0 0 ' + caja().ancho + ' ' + caja().alto"
+  [attr.width]="caja().ancho"
+  [attr.height]="caja().alto"
+>
+  @for (rama of ramas(); track rama.id) {
+    <path class="rama" [attr.d]="rama.d" [attr.stroke]="rama.color" pathLength="1" />
+  }
+  @for (nodo of visibles(); track nodo.id) {
+    <g class="nodo" [attr.data-nodo-id]="nodo.id" [style.color]="nodo.color">
+      <rect
+        [attr.x]="nodo.x"
+        [attr.y]="nodo.y"
+        [attr.width]="ancho()"
+        [attr.height]="ALTO"
+        rx="8"
+        [attr.fill]="nodo.color"
+      />
+      <text [attr.x]="nodo.x + ancho() / 2" [attr.y]="nodo.y + ALTO / 2">{{ nodo.nombre }}</text>
+    </g>
+  }
+</svg>

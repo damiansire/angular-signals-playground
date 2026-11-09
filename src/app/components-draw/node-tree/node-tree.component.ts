@@ -1,164 +1,132 @@
 ﻿import {
   ChangeDetectionStrategy,
   Component,
-  DestroyRef,
+  ElementRef,
   computed,
-  inject,
   input,
-  output,
+  viewChild,
 } from '@angular/core';
-import type { EChartsOption } from 'echarts';
-import type { ECharts } from 'echarts/core';
-import { NgxEchartsDirective, provideEchartsCore } from 'ngx-echarts';
 import { Link, NodeTree } from '../../libs/tree-model';
 import { getLevelColor } from '../node-level-color';
 
-// Tamaño fijo (en px de pantalla) del símbolo roundRect de cada nodo — echarts no lo escala
-// con el roam. Se necesita para poder anclar un conector visualmente al BORDE del nodo, no
-// a su centro (que es lo único que da convertToPixel).
-const NODE_SYMBOL_WIDTH = 78;
+// Medidas en unidades del viewBox. Una fila por tag (y) y una columna por nivel (x): la sangría es
+// menor que el ancho del nodo, pero dos nodos nunca comparten fila, así que no se pisan.
+const COLUMNA = 44;
+const FILA = 46;
+const ALTO = 30;
+const MARGEN = 14;
+// Ancho de un carácter de la etiqueta (mono, 12px) más el aire a los costados del texto.
+const ANCHO_LETRA = 7.4;
+const AIRE = 24;
+// El tronco baja del padre un poco adentro de su borde izquierdo y dobla con este radio.
+const TRONCO = 16;
+const CODO = 8;
 
+interface NodoDibujado {
+  id: string;
+  nombre: string;
+  x: number;
+  y: number;
+  color: string;
+}
+
+interface Rama {
+  id: string;
+  d: string;
+  color: string;
+}
+
+/**
+ * El árbol en SVG, armado por Angular: el DOM ya es el dibujo. Antes lo pintaba ECharts en un
+ * canvas, un chunk aparte que llegaba con `@defer (on idle)`; con la escena animando, el navegador
+ * casi nunca quedaba ocioso y el árbol aparecía al final, todo junto. Y para anclar los conectores
+ * había que preguntarle píxeles al canvas cuadro a cuadro.
+ */
 @Component({
   selector: 'app-node-tree',
-  imports: [NgxEchartsDirective],
-  // Build modular: `import('echarts')` traía los ~40 tipos de gráfico para dibujar UN grafo.
-  // El porqué del módulo aparte está en `echarts-graph.ts`.
-  providers: [provideEchartsCore({ echarts: () => import('./echarts-graph') })],
   templateUrl: './node-tree.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   styleUrl: './node-tree.component.css',
 })
 export class NodeTreeComponent {
-  // Dimensiones de arranque explícitas: echarts v6 LANZA si hace el primer setOption sobre un
-  // contenedor de 0px, y en la molécula el card puede montarse en 0px (mid-animación). El ancho
-  // fijo evita eso; después `onChartInit` lo corrige al ancho real del DOM (con dims explícitas,
-  // no `resize()` a secas, que no destraba el ancho de arranque).
-  protected readonly INIT_OPTS = { width: 800, height: 400 };
-
+  /** El árbol COMPLETO: el lienzo se mide con todos, así un nodo nuevo no corre a los demás. */
   readonly nodes = input<NodeTree[]>([]);
   readonly links = input<Link[]>([]);
-  // Se dispara cada vez que el canvas termina de pintar (carga, animación o roam del
-  // usuario): quien necesite leer posiciones en pantalla de los nodos sabe cuándo recalcular.
-  readonly viewChanged = output<void>();
+  /** Qué nodos se ven; sin valor, todos. */
+  readonly nodesToShow = input<string[] | undefined>();
 
-  private chart: ECharts | null = null;
-  private resizeObserver: ResizeObserver | null = null;
-  // echarts inicializa y re-pinta de forma asíncrona; sin esta guarda, un evento tardío
-  // puede emitir después de que el componente ya fue destruido (NG0953).
-  private destroyed = false;
+  private readonly lienzo = viewChild<ElementRef<SVGSVGElement>>('lienzo');
 
-  constructor() {
-    inject(DestroyRef).onDestroy(() => {
-      this.destroyed = true;
-      this.resizeObserver?.disconnect();
-      // ngx-echarts no dispone la instancia al destruirse: sin esto, el canvas y sus
-      // listeners quedan vivos en el DOM más allá de la vida del componente.
-      this.chart?.dispose();
+  protected readonly ALTO = ALTO;
+
+  protected readonly ancho = computed(
+    () => Math.max(0, ...this.nodes().map((n) => n.name.length)) * ANCHO_LETRA + AIRE,
+  );
+
+  private readonly todos = computed(() =>
+    this.nodes().map<NodoDibujado>((n) => ({
+      id: n.id,
+      nombre: n.name,
+      x: MARGEN + n.x * COLUMNA,
+      y: MARGEN + n.y * FILA,
+      color: n.color || getLevelColor(n.level),
+    })),
+  );
+
+  protected readonly visibles = computed(() => {
+    const mostrar = this.nodesToShow();
+    if (!mostrar) return this.todos();
+    const set = new Set(mostrar);
+    return this.todos().filter((n) => set.has(n.id));
+  });
+
+  protected readonly ramas = computed<Rama[]>(() => {
+    const porId = new Map(this.visibles().map((n) => [n.id, n]));
+    return this.links().flatMap(({ source, target }) => {
+      const padre = porId.get(source);
+      const hijo = porId.get(target);
+      if (!padre || !hijo) return [];
+      const x = padre.x + TRONCO;
+      const y = hijo.y + ALTO / 2;
+      return [
+        {
+          id: `${source}>${target}`,
+          d: `M ${x} ${padre.y + ALTO} V ${y - CODO} Q ${x} ${y} ${x + CODO} ${y} H ${hijo.x}`,
+          color: padre.color,
+        },
+      ];
     });
-  }
+  });
 
-  chartOption = computed<EChartsOption>(() => ({
-    backgroundColor: 'transparent',
-    tooltip: {},
-    animationDurationUpdate: 600,
-    animationEasingUpdate: 'cubicOut',
-    series: [
-      {
-        type: 'graph',
-        symbol: 'roundRect',
-        symbolSize: [NODE_SYMBOL_WIDTH, 32],
-        // ECharts encaja los CENTROS de los nodos en el lienzo: a zoom 1 las hojas de los costados
-        // quedaban cortadas contra el borde. Un poco más lejos, y los nodos con su tamaño de siempre
-        // (si no, se achican con el zoom). Con márgenes de caja, en cambio, deformaba los nodos.
-        zoom: 0.8,
-        nodeScaleRatio: 0,
-        // Se arrastra, pero la rueda no hace zoom: el árbol vive en pantallas que scrollean (la
-        // molécula, la hoja del manual), y con zoom la rueda encima del árbol no movía nada.
-        roam: 'move',
-        label: {
-          show: true,
-          fontFamily: 'var(--font-mono, ui-monospace, monospace)',
-          fontSize: 12,
-          fontWeight: 600,
-          color: '#fff',
-        },
-        edgeSymbol: ['none', 'none'],
-        // Cada nodo lleva su itemStyle horneado (en vez de un color por callback) para poder
-        // teñir el GLOW con su propio color: sobre el clima claro un aro de luz del color del
-        // nodo lo hace leer "encendido" (energía de señal) en vez de una pastilla plana.
-        data: this.nodes().map((node) => {
-          const c = node.color || getLevelColor(node.level);
-          return {
-            ...node,
-            itemStyle: {
-              color: c,
-              borderColor: 'rgba(255, 255, 255, 0.85)',
-              borderWidth: 1,
-              shadowColor: c,
-              shadowBlur: 16,
-              shadowOffsetY: 0,
-            },
-          };
-        }),
-        links: this.links(),
-        // Las aristas heredan el color del nodo de ORIGEN ('source') y curvan suave con un halo
-        // tenue: se leen como trazas de señal que fluyen entre nodos, no cables grises muertos.
-        lineStyle: {
-          color: 'source',
-          opacity: 0.9,
-          width: 2.5,
-          curveness: 0.28,
-          shadowColor: 'rgba(37, 99, 235, 0.18)',
-          shadowBlur: 8,
-        },
-      },
-    ],
-  }));
-
-  onChartInit(instance: ECharts) {
-    this.chart = instance;
-    // El canvas arranca con `INIT_OPTS` (width 800, para no romper en 0px). En el montaje imperativo
-    // de la molécula el autoResize de ngx-echarts no dispara, dejando el canvas en 800 (desborda en
-    // cards angostas). Observamos el contenedor y forzamos las dimensiones REALES del DOM: `resize()`
-    // sin args no destraba el ancho de arranque, hay que pasarlas explícitas.
-    const dom = instance.getDom();
-    const applySize = (): void => {
-      if (this.destroyed) return;
-      const width = dom.clientWidth;
-      if (width > 0) instance.resize({ width, height: dom.clientHeight || 400 });
+  protected readonly caja = computed(() => {
+    const nodos = this.todos();
+    if (nodos.length === 0) return { ancho: 0, alto: 0 };
+    return {
+      ancho: Math.max(...nodos.map((n) => n.x)) + this.ancho() + MARGEN,
+      alto: Math.max(...nodos.map((n) => n.y)) + ALTO + MARGEN,
     };
-    this.resizeObserver = new ResizeObserver(applySize);
-    this.resizeObserver.observe(dom);
-    applySize();
-    this.emitViewChanged();
-  }
+  });
 
-  emitViewChanged() {
-    if (!this.destroyed) {
-      this.viewChanged.emit();
-    }
-  }
+  protected readonly descripcion = computed(() =>
+    this.visibles()
+      .map((n) => n.nombre)
+      .join(', '),
+  );
 
-  /** Posición en pantalla (viewport) del borde derecho del nodo `id`, o `null` si no está
-   * pintado. Es el borde (no el centro) porque un conector debe verse SALIR del rectángulo,
-   * no nacer de un punto perdido detrás suyo. */
+  /** Posición en pantalla (viewport) del borde izquierdo o derecho del nodo `id`, a media altura.
+   *  Sale de la cuenta del layout y no del nodo pintado: el nodo entra animado, el conector apunta
+   *  a donde termina, y quien pregunta puede hacerlo antes de que el nodo se pinte. */
   getScreenEdgePosition(
     id: string,
     side: 'left' | 'right' = 'right',
   ): { x: number; y: number } | null {
-    const node = this.nodes().find((n) => n.id === id);
-    if (!this.chart || !node) {
-      return null;
-    }
-    const pixel = this.chart.convertToPixel({ seriesIndex: 0 }, [node.x, node.y]);
-    if (!pixel) {
-      return null;
-    }
-    const rect = this.chart.getDom().getBoundingClientRect();
-    // Borde derecho o izquierdo del símbolo según de qué lado sale el conector (el código puede
-    // estar a la derecha del árbol o a su izquierda): el conector debe SALIR del rectángulo hacia
-    // el código, no cruzarlo por encima.
-    const edgeX = pixel[0] + (side === 'left' ? -NODE_SYMBOL_WIDTH / 2 : NODE_SYMBOL_WIDTH / 2);
-    return { x: rect.left + edgeX, y: rect.top + pixel[1] };
+    const nodo = this.todos().find((n) => n.id === id);
+    const svg = this.lienzo()?.nativeElement;
+    const { ancho } = this.caja();
+    if (!nodo || !svg || ancho === 0) return null;
+    const rect = svg.getBoundingClientRect();
+    const escala = rect.width / ancho;
+    const x = side === 'left' ? nodo.x : nodo.x + this.ancho();
+    return { x: rect.left + x * escala, y: rect.top + (nodo.y + ALTO / 2) * escala };
   }
 }
