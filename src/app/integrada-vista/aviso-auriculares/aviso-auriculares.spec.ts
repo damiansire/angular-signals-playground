@@ -3,6 +3,7 @@ import {
   NUCLEO,
   ALEJARSE_MS,
   SE_CIERRA_MS,
+  SE_ALEJA_DESDE_MS,
   VIAJE_MS,
   aireQueCabe,
   aireQueCubre,
@@ -144,9 +145,13 @@ describe('el viaje de la cámara, del ojo de Angie a la colina', () => {
       expect(enPantalla(en(t))).toBeLessThanOrEqual(antes + 1e-12);
       antes = enPantalla(en(t));
     }
-    // Quieta un rato con la pantalla toda ojo, antes de que la cámara se aleje.
-    for (let t = SE_CIERRA_MS * 0.8; t < SE_CIERRA_MS; t += 10) expect(en(t).aviso).toBe(0);
-    expect(en(SE_CIERRA_MS - 1).colina).toBe(S0);
+    expect(enPantalla(en(SE_CIERRA_MS))).toBe(0);
+  });
+
+  it('la cámara arranca cuando el aviso ya es una mota, y no antes: no queda un rato toda negra', () => {
+    for (let t = 0; t < SE_ALEJA_DESDE_MS; t += 10) expect(en(t).colina).toBe(S0);
+    expect(SE_ALEJA_DESDE_MS).toBeLessThan(SE_CIERRA_MS);
+    expect(enPantalla(en(SE_ALEJA_DESDE_MS))).toBeLessThan(0.01);
   });
 
   it('mientras la cámara se aleja no queda ningún punto del aviso', () => {
@@ -160,12 +165,12 @@ describe('el viaje de la cámara, del ojo de Angie a la colina', () => {
       expect(c.colina).toBeLessThanOrEqual(antes + 1e-9);
       antes = c.colina;
     }
-    expect(en(SE_CIERRA_MS + ALEJARSE_MS - 1).colina).toBeCloseTo(1, 1);
+    expect(en(VIAJE_MS - 1).colina).toBeCloseTo(1, 1);
     expect(en(VIAJE_MS).colina).toBe(1);
   });
 
   it('como en Powers of Ten: a mitad de camino, tiempos iguales dividen la escala por lo mismo', () => {
-    const t = (f: number) => SE_CIERRA_MS + ALEJARSE_MS * f;
+    const t = (f: number) => SE_ALEJA_DESDE_MS + ALEJARSE_MS * f;
     const r1 = en(t(0.4)).colina / en(t(0.5)).colina;
     const r2 = en(t(0.5)).colina / en(t(0.6)).colina;
     expect(r1).toBeCloseTo(r2, 1);
