@@ -1,7 +1,14 @@
-import { ChangeDetectionStrategy, Component, computed, effect, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, effect, input, signal } from '@angular/core';
 import { gsap } from 'gsap';
 import { CD_EDGES, CD_NODES } from '../../../libs/cd-tree';
-import { EscenaDelManual, chispas, cieloCentradoEn, pintarPantalla } from './escena-del-manual';
+import {
+  EscenaDelManual,
+  alCambiarDeTamano,
+  chispas,
+  cieloCentradoEn,
+  pintarPantalla,
+} from './escena-del-manual';
+import { type LoQueImporta, cieloAngosto } from './escenas.logica';
 import { PALETA, el } from './nave-del-manual';
 
 /** Una llamada de la demo o del desafío; `n` sube con cada una, aunque se repita la misma API. */
@@ -24,6 +31,14 @@ const aPantalla = (x: number, y: number): { x: number; y: number } => ({
 const REVISADO = '#7fdcae';
 const LECTURA = { x: 222, y: 172, ancho: 158, alto: 28 } as const;
 const TOTAL_DE_NODOS = CD_NODES.length;
+/**
+ * En angosto se encuadra la cerca entera, con la anomalía de afuera y el fuego aunque laten (x -16 a
+ * 396): con el cielo de sobra, a 390 px la cerca y el "0/7" de la lectura quedaban cortados a la
+ * derecha y la anomalía a la izquierda. Centrada en la cerca y su rótulo, como el cielo ancho.
+ */
+const LO_QUE_IMPORTA: LoQueImporta = { x: -16, ancho: 412, centro: 111 };
+/** A 390 la ventanilla queda casi cuadrada: el cielo de 340 no alcanzaba para encuadrarla. */
+const ALTO_PINTADO = 520;
 
 /** Lo que dice la lectura de la pantalla. */
 interface Lectura {
@@ -43,7 +58,7 @@ interface Lectura {
   selector: 'app-escena-zona',
   template: `<svg
     class="esc"
-    [attr.viewBox]="cielo"
+    [attr.viewBox]="cielo()"
     preserveAspectRatio="xMidYMid slice"
     role="img"
     [attr.aria-label]="descripcion()"
@@ -65,7 +80,8 @@ export class EscenaZonaComponent extends EscenaDelManual {
 
   protected readonly semilla = 53;
   // Centrado en la cerca y su rótulo (y 4 a 218), no en la nave: si no, el rótulo quedaba afuera.
-  protected readonly cielo = cieloCentradoEn(111);
+  // El primer cuadro va con el cielo alto, que es el que se pinta; después, el que pida el ancho.
+  protected readonly cielo = signal(cieloCentradoEn(111, ALTO_PINTADO));
   protected readonly descripcion = computed(
     () =>
       `Pantalla de la nave: total ${this.enPantalla()}${this.vieja() ? ' (viejo)' : ''}, ` +
@@ -84,6 +100,12 @@ export class EscenaZonaComponent extends EscenaDelManual {
 
   constructor() {
     super();
+    alCambiarDeTamano(this.host, (ancho, alto) =>
+      this.cielo.set(
+        cieloAngosto(ancho, alto, { altoDelCielo: ALTO_PINTADO, importa: LO_QUE_IMPORTA }) ??
+          cieloCentradoEn(111),
+      ),
+    );
     effect(() => {
       const llamada = this.llamada();
       const lectura: Lectura = {
