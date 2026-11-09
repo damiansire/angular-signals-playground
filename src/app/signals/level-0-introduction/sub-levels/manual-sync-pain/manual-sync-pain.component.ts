@@ -10,7 +10,6 @@ import {
 import { PaginaDelManualComponent } from '../../manual/pagina-del-manual.component';
 import { EscenaAManoComponent, type LugarDelPanel } from '../../manual/escena-a-mano.component';
 import { conCortes } from '../../../../libs/cortes-de-codigo';
-import { siguienteSinTocar } from '../../manual/guia.logica';
 
 const TODOS = new Set<SpotId>(['value', 'mult2', 'mult3']);
 const SOLO_EL_VALOR = new Set<SpotId>(['value']);
@@ -69,17 +68,13 @@ export class ManualSyncPainComponent {
   );
 
   /**
-   * La mano: dos sumas con el handler incompleto (los lugares olvidados quedan viejos), completar el
-   * handler, y una suma más con él. El botón lleva la cuenta, así cada suma es un toque distinto.
+   * La mano dice lo mismo que los pasos: suma hasta que un lugar queda viejo, después el hueco, y una
+   * suma más con el handler completo. El botón lleva la cuenta, así cada suma es un toque distinto.
    */
-  private readonly pasos = signal<readonly string[]>([]);
   protected readonly guia = computed(() => {
     if (this.sano()) return null;
-    const paso = siguienteSinTocar(['suma-1', 'suma-2', 'completo', 'suma-3'], this.pasos());
-    if (paso === null) return null;
-    return paso === 'completo'
-      ? '[data-guia="completo"]'
-      : `.msp-inc[data-cuenta="${this.panel().count}"]`;
+    if (this.vioElBug() && !this.completo()) return '[data-guia="completo"]';
+    return `.msp-inc[data-cuenta="${this.panel().count}"]`;
   });
 
   protected sumar(): void {
@@ -87,9 +82,6 @@ export class ManualSyncPainComponent {
     this.panel.update((p) => increment(p, completo ? TODOS : SOLO_EL_VALOR));
     this.corrioCompleto.set(completo);
     if (this.viejos().size > 0) this.vioElBug.set(true);
-    const pasos = this.pasos();
-    const suma = completo ? 'suma-3' : (siguienteSinTocar(['suma-1', 'suma-2'], pasos) ?? 'suma-2');
-    this.pasos.set([...pasos, suma]);
   }
 
   /** Tocar el hueco escribe las dos líneas que faltaban; tocarlas otra vez las borra. */
@@ -97,6 +89,5 @@ export class ManualSyncPainComponent {
     const completo = !this.completo();
     this.completo.set(completo);
     if (!completo) this.corrioCompleto.set(false);
-    if (completo) this.pasos.update((pasos) => [...pasos, 'completo']);
   }
 }

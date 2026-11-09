@@ -48,6 +48,18 @@ describe('ManualSyncPainComponent', () => {
     expect(etapas()[1].classList).toContain('pm-etapa--hecho');
   });
 
+  it('la mano dice lo mismo que los pasos: sumar, el hueco apenas algo queda viejo, sumar', () => {
+    const mano = () =>
+      (fixture.componentInstance as unknown as { guia: () => string | null }).guia();
+    expect(mano()).toBe('.msp-inc[data-cuenta="0"]');
+    click('.msp-inc');
+    expect(mano()).toBe('[data-guia="completo"]');
+    click('.msp-hueco');
+    expect(mano()).toBe('.msp-inc[data-cuenta="1"]');
+    click('.msp-inc');
+    expect(mano()).toBeNull();
+  });
+
   it('el panel de la nave dice qué quedó viejo', () => {
     click('.msp-inc');
     const panel = el.querySelector('app-escena-a-mano svg')?.getAttribute('aria-label') ?? '';
