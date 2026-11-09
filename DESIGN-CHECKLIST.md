@@ -920,7 +920,10 @@ Del minijuego de operadores (2026-11-08):
       renglón de lectura, `total` y `N/7` revisados: el valor solo se ve ahí, en rojo con "!"
       cuando quedó viejo, y cambia cuando el barrido enciende el árbol, no antes (sin movimiento,
       al toque). Antes la demo en papel tenía su propio árbol y su propio total, y el desafío
-      parcheaba con otro código.
+      parcheaba con otro código. A 600 px "correr" va al lado del código (debajo, solo bajo
+      480 px): debajo, la consola pasaba 10 px el pie, "correr" quedaba tapado por "Anterior" y al
+      bajar el HUD pisaba "LEY 5". La caja de la nave incluye la antena: el choque con la anomalía
+      se mide contra cada forma de la nave, no contra esa caja.
 - [ ] La ley va a la izquierda también entre 700 y 1099: la regla de la grilla la centraba.
 - [ ] Integrada, medido con input real a 1920×1080, 1440×900, 1366×768 (entra sin scroll),
       1280×640 (consola al costado) y 1024×700, y a 600×800: sin desborde horizontal, sin choques
