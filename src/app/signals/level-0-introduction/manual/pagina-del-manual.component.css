@@ -12,7 +12,7 @@
 
 /* A lo ancho, dos columnas que corren cada una por su cuenta: con una grilla de filas compartidas,
    la escena (más alta que la ley) empujaba la demo y dejaba un hueco a la izquierda. La página va
-   al medio del alto, con la escena alrededor; la que se llena (`llena`) lo ocupa entero. */
+   al medio del alto, con la escena alrededor. */
 .pm {
   position: relative;
   flex: 1 0 auto;
@@ -20,9 +20,6 @@
   grid-template-columns: minmax(0, 1fr) clamp(19rem, 29%, 26rem);
   align-content: center;
   gap: 1.25rem clamp(1.5rem, 2.6vw, 2.75rem);
-}
-.pm--llena {
-  align-content: stretch;
 }
 .pm-col {
   display: flex;
@@ -161,10 +158,6 @@
   outline-offset: 2px;
 }
 
-.pm--llena .pm-mesa,
-.pm--llena .pm-demo {
-  flex: 1 0 auto;
-}
 .pm-demo {
   display: flex;
   flex-direction: column;
@@ -333,9 +326,6 @@
       'mesa mesa'
       'paso2 paso2';
     gap: 1rem 1.5rem;
-  }
-  .pm--llena {
-    grid-template-rows: auto 1fr auto;
   }
   .pm-col {
     display: contents;

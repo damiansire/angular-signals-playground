@@ -3,22 +3,6 @@
  * navegador. La lámina solo traduce el resultado a movimiento.
  */
 
-/**
- * Qué posiciones del documento están a la vista, de menor a mayor. La demo guarda los nodos en el
- * orden en que se tocaron y la lámina los ubica por su lugar en el HTML; los ids que ya no están en
- * el árbol no cuentan.
- */
-export function posicionesEnElDocumento(
-  orden: readonly string[],
-  visibles: readonly string[],
-): number[] {
-  const lugar = new Map(orden.map((id, i) => [id, i]));
-  return [...new Set(visibles)]
-    .map((id) => lugar.get(id))
-    .filter((i): i is number => i !== undefined)
-    .sort((a, b) => a - b);
-}
-
 export type Costo = 'barato' | 'medio' | 'caro';
 
 /**

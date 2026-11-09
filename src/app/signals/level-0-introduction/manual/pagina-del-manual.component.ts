@@ -40,11 +40,6 @@ export class PaginaDelManualComponent {
   /** Lo próximo que hay que tocar en la demo; `null` cuando ya no hace falta guiar. */
   readonly guia = input<string | null>(null);
   /**
-   * La mesa ocupa todo el alto: solo para una demo que crece con él (el árbol de la ley 1). Una de
-   * tamaño fijo, estirada, dejaba media mesa de papel vacía.
-   */
-  readonly llena = input(false);
-  /**
    * La página en una sola pieza: la escena de la nave es el escenario, su pantalla muestra lo que
    * pasa, y abajo va su consola (`[consola]`) con los dos pasos, probar (`[hacer]`) y arreglar
    * (`[arreglo]`). Sin esto, la demo, la escena y el desafío van en tres tarjetas.

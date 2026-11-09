@@ -26,7 +26,7 @@
   }
 </ng-template>
 
-<article #marco class="pm" [class.pm--llena]="llena()" [class.pm--integrada]="integrada()">
+<article #marco class="pm" [class.pm--integrada]="integrada()">
   @if (integrada()) {
     <ng-container [ngTemplateOutlet]="cabeza" />
     <!-- Una sola pieza: la nave es el escenario y su pantalla muestra lo que pasa; abajo, su
