@@ -1004,7 +1004,9 @@ Del minijuego de operadores (2026-11-08):
       que lo lee. El hueco es la declaración (`let total = 0;` ↔ `const total = signal(0);`) y la
       escritura la sigue (`total++;` ↔ `total.update((t) => t + 1);`): con `let` se barre el árbol
       entero, los siete quedan en rosa y la lectura en rojo; con el signal el aviso corre solo por
-      los dos hilos, se encienden los dos `<p>` en verde y el resto se apaga. La lectura va ARRIBA
+      los dos hilos, se encienden los dos `<p>` en verde y el resto se apaga. La cuenta cambia
+      cuando el aviso llega o el barrido termina, no antes (sin movimiento, al toque): al toque,
+      decía 2/7 con el árbol todavía en rosa. La lectura va ARRIBA
       del árbol: abajo la cruzaban los hilos, que entran a los nodos desde abajo. Antes la demo en
       papel tenía su propio árbol de pastillas con "count.set(1)" y "Reiniciar", y el desafío era
       un sistema de perilla aparte (`SIGNAL_NOTIFY_SYSTEM`): tres tarjetas que a 390 scrolleaban.
