@@ -659,26 +659,25 @@ entrar desarma a Angie en luz y se hace noche, la costura con el prólogo.
       Después la CÁMARA SE ALEJA como en Powers of Ten (2026-11-09, `cuadroDelViaje`): la noche
       era un suspiro de Angie y vuelve a su boca. Tres tramos: (a) la BOCANADA (`BOCANADA_MS`): el
       aviso se cierra en un círculo blando (máscara con `--aa-aire`) hasta caber adentro
-      (`aireQueCabe`, si se achica antes asoman sus bordes rectos) y después se achica a `CHICO`,
-      un circulito con la noche en miniatura, delante de la boca enorme y abierta en "o" de la
-      Angie de la colina (`abrirLaBoca`); el texto se va primero; (b) la cámara se ALEJA
+      (`aireQueCabe`, si se achica antes asoman sus bordes rectos), después se va parejo en escala
+      hasta CERO adentro de la boca enorme y abierta en "o" de la Angie de la colina
+      (`abrirLaBoca`), y la pantalla queda un rato toda del color de la boca, quieta; el texto se
+      va primero; (b) la cámara se ALEJA
       (`ALEJARSE_MS`) de la boca a la cara, a Angie en la piedra y a la colina entera, en escala
       pareja (cada tramo de tiempo divide la escala por lo mismo); arranca desde ADENTRO de la
-      boca, con toda la pantalla del color de la "o" (#940054) y el aviso como un punto en el
-      medio (`profundidadDesdeLaBoca`: las cuatro esquinas, en el dibujo de la "o", caen adentro
-      con margen ×2, tope 400); después asoma el borde de la "o", la cara, Angie y la colina; el
-      circulito se achica más
-      despacio que el mundo (`PERSISTE`) y llega a la colina todavía visible; (c) TRAGA
-      (`TRAGA_MS`): el circulito entra y la boca se cierra con un trago. El título de la colina
+      boca, con toda la pantalla del color de la "o" (#940054) (`profundidadDesdeLaBoca`: las cuatro esquinas, en el dibujo de la "o", caen adentro
+      con margen ×2, tope 400); después asoma el borde de la "o", la cara, Angie y la colina; (c)
+      TRAGA (`TRAGA_MS`): al llegar, la boca se cierra con un trago. El título de la colina
       entra recién al llegar (`llego`): antes se vería gigante. Lo que NO puede pasar
       (anti-patrones): un zoom en línea recta (la boca pasaba en un parpadeo y la colina se
       arrastraba); la colina en RECTÁNGULOS (animada por el compositor, el navegador la pintaba
       una sola vez a la escala del arranque: por eso va cuadro a cuadro con
-      `requestAnimationFrame`, y cada cuadro se vuelve a dibujar); el circulito al costado de la
+      `requestAnimationFrame`, y cada cuadro se vuelve a dibujar); el aviso al costado de la
       boca (la cara se mueve sola y a 40× dos píxeles se notan: la cámara SIGUE a la "o" visible
       cada cuadro; la del perfil también existe, apagada, y mide cero); un cuadro sin aviso al
-      arrancar (el primero se pinta antes de prender la máscara); texto del aviso legible en el
-      circulito; cortes entre tramos; más de unos 6 s; arrancar con la cara a la vista (con la
+      arrancar (el primero se pinta antes de prender la máscara); texto del aviso legible mientras
+      se va; un PUNTO que queda en el medio de la boca y viaja hasta la colina (se leía como algo
+      nuevo: el aviso termina en cero antes de que la cámara se aleje); cortes entre tramos; más de unos 6 s; arrancar con la cara a la vista (con la
       boca medida por su caja de pantalla, girada y estirada por el muelle, asomaba medio borde
       de la "o"; y la "o" se pinta más angosta que su geometría a cientos de aumentos: de ahí el
       margen); el aviso de vuelta entero un cuadro al llegar (queda en escala 0 hasta que
