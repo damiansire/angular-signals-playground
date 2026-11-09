@@ -35,13 +35,13 @@ brilla como un sol. Por eso de ahí llega la voz del capitán, y por eso ahí va
 
 ## Personajes
 
-| Quién          | En el guion              | Qué lo define                                                                                                                           |
-| -------------- | ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------- |
-| Capitán        | `cap`                    | Da las órdenes y hace las preguntas que abren cada concepto ("¿Y quién le avisó a la pantalla?")                                        |
-| Nave A         | `naveA`                  | "Extraño a mi familia." y el deseo que quedó cortado: "Y yo quiero unas…". Es la que le dice "Siempre tan aguafiestas" a la exploradora |
-| Nave B         | `naveB`                  | "Yo quiero comer helado de chocolate."                                                                                                  |
-| La exploradora | `nave4`                  | La impaciente: "¡Oigan! Dejen de desear y apúrense, van muy lento." Queda afuera de la anomalía                                         |
-| Angie          | `voz`, después `mascota` | La gema que espera en la colina, y es la exploradora. Habla tranquila, enseña sin apurar y no dice quién es hasta la penúltima etapa    |
+| Quién          | En el guion              | Qué lo define                                                                                                                                               |
+| -------------- | ------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Capitán        | `cap`                    | Da las órdenes y hace las preguntas que abren cada concepto ("¿Y quién le avisó a la pantalla?")                                                            |
+| Nave A         | `naveA`                  | "Extraño a mi familia." y el antojo que la exploradora pisa: "Y yo quiero unas papas fritas…". Es la que le dice "Siempre tan aguafiestas" a la exploradora |
+| Nave B         | `naveB`                  | "Yo quiero comer helado de chocolate."                                                                                                                      |
+| La exploradora | `nave4`                  | La impaciente: "¡Oigan! Dejen de desear y apúrense, van muy lento." Queda afuera de la anomalía                                                             |
+| Angie          | `voz`, después `mascota` | La gema que espera en la colina, y es la exploradora. Habla tranquila, enseña sin apurar y no dice quién es hasta la penúltima etapa                        |
 
 Angie es **ella**.
 

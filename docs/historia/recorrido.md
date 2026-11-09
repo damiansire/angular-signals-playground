@@ -65,7 +65,7 @@ de Angie es un globo de diálogo, no una nube.
 ### Volver a casa
 
 Es el acto 0 del prólogo, sin cambios de fondo: las cuatro naves, los deseos (`casa-volver`,
-`casa-familia`, `casa-helado`), el deseo cortado (`casa-unas`), la exploradora que los apura
+`casa-familia`, `casa-helado`), las papas fritas que nadie deja terminar (`casa-unas`), la exploradora que los apura
 (`casa-apuren`) y "Siempre tan aguafiestas." (`linea-msxheigk`). La exploradora ya lleva los colores
 de Angie.
 
@@ -259,8 +259,8 @@ alcanzaban, ahora funcionan traducidos a signals. El sistema concreto está en
 
 ## Epílogo
 
-La colina otra vez, ahora con todos. Helado de chocolate y el deseo que quedó cortado (falta decidir
-qué era). Angie ya no mira el sol con melancolía. "Este mundo también es casa." (`c12-casa`).
+La colina otra vez, ahora con todos. Helado de chocolate y las papas fritas que la exploradora
+pisó. Angie ya no mira el sol con melancolía. "Este mundo también es casa." (`c12-casa`).
 
 ## Los 40 desafíos
 

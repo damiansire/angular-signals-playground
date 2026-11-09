@@ -306,6 +306,12 @@ puede alcanzar" son dos cosas distintas y hay que chequear las dos.
 - [ ] Un bucle que avanza un índice no lo hace adentro de una llamada con `?.`: sin quien escuche,
       el argumento no se evalúa y el bucle no termina. Pasó con `alPasarPunto` y colgaba el prólogo
       abierto desde la bitácora (y a Karma, que se desconectaba sin nombrar el spec).
+- [ ] El HUD del prólogo son íconos de 44 px (pausa, sonido, pantalla completa; a la derecha, empezar
+      de cero) con su nombre en `aria-label` y `title`, que cambia con el estado. No hay "Saltar
+      intro" ni "Velocidad": el prólogo es el comienzo de la historia, no una intro que se saltea.
+- [ ] Con el manual abierto en el prólogo, su cabecera (el libro, las marcas, "1 de 5" y "Cerrar")
+      va en la fila del HUD, entre los íconos: una sola franja arriba. El HUD queda por encima de la
+      hoja para seguir a mano. Por debajo de 760 px el nombre del libro se va.
 - [ ] "Empezar de cero" está en la barra, en el HUD del prólogo y en la colina, y pide un segundo
       toque que caduca. Su globo en la colina es corto: el largo tapaba el título a 1024×768, y el
       del "¿seguro?" se ve sin apuntar. Borrar recarga SIN la query.
@@ -782,7 +788,8 @@ Del minijuego de operadores (2026-11-08):
       dispara, el velo y la hoja se apartan (`prologo--disparo`): tapado, el único aviso del acierto
       pasaba detrás de la hoja.
 - [ ] La hoja dice qué hacer: qué es cada nombre del código (`v`, `c === 'combustible'`), qué tiene que
-      salir, la meta de la lectura y "Tocá el operador marcado". Sin esto el hueco era adivinar.
+      salir y la meta de la lectura. Sin esto el hueco era adivinar. Qué tocar lo dice la flecha
+      "tocá acá" sobre el operador: la frase "Tocá el operador marcado" repetía lo mismo.
 - [ ] Los huecos se arreglan con `map`, `tap` y `filter`, uno por nave: los tres más simples, con
       un encargo que se dice en una frase (duplicar la velocidad, verla en el panel, sacar el agua).
       Con `scan` y `throttleTime` el primerizo no tenía de dónde sacar qué hacían.

@@ -8,9 +8,6 @@ fecha y adónde fue. Los ids (H1, J1…) sirven para nombrarlos en una sesión (
 
 ## Historia
 
-- **H1. El deseo cortado.** "Y yo quiero unas…" (`casa-unas`) nunca se dijo, y el epílogo lo
-  completa junto al helado de chocolate. Falta elegir qué era. **Propuesta:** "unas vacaciones", y
-  terminan de vacaciones para siempre en la colina.
 - **H2. La familia.** "Extraño a mi familia." (`casa-familia`) queda sin resolver si se quedan a
   vivir en Signal Space. **Propuesta:** la familia es la tripulación, que estaba incompleta sin la
   exploradora; en el epílogo están los cuatro.
@@ -151,6 +148,9 @@ Textos que estaban desactualizados y no dependían de la historia nueva. Cerrado
 
 ## Cerrados
 
+- **H1. El deseo cortado** (2026-11-09). Eran papas fritas: "Y yo quiero unas papas fritas…"
+  (`casa-unas`) se dice entero, con su globo de papas como el del helado, y la exploradora igual
+  la pisa. El epílogo las sirve junto al helado de chocolate. Está en el canon y en el recorrido.
 - **H6. El salto atrás** (2026-11-08). Sin marca: el prólogo arranca directo después de la colina,
   sin cartel de "Un rato antes…". Está en el recorrido, en "La colina".
 - **H7. El intercambio con el sol** (2026-11-08). "Esto es demasiado caótico." y "Supongo que sí…
