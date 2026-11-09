@@ -8,6 +8,7 @@ import {
   ErrorHandler,
   Injector,
   Provider,
+  TemplateRef,
   Type,
   afterNextRender,
   createComponent,
@@ -47,6 +48,7 @@ import { ARBOL_DE_SIGNAL_SPACE } from './arbol-de-signal-space';
 import { HojaDelHuecoComponent } from './hoja-del-hueco/hoja-del-hueco.component';
 import { PAGINA_DEL_MANUAL } from '../signals/level-0-introduction/manual/pagina-del-manual';
 import { vigilarEstampado } from './estampado-tardio';
+import { apagarLaTele, encenderLaTele } from './tele-del-manual';
 import { AYUDA_DE_ANGIE } from '../components-atom/manipulable-system/manipulable-system.component';
 
 import { signalsRoutesTree } from '../app.routes';
@@ -108,15 +110,16 @@ const CONFIRMACION_DE_BORRADO_MS = 4000;
  */
 interface Libro {
   readonly nombre: string;
-  readonly cerrar: string;
+  /** Lo que dice el botón de la última página: adónde sigue la historia. */
+  readonly sigue: string;
   readonly primeraLey: number;
   readonly concepto?: number;
   readonly ayuda?: boolean;
 }
-const MANUAL: Libro = { nombre: 'Manual de a bordo', cerrar: 'Cerrar el manual', primeraLey: 1 };
+const MANUAL: Libro = { nombre: 'Manual de a bordo', sigue: 'Seguir la historia', primeraLey: 1 };
 const SIGNAL_SPACE: Libro = {
   nombre: 'Signal Space',
-  cerrar: 'Seguir',
+  sigue: 'Seguir',
   primeraLey: PAGINAS_DEL_MANUAL.length + 1,
 };
 
@@ -346,8 +349,9 @@ export class IntegradaVistaComponent {
 
   /**
    * El manual de a bordo del prólogo. El motor frena la historia con la orden del capitán ya
-   * leída y pide `leerManual`; esto muestra una página por vez y resuelve al cerrarlo. Se lee a
-   * modo de estudio: se puede ir y volver, y cerrarlo no exige resolver nada (ADR 0002).
+   * leída y pide `leerManual`; esto muestra una página por vez y resuelve después de la última. Se
+   * lee a modo de estudio: se puede ir y volver, y pasar de página no exige resolver nada (ADR
+   * 0002). No se cierra: es la pantalla de la nave, y la historia sigue al terminarla.
    *
    * También se abre suelto desde la bitácora, para quien salteó el prólogo. Suelto va afuera del
    * escenario; en la historia va adentro del prólogo, porque la pantalla completa es la del prólogo
@@ -366,12 +370,20 @@ export class IntegradaVistaComponent {
   protected readonly paginaSuelta = computed(() =>
     this.manualSuelto() ? this.paginaActual() : null,
   );
+  /** El libro abierto desde la bitácora: su primera página vuelve a ella. */
+  protected readonly desdeLaBitacora = computed(
+    () => this.manualSuelto() && this.libro().concepto === undefined,
+  );
+  /** Mientras la pantalla se apaga, los botones de página ya no hacen nada. */
+  private apagandose = false;
   private readonly hojaDelManual = viewChild<ElementRef<HTMLElement>>('hojaDelManual');
   private readonly pantallaDelManual = viewChild<ElementRef<HTMLElement>>('pantallaDelManual');
   private readonly cuerpoDelManual = viewChild<ElementRef<HTMLElement>>('cuerpoDelManual');
+  private readonly marcasDelLibro = viewChild.required<TemplateRef<unknown>>('marcasDelLibro');
+  private readonly pieDelLibro = viewChild.required<TemplateRef<unknown>>('pieDelLibro');
   /** La página que se veía antes: dice para qué lado se da vuelta la hoja. */
   private paginaPrevia: number | null = null;
-  /** Cierra la hoja: `true` si se leyó hasta el final, `false` si se cerró antes. */
+  /** Deja la hoja: `true` si se leyó hasta el final, `false` si se salió antes. */
   private terminarManual: ((completo: boolean) => void) | null = null;
   /** Cada página que se abre, para que el viaje guarde dónde quedó. */
   private alAbrirPagina: ((i: number) => void) | null = null;
@@ -420,8 +432,8 @@ export class IntegradaVistaComponent {
   }
 
   /**
-   * Escape cierra el manual y las flechas de costado pasan de página, salvo adentro de la pantalla,
-   * donde las flechas pueden ser de la demo. Las de leer scrollean la hoja a mano: el
+   * Las flechas de costado pasan de página, salvo adentro de la pantalla, donde pueden ser de la
+   * demo. Escape no hace nada: el libro no se cierra, se sigue. Las de leer scrollean la hoja a mano: el
    * `preventDefault` aparta al recorrido de atrás, que escucha las flechas en `window`, y también
    * frena el scroll nativo.
    */
@@ -430,10 +442,7 @@ export class IntegradaVistaComponent {
     if (this.pagina() === null || !hoja || e.defaultPrevented) return;
     const objetivo = e.target instanceof Element ? e.target : null;
     const enLaPantalla = objetivo?.closest('.subhost');
-    if (e.key === 'Escape') {
-      // En el viaje la hoja no se cierra: la historia sigue con la página siguiente.
-      if (this.libro().concepto === undefined) this.terminarManual?.(false);
-    } else if (e.key === 'ArrowRight' && !enLaPantalla) this.pasarPagina(1);
+    if (e.key === 'ArrowRight' && !enLaPantalla) this.pasarPagina(1);
     else if (e.key === 'ArrowLeft' && !enLaPantalla) this.pasarPagina(-1);
     else {
       // En la historia, una tecla afuera de la hoja es del prólogo (la pausa, por ejemplo). Un botón
@@ -446,16 +455,24 @@ export class IntegradaVistaComponent {
     e.preventDefault();
   }
 
-  protected cerrarManual(): void {
-    this.terminarManual?.(false);
-  }
-
   protected pasarPagina(paso: 1 | -1): void {
     const i = this.pagina();
-    if (i === null) return;
+    if (i === null || this.apagandose) return;
     const j = i + paso;
-    if (j >= this.paginas().length) this.terminarManual?.(true);
+    if (j >= this.paginas().length) void this.dejarLaHoja(true);
     else if (j >= 0) this.irAPagina(j);
+    else if (this.desdeLaBitacora()) void this.dejarLaHoja(false);
+  }
+
+  /** El libro se deja como se entró: la pantalla se apaga y la historia sigue detrás. */
+  private async dejarLaHoja(completo: boolean): Promise<void> {
+    const hoja = this.hojaDelManual()?.nativeElement;
+    if (hoja && this.libro().concepto === undefined) {
+      this.apagandose = true;
+      await apagarLaTele(hoja).catch(() => undefined);
+      this.apagandose = false;
+    }
+    this.terminarManual?.(completo);
   }
 
   /**
@@ -473,18 +490,35 @@ export class IntegradaVistaComponent {
     const i = this.pagina()!;
     const previa = this.paginaPrevia;
     this.paginaPrevia = i;
+    // La primera página del libro entra prendiendo la pantalla, cuando ya está montada.
+    const prender =
+      previa === null && this.libro().concepto === undefined
+        ? encenderLaTele(
+            hoja,
+            this.manualSuelto() ? null : this.host.querySelector('.prologo__escena'),
+          )
+        : null;
     // En el prólogo Angie todavía no interviene: los desafíos de las páginas van sin su pista.
-    const montada = this.montarDiferido(host, pagina.cargar, pagina.ley, [
-      { provide: AYUDA_DE_ANGIE, useValue: this.libro().ayuda ?? false },
-      {
-        provide: PAGINA_DEL_MANUAL,
-        useValue: {
-          numero: this.libro().primeraLey + i,
-          ley: pagina.ley,
-          enLaNave: pagina.enLaNave,
+    const montada = this.montarDiferido(
+      host,
+      pagina.cargar,
+      pagina.ley,
+      [
+        { provide: AYUDA_DE_ANGIE, useValue: this.libro().ayuda ?? false },
+        {
+          provide: PAGINA_DEL_MANUAL,
+          useValue: {
+            numero: this.libro().primeraLey + i,
+            ley: pagina.ley,
+            enLaNave: pagina.enLaNave,
+            ...(this.libro().concepto === undefined
+              ? { marcas: this.marcasDelLibro(), pie: this.pieDelLibro() }
+              : {}),
+          },
         },
-      },
-    ]);
+      ],
+      prender,
+    );
     const vigia = this.enc ? vigilarEstampado(host, this.enc) : null;
     // Cada página arranca arriba, y el foco va a la hoja: con teclado, se lee sin buscarla.
     hoja.scrollTop = 0;
@@ -532,6 +566,9 @@ export class IntegradaVistaComponent {
     import('./prologo-anomalia').then(
       ({ initPrologoAnomalia }) => {
         if (pedido !== this.pedidoPrologo) return;
+        // La primera página del manual se pide ya: cuando el capitán lo abre, la pantalla se prende
+        // con ella montada, y no queda negra mientras llega.
+        PAGINAS_DEL_MANUAL[0]?.cargar().catch(() => undefined);
         this.cerrarPrologo = initPrologoAnomalia(this.host, {
           // Saltar la intro en pleno minijuego también lo cierra.
           alTerminar: () => {
@@ -833,7 +870,7 @@ export class IntegradaVistaComponent {
     const capitulo = CAPITULO_DE_CONCEPTO[concepto];
     const libro: Libro = {
       nombre: etapaDe(capitulo)?.nombre ?? NOMBRES_DE_CONCEPTO[concepto],
-      cerrar: 'Seguir el viaje',
+      sigue: 'Seguir el viaje',
       primeraLey: 1,
       concepto,
       ayuda: true,
@@ -926,11 +963,13 @@ export class IntegradaVistaComponent {
     await this.leerSuelto([ARBOL_DE_SIGNAL_SPACE], SIGNAL_SPACE);
   }
 
+  /** Suelto, el libro empieza y termina en la bitácora: no hay otro lugar adonde seguir. */
   private async leerSuelto(paginas: readonly PaginaDelManual[], libro: Libro): Promise<void> {
     this.bitacoraAbierta.set(false);
     this.manualSuelto.set(true);
-    await this.leerManual(paginas, libro);
+    await this.leerManual(paginas, { ...libro, sigue: 'Volver a la bitácora' });
     this.manualSuelto.set(false);
+    await this.abrirBitacora();
   }
 
   /**
@@ -1014,6 +1053,7 @@ export class IntegradaVistaComponent {
     cargar: () => Promise<SubNivelDiferido>,
     title: string | undefined,
     lugar: readonly Provider[] = [],
+    alMontar: (() => void) | null = null,
   ): SubHandle {
     let vivo = true;
     let desmontar: (() => void) | null = null;
@@ -1026,6 +1066,7 @@ export class IntegradaVistaComponent {
         desmontar = this.montar(host, component, injector ?? this.env);
         const enc = this.enc;
         if (enc) host.querySelectorAll('*').forEach((e) => e.setAttribute(enc, ''));
+        alMontar?.();
       })
       .catch((error: unknown) => this.errorHandler.handleError(error));
     return {

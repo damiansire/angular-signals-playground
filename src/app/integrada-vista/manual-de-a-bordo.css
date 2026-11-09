@@ -1,8 +1,7 @@
-/* La hoja donde se lee: el libro de leyes del prólogo y las etapas del viaje. No es un rectángulo
-   encima de la escena: no tiene fondo, borde ni barras. La cabecera, el título y los botones van
-   sueltos sobre el cielo, y lo que se toca es papel con el borde de tinta del manual. Ocupa todo
-   lo que deja el HUD porque cada página es una pantalla entera, y la caja de diálogo se esconde:
-   la orden ya se leyó. */
+/* La hoja donde se lee: el libro de leyes del prólogo y las etapas del viaje. En el viaje no es un
+   rectángulo encima de la escena: no tiene fondo, borde ni barras, y la cabecera, el título y los
+   botones van sueltos sobre el cielo. El libro de leyes es la pantalla de la nave, entera (ver más
+   abajo). La caja de diálogo se esconde: la orden ya se leyó. */
 .prologo__manual {
   position: absolute;
   z-index: 5;
@@ -167,13 +166,18 @@
   outline: 3px solid #fff8ec;
   outline-offset: 3px;
 }
-.prologo__manual-atras {
-  grid-column: 1;
+.prologo__manual-pie .prologo__manual-paginas {
+  display: contents;
+}
+.prologo__manual-pie .prologo__manual-atras {
+  grid-area: 1 / 1;
   justify-self: start;
 }
-.prologo__manual-boton--sigue {
-  grid-column: 3;
+.prologo__manual-pie .prologo__manual-boton--sigue {
+  grid-area: 1 / 3;
   justify-self: end;
+}
+.prologo__manual-boton--sigue {
   outline-color: #b8791f;
   background: #ffd27a;
   rotate: -1.5deg;
@@ -191,7 +195,7 @@
     monospace;
   letter-spacing: 0.08em;
   color: #6a6355;
-  grid-column: 2;
+  grid-area: 1 / 2;
   pointer-events: none;
   opacity: 0;
   /* Keyframes propios: Angular renombra los de cada hoja de estilo, y los de las cards no llegan. */
@@ -207,13 +211,6 @@
     opacity: 0;
   }
 }
-/* Cerrar sin hojear hasta el final: con mouse, Escape no se adivina. */
-.prologo__manual-cerrar {
-  grid-area: 1 / 4;
-  align-self: center;
-  padding: 0.35rem 0.7rem;
-  font-size: 0.82rem;
-}
 @media (prefers-reduced-motion: reduce) {
   .prologo__manual-boton {
     rotate: none;
@@ -223,24 +220,12 @@
 
 /* Abierto afuera del prólogo (el manual desde la bitácora, y cada etapa del viaje): va afuera del
    escenario y a la altura de la bitácora, sin el HUD arriba. Detrás no está la escena del prólogo
-   sino el mapa crema: un velo gris lo dejaba leer a través, y "11 sin establecer" se pisaba con la
-   cabecera. Va el cielo del prólogo, casi opaco y con sus estrellas. */
+   sino el mapa crema: un velo lo dejaba leer a través, y "11 sin establecer" se pisaba con la
+   cabecera. Va el negro de la tele apagada, opaco. */
 .manual-suelto {
   position: fixed;
   inset: 0;
   z-index: 70;
-}
-.manual-suelto .prologo__velo {
-  background:
-    radial-gradient(1.5px 1.5px at 12% 18%, rgb(255 248 236 / 80%), transparent),
-    radial-gradient(1px 1px at 27% 72%, rgb(255 248 236 / 70%), transparent),
-    radial-gradient(1.5px 1.5px at 46% 9%, rgb(255 248 236 / 60%), transparent),
-    radial-gradient(1px 1px at 63% 84%, rgb(255 248 236 / 70%), transparent),
-    radial-gradient(2px 2px at 78% 31%, rgb(255 210 122 / 70%), transparent),
-    radial-gradient(1px 1px at 91% 66%, rgb(255 248 236 / 60%), transparent),
-    radial-gradient(1.5px 1.5px at 6% 88%, rgb(255 248 236 / 50%), transparent),
-    radial-gradient(ellipse 80% 90% at 50% 45%, rgb(38 22 64 / 96%), rgb(14 8 30 / 98%));
-  backdrop-filter: blur(6px);
 }
 .manual-suelto .prologo__manual {
   inset: 1.5rem 0 0;
@@ -269,50 +254,9 @@
   margin: 0;
 }
 
-/* El libro de leyes (el manual y el árbol de Signal Space), en el prólogo: la escena queda detrás,
-   desenfocada y más oscura hacia el medio, donde se lee. Como las lecciones del viaje a Japón. */
-.prologo--manual .prologo__escena,
-.prologo--manual .prologo__mascot {
-  filter: blur(2.5px);
-}
-.prologo--manual .prologo__velo {
-  background: radial-gradient(
-    ellipse 62% 72% at 50% 52%,
-    rgb(14 8 30 / 74%),
-    rgb(14 8 30 / 56%) 62%,
-    rgb(14 8 30 / 40%)
-  );
-}
-/* En el prólogo la cabecera del libro va en la fila de la barra, entre los íconos de la izquierda y
-   el de la derecha: una sola franja arriba, y la página gana el alto que ocupaba la segunda. La hoja
-   llega hasta arriba a lo ancho, y la barra queda por encima para seguir a mano. */
+/* La barra del juego queda arriba de la pantalla del libro, para seguir a mano. */
 .prologo--manual .prologo__hud {
   z-index: 6;
-}
-.prologo--manual .prologo__manual {
-  inset-block-start: 1rem;
-  width: 100%;
-  padding-inline: 0;
-}
-.prologo--manual .prologo__manual-cabeza {
-  min-height: 44px;
-  margin-bottom: 0.25rem;
-  /* El borde de la barra (1rem), tres íconos de 44 px con su espacio, y aire; a la derecha, uno. */
-  padding-inline: calc(2rem + 3 * 44px + 0.9rem) calc(2rem + 44px);
-}
-/* Angosto no entran la barra, el nombre del libro, las marcas y "Cerrar" en una fila: el nombre se
-   va, y las marcas con "1 de 5" ya dicen dónde se está. */
-@media (max-width: 760px) {
-  .prologo--manual .prologo__manual-libro {
-    display: none;
-  }
-}
-.prologo--manual .prologo__manual-cuerpo,
-.prologo--manual .prologo__manual-pie {
-  box-sizing: border-box;
-  width: min(112rem, calc(100% - 3rem));
-  margin-inline: auto;
-  padding-inline: clamp(1rem, 2.4vw, 2.2rem);
 }
 /* La página se estira hasta el pie: cada eslabón entre la hoja y ella crece con el alto que queda. */
 .prologo__manual--libro .prologo__manual-cuerpo,
@@ -412,4 +356,72 @@
 .prologo__manual .subhost .htt-arbol app-node-tree {
   position: absolute;
   inset: 0.5rem;
+}
+
+/* ── El libro de leyes: la pantalla de la nave, entera ─────────────────────────────────────────
+   Se entra en ella (ver `tele-del-manual.ts`): detrás queda el negro de la tele, y la página es el
+   mundo de borde a borde, con el cielo de la escena. Sin velo, sin desenfoque y sin tarjeta: así
+   se veía un modal encima de la historia. Arriba solo va la barra del juego; la ley y sus marcas
+   van debajo, y los botones de página en la consola. */
+.prologo__tele {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  background: #050309;
+}
+.prologo__manual.prologo__manual--libro {
+  inset: 0;
+  width: 100%;
+  padding: 4.25rem 0 0;
+  background: #130d2b;
+  animation: none;
+  overflow-x: hidden;
+}
+.manual-suelto .prologo__manual.prologo__manual--libro {
+  inset: 0;
+  padding-top: 1.25rem;
+}
+/* El vidrio visto desde adentro: las esquinas redondeadas de la pantalla y un reflejo que casi no
+   se ve. Encima de todo y sin tocarse. */
+.prologo__manual--libro::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  border-radius: clamp(14px, 2.4vw, 32px);
+  box-shadow:
+    0 0 0 4rem #050309,
+    inset 0 0 3rem rgb(5 3 9 / 45%);
+  background: linear-gradient(118deg, rgb(255 255 255 / 4%) 0 20%, rgb(255 255 255 / 0%) 34%);
+  pointer-events: none;
+}
+.prologo__manual-donde {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem 0.9rem;
+  margin-top: 0.45rem;
+}
+/* Ir y volver, en la última fila de la consola: "Anterior" a la izquierda, solo si hay adónde, y
+   "Siguiente" siempre a la derecha. */
+.prologo__manual-paginas {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+.prologo__manual-paginas .prologo__manual-boton--sigue {
+  margin-left: auto;
+}
+/* Van adentro de la pantalla montada, donde la armonización pinta cada botón de pastilla oscura:
+   los cartelitos del libro siguen siendo de papel. */
+.prologo__manual.card--dissolve .subhost .prologo__manual-paginas .prologo__manual-boton {
+  border: 2px solid #5d4a5e;
+  background: #fffaf2;
+  color: #2b2230;
+  font:
+    800 1rem / 1.2 'Baloo 2',
+    var(--font-display, system-ui, sans-serif);
+}
+.prologo__manual.card--dissolve .subhost .prologo__manual-paginas .prologo__manual-boton--sigue {
+  background: #ffd27a;
 }
