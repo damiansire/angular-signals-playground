@@ -13,6 +13,7 @@ import {
 } from './musica-del-presentimiento';
 import { tocarColina } from './musica-de-la-colina';
 import { planDeLaRadio, tocarRadio } from './ruido-de-radio';
+import { queHaceElToque } from './toque-de-dialogo';
 
 /**
  * Pantalla de inicio: una mañana en la colina. Angie está sentada en la piedra del centro, mirando
@@ -490,34 +491,47 @@ export function initInicioAngie(host: HTMLElement, cuerpo?: AngieDeLaColina): In
   const esperar = (ms: number): Promise<void> => new Promise((ok) => setTimeout(ok, ms));
 
   /**
-   * El próximo toque de quien mira, o Enter/Espacio: los pensamientos los pasa la persona, no un
-   * reloj. El teclado va en `document`: el foco nunca está en la escena.
+   * Un globo que se escribe y espera que lo pasen: los pensamientos los pasa la persona, no un
+   * reloj. A medio escribir, el toque lo termina de escribir (`ini--escrito`); escrito, lo pasa
+   * (`queHaceElToque`). `ms` es lo que tarda en escribirse solo. El teclado va en `document`: el
+   * foco nunca está en la escena.
    */
   let soltarToque: (() => void) | null = null;
-  const siguienteToque = (): Promise<void> =>
+  const pensamiento = (ms: number): Promise<void> =>
     new Promise((ok) => {
+      const empezo = performance.now();
+      let completadoEn: number | null = null;
       const listo = (): void => {
         escena.removeEventListener('click', alClicDeAvance);
         document.removeEventListener('keydown', alTecla);
         soltarToque = null;
+        // En el mismo cuadro que el globo que se va: sus letras vuelven a esperar a que se encoja.
+        escena.classList.remove('ini--escrito');
         ok();
+      };
+      const tocar = (): void => {
+        const ahora = performance.now() - empezo;
+        const hace = queHaceElToque(ahora, ms, completadoEn);
+        if (hace === 'pasar') listo();
+        if (hace !== 'completar') return;
+        completadoEn = ahora;
+        escena.classList.add('ini--escrito');
+        // Los blips duraban lo que tardaba en escribirse: seguían hablando sobre el globo ya escrito.
+        sonido().callar();
       };
       // Sonido y pausa hacen lo suyo: no pasan el pensamiento.
       const alClicDeAvance = (e: MouseEvent): void => {
-        if (!(e.target as Element | null)?.closest('.ini__ajustes')) listo();
+        if (!(e.target as Element | null)?.closest('.ini__ajustes')) tocar();
       };
       const alTecla = (e: KeyboardEvent): void => {
         if (e.key !== 'Enter' && e.key !== ' ') return;
         e.preventDefault();
-        listo();
+        tocar();
       };
       escena.addEventListener('click', alClicDeAvance);
       document.addEventListener('keydown', alTecla);
       soltarToque = listo;
     });
-  /** Lo que tarda en entrar cada nube: un toque antes se cumple recién cuando ya se la leyó. */
-  const pensamiento = (ms: number): Promise<unknown> =>
-    Promise.all([esperar(ms), siguienteToque()]);
 
   /** Cada globo se le dice también a quien escucha la pantalla: el dibujo está oculto. */
   const contar = (texto: string): void => {

@@ -73,7 +73,11 @@
   <div class="cine__barra cine__barra--abajo">
     <div class="cine__dialogo" aria-live="polite">
       @for (l of linea() ? [linea()!] : []; track l.id) {
-        <div class="cine__linea" [attr.data-quien]="l.quien">
+        <div
+          class="cine__linea"
+          [class.cine__linea--escrita]="escrita()"
+          [attr.data-quien]="l.quien"
+        >
           <span class="cine__retrato" aria-hidden="true">
             @if (l.quien === 'mascota') {
               <img src="angular-mascot-idea.svg" alt="" width="240" height="300" />

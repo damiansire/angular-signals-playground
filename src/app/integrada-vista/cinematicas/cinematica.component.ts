@@ -28,6 +28,7 @@ import {
   type LineaEnPantalla,
 } from './cinematica-guion';
 import { cargarEscena } from './escenas';
+import { queHaceElToque } from '../toque-de-dialogo';
 
 export type FinDeCinematica = 'fin' | 'salteada';
 
@@ -49,6 +50,13 @@ const TITULO_AL_RINCON_MS = 2400;
  * puesto al héroe en escena. Primero el entorno, después el héroe, al final el texto.
  */
 const ANTES_DE_HABLAR_MS = 1500;
+
+/**
+ * Lo que tarda una línea en entrar entera: cada palabra entra 42 ms después de la anterior (el
+ * `--i` del CSS) y tarda su resorte, unos 520 ms.
+ */
+const ENTRA_UNA_PALABRA_MS = 520;
+const ENTRE_PALABRAS_MS = 42;
 
 /** Teclas que scrollean el recorrido de atrás: con la cinemática abierta se consumen acá. */
 const TECLAS_DE_DESPLAZAMIENTO = new Set([
@@ -126,6 +134,10 @@ export class CinematicaComponent {
   });
 
   protected readonly linea = signal<LineaEnPantalla | null>(null);
+  /** Un toque la completó a medio entrar: sus palabras saltan a su lugar. */
+  protected readonly escrita = signal(false);
+  private lineaDesde = 0;
+  private completadaEn: number | null = null;
   private readonly beats = signal<ReadonlySet<string>>(new Set());
   protected readonly clasesDeBeats = computed(() =>
     [
@@ -200,9 +212,25 @@ export class CinematicaComponent {
     return salida;
   }
 
-  /** Enter, espacio o el botón: la línea siguiente entra ya, como en cualquier RPG. */
+  /**
+   * Enter, espacio o el botón, como en cualquier RPG: a medio entrar, la línea se completa; entera,
+   * la siguiente entra ya (`queHaceElToque`). Antes todo toque pasaba, y dos clics rápidos se
+   * llevaban una línea sin que se leyera.
+   */
   protected avanzar(): void {
     if (this.cerrada) return;
+    const l = this.linea();
+    if (l) {
+      const ms = performance.now() - this.lineaDesde;
+      const entra = (this.palabrasDe(l).length - 1) * ENTRE_PALABRAS_MS + ENTRA_UNA_PALABRA_MS;
+      const hace = queHaceElToque(ms, entra, this.completadaEn);
+      if (hace === 'nada') return;
+      if (hace === 'completar') {
+        this.completadaEn = ms;
+        this.escrita.set(true);
+        return;
+      }
+    }
     sonido().efecto('toque');
     const ahora = this.ahora();
     const proxima = this.eventos.find((e) => e.t > ahora + 30 && this.esLinea(e));
@@ -319,6 +347,9 @@ export class CinematicaComponent {
         t: desfase + l.t0,
         hacer: () => {
           this.linea.set(l);
+          this.escrita.set(false);
+          this.lineaDesde = performance.now();
+          this.completadaEn = null;
           if (l.beat) encender(l.beat);
           sonido().hablar(l.quien, l.txt, l.t1 - l.t0);
         },

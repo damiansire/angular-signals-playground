@@ -19,6 +19,7 @@ import {
   TECLA_MS,
 } from './inicio-angie';
 import { LO_QUE_DICE_EL_SOL, LO_QUE_RESPONDE_ANGIE } from './intercambio-del-sol';
+import { RESPIRO_MS } from './toque-de-dialogo';
 
 /**
  * La pantalla de inicio es dibujo, pero lo que la sostiene son cuentas: el paisaje sale con semilla
@@ -379,6 +380,13 @@ describe('inicio-angie', () => {
       const tocar = (): void => {
         escena.dispatchEvent(new MouseEvent('click', { bubbles: true }));
       };
+      /** Pasa el globo: si el toque lo completa a medio escribir, el siguiente lo pasa. */
+      const pasar = async (): Promise<void> => {
+        tocar();
+        if (!escena.classList.contains('ini--escrito')) return;
+        await new Promise((ok) => setTimeout(ok, RESPIRO_MS + 50));
+        tocar();
+      };
 
       void inicio.despedir();
       await hasta('ini--radio');
@@ -391,22 +399,30 @@ describe('inicio-angie', () => {
       await new Promise((ok) => setTimeout(ok, 1400));
       expect(escena.classList).not.toContain('ini--oye');
 
-      tocar();
+      await pasar();
       await hasta('ini--oye');
       expect(escena.classList).not.toContain('ini--radio');
       expect(escena.classList).not.toContain('ini--piensa');
       expect(dicho.textContent).toBe(LO_QUE_DICE_EL_SOL);
 
       await new Promise((ok) => setTimeout(ok, 1200));
-      tocar();
+      await pasar();
       await hasta('ini--responde');
       expect(escena.classList).not.toContain('ini--oye');
       expect(dicho.textContent).toBe(LO_QUE_RESPONDE_ANGIE.replace('\n', ' '));
       expect(sonrisas).toEqual([]);
 
+      // A medio escribir, el toque lo completa y no pasa: una ráfaga se llevaba dos globos juntos.
       await new Promise((ok) => setTimeout(ok, 1600));
       tocar();
+      expect(escena.classList).toContain('ini--escrito');
+      expect(escena.classList).toContain('ini--responde');
+      tocar();
+      expect(escena.classList).toContain('ini--responde');
+      await new Promise((ok) => setTimeout(ok, RESPIRO_MS + 50));
+      tocar();
       await hasta('ini--piensa-2');
+      expect(escena.classList).not.toContain('ini--escrito');
       expect(escena.classList).toContain('ini--piensa');
       expect(escena.classList).not.toContain('ini--responde');
       expect(dicho.textContent).toBe('Así que… La hora ha llegado…');

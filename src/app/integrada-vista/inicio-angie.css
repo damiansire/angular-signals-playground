@@ -1011,6 +1011,25 @@
   transition: opacity 0.2s ease-out var(--sigue);
   animation: ini-sigue 0.9s ease-in-out var(--sigue) infinite;
 }
+/* Un toque a medio escribir completa el globo (`ini--escrito`, ver `queHaceElToque`): sin
+   transición, cada cosa salta a como queda escrita, y el triangulito ya invita a seguir. */
+.ini--escrito.ini--oye .ini__voz-sol .ini__tecla,
+.ini--escrito.ini--responde .ini__dice .ini__tecla,
+.ini--escrito.ini--piensa .ini__frase:first-child .ini__tecla,
+.ini--escrito.ini--piensa-2 .ini__frase + .ini__frase .ini__tecla,
+.ini--escrito.ini--piensa .ini__puntos i,
+.ini--escrito.ini--piensa .ini__rastro,
+.ini--escrito.ini--piensa .ini__burbuja,
+.ini--escrito.ini--oye .ini__voz-sol,
+.ini--escrito.ini--responde .ini__dice {
+  transition: none;
+}
+.ini--escrito.ini--piensa .ini__burbuja::after,
+.ini--escrito.ini--oye .ini__voz-sol::after,
+.ini--escrito.ini--responde .ini__renglon-dicho:last-child::after {
+  --sigue: 0ms;
+  transition: none;
+}
 /* Las ondas de radio: anillos cortados que salen del sol y tiemblan, una señal con interferencia
    que todavía no se entiende. Cuando la voz entra limpia, los anillos siguen pero quietos y
    enteros: es la misma señal, ya sintonizada. Se afinan al crecer, así lejos no son un rayón. */

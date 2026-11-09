@@ -369,6 +369,10 @@
   animation: cine-palabra var(--resorte-suave-ms, 520ms) var(--resorte-suave, ease-out) both;
   animation-delay: calc(var(--i, 0) * 42ms);
 }
+/* Un toque a medio entrar la completa: cada palabra salta a su lugar. */
+.cine__linea--escrita .cine__palabra {
+  animation: none;
+}
 
 .cine__seguir {
   display: grid;
