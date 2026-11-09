@@ -40,20 +40,49 @@ export function renderCost(kind: MutationKind): RenderCost {
   return 'barato';
 }
 
-/** El tramo que el flujo salta: de la última etapa que corre antes del hueco a la primera después. */
-export interface SaltoDelFlujo {
-  desde: RenderStage;
-  hasta: RenderStage;
+/** La cadena entera, de la fuente a la pantalla: `DOM` y después las etapas de render. */
+export const ESTACIONES = ['DOM', ...RENDER_STAGES] as const;
+export type Estacion = (typeof ESTACIONES)[number];
+
+/** Lo que tarda en dibujarse cada pieza del flujo (s): un tramo entre vecinas, o un salto. */
+export const DIBUJO_TRAMO = 0.18;
+export const DIBUJO_SALTO = 0.45;
+
+/**
+ * Una pieza del flujo, entre dos estaciones (índices de `ESTACIONES`): un tramo si son vecinas, un
+ * salto si pasa por encima de las que el cambio no dispara. `retraso` y `fin`, en segundos desde
+ * que arranca el dibujo: la estación `hasta` se enciende en `fin`.
+ */
+export interface PiezaDelFlujo {
+  readonly desde: number;
+  readonly hasta: number;
+  readonly salto: boolean;
+  readonly retraso: number;
+  readonly fin: number;
+}
+
+/** Qué estaciones toca el flujo de `kind`: `DOM` siempre, que es de donde sale. */
+export function estacionesQueCorren(kind: MutationKind): boolean[] {
+  const corre = new Set<Estacion>(stagesTriggered(kind));
+  return ESTACIONES.map((estacion) => estacion === 'DOM' || corre.has(estacion));
 }
 
 /**
- * Dónde salta el flujo para `kind`, o `null` si recorre la cadena entera. Dibujado, es el arco que
- * pasa por encima de las etapas que el cambio no dispara (transform: de style a composite).
+ * El flujo de `kind` como se dibuja: de arriba hacia abajo, una pieza detrás de otra, y el salto
+ * ocupa su turno entre los tramos (transform: DOM → style, salto a composite).
  */
-export function saltoDelFlujo(kind: MutationKind): SaltoDelFlujo | null {
-  const corre = new Set(stagesTriggered(kind));
-  const hueco = RENDER_STAGES.findIndex((stage) => !corre.has(stage));
-  if (hueco < 1) return null;
-  const despues = RENDER_STAGES.slice(hueco).find((stage) => corre.has(stage));
-  return despues ? { desde: RENDER_STAGES[hueco - 1], hasta: despues } : null;
+export function recorridoDelFlujo(kind: MutationKind): PiezaDelFlujo[] {
+  const corre = estacionesQueCorren(kind);
+  const piezas: PiezaDelFlujo[] = [];
+  let t = 0;
+  for (let desde = 0; desde < ESTACIONES.length - 1;) {
+    const hasta = corre.findIndex((si, i) => si && i > desde);
+    if (hasta < 0) break;
+    const salto = hasta > desde + 1;
+    const fin = t + (salto ? DIBUJO_SALTO : DIBUJO_TRAMO);
+    piezas.push({ desde, hasta, salto, retraso: t, fin });
+    t = fin;
+    desde = hasta;
+  }
+  return piezas;
 }

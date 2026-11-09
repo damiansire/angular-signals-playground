@@ -1,9 +1,13 @@
 import {
   stagesTriggered,
   renderCost,
-  saltoDelFlujo,
   RENDER_STAGES,
   MutationKind,
+  ESTACIONES,
+  DIBUJO_SALTO,
+  DIBUJO_TRAMO,
+  estacionesQueCorren,
+  recorridoDelFlujo,
 } from './render-pipeline';
 
 describe('render-pipeline (dominio de "de la mutación al pixel")', () => {
@@ -53,18 +57,42 @@ describe('render-pipeline (dominio de "de la mutación al pixel")', () => {
   });
 });
 
-describe('saltoDelFlujo: el tramo que el flujo pasa por arriba', () => {
-  it('transform y opacity saltan de style a composite, por encima de layout y paint', () => {
-    expect(saltoDelFlujo('transform')).toEqual({ desde: 'style', hasta: 'composite' });
-    expect(saltoDelFlujo('opacity')).toEqual({ desde: 'style', hasta: 'composite' });
+describe('render-pipeline (el flujo dibujado)', () => {
+  const nombres = (kind: MutationKind) =>
+    recorridoDelFlujo(kind).map((p) => `${ESTACIONES[p.desde]}→${ESTACIONES[p.hasta]}`);
+
+  it('la cadena arranca en DOM, que corre siempre', () => {
+    expect(ESTACIONES[0]).toBe('DOM');
+    for (const kind of ['transform', 'color', 'geometry'] as const) {
+      expect(estacionesQueCorren(kind)[0]).toBeTrue();
+    }
   });
 
-  it('color salta solo layout: de style a paint', () => {
-    expect(saltoDelFlujo('color')).toEqual({ desde: 'style', hasta: 'paint' });
+  it('un cambio caro recorre la cadena entera, de a tramos y sin saltos', () => {
+    expect(nombres('geometry')).toEqual([
+      'DOM→style',
+      'style→layout',
+      'layout→paint',
+      'paint→composite',
+    ]);
+    expect(recorridoDelFlujo('textContent').some((p) => p.salto)).toBeFalse();
   });
 
-  it('texto y geometría recorren la cadena entera, sin salto', () => {
-    expect(saltoDelFlujo('textContent')).toBeNull();
-    expect(saltoDelFlujo('geometry')).toBeNull();
+  it('transform salta de style a composite, por encima de layout y paint', () => {
+    expect(nombres('transform')).toEqual(['DOM→style', 'style→composite']);
+    expect(recorridoDelFlujo('transform')[1].salto).toBeTrue();
+    expect(estacionesQueCorren('transform')).toEqual([true, true, false, false, true]);
+  });
+
+  it('color salta solo layout', () => {
+    expect(nombres('color')).toEqual(['DOM→style', 'style→paint', 'paint→composite']);
+  });
+
+  it('se dibuja en orden: cada pieza arranca cuando termina la anterior', () => {
+    const piezas = recorridoDelFlujo('color');
+    expect(piezas[0].retraso).toBe(0);
+    expect(piezas[1].retraso).toBeCloseTo(DIBUJO_TRAMO);
+    expect(piezas[2].retraso).toBeCloseTo(DIBUJO_TRAMO + DIBUJO_SALTO);
+    for (let i = 1; i < piezas.length; i++) expect(piezas[i].retraso).toBe(piezas[i - 1].fin);
   });
 });
