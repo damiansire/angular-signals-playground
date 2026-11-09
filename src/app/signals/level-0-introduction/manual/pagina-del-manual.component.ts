@@ -11,6 +11,7 @@ import {
   signal,
   viewChild,
 } from '@angular/core';
+import { NgTemplateOutlet } from '@angular/common';
 import { PAGINA_DEL_MANUAL } from './pagina-del-manual';
 import { ManoGuiaComponent, type Punta } from './mano-guia.component';
 import { puntaDeLaMano, sigueMostrando } from './guia.logica';
@@ -28,7 +29,7 @@ const TOPE_DE_TOQUES = 16;
  */
 @Component({
   selector: 'app-pagina-del-manual',
-  imports: [ManoGuiaComponent],
+  imports: [ManoGuiaComponent, NgTemplateOutlet],
   templateUrl: './pagina-del-manual.component.html',
   styleUrl: './pagina-del-manual.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -42,6 +43,16 @@ export class PaginaDelManualComponent {
    * tamaño fijo, estirada, dejaba media mesa de papel vacía.
    */
   readonly llena = input(false);
+  /**
+   * La página en una sola pieza: la escena de la nave es el escenario, su pantalla muestra lo que
+   * pasa, y abajo va su consola (`[consola]`) con los dos pasos, probar (`[hacer]`) y arreglar
+   * (`[arreglo]`). Sin esto, la demo, la escena y el desafío van en tres tarjetas.
+   */
+  readonly integrada = input(false);
+  /** En qué paso de la consola va la página: el otro queda apagado. */
+  readonly paso = input<1 | 2>(1);
+  /** El arreglo funcionó: los dos pasos quedan hechos. */
+  readonly resuelta = input(false);
   /** Lo que "Mostrame" espera entre un toque y el siguiente: que la demo responda y se vea. */
   readonly respiro = input(280);
 

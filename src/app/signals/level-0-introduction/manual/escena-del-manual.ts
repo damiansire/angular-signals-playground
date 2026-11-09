@@ -6,6 +6,16 @@ import { NaveDelManual, PALETA, azar, el, sinMovimiento } from './nave-del-manua
 export const ANCHO = 400;
 export const ALTO = 260;
 
+/**
+ * El cielo de la lámina cuando es el escenario de la página integrada: la misma nave y la misma
+ * pantalla en el medio, con cielo de sobra alrededor. La escena lo llena con `xMidYMid slice`, así
+ * que la ventanilla puede tener cualquier proporción entre 4:3 y 3.5:1 sin recortar lo que
+ * importa. Su centro es el de la nave, su pantalla y lo que descansa debajo (y 18 a 240), no el de
+ * la lámina: centrado en la lámina, una ventanilla apaisada le cortaba el borde de arriba a la
+ * pantalla.
+ */
+export const CIELO_DEL_ESCENARIO = '-200 -41 800 340';
+
 /** Dónde vive la pantalla de la nave en cada lámina: a la derecha, proyectada desde la nariz. */
 export const PANTALLA = { x: 214, y: 26, ancho: 174, alto: 178 } as const;
 
@@ -62,6 +72,12 @@ export abstract class EscenaDelManual {
  */
 function pintarCielo(svg: SVGSVGElement, semilla: number): void {
   const id = `cielo-${semilla}`;
+  // El cielo cubre todo el `viewBox`, que en el escenario es más grande que la lámina.
+  const vb = svg.viewBox.baseVal;
+  const caja = vb?.width
+    ? { x: vb.x, y: vb.y, ancho: vb.width, alto: vb.height }
+    : { x: 0, y: 0, ancho: ANCHO, alto: ALTO };
+  const cuantas = Math.round((46 * caja.ancho * caja.alto) / (ANCHO * ALTO));
   const defs = el(svg, 'defs');
   const fondo = el(defs, 'linearGradient', { id: `${id}-f`, x1: 0, y1: 0, x2: 0.3, y2: 1 });
   el(fondo, 'stop', { offset: 0, 'stop-color': '#130d2b' });
@@ -81,15 +97,21 @@ function pintarCielo(svg: SVGSVGElement, semilla: number): void {
   const cielo = el(svg, 'g', { 'aria-hidden': 'true' });
   svg.insertBefore(cielo, svg.firstChild);
   svg.insertBefore(defs, cielo);
-  el(cielo, 'rect', { width: ANCHO, height: ALTO, fill: `url(#${id}-f)` });
+  el(cielo, 'rect', {
+    x: caja.x,
+    y: caja.y,
+    width: caja.ancho,
+    height: caja.alto,
+    fill: `url(#${id}-f)`,
+  });
   el(cielo, 'ellipse', { cx: 70, cy: 70, rx: 170, ry: 120, fill: `url(#${id}-b)` });
   const estrellas = el(cielo, 'g');
   const titilan: SVGCircleElement[] = [];
-  for (let i = 0; i < 46; i++) {
+  for (let i = 0; i < cuantas; i++) {
     const r = 0.5 + azar(semilla * 31 + i * 3.1) * 1.2;
     const e = el(estrellas, 'circle', {
-      cx: (azar(semilla + i * 7.7) * ANCHO).toFixed(1),
-      cy: (azar(semilla * 3 + i * 1.3) * ALTO).toFixed(1),
+      cx: (caja.x + azar(semilla + i * 7.7) * caja.ancho).toFixed(1),
+      cy: (caja.y + azar(semilla * 3 + i * 1.3) * caja.alto).toFixed(1),
       r: r.toFixed(2),
       fill: i % 7 === 0 ? PALETA.luz : '#efe6ff',
       opacity: (0.35 + azar(i * 5.5 + semilla) * 0.55).toFixed(2),
@@ -109,7 +131,14 @@ function pintarCielo(svg: SVGSVGElement, semilla: number): void {
     'stroke-width': 2,
     transform: 'rotate(-14 40 38)',
   });
-  el(svg, 'rect', { width: ANCHO, height: ALTO, fill: `url(#${id}-v)`, 'pointer-events': 'none' });
+  el(svg, 'rect', {
+    x: caja.x,
+    y: caja.y,
+    width: caja.ancho,
+    height: caja.alto,
+    fill: `url(#${id}-v)`,
+    'pointer-events': 'none',
+  });
 
   if (!sinMovimiento()) {
     titilan.forEach((e, i) =>

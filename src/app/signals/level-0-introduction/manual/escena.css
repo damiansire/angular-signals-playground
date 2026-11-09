@@ -18,3 +18,17 @@
   -webkit-user-select: none;
   touch-action: manipulation;
 }
+
+/* De escenario (la página integrada): la escena llena la ventanilla, sin marco propio; el marco es
+   el del escenario. */
+:host:has(.esc--escenario) {
+  position: absolute;
+  inset: 0;
+}
+.esc.esc--escenario {
+  width: 100%;
+  height: 100%;
+  aspect-ratio: auto;
+  border-radius: 0;
+  box-shadow: none;
+}

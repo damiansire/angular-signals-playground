@@ -122,7 +122,7 @@
 /* "Mostrame": un cartelito de papel dorado, un poco torcido, como los del viaje. Se endereza al
    pasarle por encima, y apretado se hunde en su sombra. Con tres ancestros le gana a la pastilla
    oscura que la hoja le pone a todo botón de su pantalla (`.subhost button:not([class*='bg-'])`). */
-.pm .pm-paso .pm-mostrar {
+.pm :is(.pm-paso, .pm-etapas) .pm-mostrar {
   margin-left: auto;
   padding: 0.45rem 1rem 0.5rem;
   border: 2px solid #5d4a5e;
@@ -143,21 +143,21 @@
     translate 0.2s,
     background-color 0.2s;
 }
-.pm .pm-paso .pm-mostrar:hover:not(:disabled) {
+.pm :is(.pm-paso, .pm-etapas) .pm-mostrar:hover:not(:disabled) {
   rotate: 0deg;
   translate: 2px -2px;
   background: #ffdc94;
 }
-.pm .pm-paso .pm-mostrar:active:not(:disabled) {
+.pm :is(.pm-paso, .pm-etapas) .pm-mostrar:active:not(:disabled) {
   translate: 1px 2px;
   box-shadow: 1px 2px 0 rgb(43 34 48 / 22%);
 }
-.pm .pm-paso .pm-mostrar:disabled {
+.pm :is(.pm-paso, .pm-etapas) .pm-mostrar:disabled {
   cursor: default;
   rotate: 0deg;
   opacity: 0.75;
 }
-.pm .pm-paso .pm-mostrar:focus-visible {
+.pm :is(.pm-paso, .pm-etapas) .pm-mostrar:focus-visible {
   outline: 3px solid #2b2230;
   outline-offset: 2px;
 }
@@ -200,6 +200,129 @@
   min-width: 0;
 }
 
+/* ── La página integrada: una sola pieza ──────────────────────────────────────────────────────
+   La nave es el escenario y su pantalla muestra lo que pasa; abajo, la consola de la nave con lo
+   que se toca. Todo en la paleta de esa pantalla (vidrio violeta, filas con borde lila): en papel,
+   la demo, la escena y el desafío se leían como tres tarjetas sueltas que repetían los números. */
+.pm.pm--integrada {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+/* A lo ancho y a la izquierda en cualquier ancho: entre 700 y 1099 la regla de la grilla la centra. */
+.pm.pm--integrada .pm-cabeza {
+  align-self: stretch;
+}
+.pm-escenario {
+  flex: 1 0 auto;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  container-type: inline-size;
+  border-radius: 22px;
+  overflow: hidden;
+  background: #1c1434;
+  box-shadow:
+    0 0 0 3px #2b1b33,
+    0 0 0 5px #5b4a96,
+    0 26px 50px -20px rgb(6 3 14 / 80%);
+}
+/* La ventanilla crece con el alto que queda; la escena la llena recortando cielo, nunca la nave
+   ni su pantalla (`xMidYMid slice` sobre un cielo más grande que lo que importa). Nunca más
+   apaisada que 3.5:1 (`CIELO_DEL_ESCENARIO`): a 1280×640 quedaba en 4.6:1 y el recorte le comía el
+   borde de arriba a la pantalla de la nave. */
+.pm-ventana {
+  position: relative;
+  flex: 1 1 auto;
+  min-height: max(clamp(15rem, 40vh, 30rem), 28.5cqi);
+  margin: 0;
+}
+.pm-ventana .pm-nave {
+  position: absolute;
+  inset: auto auto 0.85rem 1.1rem;
+  max-width: min(26rem, 40%);
+  padding: 0;
+  font: italic 600 clamp(1rem, 1.25vw, 1.2rem) / 1.3 var(--font-editorial, Georgia, serif);
+  color: #f2ecff;
+  text-shadow: 0 2px 8px rgb(11 6 24 / 90%);
+  pointer-events: none;
+}
+
+.pm-consola {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  padding: 0.9rem clamp(1rem, 1.8vw, 1.6rem) 1.15rem;
+  background: #241a45;
+  border-top: 2px solid #5b4a96;
+  color: #f2ecff;
+}
+/* Los dos pasos en una fila, con el alto de "Mostrame" aunque ya no esté: al irse, la consola no
+   se achica. */
+.pm-etapas {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem 1.75rem;
+  min-height: 2.75rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.pm-etapa {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font: 600 1.05rem / 1.3 var(--font-display, system-ui, sans-serif);
+  color: #b9aee0;
+}
+.pm-etapa .pm-num {
+  background: #3a2c5c;
+  box-shadow: inset 0 0 0 2px #5b4a96;
+  color: #b9aee0;
+}
+.pm-etapa--ahora {
+  color: #fff8ec;
+}
+.pm-etapa--ahora .pm-num {
+  background: #ffd27a;
+  box-shadow:
+    inset 0 0 0 2px #2b1b33,
+    0 0 0 3px rgb(255 210 122 / 30%);
+  color: #2b1b33;
+}
+.pm-etapa--hecho .pm-num {
+  background: #6ad19a;
+  box-shadow: inset 0 0 0 2px #2b1b33;
+  color: #2b1b33;
+}
+.pm-etapas-boton {
+  margin-left: auto;
+}
+.pm-etapas-boton:empty {
+  display: none;
+}
+
+/* Ancha y baja (1280×640, 1366×768): apiladas, la escena 3.5:1 y la consola no entraban, y
+   `increment()` quedaba debajo del pie. La consola va al lado, y la escena en la parte más ancha:
+   más angosta que 1.3:1, el recorte le cortaba la punta del fuego a la nave. */
+@media (min-width: 1100px) and (max-height: 800px) {
+  .pm-escenario {
+    flex-direction: row;
+  }
+  .pm-ventana {
+    flex: 1.5 1 0;
+    min-height: 18rem;
+  }
+  .pm-consola {
+    flex: 1 1 0;
+    min-width: 0;
+    justify-content: center;
+    border-top: 0;
+    border-left: 2px solid #5b4a96;
+  }
+}
+
 /* Entre 700 y 1099 la escena va al lado de la ley, chica, y la mesa y el desafío abajo a lo ancho.
    Las columnas se disuelven para que cada pieza tome su lugar en la grilla. */
 @media (max-width: 1099px) {
@@ -233,6 +356,14 @@
   }
 }
 @media (max-width: 699px) {
+  .pm-ventana {
+    min-height: 0;
+    aspect-ratio: 4 / 3;
+  }
+  .pm-ventana .pm-nave {
+    max-width: none;
+    inset-inline-end: 1.1rem;
+  }
   .pm {
     grid-template-columns: minmax(0, 1fr);
     grid-template-rows: none;
@@ -241,13 +372,13 @@
   .pm-escena {
     max-width: 24rem;
   }
-  .pm .pm-paso .pm-mostrar {
+  .pm :is(.pm-paso, .pm-etapas) .pm-mostrar {
     margin-left: 0;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .pm .pm-paso .pm-mostrar,
+  .pm :is(.pm-paso, .pm-etapas) .pm-mostrar,
   .pm-escena {
     rotate: none;
     transition: none;
