@@ -104,6 +104,20 @@
    altura de siempre tapaba "Seguir el viaje" y el click caía en ella. */
 .prologo__manual app-concept-card {
   bottom: 5.5rem;
+  /* Arranca invisible y en la molécula la revela la entrada del sub-nivel (`.warp`), que en la hoja
+     no corre: en el viaje la pista no aparecía nunca. Aparece cuando la página ya asentó, porque
+     mientras entra deslizándose es el bloque contenedor de este `fixed` y la pista flotaba en el
+     medio. */
+  animation: prologo-pista 0.9s both;
+}
+@keyframes prologo-pista {
+  0%,
+  70% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
 }
 /* En tres columnas: "Anterior" a la izquierda solo si hay página antes, y "Siguiente" siempre a la
    derecha, esté o no el otro. Sin barra: los dos carteles flotan en las esquinas de abajo. */
