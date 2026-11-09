@@ -1,64 +1,50 @@
-<app-pagina-del-manual [guia]="guia()" [respiro]="900">
-  <p hacer class="msp-hacer">Sumá y mirá qué queda viejo.</p>
+<app-pagina-del-manual
+  [guia]="guia()"
+  [respiro]="900"
+  [integrada]="true"
+  [paso]="paso()"
+  [resuelta]="sano()"
+>
+  <p hacer>Sumá y mirá el panel.</p>
+  <p arreglo>Completá el handler y sumá.</p>
 
-  <!-- Sin bajada: con el handler incompleto una de las tres vistas se marca "quedó viejo" sola.
-       El bug se ve, no hace falta anunciarlo. -->
-  <section demo class="msp">
-    <div class="msp-toggle" role="group" aria-label="Versión del handler">
+  <app-escena-a-mano
+    escena
+    [lugares]="lugaresDelPanel()"
+    [cuenta]="panel().count"
+    [sano]="sano()"
+  />
+
+  <!-- Los números se ven una sola vez, en el panel de la nave. Acá va lo que se toca: el handler,
+       con su hueco, y la corrida. -->
+  <section consola class="msp">
+    <div class="msp-codigo" role="group" aria-label="El handler de increment">
+      @for (r of antes; track $index) {
+        <span class="msp-linea" [innerHTML]="r"></span>
+      }
       <button
-        class="msp-tab"
-        [class.msp-on]="!handlerComplete()"
-        [attr.aria-pressed]="!handlerComplete()"
-        (click)="setComplete(false)"
-      >
-        handler incompleto
-      </button>
-      <button
-        class="msp-tab"
-        [class.msp-on]="handlerComplete()"
-        [attr.aria-pressed]="handlerComplete()"
+        type="button"
+        class="msp-hueco"
+        [class.msp-hueco--lleno]="completo()"
+        [attr.aria-pressed]="completo()"
         data-guia="completo"
-        (click)="setComplete(true)"
+        (click)="alternarHandler()"
       >
-        handler completo
+        @if (completo()) {
+          @for (r of agregadas; track $index) {
+            <span class="msp-linea" [innerHTML]="r"></span>
+          }
+        } @else {
+          <span class="msp-linea" [innerHTML]="faltan"></span>
+        }
       </button>
+      <span class="msp-linea">{{ '}' }}</span>
     </div>
 
-    <div class="msp-stage">
-      <div class="msp-left">
-        <pre
-          class="msp-code"
-        >@for (r of renglones(); track $index) {<span class="msp-linea" [class]="r.clase" [innerHTML]="r.html"></span>}</pre>
-
-        <div class="msp-actions">
-          <button class="msp-inc" [attr.data-cuenta]="count()" (click)="increment()">
-            increment()
-          </button>
-          <span class="msp-lines"
-            >sync a mano <strong>{{ syncLines() }}</strong></span
-          >
-        </div>
-      </div>
-
-      <ul class="msp-spots">
-        @for (spot of spots; track spot.id) {
-          <li class="msp-spot" [class.msp-stale]="isStale(spot.id)">
-            <span class="msp-spot-label">{{ spot.label }}</span>
-            <span class="msp-spot-val">{{ rendered()[spot.id] }}</span>
-            @if (isStale(spot.id)) {
-              <span class="msp-badge">quedó viejo ✗</span>
-            }
-          </li>
-        }
-      </ul>
+    <div class="msp-mando">
+      <button type="button" class="msp-inc" [attr.data-cuenta]="panel().count" (click)="sumar()">
+        increment()
+      </button>
     </div>
   </section>
-
-  <app-escena-a-mano escena [lugares]="lugaresDelPanel()" [cuenta]="count()" [sano]="sano()" />
-
-  <app-manipulable-system
-    desafio
-    [system]="closingSystem"
-    (corrida)="sano.set($event.salud === 'healthy')"
-  />
 </app-pagina-del-manual>

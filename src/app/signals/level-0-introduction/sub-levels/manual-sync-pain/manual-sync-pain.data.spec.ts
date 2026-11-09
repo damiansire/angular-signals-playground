@@ -1,4 +1,17 @@
-import { deriveOutputs, renderedUnderHandler, staleSpots, SpotId } from './manual-sync-pain.data';
+import {
+  PANEL_INICIAL,
+  PanelAMano,
+  SpotId,
+  deriveOutputs,
+  increment,
+  staleSpots,
+} from './manual-sync-pain.data';
+
+const INCOMPLETO = new Set<SpotId>(['value']);
+const COMPLETO = new Set<SpotId>(['value', 'mult2', 'mult3']);
+
+const sumar = (veces: number, synced: ReadonlySet<SpotId>, desde = PANEL_INICIAL): PanelAMano =>
+  Array.from({ length: veces }).reduce<PanelAMano>((p) => increment(p, synced), desde);
 
 describe('manual-sync-pain (dominio "a mano no escala")', () => {
   it('deriva la verdad de cada spot desde count', () => {
@@ -7,19 +20,30 @@ describe('manual-sync-pain (dominio "a mano no escala")', () => {
     expect(deriveOutputs(1)).toEqual({ value: '1', mult2: 'No', mult3: 'No' });
   });
 
-  it('handler incompleto (solo value): los derivados quedan viejos', () => {
-    const synced = new Set<SpotId>(['value']);
-    // count=4: mult2 debería ser "Sí" pero quedó en el inicial (count=0 → "Sí"), mult3 "No" vs inicial "Sí".
-    expect(renderedUnderHandler(4, synced)).toEqual({ value: '4', mult2: 'Sí', mult3: 'Sí' });
-    expect(staleSpots(4, synced)).toEqual(['mult3']);
-    // count=5: mult2 debería "No" (quedó "Sí"), mult3 "No" (quedó "Sí") → dos viejos.
-    expect(staleSpots(5, synced)).toEqual(['mult2', 'mult3']);
+  it('arranca al día', () => {
+    expect(staleSpots(PANEL_INICIAL)).toEqual([]);
   });
 
-  it('handler completo (los tres spots): nunca hay viejos, para cualquier count', () => {
-    const synced = new Set<SpotId>(['value', 'mult2', 'mult3']);
-    for (let count = 0; count <= 12; count++) {
-      expect(staleSpots(count, synced)).toEqual([]);
+  it('handler incompleto: solo escribe el valor y los derivados quedan en el de cero', () => {
+    const panel = sumar(4, INCOMPLETO);
+    expect(panel.shown).toEqual({ value: '4', mult2: 'Sí', mult3: 'Sí' });
+    expect(staleSpots(panel)).toEqual(['mult3']);
+    expect(staleSpots(sumar(5, INCOMPLETO))).toEqual(['mult2', 'mult3']);
+  });
+
+  it('completar el handler no arregla el panel hasta la próxima corrida', () => {
+    const roto = sumar(2, INCOMPLETO);
+    expect(staleSpots(roto)).toEqual(['mult3']);
+    const arreglado = sumar(1, COMPLETO, roto);
+    expect(arreglado.shown).toEqual({ value: '3', mult2: 'No', mult3: 'Sí' });
+    expect(staleSpots(arreglado)).toEqual([]);
+  });
+
+  it('handler completo: nunca hay viejos, para cualquier cuenta', () => {
+    let panel = PANEL_INICIAL;
+    for (let i = 0; i < 12; i++) {
+      panel = increment(panel, COMPLETO);
+      expect(staleSpots(panel)).toEqual([]);
     }
   });
 });

@@ -1,112 +1,102 @@
 import { Component, ChangeDetectionStrategy, signal, computed } from '@angular/core';
 import {
+  PANEL_INICIAL,
   SPOTS,
-  SpotId,
-  deriveOutputs,
-  renderedUnderHandler,
+  type PanelAMano,
+  type SpotId,
+  increment,
   staleSpots,
 } from './manual-sync-pain.data';
-import { ManipulableSystemComponent } from '../../../../components-atom/manipulable-system/manipulable-system.component';
 import { PaginaDelManualComponent } from '../../manual/pagina-del-manual.component';
 import { EscenaAManoComponent, type LugarDelPanel } from '../../manual/escena-a-mano.component';
-import { MANUAL_SYNC_SYSTEM } from '../../introduction-systems';
 import { conCortes } from '../../../../libs/cortes-de-codigo';
 import { siguienteSinTocar } from '../../manual/guia.logica';
 
-const GLIFOS: Record<SpotId, string> = { value: '#', mult2: '×2', mult3: '×3' };
+const TODOS = new Set<SpotId>(['value', 'mult2', 'mult3']);
+const SOLO_EL_VALOR = new Set<SpotId>(['value']);
 
+// La sangría va con espacios duros (U+00A0): con espacios comunes, al envolver en angosto el
+// renglón se cortaba justo después de ellos y quedaba uno vacío arriba del código.
+const SANGRIA = '  ';
+const renglon = (texto: string) => conCortes(SANGRIA + texto);
+
+/**
+ * La ley 4 en una sola pieza: el panel de la nave es la demo, y la consola tiene el handler con el
+ * hueco que se olvida. Probar es sumar y ver qué lugar queda viejo; arreglar es completar el handler
+ * en el mismo código y volver a sumar. El panel no se arregla solo al completar: se arregla en la
+ * próxima corrida, como en el DOM.
+ */
 @Component({
   selector: 'app-manual-sync-pain',
   templateUrl: './manual-sync-pain.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ManipulableSystemComponent, PaginaDelManualComponent, EscenaAManoComponent],
+  imports: [PaginaDelManualComponent, EscenaAManoComponent],
   styleUrl: './manual-sync-pain.component.css',
 })
 export class ManualSyncPainComponent {
-  /** El desafío quedó sano: la lámina festeja. */
-  protected readonly sano = signal(false);
-  readonly closingSystem = MANUAL_SYNC_SYSTEM;
-  protected readonly spots = SPOTS;
-  protected readonly count = signal(0);
-  protected readonly handlerComplete = signal(false);
+  protected readonly panel = signal<PanelAMano>(PANEL_INICIAL);
+  protected readonly completo = signal(false);
+  /** Con qué handler corrió el último `increment()`: el arreglo vale cuando ya corrió. */
+  private readonly corrioCompleto = signal(false);
+  /** Ya se vio un lugar viejo: el paso de arreglar se prende. */
+  private readonly vioElBug = signal(false);
 
-  // El handler como texto (las llaves van dentro de interpolación, así no chocan con el
-  // control-flow del template). `added` son las dos líneas que el handler incompleto olvida.
-  // La sangría va con espacios duros (U+00A0): con espacios comunes, al envolver en angosto el
-  // renglón se cortaba justo después de ellos y quedaba uno vacío arriba del código.
-  protected readonly handlerBase = `function increment() {\n\u00a0\u00a0count++\n\u00a0\u00a0querySelector('#count').textContent = count`;
-  protected readonly handlerAdded = `\n\u00a0\u00a0querySelector('#mult2').textContent = count % 2 ? 'No' : 'Sí'\n\u00a0\u00a0querySelector('#mult3').textContent = count % 3 ? 'No' : 'Sí'`;
-  protected readonly handlerClose = `\n}`;
+  protected readonly antes = [
+    conCortes('function increment() {'),
+    renglon('count++'),
+    renglon("querySelector('#count').textContent = count"),
+  ];
+  // Las del hueco van sin sangría de texto: la pone el botón, así el subrayado no la toma.
+  protected readonly faltan = conCortes('// falta #mult2 y #mult3');
+  protected readonly agregadas = [
+    conCortes("querySelector('#mult2').textContent = count % 2 ? 'No' : 'Sí'"),
+    conCortes("querySelector('#mult3').textContent = count % 3 ? 'No' : 'Sí'"),
+  ];
 
-  // El handler renglón por renglón, con su clase y con puntos de corte: angosto, cada renglón
-  // envuelve con sangría colgante (ver `.msp-linea`) en vez de seguir en la columna 0, donde la
-  // continuación de "querySelector('#count').textContent" se leía como otra sentencia.
-  protected readonly renglones = computed(() =>
-    [
-      { texto: this.handlerBase, clase: 'msp-hl' },
-      {
-        texto: this.handlerAdded,
-        clase: this.handlerComplete() ? 'msp-added' : 'msp-added msp-hidden',
-      },
-      { texto: this.handlerClose, clase: 'msp-cmt' },
-    ].flatMap(({ texto, clase }) =>
-      texto
-        .split('\n')
-        .filter((renglon, i) => i > 0 || renglon !== '')
-        .map((renglon) => ({ clase, html: conCortes(renglon) })),
-    ),
-  );
+  private readonly viejos = computed(() => new Set(staleSpots(this.panel())));
+  protected readonly sano = computed(() => this.completo() && this.corrioCompleto());
+  protected readonly paso = computed<1 | 2>(() => (this.vioElBug() || this.completo() ? 2 : 1));
 
-  private readonly synced = computed<ReadonlySet<SpotId>>(() =>
-    this.handlerComplete()
-      ? new Set<SpotId>(['value', 'mult2', 'mult3'])
-      : new Set<SpotId>(['value']),
-  );
-
-  protected readonly rendered = computed(() => renderedUnderHandler(this.count(), this.synced()));
-  protected readonly truth = computed(() => deriveOutputs(this.count()));
-  protected readonly stale = computed(() => new Set(staleSpots(this.count(), this.synced())));
-  protected readonly syncLines = computed(() => this.synced().size);
-
-  /** Los tres lugares como los ve el panel de la nave en la lámina. */
+  /** Los tres lugares como los ve el panel de la nave. */
   protected readonly lugaresDelPanel = computed<LugarDelPanel[]>(() =>
-    this.spots.map((spot) => ({
+    SPOTS.map((spot) => ({
       id: spot.id,
-      glifo: GLIFOS[spot.id],
-      valor: this.rendered()[spot.id],
-      viejo: this.stale().has(spot.id),
-      sincronizado: this.synced().has(spot.id),
+      rotulo: spot.selector,
+      valor: this.panel().shown[spot.id],
+      viejo: this.viejos().has(spot.id),
+      sincronizado: this.completo() || spot.id === 'value',
     })),
   );
 
   /**
-   * La mano: dos sumas con el handler incompleto (una vista queda vieja), el completo, y una suma
-   * más con él (ya no queda ninguna). El botón lleva la cuenta, así cada suma es un toque distinto.
+   * La mano: dos sumas con el handler incompleto (los lugares olvidados quedan viejos), completar el
+   * handler, y una suma más con él. El botón lleva la cuenta, así cada suma es un toque distinto.
    */
   private readonly pasos = signal<readonly string[]>([]);
   protected readonly guia = computed(() => {
+    if (this.sano()) return null;
     const paso = siguienteSinTocar(['suma-1', 'suma-2', 'completo', 'suma-3'], this.pasos());
     if (paso === null) return null;
     return paso === 'completo'
       ? '[data-guia="completo"]'
-      : `.msp-inc[data-cuenta="${this.count()}"]`;
+      : `.msp-inc[data-cuenta="${this.panel().count}"]`;
   });
 
-  protected increment(): void {
-    this.count.update((n) => n + 1);
+  protected sumar(): void {
+    const completo = this.completo();
+    this.panel.update((p) => increment(p, completo ? TODOS : SOLO_EL_VALOR));
+    this.corrioCompleto.set(completo);
+    if (this.viejos().size > 0) this.vioElBug.set(true);
     const pasos = this.pasos();
-    const suma = this.handlerComplete()
-      ? 'suma-3'
-      : (siguienteSinTocar(['suma-1', 'suma-2'], pasos) ?? 'suma-2');
+    const suma = completo ? 'suma-3' : (siguienteSinTocar(['suma-1', 'suma-2'], pasos) ?? 'suma-2');
     this.pasos.set([...pasos, suma]);
   }
 
-  protected setComplete(complete: boolean): void {
-    this.handlerComplete.set(complete);
-    if (complete) this.pasos.update((pasos) => [...pasos, 'completo']);
-  }
-
-  protected isStale(id: SpotId): boolean {
-    return this.stale().has(id);
+  /** Tocar el hueco escribe las dos líneas que faltaban; tocarlas otra vez las borra. */
+  protected alternarHandler(): void {
+    const completo = !this.completo();
+    this.completo.set(completo);
+    if (!completo) this.corrioCompleto.set(false);
+    if (completo) this.pasos.update((pasos) => [...pasos, 'completo']);
   }
 }

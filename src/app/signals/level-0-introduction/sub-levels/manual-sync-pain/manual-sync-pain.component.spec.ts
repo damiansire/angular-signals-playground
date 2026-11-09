@@ -9,11 +9,7 @@ describe('ManualSyncPainComponent', () => {
     (el.querySelector(selector) as HTMLButtonElement).click();
     fixture.detectChanges();
   };
-  const clickCompleteTab = () => {
-    // Segundo tab = "handler completo" (por índice: "incompleto" contiene "completo" como substring).
-    (el.querySelectorAll('.msp-tab')[1] as HTMLButtonElement).click();
-    fixture.detectChanges();
-  };
+  const etapas = () => [...el.querySelectorAll('.pm-etapa')];
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
@@ -24,23 +20,38 @@ describe('ManualSyncPainComponent', () => {
     fixture.detectChanges();
   });
 
-  it('se crea', () => {
-    expect(fixture.componentInstance).toBeTruthy();
+  it('es una sola pieza: escena, consola y sin desafío aparte', () => {
+    expect(el.querySelector('.pm-escenario app-escena-a-mano')).not.toBeNull();
+    expect(el.querySelector('.pm-consola .msp-codigo')).not.toBeNull();
+    expect(el.querySelector('app-manipulable-system')).toBeNull();
   });
 
-  it('muestra los tres lugares del DOM', () => {
-    expect(el.querySelectorAll('.msp-spot').length).toBe(3);
+  it('el handler arranca con su hueco y lo tocado lo completa', () => {
+    expect(el.querySelector('.msp-hueco')?.textContent).toContain('falta');
+    click('.msp-hueco');
+    expect(el.querySelector('.msp-hueco')?.textContent).toContain("'#mult3'");
+    expect(el.querySelector('.msp-hueco')?.getAttribute('aria-pressed')).toBe('true');
   });
 
-  it('handler incompleto: al incrementar, los derivados quedan viejos', () => {
+  it('con un lugar viejo se prende el paso de arreglar', () => {
+    expect(etapas()[0].classList).toContain('pm-etapa--ahora');
     click('.msp-inc');
-    expect(el.querySelectorAll('.msp-spot.msp-stale').length).toBe(2);
-    expect(el.querySelectorAll('.msp-badge').length).toBe(2);
+    expect(etapas()[1].classList).toContain('pm-etapa--ahora');
+    expect(etapas()[0].classList).toContain('pm-etapa--hecho');
   });
 
-  it('handler completo: no queda nada viejo', () => {
+  it('completar no alcanza: se resuelve al volver a sumar', () => {
     click('.msp-inc');
-    clickCompleteTab();
-    expect(el.querySelectorAll('.msp-spot.msp-stale').length).toBe(0);
+    click('.msp-hueco');
+    expect(etapas()[1].classList).not.toContain('pm-etapa--hecho');
+    click('.msp-inc');
+    expect(etapas()[1].classList).toContain('pm-etapa--hecho');
+  });
+
+  it('el panel de la nave dice qué quedó viejo', () => {
+    click('.msp-inc');
+    const panel = el.querySelector('app-escena-a-mano svg')?.getAttribute('aria-label') ?? '';
+    expect(panel).toContain('#mult2 Sí (viejo)');
+    expect(panel).toContain('#mult3 Sí (viejo)');
   });
 });

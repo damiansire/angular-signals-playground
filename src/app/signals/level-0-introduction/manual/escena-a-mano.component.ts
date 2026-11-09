@@ -1,13 +1,13 @@
 import { ChangeDetectionStrategy, Component, computed, effect, input } from '@angular/core';
 import { gsap } from 'gsap';
-import { EscenaDelManual, chispas, pintarPantalla } from './escena-del-manual';
+import { CIELO_DEL_ESCENARIO, EscenaDelManual, chispas, pintarPantalla } from './escena-del-manual';
 import { PALETA, el } from './nave-del-manual';
 
 /** Un lugar del panel: lo que muestra y si quedó viejo. */
 export interface LugarDelPanel {
   readonly id: string;
-  /** Un glifo corto para el panel: `#`, `×2`, `×3`. */
-  readonly glifo: string;
+  /** Su rótulo en el panel: el mismo selector con que el handler lo busca. */
+  readonly rotulo: string;
   readonly valor: string;
   readonly viejo: boolean;
   /** El handler lo actualiza: el lápiz pasa por acá. */
@@ -16,16 +16,24 @@ export interface LugarDelPanel {
 
 const FILA = { x: 226, ancho: 150, alto: 44, y0: 40, paso: 54 } as const;
 const NARIZ = { x: 182, y: 148 };
-const REPOSO = { x: 360, y: 246 };
+// Apoyado en la esquina de la pantalla: más abajo, el escenario apaisado lo cortaba.
+const REPOSO = { x: 360, y: 236 };
 
 /**
- * Lámina de la ley 4: el panel de la nave tiene tres lugares que dependen del mismo número, y el
- * handler los actualiza a mano. Con cada `increment()` el lápiz pasa por los lugares que el handler
- * nombra; el que se olvida queda con el número viejo, en rojo, y la nave lo mira preocupada.
+ * Lámina de la ley 4, que es el escenario de su página: el panel de la nave tiene tres lugares que
+ * dependen del mismo número, rotulados con el selector que los busca, y el handler los actualiza a
+ * mano. Con cada `increment()` el lápiz pasa por los lugares que el handler nombra; el que se
+ * olvida queda con el número viejo, en rojo, y la nave lo mira preocupada.
  */
 @Component({
   selector: 'app-escena-a-mano',
-  template: `<svg class="esc" viewBox="0 0 400 260" role="img" [attr.aria-label]="descripcion()">
+  template: `<svg
+    class="esc esc--escenario"
+    [attr.viewBox]="cielo"
+    preserveAspectRatio="xMidYMid slice"
+    role="img"
+    [attr.aria-label]="descripcion()"
+  >
     <g data-nave transform="translate(112 150) scale(1.05)"></g>
   </svg>`,
   styleUrl: './escena.css',
@@ -38,11 +46,12 @@ export class EscenaAManoComponent extends EscenaDelManual {
   readonly sano = input(false);
 
   protected readonly semilla = 41;
+  protected readonly cielo = CIELO_DEL_ESCENARIO;
   protected readonly descripcion = computed(
     () =>
       'Panel de la nave: ' +
       this.lugares()
-        .map((l) => `${l.glifo} ${l.valor}${l.viejo ? ' (viejo)' : ''}`)
+        .map((l) => `${l.rotulo} ${l.valor}${l.viejo ? ' (viejo)' : ''}`)
         .join(', '),
   );
 
@@ -85,15 +94,15 @@ export class EscenaAManoComponent extends EscenaDelManual {
         stroke: '#5b4a96',
         'stroke-width': 1.4,
       });
-      const glifo = el(pantalla, 'text', {
+      const rotulo = el(pantalla, 'text', {
         x: FILA.x + 14,
         y: y + 28,
         'font-family': "'JetBrains Mono', Consolas, monospace",
-        'font-size': 14,
+        'font-size': 12.5,
         'font-weight': 700,
         fill: '#b9aee0',
       });
-      glifo.textContent = l.glifo;
+      rotulo.textContent = l.rotulo;
       const valor = el(pantalla, 'text', {
         x: FILA.x + FILA.ancho - 46,
         y: y + 31,

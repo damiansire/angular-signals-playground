@@ -1,84 +1,30 @@
 /* Clases con prefijo `msp-`: se embebe en la vista integrada, que estampa su enc; sin prefijo,
-   las clases del motor de la molécula pisarían las nuestras. */
+   las clases del motor de la molécula pisarían las nuestras. Va en la consola de la nave: la misma
+   paleta que su pantalla (vidrio violeta, borde lila, texto claro). */
 :host {
   display: block;
-  color: #1c1e24;
 }
 
 .msp {
-  display: flex;
-  flex-direction: column;
-  gap: 1.4rem;
-}
-
-/* Toggle handler incompleto / completo. */
-.msp-toggle {
-  display: inline-flex;
-  gap: 0.4rem;
-  align-self: flex-start;
-}
-
-.msp-tab {
-  font: inherit;
-  font-size: 0.85rem;
-  padding: 0.4rem 0.85rem;
-  border-radius: 0.5rem;
-  border: 1px solid #cfc9bd;
-  background: transparent;
-  color: #7c7566;
-  cursor: pointer;
-  transition:
-    border-color 0.15s,
-    color 0.15s;
-}
-
-/* En la molécula el card impone fondo oscuro a los botones; marcamos el activo con
-   propiedades que esa regla no toca: `outline` + `opacity` (mismo recurso que dom-to-pixel). */
-.msp-tab:not(.msp-on) {
-  /* 0.5 dejaba el rótulo a 2.8:1 contra la escena; 0.75 sigue apagado y se lee. */
-  opacity: 0.75;
-}
-
-.msp-tab.msp-on {
-  border-color: #17140f;
-  color: #17140f;
-  font-weight: 600;
-  outline: 2px solid #e0a13a;
-  outline-offset: 2px;
-}
-
-.msp-tab:focus-visible {
-  outline: 2px solid #2563eb;
-  outline-offset: 2px;
-}
-
-/* Escena: código a la izquierda, spots del DOM a la derecha. */
-.msp-stage {
   display: grid;
-  grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
-  gap: 1.5rem;
-  align-items: start;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 1rem 1.5rem;
 }
 
-.msp-left {
+.msp-codigo {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
-}
-
-.msp-code {
-  margin: 0;
-  font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
-  font-size: 0.8rem;
-  line-height: 1.7;
-  background: #14120e;
-  color: #cfc7b6;
-  padding: 1rem 1.1rem;
-  border-radius: 0.6rem;
-  /* Envuelve por palabra en cualquier ancho: embebido en el recorrido, su scroll horizontal queda
-     invisible (el recorrido oculta las barras) y a 820 y 1001 px la línea clave se cortaba en
-     "('#count'". */
-  white-space: pre-wrap;
+  padding: 0.85rem 1.1rem;
+  border: 1.5px solid #5b4a96;
+  border-radius: 12px;
+  background: #1c1434;
+  font:
+    500 clamp(0.85rem, 1vw, 1rem) / 1.65 'JetBrains Mono',
+    'Cascadia Mono',
+    Consolas,
+    monospace;
+  color: #f2ecff;
   overflow-wrap: break-word;
 }
 
@@ -90,129 +36,82 @@
   text-indent: -4ch;
 }
 
-.msp-cmt {
-  color: #7d7660;
-}
-
-.msp-hl {
-  color: #f0ede4;
-}
-
-.msp-added {
-  color: #6ac48f;
-}
-
-.msp-hidden {
-  display: none;
-}
-
-.msp-actions {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  flex-wrap: wrap;
-}
-
-.msp-inc {
-  font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
-  font-size: 0.85rem;
-  padding: 0.5rem 1rem;
-  border-radius: 0.6rem;
-  border: 1px solid #17140f;
-  background: #17140f;
-  color: #ffffff;
+/* El hueco del handler: lo que se toca para arreglarlo, en dorado y subrayado como los tokens de
+   los desafíos. Lleno, las dos líneas nuevas en verde. Tres clases más el elemento: le gana a la
+   pastilla oscura que la hoja le pone a todo botón (`.subhost button:not([class*='bg-'])`). */
+.msp .msp-codigo button.msp-hueco {
+  display: block;
+  width: 100%;
+  margin: 0.1rem 0;
+  /* La sangría del renglón: como espacio del botón y no del texto, el subrayado no la toma. */
+  padding: 0.1rem 0.4rem 0.1rem 2ch;
+  border: 0;
+  border-radius: 6px;
+  background: rgb(255 210 122 / 8%);
+  font: inherit;
+  text-align: left;
+  color: #ffd27a;
   cursor: pointer;
-  transition: transform 0.06s;
+  transition: background-color 0.15s;
 }
-
-.msp-inc:active {
-  transform: translateY(1px);
+.msp .msp-codigo button.msp-hueco .msp-linea {
+  text-decoration: underline dashed 1.5px;
+  text-underline-offset: 0.3em;
 }
-
-.msp-inc:focus-visible {
-  /* Doble anillo: la tinta da el contraste sobre el crema y el acento queda por dentro. */
-  outline: 2px solid var(--focus-ink);
+.msp .msp-codigo button.msp-hueco:hover {
+  background: rgb(255 210 122 / 16%);
+}
+.msp .msp-codigo button.msp-hueco.msp-hueco--lleno {
+  background: rgb(106 209 154 / 10%);
+  color: #8be0b3;
+}
+.msp .msp-codigo button.msp-hueco:focus-visible {
+  outline: 2px solid #ffd27a;
   outline-offset: 2px;
-  box-shadow: 0 0 0 2px #e0a13a;
 }
 
-.msp-lines {
-  font-size: 0.9rem;
-  color: #5c5648;
-}
-
-.msp-lines strong {
-  font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
-  color: #17140f;
-}
-
-/* Los tres lugares del DOM y su valor renderizado. */
-.msp-spots {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 0.6rem;
-}
-
-.msp-spot {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  padding: 0.7rem 0.95rem;
-  border-radius: 0.6rem;
-  border: 1.5px solid #dcd6ca;
-  background: rgba(255, 255, 255, 0.55);
-  transition:
-    border-color 0.3s,
-    background 0.3s;
-}
-
-.msp-spot-label {
-  flex: 1;
-  font-size: 0.95rem;
-  color: #5c5648;
-}
-
-.msp-spot-val {
-  font-family: Georgia, 'Times New Roman', serif;
-  font-size: 1.4rem;
-  line-height: 1;
-  color: #17140f;
-}
-
-.msp-spot.msp-stale {
-  border-color: #d92626;
-  background: #fdecec;
-}
-
-.msp-spot.msp-stale .msp-spot-val {
-  color: #d92626;
-}
-
-.msp-badge {
-  font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
-  font-size: 0.7rem;
-  font-weight: 700;
-  letter-spacing: 0.02em;
-  color: #d92626;
-  background: rgba(217, 38, 38, 0.12);
-  padding: 0.2rem 0.5rem;
+/* La corrida: el botón dorado de la consola, con su sombra de tinta. */
+.msp .msp-mando button.msp-inc {
+  padding: 0.7rem 1.4rem;
+  border: 2px solid #2b1b33;
   border-radius: 999px;
-  white-space: nowrap;
+  background: #ffd27a;
+  box-shadow: 0 4px 0 #2b1b33;
+  font:
+    700 1.05rem / 1.2 'JetBrains Mono',
+    'Cascadia Mono',
+    Consolas,
+    monospace;
+  color: #2b1b33;
+  cursor: pointer;
+  transition:
+    translate 0.08s,
+    box-shadow 0.08s,
+    background-color 0.15s;
+}
+.msp .msp-mando button.msp-inc:hover {
+  background: #ffdc94;
+}
+.msp .msp-mando button.msp-inc:active {
+  translate: 0 3px;
+  box-shadow: 0 1px 0 #2b1b33;
+}
+.msp .msp-mando button.msp-inc:focus-visible {
+  outline: 3px solid #fff8ec;
+  outline-offset: 3px;
 }
 
-/* A una columna, `1fr` a secas crecía hasta el renglón más largo del <pre> y la escena se salía de
-   la card (y embebida, la card recorta). */
-@media (max-width: 720px) {
-  .msp-stage {
+/* Angosto, o con la consola al lado de la escena (ancha y baja, ver `pagina-del-manual`), la
+   corrida va debajo del código. */
+@media (max-width: 699px), (min-width: 1100px) and (max-height: 800px) {
+  .msp {
     grid-template-columns: minmax(0, 1fr);
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .msp-spot {
+  .msp .msp-codigo button.msp-hueco,
+  .msp .msp-mando button.msp-inc {
     transition: none;
   }
 }
