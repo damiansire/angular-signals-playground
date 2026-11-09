@@ -1,17 +1,14 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  DestroyRef,
-  afterNextRender,
-  computed,
-  effect,
-  inject,
-  input,
-  signal,
-} from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, effect, input, signal } from '@angular/core';
 import { gsap } from 'gsap';
 import { CD_EDGES, CD_NODES, SIGNAL_DEPENDENTS } from '../../../libs/cd-tree';
-import { CIELO_DEL_ESCENARIO, EscenaDelManual, chispas, pintarPantalla } from './escena-del-manual';
+import {
+  CIELO_DEL_ESCENARIO,
+  EscenaDelManual,
+  alCambiarDeTamano,
+  chispas,
+  cieloCentradoEn,
+  pintarPantalla,
+} from './escena-del-manual';
 import { PALETA, el } from './nave-del-manual';
 import { cieloAngosto } from './escenas.logica';
 
@@ -45,7 +42,7 @@ const TOTAL_DE_NODOS = CD_NODES.length;
  * recorte le comía a la pantalla el último `<p>` y la cuenta de revisados.
  */
 const ALTO_PINTADO = 520;
-const CIELO_PINTADO = `-200 ${129 - ALTO_PINTADO / 2} 800 ${ALTO_PINTADO}`;
+const CIELO_PINTADO = cieloCentradoEn(129, ALTO_PINTADO);
 
 /**
  * Lámina de la ley 6, que es el escenario de su página: ya no hay cerca de Zone.js. El valor es una
@@ -100,15 +97,11 @@ export class EscenaSignalComponent extends EscenaDelManual {
   constructor() {
     super();
     // Corre después de `armar`, que ya pintó el cielo alto: el `viewBox` que siga cae adentro.
-    const destruir = inject(DestroyRef);
-    afterNextRender(() => {
-      const observador = new ResizeObserver(([caja]) => {
-        const { width, height } = caja.contentRect;
-        this.cielo.set(cieloAngosto(width, height, ALTO_PINTADO) ?? CIELO_DEL_ESCENARIO);
-      });
-      observador.observe(this.host);
-      destruir.onDestroy(() => observador.disconnect());
-    });
+    alCambiarDeTamano(this.host, (ancho, alto) =>
+      this.cielo.set(
+        cieloAngosto(ancho, alto, { altoDelCielo: ALTO_PINTADO }) ?? CIELO_DEL_ESCENARIO,
+      ),
+    );
     effect(() => {
       const aviso = this.aviso();
       const valor = this.valor();

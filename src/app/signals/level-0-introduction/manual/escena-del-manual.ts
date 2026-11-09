@@ -14,8 +14,8 @@ export const ALTO = 260;
  * el de la lámina: centrada en la lámina, una ventanilla apaisada le cortaba el borde de arriba a la
  * pantalla.
  */
-export function cieloCentradoEn(y: number): string {
-  return `-200 ${y - 170} 800 340`;
+export function cieloCentradoEn(y: number, alto = 340): string {
+  return `-200 ${y - alto / 2} 800 ${alto}`;
 }
 
 /** El de la mayoría: la nave, su pantalla y lo que descansa debajo (y 18 a 240). */
@@ -218,4 +218,22 @@ export function chispas(padre: SVGGElement | SVGSVGElement, x: number, y: number
       },
     );
   }
+}
+
+/**
+ * Avisa el tamaño de la escena cada vez que cambia, desde que está pintada. Va en el constructor de
+ * la lámina: necesita su contexto de inyección para desconectarse al desmontar.
+ */
+export function alCambiarDeTamano(
+  host: HTMLElement,
+  alMedir: (ancho: number, alto: number) => void,
+): void {
+  const destruir = inject(DestroyRef);
+  afterNextRender(() => {
+    const observador = new ResizeObserver(([caja]) =>
+      alMedir(caja.contentRect.width, caja.contentRect.height),
+    );
+    observador.observe(host);
+    destruir.onDestroy(() => observador.disconnect());
+  });
 }

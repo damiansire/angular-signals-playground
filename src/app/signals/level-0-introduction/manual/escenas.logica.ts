@@ -13,8 +13,15 @@ export function saltosDelPaisaje(costo: Costo): number {
   return costo === 'barato' ? 0 : costo === 'medio' ? 14 : 5;
 }
 
-/** Lo que una escena no puede recortar: la nave, con su fuego, y su pantalla con su marco. */
-const LO_QUE_IMPORTA = { x: 4, ancho: 394, centro: 130 } as const;
+/** La franja de la lámina que una escena angosta no puede recortar: desde dónde, cuánto y su centro. */
+export interface LoQueImporta {
+  readonly x: number;
+  readonly ancho: number;
+  readonly centro: number;
+}
+
+/** El de la mayoría: la nave, con su fuego, y su pantalla con su marco. */
+const LO_QUE_IMPORTA: LoQueImporta = { x: 4, ancho: 394, centro: 130 };
 /** El cielo entero del escenario mide 340 de alto: más alto, quedaría sin pintar. */
 export const ALTO_DEL_CIELO = 340;
 /** Por debajo de este ancho (px) la escena encuadra la nave y su pantalla, sin cielo de sobra. */
@@ -29,11 +36,14 @@ export const ESCENA_ANGOSTA = 560;
 export function cieloAngosto(
   ancho: number,
   alto: number,
-  altoDelCielo = ALTO_DEL_CIELO,
+  {
+    altoDelCielo = ALTO_DEL_CIELO,
+    importa = LO_QUE_IMPORTA,
+  }: { altoDelCielo?: number; importa?: LoQueImporta } = {},
 ): string | null {
   if (ancho <= 0 || alto <= 0 || ancho >= ESCENA_ANGOSTA) return null;
-  const h = (LO_QUE_IMPORTA.ancho * alto) / ancho;
+  const h = (importa.ancho * alto) / ancho;
   if (h > altoDelCielo) return null;
-  const y = LO_QUE_IMPORTA.centro - h / 2;
-  return `${LO_QUE_IMPORTA.x} ${y.toFixed(1)} ${LO_QUE_IMPORTA.ancho} ${h.toFixed(1)}`;
+  const y = importa.centro - h / 2;
+  return `${importa.x} ${y.toFixed(1)} ${importa.ancho} ${h.toFixed(1)}`;
 }

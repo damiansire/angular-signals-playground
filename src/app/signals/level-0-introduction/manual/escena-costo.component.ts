@@ -1,14 +1,4 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  DestroyRef,
-  afterNextRender,
-  computed,
-  effect,
-  inject,
-  input,
-  signal,
-} from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, effect, input, signal } from '@angular/core';
 import { gsap } from 'gsap';
 import {
   ESTACIONES,
@@ -18,7 +8,13 @@ import {
   renderCost,
   stagesTriggered,
 } from '../../../libs/render-pipeline';
-import { CIELO_DEL_ESCENARIO, EscenaDelManual, chispas, pintarPantalla } from './escena-del-manual';
+import {
+  CIELO_DEL_ESCENARIO,
+  EscenaDelManual,
+  alCambiarDeTamano,
+  chispas,
+  pintarPantalla,
+} from './escena-del-manual';
 import { PALETA, azar, el } from './nave-del-manual';
 import { type Costo, cieloAngosto, saltosDelPaisaje } from './escenas.logica';
 
@@ -99,15 +95,9 @@ export class EscenaCostoComponent extends EscenaDelManual {
   constructor() {
     super();
     // El cielo se pinta con el `viewBox` ancho, que contiene al angosto: cambiarlo no deja huecos.
-    const destruir = inject(DestroyRef);
-    afterNextRender(() => {
-      const observador = new ResizeObserver(([caja]) => {
-        const { width, height } = caja.contentRect;
-        this.cielo.set(cieloAngosto(width, height) ?? CIELO_DEL_ESCENARIO);
-      });
-      observador.observe(this.host);
-      destruir.onDestroy(() => observador.disconnect());
-    });
+    alCambiarDeTamano(this.host, (ancho, alto) =>
+      this.cielo.set(cieloAngosto(ancho, alto) ?? CIELO_DEL_ESCENARIO),
+    );
     effect(() => {
       const corrida = this.corrida();
       if (!this.lista || !corrida || corrida.n === this.vista) return;

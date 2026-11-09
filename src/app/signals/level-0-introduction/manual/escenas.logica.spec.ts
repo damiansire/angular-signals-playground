@@ -25,7 +25,7 @@ describe('cieloAngosto', () => {
   // La ventanilla de Signal Space a 390 px: la consola es corta y la escena queda más alta que ancha.
   it('con un cielo pintado más alto, encuadra también una ventanilla alta', () => {
     expect(cieloAngosto(390, 412)).toBeNull();
-    expect(cieloAngosto(390, 412, 520)).toBe('4 -78.1 394 416.2');
+    expect(cieloAngosto(390, 412, { altoDelCielo: 520 })).toBe('4 -78.1 394 416.2');
   });
 
   it('sin medida todavía, el de siempre', () => {
