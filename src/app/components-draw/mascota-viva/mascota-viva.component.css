@@ -37,8 +37,9 @@
   display: inline;
 }
 
-/* Pensativa (sentada de frente): la sonrisa abierta pasa a una chica y cerrada. La "o" de antes se
-   leía preocupada. */
+/* Pensativa (sentada de frente): la sonrisa abierta pasa a una boca casi recta, apenas caída en las
+   puntas: melancólica. Chica y curvada hacia arriba se leía como una sonrisa, y la "o" de antes,
+   preocupada. */
 .mv__boca-pena,
 .mv__brillo-pena,
 :host(.mv--pensativa) .mv__brillo,
