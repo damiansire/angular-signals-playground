@@ -656,20 +656,30 @@ entrar desarma a Angie en luz y se hace noche, la costura con el prólogo.
       continúa sin sonido y los botones de sonido de la colina lo reflejan. Con sonido, su toque es
       el gesto que el navegador exige: suena la prueba de un oído al otro (`planDeLaPrueba`), la
       copa que suena golpea y Angie se vuelca hacia ese lado (`inclinarse`), y en el acorde salta.
-      Después la CÁMARA SE ALEJA (`ALEJARSE_MS`) desde la BOCA de Angie en la piedra (punto fijo de
-      las dos escalas, sacado con `getScreenCTM` del dibujo): la noche era un suspiro suyo. El aviso
-      compensa la escala de la colina (arranca en `1 / CERCA`, así el primer cuadro no salta) y se
-      cierra en un CÍRCULO blando sobre la boca (máscara que crece con `--aa-aire`, el final de
-      dibujo animado) mientras ella suspira (`suspirar`); el texto se va primero. Defectos
-      resueltos: (1) un rectángulo con bordes redondeados que se achica se leía como una ventana,
-      "muy cuadrado"; (2) nubes oscuras sobre la cara se leían como el humo de una explosión; (3)
-      con la colina a 2,6× el navegador pintaba solo lo visible al arrancar y, al abrirse, la colina
-      y Angie salían CORTADAS en rectángulos: `CERCA` queda en 1,12. Los cuadros pausados NO
-      muestran (3), porque pausar le da tiempo a pintar: grabar en tiempo real con screencast por
-      CDP (Edge headless, click real) y mirar la hoja de cuadros. El aviso sigue del tamaño de la
-      pantalla hasta `ENCAJA`, cuando el círculo ya cabe adentro (`aireQueCabe`): si se achica
-      antes, asoman sus bordes rectos. El aire baja en escala pareja (`caminoDelAire`). Probarlo
-      en escritorio y en 375 de ancho. Ojo: un click por `ref`
+      Después la CÁMARA SE ALEJA como en Powers of Ten (2026-11-09, `cuadroDelViaje`): la noche
+      era un suspiro de Angie y vuelve a su boca. Tres tramos: (a) la BOCANADA (`BOCANADA_MS`): el
+      aviso se cierra en un círculo blando (máscara con `--aa-aire`) hasta caber adentro
+      (`aireQueCabe`, si se achica antes asoman sus bordes rectos) y después se achica a `CHICO`,
+      un circulito con la noche en miniatura, delante de la boca enorme y abierta en "o" de la
+      Angie de la colina (`abrirLaBoca`); el texto se va primero; (b) la cámara se ALEJA
+      (`ALEJARSE_MS`) de la boca a la cara, a Angie en la piedra y a la colina entera, en escala
+      pareja (cada tramo de tiempo divide la escala por lo mismo); arranca de
+      `profundidadDelViaje` (la boca en media pantalla, tope 60); el circulito se achica más
+      despacio que el mundo (`PERSISTE`) y llega a la colina todavía visible; (c) TRAGA
+      (`TRAGA_MS`): el circulito entra y la boca se cierra con un trago. El título de la colina
+      entra recién al llegar (`llego`): antes se vería gigante. Lo que NO puede pasar
+      (anti-patrones): un zoom en línea recta (la boca pasaba en un parpadeo y la colina se
+      arrastraba); la colina en RECTÁNGULOS (animada por el compositor, el navegador la pintaba
+      una sola vez a la escala del arranque: por eso va cuadro a cuadro con
+      `requestAnimationFrame`, y cada cuadro se vuelve a dibujar); el circulito al costado de la
+      boca (la cara se mueve sola y a 40× dos píxeles se notan: la cámara SIGUE a la "o" visible
+      cada cuadro; la del perfil también existe, apagada, y mide cero); un cuadro sin aviso al
+      arrancar (el primero se pinta antes de prender la máscara); texto del aviso legible en el
+      circulito; cortes entre tramos; más de unos 5 s. Defectos viejos que siguen valiendo: un
+      rectángulo que se achica se leía como una ventana; nubes oscuras sobre la cara, como humo
+      de explosión. Los cuadros pausados NO muestran los rectángulos, porque pausar le da tiempo
+      a pintar: grabar en tiempo real con screencast por CDP (Edge headless, click real) y mirar
+      la hoja de cuadros. Verificado así a 1440×900 y 390×844. Ojo: un click por `ref`
       de la herramienta hace scroll del overlay (`overflow: hidden` igual scrollea): no es un bug,
       repetir con click por coordenada. En el acorde final, ondas y notas usan otra animación: con
       el mismo nombre, las del lado que ya había sonado no volvían a salir. Va diferido (`@defer`,
