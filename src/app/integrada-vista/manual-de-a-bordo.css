@@ -372,9 +372,8 @@
   letter-spacing: 0.01em;
   color: #8a7d66;
 }
-/* El lienzo de ECharts queda con el alto en px de la medición anterior: en el flujo, ese alto era
-   el mínimo de la grilla y la hoja nunca podía achicarse (a 1366×768 se pasaba). Va encima de su
-   recuadro, que es quien tiene el alto. */
+/* El árbol va encima de su recuadro, que es quien tiene el alto: en el flujo, su alto natural sería
+   el mínimo de la grilla y la hoja no podría achicarse (a 1366×768 se pasaba). */
 .prologo__manual .subhost .htt-arbol .tree-card {
   height: 100%;
   min-height: 17rem;
@@ -382,7 +381,4 @@
 .prologo__manual .subhost .htt-arbol app-node-tree {
   position: absolute;
   inset: 0.5rem;
-}
-.prologo__manual .subhost .htt-arbol :is(.demo-chart, .tree-slot) {
-  height: 100%;
 }
