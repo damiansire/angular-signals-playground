@@ -923,7 +923,7 @@ Del minijuego de operadores (2026-11-08):
       raya y la mitad de abajo de la hoja, vacía. A 1100 px o más: dos columnas (leer | la nave y
       el desafío); entre 700 y 1099, la escena al lado del título y la demo y el desafío a lo ancho;
       por debajo, una sola columna.
-- [ ] La página integrada (`[integrada]`, por ahora las leyes 2, 4 y 5) es UNA pieza: la escena de la nave es
+- [ ] La página integrada (`[integrada]`, por ahora las leyes 2, 3, 4 y 5) es UNA pieza: la escena de la nave es
       el escenario y su pantalla muestra los números, una sola vez; abajo, la consola de la nave, en
       la paleta de su pantalla (vidrio `#1c1434`, borde `#5b4a96`, texto `#f2ecff`). Antes, la demo
       en papel repetía los números del panel y el desafío usaba otro código (`badge`, `total`): tres
@@ -961,6 +961,22 @@ Del minijuego de operadores (2026-11-08):
       renglón, y el paso 2 nombra el selector que dio `null`: con "Cambiá el querySelector." el paso
       no entraba en la fila de "Mostrame" a 600 px, y la consola bajaba un renglón más. A 600×800 la
       hoja baja 48 px (la ley 4, 121), con "correr" a la vista desde el arranque.
+- [ ] La ley 3 en el escenario: la pantalla de la nave ES el pipeline, en vertical (DOM, style,
+      layout, paint, composite) con las capas caras marcadas. Antes la demo en papel lo dibujaba
+      dos veces (el SVG ancho y el vertical en HTML) y la lámina repetía el costo en barras de 16
+      ms. Cada corrida dibuja su flujo pieza por pieza, con el pulso en la punta
+      (`recorridoDelFlujo`, función pura): caro baja derecho por todas, color salta layout y
+      transform salta las dos caras por el carril de la izquierda; las salteadas quedan tachadas
+      desde el arranque. La palabra del costo aparece cuando el flujo llega, y recién ahí cambia el
+      vuelo (a los tirones y la nave trabada, o de corrido). El hueco es la propiedad y rota de la
+      más cara a la más barata (`left`, `textContent`, `color`, `transform`): la mano alterna el
+      hueco y "correr" para que se vean las cuatro, y se resuelve recién al correr `transform`.
+      Rótulos de 13.5 unidades o más y, por debajo de 560 px de escena, el `viewBox` encuadra la
+      nave y su pantalla (`cieloAngosto`): con el cielo de sobra, a 390 px la escena quedaba a
+      0.69 y "capas caras" en 8 px; encuadrada, a 0.82, el más chico llega a 11 px. Las cajas de
+      texto no se tocan (`getBoundingClientRect` entre todos los rótulos de la pantalla): con
+      filas cada 34 unidades "capas caras" pisaba a layout y a paint, y "barato" quedaba pegado a
+      "style"; la fila de DOM baja hasta despegarse del brillo del vidrio.
 - [ ] La ley va a la izquierda también entre 700 y 1099: la regla de la grilla la centraba.
 - [ ] Integrada, medido con input real a 1920×1080, 1440×900, 1366×768 (entra sin scroll),
       1280×640 (consola al costado) y 1024×700, y a 600×800: sin desborde horizontal, sin choques
