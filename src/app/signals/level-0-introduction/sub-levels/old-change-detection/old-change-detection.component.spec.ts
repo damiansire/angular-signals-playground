@@ -5,6 +5,13 @@ describe('OldChangeDetectionComponent', () => {
   let fixture: ComponentFixture<OldChangeDetectionComponent>;
   let el: HTMLElement;
 
+  const click = (selector: string) => {
+    (el.querySelector(selector) as HTMLButtonElement).click();
+    fixture.detectChanges();
+  };
+  const etapas = () => [...el.querySelectorAll('.pm-etapa')];
+  const pantalla = () => el.querySelector('app-escena-zona svg')?.getAttribute('aria-label') ?? '';
+
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [OldChangeDetectionComponent],
@@ -14,19 +21,46 @@ describe('OldChangeDetectionComponent', () => {
     fixture.detectChanges();
   });
 
-  it('se crea', () => {
-    expect(fixture.componentInstance).toBeTruthy();
+  it('es una sola pieza: escena, consola y sin desafío aparte', () => {
+    expect(el.querySelector('.pm-escenario app-escena-zona')).not.toBeNull();
+    expect(el.querySelector('.pm-consola .ocd-codigo')).not.toBeNull();
+    expect(el.querySelector('app-manipulable-system')).toBeNull();
   });
 
-  it('dibuja los 7 nodos del árbol, ninguno barrido al inicio', () => {
-    expect(el.querySelectorAll('.ocd-node').length).toBe(7);
-    expect(el.querySelectorAll('.ocd-node.ocd-swept').length).toBe(0);
+  it('arranca con la API que Zone.js no parchea, y el hueco la rota', () => {
+    expect(el.querySelector('.ocd-hueco')?.textContent).toContain('requestIdleCallback');
+    click('.ocd-hueco');
+    expect(el.querySelector('.ocd-hueco')?.textContent).toContain('setTimeout');
+    expect(el.querySelector('.ocd-hueco')?.classList).toContain('ocd-hueco--parcheada');
   });
 
-  it('disparar una API parcheada re-chequea el árbol entero', () => {
-    (el.querySelector('.ocd-api') as HTMLButtonElement).click();
-    fixture.detectChanges();
-    expect(el.querySelectorAll('.ocd-node.ocd-swept').length).toBe(7);
-    expect(el.querySelector('.ocd-count strong')!.textContent).toContain('7 / 7');
+  it('sin parche, el valor cambia pero la pantalla queda vieja y nadie revisa', () => {
+    click('.ocd-correr');
+    expect(pantalla()).toContain('total 0 (viejo)');
+    expect(pantalla()).toContain('0 de 7 nodos revisados');
+    expect(etapas()[1].classList).toContain('pm-etapa--ahora');
+    expect(etapas()[0].classList).toContain('pm-etapa--hecho');
+  });
+
+  it('con una API parcheada, revisa los siete y se resuelve', () => {
+    click('.ocd-correr');
+    click('.ocd-hueco');
+    expect(etapas()[1].classList).not.toContain('pm-etapa--hecho');
+    click('.ocd-correr');
+    expect(pantalla()).toContain('total 2,');
+    expect(pantalla()).toContain('7 de 7 nodos revisados');
+    expect(etapas()[1].classList).toContain('pm-etapa--hecho');
+  });
+
+  it('la mano dice lo mismo que los pasos: correr, el hueco, correr', () => {
+    const mano = () =>
+      (fixture.componentInstance as unknown as { guia: () => string | null }).guia();
+    expect(mano()).toBe('.ocd-correr[data-cuenta="0"]');
+    click('.ocd-correr');
+    expect(mano()).toBe('[data-guia="api"]');
+    click('.ocd-hueco');
+    expect(mano()).toBe('.ocd-correr[data-cuenta="1"]');
+    click('.ocd-correr');
+    expect(mano()).toBeNull();
   });
 });

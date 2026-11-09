@@ -1,64 +1,50 @@
-<app-pagina-del-manual [guia]="guia()">
-  <p hacer class="ocd-hacer">Tocá una API.</p>
+<app-pagina-del-manual
+  [guia]="guia()"
+  [respiro]="1600"
+  [integrada]="true"
+  [paso]="paso()"
+  [resuelta]="sano()"
+>
+  <p hacer>Corré.</p>
+  <p arreglo>Cambiá la API.</p>
 
-  <!-- Sin bajada: tocás una API parcheada y el árbol entero se prende. Eso ES "los reviso a
-       todos", y el contador lo confirma en N/N. -->
-  <section demo class="ocd">
-    <!-- El rótulo visible salía sobrando: el grupo ya se anuncia por su aria-label. -->
-    <div class="ocd-apis" role="group" aria-label="APIs que Zone.js parchea">
-      @for (api of patchedApis; track api) {
-        <button class="ocd-api" [attr.data-guia]="api" (click)="trigger(api)">{{ api }}</button>
+  <app-escena-zona
+    escena
+    [llamada]="llamada()"
+    [enPantalla]="zona().enPantalla"
+    [vieja]="vieja()"
+    [revisados]="zona().revisados"
+    [sano]="sano()"
+  />
+
+  <!-- El árbol y el valor se ven una sola vez, en la pantalla de la nave. Acá va lo que se toca:
+       el código, con la API como hueco, y la corrida. -->
+  <section consola class="ocd">
+    <div class="ocd-codigo" role="group" aria-label="El código que cambia el valor">
+      <button
+        type="button"
+        class="ocd-hueco"
+        [class.ocd-hueco--parcheada]="api().parcheada"
+        [attr.aria-label]="'Cambiar la API: ' + api().nombre"
+        data-guia="api"
+        (click)="cambiarApi()"
+      >
+        <span class="ocd-linea" [innerHTML]="renglonDeLaApi()"></span>
+      </button>
+      @for (r of cuerpo; track $index) {
+        <span class="ocd-linea" [innerHTML]="r"></span>
       }
     </div>
 
-    <div class="ocd-stage">
-      <svg
-        class="ocd-tree"
-        viewBox="0 0 340 240"
-        role="img"
-        aria-label="Árbol DOM: Zone.js re-chequea todos los nodos"
+    <div class="ocd-mando">
+      <button
+        type="button"
+        class="ocd-correr"
+        [attr.data-cuenta]="zona().total"
+        (click)="correrCodigo()"
       >
-        @for (path of edgePaths; track path) {
-          <path class="ocd-edge" [attr.d]="path" />
-        }
-        @for (node of nodes; track node.id) {
-          <g class="ocd-node" [class.ocd-swept]="swept()">
-            <!-- Píldora y no círculo: "section" no entra en un radio de 15 y se leía cortado. -->
-            <rect
-              [attr.x]="node.x - ancho(node.label) / 2"
-              [attr.y]="node.y - 15"
-              [attr.width]="ancho(node.label)"
-              height="30"
-              rx="15"
-              [style.transition-delay]="node.depth * 0.15 + 's'"
-            />
-            <text [attr.x]="node.x" [attr.y]="node.y + 4" text-anchor="middle">
-              {{ node.label }}
-            </text>
-          </g>
-        }
-      </svg>
-
-      <div class="ocd-readout">
-        @if (lastTrigger()) {
-          <p class="ocd-fired">
-            <code>{{ lastTrigger() }}</code> →
-          </p>
-        }
-        <p class="ocd-count">
-          re-chequeados
-          <strong>{{ rechecked() }} / {{ total }}</strong>
-        </p>
-        <button class="ocd-reset" (click)="reset()">Reiniciar</button>
-      </div>
+        &#9654; correr
+      </button>
     </div>
   </section>
-
-  <app-escena-zona escena [llamada]="llamada()" [barrido]="swept()" [sano]="sano()" />
-
-  <app-manipulable-system
-    desafio
-    [system]="closingSystem"
-    (corrida)="alCorrerElDesafio($event.salud === 'healthy')"
-  />
 </app-pagina-del-manual>

@@ -1,69 +1,75 @@
 import { Component, ChangeDetectionStrategy, signal, computed } from '@angular/core';
-import { CD_NODES, CD_EDGES, recheckedByZone } from '../../../../libs/cd-tree';
-import { ManipulableSystemComponent } from '../../../../components-atom/manipulable-system/manipulable-system.component';
+import {
+  APIS,
+  ZONA_INICIAL,
+  type ApiAsync,
+  type EstadoDeLaZona,
+  correr,
+  quedoVieja,
+  siguienteApi,
+} from './old-change-detection.data';
 import { PaginaDelManualComponent } from '../../manual/pagina-del-manual.component';
 import { EscenaZonaComponent, type Llamada } from '../../manual/escena-zona.component';
-import { ZONE_PATCH_SYSTEM } from '../../introduction-systems';
+import { conCortes } from '../../../../libs/cortes-de-codigo';
 
+// La sangría va con espacios duros (U+00A0): con espacios comunes, al envolver en angosto el
+// renglón se cortaba justo después de ellos y quedaba uno vacío arriba del código.
+const SANGRIA = '  ';
+
+/**
+ * La ley 5 en una sola pieza: la cerca de Zone.js, la nave y el árbol de su pantalla son la demo, y
+ * la consola tiene el código que cambia el valor, con la API como hueco. Probar es correrlo con la
+ * que Zone.js no parchea: el valor cambia, pero nadie revisa y la pantalla queda vieja. Arreglar es
+ * cambiar la API por una parcheada y volver a correr: el barrido revisa el árbol entero.
+ */
 @Component({
   selector: 'app-old-change-detection',
   templateUrl: './old-change-detection.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ManipulableSystemComponent, PaginaDelManualComponent, EscenaZonaComponent],
+  imports: [PaginaDelManualComponent, EscenaZonaComponent],
   styleUrl: './old-change-detection.component.css',
 })
 export class OldChangeDetectionComponent {
-  /** El desafío quedó sano: la lámina festeja. */
-  protected readonly sano = signal(false);
-  readonly closingSystem = ZONE_PATCH_SYSTEM;
-  protected readonly nodes = CD_NODES;
-  protected readonly total = CD_NODES.length;
-  protected readonly patchedApis = ['setTimeout', 'addEventListener', 'fetch', 'Promise'];
-
-  /** Mono de 12 px: unos 7,4 px por letra, más aire a los costados; nunca menos que el círculo. */
-  protected ancho(rotulo: string): number {
-    return Math.max(30, Math.round(rotulo.length * 7.4 + 14));
-  }
-
-  protected readonly swept = signal(false);
-  protected readonly lastTrigger = signal<string | null>(null);
-  protected readonly rechecked = computed(() => (this.swept() ? recheckedByZone() : 0));
-
-  /** Aristas ya resueltas a coordenadas para el `<path>`. */
-  protected readonly edgePaths = CD_EDGES.map((edge) => {
-    const from = CD_NODES.find((n) => n.id === edge.from)!;
-    const to = CD_NODES.find((n) => n.id === edge.to)!;
-    return `M${from.x},${from.y} L${to.x},${to.y}`;
-  });
-
-  /** La última llamada, para la lámina: la de la demo o la del desafío. */
+  protected readonly api = signal<ApiAsync>(APIS[0]);
+  protected readonly zona = signal<EstadoDeLaZona>(ZONA_INICIAL);
+  /** Ya se vio la pantalla vieja: el paso de arreglar se prende. */
+  private readonly vioElBug = signal(false);
+  /** La última llamada, para la lámina; `n` sube con cada corrida. */
   protected readonly llamada = signal<Llamada | null>(null);
 
-  private readonly tocoUnaApi = signal(false);
-  /** Con una alcanza: cualquier API parcheada prende el árbol entero. */
-  protected readonly guia = computed(() =>
-    this.tocoUnaApi() ? null : `[data-guia="${this.patchedApis[0]}"]`,
+  protected readonly cuerpo = [conCortes(SANGRIA + 'this.total++;'), conCortes('});')];
+  protected readonly renglonDeLaApi = computed(() => conCortes(this.api().renglon));
+
+  protected readonly vieja = computed(() => quedoVieja(this.zona()));
+  /** La última corrida fue con una API parcheada y la pantalla quedó al día. */
+  protected readonly sano = computed(
+    () => this.llamada()?.parcheada === true && this.api().parcheada && !this.vieja(),
   );
+  protected readonly paso = computed<1 | 2>(() => (this.vioElBug() ? 2 : 1));
 
-  protected trigger(api: string): void {
-    this.tocoUnaApi.set(true);
-    this.lastTrigger.set(api);
-    this.swept.set(true);
-    this.llamar(api, true);
+  /**
+   * La mano dice lo mismo que los pasos: correr, el hueco mientras la API no esté parcheada, y
+   * correr otra vez. El botón lleva las corridas, así cada una es un toque distinto.
+   */
+  protected readonly guia = computed(() => {
+    if (this.sano()) return null;
+    if (this.vioElBug() && !this.api().parcheada) return '[data-guia="api"]';
+    return `.ocd-correr[data-cuenta="${this.zona().total}"]`;
+  });
+
+  protected correrCodigo(): void {
+    const api = this.api();
+    this.zona.update((z) => correr(z, api));
+    if (this.vieja()) this.vioElBug.set(true);
+    this.llamada.update((antes) => ({
+      n: (antes?.n ?? 0) + 1,
+      api: api.nombre,
+      parcheada: api.parcheada,
+    }));
   }
 
-  /** En el desafío, la API sana es la parcheada: con la otra, Zone.js no se entera. */
-  protected alCorrerElDesafio(sano: boolean): void {
-    this.sano.set(sano);
-    this.llamar(sano ? 'setTimeout' : 'requestIdleCallback', sano);
-  }
-
-  private llamar(api: string, parcheada: boolean): void {
-    this.llamada.update((antes) => ({ n: (antes?.n ?? 0) + 1, api, parcheada }));
-  }
-
-  protected reset(): void {
-    this.swept.set(false);
-    this.lastTrigger.set(null);
+  /** El hueco rota a la API siguiente. */
+  protected cambiarApi(): void {
+    this.api.update(siguienteApi);
   }
 }
