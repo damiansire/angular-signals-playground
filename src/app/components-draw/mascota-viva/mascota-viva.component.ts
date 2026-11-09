@@ -111,9 +111,6 @@ type Postura = 'parada' | 'caminando' | 'sentada';
  * caídos y una sonrisa chica cerrada. La ceja levantada y la boca en "o" se leían como susto, y
  * las cejas muy inclinadas, como pena.
  */
-/** Cuánto se abre la boca en "o" cuando la abre a propósito, en la escala de su muelle. */
-const BOCA_ABIERTA = 0.45;
-
 const REPOSO: Record<Postura, Readonly<Record<string, number>>> = {
   parada: {},
   caminando: { cara: 12, mirarX: 12, mirarY: 1 },
@@ -304,24 +301,12 @@ export class MascotaVivaComponent {
     this.despertar();
   }
 
-  /** La boca abierta a propósito (`abrirLaBoca`): ningún gesto se la cierra. */
-  private bocaAbierta = false;
-
-  /**
-   * Abre la boca en "o" y la deja abierta, le gane o no a lo que hace su vida propia: algo está por
-   * entrar. Al cerrarla traga: se aplasta un poco y la boca vuelve con su muelle.
-   */
-  abrirLaBoca(si: boolean): void {
-    if (this.bocaAbierta === si) return;
-    this.bocaAbierta = si;
-    this.host.classList.toggle('mv--boca-abierta', si);
-    if (si || sinMovimiento() || this.agarre) {
-      this.pintar();
-      return;
-    }
-    this.m.boca.x = BOCA_ABIERTA;
-    this.m.boca.destino = 0;
-    this.m.aplastar.v = Math.min(this.m.aplastar.v + 2.6, 6.5);
+  /** Un suspiro: se desinfla, abre la boca para soltar el aire y se le aflojan las cejas. */
+  suspirar(): void {
+    if (sinMovimiento() || this.cayendo || this.agarre) return;
+    this.m.aplastar.v = Math.min(this.m.aplastar.v + 2.4, 6.5);
+    this.m.boca.v += 18;
+    this.m.cejas.v -= 120;
     this.despertar();
   }
 
@@ -874,12 +859,10 @@ export class MascotaVivaComponent {
       `translate(0 ${n(m.cejas.x + m.pena.x)}) rotate(${n(-m.cejas.x * 0.5 + m.pena.x * 6)} 612 563)`,
     );
     set(this.elParpados(), `translate(0 ${n(-PARPADO_ALTO * (1 - limitar(m.pena.x, 0, 1)))})`);
-    // Abierta a propósito, ningún gesto de su vida propia se la cierra.
-    const abre = this.bocaAbierta ? Math.max(m.boca.x, BOCA_ABIERTA) : m.boca.x;
-    const boca = limitar(1 + abre, 0.5, 2.2);
+    const boca = limitar(1 + m.boca.x, 0.5, 2.2);
     set(
       this.elBoca(),
-      `translate(526.58 650) scale(${n(1 + abre * 0.2)} ${n(boca)}) translate(-526.58 -650)`,
+      `translate(526.58 650) scale(${n(1 + m.boca.x * 0.2)} ${n(boca)}) translate(-526.58 -650)`,
     );
     // Cada pierna por su lado: caminando se cruzan, y sentada se estiran hacia adelante, ladera abajo.
     // De frente las piernas cuelgan derechas del borde: ni caderas corridas ni estiradas.

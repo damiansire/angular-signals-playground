@@ -217,17 +217,6 @@
 :host(.mv--viva) .mv__boca-o {
   display: none;
 }
-/* Con la boca abierta a propósito (`abrirLaBoca`), la "o" gana sobre cualquier otra boca. */
-:host(.mv--boca-abierta) .mv__boca-o,
-:host(.mv--viva.mv--boca-abierta) .mv__boca-o {
-  display: inline;
-}
-:host(.mv--boca-abierta) .mv__sonrisa,
-:host(.mv--viva.mv--boca-abierta) .mv__sonrisa,
-:host(.mv--viva.mv--pensativa.mv--boca-abierta) .mv__sonrisa,
-:host(.mv--viva.mv--pensativa.mv--boca-abierta) .mv__boca-pena {
-  display: none;
-}
 /* Sonriendo, la sonrisa gana sobre la boca de la postura: la "o" sin vida propia y la boca chica
    pensativa con ella. */
 :host(.mv--sonrie) .mv__sonrisa,
