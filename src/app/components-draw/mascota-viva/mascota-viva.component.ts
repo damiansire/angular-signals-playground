@@ -325,6 +325,11 @@ export class MascotaVivaComponent {
     this.despertar();
   }
 
+  /** Con la mirada fija no parpadea: quien la mira de muy cerca vería el ojo cerrarse de golpe. */
+  sinParpadear(si: boolean): void {
+    this.host.classList.toggle('mv--sin-parpadear', si);
+  }
+
   /**
    * Sonríe aunque esté pensativa: la sonrisa le gana a la boca chica y a la "o". Es la cara de quien
    * ya decidió. `false` la devuelve a la boca de su postura.

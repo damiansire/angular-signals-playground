@@ -168,6 +168,9 @@
      reloj, no un bicho. */
   animation: mv-parpadea 6.7s linear infinite;
 }
+:host(.mv--sin-parpadear) .mv__parpado {
+  animation: none;
+}
 @keyframes mv-parpadea {
   0%,
   41%,
