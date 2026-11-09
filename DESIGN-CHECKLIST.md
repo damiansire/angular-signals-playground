@@ -596,9 +596,9 @@ entrar desarma a Angie en luz y se hace noche, la costura con el prólogo.
 - [ ] No se entra mientras la portada todavía está entrando: el click se frena en captura hasta
       que el llamado termina su animación (`animationend` de `.ini__llamado`). Un toque a mitad de
       la bajada cortaba la portada sin terminar de leerla. Sin movimiento, se puede de entrada.
-- [ ] Antes de desarmarse, Angie lo piensa en dos tiempos, en la misma nube y con el atardecer ya
-      empezando: "Así que… Ellos ya están aquí…" (lo presiente, `T.presentir`) y después "Entonces… La
-      hora ha llegado…" (lo decide). Cada pensamiento lo pasa QUIEN MIRA con un click (o Enter/Espacio en
+- [ ] Angie lo piensa en dos tiempos, en la misma nube: "Así que… Ellos ya están aquí…" (lo
+      presiente, con la radio, `T.presentir`) y, después de hablar con el sol y con el atardecer
+      empezando, "Así que… La hora ha llegado…" (lo decide, sonriendo). Cada pensamiento lo pasa QUIEN MIRA con un click (o Enter/Espacio en
       `document`), no un reloj; `T.presentir`/`T.pensar` son solo lo mínimo que tarda en entrar la
       nube. Un triangulito que late abajo a la derecha de la nube (como en un diálogo de juego)
       aparece con el último punto y dice "tocá para seguir". Sonido y pausa no pasan el
@@ -616,7 +616,21 @@ entrar desarma a Angie en luz y se hace noche, la costura con el prólogo.
       12 px y no se leían como rastro. Medir nube y burbujas contra sol, fichas, lamparita y
       llamado en los seis anchos y en 800×737 (cero solapes, a 8 px o más del borde), con cuadros
       encadenados tras un click real. Con movimiento reducido no aparece.
-- [ ] (2026-11-08) Antes de pensar, el sol habla y Angie le contesta: "Esto es demasiado
+- [ ] (2026-11-09) El toque prende una radio, no un diálogo: estática, chasquidos y silbidos de
+      dial (`ruido-de-radio.ts`, plan con semilla) y anillos punteados que salen del sol y
+      tiemblan (`ini--radio`). Recién a los `T.sintonizar` entra el primer pensamiento. Con la voz
+      del sol la estática se apaga y los anillos quedan enteros y quietos; cuando Angie contesta, se
+      desvanecen. Los anillos van DEBAJO del globo del sol: encima, uno le cruzaba la frase.
+- [ ] (2026-11-09) Los cuatro globos se escriben de a una letra, como los diálogos de un RPG
+      (`TECLA_MS`, que es también `--tecla` en el CSS y lo que espera cada globo antes del toque,
+      `loQueTardaEnEscribirse`). El globo entra entero y las letras lo llenan: no cambia de tamaño
+      mientras se escribe. Las palabras no se parten al bajar de renglón. Los puntos y el
+      triangulito de "tocá para seguir" esperan a que termine la frase, y los blips de voz duran
+      lo mismo que la escritura. Al irse, las letras esperan a que el globo se encoja.
+- [ ] (2026-11-09) Con "Ellos ya están aquí" Angie tiene la boca en "o"; con "La hora ha llegado"
+      sonríe y se sonroja (`sonreir()` de `app-mascota-viva`, clase `mv--sonrie`, que le gana a la
+      boca chica pensativa y a la "o").
+- [ ] (2026-11-08) Después del presentimiento, el sol habla y Angie le contesta: "Esto es demasiado
       caótico." y "Supongo que sí… Desde su perspectiva puede ser caótico.". Es el mismo texto que
       la línea `voz-supongo` del prólogo, y sale de un solo archivo (`intercambio-del-sol.ts`):
       el bucle se nota porque las dos puntas dicen lo mismo, letra por letra. La voz del sol va
@@ -884,7 +898,7 @@ Del minijuego de operadores (2026-11-08):
       raya y la mitad de abajo de la hoja, vacía. A 1100 px o más: dos columnas (leer | la nave y
       el desafío); entre 700 y 1099, la escena al lado del título y la demo y el desafío a lo ancho;
       por debajo, una sola columna.
-- [ ] La página integrada (`[integrada]`, por ahora la ley 4) es UNA pieza: la escena de la nave es
+- [ ] La página integrada (`[integrada]`, por ahora las leyes 4 y 5) es UNA pieza: la escena de la nave es
       el escenario y su pantalla muestra los números, una sola vez; abajo, la consola de la nave, en
       la paleta de su pantalla (vidrio `#1c1434`, borde `#5b4a96`, texto `#f2ecff`). Antes, la demo
       en papel repetía los números del panel y el desafío usaba otro código (`badge`, `total`): tres
@@ -899,6 +913,14 @@ Del minijuego de operadores (2026-11-08):
       consola va al costado: apiladas no entraban, y `increment()` quedaba debajo del pie. Ahí la
       escena se lleva la parte más ancha: más angosta que 1.3:1, el recorte le cortaba el fuego.
 - [ ] El subrayado del hueco no toma la sangría: va como espacio del botón, no del texto.
+- [ ] La ley 5 en el escenario: la anomalía va AFUERA de la cerca, a la izquierda, y el punto que
+      pasa por afuera viaja por debajo de la cerca hasta ella; dentro de la cerca solo quedaba
+      lugar detrás de la nave. Su cielo se centra en 111 (`cieloCentradoEn`): la cerca y la lectura
+      bajan más que la pantalla de la ley 4. El árbol se achica para dejarle a la pantalla un
+      renglón de lectura, `total` y `N/7` revisados: el valor solo se ve ahí, en rojo con "!"
+      cuando quedó viejo, y cambia cuando el barrido enciende el árbol, no antes (sin movimiento,
+      al toque). Antes la demo en papel tenía su propio árbol y su propio total, y el desafío
+      parcheaba con otro código.
 - [ ] La ley va a la izquierda también entre 700 y 1099: la regla de la grilla la centraba.
 - [ ] Integrada, medido con input real a 1920×1080, 1440×900, 1366×768 (entra sin scroll),
       1280×640 (consola al costado) y 1024×700, y a 600×800: sin desborde horizontal, sin choques

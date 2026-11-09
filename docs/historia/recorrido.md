@@ -27,7 +27,7 @@ sub-nivel, contando el sub-nivel desde 1.
 
 | Etapa                    | Qué pasa                                                                                                                                              | Desafíos       |
 | ------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------- | -------------- |
-| La colina                | Desde el sol: "Esto es demasiado caótico." Angie contesta, piensa "Así que… Ellos ya están aquí…" y "Entonces… La hora ha llegado…", y se vuelve luz  | —              |
+| La colina                | Una radio desde el sol: piensa "Así que… Ellos ya están aquí…", el sol dice "Esto es demasiado caótico.", contesta y decide "Así que… La hora ha llegado…" | —              |
 | Volver a casa            | Las cuatro naves y sus deseos. La exploradora, ya con los colores de Angie, los apura                                                                 | —              |
 | La anomalía              | Los atrae, y "¡Activen todos los operadores!" abre el minijuego. Funciona, pero el tirón es más rápido. La exploradora queda afuera                   | 3 nuevos       |
 | El manual de a bordo     | "¡Rápido, el manual de a bordo!": cinco páginas en la cabina                                                                                          | 0/1 a 0/5      |
@@ -47,13 +47,16 @@ Es lo primero que se ve, y es un adelanto: pasa al mismo tiempo que la llegada d
 prólogo, contada desde el lado de Angie.
 
 1. Mañana en la colina. Angie, sentada en la piedra, mira el sol con melancolía, como hoy.
-2. Desde el sol, lejano: "Esto es demasiado caótico." Es el capitán, adentro de la anomalía.
-3. Angie contesta en voz alta: "Supongo que sí… Desde su perspectiva puede ser caótico."
-4. Piensa: "Así que… Ellos ya están aquí…"
-5. Piensa: "Entonces… La hora ha llegado…"
+2. Se cruza una radio: estática, chasquidos y ondas que salen del sol, una señal que todavía no se
+   entiende. Angie, con la boca en "o", piensa: "Así que… Ellos ya están aquí…"
+3. La señal entra y la voz llega limpia desde el sol: "Esto es demasiado caótico." Es el capitán,
+   adentro de la anomalía.
+4. Angie contesta en voz alta: "Supongo que sí… Desde su perspectiva puede ser caótico." Lo que
+   dice sube al sol hecho luz.
+5. Con el atardecer, sonríe y piensa: "Así que… La hora ha llegado…"
 6. Se desarma en luz, y las luces van al sol, como hoy.
 
-Los pasos 2 y 3 dicen exactamente lo mismo que en "La voz y Angie": así, cuando la tripulación los
+Cada globo se escribe de a una letra, como los diálogos de un RPG. Los pasos 3 y 4 dicen exactamente lo mismo que en "La voz y Angie": así, cuando la tripulación los
 dice, se reconocen. Cada línea la pasa quien juega con un toque, como los pensamientos. No hay cartel
 de "Un rato antes…": el prólogo arranca directo, como antes (H6).
 

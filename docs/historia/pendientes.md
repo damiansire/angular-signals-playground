@@ -104,13 +104,13 @@ fecha y adónde fue. Los ids (H1, J1…) sirven para nombrarlos en una sesión (
   de las páginas del manual (qué hacer, la demo, la escena de la nave y el desafío), una etapa por
   vez, como se hizo con la Introducción.
 - **T14. Las páginas del manual en una sola pieza.** Damian pidió que la demo, la escena de la nave
-  y el desafío no se lean como tres cosas sueltas. La ley 4 ya es una sola pieza
+  y el desafío no se lean como tres cosas sueltas. Las leyes 4 y 5 ya son una sola pieza
   (`app-pagina-del-manual` con `[integrada]`): la nave es el escenario y su pantalla muestra los
   números, una sola vez, y abajo va su consola con los dos pasos, probar y arreglar, sobre el mismo
-  código. Faltan la 1, la 2, la 3 y la 5, una por vez, cada una con su desafío reescrito sobre lo
-  que muestra la nave (el de la 1 y el de la 2 no se entendían). Cuando pasen las cinco, se borran
-  la forma en tres tarjetas y sus cinco sistemas de `introduction-systems.ts` (`MANUAL_SYNC_SYSTEM`
-  ya no lo usa nadie), y el barrido y los docs pasan de 40 desafíos a 35.
+  código. Faltan la 1, la 2 y la 3, una por vez, cada una con su desafío reescrito sobre lo que
+  muestra la nave (el de la 1 y el de la 2 no se entendían). Cuando pasen las cinco, se borran la
+  forma en tres tarjetas y sus cinco sistemas de `introduction-systems.ts` (`MANUAL_SYNC_SYSTEM` y
+  `ZONE_PATCH_SYSTEM` ya no los usa nadie), y el barrido y los docs pasan de 40 desafíos a 35.
 - **T6. El gate de prosa.** `scripts/prose-budget.mjs` mide solo los `*.component.html` que están
   bajo `src/app/signals/**/sub-levels/`. Si las pantallas se mudan, mide cero y pasa sin avisar.
   Además, una pantalla movida o renombrada arranca sin crédito de línea base, con 8 palabras. La
@@ -165,6 +165,9 @@ Textos que estaban desactualizados y no dependían de la historia nueva. Cerrado
   Desde su perspectiva puede ser caótico." en la colina y en la cabina, sin "Así que caótico…". En
   el prólogo es la línea `voz-supongo`, que reemplaza a `voz-asi-que` y `voz-perspectiva`. Está
   en el recorrido.
+- **H11. El orden de la colina** (2026-11-09). Primero la radio y el presentimiento ("Así que…
+  Ellos ya están aquí…"), después el sol y la respuesta, y al final la decisión, sonriendo: "Así
+  que… La hora ha llegado…" (antes "Entonces…", y el sol hablaba primero). Está en el recorrido.
 - **J1. El minijuego de operadores** (2026-11-08). Tres huecos, uno por nave: `map`, `tap` y
   `filter` (2026-11-09; antes `map`, `scan` y `throttleTime`). Está en el recorrido, en "La anomalía y el minijuego de operadores".
 - **J2. Completar el hueco** (2026-11-08). Se elige entre tres operadores con la perilla de
