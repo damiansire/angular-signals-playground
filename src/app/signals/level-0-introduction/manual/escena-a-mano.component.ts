@@ -10,9 +10,18 @@ export interface LugarDelPanel {
   readonly rotulo: string;
   readonly valor: string;
   readonly viejo: boolean;
+  /** Dice "Sí": el número es múltiplo. Al día, va en verde; viejo, el rojo le gana. */
+  readonly siEsMultiplo: boolean;
   /** El handler lo actualiza: el lápiz pasa por acá. */
   readonly sincronizado: boolean;
 }
+
+/** Cómo se pinta cada lugar del panel: viejo en rojo, un "Sí" al día en verde, el resto neutro. */
+const TONOS = {
+  neutro: { borde: '#5b4a96', fondo: '#2f2556', texto: '#f2ecff' },
+  si: { borde: '#6ad19a', fondo: '#1f3b3a', texto: '#a6f0c6' },
+  viejo: { borde: '#ff7676', fondo: '#4a2440', texto: '#ffb3b3' },
+} as const;
 
 const FILA = { x: 226, ancho: 150, alto: 44, y0: 40, paso: 54 } as const;
 const NARIZ = { x: 182, y: 148 };
@@ -167,16 +176,13 @@ export class EscenaAManoComponent extends EscenaDelManual {
     if (!fila) return;
     fila.valor.textContent = l.valor;
     const t = this.quieta ? 0 : 0.2;
+    const tono = l.viejo ? TONOS.viejo : l.siEsMultiplo ? TONOS.si : TONOS.neutro;
     gsap.to(fila.caja, {
-      attr: { stroke: l.viejo ? '#ff7676' : '#5b4a96', fill: l.viejo ? '#4a2440' : '#2f2556' },
+      attr: { stroke: tono.borde, fill: tono.fondo },
       duration: t,
       overwrite: 'auto',
     });
-    gsap.to(fila.valor, {
-      attr: { fill: l.viejo ? '#ffb3b3' : '#f2ecff' },
-      duration: t,
-      overwrite: 'auto',
-    });
+    gsap.to(fila.valor, { attr: { fill: tono.texto }, duration: t, overwrite: 'auto' });
     gsap.killTweensOf(fila.marca);
     if (l.viejo && !this.quieta) {
       gsap.fromTo(

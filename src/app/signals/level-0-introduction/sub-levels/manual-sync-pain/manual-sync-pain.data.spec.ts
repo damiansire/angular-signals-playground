@@ -3,6 +3,7 @@ import {
   PanelAMano,
   SpotId,
   deriveOutputs,
+  diceQueSi,
   increment,
   staleSpots,
 } from './manual-sync-pain.data';
@@ -45,5 +46,11 @@ describe('manual-sync-pain (dominio "a mano no escala")', () => {
       panel = increment(panel, COMPLETO);
       expect(staleSpots(panel)).toEqual([]);
     }
+  });
+
+  it('un múltiplo dice que sí; el número y el "No" no', () => {
+    expect(diceQueSi(deriveOutputs(6).mult3)).toBeTrue();
+    expect(diceQueSi(deriveOutputs(4).mult3)).toBeFalse();
+    expect(diceQueSi(deriveOutputs(6).value)).toBeFalse();
   });
 });

@@ -27,6 +27,11 @@ export function deriveOutputs(count: number): Record<SpotId, string> {
   };
 }
 
+/** El lugar dice que el número es múltiplo: en el panel se pinta de verde, si no quedó viejo. */
+export function diceQueSi(mostrado: string): boolean {
+  return mostrado === 'Sí';
+}
+
 /** El panel como lo deja el DOM: la cuenta y lo que cada lugar muestra de verdad en pantalla. */
 export interface PanelAMano {
   readonly count: number;

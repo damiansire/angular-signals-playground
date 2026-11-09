@@ -4,6 +4,7 @@ import {
   SPOTS,
   type PanelAMano,
   type SpotId,
+  diceQueSi,
   increment,
   staleSpots,
 } from './manual-sync-pain.data';
@@ -63,6 +64,7 @@ export class ManualSyncPainComponent {
       rotulo: spot.selector,
       valor: this.panel().shown[spot.id],
       viejo: this.viejos().has(spot.id),
+      siEsMultiplo: diceQueSi(this.panel().shown[spot.id]),
       sincronizado: this.completo() || spot.id === 'value',
     })),
   );
