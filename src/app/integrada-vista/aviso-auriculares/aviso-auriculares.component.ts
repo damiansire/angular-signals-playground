@@ -24,7 +24,7 @@ import {
   cuandoSuena,
   estrellasDelAlba,
   profundidadDelViaje,
-  profundidadDesdeLaBoca,
+  profundidadDesdeElOjo,
   letrasDelLlamado,
   planDeLaPrueba,
   tocarPrueba,
@@ -46,6 +46,13 @@ const LENTE_DERECHO =
  * Angie se vuelca hacia el lado que suena, y la cámara se aleja: el aviso queda a lo lejos y aparece
  * la colina, con ella sentada en la piedra.
  */
+/**
+ * Dónde arranca la cámara, en el dibujo del ojo izquierdo de Angie (`.mv__parpado`): el centro y el
+ * radio del negro que se puede llenar sin tocar el párpado de arriba, el borde del ojo ni su brillo
+ * pensativo, que queda abajo a la derecha.
+ */
+const MANCHA = { x: 455, y: 613, radio: 8 } as const;
+
 @Component({
   selector: 'app-aviso-auriculares',
   imports: [MascotaVivaComponent],
@@ -70,8 +77,11 @@ const LENTE_DERECHO =
 export class AvisoAuricularesComponent {
   /** Se eligió (con o sin sonido) y la cámara empieza a alejarse: la colina puede despertarse. */
   readonly elegido = output<boolean>();
-  /** La boca de Angie en la colina: abierta mientras el aviso viaja hacia ella, y la cierra al llegar. */
-  readonly boca = output<boolean>();
+  /**
+   * La cámara viaja desde el ojo de Angie: mientras dura, ella no parpadea. Un parpadeo a cientos de
+   * aumentos abría la pantalla negra de golpe.
+   */
+  readonly viaje = output<boolean>();
   /** La cámara llegó a la colina: recién ahí entra su título, que de cerca se vería gigante. */
   readonly llego = output<void>();
 
@@ -176,13 +186,12 @@ export class AvisoAuricularesComponent {
   }
 
   /**
-   * La cámara se aleja desde la boca de Angie en la colina, como en Powers of Ten: la noche del aviso
-   * era un suspiro suyo. Primero el aviso se cierra en un círculo y se va hasta desaparecer adentro
-   * de su boca, enorme y abierta, que queda ocupando toda la pantalla; después la cámara se aleja a
-   * la cara, a Angie en la piedra y a la colina entera; al final la boca se cierra con un trago. Va cuadro a cuadro desde acá y no con una animación del
-   * navegador: animada por el compositor, la colina agrandada se pintaba una sola vez y, al
-   * alejarse, aparecía cortada en rectángulos. Cada cuadro cambia la escala y el navegador la
-   * vuelve a dibujar.
+   * La cámara se aleja desde el ojo de Angie en la colina, como en Powers of Ten: la noche del aviso
+   * era lo que ella miraba. Primero el aviso se cierra en un círculo y se va hasta desaparecer en el
+   * negro de su ojo, que ocupa toda la pantalla; después la cámara se aleja a la cara, a Angie en la
+   * piedra y a la colina entera. Va cuadro a cuadro desde acá y no con una animación del navegador:
+   * animada por el compositor, la colina agrandada se pintaba una sola vez y, al alejarse, aparecía
+   * cortada en rectángulos. Cada cuadro cambia la escala y el navegador la vuelve a dibujar.
    */
   private alejarse(conSonido: boolean): void {
     this.elegido.emit(conSonido);
@@ -193,70 +202,63 @@ export class AvisoAuricularesComponent {
       return;
     }
     const r = this.host.getBoundingClientRect();
-    // Primero la abre: la "o" es lo que se mide, y lo que la cámara sigue.
-    this.boca.emit(true);
-    // La de frente: la del perfil también existe, apagada, y mide cero.
-    const laO = [...escena.querySelectorAll<SVGGraphicsElement>('.ini__angie .mv__boca-o')].find(
+    this.viaje.emit(true);
+    // Los ojos de frente: los del perfil también existen, apagados, y miden cero.
+    const elOjo = [...escena.querySelectorAll<SVGGraphicsElement>('.ini__angie .mv__parpado')].find(
       (o) => o.getBoundingClientRect().width > 0,
     );
-    const medida = laO?.getBoundingClientRect();
-    let boca =
-      medida && medida.width > 0
-        ? { x: medida.left + medida.width / 2 - r.left, y: medida.top + medida.height / 2 - r.top }
-        : { x: r.width / 2, y: r.height * 0.6 };
+    const enPantalla = (): { x: number; y: number } | null => {
+      const m = elOjo?.getScreenCTM();
+      if (!m) return null;
+      const p = new DOMPoint(MANCHA.x, MANCHA.y).matrixTransform(m);
+      return { x: p.x - r.left, y: p.y - r.top };
+    };
+    let ojo = enPantalla() ?? { x: r.width / 2, y: r.height * 0.6 };
     const esquinas = [
       [0, 0],
       [r.width, 0],
       [0, r.height],
       [r.width, r.height],
-    ].map(([x, y]) => [x - boca.x, y - boca.y] as const);
-    const enPantalla = laO?.getScreenCTM();
-    const profundidad =
-      laO && enPantalla
-        ? profundidadDesdeLaBoca(
-            { ancho: laO.getBBox().width, alto: laO.getBBox().height },
-            enPantalla.inverse(),
-            esquinas,
-          )
-        : profundidadDelViaje({ ancho: 10, alto: 20 }, r.width, r.height);
-    const cubre = aireQueCubre(boca.x, boca.y, r.width, r.height);
-    const cabe = aireQueCabe(boca.x, boca.y, r.width, r.height);
+    ].map(([x, y]) => [x - ojo.x, y - ojo.y] as const);
+    const matriz = elOjo?.getScreenCTM();
+    const profundidad = matriz
+      ? profundidadDesdeElOjo(
+          { ancho: 2 * MANCHA.radio, alto: 2 * MANCHA.radio },
+          matriz.inverse(),
+          esquinas,
+        )
+      : profundidadDelViaje({ ancho: 10, alto: 10 }, r.width, r.height);
+    const cubre = aireQueCubre(ojo.x, ojo.y, r.width, r.height);
+    const cabe = aireQueCabe(ojo.x, ojo.y, r.width, r.height);
 
     /**
-     * La cámara sigue a la boca: la cara de Angie se mueve sola, y a 40 aumentos dos píxeles de su
-     * vaivén dejaban el aviso al costado de la boca. Con la boca como punto fijo de la escala, queda donde
-     * estaría sin acercar, y lo que se mueve es apenas lo que se mueve ella.
+     * La cámara sigue al ojo: la cara de Angie se mueve sola, y a cientos de aumentos dos píxeles de
+     * su vaivén dejaban el negro corrido y asomaba la cara. Con el ojo como punto fijo de la escala,
+     * queda donde estaría sin acercar, y lo que se mueve es apenas lo que se mueve ella.
      */
-    const seguirLaBoca = (escala: number): void => {
-      const b = laO?.getBoundingClientRect();
-      if (b && b.width > 0) {
-        // Lo medido viene con la escala de este cuadro alrededor de la boca anterior: se deshace.
-        const mx = b.left + b.width / 2 - r.left;
-        const my = b.top + b.height / 2 - r.top;
-        boca = { x: boca.x + (mx - boca.x) / escala, y: boca.y + (my - boca.y) / escala };
+    const seguirElOjo = (escala: number): void => {
+      const medido = enPantalla();
+      if (medido) {
+        // Lo medido viene con la escala de este cuadro alrededor del ojo anterior: se deshace.
+        ojo = { x: ojo.x + (medido.x - ojo.x) / escala, y: ojo.y + (medido.y - ojo.y) / escala };
       }
-      const origen = `${boca.x}px ${boca.y}px`;
+      const origen = `${ojo.x}px ${ojo.y}px`;
       escena.style.transformOrigin = origen;
       this.host.style.transformOrigin = origen;
-      this.host.style.setProperty('--aa-x', `${boca.x}px`);
-      this.host.style.setProperty('--aa-y', `${boca.y}px`);
+      this.host.style.setProperty('--aa-x', `${ojo.x}px`);
+      this.host.style.setProperty('--aa-y', `${ojo.y}px`);
     };
 
-    let boquiabierta = true;
     let escala = 1;
     let cero = 0;
     const pintar = (ahora: number): void => {
       const t = ahora - cero;
       const c = cuadroDelViaje(t, profundidad, cubre, cabe);
-      seguirLaBoca(escala);
+      seguirElOjo(escala);
       escala = c.colina;
       escena.style.scale = `${c.colina}`;
       this.host.style.scale = `${c.aviso}`;
       this.host.style.setProperty('--aa-aire', `${c.aire}px`);
-      if (boquiabierta && !c.bocaAbierta) {
-        boquiabierta = false;
-        this.boca.emit(false);
-      }
       if (t < VIAJE_MS) {
         this.cuadro = requestAnimationFrame(pintar);
         return;
@@ -264,6 +266,7 @@ export class AvisoAuricularesComponent {
       escena.style.removeProperty('scale');
       escena.style.removeProperty('transform-origin');
       // El aviso queda en cero hasta que lo oculta `listo`: devuelto a su tamaño, volvía entero un cuadro.
+      this.viaje.emit(false);
       this.momento.set('listo');
       this.llego.emit();
     };

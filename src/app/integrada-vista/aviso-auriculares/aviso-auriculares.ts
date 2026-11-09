@@ -138,41 +138,40 @@ export function letrasDelLlamado(frase: string): LetraDelLlamado[][] {
 }
 
 /**
- * La bocanada (ver el CSS del componente) es un círculo blando centrado en la boca de Angie, que
- * crece con `--aa-aire`: con aire `a` tapa del todo hasta `NUCLEO * a` y se desvanece hasta `a`. Un
- * círculo que se cierra en la boca es el final de dibujo animado; las nubes oscuras que tenía antes
- * se leían como el humo de una explosión.
+ * El cierre (ver el CSS del componente) es un círculo blando centrado en el ojo de Angie, que crece
+ * con `--aa-aire`: con aire `a` tapa del todo hasta `NUCLEO * a` y se desvanece hasta `a`. Un círculo
+ * que se cierra es el final de dibujo animado; las nubes oscuras que tenía antes se leían como el
+ * humo de una explosión.
  */
 export const NUCLEO = 0.86;
 
-/** El aire con el que la bocanada tapa el aviso entero: arranca sin que se note el recorte. */
+/** El aire con el que el círculo tapa el aviso entero: arranca sin que se note el recorte. */
 export function aireQueCubre(x: number, y: number, ancho: number, alto: number): number {
   return (1.02 * Math.hypot(Math.max(x, ancho - x), Math.max(y, alto - y))) / NUCLEO;
 }
 
-/** El aire más grande con el que la bocanada queda adentro del aviso, sin tocar sus bordes. */
+/** El aire más grande con el que el círculo queda adentro del aviso, sin tocar sus bordes. */
 export function aireQueCabe(x: number, y: number, ancho: number, alto: number): number {
   return 0.95 * Math.min(x, ancho - x, y, alto - y);
 }
 
-// ─── El viaje de la cámara, de la boca a la colina ─────────────────────────────────────────────
+// ─── El viaje de la cámara, del ojo de Angie a la colina ───────────────────────────────────────
 
 /**
- * Los tres tramos del viaje, en ms. Primero la bocanada: el aviso se cierra en un círculo, se va
- * lejos hasta desaparecer y la pantalla queda toda del color de la boca abierta de Angie. Después la
- * cámara se aleja, de la boca a la cara, a Angie en la piedra y a la colina entera. Al final la boca
- * se cierra con un trago.
+ * Los dos tramos del viaje, en ms. Primero el aviso se cierra en un círculo y se va lejos, adentro
+ * del ojo de Angie, hasta desaparecer: la noche era lo que ella miraba, y la pantalla queda toda del
+ * negro de su ojo. Después la cámara se aleja, del ojo a la cara, a Angie en la piedra y a la colina
+ * entera.
  */
-export const BOCANADA_MS = 1600;
+export const SE_CIERRA_MS = 1600;
 export const ALEJARSE_MS = 4200;
-export const TRAGA_MS = 450;
-export const VIAJE_MS = BOCANADA_MS + ALEJARSE_MS + TRAGA_MS;
+export const VIAJE_MS = SE_CIERRA_MS + ALEJARSE_MS;
 
-/** Hasta acá de la bocanada el aviso sigue del tamaño de la pantalla: el círculo se cierra adentro. */
+/** Hasta acá del cierre el aviso sigue del tamaño de la pantalla: el círculo se cierra adentro. */
 const ENCAJA = 0.35;
 /**
- * Desde acá de la bocanada el aviso ya no está y la pantalla es toda boca, quieta, antes de que la
- * cámara se aleje. Un puntito que quedaba (y seguía hasta la colina) se leía como algo nuevo.
+ * Desde acá del cierre el aviso ya no está y la pantalla es toda ojo, quieta, antes de que la cámara
+ * se aleje. Un puntito que quedaba (y seguía hasta la colina) se leía como algo nuevo.
  */
 const DESAPARECE = 0.8;
 /** Hasta dónde se va en escala antes de cerrarse en cero: parejo, como algo que se aleja. */
@@ -180,14 +179,12 @@ const LEJOS = 0.004;
 
 /** Lo que muestra la cámara en un instante del viaje. */
 export interface CuadroDelViaje {
-  /** La escala de la colina, con la boca como punto fijo: de `profundidad` a 1. */
+  /** La escala de la colina, con el ojo como punto fijo: de `profundidad` a 1. */
   readonly colina: number;
   /** La escala del aviso dentro de la colina (su escala en pantalla es `colina * aviso`). */
   readonly aviso: number;
-  /** El radio de la bocanada, en px del aviso. */
+  /** El radio del círculo, en px del aviso. */
   readonly aire: number;
-  /** La boca de Angie, abierta hasta llegar a la colina. */
-  readonly bocaAbierta: boolean;
 }
 
 /** Entra y sale suave: la cámara no arranca ni frena de golpe. */
@@ -196,8 +193,8 @@ const entre01 = (v: number): number => Math.min(1, Math.max(0, v));
 
 /**
  * El cuadro del viaje en el ms `t`. Como en Powers of Ten, la cámara se aleja en escala: cada tramo
- * de tiempo divide la escala por lo mismo, así la boca, la cara, Angie y la colina duran parecido. En
- * línea recta, la boca pasaba en un parpadeo y la colina se arrastraba.
+ * de tiempo divide la escala por lo mismo, así el ojo, la cara, Angie y la colina duran parecido. En
+ * línea recta, el ojo pasaba en un parpadeo y la colina se arrastraba.
  *
  * `profundidad` es de qué tan cerca arranca la colina; `cubre` y `cabe`, el aire que tapa el aviso
  * entero y el que entra justo adentro (`aireQueCubre`, `aireQueCabe`).
@@ -209,64 +206,57 @@ export function cuadroDelViaje(
   cabe: number,
 ): CuadroDelViaje {
   const S0 = profundidad;
-  if (t < BOCANADA_MS) {
-    const u = entre01(t / BOCANADA_MS);
+  if (t < SE_CIERRA_MS) {
+    const u = entre01(t / SE_CIERRA_MS);
     if (u < ENCAJA) {
       // Parejo en escala: en línea recta casi todo el tramo pasaba con la pantalla tapada.
-      return {
-        colina: S0,
-        aviso: 1 / S0,
-        aire: cubre * (cabe / cubre) ** (u / ENCAJA),
-        bocaAbierta: true,
-      };
+      return { colina: S0, aviso: 1 / S0, aire: cubre * (cabe / cubre) ** (u / ENCAJA) };
     }
     // Se va parejo en escala y el último tramo se cierra en cero: no queda ningún punto.
     const v = suave(entre01((u - ENCAJA) / (DESAPARECE - ENCAJA)));
-    return { colina: S0, aviso: ((1 - v) * LEJOS ** v) / S0, aire: cabe, bocaAbierta: true };
+    return { colina: S0, aviso: ((1 - v) * LEJOS ** v) / S0, aire: cabe };
   }
-  if (t < BOCANADA_MS + ALEJARSE_MS) {
-    const v = entre01((t - BOCANADA_MS) / ALEJARSE_MS);
-    // Casi todo parejo en escala, con un poco de arranque y llegada suaves.
-    const p = 0.55 * v + 0.45 * suave(v);
-    return { colina: S0 ** (1 - p), aviso: 0, aire: cabe, bocaAbierta: true };
-  }
-  const w = entre01((t - BOCANADA_MS - ALEJARSE_MS) / TRAGA_MS);
-  return { colina: 1, aviso: 0, aire: cabe, bocaAbierta: w < 0.3 };
+  const v = entre01((t - SE_CIERRA_MS) / ALEJARSE_MS);
+  // Casi todo parejo en escala, con un poco de arranque y llegada suaves.
+  const p = 0.55 * v + 0.45 * suave(v);
+  return { colina: S0 ** (1 - p), aviso: 0, aire: cabe };
 }
 
 /**
- * De qué tan cerca arranca la colina: desde ADENTRO de la boca abierta, con toda la pantalla de su
- * color. `boca` es el tamaño de la "o" en su propio dibujo; `dx` y `dy`, una esquina de la pantalla
- * vista desde su centro, en ese mismo dibujo. La esquina tiene que caer adentro de la boca, que es
- * casi una elipse: con la boca en media pantalla, se veía la cara desde el primer cuadro y no había
- * adentro. Con margen y con tope, que de más no muestra nada distinto.
+ * De qué tan cerca arranca la colina: desde ADENTRO del ojo, con toda la pantalla de su negro.
+ * `mancha` es el negro que se puede llenar, en el dibujo del ojo (lejos de su brillo y del párpado);
+ * `dx` y `dy`, una esquina de la pantalla vista desde su centro, en ese mismo dibujo. La esquina
+ * tiene que caer adentro: con la mancha en media pantalla, se veía la cara desde el primer cuadro.
+ * Con margen y con tope, que de más no muestra nada distinto.
  */
 export function profundidadDelViaje(
-  boca: { readonly ancho: number; readonly alto: number },
+  mancha: { readonly ancho: number; readonly alto: number },
   dx: number,
   dy: number,
 ): number {
-  const a = Math.max(boca.ancho, 1) / 2;
-  const b = Math.max(boca.alto, 1) / 2;
-  const s = 2 * Math.hypot(dx / a, dy / b);
-  return Math.min(400, Math.max(6, s));
+  const a = Math.max(mancha.ancho, 1) / 2;
+  const b = Math.max(mancha.alto, 1) / 2;
+  const s = MARGEN * Math.hypot(dx / a, dy / b);
+  return Math.min(TOPE, Math.max(6, s));
 }
+const MARGEN = 2;
+const TOPE = 900;
 
 /**
- * La profundidad que deja las cuatro esquinas adentro de la "o". Va en el dibujo de la boca y no en
- * su caja de pantalla: la "o" está girada y estirada por su muelle, y medida por la caja la cámara
- * arrancaba con medio borde de la boca a la vista. `aLaBoca` es la inversa de su matriz de pantalla
- * (solo la parte lineal) y `esquinas`, cada esquina menos el centro de la boca, en píxeles.
+ * La profundidad que deja las cuatro esquinas adentro de la mancha. Va en el dibujo del ojo y no en
+ * su caja de pantalla: Angie está girada y estirada por sus muelles, y medida por la caja la cámara
+ * arrancaba con un borde a la vista. `alOjo` es la inversa de su matriz de pantalla (solo la parte
+ * lineal) y `esquinas`, cada esquina menos el centro de la mancha, en píxeles.
  */
-export function profundidadDesdeLaBoca(
-  boca: { readonly ancho: number; readonly alto: number },
-  aLaBoca: { readonly a: number; readonly b: number; readonly c: number; readonly d: number },
+export function profundidadDesdeElOjo(
+  mancha: { readonly ancho: number; readonly alto: number },
+  alOjo: { readonly a: number; readonly b: number; readonly c: number; readonly d: number },
   esquinas: readonly (readonly [number, number])[],
 ): number {
-  const { a, b, c, d } = aLaBoca;
+  const { a, b, c, d } = alOjo;
   return Math.max(
     ...esquinas.map(([x, y]) =>
-      profundidadDelViaje(boca, Math.abs(a * x + c * y), Math.abs(b * x + d * y)),
+      profundidadDelViaje(mancha, Math.abs(a * x + c * y), Math.abs(b * x + d * y)),
     ),
   );
 }

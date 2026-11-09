@@ -176,16 +176,16 @@ export class IntegradaVistaComponent {
   /** La de la colina: la escena la lleva hasta el borde, y el paso y la pose los pone ella. */
   private readonly angieInicio = viewChild('angieInicio', { read: MascotaVivaComponent });
 
-  /** La noche del aviso vuelve a su boca: la tiene abierta mientras viaja, y la cierra al llegar. */
-  protected angieAbreLaBoca(abierta: boolean): void {
-    this.angieInicio()?.abrirLaBoca(abierta);
+  /** La cámara viaja desde su ojo: mientras dura, Angie no parpadea. */
+  protected angieMiraFijo(fijo: boolean): void {
+    this.angieInicio()?.sinParpadear(fijo);
   }
 
   /** La escena de la colina, para que el aviso le avise cuando se va. */
   private inicio: InicioAngie | null = null;
 
   /**
-   * La cámara llegó desde la boca de Angie a la colina: entra el título y empieza su música. Aunque hayan elegido
+   * La cámara llegó desde el ojo de Angie a la colina: entra el título y empieza su música. Aunque hayan elegido
    * sin sonido: la música espera callada, y si lo prenden en la colina, suena ahí.
    */
   protected alLlegarALaColina(): void {

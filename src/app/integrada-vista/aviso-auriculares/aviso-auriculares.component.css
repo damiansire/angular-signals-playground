@@ -26,7 +26,7 @@
   pointer-events: none;
 }
 
-/* La bocanada: un círculo blando que se cierra en la boca de Angie, como el final de un dibujo
+/* El cierre: un círculo blando que se cierra en el ojo de Angie, como el final de un dibujo
    animado. Tapa del todo hasta `NUCLEO` (0,86) de `--aa-aire` y se desvanece hasta el borde. */
 @property --aa-aire {
   syntax: '<length>';
