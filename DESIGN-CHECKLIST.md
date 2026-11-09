@@ -899,12 +899,12 @@ Del minijuego de operadores (2026-11-08):
 - [ ] En cada escena, nada importante detrás de la nave: el planeta va arriba a la izquierda, el
       lápiz descansa adentro del cuadro y el rótulo "zone" cuelga de la cerca. Con movimiento
       reducido cada escena queda en el momento que explica, sin bucles.
-- [ ] Suelto, el libro va sobre el cielo del prólogo casi opaco y desenfocado: sin papel propio, el
-      velo gris dejaba leer el mapa a través y "11 sin establecer" se pisaba con la cabecera.
-- [ ] Pasar de página se ve. En el libro de leyes la página nueva entra deslizándose desde el lado
-      al que se va: la hoja de papel que gira, sobre un libro sin papel, era un destello blanco a
-      pantalla entera. En la hoja del viaje, una hoja de papel gira desde el lomo (para atrás, desde
-      el otro borde) y la pantalla nueva entra apenas corrida. Gira por DEBAJO de la cabeza y el pie: por
+- [ ] Afuera del prólogo (el manual suelto y el viaje), la hoja va sobre el cielo del prólogo, casi
+      opaco, desenfocado y con estrellas: sin papel propio, el velo gris dejaba leer el mapa a
+      través y "11 sin establecer" se pisaba con la cabecera.
+- [ ] Pasar de página se ve: la página nueva entra deslizándose, con su título, desde el lado al
+      que se va. La hoja de papel que giraba desde el lomo, sobre una hoja sin papel, era un
+      destello blanco a pantalla entera. Gira por DEBAJO de la cabeza y el pie: por
       encima, con la perspectiva, tapaba "Siguiente" y "Cerrar" mientras giraba. Sin animación con
       movimiento reducido.
 - [ ] Suelto, medido a 1280×640, 1024×700 y 600×800 con input real: rueda, teclas, Escape y el
@@ -918,7 +918,7 @@ Del minijuego de operadores (2026-11-08):
 - [ ] No es un rectángulo encima de la escena: la hoja no tiene fondo, borde ni barras; la escena
       queda detrás, desenfocada y oscurecida hacia el medio, y la ley va suelta en Fraunces con
       sombra tintada. Lo que se toca (la mesa, la escena, el desafío) es papel con borde de tinta.
-      La hoja del viaje sigue siendo de papel: su `concepto` está definido.
+      La hoja del viaje habla igual (ADR 0010): ver "El viaje".
 - [ ] La mano guía señala lo próximo que hay que tocar y amaga el toque hasta que alguien lo toca
       (cada página dice qué con `guia`, un selector). Antes "Clickeá un tag" no decía cuál y nadie
       empezaba. Entra 1,2 s después de la ley para no robarle la mirada.
@@ -963,6 +963,17 @@ Del minijuego de operadores (2026-11-08):
       la molécula. Escape la saltea y abre la hoja.
 - [ ] La hoja dice el nombre de la etapa ("La caja que avisa"), no "Nivel 1"; cada página lleva
       el título de su pantalla y el pie dice "Seguir el viaje" en la última.
+- [ ] La hoja del viaje no es un rectángulo crema a pantalla entera: el título va suelto sobre el
+      cielo con la letra de la ley, la pantalla entera en una tarjeta de papel con borde de tinta, y
+      en el medio del alto cuando es corta. Antes media hoja quedaba vacía debajo de la pantalla.
+- [ ] El desafío (`app-manipulable-system`) va en su recuadro punteado adentro del papel, a lo
+      ancho: la raya de arriba y el tope de 64rem eran para cerrar una card de la molécula.
+- [ ] La pista de Angie se ve: arranca invisible y la revela la entrada del sub-nivel (`.warp`), que
+      en la hoja no corre, y en el viaje no aparecía nunca. Aparece cuando la página ya asentó:
+      mientras entra deslizándose es el bloque contenedor de su `fixed`, y flotaba en el medio.
+- [ ] Medido con input real a 1440×900, 1366×768 (scroll de 57 px con "más abajo"), 1024×768 y
+      480×900 (una columna): sin desborde horizontal; "Seguir el viaje" en la última página lleva a
+      la cinemática del capítulo siguiente.
 - [ ] La pista de Angie (`app-concept-card`, fija en la esquina) va por encima del pie de la hoja:
       a `bottom: 1rem` tapaba "Seguir el viaje" y el click caía en la card. Medirlo con
       `elementFromPoint` en el centro del botón.
