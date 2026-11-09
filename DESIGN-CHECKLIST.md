@@ -884,6 +884,26 @@ Del minijuego de operadores (2026-11-08):
       raya y la mitad de abajo de la hoja, vacía. A 1100 px o más: dos columnas (leer | la nave y
       el desafío); entre 700 y 1099, la escena al lado del título y la demo y el desafío a lo ancho;
       por debajo, una sola columna.
+- [ ] La página integrada (`[integrada]`, por ahora la ley 4) es UNA pieza: la escena de la nave es
+      el escenario y su pantalla muestra los números, una sola vez; abajo, la consola de la nave, en
+      la paleta de su pantalla (vidrio `#1c1434`, borde `#5b4a96`, texto `#f2ecff`). Antes, la demo
+      en papel repetía los números del panel y el desafío usaba otro código (`badge`, `total`): tres
+      tarjetas sueltas. El desafío es el paso 2 de la misma consola, sobre el mismo código: el hueco
+      del handler se toca ahí, y completarlo no arregla el panel hasta la próxima corrida.
+- [ ] Los dos pasos de la consola dicen dónde se está: el que toca, en dorado; el hecho, en verde.
+      La fila guarda el alto de "Mostrame" aunque ya no esté: al irse, la consola no se achica.
+- [ ] El escenario llena la ventanilla con `xMidYMid slice` sobre un cielo más grande que la lámina
+      (`CIELO_DEL_ESCENARIO`, centrado en la nave, su pantalla y el lápiz), y la ventanilla nunca es
+      más apaisada que 3.5:1 (`28.5cqi` de alto mínimo): a 1280×640 quedaba en 4.6:1 y el recorte le
+      cortaba el borde de arriba a la pantalla. A 1100 px de ancho o más y 800 o menos de alto, la
+      consola va al costado: apiladas no entraban, y `increment()` quedaba debajo del pie. Ahí la
+      escena se lleva la parte más ancha: más angosta que 1.3:1, el recorte le cortaba el fuego.
+- [ ] El subrayado del hueco no toma la sangría: va como espacio del botón, no del texto.
+- [ ] La ley va a la izquierda también entre 700 y 1099: la regla de la grilla la centraba.
+- [ ] Integrada, medido con input real a 1920×1080, 1440×900, 1366×768 (entra sin scroll),
+      1280×640 (consola al costado) y 1024×700, y a 600×800: sin desborde horizontal, sin choques
+      entre título, HUD, cabeza, leyenda, nave, pantalla, "Mostrame" y pie, la nave y su pantalla
+      adentro de la ventanilla, y "Mostrame" hasta los dos pasos hechos.
 - [ ] La escena REACCIONA a la demo, no la ilustra: el árbol se arma con cada tag tocado, el paquete
       viaja al instrumento que nombra la línea, el paisaje va a los tirones con el cambio caro, el
       lápiz se saltea el lugar que el handler olvida, el barrido de Zone.js no ve lo que pasa por
