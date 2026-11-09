@@ -24,6 +24,7 @@ import {
   cuandoSuena,
   estrellasDelAlba,
   profundidadDelViaje,
+  profundidadDesdeLaBoca,
   letrasDelLlamado,
   planDeLaPrueba,
   tocarPrueba,
@@ -203,7 +204,21 @@ export class AvisoAuricularesComponent {
       medida && medida.width > 0
         ? { x: medida.left + medida.width / 2 - r.left, y: medida.top + medida.height / 2 - r.top }
         : { x: r.width / 2, y: r.height * 0.6 };
-    const profundidad = profundidadDelViaje(medida?.height ?? 20, r.width, r.height);
+    const esquinas = [
+      [0, 0],
+      [r.width, 0],
+      [0, r.height],
+      [r.width, r.height],
+    ].map(([x, y]) => [x - boca.x, y - boca.y] as const);
+    const enPantalla = laO?.getScreenCTM();
+    const profundidad =
+      laO && enPantalla
+        ? profundidadDesdeLaBoca(
+            { ancho: laO.getBBox().width, alto: laO.getBBox().height },
+            enPantalla.inverse(),
+            esquinas,
+          )
+        : profundidadDelViaje({ ancho: 10, alto: 20 }, r.width, r.height);
     const cubre = aireQueCubre(boca.x, boca.y, r.width, r.height);
     const cabe = aireQueCabe(boca.x, boca.y, r.width, r.height);
 
@@ -246,10 +261,9 @@ export class AvisoAuricularesComponent {
         this.cuadro = requestAnimationFrame(pintar);
         return;
       }
-      for (const el of [escena, this.host]) {
-        el.style.removeProperty('scale');
-        el.style.removeProperty('transform-origin');
-      }
+      escena.style.removeProperty('scale');
+      escena.style.removeProperty('transform-origin');
+      // El aviso queda en cero hasta que lo oculta `listo`: devuelto a su tamaño, volvía entero un cuadro.
       this.momento.set('listo');
       this.llego.emit();
     };

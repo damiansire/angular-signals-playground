@@ -9,6 +9,7 @@ import {
   aireQueCubre,
   cuadroDelViaje,
   profundidadDelViaje,
+  profundidadDesdeLaBoca,
   type CuadroDelViaje,
   PANEO,
   cuandoSeAbre,
@@ -166,7 +167,7 @@ describe('el viaje de la cámara, de la boca a la colina', () => {
 
   it('el circulito se achica más despacio que el mundo: llega a la colina todavía visible', () => {
     const llegando = en(BOCANADA_MS + ALEJARSE_MS);
-    expect(enPantalla(llegando)).toBeGreaterThan(1 / S0);
+    expect(enPantalla(llegando)).toBeGreaterThan(CHICO / S0);
     expect(enPantalla(llegando)).toBeLessThan(CHICO);
   });
 
@@ -176,9 +177,27 @@ describe('el viaje de la cámara, de la boca a la colina', () => {
     expect(en(VIAJE_MS).aviso).toBe(0);
   });
 
-  it('la profundidad pone la boca en media pantalla, con tope', () => {
-    expect(profundidadDelViaje(10, 1440, 900)).toBe(45);
-    expect(profundidadDelViaje(1, 1440, 900)).toBe(60);
-    expect(profundidadDelViaje(200, 1440, 900)).toBe(6);
+  it('arranca desde adentro de la boca: las esquinas de la pantalla caen dentro de la "o"', () => {
+    const boca = { ancho: 10, alto: 16 };
+    const s = profundidadDelViaje(boca, 800, 500);
+    // La "o" agrandada, como elipse: la esquina más lejana queda adentro.
+    expect((800 / ((s * boca.ancho) / 2)) ** 2 + (500 / ((s * boca.alto) / 2)) ** 2).toBeLessThan(
+      1,
+    );
+    expect(profundidadDelViaje({ ancho: 0.1, alto: 0.1 }, 800, 500)).toBe(400);
+    expect(profundidadDelViaje({ ancho: 900, alto: 900 }, 10, 10)).toBe(6);
+  });
+
+  it('mide la pantalla en el dibujo de la "o": girada, la boca alta queda acostada', () => {
+    const boca = { ancho: 10, alto: 30 };
+    const esquinas = [
+      [-400, -100],
+      [400, 100],
+    ] as const;
+    const derecha = profundidadDesdeLaBoca(boca, { a: 1, b: 0, c: 0, d: 1 }, esquinas);
+    const acostada = profundidadDesdeLaBoca(boca, { a: 0, b: 1, c: -1, d: 0 }, esquinas);
+    expect(derecha).toBeCloseTo(profundidadDelViaje(boca, 400, 100), 6);
+    expect(acostada).toBeCloseTo(profundidadDelViaje(boca, 100, 400), 6);
+    expect(acostada).toBeLessThan(derecha);
   });
 });

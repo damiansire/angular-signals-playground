@@ -162,20 +162,23 @@ export function aireQueCabe(x: number, y: number, ancho: number, alto: number): 
  * de la boca de Angie, que se ve enorme detrás. Después la cámara se aleja, de la boca a la cara, a
  * Angie en la piedra y a la colina entera. Al final el circulito entra y la boca se cierra.
  */
-export const BOCANADA_MS = 1100;
-export const ALEJARSE_MS = 3300;
+export const BOCANADA_MS = 1300;
+export const ALEJARSE_MS = 4200;
 export const TRAGA_MS = 450;
 export const VIAJE_MS = BOCANADA_MS + ALEJARSE_MS + TRAGA_MS;
 
 /** Hasta acá de la bocanada el aviso sigue del tamaño de la pantalla: el círculo se cierra adentro. */
 const ENCAJA = 0.45;
-/** Cuánto se achica el aviso dentro del circulito: lo bastante para que no se lea su texto. */
-export const CHICO = 0.15;
+/**
+ * Cuánto se achica el aviso: se va lejos, a un puntito, y la pantalla queda toda del color de la
+ * boca abierta. Con más, quedaba un círculo grande y no se leía que se iba.
+ */
+export const CHICO = 0.07;
 /**
  * Cuánto se resiste el circulito a achicarse con el mundo (de 0 a 1): con 0 se perdía en un píxel
  * antes de ver la cara; con esto llega a la colina como un punto que todavía se ve.
  */
-const PERSISTE = 0.35;
+const PERSISTE = 0.25;
 
 /** Lo que muestra la cámara en un instante del viaje. */
 export interface CuadroDelViaje {
@@ -241,11 +244,38 @@ export function cuadroDelViaje(
 }
 
 /**
- * De qué tan cerca arranca la colina: con la boca de Angie ocupando la mitad del lado corto de la
- * pantalla. `bocaPx` es lo que mide su boca abierta en la colina, sin acercar. Con un tope: más de
- * 60 aumentos ya no muestra nada más que rosa.
+ * De qué tan cerca arranca la colina: desde ADENTRO de la boca abierta, con toda la pantalla de su
+ * color. `boca` es el tamaño de la "o" en su propio dibujo; `dx` y `dy`, una esquina de la pantalla
+ * vista desde su centro, en ese mismo dibujo. La esquina tiene que caer adentro de la boca, que es
+ * casi una elipse: con la boca en media pantalla, se veía la cara desde el primer cuadro y no había
+ * adentro. Con margen y con tope, que de más no muestra nada distinto.
  */
-export function profundidadDelViaje(bocaPx: number, ancho: number, alto: number): number {
-  const s = (0.5 * Math.min(ancho, alto)) / Math.max(bocaPx, 1);
-  return Math.min(60, Math.max(6, s));
+export function profundidadDelViaje(
+  boca: { readonly ancho: number; readonly alto: number },
+  dx: number,
+  dy: number,
+): number {
+  const a = Math.max(boca.ancho, 1) / 2;
+  const b = Math.max(boca.alto, 1) / 2;
+  const s = 2 * Math.hypot(dx / a, dy / b);
+  return Math.min(400, Math.max(6, s));
+}
+
+/**
+ * La profundidad que deja las cuatro esquinas adentro de la "o". Va en el dibujo de la boca y no en
+ * su caja de pantalla: la "o" está girada y estirada por su muelle, y medida por la caja la cámara
+ * arrancaba con medio borde de la boca a la vista. `aLaBoca` es la inversa de su matriz de pantalla
+ * (solo la parte lineal) y `esquinas`, cada esquina menos el centro de la boca, en píxeles.
+ */
+export function profundidadDesdeLaBoca(
+  boca: { readonly ancho: number; readonly alto: number },
+  aLaBoca: { readonly a: number; readonly b: number; readonly c: number; readonly d: number },
+  esquinas: readonly (readonly [number, number])[],
+): number {
+  const { a, b, c, d } = aLaBoca;
+  return Math.max(
+    ...esquinas.map(([x, y]) =>
+      profundidadDelViaje(boca, Math.abs(a * x + c * y), Math.abs(b * x + d * y)),
+    ),
+  );
 }
