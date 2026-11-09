@@ -110,7 +110,6 @@ whose CI run went green.
 - **[Angular 22](https://angular.dev)** — standalone components, signals, `@if`/`@for` control flow
 - **[`@angular/build`](https://angular.dev/tools/cli/build)** — esbuild/Vite-based toolchain
 - **[Tailwind CSS](https://tailwindcss.com)** — utility-first styling
-- **[ngx-echarts](https://github.com/xieziyu/ngx-echarts)** — charts used by some visualizations
 - **ESLint + angular-eslint** — linting and Angular best-practice rules
 
 ## Project structure

@@ -892,8 +892,9 @@ Del minijuego de operadores (2026-11-08):
 - [ ] Clicks rápidos sobre un tag alternan: `app-code` lee la selección de su signal, no del objeto
       que le pasa el template. Con tres clicks seguidos la vista no se rehacía, los tres decían
       'Select' y el árbol duplicaba el nodo (NG0955).
-- [ ] La rueda encima del árbol de ECharts baja la hoja: el árbol se arrastra (`roam: 'move'`) pero
-      no hace zoom. Con zoom, la rueda encima del árbol no movía la hoja ni la molécula.
+- [ ] Tocar un tag marca el ELEMENTO entero, como una sola marca: `<h2> Introduction </h2>` es un
+      nodo con su texto, y marcar solo la apertura lo leía como tres cosas. El texto y el cierre
+      también son blanco del toque; solo la apertura es parada de teclado.
 - [ ] El ancho máximo de 64rem de las pantallas en la molécula se anula en la hoja: con él, a 2000 px
       la página quedaba en una franja angosta. El CSS del manual vive en `manual-de-a-bordo.css`.
 - [ ] En cada escena, nada importante detrás de la nave: el planeta va arriba a la izquierda, el
@@ -935,10 +936,17 @@ Del minijuego de operadores (2026-11-08):
       pantallas (especificidad 0,4,1): con `.pm .pm-paso .pm-mostrar` y los selectores del libro.
 - [ ] Solo la demo que crece con el alto estira la mesa (`llena`, el árbol de la ley 1). Las de
       tamaño fijo, estiradas, dejaban media mesa de papel vacía: van centradas en el alto.
-- [ ] El lienzo de ECharts va `position: absolute` en su lugar: guarda su alto en píxeles, y con
-      él en el flujo el mínimo de la grilla crecía y la hoja desbordaba 12 px a 1366×768.
-- [ ] El árbol no recorta nodos a los costados: `zoom: 0.8` con `nodeScaleRatio: 0`. Los márgenes
-      de la serie (`left`/`right`) deformaban los nodos.
+- [ ] El árbol va `position: absolute` en su recuadro: con su alto natural en el flujo, el mínimo de
+      la grilla crecía y la hoja desbordaba 12 px a 1366×768.
+- [ ] El nodo aparece con el toque, no al final: el árbol es SVG armado por Angular. Con ECharts
+      (canvas en un chunk con `@defer (on idle)`) la escena animada no dejaba al navegador ocioso y
+      el árbol llegaba tarde y todo junto.
+- [ ] Ningún conector cruza a otro: un nodo por fila en el orden del código y la profundidad como
+      sangría (el árbol del inspector). El árbol espejado de arriba hacia abajo invertía a los
+      hermanos (article antes que section) y enredaba los conectores. Cada conector sale del final
+      del elemento en su renglón, no del tag: si no, tachaba el texto recién marcado.
+- [ ] El árbol se centra en su recuadro y su lienzo no cambia de tamaño al revelar nodos: se mide
+      con el árbol completo, así un nodo nuevo no corre a los demás.
 - [ ] Los nodos con rótulo largo de la ley 5 son píldoras que crecen con el texto: "section" en
       un círculo de radio 15 se leía "ectio".
 - [ ] Medido con input real a 1920×1080, 1366×768 (entra sin scroll), 1024×768 y 480×900 (scroll
