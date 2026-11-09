@@ -1,11 +1,4 @@
-import {
-  Component,
-  computed,
-  input,
-  output,
-  viewChild,
-  ChangeDetectionStrategy,
-} from '@angular/core';
+import { Component, computed, input, viewChild, ChangeDetectionStrategy } from '@angular/core';
 import { NodeTreeComponent } from '../../components-draw/node-tree/node-tree.component';
 import { generateLinks, generateNodes } from '../../libs/code-parser';
 
@@ -19,27 +12,12 @@ import { generateLinks, generateNodes } from '../../libs/code-parser';
 export class TreeComponent {
   htmlCode = input<string>('');
   nodesToShow = input<string[] | undefined>();
-  // Se re-emite cada vez que el chart interno vuelve a pintar (carga/animación/roam),
-  // para que quien dibuje conectores externos sepa cuándo recalcular posiciones.
-  readonly viewChanged = output<void>();
   // Estado derivado del input: `computed`, no `effect`+`set`. El parseo del HTML es
   // una función pura, así que nodos y aristas son una proyección directa de `htmlCode()`.
   readonly nodesData = computed(() => generateNodes(this.htmlCode()));
-  /** Espeja el árbol horizontalmente (crece hacia el lado opuesto). Se usa cuando el código está a
-   *  la IZQUIERDA del árbol (html-to-tree con el código al centro): así el árbol crece HACIA el código
-   *  y los conectores quedan cortos, en vez de cruzar la escena. Otros demos no lo activan. */
-  readonly mirror = input(false);
   readonly nodes = computed(() => {
-    const hiddenNodes = this.nodesToShow();
-    const visible = hiddenNodes
-      ? this.nodesData().filter((node) => hiddenNodes.includes(node.id))
-      : this.nodesData();
-    if (!this.mirror()) return visible;
-    // Espejo horizontal alrededor del centro del árbol COMPLETO (no del subconjunto visible), para
-    // que la posición de cada nodo no salte según cuántos estén revelados.
-    const xs = this.nodesData().map((n) => n.x);
-    const axis = Math.min(...xs) + Math.max(...xs);
-    return visible.map((n) => ({ ...n, x: axis - n.x }));
+    const shown = this.nodesToShow();
+    return shown ? this.nodesData().filter((node) => shown.includes(node.id)) : this.nodesData();
   });
   readonly links = computed(() => generateLinks(this.htmlCode()));
   /** Todavía no se reveló ningún nodo. El área del árbol es el ESCENARIO donde va a crecer, pero
@@ -49,8 +27,7 @@ export class TreeComponent {
 
   private readonly nodeTree = viewChild(NodeTreeComponent);
 
-  /** Posición en pantalla (viewport) del borde derecho del nodo `id`, o `null` si no está
-   * pintado. */
+  /** Posición en pantalla (viewport) del borde del nodo `id`, o `null` si no se muestra. */
   getScreenEdgePosition(
     id: string,
     side: 'left' | 'right' = 'right',
