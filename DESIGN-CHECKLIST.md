@@ -631,6 +631,14 @@ entrar desarma a Angie en luz y se hace noche, la costura con el prólogo.
       mientras se escribe. Las palabras no se parten al bajar de renglón. Los puntos y el
       triangulito de "tocá para seguir" esperan a que termine la frase, y los blips de voz duran
       lo mismo que la escritura. Al irse, las letras esperan a que el globo se encoja.
+- [ ] (2026-11-10) El toque sobre un diálogo que se escribe (los globos de la colina y las líneas
+      de las cinemáticas) hace lo de un RPG (`queHaceElToque`): a medio escribir lo COMPLETA en el
+      acto (`ini--escrito`, `cine__linea--escrita`: letras, puntos y triangulito saltan a su lugar y
+      se cortan los blips), y recién escrito lo PASA. Después de completar, el toque siguiente
+      espera `RESPIRO_MS` (350) para pasar. Anti-patrones (Damian, con muchos clics): todo toque
+      pasaba, y una ráfaga se llevaba dos diálogos juntos sin leer ninguno; en la colina el toque a
+      medio escribir quedaba guardado y el globo se iba solo al terminar de escribirse. Probado con
+      una ráfaga real cada 60-90 ms: un diálogo por vez, cada uno entero unos 400 ms.
 - [ ] (2026-11-09) Con "Ellos ya están aquí" Angie tiene la boca en "o"; con "La hora ha llegado"
       sonríe y se sonroja (`sonreir()` de `app-mascota-viva`, clase `mv--sonrie`, que le gana a la
       boca chica pensativa y a la "o").
