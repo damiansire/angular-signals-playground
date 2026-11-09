@@ -33,8 +33,8 @@ const NARIZ = { x: 182, y: 148 };
 const MONO = "'JetBrains Mono', Consolas, monospace";
 /**
  * El pipeline en vertical, en la pantalla de la nave: una fila por estación. Los rótulos van más
- * grandes que en las otras pantallas (13.5 unidades el más chico): a 390 px la escena queda a 0.84
- * y tienen que llegar a 11 px.
+ * grandes que en las otras pantallas (13.5 unidades el más chico): en un teléfono la escena se
+ * achica y tienen que llegar a 11 px.
  */
 const PUNTO_X = 252;
 const CARRIL_X = 234;

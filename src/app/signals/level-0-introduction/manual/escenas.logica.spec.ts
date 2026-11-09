@@ -35,8 +35,8 @@ describe('cieloAngosto', () => {
   });
 
   it('angosta, encuadra la nave y su pantalla con el alto de la ventanilla', () => {
-    // La ventanilla 4:3 de un teléfono de 390 px.
-    expect(cieloAngosto(314, 235.5)).toBe('22 -11.0 376 282.0');
+    // La escena de un teléfono de 390 px, a lo ancho.
+    expect(cieloAngosto(390, 260)).toBe('4 -1.3 394 262.7');
   });
 
   it('más alta que el cielo, vuelve al de siempre en vez de dejar franjas sin pintar', () => {
