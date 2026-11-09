@@ -1,38 +1,58 @@
-<app-pagina-del-manual [guia]="guia()" [llena]="true">
-  <p hacer class="htt-hacer">Tocá un tag del código.</p>
+<app-pagina-del-manual
+  [guia]="guia()"
+  [respiro]="900"
+  [integrada]="true"
+  [paso]="paso()"
+  [resuelta]="sano()"
+>
+  <p hacer>Tocá los tags.</p>
+  <p arreglo class="htt-arreglo">Mové el <code>&lt;/article&gt;</code>.</p>
 
-  <!-- El código y el árbol, uno al lado del otro y con el alto de la mesa: cada tag tocado tira su
-       conector hasta su nodo, que queda en el mismo orden vertical que el código. -->
-  <div demo class="htt">
-    <app-code
-      class="htt-codigo"
-      textSize="text-xl"
-      (codeClick)="codeClickHandler($event)"
-      [htmlCode]="htmlCode"
-    ></app-code>
-    <app-tree class="htt-arbol" [nodesToShow]="nodesToShow()" [htmlCode]="htmlCode"></app-tree>
-    <svg #overlay class="htt-conectores" aria-hidden="true">
-      @for (line of connectors(); track line.id) {
-        <path
-          class="connector"
-          [attr.d]="line.path"
-          fill="none"
-          [attr.stroke]="line.color"
-          [style.color]="line.color"
-          stroke-width="2.5"
-          stroke-dasharray="6 8"
-          stroke-linecap="round"
-          opacity="0.9"
-        />
+  <app-escena-arbol escena [reveladas]="reveladas()" [fuera]="fuera()" [sano]="sano()" />
+
+  <!-- El árbol se ve una sola vez, en la pantalla de la nave. Acá va lo que se toca: el HTML, con
+       cada tag que abre como botón y el cierre fuera de lugar como hueco. -->
+  <section consola class="htt">
+    <div class="htt-codigo" role="group" aria-label="El HTML de la pantalla">
+      @for (r of renglones(); track $index) {
+        <span class="htt-linea" [style.padding-left.ch]="r.sangria * 2">
+          @for (p of r.piezas; track $index) {
+            @switch (p.tipo) {
+              @case ('abre') {
+                <button
+                  type="button"
+                  class="htt-tag"
+                  [class.htt-tag--visto]="revelada(p.id)"
+                  [attr.aria-pressed]="revelada(p.id)"
+                  [attr.data-guia]="'abre-' + p.id"
+                  (click)="revelar(p.id)"
+                >
+                  {{ p.texto }}
+                </button>
+              }
+              @case ('hueco') {
+                <button
+                  type="button"
+                  class="htt-hueco"
+                  [class.htt-hueco--ahora]="paso() === 2 && !arreglado()"
+                  [class.htt-hueco--movido]="arreglado()"
+                  [attr.aria-pressed]="arreglado()"
+                  data-guia="cierre"
+                  (click)="moverCierre()"
+                >
+                  {{ p.texto }}
+                </button>
+              }
+              @case ('texto') {
+                <span class="htt-texto">{{ p.texto }}</span>
+              }
+              @default {
+                <span class="htt-cierra">{{ p.texto }}</span>
+              }
+            }
+          }
+        </span>
       }
-    </svg>
-  </div>
-
-  <app-escena-arbol escena [reveladas]="reveladas()" [sano]="sano()" />
-
-  <app-manipulable-system
-    desafio
-    [system]="closingSystem"
-    (corrida)="sano.set($event.salud === 'healthy')"
-  />
+    </div>
+  </section>
 </app-pagina-del-manual>

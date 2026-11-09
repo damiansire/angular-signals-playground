@@ -1,60 +1,93 @@
-/* Los conectores no son líneas muertas: el guion FLUYE del código hacia el nodo del árbol,
-   como la señal propagándose (el tema mismo de la app). El motor reescribe `d` cada frame para
-   seguir el nodo; el desplazamiento del dash es puramente CSS, así que perseguir y fluir no
-   pelean. `M` del path arranca en el árbol y termina en el código, por eso el offset va hacia
-   valores negativos: el patrón viaja código → árbol. */
-.connector {
-  /* Glow del color del conector (currentColor = line.color, seteado inline): sobre el clima
-     claro la traza se lee "encendida" como en la referencia, no una línea plana. */
-  filter: drop-shadow(0 0 4px currentColor);
-  animation: connector-flow 0.85s linear infinite;
-}
-@keyframes connector-flow {
-  to {
-    stroke-dashoffset: -14;
-  }
-}
-@media (prefers-reduced-motion: reduce) {
-  .connector {
-    animation: none;
-  }
-}
-
-/* La página la ordena el manual (ley, qué hacer, demo, desafío); acá solo lo propio. */
+/* Clases con prefijo `htt-`: se embebe en la vista integrada, que estampa su enc; sin prefijo,
+   las clases del motor de la molécula pisarían las nuestras. Va en la consola de la nave: la misma
+   paleta que su pantalla (vidrio violeta, borde lila, texto claro), como las leyes 4 y 5. */
 :host {
   display: block;
-  color: #1c1e24;
 }
 
-.htt-hacer {
-  margin: 0;
+.htt-arreglo code {
+  font:
+    700 0.92em / 1 'JetBrains Mono',
+    'Cascadia Mono',
+    Consolas,
+    monospace;
 }
 
-/* El código a su ancho y el árbol con todo lo demás, los dos con el alto de la mesa. Los conectores
-   van encima de los dos, sin atrapar toques. */
-.htt {
-  position: relative;
-  flex: 1 0 auto;
-  display: grid;
-  grid-template-columns: minmax(0, auto) minmax(16rem, 1fr);
-  gap: clamp(1.5rem, 3vw, 3rem);
-  min-height: 18rem;
+.htt-codigo {
+  display: flex;
+  flex-direction: column;
+  padding: 0.55rem 1.1rem;
+  border: 1.5px solid #5b4a96;
+  border-radius: 12px;
+  background: #1c1434;
+  font:
+    500 clamp(0.85rem, 1vw, 1rem) / 1.4 'JetBrains Mono',
+    'Cascadia Mono',
+    Consolas,
+    monospace;
+  color: #f2ecff;
 }
-.htt-codigo,
-.htt-arbol {
+
+/* Un renglón por elemento; la sangría va como relleno, en `ch`: la que aparenta el código. */
+.htt-linea {
   display: block;
-  min-width: 0;
+  white-space: nowrap;
 }
-.htt-conectores {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  overflow: visible;
-  pointer-events: none;
+.htt-texto {
+  color: #f2ecff;
 }
-@media (max-width: 699px) {
-  .htt {
-    grid-template-columns: minmax(0, 1fr);
+.htt-cierra {
+  color: #b9aee0;
+}
+
+/* Los tags que abren: se tocan, en dorado y subrayados como los tokens de los desafíos; tocados,
+   claros, porque su pieza ya está en la pantalla. Tres clases más el elemento: le gana a la
+   pastilla oscura que la hoja le pone a todo botón (`.subhost button:not([class*='bg-'])`). */
+.htt .htt-codigo button.htt-tag,
+.htt .htt-codigo button.htt-hueco {
+  display: inline-block;
+  margin: 0 -0.2rem;
+  padding: 0 0.2rem;
+  border: 0;
+  border-radius: 5px;
+  background: rgb(255 210 122 / 8%);
+  font: inherit;
+  color: #ffd27a;
+  text-decoration: underline dashed 1.5px;
+  text-underline-offset: 0.3em;
+  cursor: pointer;
+  transition:
+    background-color 0.15s,
+    color 0.15s;
+}
+.htt .htt-codigo button.htt-tag:hover,
+.htt .htt-codigo button.htt-hueco:hover {
+  background: rgb(255 210 122 / 16%);
+}
+.htt .htt-codigo button.htt-tag.htt-tag--visto {
+  background: transparent;
+  color: #cbc0f0;
+  text-decoration: none;
+}
+/* El hueco: el cierre fuera de lugar. Mientras se prueba, es un cierre más (no hay que delatarlo
+   antes de que la pantalla lo muestre); en el paso de arreglar, dorado como lo que se toca, y
+   movido, en verde. */
+.htt .htt-codigo button.htt-hueco:not(.htt-hueco--ahora, .htt-hueco--movido) {
+  background: transparent;
+  color: #b9aee0;
+  text-decoration: none;
+}
+.htt .htt-codigo button.htt-hueco.htt-hueco--movido {
+  background: rgb(106 209 154 / 10%);
+  color: #8be0b3;
+}
+.htt .htt-codigo button:focus-visible {
+  outline: 2px solid #ffd27a;
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .htt .htt-codigo button {
+    transition: none;
   }
 }

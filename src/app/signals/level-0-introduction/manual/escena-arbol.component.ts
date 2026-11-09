@@ -1,9 +1,10 @@
 import { ChangeDetectionStrategy, Component, computed, effect, input } from '@angular/core';
 import { gsap } from 'gsap';
-import { EscenaDelManual, chispas, pintarPantalla } from './escena-del-manual';
+import { CIELO_DEL_ESCENARIO, EscenaDelManual, chispas, pintarPantalla } from './escena-del-manual';
 import { PALETA, el } from './nave-del-manual';
 
 interface Pieza {
+  readonly id: string;
   readonly tag: string;
   readonly x: number;
   readonly y: number;
@@ -12,34 +13,77 @@ interface Pieza {
   readonly color: string;
   /** Renglones de texto: un `<p>` se dibuja como líneas, no como caja. */
   readonly renglones?: readonly number[];
+  /** El panel donde la sangría lo pone. */
+  readonly panel?: string;
+  /** Cuánto cae cuando los tags lo dejan fuera de su panel: al fondo del marco, debajo de él. */
+  readonly caida?: number;
 }
 
 /**
- * Cada nodo del HTML de la demo es una pieza de la pantalla de la nave, en el mismo orden de
+ * Cada elemento del HTML de la consola es una pieza de la pantalla de la nave, en orden de
  * documento: `<main>` es el marco, `<section>` y `<article>` los paneles, y los títulos y párrafos
- * van adentro de su panel. Que una pieza viva adentro de otra ES el árbol.
+ * van adentro de su panel. Que una pieza viva adentro de otra ES el árbol. Debajo de los paneles
+ * queda un hueco del marco: ahí caen los hijos de `<main>` que no son paneles.
  */
 const PIEZAS: readonly Pieza[] = [
-  { tag: 'main', x: 221, y: 33, ancho: 160, alto: 164, color: '#2c2352' },
-  { tag: 'section', x: 228, y: 58, ancho: 70, alto: 132, color: '#3e3170' },
-  { tag: 'h2', x: 235, y: 68, ancho: 50, alto: 12, color: PALETA.luz },
-  { tag: 'p', x: 235, y: 90, ancho: 52, alto: 46, color: '#cbc0f0', renglones: [52, 44, 48, 34] },
-  { tag: 'article', x: 304, y: 58, ancho: 70, alto: 132, color: '#3e3170' },
-  { tag: 'h3', x: 311, y: 68, ancho: 42, alto: 10, color: PALETA.acento },
-  { tag: 'p', x: 311, y: 88, ancho: 50, alto: 34, color: '#cbc0f0', renglones: [50, 40, 46] },
+  { id: 'main', tag: 'main', x: 221, y: 33, ancho: 160, alto: 164, color: '#2c2352' },
+  { id: 'section', tag: 'section', x: 228, y: 58, ancho: 70, alto: 92, color: '#3e3170' },
+  { id: 'h2', tag: 'h2', x: 235, y: 72, ancho: 50, alto: 12, color: PALETA.luz, panel: 'section' },
+  {
+    id: 'p1',
+    tag: 'p',
+    x: 235,
+    y: 94,
+    ancho: 52,
+    alto: 27,
+    color: '#cbc0f0',
+    renglones: [52, 44, 34],
+    panel: 'section',
+  },
+  { id: 'article', tag: 'article', x: 304, y: 58, ancho: 70, alto: 92, color: '#3e3170' },
+  {
+    id: 'h3',
+    tag: 'h3',
+    x: 311,
+    y: 72,
+    ancho: 42,
+    alto: 10,
+    color: PALETA.acento,
+    panel: 'article',
+    caida: 88,
+  },
+  {
+    id: 'p2',
+    tag: 'p',
+    x: 311,
+    y: 94,
+    ancho: 50,
+    alto: 16,
+    color: '#cbc0f0',
+    renglones: [50, 38],
+    panel: 'article',
+    caida: 82,
+  },
 ];
+const INDICE = new Map(PIEZAS.map((p, i) => [p.id, i]));
+/** Un panel sin hijos es una tira: vacío, no ocupa nada. */
+const ALTO_VACIO = 9;
+const AVISO = '#ff7676';
 
 /**
- * Lámina de la ley 1: la pantalla de la nave se arma con los nodos que se revelan en la demo.
- * Mientras no hay ninguno, la pantalla muestra dónde va cada pieza y la nave mira el código.
+ * Lámina de la ley 1, que es el escenario de su página: la pantalla de la nave se arma con los tags
+ * que se tocan en la consola. Cada pieza va a donde la ponen los tags, no la sangría: si un panel se
+ * cierra antes de tiempo, queda chico y vacío, sus hijos caen fuera de él y la nave se preocupa.
+ * Moviendo el cierre, suben a su lugar.
  */
 @Component({
   selector: 'app-escena-arbol',
   template: `<svg
-    class="esc"
-    viewBox="0 0 400 260"
+    class="esc esc--escenario"
+    [attr.viewBox]="cielo"
+    preserveAspectRatio="xMidYMid slice"
     role="img"
-    [attr.aria-label]="'Pantalla de la nave: ' + armadas() + ' de ' + total + ' piezas'"
+    [attr.aria-label]="descripcion()"
   >
     <g data-nave transform="translate(112 150) scale(1.05)"></g>
   </svg>`,
@@ -47,26 +91,40 @@ const PIEZAS: readonly Pieza[] = [
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class EscenaArbolComponent extends EscenaDelManual {
-  /** Los nodos revelados, como posición en el orden del documento. */
-  readonly reveladas = input<readonly number[]>([]);
-  /** El desafío quedó sano: la nave festeja. */
+  /** Los elementos revelados, por id. */
+  readonly reveladas = input<readonly string[]>([]);
+  /** Los elementos que los tags dejan fuera del panel donde los pone la sangría. */
+  readonly fuera = input<readonly string[]>([]);
+  /** La página quedó sana: la nave festeja. */
   readonly sano = input(false);
 
   protected readonly semilla = 11;
-  protected readonly total = PIEZAS.length;
-  protected readonly armadas = computed(
-    () => this.reveladas().filter((i) => i < this.total).length,
+  protected readonly cielo = CIELO_DEL_ESCENARIO;
+  private readonly armadas = computed(() => this.reveladas().filter((id) => INDICE.has(id)));
+  private readonly caidas = computed(() =>
+    this.armadas().filter((id) => this.fuera().includes(id)),
   );
+  protected readonly descripcion = computed(() => {
+    const caidas = this.caidas().length;
+    return (
+      `Pantalla de la nave: ${this.armadas().length} de ${PIEZAS.length} piezas` +
+      (caidas ? `, ${caidas} fuera de su panel` : '')
+    );
+  });
 
   private piezas: SVGGElement[] = [];
+  private cajas = new Map<string, SVGRectElement>();
+  private aviso: SVGRectElement | null = null;
   private etiquetas: SVGGElement | null = null;
-  private vistas = new Set<number>();
+  private vistas = new Set<string>();
+  private caidasVistas = new Set<string>();
 
   constructor() {
     super();
     effect(() => {
-      const ahora = new Set(this.reveladas().filter((i) => i < this.total));
-      if (this.lista) this.reaccion(() => this.mostrar(ahora));
+      const ahora = new Set(this.armadas());
+      const fuera = new Set(this.fuera());
+      if (this.lista) this.reaccion(() => this.mostrar(ahora, fuera));
     });
     effect(() => {
       if (this.sano() && this.lista) this.reaccion(() => this.festejar());
@@ -75,16 +133,19 @@ export class EscenaArbolComponent extends EscenaDelManual {
 
   protected armar(svg: SVGSVGElement): void {
     const pantalla = pintarPantalla(svg, { x: 182, y: 148 });
-    // El lugar de cada pieza, punteado: la pantalla vacía se lee como algo por armar.
-    const fantasma = el(pantalla, 'g', {
+    // El lugar de cada pieza, punteado: la pantalla vacía se lee como algo por armar. Los de adentro
+    // del marco van encima de él: un panel que quedó chico deja a la vista los lugares que perdió.
+    const punteado = {
       fill: 'none',
       stroke: '#7d6cc4',
       'stroke-width': 1.3,
       'stroke-dasharray': '4 4',
       opacity: 0.8,
-    });
+    };
+    const marco = el(pantalla, 'g', punteado);
+    const fantasma = el(pantalla, 'g', punteado);
     for (const p of PIEZAS) {
-      el(fantasma, 'rect', {
+      el(p.id === 'main' ? marco : fantasma, 'rect', {
         x: p.x,
         y: p.y,
         width: p.ancho,
@@ -92,6 +153,20 @@ export class EscenaArbolComponent extends EscenaDelManual {
         rx: 5,
       });
     }
+    // El aviso: lo que cayó fuera de su panel, rodeado en rojo.
+    const aviso = el(pantalla, 'rect', {
+      x: 305,
+      y: 154,
+      width: 68,
+      height: 39,
+      rx: 7,
+      fill: 'rgb(255 118 118 / 12%)',
+      stroke: AVISO,
+      'stroke-width': 1.4,
+      'stroke-dasharray': '5 3',
+      opacity: 0,
+    });
+    this.aviso = aviso;
     this.piezas = PIEZAS.map((p) => {
       const g = el(pantalla, 'g', { opacity: 0 });
       if (p.renglones) {
@@ -106,7 +181,7 @@ export class EscenaArbolComponent extends EscenaDelManual {
           }),
         );
       } else {
-        el(g, 'rect', {
+        const caja = el(g, 'rect', {
           x: p.x,
           y: p.y,
           width: p.ancho,
@@ -114,6 +189,7 @@ export class EscenaArbolComponent extends EscenaDelManual {
           rx: p.tag === 'main' ? 9 : 5,
           fill: p.color,
         });
+        this.cajas.set(p.id, caja);
         if (p.tag === 'main') {
           for (const [i, c] of ['#ff7a8a', '#ffd27a', '#7fdcae'].entries()) {
             el(g, 'circle', { cx: p.x + 10 + i * 9, cy: p.y + 10, r: 3, fill: c });
@@ -123,18 +199,44 @@ export class EscenaArbolComponent extends EscenaDelManual {
       gsap.set(g, { svgOrigin: `${p.x + p.ancho / 2} ${p.y + Math.min(p.alto, 24) / 2}` });
       return g;
     });
+    this.piezas[0].after(fantasma, aviso);
     this.etiquetas = el(svg, 'g', { 'pointer-events': 'none' });
-    this.mostrar(new Set(this.reveladas().filter((i) => i < this.total)), true);
+    this.mostrar(new Set(this.armadas()), new Set(this.fuera()), true);
   }
 
-  private mostrar(ahora: ReadonlySet<number>, primeraVez = false): void {
-    const nuevas = [...ahora].filter((i) => !this.vistas.has(i));
-    const idas = [...this.vistas].filter((i) => !ahora.has(i));
+  private mostrar(
+    ahora: ReadonlySet<string>,
+    fuera: ReadonlySet<string>,
+    primeraVez = false,
+  ): void {
+    const nuevas = PIEZAS.filter((p) => ahora.has(p.id) && !this.vistas.has(p.id));
+    const idas = PIEZAS.filter((p) => !ahora.has(p.id) && this.vistas.has(p.id));
+    const caidas = new Set([...ahora].filter((id) => fuera.has(id)));
+    // Las que ya estaban a la vista y cambiaron de lugar porque se movió el cierre.
+    const mudadas = PIEZAS.filter(
+      (p) =>
+        this.vistas.has(p.id) &&
+        ahora.has(p.id) &&
+        caidas.has(p.id) !== this.caidasVistas.has(p.id),
+    );
     this.vistas = new Set(ahora);
+    this.caidasVistas = caidas;
     const t = this.quieta || primeraVez ? 0 : 1;
 
-    for (const i of idas) {
-      gsap.to(this.piezas[i], {
+    // Un panel cuyos hijos quedaron afuera no tiene nada adentro: una tira vacía.
+    for (const [id, caja] of this.cajas) {
+      const p = PIEZAS[INDICE.get(id) ?? 0];
+      const vacio = PIEZAS.some((h) => h.panel === id && fuera.has(h.id));
+      gsap.to(caja, {
+        attr: { height: vacio ? ALTO_VACIO : p.alto },
+        duration: 0.35 * t,
+        ease: vacio ? 'power2.in' : 'back.out(1.6)',
+        overwrite: 'auto',
+      });
+    }
+
+    for (const p of idas) {
+      gsap.to(this.piezas[INDICE.get(p.id) ?? 0], {
         opacity: 0,
         scale: 0.7,
         duration: 0.2 * t,
@@ -142,70 +244,107 @@ export class EscenaArbolComponent extends EscenaDelManual {
         overwrite: 'auto',
       });
     }
-    for (const i of nuevas) {
-      gsap.fromTo(
-        this.piezas[i],
-        { opacity: 0, scale: 0.55 },
-        { opacity: 1, scale: 1, duration: 0.32 * t, ease: 'back.out(2.2)', overwrite: 'auto' },
-      );
-      if (t) this.rotular(i);
+    for (const p of nuevas) {
+      const g = this.piezas[INDICE.get(p.id) ?? 0];
+      const cae = caidas.has(p.id);
+      // Aparece donde la pone la sangría y, si los tags la dejan afuera, se cae de ahí.
+      gsap
+        .timeline()
+        .fromTo(
+          g,
+          { opacity: 0, scale: 0.55, y: 0 },
+          { opacity: 1, scale: 1, duration: 0.32 * t, ease: 'back.out(2.2)' },
+        )
+        .to(g, { y: cae ? (p.caida ?? 0) : 0, duration: 0.55 * t, ease: 'bounce.out' }, '+=0.12');
+      if (t) this.rotular(p, cae);
+    }
+    for (const p of mudadas) {
+      const sube = !caidas.has(p.id);
+      gsap.to(this.piezas[INDICE.get(p.id) ?? 0], {
+        y: sube ? 0 : (p.caida ?? 0),
+        duration: 0.6 * t,
+        delay: sube ? 0.2 * t : 0,
+        ease: sube ? 'back.out(1.8)' : 'bounce.out',
+        overwrite: 'auto',
+      });
+    }
+
+    if (this.aviso) {
+      gsap.to(this.aviso, {
+        opacity: caidas.size > 0 ? 1 : 0,
+        duration: 0.25 * t,
+        delay: caidas.size > 0 ? 0.6 * t : 0,
+        overwrite: 'auto',
+      });
     }
 
     const nave = this.nave;
     if (!nave) return;
-    const ultima = nuevas.at(-1);
-    if (ultima !== undefined) {
-      const p = PIEZAS[ultima];
-      nave.mirar(p.x + p.ancho / 2, p.y + 6);
+    const ultima = nuevas.at(-1) ?? mudadas.at(-1);
+    if (ultima) {
+      const dy = caidas.has(ultima.id) ? (ultima.caida ?? 0) : 0;
+      nave.mirar(ultima.x + ultima.ancho / 2, ultima.y + dy + 6);
       nave.empujar(-30, 1.5);
     } else if (ahora.size === 0) {
-      // Vacía, mira hacia el código: es de ahí que va a venir la primera pieza.
-      nave.mirar(-60, 230);
+      // Vacía, mira hacia la consola: es de ahí que va a venir la primera pieza.
+      nave.mirar(120, 300);
     }
     nave.animo(
-      ahora.size === PIEZAS.length ? 'contenta' : ahora.size === 0 ? 'atenta' : 'tranquila',
+      caidas.size > 0
+        ? 'preocupada'
+        : ahora.size === PIEZAS.length
+          ? 'contenta'
+          : ahora.size === 0
+            ? 'atenta'
+            : 'tranquila',
     );
-    if (ahora.size === PIEZAS.length && nuevas.length > 0) nave.saltito();
   }
 
-  /** El nombre del tag sube un momento sobre la pieza que acaba de llegar. */
-  private rotular(i: number): void {
+  /** El nombre del tag sube un momento sobre la pieza que acaba de llegar, donde termina. */
+  private rotular(p: Pieza, cae: boolean): void {
     if (!this.etiquetas) return;
-    const p = PIEZAS[i];
+    const y = p.y + (cae ? (p.caida ?? 0) : 0);
     const g = el(this.etiquetas, 'g');
     const texto = `<${p.tag}>`;
     const ancho = texto.length * 6.6 + 10;
     const cx = Math.min(p.x + p.ancho / 2, 386 - ancho / 2);
     el(g, 'rect', {
       x: cx - ancho / 2,
-      y: p.y - 9,
+      y: y - 9,
       width: ancho,
       height: 16,
       rx: 8,
       fill: PALETA.tinta,
-      stroke: PALETA.luz,
+      stroke: cae ? AVISO : PALETA.luz,
       'stroke-width': 1,
     });
     const t = el(g, 'text', {
       x: cx,
-      y: p.y + 3,
+      y: y + 3,
       'text-anchor': 'middle',
       'font-family': "'JetBrains Mono', Consolas, monospace",
       'font-size': 10.5,
       'font-weight': 700,
-      fill: PALETA.luz,
+      fill: cae ? '#ffb3b3' : PALETA.luz,
     });
     t.textContent = texto;
     gsap
       .timeline({ onComplete: () => g.remove() })
-      .fromTo(g, { opacity: 0, y: 6 }, { opacity: 1, y: 0, duration: 0.22, ease: 'back.out(2)' })
+      .fromTo(
+        g,
+        { opacity: 0, y: 6 },
+        { opacity: 1, y: 0, duration: 0.22, ease: 'back.out(2)', delay: cae ? 0.75 : 0 },
+      )
       .to(g, { opacity: 0, y: -8, duration: 0.3, ease: 'power1.in' }, '+=0.7');
   }
 
+  /** Cuando el título y el párrafo ya subieron a su panel, no mientras suben. */
   private festejar(): void {
-    this.nave?.animo('contenta');
-    this.nave?.saltito(18);
-    const svg = this.host.querySelector('svg');
-    if (svg) chispas(svg, 140, 118);
+    gsap.delayedCall(this.quieta ? 0 : 0.8, () => {
+      this.nave?.animo('contenta');
+      this.nave?.saltito(18);
+      const svg = this.host.querySelector('svg');
+      if (svg) chispas(svg, 140, 118);
+    });
   }
 }
