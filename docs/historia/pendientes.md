@@ -103,16 +103,6 @@ fecha y adónde fue. Los ids (H1, J1…) sirven para nombrarlos en una sesión (
   sus títulos son técnicos ("Read-only signals: asReadonly()"). **Propuesta:** pasarlas al formato
   de las páginas del manual (qué hacer, la demo, la escena de la nave y el desafío), una etapa por
   vez, como se hizo con la Introducción.
-- **T14. Las páginas del manual en una sola pieza.** Damian pidió que la demo, la escena de la nave
-  y el desafío no se lean como tres cosas sueltas. Las cinco leyes ya son una sola pieza
-  (`app-pagina-del-manual` con `[integrada]`): la nave es el escenario y su pantalla muestra los
-  números (en la 3, el pipeline; en la 1, el árbol), una sola vez, y abajo va su consola con los dos
-  pasos, probar y arreglar, sobre el mismo código. En la 1, el desafío de "parsear" pasó a un
-  `</article>` fuera de lugar: lo que la sangría pone adentro del panel cae afuera. La limpieza ya
-  está: sin los cinco sistemas de perilla de `introduction-systems.ts`, sin `app-tree` ni
-  `posicionesEnElDocumento`, sin `llena`, y el barrido cuenta 35. Queda la forma en tres tarjetas
-  porque la usa el árbol de Signal Space (`signals-change-detection`, la ley 6): se borra cuando esa
-  página pase a una sola pieza.
 - **T6. El gate de prosa.** `scripts/prose-budget.mjs` mide solo los `*.component.html` que están
   bajo `src/app/signals/**/sub-levels/`. Si las pantallas se mudan, mide cero y pasa sin avisar.
   Además, una pantalla movida o renombrada arranca sin crédito de línea base, con 8 palabras. La
@@ -174,6 +164,15 @@ Textos que estaban desactualizados y no dependían de la historia nueva. Cerrado
   `filter` (2026-11-09; antes `map`, `scan` y `throttleTime`). Está en el recorrido, en "La anomalía y el minijuego de operadores".
 - **J2. Completar el hueco** (2026-11-08). Se elige entre tres operadores con la perilla de
   `ManipulableChallenge`, como en los demás desafíos. Teclear quedó como pendiente aparte.
+- **T14. Las páginas del manual en una sola pieza** (2026-11-09). Damian pidió que la demo, la
+  escena de la nave y el desafío no se lean como tres cosas sueltas. Las seis leyes (las cinco del
+  manual y la de Signal Space) son una sola pieza: la nave es el escenario y su pantalla muestra los
+  números una sola vez (en la 3, el pipeline; en la 1 y la 6, el árbol), y abajo va su consola con
+  los dos pasos, probar y arreglar, sobre el mismo código. En la 1, el desafío de "parsear" pasó a
+  un `</article>` fuera de lugar; en la 6, el hueco es la declaración (`let` o `signal`). Sin la
+  forma de tres tarjetas ni el input `integrada` en `app-pagina-del-manual`, sin
+  `introduction-systems.ts` (sus seis sistemas de perilla), sin `app-tree` ni
+  `posicionesEnElDocumento`, y el barrido cuenta 34.
 
 ## Memoria
 

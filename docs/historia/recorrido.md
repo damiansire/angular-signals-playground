@@ -79,7 +79,7 @@ Es el acto 1 hasta la orden del capitán: `anom-que-pasa`, `anom-sin-control`, `
 huecos cortos, uno por nave, para **completar el hueco** eligiendo el operador (J2).
 
 El minijuego reusa `ManipulableChallenge` (`src/app/libs/manipulable-challenge.ts`). El hueco es la
-perilla, las opciones son sus posiciones, y la primera es la rota, como en los 35 desafíos de perilla.
+perilla, las opciones son sus posiciones, y la primera es la rota, como en los 34 desafíos de perilla.
 Cada hueco entra en el `SHAPE` actual: una perilla, hasta dos lecturas y hasta seis renglones de
 código.
 
@@ -171,9 +171,11 @@ Los pasos 5 y 6 están hechos (2026-11-09). Después del pacto (`leccion-armonia
 "Nuestra pantalla sigue marcando la velocidad vieja." (`leccion-pantalla`), la Nave B pregunta "¿Y
 quién le avisó a la pantalla?" (`leccion-pregunta`) y Angie contesta "Aquí nadie revisa todo. Miren
 el árbol." (`leccion-arbol`). La historia se frena ahí y se abre la hoja del manual con el título
-"Signal Space" y la ley 6 (`arbol-de-signal-space.ts`). Su lámina tiene la nave, el árbol en su
-pantalla y una caja ámbar con un hilo hasta cada nodo que lee el valor: al cambiarlo, el aviso viaja
-solo por esos hilos. Con un `let`, alguien barre el árbol entero como en casa, y la nave se preocupa.
+"Signal Space" y la ley 6 (`arbol-de-signal-space.ts`), en una sola pieza como las cinco del manual:
+la nave es el escenario, su pantalla tiene el árbol y cuántos nodos se revisaron, y una caja ámbar
+tiene un hilo hasta cada nodo que lee el valor. En la consola, el código que lo cambia, con la
+declaración como hueco: con `let total = 0;`, alguien barre el árbol entero como en casa y la nave
+se preocupa; con `const total = signal(0);`, el aviso viaja solo por los dos hilos.
 "Seguir" cierra la hoja y Angie dice "Guarden esa pregunta. Los acompaña todo el viaje."
 (`leccion-guarden`). Esas líneas reemplazan a la cinemática del capítulo 0, que se retiró con la
 Introducción (ADR 0006). La bitácora abre el árbol suelto, como el manual.
@@ -283,15 +285,15 @@ pisó. Angie ya no mira el sol con melancolía. "Este mundo también es casa." (
 | La tormenta             | 10/1 Debounce con RxJS · 10/2 Debounce a mano (effect + onCleanup) · 10/3 debounced() nativo                                                                                                       |
 | Quien lee, avisa        | 11/1 Change detection sin Zone.js                                                                                                                                                                  |
 
-Son 6 + 15 + 13 + 6 = 40. Las cinco leyes del manual llevan el desafío adentro de su página, sobre
-el mismo código que la demo; los otros 35 son de perilla (`*-systems.ts`). Los desafíos que quizá
+Son 6 + 15 + 13 + 6 = 40. Las cinco leyes del manual y la de Signal Space llevan el desafío adentro
+de su página, sobre el mismo código que la demo; los otros 34 son de perilla (`*-systems.ts`). Los desafíos que quizá
 conviene mover o juntar están en [pendientes](./pendientes.md).
 
 ## Lo que se reusa y lo que se rehace
 
 | Se reusa                                                                      | Por qué                                                                  |
 | ----------------------------------------------------------------------------- | ------------------------------------------------------------------------ |
-| `libs/manipulable-challenge.ts`, los 12 `*-systems.ts` y su barrido de los 35 | Son la lógica de cada desafío, ya probada como función pura              |
+| `libs/manipulable-challenge.ts`, los 11 `*-systems.ts` y su barrido de los 34 | Son la lógica de cada desafío, ya probada como función pura              |
 | `libs/cd-tree.ts`                                                             | El árbol de las páginas 5 y 6 y de Quien lee, avisa                      |
 | `libs/partida.ts`                                                             | El guardado, con una versión nueva                                       |
 | `libs/sonido.ts`, `libs/resorte.ts`, `libs/muelle.ts`, `libs/rastros.ts`      | El sonido, los resortes, el reloj de muelles y los rastros de los toques |

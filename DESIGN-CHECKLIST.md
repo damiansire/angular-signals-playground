@@ -923,14 +923,14 @@ Del minijuego de operadores (2026-11-08):
       prólogo: suelto, el motor no está, y sin `preventDefault` ↓ movía la molécula de atrás.
 - [ ] La hoja es una columna flex con el cuerpo estirado: en una página corta el pie flotaba a
       mitad de la hoja, con media hoja vacía debajo.
-- [ ] Cada página lee igual: la ley suelta sobre el cielo, y en papel "1 · qué hacer" con la demo,
-      la escena de la nave y "2 · el desafío" (`app-pagina-del-manual`, en
-      `signals/level-0-introduction/manual/`). Antes el código quedaba chico arriba a la izquierda
-      con un hueco al lado, "Leer el HTML" flotaba sin contexto, el desafío quedaba abajo de una
-      raya y la mitad de abajo de la hoja, vacía. A 1100 px o más: dos columnas (leer | la nave y
-      el desafío); entre 700 y 1099, la escena al lado del título y la demo y el desafío a lo ancho;
-      por debajo, una sola columna.
-- [ ] La página integrada (`[integrada]`, las cinco leyes) es UNA pieza: la escena de la nave es
+- [ ] Cada página lee igual (`app-pagina-del-manual`, en `signals/level-0-introduction/manual/`):
+      la ley suelta sobre el cielo, la nave como escenario y su consola abajo. Antes el código
+      quedaba chico arriba a la izquierda con un hueco al lado, "Leer el HTML" flotaba sin contexto,
+      el desafío quedaba abajo de una raya y la mitad de abajo de la hoja, vacía.
+- [ ] La página del manual es UNA pieza, siempre (las seis leyes, la 6 en Signal Space): ya no hay
+      forma de tres tarjetas ni input `integrada`, y con ella se fueron `[demo]`, `[desafio]`,
+      `.pm-mesa` y el marco de papel de la escena. Anti-patrón: volver a traer una demo o un
+      desafío de perilla al lado de la escena. La escena de la nave es
       el escenario y su pantalla muestra los números, una sola vez; abajo, la consola de la nave, en
       la paleta de su pantalla (vidrio `#1c1434`, borde `#5b4a96`, texto `#f2ecff`). Antes, la demo
       en papel repetía los números del panel y el desafío usaba otro código (`badge`, `total`): tres
@@ -999,6 +999,20 @@ Del minijuego de operadores (2026-11-08):
       1440×900, 1366×768, 1280×640 y suelto a 390×844: la ventanilla cede el renglón que suma el
       arreglo. Antes el desafío era "parsear" un `<div>` adentro de un `<p>`, con otro código: no se
       entendía.
+- [ ] La ley 6 en el escenario (Signal Space): la pantalla de la nave es el árbol de la ley 5 y,
+      arriba, la lectura "revisados N/7"; la caja ámbar del valor tiene un hilo hasta cada `<p>`
+      que lo lee. El hueco es la declaración (`let total = 0;` ↔ `const total = signal(0);`) y la
+      escritura la sigue (`total++;` ↔ `total.update((t) => t + 1);`): con `let` se barre el árbol
+      entero, los siete quedan en rosa y la lectura en rojo; con el signal el aviso corre solo por
+      los dos hilos, se encienden los dos `<p>` en verde y el resto se apaga. La lectura va ARRIBA
+      del árbol: abajo la cruzaban los hilos, que entran a los nodos desde abajo. Antes la demo en
+      papel tenía su propio árbol de pastillas con "count.set(1)" y "Reiniciar", y el desafío era
+      un sistema de perilla aparte (`SIGNAL_NOTIFY_SYSTEM`): tres tarjetas que a 390 scrolleaban.
+      A 390 la consola es corta y la ventanilla queda más alta que ancha (412 px): con el cielo de
+      340 `cieloAngosto` se rendía y el recorte le comía a la pantalla el último `<p>` y la cuenta.
+      La lámina pinta un cielo de 520 y encuadra con ese alto. Medido con input real en la historia
+      a 1440×900 y suelto a 1440×900 (con movimiento reducido), 1280×640 y 390×844: entra sin
+      scroll, "Mostrame" la resuelve, y "Seguir" vuelve a "Guarden esa pregunta.".
 - [ ] La ley va a la izquierda también entre 700 y 1099: la regla de la grilla la centraba.
 - [ ] Integrada, medido con input real a 1920×1080, 1440×900, 1366×768 (entra sin scroll),
       1280×640 (consola al costado) y 1024×700, y a 600×800: sin desborde horizontal, sin choques
@@ -1081,8 +1095,6 @@ Del minijuego de operadores (2026-11-08):
       mano mide lo que el guante, porque adentro de una caja de 0 el guante también medía 0.
 - [ ] "Mostrame" y los botones del pie le ganan a la pastilla oscura global de los botones de las
       pantallas (especificidad 0,4,1): con `.pm .pm-paso .pm-mostrar` y los selectores del libro.
-- [ ] En la forma de tres tarjetas (hoy solo el árbol de Signal Space) la demo va centrada en el
-      alto: estirada, dejaba media mesa de papel vacía. `llena` se fue con la ley 1 vieja.
 - [ ] El árbol va `position: absolute` en su recuadro: con su alto natural en el flujo, el mínimo de
       la grilla crecía y la hoja desbordaba 12 px a 1366×768.
 - [ ] El nodo aparece con el toque, no al final: el árbol es SVG armado por Angular. Con ECharts
@@ -1106,8 +1118,9 @@ Del minijuego de operadores (2026-11-08):
       "Seguir". Retomar desde `leccion-guarden` no la vuelve a abrir.
 - [ ] La hoja dice "Signal Space" y la ley 6 (sigue a las cinco del manual), no "Manual de a
       bordo". Con una sola página no hay marcas, ni "1 de 1", ni "← Anterior".
-- [ ] La lámina reacciona a la demo: el aviso viaja solo por los hilos de los dos nodos que leen;
-      con el desafío roto (`let`), el árbol entero se pinta, como en casa, y la nave se preocupa.
+- [ ] La lámina reacciona a la corrida: con el signal, el aviso viaja solo por los hilos de los dos
+      nodos que leen; con `let`, el árbol entero se pinta, como en casa, y la nave se preocupa. Es
+      la ley 6 en una sola pieza, como las cinco del manual (ver "La ley 6 en el escenario").
 - [ ] Un desafío resuelto en una hoja del prólogo no se anota en la molécula: el motor solo cuenta
       el `sistema-establecido` que sale de una card. Antes caía en el concepto que hubiera en
       pantalla, y Signal Space marcaba Signals 1/1.
