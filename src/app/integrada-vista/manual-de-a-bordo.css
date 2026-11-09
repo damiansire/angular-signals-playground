@@ -283,6 +283,37 @@
     rgb(14 8 30 / 40%)
   );
 }
+/* En el prólogo la cabecera del libro va en la fila de la barra, entre los íconos de la izquierda y
+   el de la derecha: una sola franja arriba, y la página gana el alto que ocupaba la segunda. La hoja
+   llega hasta arriba a lo ancho, y la barra queda por encima para seguir a mano. */
+.prologo--manual .prologo__hud {
+  z-index: 6;
+}
+.prologo--manual .prologo__manual {
+  inset-block-start: 1rem;
+  width: 100%;
+  padding-inline: 0;
+}
+.prologo--manual .prologo__manual-cabeza {
+  min-height: 44px;
+  margin-bottom: 0.25rem;
+  /* El borde de la barra (1rem), tres íconos de 44 px con su espacio, y aire; a la derecha, uno. */
+  padding-inline: calc(2rem + 3 * 44px + 0.9rem) calc(2rem + 44px);
+}
+/* Angosto no entran la barra, el nombre del libro, las marcas y "Cerrar" en una fila: el nombre se
+   va, y las marcas con "1 de 5" ya dicen dónde se está. */
+@media (max-width: 760px) {
+  .prologo--manual .prologo__manual-libro {
+    display: none;
+  }
+}
+.prologo--manual .prologo__manual-cuerpo,
+.prologo--manual .prologo__manual-pie {
+  box-sizing: border-box;
+  width: min(112rem, calc(100% - 3rem));
+  margin-inline: auto;
+  padding-inline: clamp(1rem, 2.4vw, 2.2rem);
+}
 /* La página se estira hasta el pie: cada eslabón entre la hoja y ella crece con el alto que queda. */
 .prologo__manual--libro .prologo__manual-cuerpo,
 .prologo__manual--libro .subhost,

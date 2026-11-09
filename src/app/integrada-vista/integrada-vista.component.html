@@ -673,24 +673,74 @@
             <ng-container *ngTemplateOutlet="hojaDelManualTpl; context: { $implicit: p }" />
           }
           <p class="prologo__titulo" aria-hidden="true">Angular Signals</p>
+          <!-- Íconos y no palabras: la barra es del juego, no un menú. El nombre de cada uno va en
+               `aria-label` y `title`, que el prólogo reescribe con el estado; el ícono lo elige
+               `aria-pressed`. -->
           <div class="prologo__hud prologo__hud--controles">
-            <button class="prologo__pause" type="button" aria-pressed="false">Pausa</button>
-            <button class="prologo__sound" type="button" aria-pressed="true">Sonido: sí</button>
-            <button class="prologo__speed" type="button">Velocidad ×1</button>
-            <button class="prologo__full" type="button" aria-pressed="false">
-              Pantalla completa
+            <button
+              class="prologo__pause prologo__icono"
+              type="button"
+              aria-pressed="false"
+              aria-label="Pausa"
+              title="Pausa"
+            >
+              <svg class="ico ico--suelto" viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M8 5v14M16 5v14" />
+              </svg>
+              <svg class="ico ico--apretado" viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M7 4.5v15l12-7.5z" />
+              </svg>
+            </button>
+            <button
+              class="prologo__sound prologo__icono"
+              type="button"
+              aria-pressed="true"
+              aria-label="Sonido: sí"
+              title="Sonido: sí"
+            >
+              <svg class="ico ico--apretado" viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z" />
+                <path d="M15.5 9a4 4 0 0 1 0 6M18.5 6.5a7.5 7.5 0 0 1 0 11" />
+              </svg>
+              <svg class="ico ico--suelto" viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z" />
+                <path d="M16 9.5l5 5M21 9.5l-5 5" />
+              </svg>
+            </button>
+            <button
+              class="prologo__full prologo__icono"
+              type="button"
+              aria-pressed="false"
+              aria-label="Pantalla completa"
+              title="Pantalla completa"
+            >
+              <svg class="ico ico--suelto" viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5" />
+              </svg>
+              <svg class="ico ico--apretado" viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M9 4v5H4M20 9h-5V4M15 20v-5h5M4 15h5v5" />
+              </svg>
             </button>
           </div>
           <div class="prologo__hud prologo__hud--salida">
+            <!-- Borrar todo pide confirmación con palabras: un ícono solo no alcanza para avisar. -->
             <button
               class="prologo__reinicio"
               type="button"
+              [class.prologo__icono]="!confirmandoBorrado()"
               [class.prologo__reinicio--confirmar]="confirmandoBorrado()"
+              [attr.aria-label]="confirmandoBorrado() ? null : 'Empezar de cero'"
+              [attr.title]="confirmandoBorrado() ? null : 'Empezar de cero'"
               (click)="pedirEmpezarDeCero()"
             >
-              {{ confirmandoBorrado() ? '¿Seguro? Se borra todo' : 'Empezar de cero' }}
+              @if (confirmandoBorrado()) {
+                ¿Seguro? Se borra todo
+              } @else {
+                <svg class="ico" viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M4.5 12a7.5 7.5 0 1 0 2.2-5.3M4.5 4.5v4h4" />
+                </svg>
+              }
             </button>
-            <button class="prologo__skip" type="button">Saltar intro &rarr;</button>
           </div>
         </div>
       </div>

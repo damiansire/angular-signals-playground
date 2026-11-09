@@ -484,6 +484,12 @@ const ANIMOS = {
 } as const satisfies Record<string, Animo>;
 type NombreAnimo = keyof typeof ANIMOS;
 
+/** Los botones de la barra son íconos: su nombre (y el globito al apuntarlos) cambia con el estado. */
+function nombrar(boton: HTMLButtonElement, nombre: string): void {
+  boton.setAttribute('aria-label', nombre);
+  boton.title = nombre;
+}
+
 export function initPrologoAnomalia(host: HTMLElement, opts: PrologoOpciones): () => void {
   const contenedor = host.querySelector<HTMLElement>('.prologo');
   const lienzo = contenedor?.querySelector<SVGSVGElement>('.prologo__escena');
@@ -492,7 +498,7 @@ export function initPrologoAnomalia(host: HTMLElement, opts: PrologoOpciones): (
   const suena = contenedor?.querySelector<HTMLButtonElement>('.prologo__sound');
   const pantalla = contenedor?.querySelector<HTMLButtonElement>('.prologo__full');
   const veloz = contenedor?.querySelector<HTMLButtonElement>('.prologo__speed');
-  if (!contenedor || !lienzo || !saltar || !pausa || !suena || !pantalla || !veloz) {
+  if (!contenedor || !lienzo || !pausa || !suena || !pantalla) {
     // Sin prólogo hay que seguir igual: `alTerminar` es el empalme que arranca la construcción de
     // Tusi. Devolver un no-op sin llamarlo dejaba la landing congelada para siempre.
     opts.alTerminar();
@@ -504,9 +510,11 @@ export function initPrologoAnomalia(host: HTMLElement, opts: PrologoOpciones): (
   const btnPausa = pausa;
   const btnSonido = suena;
   const btnPantalla = pantalla;
+  // Opcionales: sin ellos el prólogo corre igual, solo sin decir esa parte. La barra del juego ya
+  // no ofrece saltar ni cambiar la velocidad (el prólogo es el comienzo de la historia, no una
+  // intro); los conservan los tests, que necesitan terminar y acelerar.
   const btnVelocidad = veloz;
   const skipEl = saltar;
-  // Opcionales: sin ellos el prólogo corre igual, solo sin decir esa parte.
   const mascotaEl = raiz.querySelector<HTMLElement>('.prologo__mascot');
   const globos = [...raiz.querySelectorAll<HTMLElement>('.prologo__globo')];
   const vozEl = raiz.querySelector<HTMLElement>('.prologo__voz');
@@ -2139,7 +2147,7 @@ export function initPrologoAnomalia(host: HTMLElement, opts: PrologoOpciones): (
 
   function despausar(): void {
     pausado = false;
-    btnPausa.textContent = 'Pausa';
+    nombrar(btnPausa, 'Pausa');
     btnPausa.setAttribute('aria-pressed', 'false');
   }
 
@@ -2153,7 +2161,7 @@ export function initPrologoAnomalia(host: HTMLElement, opts: PrologoOpciones): (
       return;
     }
     pausado = true;
-    btnPausa.textContent = 'Continuar';
+    nombrar(btnPausa, 'Continuar');
     btnPausa.setAttribute('aria-pressed', 'true');
     cancelAnimationFrame(raf);
     // En pausa Angie tampoco se mueve sola: la escena entera se congela.
@@ -2224,7 +2232,7 @@ export function initPrologoAnomalia(host: HTMLElement, opts: PrologoOpciones): (
   const alSaltar = (): void => terminar();
   const alPausar = (): void => alternarPausa();
   const pintarVelocidad = (): void => {
-    btnVelocidad.textContent = `Velocidad ×${velocidad}`;
+    if (btnVelocidad) btnVelocidad.textContent = `Velocidad ×${velocidad}`;
   };
   const alCambiarVelocidad = (): void => {
     velocidad = VELOCIDADES[(VELOCIDADES.indexOf(velocidad) + 1) % VELOCIDADES.length];
@@ -2235,7 +2243,7 @@ export function initPrologoAnomalia(host: HTMLElement, opts: PrologoOpciones): (
 
   const pintarPantalla = (): void => {
     const activa = document.fullscreenElement === raiz;
-    btnPantalla.textContent = activa ? 'Salir de pantalla completa' : 'Pantalla completa';
+    nombrar(btnPantalla, activa ? 'Salir de pantalla completa' : 'Pantalla completa');
     btnPantalla.setAttribute('aria-pressed', String(activa));
   };
   /** Rechazar la pantalla completa (iframe, política) no es motivo para romper la reproducción. */
@@ -2250,7 +2258,7 @@ export function initPrologoAnomalia(host: HTMLElement, opts: PrologoOpciones): (
    */
   const pintarSonido = (): void => {
     const activo = sonido().activo();
-    btnSonido.textContent = activo ? 'Sonido: sí' : 'Sonido: no';
+    nombrar(btnSonido, activo ? 'Sonido: sí' : 'Sonido: no');
     btnSonido.setAttribute('aria-pressed', String(activo));
   };
   const alCambiarSonido = (): void => {
@@ -2259,11 +2267,11 @@ export function initPrologoAnomalia(host: HTMLElement, opts: PrologoOpciones): (
   };
   const dejarDeOirSonido = sonido().alCambiar(pintarSonido);
 
-  skipEl.addEventListener('click', alSaltar);
+  skipEl?.addEventListener('click', alSaltar);
   btnPausa.addEventListener('click', alPausar);
   btnSonido.addEventListener('click', alCambiarSonido);
   btnPantalla.addEventListener('click', alCambiarPantalla);
-  btnVelocidad.addEventListener('click', alCambiarVelocidad);
+  btnVelocidad?.addEventListener('click', alCambiarVelocidad);
   svg.addEventListener('pointerdown', alTocar);
   document.addEventListener('fullscreenchange', pintarPantalla);
   document.addEventListener('keydown', alTeclado);
@@ -2292,11 +2300,11 @@ export function initPrologoAnomalia(host: HTMLElement, opts: PrologoOpciones): (
     soltarAudio();
     dejarDeOirSonido();
     observador?.disconnect();
-    skipEl.removeEventListener('click', alSaltar);
+    skipEl?.removeEventListener('click', alSaltar);
     btnPausa.removeEventListener('click', alPausar);
     btnSonido.removeEventListener('click', alCambiarSonido);
     btnPantalla.removeEventListener('click', alCambiarPantalla);
-    btnVelocidad.removeEventListener('click', alCambiarVelocidad);
+    btnVelocidad?.removeEventListener('click', alCambiarVelocidad);
     svg.removeEventListener('pointerdown', alTocar);
     document.removeEventListener('fullscreenchange', pintarPantalla);
     if (document.fullscreenElement === raiz) void document.exitFullscreen().catch(() => undefined);

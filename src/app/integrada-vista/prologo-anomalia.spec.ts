@@ -168,9 +168,9 @@ describe('initPrologoAnomalia', () => {
 
       // Como si lo hubiera silenciado el toggle del intro.
       sonido().alternar(false);
-      expect(p.sonido.textContent).toBe('Sonido: no');
+      expect(p.sonido.getAttribute('aria-label')).toBe('Sonido: no');
       sonido().alternar(true);
-      expect(p.sonido.textContent).toBe('Sonido: sí');
+      expect(p.sonido.getAttribute('aria-label')).toBe('Sonido: sí');
     });
 
     it('cerrado, deja de escuchar la preferencia', () => {
@@ -180,7 +180,7 @@ describe('initPrologoAnomalia', () => {
 
       sonido().alternar(false);
 
-      expect(p.sonido.textContent).toBe('Sonido: sí');
+      expect(p.sonido.getAttribute('aria-label')).toBe('Sonido: sí');
     });
   });
 

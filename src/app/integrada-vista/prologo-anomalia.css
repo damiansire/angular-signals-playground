@@ -20,7 +20,6 @@
   --hud-fondo: rgb(20 10 30 / 45%);
   --hud-borde: rgb(255 255 255 / 28%);
   --hud-borde-vivo: rgb(255 255 255 / 60%);
-  --hud-skip: #f0b458;
   --hud-skip-vivo: #ffd9a3;
   --hud-skip-borde: rgb(235 155 60 / 55%);
   --hud-opacidad: 1;
@@ -224,7 +223,6 @@
   --hud-fondo: rgb(255 255 255 / 55%);
   --hud-borde: rgb(32 29 22 / 24%);
   --hud-borde-vivo: #b8791f;
-  --hud-skip: #96601a;
   --hud-skip-vivo: #5c3a08;
   --hud-skip-borde: rgb(184 121 31 / 55%);
 }
@@ -280,16 +278,27 @@
   outline-offset: 2px;
 }
 
-/* Sin `!important`: con él ganaba también sobre su propio `:hover`. */
-.prologo__hud .prologo__skip {
-  border-color: var(--hud-skip-borde);
-  color: var(--hud-skip);
-  font-size: 0.8rem;
+/* Un botón-ícono es un círculo de 44 px: el mismo blanco cómodo, sin la palabra. */
+.prologo__hud .prologo__icono {
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  display: grid;
+  place-items: center;
 }
-
-/* Al apuntarlo NO se despinta a blanco: el ámbar es su identidad. */
-.prologo__hud .prologo__skip:hover:not(:disabled) {
-  color: var(--hud-skip-vivo);
+.prologo__hud .ico {
+  width: 20px;
+  height: 20px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+/* Los dos íconos de un interruptor viven juntos y `aria-pressed` elige cuál se ve. */
+.prologo__hud [aria-pressed='true'] .ico--suelto,
+.prologo__hud [aria-pressed='false'] .ico--apretado {
+  display: none;
 }
 
 .prologo__hud .prologo__reinicio--confirmar {
