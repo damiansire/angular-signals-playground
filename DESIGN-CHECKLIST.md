@@ -574,7 +574,10 @@ entrar desarma a Angie en luz y se hace noche, la costura con el prólogo.
       ella (la caminata se sacó; `sentarse(deUna)` asienta los muelles sin animar la bajada, así no
       se ve que recién llega). Sentada es de frente (`mv--pensativa`), mirando al sol
       (`MIRA_AL_SOL`), con los brazos al costado y las piernas colgando del borde, balanceándose a
-      destiempo. NADA de mano en el mentón: le tapaba la cara (se sacó `mv__menton`). Lo que la
+      destiempo. La cara es MELANCÓLICA (2026-11-09): párpados apenas caídos y la boca casi recta,
+      con las puntas un poco caídas (`mv__boca-pena`); nada de sonrisa (la boca chica curvada hacia
+      arriba se leía contenta) ni de "o" (preocupada). Sonríe recién con "La hora ha llegado".
+      NADA de mano en el mentón: le tapaba la cara (se sacó `mv__menton`). Lo que la
       arruinaría: sentada flotando o parada delante de la piedra (la piedra es paisaje,
       `.ini__piedra`, con la misma caja que Angie y en el centro, con la inclinación que tiene ella
       sentada, debajo del atardecer para que se tiña con la colina; el cuerpo queda casi a altura
@@ -952,7 +955,9 @@ Del minijuego de operadores (2026-11-08):
       adentro de la ventanilla, y "Mostrame" hasta los dos pasos hechos.
 - [ ] La escena REACCIONA a la demo, no la ilustra: el árbol se arma con cada tag tocado, el paquete
       viaja al instrumento que nombra la línea, el paisaje va a los tirones con el cambio caro, el
-      lápiz se saltea el lugar que el handler olvida, el barrido de Zone.js no ve lo que pasa por
+      lápiz se saltea el lugar que el handler olvida (en el panel de la ley 4, el lugar viejo va en
+      rojo con "!", un "Sí" al día en verde y el resto neutro: un múltiplo que se cumple se ve sin
+      leer), el barrido de Zone.js no ve lo que pasa por
       afuera de la cerca. Y el desafío resuelto hace saltar a la nave.
 - [ ] La página sabe su número, su ley y lo que dice la nave por un token (`PAGINA_DEL_MANUAL`) que
       la vista pasa al montarla: la misma pantalla en la molécula no lo recibe y no muestra la
