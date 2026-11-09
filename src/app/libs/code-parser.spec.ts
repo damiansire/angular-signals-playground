@@ -6,6 +6,7 @@ import {
   generateLinks,
   generateNodes,
   isNodeId,
+  duenosDeTokens,
   walkTags,
 } from './code-parser'; // Ajusta la ruta si es necesario
 
@@ -505,61 +506,89 @@ describe('generateNodes', () => {
     expect(nodes.map((n) => n.id)).toEqual(['div-1', 'p-1']);
   });
 
-  it('keeps a single sibling centered (x = 0)', () => {
-    const nodes = generateNodes('<div><p></p></div>');
-    const p = nodes.find((n) => n.id === 'p-1');
-    expect(p?.x).toBe(0);
-  });
-
-  it('spreads two siblings on the same level to opposite sides', () => {
-    const nodes = generateNodes('<div><p></p><span></span></div>');
-    const xs = nodes
-      .filter((n) => n.level === 2)
-      .map((n) => n.x)
-      .sort((a, b) => a - b);
-    expect(xs).toEqual([-100, 100]);
-  });
-
-  it('spreads three siblings symmetrically around the center', () => {
-    const nodes = generateNodes('<ul><li></li><li></li><li></li></ul>');
-    const xs = nodes
-      .filter((n) => n.level === 2)
-      .map((n) => n.x)
-      .sort((a, b) => a - b);
-    // 3 hermanos: el del medio centrado, los otros a ±spacing
-    expect(xs).toEqual([-200, 0, 200]);
-  });
-
-  it('spreads five siblings symmetrically without overlapping at x = 0', () => {
-    const nodes = generateNodes('<ul><li></li><li></li><li></li><li></li><li></li></ul>');
-    const xs = nodes
-      .filter((n) => n.level === 2)
-      .map((n) => n.x)
-      .sort((a, b) => a - b);
-    expect(xs).toEqual([-400, -200, 0, 200, 400]);
-    // ninguna posición se repite (no se apilan en x = 0)
-    expect(new Set(xs).size).toBe(5);
-  });
-
-  it('assigns y growing with the nesting depth', () => {
-    const nodes = generateNodes('<div><p></p></div>');
-    const div = nodes.find((n) => n.id === 'div-1')!;
-    const p = nodes.find((n) => n.id === 'p-1')!;
-    expect(p.y).toBeGreaterThan(div.y);
-  });
-
-  it('para HTML ramificado centra por NIVEL global, no agrupa por padre (limitacion documentada)', () => {
-    // <div><a/><b/></div><section><c/></section>
-    // Nivel 1: div, section. Nivel 2: a, b (hijos de div) y c (hijo de section).
-    // El layout reparte los 3 hijos del nivel 2 de forma global (sin agrupar bajo
-    // su padre), por eso 'c' no queda bajo 'section'. Este test fija ese tradeoff.
+  it('pone un nodo por fila en el orden del documento', () => {
     const nodes = generateNodes('<div><a></a><b></b></div><section><c></c></section>');
-    const level2 = nodes
-      .filter((n) => n.level === 2)
-      .sort((p, q) => p.x - q.x)
-      .map((n) => ({ id: n.id, x: n.x }));
-    // 3 nodos en el nivel 2, repartidos simetricamente alrededor de x = 0.
-    expect(level2.map((n) => n.x)).toEqual([-200, 0, 200]);
-    expect(level2.length).toBe(3);
+    expect(nodes.map((n) => [n.id, n.y])).toEqual([
+      ['div-1', 0],
+      ['a-1', 1],
+      ['b-1', 2],
+      ['section-1', 3],
+      ['c-1', 4],
+    ]);
+  });
+
+  it('usa la profundidad como columna, con la raíz en la cero', () => {
+    const nodes = generateNodes('<main><section><h2></h2></section><article></article></main>');
+    expect(nodes.map((n) => [n.id, n.x])).toEqual([
+      ['main-1', 0],
+      ['section-1', 1],
+      ['h2-1', 2],
+      ['article-1', 1],
+    ]);
+  });
+
+  it('cada hijo queda debajo de su padre y antes del hermano siguiente del padre', () => {
+    // Lo que garantiza que las aristas no se crucen: el subárbol de un nodo ocupa las filas
+    // contiguas que le siguen.
+    const nodes = generateNodes('<div><a></a><b></b></div><section><c></c></section>');
+    const fila = new Map(nodes.map((n) => [n.id, n.y]));
+    for (const { source, target } of generateLinks(
+      '<div><a></a><b></b></div><section><c></c></section>',
+    )) {
+      expect(fila.get(target)!).toBeGreaterThan(fila.get(source)!);
+    }
+    expect(fila.get('b-1')!).toBeLessThan(fila.get('section-1')!);
+  });
+});
+
+describe('duenosDeTokens', () => {
+  it('la apertura, el texto y el cierre de <h2> son del mismo nodo', () => {
+    expect(duenosDeTokens(['<h2>', 'Introduction', '</h2>'])).toEqual(['h2-1', 'h2-1', 'h2-1']);
+  });
+
+  it('un texto partido en dos renglones sigue siendo de su <p>', () => {
+    expect(
+      duenosDeTokens([
+        '<section>',
+        '<p>',
+        'This is a simple example',
+        'of a DOM tree',
+        '</p>',
+        '</section>',
+      ]),
+    ).toEqual(['section-1', 'p-1', 'p-1', 'p-1', 'p-1', 'section-1']);
+  });
+
+  it('el cierre de un contenedor es suyo, no del último hijo', () => {
+    expect(duenosDeTokens(['<main>', '<h3>', 'T', '</h3>', '<p>', '</p>', '</main>'])).toEqual([
+      'main-1',
+      'h3-1',
+      'h3-1',
+      'h3-1',
+      'p-1',
+      'p-1',
+      'main-1',
+    ]);
+  });
+
+  it('las void no se quedan con lo que sigue', () => {
+    expect(duenosDeTokens(['<p>', '<br>', 'texto', '</p>'])).toEqual(['p-1', 'br-1', 'p-1', 'p-1']);
+  });
+
+  it('texto suelto y cierres huérfanos no son de nadie', () => {
+    expect(duenosDeTokens(['hola', '</div>', '<p>', '</span>', '</p>'])).toEqual([
+      null,
+      null,
+      'p-1',
+      null,
+      'p-1',
+    ]);
+  });
+
+  it('los ids coinciden con los nodos que dibuja el árbol', () => {
+    const html = '<main><section><h2>Hi</h2></section><article><p>x</p></article></main>';
+    const nodos = new Set(generateNodes(html).map((n) => n.id));
+    const duenos = duenosDeTokens(spliteInTags(html)).filter((d): d is string => d !== null);
+    expect(new Set(duenos)).toEqual(nodos);
   });
 });

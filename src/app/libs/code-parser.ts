@@ -179,44 +179,47 @@ export function generateLinks(htmlCode: string): Link[] {
     .map((tag) => ({ source: tag.parentId as string, target: tag.id }));
 }
 
+/**
+ * Un nodo por fila, en el orden en que el parser lee el HTML, y la profundidad como columna: el
+ * árbol del inspector del navegador. Así cada tag del código y su nodo quedan en el mismo orden
+ * vertical y los conectores entre los dos no se cruzan nunca. El árbol de arriba hacia abajo que
+ * había antes repartía cada nivel por separado: con HTML ramificado los hermanos quedaban lejos de
+ * su padre y los conectores al código se enredaban.
+ */
 export function generateNodes(htmlCode: string): NodeTree[] {
-  const y = 100;
-  const yOffset = 100;
-  const elementForLevel: number[] = [];
-
-  const nodes: NodeTree[] = walkTags(htmlCode)
+  return walkTags(htmlCode)
     .filter((tag) => tag.opensNode)
-    .map((tag) => ({
+    .map((tag, fila) => ({
       name: tag.id,
-      x: 0,
-      y: y + tag.level * yOffset,
+      x: tag.level - 1,
+      y: fila,
       id: tag.id,
       level: tag.level,
     }));
+}
 
-  for (const node of nodes) {
-    elementForLevel[node.level] = (elementForLevel[node.level] ?? 0) + 1;
-  }
+/**
+ * De qué nodo es cada token, en el orden en que llegan: la apertura es de su propio nodo, el texto
+ * es del elemento que lo contiene y el cierre, del elemento que cierra. `<h2> Introduction </h2>`
+ * es UN nodo con su texto adentro, así que tocarlo marca los tres tokens y no solo la apertura.
+ * `null` para lo que no pertenece a ningún elemento (texto suelto, cierres huérfanos).
+ *
+ * Recibe los tokens ya cortados porque quien los muestra los corta por renglón, y los ids de texto
+ * dependen de ese corte; los ids de tags salen del mismo generador que usa `walkTags`.
+ */
+export function duenosDeTokens(tokens: string[]): (string | null)[] {
+  const ids = new HtmlIdGeneratorService();
+  const abiertos: { element: string; id: string }[] = [];
 
-  // Posicionamiento horizontal general: cada nivel se centra en x = 0 y sus
-  // hermanos se reparten de forma simétrica con un espaciado fijo. Funciona
-  // para cualquier cantidad de hermanos (1, 2, 3, 5, 6+), no solo 1/2/4.
-  //
-  // LIMITACIÓN (tradeoff conocido): el layout centra cada NIVEL globalmente,
-  // sin agrupar por padre. Para HTML ramificado (p.ej. <div><a/><b/></div>
-  // <section><c/></section>) un hijo puede no quedar justo debajo de su padre y
-  // las aristas se cruzan. Un Reingold–Tilford completo sería sobre-ingeniería
-  // para este demo; se documenta a propósito en vez de implicar que el caso
-  // general está cubierto.
-  const spacing = 200;
-  const elementLevelIndex: number[] = [];
-  for (const node of nodes) {
-    elementLevelIndex[node.level] = (elementLevelIndex[node.level] ?? 0) + 1;
+  return tokens.map((token) => {
+    const id = ids.generateId(token);
+    if (!isTag(token)) return abiertos.at(-1)?.id ?? null;
 
-    const indexInLevel = elementLevelIndex[node.level] - 1; // 0-based
-    const countInLevel = elementForLevel[node.level];
-    node.x = (indexInLevel - (countInLevel - 1) / 2) * spacing;
-  }
-
-  return nodes;
+    const { element, isClosingTag } = HtmlHelper.getElementType(token);
+    if (isClosingTag) {
+      return abiertos.at(-1)?.element === element ? (abiertos.pop()?.id ?? null) : null;
+    }
+    if (!closesItself(element, token)) abiertos.push({ element, id });
+    return id;
+  });
 }
