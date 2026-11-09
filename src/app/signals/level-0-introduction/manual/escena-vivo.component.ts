@@ -56,7 +56,7 @@ const anchoDeFicha = (texto: string): number => texto.length * 7.3 + 14;
 @Component({
   selector: 'app-escena-vivo',
   template: `<svg
-    class="esc esc--escenario"
+    class="esc"
     [attr.viewBox]="cielo"
     preserveAspectRatio="xMidYMid slice"
     role="img"

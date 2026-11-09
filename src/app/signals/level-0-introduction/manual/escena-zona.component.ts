@@ -42,7 +42,7 @@ interface Lectura {
 @Component({
   selector: 'app-escena-zona',
   template: `<svg
-    class="esc esc--escenario"
+    class="esc"
     [attr.viewBox]="cielo"
     preserveAspectRatio="xMidYMid slice"
     role="img"

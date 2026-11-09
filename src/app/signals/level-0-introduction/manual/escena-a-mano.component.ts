@@ -37,7 +37,7 @@ const REPOSO = { x: 360, y: 236 };
 @Component({
   selector: 'app-escena-a-mano',
   template: `<svg
-    class="esc esc--escenario"
+    class="esc"
     [attr.viewBox]="cielo"
     preserveAspectRatio="xMidYMid slice"
     role="img"
