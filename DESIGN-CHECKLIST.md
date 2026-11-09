@@ -923,7 +923,7 @@ Del minijuego de operadores (2026-11-08):
       raya y la mitad de abajo de la hoja, vacía. A 1100 px o más: dos columnas (leer | la nave y
       el desafío); entre 700 y 1099, la escena al lado del título y la demo y el desafío a lo ancho;
       por debajo, una sola columna.
-- [ ] La página integrada (`[integrada]`, por ahora las leyes 2, 3, 4 y 5) es UNA pieza: la escena de la nave es
+- [ ] La página integrada (`[integrada]`, las cinco leyes) es UNA pieza: la escena de la nave es
       el escenario y su pantalla muestra los números, una sola vez; abajo, la consola de la nave, en
       la paleta de su pantalla (vidrio `#1c1434`, borde `#5b4a96`, texto `#f2ecff`). Antes, la demo
       en papel repetía los números del panel y el desafío usaba otro código (`badge`, `total`): tres
@@ -979,6 +979,19 @@ Del minijuego de operadores (2026-11-08):
       texto no se tocan (`getBoundingClientRect` entre todos los rótulos de la pantalla): con
       filas cada 34 unidades "capas caras" pisaba a layout y a paint, y "barato" quedaba pegado a
       "style"; la fila de DOM baja hasta despegarse del brillo del vidrio.
+- [ ] La ley 1 en el escenario: la consola dibuja el HTML a mano, sin `app-code` ni `app-tree` (el
+      árbol es la pantalla). Cada tag que abre es un botón dorado que revela su pieza; tocado, claro.
+      El bug es `<article></article>` cerrado enseguida, con `<h3>` y `<p>` sangrados adentro: al
+      revelarlos aparecen donde los pone la sangría y CAEN al fondo del marco, el panel queda en una
+      tira vacía, lo caído va rodeado en rojo y la nave se preocupa. Los lugares punteados de los
+      hijos van ENCIMA del marco de `<main>`: debajo, el marco los tapaba apenas aparecía y el panel
+      chico no mostraba lo que había perdido. El hueco `</article>` no se delata en el paso 1 (es un
+      cierre más); en el paso 2 va dorado y, movido, verde: el título y el párrafo suben a su panel y
+      recién ahí la nave festeja. El código no se envuelve (la sangría va en `ch`) y va a renglón
+      1.4: son 10 renglones arreglado, contra 3 de la ley 5. A pantalla entera entra sin scroll a
+      1440×900, 1366×768, 1280×640 y suelto a 390×844: la ventanilla cede el renglón que suma el
+      arreglo. Antes el desafío era "parsear" un `<div>` adentro de un `<p>`, con otro código: no se
+      entendía.
 - [ ] La ley va a la izquierda también entre 700 y 1099: la regla de la grilla la centraba.
 - [ ] Integrada, medido con input real a 1920×1080, 1440×900, 1366×768 (entra sin scroll),
       1280×640 (consola al costado) y 1024×700, y a 600×800: sin desborde horizontal, sin choques

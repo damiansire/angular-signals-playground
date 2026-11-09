@@ -104,14 +104,16 @@ fecha y adónde fue. Los ids (H1, J1…) sirven para nombrarlos en una sesión (
   de las páginas del manual (qué hacer, la demo, la escena de la nave y el desafío), una etapa por
   vez, como se hizo con la Introducción.
 - **T14. Las páginas del manual en una sola pieza.** Damian pidió que la demo, la escena de la nave
-  y el desafío no se lean como tres cosas sueltas. Las leyes 2, 3, 4 y 5 ya son una sola pieza
+  y el desafío no se lean como tres cosas sueltas. Las cinco leyes ya son una sola pieza
   (`app-pagina-del-manual` con `[integrada]`): la nave es el escenario y su pantalla muestra los
-  números (en la 3, el pipeline), una sola vez, y abajo va su consola con los dos pasos, probar y
-  arreglar, sobre el mismo código. Falta la 1, con su desafío reescrito sobre lo que muestra la
-  nave (el de la 1 no se entendía). Cuando pasen las cinco, se borran la forma en tres tarjetas y
-  sus cinco sistemas de `introduction-systems.ts` (`MANUAL_SYNC_SYSTEM`, `ZONE_PATCH_SYSTEM`,
-  `DOM_ALIVE_SYSTEM` y `DOM_PIXEL_SYSTEM` ya no los usa nadie), y el barrido y los docs pasan de 40
-  desafíos a 35.
+  números (en la 3, el pipeline; en la 1, el árbol), una sola vez, y abajo va su consola con los dos
+  pasos, probar y arreglar, sobre el mismo código. En la 1, el desafío de "parsear" pasó a un
+  `</article>` fuera de lugar: lo que la sangría pone adentro del panel cae afuera. Falta la
+  limpieza: borrar la forma en tres tarjetas y sus cinco sistemas de `introduction-systems.ts`
+  (`MANUAL_SYNC_SYSTEM`, `ZONE_PATCH_SYSTEM`, `DOM_ALIVE_SYSTEM`, `DOM_PIXEL_SYSTEM` y
+  `HTML_TREE_SYSTEM` ya no los usa nadie), y que el barrido y los docs pasen de 40 desafíos a 35. Con
+  la 1 quedaron sin uso `app-tree` (`components/tree/`) y `posicionesEnElDocumento`
+  (`manual/escenas.logica.ts`): van en la misma limpieza.
 - **T6. El gate de prosa.** `scripts/prose-budget.mjs` mide solo los `*.component.html` que están
   bajo `src/app/signals/**/sub-levels/`. Si las pantallas se mudan, mide cero y pasa sin avisar.
   Además, una pantalla movida o renombrada arranca sin crédito de línea base, con 8 palabras. La
