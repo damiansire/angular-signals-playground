@@ -2149,14 +2149,12 @@ export function initPrologoAnomalia(host: HTMLElement, opts: PrologoOpciones): (
   }
 
   const reducido = (): boolean => matchMedia('(prefers-reduced-motion: reduce)').matches;
-  /** Abajo de este ancho la cinemática no se puede seguir: se saltea, igual que sin movimiento. */
-  const angosto = (): boolean => innerWidth < 700;
 
   function arrancar(desde: number): void {
     cancelAnimationFrame(raf);
     // Va ANTES de destapar: destapar y terminar en el mismo turno dejaba el velo puesto sobre una
     // escena terminada, con los botones muertos y la app bloqueada.
-    if (reducido() || angosto() || terminado) {
+    if (reducido() || terminado) {
       terminar();
       return;
     }
