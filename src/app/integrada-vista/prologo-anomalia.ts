@@ -47,6 +47,7 @@ import {
   naveAdentro,
   opacidadDelRotulo,
   proyectiles,
+  saltoQuieto,
   sincronia,
   suave,
   temblor,
@@ -2050,6 +2051,18 @@ export function initPrologoAnomalia(host: HTMLElement, opts: PrologoOpciones): (
   const ESPERA_ARBOL = M.arbol - 150;
   let arbol: 'antes' | 'mirando' | 'despues' = opts.arbol ? 'antes' : 'despues';
 
+  /**
+   * Con movimiento reducido la cinemática no corre, pero lo que se juega en ella sí: terminarla
+   * salteaba el minijuego, el manual y el árbol, que son la Introducción. El reloj salta de parada
+   * en parada (`saltoQuieto`) con la escena quieta y, cerrada la última, el prólogo termina.
+   */
+  let quieto = false;
+  const paradasPendientes = (): number[] => [
+    ...(operadores === 'despues' ? [] : [ESPERA_OPERADORES]),
+    ...(manual === 'despues' ? [] : [ESPERA_MANUAL]),
+    ...(arbol === 'despues' ? [] : [ESPERA_ARBOL]),
+  ];
+
   function pedirArbol(): void {
     arbol = 'mirando';
     void opts.arbol?.(ARBOL_DE_SIGNAL_SPACE).then(() => {
@@ -2097,6 +2110,24 @@ export function initPrologoAnomalia(host: HTMLElement, opts: PrologoOpciones): (
     });
     rotulo.textContent = operador;
     const quitar = (): void => base.remove();
+    if (quieto) {
+      // El nombre aparece y se apaga al lado de la nave, sin viajar ni sacudir a nadie.
+      fijar(bala, { transform: 'translate(150 -6)' });
+      bala
+        .animate(
+          [
+            { opacity: 0 },
+            { opacity: 1, offset: 0.15 },
+            { opacity: 1, offset: 0.8 },
+            { opacity: 0 },
+          ],
+          {
+            duration: 1500,
+          },
+        )
+        .finished.then(quitar, quitar);
+      return;
+    }
     bala
       .animate(
         [
@@ -2121,7 +2152,9 @@ export function initPrologoAnomalia(host: HTMLElement, opts: PrologoOpciones): (
     // Tope de 80 ms: si la pestaña estuvo oculta, rAF vuelve con un salto enorme.
     const dt = anterior === null ? 0 : Math.min(80, ts - anterior);
     anterior = ts;
-    let t = Math.min(tAhora + dt * velocidad, T.fin);
+    let t = quieto
+      ? saltoQuieto(tAhora, paradasPendientes(), T.fin)
+      : Math.min(tAhora + dt * velocidad, T.fin);
     // Mientras se juega, la historia no avanza pero los muelles sí: las naves tiemblan y responden.
     if (operadores !== 'despues' && t >= ESPERA_OPERADORES) {
       t = ESPERA_OPERADORES;
@@ -2143,7 +2176,8 @@ export function initPrologoAnomalia(host: HTMLElement, opts: PrologoOpciones): (
       siguientePunto += 1;
       opts.alPasarPunto?.(punto.id);
     }
-    dibujar(tAhora, (dt * velocidad) / 1000);
+    // Quieto, los muelles no avanzan: una nave que toma la palabra no se sacude.
+    dibujar(tAhora, quieto ? 0 : (dt * velocidad) / 1000);
     if (tAhora < T.fin) raf = requestAnimationFrame((t) => frame(t, gen));
     else terminar();
   }
@@ -2154,7 +2188,8 @@ export function initPrologoAnomalia(host: HTMLElement, opts: PrologoOpciones): (
     cancelAnimationFrame(raf);
     // Va ANTES de destapar: destapar y terminar en el mismo turno dejaba el velo puesto sobre una
     // escena terminada, con los botones muertos y la app bloqueada.
-    if (reducido() || terminado) {
+    quieto = reducido();
+    if (terminado || (quieto && saltoQuieto(desde, paradasPendientes(), T.fin) === T.fin)) {
       terminar();
       return;
     }
@@ -2344,7 +2379,7 @@ export function initPrologoAnomalia(host: HTMLElement, opts: PrologoOpciones): (
   document.addEventListener('visibilitychange', alCambiarVisibilidad);
   const mqlReduce = matchMedia('(prefers-reduced-motion: reduce)');
   const alReducirMovimiento = (e: MediaQueryListEvent): void => {
-    if (e.matches) terminar();
+    quieto = e.matches;
   };
   mqlReduce.addEventListener('change', alReducirMovimiento);
   raiz.addEventListener('wheel', alDesplazar, { passive: false });

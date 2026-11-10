@@ -276,26 +276,76 @@ describe('initPrologoAnomalia', () => {
     });
   });
 
-  it('pedir menos movimiento a mitad de la cinemática la termina', () => {
-    let avisar: ((e: MediaQueryListEvent) => void) | undefined;
-    const real = window.matchMedia.bind(window);
-    spyOn(window, 'matchMedia').and.callFake((q: string) =>
-      q.includes('reduced-motion')
-        ? ({
-            matches: false,
-            media: q,
-            addEventListener: (_t: string, fn: (e: MediaQueryListEvent) => void) => (avisar = fn),
-            removeEventListener: () => undefined,
-          } as unknown as MediaQueryList)
-        : real(q),
-    );
-    const p = arrancar();
-    expect(p.veces()).withContext('arrancó corriendo').toBe(0);
+  describe('con movimiento reducido', () => {
+    /** La preferencia de movimiento, a mano: arranca como diga el test y avisa cuando cambia. */
+    function movimiento(reducido: boolean) {
+      let avisar: ((e: MediaQueryListEvent) => void) | undefined;
+      const real = window.matchMedia.bind(window);
+      spyOn(window, 'matchMedia').and.callFake((q: string) =>
+        q.includes('reduced-motion')
+          ? ({
+              matches: reducido,
+              media: q,
+              addEventListener: (_t: string, fn: (e: MediaQueryListEvent) => void) => (avisar = fn),
+              removeEventListener: () => undefined,
+            } as unknown as MediaQueryList)
+          : real(q),
+      );
+      return { reducir: () => avisar?.({ matches: true } as MediaQueryListEvent) };
+    }
 
-    avisar?.({ matches: true } as MediaQueryListEvent);
+    it('pedirlo a mitad de la cinemática, sin nada que jugar, la termina en el cuadro siguiente', () => {
+      const m = movimiento(false);
+      const cuadros = cuadrosFalsos();
+      const p = arrancar();
+      cuadros.avanzar(3);
+      expect(p.veces()).withContext('arrancó corriendo').toBe(0);
 
-    expect(p.veces()).toBe(1);
-    expect(p.raiz.hidden).toBeTrue();
+      m.reducir();
+      cuadros.avanzar(2);
+
+      expect(p.veces()).toBe(1);
+      expect(p.raiz.hidden).toBeTrue();
+    });
+
+    it('sin nada que jugar no se muestra: termina antes de destapar', () => {
+      movimiento(true);
+      const p = arrancar();
+      expect(p.veces()).toBe(1);
+      expect(p.raiz.hidden).toBeTrue();
+    });
+
+    it('la Introducción se juega igual: quieto, salta a la orden del capitán y espera', async () => {
+      movimiento(true);
+      const cuadros = cuadrosFalsos();
+      const host = hostCompleto();
+      hosts.push(host);
+      let terminado = 0;
+      let resolver: () => void = () => undefined;
+      const pedido = jasmine
+        .createSpy('operadores')
+        .and.callFake(() => new Promise<void>((ok) => (resolver = ok)));
+      cerrar.push(
+        initPrologoAnomalia(host, {
+          alTerminar: () => (terminado += 1),
+          operadores: pedido,
+        }),
+      );
+      const frase = (): string =>
+        [...host.querySelectorAll('.prologo__frase')].map((f) => f.textContent).join(' | ');
+
+      cuadros.avanzar(2);
+      expect(pedido).toHaveBeenCalledTimes(1);
+      expect(frase()).toContain('Activen todos los operadores');
+      cuadros.avanzar(300);
+      expect(terminado).withContext('espera el minijuego').toBe(0);
+
+      resolver();
+      await new Promise((ok) => setTimeout(ok));
+      cuadros.avanzar(2);
+      expect(terminado).toBe(1);
+      expect(pedido).toHaveBeenCalledTimes(1);
+    });
   });
 
   describe('pestaña oculta', () => {

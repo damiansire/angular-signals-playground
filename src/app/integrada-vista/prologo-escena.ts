@@ -30,6 +30,14 @@ export const clamp01 = (v: number): number => Math.max(0, Math.min(1, v));
  */
 export const letraConPiso = (unidades: number, pisoPx: number, k: number): number =>
   k > 0 ? Math.max(unidades, pisoPx / k) : unidades;
+
+/**
+ * Con movimiento reducido el reloj del prólogo no corre: salta a la próxima parada que falta jugar
+ * (el minijuego, el manual, el árbol) y, sin ninguna, al final. Una parada ya pasada no vuelve.
+ */
+export const saltoQuieto = (t: number, pendientes: readonly number[], fin: number): number =>
+  Math.min(fin, ...pendientes.filter((p) => p >= t));
+
 export const suave = (v: number): number => (v < 0.5 ? 2 * v * v : 1 - Math.pow(-2 * v + 2, 2) / 2);
 /** La entrada con rebote de la skill (`back.out`), para lo que tiene que caer con peso. */
 export const conRebote = (v: number, s = 1.9): number => {

@@ -20,6 +20,7 @@ import {
   naveAdentro,
   opacidadDelRotulo,
   proyectiles,
+  saltoQuieto,
   sincronia,
   zoom,
 } from './prologo-escena';
@@ -194,6 +195,19 @@ describe('prologo-escena', () => {
     it('la cámara se aleja hasta ver la figura entera', () => {
       expect(zoom(T.orden, T)).toBeGreaterThan(2);
       expect(zoom(T.fin, T)).toBeCloseTo(0.88, 5);
+    });
+  });
+
+  describe('con movimiento reducido', () => {
+    it('salta a la próxima parada que falta, en orden', () => {
+      expect(saltoQuieto(0, [500, 900], 2000)).toBe(500);
+      expect(saltoQuieto(500, [500, 900], 2000)).toBe(500);
+      expect(saltoQuieto(600, [900], 2000)).toBe(900);
+    });
+
+    it('sin paradas pendientes va al final, y una pasada no vuelve', () => {
+      expect(saltoQuieto(0, [], 2000)).toBe(2000);
+      expect(saltoQuieto(950, [500, 900], 2000)).toBe(2000);
     });
   });
 
