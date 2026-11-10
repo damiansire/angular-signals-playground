@@ -16,6 +16,7 @@ import {
   cuandoSuena,
   estrellasDelAlba,
   letrasDelLlamado,
+  loopsQueFrenaElViaje,
   planDeLaPrueba,
 } from './aviso-auriculares';
 
@@ -216,5 +217,34 @@ describe('el viaje de la cámara, del ojo de Angie a la colina', () => {
     expect(derecha).toBeCloseTo(profundidadDelViaje(mancha, 400, 100), 6);
     expect(acostada).toBeCloseTo(profundidadDelViaje(mancha, 100, 400), 6);
     expect(acostada).toBeLessThan(derecha);
+  });
+});
+
+describe('los loops que frena el viaje de la cámara', () => {
+  const colina = document.createElement('div');
+  const aviso = colina.appendChild(document.createElement('div'));
+  const animar = (padre: Element, iterations: number): Animation =>
+    padre.appendChild(document.createElement('div')).animate([{ opacity: 0.5 }, { opacity: 1 }], {
+      duration: 1000,
+      iterations,
+    });
+  beforeAll(() => document.body.appendChild(colina));
+  afterAll(() => colina.remove());
+
+  it('frena los loops de la colina, que de otro modo quedan dibujados a la escala del ojo', () => {
+    const junco = animar(colina, Infinity);
+    expect(loopsQueFrenaElViaje([junco], aviso)).toEqual([junco]);
+  });
+
+  it('no toca lo que termina solo, ni los loops del aviso, que es lo que se ve', () => {
+    const entrada = animar(colina, 1);
+    const estrella = animar(aviso, Infinity);
+    expect(loopsQueFrenaElViaje([entrada, estrella], aviso)).toEqual([]);
+  });
+
+  it('no toca los que ya frenó la pausa de fondo: al soltarlos los despausaría', () => {
+    const enPausa = animar(colina, Infinity);
+    enPausa.playbackRate = 0;
+    expect(loopsQueFrenaElViaje([enPausa], aviso)).toEqual([]);
   });
 });

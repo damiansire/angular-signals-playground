@@ -263,3 +263,21 @@ export function profundidadDesdeElOjo(
     ),
   );
 }
+
+/**
+ * Los loops de la colina que se quedan quietos mientras la cámara viaja. El navegador dibuja lo que
+ * anima a la escala más grande que alcanza la animación, contando la de la escena, y no la vuelve a
+ * bajar mientras siga animando: los juncos, las nubes y Angie quedaban dibujados a decenas de
+ * aumentos para siempre, cientos de megas de memoria de video. Con poca (Opera Neon con otras
+ * pestañas), a la colina le faltaban pedazos. Quietos durante el viaje, arrancan ya a escala 1. Los
+ * del aviso no: es lo que se ve, y se va con él. Los que ya estaban frenados (la pausa de fondo)
+ * tampoco: soltarlos sería despausarlos.
+ */
+export function loopsQueFrenaElViaje(animaciones: readonly Animation[], aviso: Node): Animation[] {
+  return animaciones.filter((a) => {
+    const efecto = a.effect;
+    if (!(efecto instanceof KeyframeEffect) || a.playbackRate === 0) return false;
+    if (efecto.target && aviso.contains(efecto.target)) return false;
+    return efecto.getComputedTiming().iterations === Infinity;
+  });
+}
