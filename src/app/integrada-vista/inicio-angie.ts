@@ -12,7 +12,7 @@ import {
   type Musica,
 } from './musica-del-presentimiento';
 import { tocarColina } from './musica-de-la-colina';
-import { planDeLaRadio, tocarRadio } from './ruido-de-radio';
+import { planDeLaRadio, sonidoDeOnda, tocarOnda, tocarRadio } from './ruido-de-radio';
 import { queHaceElToque } from './toque-de-dialogo';
 
 /**
@@ -445,7 +445,18 @@ export function initInicioAngie(host: HTMLElement, cuerpo?: AngieDeLaColina): In
     e.preventDefault();
     e.stopImmediatePropagation();
   };
+  // Suena con el anillo y no con un reloj aparte: así va pegado al dibujo aunque la pestaña se pause.
+  const alSalirUnaOnda = (e: AnimationEvent): void => {
+    if (e.animationName.includes('interferencia')) return;
+    if (!(e.target as Element | null)?.parentElement?.classList.contains('ini__radio')) return;
+    const limpia = escena.classList.contains('ini--oye');
+    if (!limpia && !escena.classList.contains('ini--radio')) return;
+    const salida = sonido().salida();
+    if (salida) tocarOnda(salida, sonidoDeOnda(limpia));
+  };
   escena.addEventListener('animationend', alLlegar);
+  escena.addEventListener('animationstart', alSalirUnaOnda);
+  escena.addEventListener('animationiteration', alSalirUnaOnda);
   escena.addEventListener('click', frenarEntrada, true);
 
   // Angie ya está sentada en la piedra del centro cuando se la ve: el aviso de auriculares se aleja
@@ -872,6 +883,8 @@ export function initInicioAngie(host: HTMLElement, cuerpo?: AngieDeLaColina): In
       escena.removeEventListener('pointerdown', alTocar);
       escena.removeEventListener('click', alClic);
       escena.removeEventListener('animationend', alLlegar);
+      escena.removeEventListener('animationstart', alSalirUnaOnda);
+      escena.removeEventListener('animationiteration', alSalirUnaOnda);
       escena.removeEventListener('click', frenarEntrada, true);
       window.removeEventListener('resize', alRedimensionar);
       animaciones.forEach((a) => a.cancel());

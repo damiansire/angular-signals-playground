@@ -63,6 +63,57 @@ export function planDeLaRadio(semilla = 7): readonly GolpeDeRadio[] {
   return golpes.sort((a, b) => a.t - b.t);
 }
 
+/** El sonido de un anillo que sale del sol: un tono que cae, como algo que se aleja. */
+export interface SonidoDeOnda {
+  readonly desde: number;
+  readonly hasta: number;
+  readonly dura: number;
+  readonly volumen: number;
+  /** Cuánto tiembla el tono, en Hz: la interferencia de la señal que todavía no se entiende. */
+  readonly temblor: number;
+}
+
+/**
+ * Cada anillo que sale del sol suena, así la señal se oye llegar y no es solo un dibujo. Con
+ * interferencia el tono tiembla; sintonizada, la misma onda sale limpia y más suave, debajo de la voz.
+ */
+export function sonidoDeOnda(limpia: boolean): SonidoDeOnda {
+  return limpia
+    ? { desde: 520, hasta: 390, dura: 0.9, volumen: 0.022, temblor: 0 }
+    : { desde: 520, hasta: 390, dura: 0.9, volumen: 0.035, temblor: 22 };
+}
+
+/** Un anillo que sale del sol. Sin audio, no suena y no tira. */
+export function tocarOnda(salida: SalidaDeAudio, onda: SonidoDeOnda): void {
+  const { ctx } = salida;
+  try {
+    const inicio = ctx.currentTime + 0.01;
+    const env = ctx.createGain();
+    env.gain.setValueAtTime(0, inicio);
+    env.gain.linearRampToValueAtTime(onda.volumen, inicio + 0.04);
+    env.gain.exponentialRampToValueAtTime(0.0001, inicio + onda.dura);
+    env.connect(salida.salida);
+    const osc = ctx.createOscillator();
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(onda.desde, inicio);
+    osc.frequency.exponentialRampToValueAtTime(onda.hasta, inicio + onda.dura);
+    osc.connect(env);
+    osc.start(inicio);
+    osc.stop(inicio + onda.dura + 0.05);
+    if (onda.temblor > 0) {
+      const lfo = ctx.createOscillator();
+      lfo.frequency.value = 13;
+      const hondo = ctx.createGain();
+      hondo.gain.value = onda.temblor;
+      lfo.connect(hondo).connect(osc.frequency);
+      lfo.start(inicio);
+      lfo.stop(inicio + onda.dura + 0.05);
+    }
+  } catch {
+    // Sin audio, la onda se ve y nada más.
+  }
+}
+
 /** El volumen de la estática de fondo: se siente, no tapa la música que ya empezó. */
 const ESTATICA = 0.05;
 

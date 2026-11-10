@@ -1,4 +1,22 @@
-import { DURA_LA_RADIO, planDeLaRadio, type GolpeDeRadio } from './ruido-de-radio';
+import { DURA_LA_RADIO, planDeLaRadio, sonidoDeOnda, type GolpeDeRadio } from './ruido-de-radio';
+
+describe('el sonido de cada onda del sol', () => {
+  it('con interferencia tiembla; sintonizada sale limpia y más suave, debajo de la voz', () => {
+    const cruzada = sonidoDeOnda(false);
+    const limpia = sonidoDeOnda(true);
+    expect(cruzada.temblor).toBeGreaterThan(0);
+    expect(limpia.temblor).toBe(0);
+    expect(limpia.volumen).toBeLessThan(cruzada.volumen);
+  });
+
+  it('cae de tono, como algo que se aleja, y no llega al segundo anillo después del suyo', () => {
+    for (const o of [sonidoDeOnda(false), sonidoDeOnda(true)]) {
+      expect(o.hasta).toBeLessThan(o.desde);
+      // Sale un anillo cada 0,6 s: se pisa con el siguiente solo en la cola, ya casi en silencio.
+      expect(o.dura).toBeLessThan(2 * 0.6);
+    }
+  });
+});
 
 describe('el ruido de la radio', () => {
   const plan = planDeLaRadio();
