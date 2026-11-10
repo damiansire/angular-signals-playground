@@ -53,3 +53,7 @@ Thumbs.db
 /_audit
 /AUDITORIA.md
 /verify.sh
+
+# Grabaciones de prueba (GIF y hoja de cuadros) que deja grabar.py al cerrar un cambio visual:
+# son para revisar en local, no se versionan.
+/pruebas
