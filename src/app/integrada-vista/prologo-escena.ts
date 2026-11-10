@@ -38,6 +38,34 @@ export const letraConPiso = (unidades: number, pisoPx: number, k: number): numbe
 export const saltoQuieto = (t: number, pendientes: readonly number[], fin: number): number =>
   Math.min(fin, ...pendientes.filter((p) => p >= t));
 
+/** Lo más angosto que se recorta la escena en vertical: con menos, una nave de costado ya no entra. */
+export const ANCHO_VERTICAL = 900;
+/** El aire que la cámara deja alrededor de los personajes, en unidades del `viewBox`. */
+const AIRE_DE_CAMARA = 170;
+
+/**
+ * Qué franja horizontal de la escena se ve. Apaisada, la escena entera: es como se compuso. En una
+ * pantalla vertical la escena entera quedaba en una franja de 220 px de alto en un celular; ahí la
+ * cámara toma toda la altura y solo el ancho que piden los personajes en pantalla, entre
+ * `ANCHO_VERTICAL` y `ANCHO`, sin salirse del cuadro compuesto.
+ */
+export function encuadreVertical(
+  actores: readonly Punto[],
+  aspecto: number,
+): { readonly x: number; readonly ancho: number } {
+  if (aspecto >= 1 || actores.length === 0) {
+    return aspecto >= 1
+      ? { x: 0, ancho: ANCHO }
+      : { x: CX - ANCHO_VERTICAL / 2, ancho: ANCHO_VERTICAL };
+  }
+  const xs = actores.map((p) => p.x);
+  const desde = Math.min(...xs) - AIRE_DE_CAMARA;
+  const hasta = Math.max(...xs) + AIRE_DE_CAMARA;
+  const ancho = Math.min(ANCHO, Math.max(ANCHO_VERTICAL, hasta - desde));
+  const x = Math.min(ANCHO - ancho, Math.max(0, (desde + hasta) / 2 - ancho / 2));
+  return { x, ancho };
+}
+
 export const suave = (v: number): number => (v < 0.5 ? 2 * v * v : 1 - Math.pow(-2 * v + 2, 2) / 2);
 /** La entrada con rebote de la skill (`back.out`), para lo que tiene que caer con peso. */
 export const conRebote = (v: number, s = 1.9): number => {

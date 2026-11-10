@@ -1,5 +1,7 @@
 import { GUION, anclajesDe, armarReloj } from './prologo-guion';
 import {
+  ANCHO,
+  ANCHO_VERTICAL,
   CX,
   CY,
   FORMACION,
@@ -10,6 +12,7 @@ import {
   bolas,
   circulos,
   crecimiento,
+  encuadreVertical,
   esquive,
   exploradora,
   formacionAfuera,
@@ -208,6 +211,48 @@ describe('prologo-escena', () => {
     it('sin paradas pendientes va al final, y una pasada no vuelve', () => {
       expect(saltoQuieto(0, [], 2000)).toBe(2000);
       expect(saltoQuieto(950, [500, 900], 2000)).toBe(2000);
+    });
+  });
+
+  describe('la cámara en vertical', () => {
+    const adentro = (e: { x: number; ancho: number }, x: number): boolean =>
+      x >= e.x && x <= e.x + e.ancho;
+
+    it('apaisada se ve la escena entera, como se compuso', () => {
+      expect(encuadreVertical([{ x: 300, y: 400 }], 16 / 9)).toEqual({ x: 0, ancho: ANCHO });
+      expect(encuadreVertical([], 1)).toEqual({ x: 0, ancho: ANCHO });
+    });
+
+    it('en vertical recorta lo que piden los personajes, con aire', () => {
+      const e = encuadreVertical(
+        [
+          { x: 300, y: 400 },
+          { x: 800, y: 450 },
+        ],
+        390 / 664,
+      );
+      expect(e.ancho).toBeLessThan(ANCHO);
+      expect(adentro(e, 300 - 100)).toBeTrue();
+      expect(adentro(e, 800 + 100)).toBeTrue();
+    });
+
+    it('nunca más angosta que una nave de costado ni afuera del cuadro', () => {
+      const sola = encuadreVertical([{ x: 1580, y: 400 }], 0.5);
+      expect(sola.ancho).toBe(ANCHO_VERTICAL);
+      expect(sola.x + sola.ancho).toBe(ANCHO);
+      const lejos = encuadreVertical(
+        [
+          { x: 0, y: 0 },
+          { x: ANCHO, y: 0 },
+        ],
+        0.5,
+      );
+      expect(lejos).toEqual({ x: 0, ancho: ANCHO });
+    });
+
+    it('sin nadie en pantalla mira al centro', () => {
+      const e = encuadreVertical([], 0.5);
+      expect(e.x + e.ancho / 2).toBe(CX);
     });
   });
 

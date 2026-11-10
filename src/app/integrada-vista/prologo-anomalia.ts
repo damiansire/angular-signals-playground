@@ -37,6 +37,7 @@ import {
   conRebote,
   crecimiento,
   cuerdasVisibles,
+  encuadreVertical,
   esquive,
   exploradora,
   formacionAfuera,
@@ -224,6 +225,9 @@ const ROTULO_DISPARO = 19;
 const PISO_DISPARO_PX = 12;
 const ROTULO_ACIERTO = 30;
 const PISO_ACIERTO_PX = 15;
+
+/** Cuánto de lo que rodea a la anomalía guarda la cámara en vertical, en unidades del `viewBox`. */
+const ALREDEDOR_DEL_CENTRO = 200;
 
 /** Lo que dice una nave cuando la tocan. Insistir le gasta la paciencia. */
 const QUEJAS = ['¡ey!', '¡piloto a bordo!', '¡la pintura!', '¡estoy manejando!'];
@@ -1112,17 +1116,39 @@ export function initPrologoAnomalia(host: HTMLElement, opts: PrologoOpciones): (
   /* ── encuadre: del viewBox a la pantalla ────────────────────────────────────────────────────── */
 
   let encuadre = { k: 1, ox: 0, oy: 0, x0: 0, y0: 0 };
+  /** El SVG y el prólogo en pantalla: se miden al cambiar de tamaño, no en cada cuadro. */
+  let caja = { ancho: 0, alto: 0, dx: 0, dy: 0, x0: 0, y0: 0 };
+  /** La franja de la escena que se ve (`encuadreVertical`). Apaisada, la escena entera. */
+  const camara = { x: 0, ancho: ANCHO };
+  /** Al medir, la cámara va directo a su lugar: deslizarse desde el tamaño viejo sería un mareo. */
+  let camaraAsentada = false;
   function medir(): void {
     const r = raiz.getBoundingClientRect();
     const rs = svg.getBoundingClientRect();
-    const k = Math.min(rs.width / ANCHO, rs.height / ALTO) || 1;
-    encuadre = {
-      k,
-      ox: rs.left - r.left + (rs.width - ANCHO * k) / 2,
-      oy: rs.top - r.top + (rs.height - ALTO * k) / 2,
+    caja = {
+      ancho: rs.width,
+      alto: rs.height,
+      dx: rs.left - r.left,
+      dy: rs.top - r.top,
       x0: r.left,
       y0: r.top,
     };
+    camaraAsentada = false;
+    encuadrar();
+  }
+  function encuadrar(): void {
+    const { x, ancho } = camara;
+    fijar(svg, { viewBox: `${r2(x)} 0 ${r2(ancho)} ${ALTO}` });
+    const k = Math.min(caja.ancho / ancho, caja.alto / ALTO) || 1;
+    const cambiaLaLetra = Math.abs(k - encuadre.k) > 0.002;
+    encuadre = {
+      k,
+      ox: caja.dx + (caja.ancho - ancho * k) / 2 - x * k,
+      oy: caja.dy + (caja.alto - ALTO * k) / 2,
+      x0: caja.x0,
+      y0: caja.y0,
+    };
+    if (!cambiaLaLetra) return;
     if (mascotaEl) mascotaEl.style.width = `${Math.round(300 * k)}px`;
     escalaRotulo = letraConPiso(ROTULO_DISPARO, PISO_DISPARO_PX, k) / ROTULO_DISPARO;
     for (const d of disparos) {
@@ -1131,6 +1157,28 @@ export function initPrologoAnomalia(host: HTMLElement, opts: PrologoOpciones): (
         'stroke-width': r2(4 * escalaRotulo),
       });
     }
+  }
+  /**
+   * La cámara sigue a las naves en pantalla y a la anomalía, que es de lo que se trata: el centro y
+   * lo que lo rodea, porque con solo el punto quedaba pegado al borde y las bolas salían por la
+   * mitad. Se desliza despacio: un corte cada vez que una nave se mueve marearía.
+   */
+  function moverCamara(dtS: number): void {
+    const actores = [
+      { x: CX - ALREDEDOR_DEL_CENTRO, y: CY },
+      { x: CX + ALREDEDOR_DEL_CENTRO, y: CY },
+      // Solo las que están en el cuadro: la que se va no arrastra a la cámara con ella.
+      ...flota.map((n) => n.pos).filter((p) => p.x > 0 && p.x < ANCHO),
+    ];
+    const meta = encuadreVertical(actores, caja.alto > 0 ? caja.ancho / caja.alto : 1);
+    const f = camaraAsentada && dtS > 0 ? 1 - Math.exp(-dtS * 1.6) : 1;
+    camaraAsentada = true;
+    const x = camara.x + (meta.x - camara.x) * f;
+    const ancho = camara.ancho + (meta.ancho - camara.ancho) * f;
+    if (Math.abs(x - camara.x) < 0.3 && Math.abs(ancho - camara.ancho) < 0.3) return;
+    camara.x = x;
+    camara.ancho = ancho;
+    encuadrar();
   }
   const aPantalla = (p: Punto): Punto => ({
     x: encuadre.ox + p.x * encuadre.k,
@@ -1964,6 +2012,7 @@ export function initPrologoAnomalia(host: HTMLElement, opts: PrologoOpciones): (
       fijar(balaBola, { transform: `translate(${r2(b.x)} ${r2(b.y)}) rotate(${r2(t * 0.4)})` });
     } else fijar(balaG, { opacity: 0 });
 
+    moverCamara(dtS);
     for (const m of [angieEscala, angieHabla]) avanzarMuelle(m, dtS);
     pintarAngie(t);
     pintarAudio(t, claro);
