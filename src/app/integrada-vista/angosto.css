@@ -189,3 +189,13 @@
     display: none;
   }
 }
+
+/* La colina en vertical (aparte de `inicio-angie.css`, que está en su presupuesto): en columna, con
+   una partida guardada ("Empezar de cero" es la tercera ficha), las fichas bajaban hasta 160 px y la
+   última tapaba la "L" del título, que en un celular empieza en 115. En fila quedan en la franja
+   del sol, que está en la otra esquina. */
+@container (max-aspect-ratio: 1 / 1) {
+  .ini__ajustes {
+    flex-direction: row;
+  }
+}
