@@ -376,8 +376,8 @@
   gap: 0.4rem 0.9rem;
   margin-top: 0.45rem;
 }
-/* Ir y volver, en la última fila de la consola: "Anterior" a la izquierda, solo si hay adónde, y
-   "Siguiente" siempre a la derecha. */
+/* Ir y volver, en la fila de los pasos de la consola, a la derecha: "Anterior" solo si hay adónde, y
+   "Siguiente" recién con la página cumplida. */
 .prologo__manual-paginas {
   display: flex;
   align-items: center;
@@ -398,4 +398,44 @@
 }
 .prologo__manual.card--dissolve .subhost .prologo__manual-paginas .prologo__manual-boton--sigue {
   background: #ffd27a;
+}
+/* Cumplida la página, "Siguiente" llega en el verde de los pasos hechos: salta a su lugar y late dos
+   veces, para que se vea sin buscarlo. */
+.prologo__manual.card--dissolve
+  .subhost
+  .prologo__manual-paginas
+  .prologo__manual-boton--sigue.prologo__manual-boton--listo {
+  border-color: #2b1b33;
+  outline-color: #2f8a5c;
+  background: #6ad19a;
+  color: #12301f;
+  animation:
+    sigue-llega 0.45s cubic-bezier(0.34, 1.8, 0.64, 1) both,
+    sigue-late 1.1s ease-out 0.45s 2;
+}
+@keyframes sigue-llega {
+  from {
+    opacity: 0;
+    scale: 0.5;
+  }
+}
+@keyframes sigue-late {
+  from {
+    box-shadow:
+      3px 4px 0 rgb(6 3 14 / 40%),
+      0 0 0 0 rgb(106 209 154 / 60%);
+  }
+  to {
+    box-shadow:
+      3px 4px 0 rgb(6 3 14 / 40%),
+      0 0 0 14px rgb(106 209 154 / 0%);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .prologo__manual.card--dissolve
+    .subhost
+    .prologo__manual-paginas
+    .prologo__manual-boton--sigue.prologo__manual-boton--listo {
+    animation: none;
+  }
 }

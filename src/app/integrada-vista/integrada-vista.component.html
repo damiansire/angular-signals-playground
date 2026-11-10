@@ -859,14 +859,17 @@
         &larr; {{ pagina()! > 0 ? 'Anterior' : 'Bitácora' }}
       </button>
     }
-    <button
-      type="button"
-      class="prologo__manual-boton prologo__manual-boton--sigue"
-      (click)="pasarPagina(1)"
-    >
-      {{ pagina()! + 1 < paginas().length ? 'Siguiente página' : libro().sigue }}
-      &rarr;
-    </button>
+    @if (puedeSeguir()) {
+      <button
+        type="button"
+        class="prologo__manual-boton prologo__manual-boton--sigue"
+        [class.prologo__manual-boton--listo]="libro().concepto === undefined"
+        (click)="pasarPagina(1)"
+      >
+        {{ pagina()! + 1 < paginas().length ? 'Siguiente página' : libro().sigue }}
+        &rarr;
+      </button>
+    }
   </nav>
 </ng-template>
 

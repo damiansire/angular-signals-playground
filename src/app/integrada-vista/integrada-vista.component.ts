@@ -375,6 +375,15 @@ export class IntegradaVistaComponent {
   protected readonly desdeLaBitacora = computed(
     () => this.manualSuelto() && this.libro().concepto === undefined,
   );
+  /**
+   * Las páginas del libro que ya se cumplieron. Recién cumplida, una página deja seguir; y queda
+   * cumplida: volver a ella no obliga a hacerla de nuevo. Una etapa del viaje no se traba.
+   */
+  private readonly cumplidas = signal<ReadonlySet<string>>(new Set());
+  protected readonly puedeSeguir = computed(() => {
+    const id = this.paginaActual()?.id;
+    return this.libro().concepto !== undefined || (id !== undefined && this.cumplidas().has(id));
+  });
   /** Mientras la pantalla se apaga, los botones de página ya no hacen nada. */
   private apagandose = false;
   private readonly hojaDelManual = viewChild<ElementRef<HTMLElement>>('hojaDelManual');
@@ -459,6 +468,7 @@ export class IntegradaVistaComponent {
   protected pasarPagina(paso: 1 | -1): void {
     const i = this.pagina();
     if (i === null || this.apagandose) return;
+    if (paso === 1 && !this.puedeSeguir()) return;
     const j = i + paso;
     if (j >= this.paginas().length) void this.dejarLaHoja(true);
     else if (j >= 0) this.irAPagina(j);
@@ -513,7 +523,11 @@ export class IntegradaVistaComponent {
             ley: pagina.ley,
             enLaNave: pagina.enLaNave,
             ...(this.libro().concepto === undefined
-              ? { marcas: this.marcasDelLibro(), pie: this.pieDelLibro() }
+              ? {
+                  marcas: this.marcasDelLibro(),
+                  pie: this.pieDelLibro(),
+                  alCumplir: () => this.cumplidas.update((c) => new Set(c).add(pagina.id)),
+                }
               : {}),
           },
         },
