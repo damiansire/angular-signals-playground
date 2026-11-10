@@ -308,10 +308,12 @@ puede alcanzar" son dos cosas distintas y hay que chequear las dos.
       sin átomos amontonados); un cambio puede romper solo una de las dos.
 - [ ] URL sync bidireccional: navegar actualiza la URL Y pegar una URL
       restaura el estado (nivel y sub-nivel). Testear ambas direcciones.
-- [ ] Retomar al recargar (ADR 0005), probado con input real: con un punto del prólogo, aviso →
-      colina → entrar arranca en esa línea; con un lugar del recorrido, abre ahí sin pasar por la
-      colina; con el prólogo pasado, entrar va a la construcción. La landing del arranque no pisa el
-      punto del prólogo: la vista la reporta antes de que se entre.
+- [ ] Retomar al recargar (ADR 0005 y 0015), probado con input real: con un punto del prólogo, el
+      toque del aviso arranca en esa línea sin pasar por la colina; con el comienzo visto, sigue el
+      viaje donde quedó; sin partida, o con una que arrancaría del principio, el aviso lleva a la
+      colina como la primera vez. Entre el aviso y la historia no se ve la colina de día: el aviso
+      sigue a la vista mientras la pantalla de inicio se desvanece. La landing del arranque no pisa
+      el punto del prólogo: la vista la reporta antes de que se entre.
 - [ ] Un bucle que avanza un índice no lo hace adentro de una llamada con `?.`: sin quien escuche,
       el argumento no se evalúa y el bucle no termina. Pasó con `alPasarPunto` y colgaba el prólogo
       abierto desde la bitácora (y a Karma, que se desconectaba sin nombrar el spec).
@@ -322,8 +324,14 @@ puede alcanzar" son dos cosas distintas y hay que chequear las dos.
       pantalla completa, empezar de cero), por encima de la pantalla del libro. El libro, sus marcas
       y "1 de 5" van debajo del título de la ley, adentro de la página: en la fila del HUD se
       chocaban con los íconos.
-- [ ] "Empezar de cero" está en la barra, en el HUD del prólogo y en la colina, y pide un segundo
-      toque que caduca. Su globo en la colina es corto: el largo tapaba el título a 1024×768, y el
+- [ ] "Empezar de cero" está en la barra, en el HUD del prólogo, en la colina y, con partida
+      guardada, en el aviso de auriculares (la colina ya no se ve), y pide un segundo toque que
+      caduca. En el aviso es una ficha arriba a la izquierda, en espejo con "Sonido" y de su mismo
+      alto (40 px; con la vuelta más chica quedaba 2 px más baja), y su "¿seguro?" es corto,
+      "¿Borrar todo?": el de la colina medía ~250 px y a 375 se montaba sobre "Sonido". Medido contra
+      sonido, título, invitación y Angie, con hit-test en el centro, a 360×640, 375×812, 500×900,
+      750×342, 820×1180, 1024×768, 1440×900 y 1920×1080. Tocarla, con puntero o con Enter, no
+      continúa el aviso. Su globo en la colina es corto: el largo tapaba el título a 1024×768, y el
       del "¿seguro?" se ve sin apuntar. Borrar recarga SIN la query.
 - [ ] El capítulo es un nombre, no una posición (ADR 0006): `?nivel=`, la cinemática, el número del
       riel y la bitácora usan `CAPITULO_DE_CONCEPTO`; la partida y el motor, la posición. Signals es
