@@ -170,13 +170,14 @@
 
 /* La noche cae en dos tiempos, como cae de verdad: primero la luz se vuelve dorada y después todo
    se apaga hacia el azul, con la colina como silueta. Multiplicar oscurece sin lavar: una cortina
-   negra que bajaba pasaba por una franja gris, como niebla, y la colina desaparecía de golpe. */
+   negra que bajaba pasaba por una franja gris, como niebla, y la colina desaparecía de golpe.
+   Multiplican recién cuando cae la luz: de día, aunque transparentes, en Opera Neon las capas en
+   modo de fusión hacían que Angie, el sol y el llamado se dibujaran a pedazos. */
 .ini__ocaso,
 .ini__penumbra {
   position: absolute;
   inset: 0;
   z-index: 1;
-  mix-blend-mode: multiply;
   opacity: 0;
   pointer-events: none;
 }
@@ -185,6 +186,7 @@
   transition: opacity 1.2s ease-out;
 }
 .ini--atardecer .ini__ocaso {
+  mix-blend-mode: multiply;
   opacity: 1;
 }
 /* Lenta: en un segundo el día se iba de golpe y la noche le robaba la atención al desarme. El
@@ -194,6 +196,7 @@
   transition: opacity 3s cubic-bezier(0.4, 0, 0.3, 1);
 }
 .ini--noche .ini__penumbra {
+  mix-blend-mode: multiply;
   opacity: 1;
 }
 
