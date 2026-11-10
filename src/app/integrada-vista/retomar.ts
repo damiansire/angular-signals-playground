@@ -25,6 +25,21 @@ export function entradaDeLaHistoria(
 }
 
 /**
+ * Adónde lleva el toque del aviso de auriculares. El aviso existe para el gesto que deja sonar, y
+ * la colina es el principio de la historia: con algo para retomar, el toque sigue directo ahí
+ * (ADR 0015). Una partida que arrancaría la historia del principio no tiene dónde retomar, y pasa
+ * por la colina como la primera vez.
+ */
+export function despuesDelAviso(
+  punto: Punto | null,
+  puntosDelPrologo: readonly string[],
+  prologoVisto: boolean,
+): 'colina' | Entrada {
+  const entrada = entradaDeLaHistoria(punto, puntosDelPrologo, prologoVisto);
+  return entrada.a === 'prologo' && entrada.desde === null ? 'colina' : entrada;
+}
+
+/**
  * El lugar que se guarda cuando el recorrido avisa dónde está. Volver a la landing desde el
  * recorrido es estar en la construcción. Mientras la historia todavía no llegó al recorrido, la
  * landing no pisa el punto del prólogo: la vista la reporta al arrancar, antes de entrar.

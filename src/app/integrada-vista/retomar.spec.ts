@@ -1,7 +1,7 @@
 import type { Punto } from '../libs/partida';
 import { leerPartida } from '../libs/partida';
 import { PUNTOS_DEL_PROLOGO } from './puntos-del-prologo';
-import { entradaDeLaHistoria, puntoDelRecorrido } from './retomar';
+import { despuesDelAviso, entradaDeLaHistoria, puntoDelRecorrido } from './retomar';
 
 const PUNTOS = ['anom-rxjs', 'anom-manual', 'voz-supongo'];
 const EN_EL_PROLOGO: Punto = { lugar: 'prologo', linea: 'anom-manual' };
@@ -61,6 +61,42 @@ describe('retomar', () => {
           expect(['prologo', 'viaje']).toContain(entradaDeLaHistoria(punto, PUNTOS, visto).a);
         }
       }
+    });
+  });
+
+  describe('despuesDelAviso', () => {
+    it('sin partida, el toque del aviso lleva a la colina', () => {
+      expect(despuesDelAviso(null, PUNTOS, false)).toBe('colina');
+    });
+
+    it('con un punto del comienzo, sigue directo a esa línea sin pasar por la colina', () => {
+      expect(despuesDelAviso(EN_EL_PROLOGO, PUNTOS, false)).toEqual({
+        a: 'prologo',
+        desde: 'anom-manual',
+      });
+    });
+
+    it('en pleno viaje, sigue directo al viaje', () => {
+      expect(despuesDelAviso({ lugar: 'viaje' }, PUNTOS, true)).toEqual({ a: 'viaje' });
+    });
+
+    it('con el comienzo visto, sigue directo al viaje aunque no haya punto', () => {
+      expect(despuesDelAviso(null, PUNTOS, true)).toEqual({ a: 'viaje' });
+    });
+
+    it('una partida que arrancaría del principio pasa por la colina', () => {
+      const viejo: Punto = { lugar: 'prologo', linea: 'casa-helado' };
+      expect(despuesDelAviso(viejo, PUNTOS, false)).toBe('colina');
+      expect(despuesDelAviso(EN_UN_SUB, PUNTOS, false)).toBe('colina');
+    });
+
+    it('una partida anterior a la 4 sigue directo al manual', () => {
+      const vieja = JSON.stringify({ v: 3, establecidos: [], cinematicas: [], prologo: true });
+      const { punto, prologo } = leerPartida(vieja, [1]);
+      expect(despuesDelAviso(punto, PUNTOS_DEL_PROLOGO, prologo)).toEqual({
+        a: 'prologo',
+        desde: 'anom-manual',
+      });
     });
   });
 
