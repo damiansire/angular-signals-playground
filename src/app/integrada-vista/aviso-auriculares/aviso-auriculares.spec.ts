@@ -21,6 +21,9 @@ import {
   loopsQueSeRedibujan,
   tocaRedibujar,
   planDeLaPrueba,
+  siguientePaso,
+  propiedadesAnimadas,
+  type PasoDelRedibujado,
 } from './aviso-auriculares';
 
 describe('aviso de auriculares', () => {
@@ -334,5 +337,41 @@ describe('cuándo se redibujan los loops en el viaje de la cámara', () => {
     }
     expect(veces).toBeGreaterThan(5);
     expect(veces).toBeLessThan(15);
+  });
+});
+
+describe('los pasos del redibujado de la colina', () => {
+  it('frena, mide y suelta en tres cuadros seguidos', () => {
+    const pasos: (PasoDelRedibujado | null)[] = [];
+    let paso: PasoDelRedibujado | null = null;
+    for (const toca of [false, true, false, false, false]) {
+      paso = siguientePaso(paso, toca);
+      pasos.push(paso);
+    }
+    expect(pasos).toEqual([null, 'frenar', 'medir', 'soltar', null]);
+  });
+
+  it('no arranca otro mientras uno está a medias: quedaría un loop fijado o quieto', () => {
+    expect(siguientePaso('frenar', true)).toBe('medir');
+    expect(siguientePaso('medir', true)).toBe('soltar');
+  });
+
+  it('después de soltar puede volver a frenar si ya toca', () => {
+    expect(siguientePaso('soltar', true)).toBe('frenar');
+    expect(siguientePaso('soltar', false)).toBeNull();
+  });
+});
+
+describe('lo que queda fijo mientras un loop va quieto', () => {
+  it('las propiedades que mueve, como se escriben en CSS', () => {
+    const cuadros = [
+      { offset: 0, computedOffset: 0, easing: 'ease', composite: 'auto', transform: 'none' },
+      { offset: 1, computedOffset: 1, easing: 'ease', composite: 'auto', transformOrigin: '50% 0' },
+    ];
+    expect(propiedadesAnimadas(cuadros).sort()).toEqual(['transform', 'transform-origin']);
+  });
+
+  it('cada una una sola vez, aunque aparezca en todos los cuadros', () => {
+    expect(propiedadesAnimadas([{ opacity: '0' }, { opacity: '1' }])).toEqual(['opacity']);
   });
 });

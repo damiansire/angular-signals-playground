@@ -28,8 +28,12 @@ import {
   profundidadDelViaje,
   profundidadDesdeElOjo,
   letrasDelLlamado,
+  QUIETOS_DESDE,
   loopsQueSeRedibujan,
+  propiedadesAnimadas,
+  siguientePaso,
   tocaRedibujar,
+  type PasoDelRedibujado,
   planDeLaPrueba,
   tocarPrueba,
   type Lado,
@@ -110,6 +114,8 @@ export class AvisoAuricularesComponent {
   private readonly temporizadores = new Set<ReturnType<typeof setTimeout>>();
   private cuadro = 0;
   private frenados: Animation[] = [];
+  /** Los loops que van quietos hasta llegar, con su efecto aparte para devolvérselo. */
+  private quietos: { animacion: Animation; efecto: KeyframeEffect; fijas: string[] }[] = [];
   private tapados: (HTMLElement | SVGElement)[] = [];
 
   constructor() {
@@ -117,6 +123,7 @@ export class AvisoAuricularesComponent {
       this.temporizadores.forEach(clearTimeout);
       cancelAnimationFrame(this.cuadro);
       this.soltarLoops();
+      this.despertarLoops();
       this.destapar();
     });
     // El foco va a la invitación, así Enter alcanza; no si la landing arranca tapada (un deep-link).
@@ -292,36 +299,43 @@ export class AvisoAuricularesComponent {
 
     let escala = 1;
     let dibujadaA = Infinity;
-    let redibujando = false;
+    let paso: PasoDelRedibujado | null = null;
     let cero = 0;
     const pintar = (ahora: number): void => {
       const t = ahora - cero;
-      const c = cuadroDelViaje(t, profundidad, cubre, cabe);
+      // Al llegar, la cámara queda quieta en la colina mientras termina el último redibujado.
+      const llego = t >= VIAJE_MS;
+      const c = cuadroDelViaje(Math.min(t, VIAJE_MS), profundidad, cubre, cabe);
       seguirElOjo(escala, c.colina);
       if (laGemaTapaLaPantalla(piezas, r)) this.tapar(detras);
       else this.destapar();
       escala = c.colina;
       // La escena va en una capa propia (`will-change`) que el navegador dibuja una vez y solo achica:
       // redibujada en cada cuadro a la escala nueva, la cara gigante salía a rayas. Esa capa no baja
-      // sola su escala y la memoria crecía, así que a cada mitad se le saca un cuadro y vuelve a la
-      // escala del momento. Los loops, igual: un cuadro quietos y el navegador los mide de nuevo.
-      if (redibujando) {
-        redibujando = false;
-        this.soltarLoops();
-        escena.style.willChange = 'transform';
-      } else if (tocaRedibujar(escala, dibujadaA)) {
+      // sola su escala y la memoria crecía, así que a cada mitad vuelve a la escala del momento, y
+      // los loops igual, hasta que con la colina a la vista se quedan quietos (`QUIETOS_DESDE`). Al
+      // llegar se redibuja una última vez, ya a escala 1, y los loops vuelven a moverse.
+      paso = siguientePaso(paso, llego || tocaRedibujar(escala, dibujadaA));
+      if (paso === 'frenar') {
         dibujadaA = escala;
-        redibujando = true;
-        this.frenarLoops(escena);
+        if (!llego && !this.quietos.length && escala <= QUIETOS_DESDE) this.aquietarLoops(escena);
+        else this.frenarLoops(escena);
+      } else if (paso === 'medir') {
+        this.medirLoops();
         escena.style.willChange = 'auto';
+      } else if (paso === 'soltar') {
+        this.soltarLoops();
+        if (!llego) escena.style.willChange = 'transform';
+        else this.despertarLoops();
       }
       escena.style.scale = `${c.colina}`;
       this.host.style.scale = `${c.aviso}`;
       this.host.style.setProperty('--aa-aire', `${c.aire}px`);
-      if (t < VIAJE_MS) {
+      if (!llego || paso !== 'soltar') {
         this.cuadro = requestAnimationFrame(pintar);
         return;
       }
+      // A escala 1 y sin corrida, sacarlas no mueve nada.
       escena.style.removeProperty('scale');
       escena.style.removeProperty('transform-origin');
       escena.style.removeProperty('translate');
@@ -331,7 +345,6 @@ export class AvisoAuricularesComponent {
       this.viaje.emit(false);
       this.momento.set('listo');
       this.llego.emit();
-      this.redibujarLoops(escena);
     };
     // El primer cuadro va ya, junto con la máscara: sin aire, el aviso desaparecía un cuadro.
     cero = performance.now();
@@ -352,20 +365,65 @@ export class AvisoAuricularesComponent {
 
   private frenarLoops(escena: HTMLElement): void {
     this.frenados = loopsQueSeRedibujan(escena.getAnimations({ subtree: true }), this.host);
-    for (const a of this.frenados) a.playbackRate = 0;
+    for (const a of this.frenados) {
+      a.playbackRate = 0;
+      this.fijarEscala(a, true);
+    }
   }
 
-  private redibujarLoops(escena: HTMLElement): void {
-    this.soltarLoops();
-    this.frenarLoops(escena);
-    this.cuadro = requestAnimationFrame(() => {
-      this.cuadro = requestAnimationFrame(() => this.soltarLoops());
-    });
+  /**
+   * Los loops quedan quietos en la pose de este cuadro y sin animación enganchada: así no tienen capa
+   * propia. Con velocidad 0 y no con pause(), que le saca al CSS el control de
+   * `animation-play-state` (ver la pausa de fondo en `molecule-engine.ts`).
+   */
+  private aquietarLoops(escena: HTMLElement): void {
+    for (const animacion of loopsQueSeRedibujan(
+      escena.getAnimations({ subtree: true }),
+      this.host,
+    )) {
+      const efecto = animacion.effect as KeyframeEffect;
+      animacion.playbackRate = 0;
+      try {
+        animacion.commitStyles();
+      } catch {
+        // Sin dibujar no se puede fijar la pose: sigue como estaba.
+        animacion.playbackRate = 1;
+        continue;
+      }
+      animacion.effect = null;
+      this.quietos.push({ animacion, efecto, fijas: propiedadesAnimadas(efecto.getKeyframes()) });
+    }
+  }
+
+  /** Vuelven a moverse desde la pose en que quedaron: sin salto. */
+  private despertarLoops(): void {
+    for (const { animacion, efecto, fijas } of this.quietos) {
+      animacion.effect = efecto;
+      const blanco = efecto.target as HTMLElement | SVGElement | null;
+      for (const p of fijas) blanco?.style.removeProperty(p);
+      animacion.playbackRate = 1;
+    }
+    this.quietos = [];
+  }
+
+  private medirLoops(): void {
+    for (const a of this.frenados) this.fijarEscala(a, false);
   }
 
   private soltarLoops(): void {
-    for (const a of this.frenados) a.playbackRate = 1;
+    for (const a of this.frenados) {
+      a.playbackRate = 1;
+      this.fijarEscala(a, false);
+    }
     this.frenados = [];
+  }
+
+  /** `will-change: transform` mantiene la escala con que el navegador dibujó un loop. */
+  private fijarEscala(a: Animation, fija: boolean): void {
+    const blanco = (a.effect as KeyframeEffect | null)?.target as HTMLElement | SVGElement | null;
+    if (!blanco) return;
+    if (fija) blanco.style.willChange = 'transform';
+    else blanco.style.removeProperty('will-change');
   }
 
   private luego(ms: number, fn: () => void): void {

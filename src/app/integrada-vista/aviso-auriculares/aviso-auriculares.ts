@@ -342,3 +342,47 @@ export function laGemaTapaLaPantalla(
 export function tocaRedibujar(escala: number, dibujadaA: number): boolean {
   return escala <= dibujadaA / 2;
 }
+
+/**
+ * Cómo se vuelve a dibujar la colina a la escala del momento: un paso por cuadro, y nunca dos
+ * redibujados encimados. Todo junto en un cuadro (los loops quietos y la escena sin su capa), el
+ * navegador se enteraba de que los loops pararon recién al mostrar el cuadro, los volvía a dibujar
+ * sin esperar y la pantalla salía vacía un cuadro: a 3440 px, un destello a cada mitad de escala.
+ * Por pasos, el redibujado espera a estar listo:
+ * - `frenar`: los loops quedan quietos, pero con la escala fijada (`will-change`), así no se
+ *   redibujan todavía;
+ * - `medir`: se les saca la fijación a ellos y a la escena, y se dibujan a la escala de este cuadro
+ *   (con la de la escena puesta, los loops seguían a la escala vieja);
+ * - `soltar`: vuelven a moverse y la escena vuelve a su capa.
+ */
+export type PasoDelRedibujado = 'frenar' | 'medir' | 'soltar';
+
+/** El paso de este cuadro, a partir del anterior y de si ya toca redibujar. */
+export function siguientePaso(
+  anterior: PasoDelRedibujado | null,
+  toca: boolean,
+): PasoDelRedibujado | null {
+  if (anterior === 'frenar') return 'medir';
+  if (anterior === 'medir') return 'soltar';
+  return toca ? 'frenar' : null;
+}
+
+/**
+ * Desde esta escala hasta llegar, los loops de la colina van quietos y sin capa propia: la colina
+ * entera es una sola capa que solo se redibuja a cada mitad. Con la colina a la vista, redibujar
+ * además cada loop (Angie, juncos, nubes, el sol) era demasiado para un cuadro y, aun por pasos,
+ * salía vacía la pantalla al alejarse y al llegar. Antes no: adentro de la cara, quietos desde el
+ * principio, la escena se redibujaba en cada cuadro del cierre del aviso, y al aquietarlos a ×128
+ * el cuadro del cambio salía vacío. Se mide a 3440 px con screencast y poca memoria de video.
+ */
+export const QUIETOS_DESDE = 32;
+
+/**
+ * Las propiedades que mueve una animación, escritas como en CSS: las que `commitStyles` deja fijas
+ * en el estilo del elemento mientras va quieta, y que hay que sacar cuando vuelve a moverse.
+ */
+export function propiedadesAnimadas(cuadros: readonly object[]): string[] {
+  const internas = new Set(['offset', 'computedOffset', 'easing', 'composite']);
+  const nombres = new Set(cuadros.flatMap((c) => Object.keys(c)).filter((k) => !internas.has(k)));
+  return [...nombres].map((k) => k.replace(/[A-Z]/g, (m) => '-' + m.toLowerCase()));
+}
