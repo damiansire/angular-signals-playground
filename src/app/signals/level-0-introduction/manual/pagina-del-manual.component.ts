@@ -7,6 +7,7 @@ import {
   afterNextRender,
   effect,
   inject,
+  untracked,
   input,
   signal,
   viewChild,
@@ -60,6 +61,9 @@ export class PaginaDelManualComponent {
     effect(() => {
       this.guia();
       afterNextRender(() => this.medir(), { injector: this.injector });
+    });
+    effect(() => {
+      if (this.resuelta()) untracked(() => this.datos?.alCumplir?.());
     });
     afterNextRender(() => {
       this.observador = new ResizeObserver(() => this.medir());

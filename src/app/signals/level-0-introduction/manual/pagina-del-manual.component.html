@@ -37,7 +37,13 @@
           <span class="pm-num" aria-hidden="true">2</span>
           <ng-content select="[arreglo]" />
         </li>
+        <!-- Los botones de página y "Mostrame" mientras haga falta. "Siguiente" llega recién con la
+             página cumplida, en el lugar de "Mostrame": en su propia fila, abajo, se podía pasar sin
+             hacer nada. -->
         <li class="pm-etapas-boton">
+          @if (datos?.pie; as p) {
+            <ng-container [ngTemplateOutlet]="p" />
+          }
           @if (guia() !== null || mostrando()) {
             <button type="button" class="pm-mostrar" [disabled]="mostrando()" (click)="mostrar()">
               <span aria-hidden="true">&#9654;</span> Mostrame
@@ -46,9 +52,6 @@
         </li>
       </ol>
       <ng-content select="[consola]" />
-      @if (datos?.pie; as p) {
-        <ng-container [ngTemplateOutlet]="p" />
-      }
     </div>
   </section>
 

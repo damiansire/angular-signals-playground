@@ -203,6 +203,9 @@
   color: #2b1b33;
 }
 .pm-etapas-boton {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
   margin-left: auto;
 }
 .pm-etapas-boton:empty {

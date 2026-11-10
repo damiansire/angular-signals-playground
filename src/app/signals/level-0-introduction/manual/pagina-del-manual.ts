@@ -16,7 +16,10 @@ export interface DatosDeLaPagina {
    * barra. Sin esto, la página va en una hoja que pone los suyos.
    */
   readonly marcas?: TemplateRef<unknown>;
+  /** Los botones de página: van en la fila de los pasos, donde estaba "Mostrame". */
   readonly pie?: TemplateRef<unknown>;
+  /** La página se cumplió (los dos pasos hechos): recién ahí el libro deja seguir. */
+  readonly alCumplir?: () => void;
 }
 
 export const PAGINA_DEL_MANUAL = new InjectionToken<DatosDeLaPagina>('PAGINA_DEL_MANUAL');
