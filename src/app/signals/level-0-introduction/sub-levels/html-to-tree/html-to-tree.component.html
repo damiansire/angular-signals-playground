@@ -1,12 +1,54 @@
-<app-pagina-del-manual [guia]="guia()" [respiro]="900" [paso]="paso()" [resuelta]="sano()">
+<app-pagina-del-manual
+  [guia]="guia()"
+  [respiro]="900"
+  [paso]="paso()"
+  [resuelta]="sano()"
+  [enPantalla]="true"
+  [portada]="true"
+  (seAbre)="abierta.set(true)"
+>
+  <!-- La portada: el árbol que la página enseña, ya armado, crece desde la raíz. -->
+  <svg portada class="htt-portada" viewBox="0 0 300 128" aria-hidden="true">
+    @for (n of portada; track n.id) {
+      @if (n.rama) {
+        <path class="htt-portada-rama" [attr.d]="n.rama" pathLength="1" [style.--i]="n.orden" />
+      }
+    }
+    @for (n of portada; track n.id) {
+      <g [attr.transform]="'translate(' + n.x + ' ' + n.y + ')'">
+        <g class="htt-portada-nodo" [style.--i]="n.orden">
+          <rect
+            x="-27"
+            y="-11"
+            width="54"
+            height="22"
+            rx="11"
+            [attr.fill]="n.color.fondo"
+            [class.htt-portada-oscuro]="n.color.oscuro"
+          />
+          <text text-anchor="middle" dominant-baseline="central" [attr.fill]="n.color.letra">
+            {{ n.tag }}
+          </text>
+        </g>
+      </g>
+    }
+  </svg>
+
   <p hacer>Tocá los tags.</p>
   <p arreglo class="htt-arreglo">Mové el <code>&lt;/article&gt;</code>.</p>
 
-  <app-escena-arbol escena [reveladas]="reveladas()" [fuera]="fuera()" [sano]="sano()" />
+  <app-escena-arbol
+    escena
+    [render]="render"
+    [abierta]="abierta()"
+    [reveladas]="reveladas()"
+    [fuera]="fuera()"
+    [sano]="sano()"
+  />
 
-  <!-- Lo que se toca: el HTML, con cada tag que abre como botón y el cierre fuera de lugar como
-       hueco; cada renglón se marca cuando su pieza ya está en la pantalla. Al lado, el mismo HTML
-       como árbol de nodos: la pantalla de la nave es como se dibuja, el árbol es como se lee. -->
+  <!-- La pantalla de la nave, en tres columnas: el HTML, con cada tag que abre como botón y el
+       cierre fuera de lugar como hueco (cada renglón se marca cuando su pieza ya está dibujada); el
+       mismo HTML como árbol de nodos, que es como se lee; y lo que se dibuja (`escena-arbol`). -->
   <section consola class="htt">
     <div class="htt-codigo" role="group" aria-label="El HTML de la pantalla">
       @for (r of renglones(); track $index) {
@@ -101,5 +143,7 @@
         </g>
       }
     </svg>
+
+    <svg #render class="htt-render" viewBox="214 26 174 178" aria-hidden="true"></svg>
   </section>
 </app-pagina-del-manual>

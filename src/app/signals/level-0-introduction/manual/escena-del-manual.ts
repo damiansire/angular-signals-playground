@@ -43,7 +43,8 @@ export abstract class EscenaDelManual {
       if (!svg) return;
       this.ctx = gsap.context(() => {
         pintarCielo(svg, this.semilla);
-        const lugar = svg.querySelector<SVGGElement>('[data-nave]');
+        // La nave puede ir en un SVG propio, al costado del cielo (la ley 1 la aparta de su pantalla).
+        const lugar = this.host.querySelector<SVGGElement>('[data-nave]');
         if (lugar) this.nave = new NaveDelManual(lugar);
         this.armar(svg);
       }, this.host);

@@ -76,7 +76,7 @@
 /* "Mostrame": un cartelito de papel dorado, un poco torcido, como los del viaje. Se endereza al
    pasarle por encima, y apretado se hunde en su sombra. Con tres clases le gana a la pastilla
    oscura que la hoja le pone a todo botón de su pantalla (`.subhost button:not([class*='bg-'])`). */
-.pm .pm-etapas .pm-mostrar {
+.pm :is(.pm-etapas, .pm-globo) .pm-mostrar {
   margin-left: auto;
   padding: 0.45rem 1rem 0.5rem;
   border: 2px solid #5d4a5e;
@@ -97,21 +97,21 @@
     translate 0.2s,
     background-color 0.2s;
 }
-.pm .pm-etapas .pm-mostrar:hover:not(:disabled) {
+.pm :is(.pm-etapas, .pm-globo) .pm-mostrar:hover:not(:disabled) {
   rotate: 0deg;
   translate: 2px -2px;
   background: #ffdc94;
 }
-.pm .pm-etapas .pm-mostrar:active:not(:disabled) {
+.pm :is(.pm-etapas, .pm-globo) .pm-mostrar:active:not(:disabled) {
   translate: 1px 2px;
   box-shadow: 1px 2px 0 rgb(43 34 48 / 22%);
 }
-.pm .pm-etapas .pm-mostrar:disabled {
+.pm :is(.pm-etapas, .pm-globo) .pm-mostrar:disabled {
   cursor: default;
   rotate: 0deg;
   opacity: 0.75;
 }
-.pm .pm-etapas .pm-mostrar:focus-visible {
+.pm :is(.pm-etapas, .pm-globo) .pm-mostrar:focus-visible {
   outline: 3px solid #2b2230;
   outline-offset: 2px;
 }
@@ -216,10 +216,10 @@
    `increment()` quedaba debajo del pie. La consola va al lado, y la escena en la parte más ancha:
    más angosta que 1.3:1, el recorte le cortaba la punta del fuego a la nave. */
 @media (min-width: 1100px) and (max-height: 800px) {
-  .pm-escenario {
+  :host(:not(.pm-pantalla)) .pm-escenario {
     flex-direction: row;
   }
-  .pm-ventana {
+  :host(:not(.pm-pantalla)) .pm-ventana {
     flex: 1.5 1 0;
     min-height: 18rem;
   }
@@ -241,13 +241,13 @@
     max-width: none;
     inset-inline-end: 1.1rem;
   }
-  .pm .pm-etapas .pm-mostrar {
+  .pm :is(.pm-etapas, .pm-globo) .pm-mostrar {
     margin-left: 0;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .pm .pm-etapas .pm-mostrar {
+  .pm :is(.pm-etapas, .pm-globo) .pm-mostrar {
     rotate: none;
     transition: none;
   }
@@ -297,19 +297,19 @@
    sobre el cielo, a 2000×780 el título le pisaba el borde a la pantalla de la nave; y la columna de
    la consola tenía su parte de arriba vacía. */
 @media (min-width: 1100px) and (max-height: 800px) {
-  :host(.pm-entera) .pm {
+  :host(.pm-entera:not(.pm-pantalla)) .pm {
     display: grid;
     grid-template-columns: 1.5fr 1fr;
     grid-template-rows: auto 1fr;
   }
-  :host(.pm-entera) .pm-escenario {
+  :host(.pm-entera:not(.pm-pantalla)) .pm-escenario {
     display: contents;
   }
-  :host(.pm-entera) .pm-ventana {
+  :host(.pm-entera:not(.pm-pantalla)) .pm-ventana {
     grid-area: 1 / 1 / 3 / 2;
     min-height: 0;
   }
-  :host(.pm-entera) .pm-cabeza {
+  :host(.pm-entera:not(.pm-pantalla)) .pm-cabeza {
     position: relative;
     inset: auto;
     grid-area: 1 / 2;
@@ -321,10 +321,268 @@
     background: #241a45;
     pointer-events: auto;
   }
-  :host(.pm-entera) .pm-titulo {
+  :host(.pm-entera:not(.pm-pantalla)) .pm-titulo {
     font-size: clamp(1.6rem, 2.1vw, 2.4rem);
   }
-  :host(.pm-entera) .pm-consola {
+  :host(.pm-entera:not(.pm-pantalla)) .pm-consola {
     grid-area: 2 / 2;
+  }
+}
+
+/* ── La consola adentro de la pantalla de la nave (`enPantalla`) ──────────────────────────────
+   Sin franja abajo: el cielo llega hasta el pie. La nave va en un carril a la izquierda
+   (`--pm-nave-*`, que lee la escena) y dice en un globo lo que hay que hacer, con "Mostrame" como su
+   ayuda. Su pantalla toma el resto: en la barra de título la ley, en el vidrio código, árbol y lo
+   que se dibuja lado a lado, y las páginas del libro como pestañas sobre su borde de abajo. En un
+   celular, la nave va arriba, su globo debajo y la pantalla al final. */
+:host(.pm-pantalla) {
+  --pm-nave-ancho: 100%;
+  --pm-nave-alto: 7.5rem;
+  --pm-nave-arriba: 0.5rem;
+}
+:host(.pm-pantalla) .pm-ventana {
+  display: grid;
+  grid-template-rows: calc(var(--pm-nave-arriba) + var(--pm-nave-alto)) auto auto;
+  align-content: start;
+  row-gap: 1rem;
+  min-height: 0;
+  aspect-ratio: auto;
+  padding: 0 clamp(0.75rem, 2.4vw, 2.2rem) 2.25rem;
+}
+/* Del ancho de lo que muestra: estirada hasta el borde, a 3440 de ancho le sobraba medio vidrio. */
+.pm-pantalla {
+  grid-row: 3;
+  justify-self: center;
+  width: fit-content;
+  max-width: 100%;
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  min-width: 0;
+  padding: 0.9rem clamp(0.85rem, 1.6vw, 1.6rem) 1.6rem;
+  border-radius: 22px;
+  background: #1c1434;
+  box-shadow:
+    0 0 0 4px #3a2c5c,
+    0 0 0 6.5px #2b1b33,
+    0 26px 50px -20px rgb(6 3 14 / 80%);
+  color: #f2ecff;
+}
+
+/* La barra de título: la ley a la izquierda, en qué página del libro va a la derecha. */
+.pm-barra {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  justify-content: space-between;
+  gap: 0.4rem 1.5rem;
+  padding-bottom: 0.7rem;
+  border-bottom: 1.5px solid #3a2c5c;
+}
+.pm-barra-ley {
+  min-width: 0;
+}
+.pm-barra .pm-ley {
+  font-size: 0.72rem;
+}
+.pm-barra-titulo {
+  margin: 0.15rem 0 0;
+  font-family: var(--font-editorial, Georgia, serif);
+  font-size: clamp(1.35rem, min(1.7vw, 3.2vh), 2.6rem);
+  font-weight: 600;
+  line-height: 1.1;
+  color: #fff8ec;
+  text-wrap: balance;
+}
+.pm-barra-nave {
+  margin: 0.15rem 0 0;
+  font: italic 600 clamp(0.9rem, min(1vw, 2vh), 1.3rem) / 1.3 var(--font-editorial, Georgia, serif);
+  color: #c9bdf0;
+}
+
+/* El globo de la nave: los dos pasos, el de ahora encendido, y su ayuda abajo. Papel claro con
+   tinta violeta, como lo que dice un personaje, no como otro panel de la pantalla. */
+.pm-globo {
+  grid-row: 2;
+  justify-self: center;
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.6rem;
+  width: max-content;
+  max-width: min(100%, 24rem);
+  padding: 0.75rem 1rem 0.85rem;
+  border: 2.5px solid #2b1b33;
+  border-radius: 18px;
+  background: #fff8ec;
+  box-shadow: 4px 5px 0 rgb(11 6 24 / 45%);
+  color: #2b1b33;
+}
+/* La cola apunta a la nave: arriba en el celular, abajo con la nave al costado. */
+.pm-globo::after {
+  content: '';
+  position: absolute;
+  left: 2.2rem;
+  bottom: 100%;
+  width: 18px;
+  height: 14px;
+  background: #fff8ec;
+  border: 2.5px solid #2b1b33;
+  border-bottom: 0;
+  clip-path: polygon(0 100%, 50% 0, 100% 100%);
+  translate: 0 2px;
+}
+.pm-globo .pm-etapas {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.45rem;
+  min-height: 0;
+}
+.pm-globo .pm-etapa {
+  color: #8a7aa8;
+}
+.pm-globo .pm-etapa--ahora {
+  color: #2b1b33;
+}
+.pm-globo .pm-etapa--hecho {
+  color: #4b7a62;
+}
+.pm .pm-globo .pm-mostrar {
+  margin-left: 0;
+}
+
+/* Las páginas, como pestañas sobre el borde de abajo: la grilla estira la barra que pone el libro
+   a todo el ancho, y "Siguiente" se va a la derecha. */
+.pm-paginas {
+  position: absolute;
+  inset: auto 1.25rem 0;
+  display: grid;
+  translate: 0 50%;
+}
+.pm-paginas:empty {
+  display: none;
+}
+
+@media (min-width: 761px) {
+  :host(.pm-pantalla) {
+    --pm-nave-ancho: clamp(11rem, 20%, 34rem);
+    --pm-nave-alto: 40%;
+    --pm-nave-arriba: 44%;
+  }
+  :host(.pm-pantalla) .pm-ventana {
+    grid-template-rows: none;
+    grid-template-columns: var(--pm-nave-ancho) minmax(0, 1fr);
+    align-content: center;
+    padding: calc(var(--pm-arriba, 0px) + 1.25rem) clamp(1rem, 2.4vw, 2.2rem) 2.75rem 0;
+  }
+  .pm-pantalla {
+    grid-row: auto;
+    grid-column: 2;
+  }
+  /* En el carril, justo arriba de la nave, con la cola hacia abajo. Sin fila propia: con
+     `grid-row`, la caja de un absoluto es esa fila y el globo caía debajo de la nave. */
+  .pm-globo {
+    grid-row: auto;
+    position: absolute;
+    left: 1rem;
+    bottom: calc(100% - var(--pm-nave-arriba) - 4rem);
+    max-width: calc(var(--pm-nave-ancho) - 2rem);
+  }
+  .pm-globo::after {
+    left: 45%;
+    top: 100%;
+    bottom: auto;
+    border-top: 0;
+    border-bottom: 2.5px solid #2b1b33;
+    clip-path: polygon(0 0, 100% 0, 50% 100%);
+    translate: 0 -2px;
+  }
+}
+
+/* ── La portada (`portada`) ─────────────────────────────────────────────────────────────────
+   La ley grande en la pantalla de la nave, con su dibujo arriba y "Leer" abajo, que abre la demo.
+   Mientras está, la ley no se repite al costado (`pm-en-portada`). */
+.pm-portada {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.6rem;
+  max-width: 52rem;
+  padding: clamp(1rem, 4vh, 3rem) clamp(1rem, 4vw, 3.5rem) clamp(0.75rem, 3vh, 2rem);
+  text-align: center;
+}
+.pm-portada-titulo {
+  margin: 0 0 0.35rem;
+  font-family: var(--font-editorial, Georgia, serif);
+  font-size: clamp(2.2rem, min(4.4vw, 7.5vh), 5.6rem);
+  font-weight: 700;
+  line-height: 1.02;
+  letter-spacing: -0.015em;
+  color: #fff8ec;
+  text-wrap: balance;
+  text-shadow:
+    0 5px 0 rgb(25 8 40 / 75%),
+    0 12px 34px rgb(25 8 40 / 55%);
+}
+.pm-portada .pm-ley {
+  font-size: clamp(0.78rem, 1vw, 1.1rem);
+}
+.pm-portada-nave {
+  margin: 0;
+  font: italic 600 clamp(1rem, min(1.4vw, 2.6vh), 1.7rem) / 1.3
+    var(--font-editorial, Georgia, serif);
+  color: #c9bdf0;
+}
+.pm-portada-botones {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem 1rem;
+  margin-top: clamp(0.5rem, 2.5vh, 1.6rem);
+}
+/* "Leer": el mismo cartel de papel dorado que "Mostrame", más grande. Apretado se aplasta. Cuatro
+   clases: le gana a la pastilla oscura de todo botón de la hoja (`.subhost button:not(...)`). */
+.pm .pm-pantalla .pm-portada .pm-leer {
+  padding: 0.55rem 1.6rem 0.6rem;
+  border: 2.5px solid #5d4a5e;
+  border-radius: 12px;
+  outline: 1.5px dashed #b8791f;
+  outline-offset: -7px;
+  background: #ffd27a;
+  box-shadow: 4px 5px 0 rgb(11 6 24 / 45%);
+  rotate: -2deg;
+  font:
+    800 clamp(1.15rem, 1.5vw, 1.6rem) / 1.2 'Baloo 2',
+    var(--font-display, system-ui, sans-serif);
+  color: #2b2230;
+  cursor: pointer;
+  transition:
+    rotate 0.2s,
+    translate 0.2s,
+    scale 0.12s,
+    background-color 0.2s;
+}
+.pm .pm-pantalla .pm-portada .pm-leer:hover {
+  rotate: 0deg;
+  translate: 2px -2px;
+  background: #ffdc94;
+}
+.pm .pm-pantalla .pm-portada .pm-leer:active {
+  scale: 1.06 0.9;
+  translate: 1px 2px;
+}
+.pm .pm-pantalla .pm-portada .pm-leer:focus-visible {
+  outline: 3px solid #fff8ec;
+  outline-offset: 3px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .pm .pm-pantalla .pm-portada .pm-leer {
+    rotate: none;
+    transition: none;
   }
 }

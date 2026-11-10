@@ -1,58 +1,130 @@
 <article #marco class="pm">
-  <header class="pm-cabeza">
-    @if (datos; as d) {
-      <p class="pm-ley">Ley {{ d.numero }}</p>
-      <h2 class="pm-titulo" id="manual-ley">{{ d.ley }}</h2>
-      @if (d.marcas) {
-        <ng-container [ngTemplateOutlet]="d.marcas" />
+  <!-- Con la pantalla de la nave (`enPantalla`), la ley va en su barra de título, no acá. -->
+  @if (!enPantalla()) {
+    <header class="pm-cabeza">
+      @if (datos; as d) {
+        <p class="pm-ley">Ley {{ d.numero }}</p>
+        <h2 class="pm-titulo" id="manual-ley">{{ d.ley }}</h2>
+        @if (d.marcas) {
+          <ng-container [ngTemplateOutlet]="d.marcas" />
+        }
       }
-    }
-  </header>
+    </header>
+  }
 
-  <!-- Una sola pieza: la nave es el escenario y su pantalla muestra lo que pasa; abajo, su consola,
-       con lo que se toca. Probar y arreglar son dos pasos de la misma consola. -->
+  <!-- Las piezas que se mueven de lugar según dónde va la consola: abajo, o adentro de la pantalla
+       de la nave. Cada una se instancia en un solo lugar. Probar y arreglar son dos pasos del mismo
+       código. -->
+  <ng-template #pasos>
+    <li
+      class="pm-etapa"
+      [class.pm-etapa--ahora]="paso() === 1 && !resuelta()"
+      [class.pm-etapa--hecho]="paso() > 1 || resuelta()"
+    >
+      <span class="pm-num" aria-hidden="true">1</span>
+      <ng-content select="[hacer]" />
+    </li>
+    <li
+      class="pm-etapa"
+      [class.pm-etapa--ahora]="paso() === 2 && !resuelta()"
+      [class.pm-etapa--hecho]="resuelta()"
+    >
+      <span class="pm-num" aria-hidden="true">2</span>
+      <ng-content select="[arreglo]" />
+    </li>
+  </ng-template>
+  <ng-template #mostrame>
+    @if (guia() !== null || mostrando()) {
+      <button type="button" class="pm-mostrar" [disabled]="mostrando()" (click)="mostrar()">
+        <span aria-hidden="true">&#9654;</span> Mostrame
+      </button>
+    }
+  </ng-template>
+  <ng-template #paginas>
+    @if (datos?.pie; as p) {
+      <ng-container [ngTemplateOutlet]="p" />
+    }
+  </ng-template>
+  <ng-template #consola><ng-content select="[consola]" /></ng-template>
+
+  <!-- Una sola pieza: la nave es el escenario y su pantalla muestra lo que pasa. -->
   <section class="pm-escenario">
     <figure class="pm-ventana">
       <ng-content select="[escena]" />
-      @if (datos; as d) {
-        <figcaption class="pm-nave">{{ d.enLaNave }}</figcaption>
+      @if (enPantalla()) {
+        @if (!enPortada()) {
+          <!-- Lo que hay que hacer lo dice la nave, con su ayuda al pie: cambia de paso, y el globo
+               salta. -->
+          <div class="pm-globo" aria-live="polite">
+            <ol class="pm-etapas">
+              <ng-container [ngTemplateOutlet]="pasos" />
+            </ol>
+            <ng-container [ngTemplateOutlet]="mostrame" />
+          </div>
+        }
+        <div #pantalla class="pm-pantalla">
+          @if (enPortada()) {
+            <div class="pm-portada">
+              <ng-content select="[portada]" />
+              @if (datos; as d) {
+                <p class="pm-ley">Ley {{ d.numero }}</p>
+                <h2 class="pm-portada-titulo" id="manual-ley">{{ d.ley }}</h2>
+                <p class="pm-portada-nave">{{ d.enLaNave }}</p>
+                @if (d.marcas) {
+                  <ng-container [ngTemplateOutlet]="d.marcas" />
+                }
+              }
+              <div class="pm-portada-botones">
+                <ng-container [ngTemplateOutlet]="paginas" />
+                <button type="button" class="pm-leer" (click)="leer()">
+                  Leer <span aria-hidden="true">&rarr;</span>
+                </button>
+              </div>
+            </div>
+          } @else {
+            <!-- La barra de título de la pantalla es la cabeza de la página: la ley, lo que le dice
+                 a la nave y en qué página del libro va. -->
+            @if (datos; as d) {
+              <header class="pm-barra">
+                <div class="pm-barra-ley">
+                  <p class="pm-ley">Ley {{ d.numero }}</p>
+                  <h2 class="pm-barra-titulo" id="manual-ley">{{ d.ley }}</h2>
+                  <p class="pm-barra-nave">{{ d.enLaNave }}</p>
+                </div>
+                @if (d.marcas) {
+                  <ng-container [ngTemplateOutlet]="d.marcas" />
+                }
+              </header>
+            }
+            <ng-container [ngTemplateOutlet]="consola" />
+            <!-- Las páginas del libro, como pestañas sobre el borde de abajo de la pantalla. -->
+            <nav class="pm-paginas" aria-label="Páginas">
+              <ng-container [ngTemplateOutlet]="paginas" />
+            </nav>
+          }
+        </div>
+      } @else {
+        @if (datos; as d) {
+          <figcaption class="pm-nave">{{ d.enLaNave }}</figcaption>
+        }
       }
     </figure>
 
-    <div class="pm-consola">
-      <ol class="pm-etapas">
-        <li
-          class="pm-etapa"
-          [class.pm-etapa--ahora]="paso() === 1 && !resuelta()"
-          [class.pm-etapa--hecho]="paso() > 1 || resuelta()"
-        >
-          <span class="pm-num" aria-hidden="true">1</span>
-          <ng-content select="[hacer]" />
-        </li>
-        <li
-          class="pm-etapa"
-          [class.pm-etapa--ahora]="paso() === 2 && !resuelta()"
-          [class.pm-etapa--hecho]="resuelta()"
-        >
-          <span class="pm-num" aria-hidden="true">2</span>
-          <ng-content select="[arreglo]" />
-        </li>
-        <!-- Los botones de página y "Mostrame" mientras haga falta. "Siguiente" llega recién con la
-             página cumplida, en el lugar de "Mostrame": en su propia fila, abajo, se podía pasar sin
-             hacer nada. -->
-        <li class="pm-etapas-boton">
-          @if (datos?.pie; as p) {
-            <ng-container [ngTemplateOutlet]="p" />
-          }
-          @if (guia() !== null || mostrando()) {
-            <button type="button" class="pm-mostrar" [disabled]="mostrando()" (click)="mostrar()">
-              <span aria-hidden="true">&#9654;</span> Mostrame
-            </button>
-          }
-        </li>
-      </ol>
-      <ng-content select="[consola]" />
-    </div>
+    @if (!enPantalla()) {
+      <div class="pm-consola">
+        <ol class="pm-etapas">
+          <ng-container [ngTemplateOutlet]="pasos" />
+          <!-- Los botones de página y "Mostrame" mientras haga falta. "Siguiente" llega recién con
+               la página cumplida, en el lugar de "Mostrame": en su propia fila, abajo, se podía
+               pasar sin hacer nada. -->
+          <li class="pm-etapas-boton">
+            <ng-container [ngTemplateOutlet]="paginas" />
+            <ng-container [ngTemplateOutlet]="mostrame" />
+          </li>
+        </ol>
+        <ng-container [ngTemplateOutlet]="consola" />
+      </div>
+    }
   </section>
 
   <app-mano-guia [punta]="punta()" />

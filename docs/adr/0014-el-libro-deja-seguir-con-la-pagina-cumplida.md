@@ -14,6 +14,8 @@ cumple la página, en otro lugar.
 1. **"Siguiente" aparece recién con la página cumplida** (los dos pasos de la consola hechos), en
    el verde de los pasos hechos y en el lugar de "▶ Mostrame", en la fila de los pasos. La flecha →
    del teclado sigue la misma regla. "← Anterior" va en esa fila, a la izquierda.
+   (El lugar se reemplaza en las páginas en la pantalla de la nave por
+   [0016](./0016-la-ley-1-va-en-la-pantalla-de-la-nave-con-portada.md): pestañas sobre su borde.)
 2. **Una página cumplida queda cumplida** mientras la vista viva: volver a ella no obliga a hacerla
    de nuevo.
 3. **No es una puerta**: "Mostrame" resuelve cualquier página, así que el avance de 0002 sigue sin

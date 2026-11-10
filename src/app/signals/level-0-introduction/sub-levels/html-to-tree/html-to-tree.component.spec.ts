@@ -16,6 +16,12 @@ describe('HtmlToTreeComponent', () => {
   const renglones = () =>
     [...el.querySelectorAll('.htt-linea')].map((r) => (r.textContent ?? '').replace(/\s+/g, ''));
   const mano = () => (fixture.componentInstance as unknown as { guia: () => string | null }).guia();
+  /** "Leer": la portada se va con una animación corta y recién después aparece la demo. */
+  const leer = async () => {
+    click('.pm-leer');
+    await new Promise((listo) => setTimeout(listo, 450));
+    fixture.detectChanges();
+  };
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
@@ -26,46 +32,64 @@ describe('HtmlToTreeComponent', () => {
     fixture.detectChanges();
   });
 
-  it('es una sola pieza: escena, consola y sin desafío aparte', () => {
-    expect(el.querySelector('.pm-escenario app-escena-arbol')).not.toBeNull();
-    expect(el.querySelector('.pm-consola .htt-codigo')).not.toBeNull();
-    expect(el.querySelector('app-manipulable-system')).toBeNull();
-    expect(el.querySelector('app-code')).toBeNull();
+  it('abre con la portada: el árbol armado y "Leer", sin la demo', async () => {
+    expect(el.querySelector('.pm-portada .htt-portada')).not.toBeNull();
+    expect(el.querySelectorAll('.htt-portada-nodo').length).toBe(NODOS.length);
+    expect(el.querySelector('.htt-codigo')?.isConnected ?? false).toBeFalse();
+    expect(mano()).toBe('[data-guia="abre-main"]');
+    await leer();
+    expect(el.querySelector('.pm-portada')).toBeNull();
+    expect(el.querySelector('.pm-pantalla .htt-codigo')).not.toBeNull();
+    expect(el.querySelector('.pm-globo .pm-etapa--ahora')).not.toBeNull();
   });
 
-  it('arranca con el bug: `</article>` cerrado enseguida y la pantalla vacía', () => {
-    expect(renglones()).toContain('<article></article>');
-    expect(el.querySelectorAll('.htt-tag').length).toBe(NODOS.length);
-    expect(pantalla()).toContain('0 de 7 piezas');
-  });
+  describe('con la portada abierta', () => {
+    beforeEach(leer);
 
-  it('cada tag revela su pieza; el título y el párrafo caen fuera de su panel', () => {
-    click('[data-guia="abre-main"]');
-    expect(pantalla()).toContain('1 de 7 piezas');
-    expect(el.querySelector('[data-guia="abre-main"]')?.getAttribute('aria-pressed')).toBe('true');
-    tocarTodos();
-    expect(pantalla()).toContain('7 de 7 piezas, 2 fuera de su panel');
-    expect(etapas()[0].classList).toContain('pm-etapa--hecho');
-    expect(etapas()[1].classList).toContain('pm-etapa--ahora');
-  });
+    it('es una sola pieza: escena, pantalla y sin desafío aparte', () => {
+      expect(el.querySelector('.pm-escenario app-escena-arbol')).not.toBeNull();
+      expect(el.querySelector('.pm-pantalla .htt-codigo')).not.toBeNull();
+      expect(el.querySelector('.pm-consola')).toBeNull();
+      expect(el.querySelector('app-manipulable-system')).toBeNull();
+      expect(el.querySelector('app-code')).toBeNull();
+    });
 
-  it('mover el cierre lo lleva después del párrafo, y sana', () => {
-    tocarTodos();
-    click('[data-guia="cierre"]');
-    const r = renglones();
-    expect(r).toContain('<article>');
-    expect(r.indexOf('</article>')).toBe(r.indexOf('<p>Texto</p>') + 1);
-    expect(pantalla()).toBe('Pantalla de la nave: 7 de 7 piezas');
-    expect(etapas()[1].classList).toContain('pm-etapa--hecho');
-  });
+    it('arranca con el bug: `</article>` cerrado enseguida y la pantalla vacía', () => {
+      expect(renglones()).toContain('<article></article>');
+      expect(el.querySelectorAll('.htt-tag').length).toBe(NODOS.length);
+      expect(pantalla()).toContain('0 de 7 piezas');
+    });
 
-  it('la mano dice lo mismo que los pasos: cada tag en orden y después el hueco', () => {
-    for (const id of NODOS) {
-      expect(mano()).toBe(`[data-guia="abre-${id}"]`);
-      click(`[data-guia="abre-${id}"]`);
-    }
-    expect(mano()).toBe('[data-guia="cierre"]');
-    click('[data-guia="cierre"]');
-    expect(mano()).toBeNull();
+    it('cada tag revela su pieza; el título y el párrafo caen fuera de su panel', () => {
+      click('[data-guia="abre-main"]');
+      expect(pantalla()).toContain('1 de 7 piezas');
+      expect(el.querySelector('[data-guia="abre-main"]')?.getAttribute('aria-pressed')).toBe(
+        'true',
+      );
+      tocarTodos();
+      expect(pantalla()).toContain('7 de 7 piezas, 2 fuera de su panel');
+      expect(etapas()[0].classList).toContain('pm-etapa--hecho');
+      expect(etapas()[1].classList).toContain('pm-etapa--ahora');
+    });
+
+    it('mover el cierre lo lleva después del párrafo, y sana', () => {
+      tocarTodos();
+      click('[data-guia="cierre"]');
+      const r = renglones();
+      expect(r).toContain('<article>');
+      expect(r.indexOf('</article>')).toBe(r.indexOf('<p>Texto</p>') + 1);
+      expect(pantalla()).toBe('Pantalla de la nave: 7 de 7 piezas');
+      expect(etapas()[1].classList).toContain('pm-etapa--hecho');
+    });
+
+    it('la mano dice lo mismo que los pasos: cada tag en orden y después el hueco', () => {
+      for (const id of NODOS) {
+        expect(mano()).toBe(`[data-guia="abre-${id}"]`);
+        click(`[data-guia="abre-${id}"]`);
+      }
+      expect(mano()).toBe('[data-guia="cierre"]');
+      click('[data-guia="cierre"]');
+      expect(mano()).toBeNull();
+    });
   });
 });

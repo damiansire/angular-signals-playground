@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, effect, input } from '@angular/core';
 import { gsap } from 'gsap';
-import { CIELO_DEL_ESCENARIO, EscenaDelManual, chispas, pintarPantalla } from './escena-del-manual';
+import { CIELO_DEL_ESCENARIO, EscenaDelManual, chispas } from './escena-del-manual';
 import { PALETA, el } from './nave-del-manual';
 
 interface Pieza {
@@ -71,32 +71,54 @@ const ALTO_VACIO = 9;
 const AVISO = '#ff7676';
 
 /**
- * Lámina de la ley 1, que es el escenario de su página: la pantalla de la nave se arma con los tags
- * que se tocan en la consola. Cada pieza va a donde la ponen los tags, no la sangría: si un panel se
- * cierra antes de tiempo, queda chico y vacío, sus hijos caen fuera de él y la nave se preocupa.
- * Moviendo el cierre, suben a su lugar.
+ * Lámina de la ley 1, que es el escenario de su página: lo que se dibuja (`render`, una columna de
+ * la pantalla de la nave, al lado del código y del árbol) se arma con los tags que se tocan. Cada
+ * pieza va a donde la ponen los tags, no la sangría: si un panel se cierra antes de tiempo, queda
+ * chico y vacío, sus hijos caen fuera de él y la nave se preocupa. Moviendo el cierre, suben a su
+ * lugar.
+ *
+ * La nave va en su propio SVG, en el carril que le deja la página (`--pm-nave-*`): con la pantalla
+ * en HTML, en el mismo cielo la pantalla se le encimaba según la proporción de la ventana.
  */
 @Component({
   selector: 'app-escena-arbol',
   template: `<svg
-    class="esc"
-    [attr.viewBox]="cielo"
-    preserveAspectRatio="xMidYMid slice"
-    role="img"
-    [attr.aria-label]="descripcion()"
-  >
-    <g data-nave transform="translate(112 150) scale(1.05)"></g>
-  </svg>`,
+      class="esc"
+      [attr.viewBox]="cielo"
+      preserveAspectRatio="xMidYMid slice"
+      role="img"
+      [attr.aria-label]="descripcion()"
+    ></svg>
+    <svg class="esc-nave" viewBox="-125 -62 214 116">
+      <g data-nave></g>
+    </svg>`,
   styleUrl: './escena.css',
+  styles: `
+    .esc-nave {
+      position: absolute;
+      left: 0;
+      top: var(--pm-nave-arriba, 0);
+      width: var(--pm-nave-ancho, 100%);
+      height: var(--pm-nave-alto, 100%);
+      overflow: visible;
+    }
+  `,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class EscenaArbolComponent extends EscenaDelManual {
+  /**
+   * Dónde se dibuja la pantalla: un SVG con el `viewBox` de `PANTALLA`, que pone la página. Como
+   * `Element`: el chequeo de plantillas tipa toda referencia a un elemento como `HTMLElement`.
+   */
+  readonly render = input.required<Element>();
   /** Los elementos revelados, por id. */
   readonly reveladas = input<readonly string[]>([]);
   /** Los elementos que los tags dejan fuera del panel donde los pone la sangría. */
   readonly fuera = input<readonly string[]>([]);
   /** La página quedó sana: la nave festeja. */
   readonly sano = input(false);
+  /** La portada se abrió: la pantalla ya muestra la demo. */
+  readonly abierta = input(true);
 
   protected readonly semilla = 11;
   protected readonly cielo = CIELO_DEL_ESCENARIO;
@@ -129,10 +151,15 @@ export class EscenaArbolComponent extends EscenaDelManual {
     effect(() => {
       if (this.sano() && this.lista) this.reaccion(() => this.festejar());
     });
+    effect(() => {
+      if (this.abierta() && this.lista) this.reaccion(() => this.alAbrirse());
+    });
   }
 
-  protected armar(svg: SVGSVGElement): void {
-    const pantalla = pintarPantalla(svg, { x: 182, y: 148 });
+  protected armar(): void {
+    const render = this.render();
+    if (!(render instanceof SVGSVGElement)) return;
+    const pantalla = el(render, 'g');
     // El lugar de cada pieza, punteado: la pantalla vacía se lee como algo por armar. Los de adentro
     // del marco van encima de él: un panel que quedó chico deja a la vista los lugares que perdió.
     const punteado = {
@@ -200,7 +227,7 @@ export class EscenaArbolComponent extends EscenaDelManual {
       return g;
     });
     this.piezas[0].after(fantasma, aviso);
-    this.etiquetas = el(svg, 'g', { 'pointer-events': 'none' });
+    this.etiquetas = el(render, 'g', { 'pointer-events': 'none' });
     this.mostrar(new Set(this.armadas()), new Set(this.fuera()), true);
   }
 
@@ -283,11 +310,11 @@ export class EscenaArbolComponent extends EscenaDelManual {
     const ultima = nuevas.at(-1) ?? mudadas.at(-1);
     if (ultima) {
       const dy = caidas.has(ultima.id) ? (ultima.caida ?? 0) : 0;
-      nave.mirar(ultima.x + ultima.ancho / 2, ultima.y + dy + 6);
+      this.mirarLaPantalla(ultima.x + ultima.ancho / 2, ultima.y + dy + 6);
       nave.empujar(-30, 1.5);
     } else if (ahora.size === 0) {
-      // Vacía, mira hacia la consola: es de ahí que va a venir la primera pieza.
-      nave.mirar(120, 300);
+      // Vacía, mira hacia el código: es de ahí que va a venir la primera pieza.
+      this.mirarLaPantalla(-120, 150);
     }
     nave.animo(
       caidas.size > 0
@@ -298,6 +325,16 @@ export class EscenaArbolComponent extends EscenaDelManual {
             ? 'atenta'
             : 'tranquila',
     );
+  }
+
+  /** La nave mira un punto de la pantalla, que vive en otro SVG: se pasa por las coordenadas de la ventana. */
+  private mirarLaPantalla(x: number, y: number): void {
+    const render = this.render();
+    const desde = render instanceof SVGSVGElement ? render.getScreenCTM() : null;
+    const hasta = this.host.querySelector<SVGSVGElement>('.esc-nave')?.getScreenCTM();
+    if (!desde || !hasta) return;
+    const p = new DOMPoint(x, y).matrixTransform(desde).matrixTransform(hasta.inverse());
+    this.nave?.mirar(p.x, p.y);
   }
 
   /** El nombre del tag sube un momento sobre la pieza que acaba de llegar, donde termina. */
@@ -338,13 +375,26 @@ export class EscenaArbolComponent extends EscenaDelManual {
       .to(g, { opacity: 0, y: -8, duration: 0.3, ease: 'power1.in' }, '+=0.7');
   }
 
+  /**
+   * "Leer": la nave salta de gusto cuando se agranda su pantalla y, ya con la demo adentro, mira el
+   * código, de donde va a venir la primera pieza.
+   */
+  private alAbrirse(): void {
+    this.nave?.animo('contenta');
+    this.nave?.saltito(14);
+    gsap.delayedCall(this.quieta ? 0 : 0.6, () => {
+      this.nave?.animo('atenta');
+      this.mirarLaPantalla(-120, 150);
+    });
+  }
+
   /** Cuando el título y el párrafo ya subieron a su panel, no mientras suben. */
   private festejar(): void {
     gsap.delayedCall(this.quieta ? 0 : 0.8, () => {
       this.nave?.animo('contenta');
       this.nave?.saltito(18);
-      const svg = this.host.querySelector('svg');
-      if (svg) chispas(svg, 140, 118);
+      const svg = this.host.querySelector<SVGSVGElement>('.esc-nave');
+      if (svg) chispas(svg, 0, -6);
     });
   }
 }

@@ -47,6 +47,21 @@ const COLOR: Readonly<Record<NodoId, { fondo: string; letra: string; oscuro?: tr
 };
 
 /**
+ * El dibujo de la portada: el árbol de la demo ya armado, con los colores de sus piezas, que crece
+ * desde la raíz. Es lo que la página enseña, antes de tocar nada.
+ */
+const PORTADA: readonly { id: NodoId; x: number; y: number; padre?: NodoId }[] = [
+  { id: 'main', x: 150, y: 16 },
+  { id: 'section', x: 82, y: 64, padre: 'main' },
+  { id: 'article', x: 218, y: 64, padre: 'main' },
+  { id: 'h2', x: 46, y: 112, padre: 'section' },
+  { id: 'p1', x: 118, y: 112, padre: 'section' },
+  { id: 'h3', x: 182, y: 112, padre: 'article' },
+  { id: 'p2', x: 254, y: 112, padre: 'article' },
+];
+const LUGAR_EN_PORTADA = new Map(PORTADA.map((n) => [n.id, n]));
+
+/**
  * La ley 1 en una sola pieza: la pantalla de la nave es el árbol, y la consola tiene el HTML con un
  * cierre fuera de lugar. Probar es tocar los tags: cada uno revela su pieza, y el título y el
  * párrafo, sangrados como si fueran de `<article>`, caen fuera de su panel porque `</article>` ya lo
@@ -60,6 +75,21 @@ const COLOR: Readonly<Record<NodoId, { fondo: string; letra: string; oscuro?: tr
   styleUrl: './html-to-tree.component.css',
 })
 export class HtmlToTreeComponent {
+  /** Se tocó "Leer" en la portada: la nave festeja que se abre su pantalla. */
+  protected readonly abierta = signal(false);
+  protected readonly portada = PORTADA.map((n, i) => {
+    const arriba = n.padre ? LUGAR_EN_PORTADA.get(n.padre) : undefined;
+    const medio = arriba ? (arriba.y + n.y) / 2 : n.y;
+    return {
+      ...n,
+      orden: i,
+      tag: TAG[n.id],
+      color: COLOR[n.id],
+      rama: arriba
+        ? `M ${arriba.x} ${arriba.y + 11} C ${arriba.x} ${medio}, ${n.x} ${medio}, ${n.x} ${n.y - 11}`
+        : null,
+    };
+  });
   protected readonly arreglado = signal(false);
   /** Los tags tocados, en el orden en que se tocaron. */
   protected readonly reveladas = signal<readonly NodoId[]>([]);
