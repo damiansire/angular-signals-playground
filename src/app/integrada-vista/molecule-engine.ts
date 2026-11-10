@@ -264,6 +264,8 @@ const ELECTRONES_ENTRADA = ['#d9503f', '#3fae8f', '#eb9b3c'];
 const PARADA_ATOMO = 1.3;
 /** Hasta dónde del scroll (`s`) la landing sigue a la vista: el recorrido arranca pasado este punto. */
 const INTRO_HASTA = 0.12;
+/** El `transition: opacity 0.6s` de `.intro`, con un margen: recién ahí la intro tapa entera. */
+const FUNDIDO_DE_LA_INTRO_MS = 650;
 /**
  * Cuánto se ve el chrome del recorrido (topbar, riel): nada mientras la landing está a la vista, y
  * después un fundido corto. Antes arrancaba en s = 0 y asomaba encima de la landing.
@@ -1144,6 +1146,26 @@ export function initMolecule(
   // Arranca en null (y no en true) para que el primer render avise siempre, sin depender de
   // adivinar en qué estado nace la landing.
   let ultimaIntroVisible: boolean | null = null;
+  // Debajo de la intro no se ve nada (el fondo de `.tusi` es opaco), pero la molécula y las cards
+  // seguían animándose, y el navegador volvía a rasterizar en cada cuadro una capa del tamaño de la
+  // pantalla. Con poca memoria de GPU (Opera Neon con otras pestañas) a la colina le faltaban tiles:
+  // Angie sin cuerpo, letras del título que no estaban. Se esconde recién cuando la intro terminó de
+  // cubrir, y vuelve apenas empieza a irse: en el fundido, lo de abajo se ve.
+  let tapadoPorIntro = false;
+  let pedidoDeTapar = 0;
+  const aplicarTapado = (tapa: boolean): void => {
+    if (tapa === tapadoPorIntro) return;
+    tapadoPorIntro = tapa;
+    const visibilidad = tapa ? 'hidden' : '';
+    if (sceneG.ownerSVGElement) sceneG.ownerSVGElement.style.visibility = visibilidad;
+    contentEl.style.visibility = visibilidad;
+    aplicarMovimiento();
+  };
+  const taparDebajo = (tapa: boolean): void => {
+    const pedido = ++pedidoDeTapar;
+    if (!tapa) aplicarTapado(false);
+    else later(() => pedido === pedidoDeTapar && aplicarTapado(true), FUNDIDO_DE_LA_INTRO_MS);
+  };
   let lastBorn = 0;
   // Último (nivel, sub-nivel) reportado a la URL, para no reescribirla en cada frame.
   let whereC = -2;
@@ -1563,6 +1585,7 @@ export function initMolecule(
       introEl.style.pointerEvents = introVisible ? '' : 'none';
       if (introVisible !== ultimaIntroVisible) {
         ultimaIntroVisible = introVisible;
+        taparDebajo(introVisible);
         onIntroVisible?.(introVisible);
       }
     }
@@ -1849,7 +1872,7 @@ export function initMolecule(
     root.classList.toggle('anims-frozen', oculta);
     subPuckE.style.display = reduceMotion ? 'none' : '';
     for (const svg of [molSvg, suborbit]) {
-      if (oculta || reduceMotion || pausaFondo) svg?.pauseAnimations();
+      if (oculta || reduceMotion || pausaFondo || tapadoPorIntro) svg?.pauseAnimations();
       else svg?.unpauseAnimations();
     }
   }

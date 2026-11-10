@@ -51,6 +51,27 @@ describe('IntegradaVistaComponent', () => {
     fixture.destroy();
   });
 
+  it('debajo de la intro no pinta nada, y lo devuelve apenas la intro se va', async () => {
+    const fixture = await montar();
+    const host: HTMLElement = fixture.nativeElement;
+    await hastaElArranque(host);
+    const molecula = host.querySelector<SVGSVGElement>('svg.mol')!;
+    const cards = host.querySelector<HTMLElement>('#content')!;
+
+    // La landing arranca en la intro: lo de abajo se esconde cuando terminó de cubrir.
+    await hasta(() => molecula.style.visibility === 'hidden');
+    expect(molecula.style.visibility).withContext('molécula tapada').toBe('hidden');
+    expect(cards.style.visibility).withContext('cards tapadas').toBe('hidden');
+
+    const stage = host.querySelector<HTMLElement>('#stage')!;
+    stage.scrollTop = stage.scrollHeight;
+    await hasta(() => molecula.style.visibility === '');
+    expect(molecula.style.visibility).withContext('molécula a la vista').toBe('');
+    expect(cards.style.visibility).withContext('cards a la vista').toBe('');
+
+    fixture.destroy();
+  });
+
   it('el motor dibuja una card por concepto del árbol', async () => {
     const fixture = await montar();
 
