@@ -131,6 +131,11 @@ export class AvisoAuricularesComponent {
   /** Los loops que van quietos hasta llegar, con su efecto aparte para devolvérselo. */
   private quietos: { animacion: Animation; efecto: KeyframeEffect; fijas: string[] }[] = [];
   private tapados: (HTMLElement | SVGElement)[] = [];
+  /**
+   * La colina de atrás, mientras el aviso la tapa. Es un diálogo modal: Tab salía de la invitación a
+   * la lamparita, a las fichas y a "Entrar" de la colina, que no se veían.
+   */
+  private inertes: HTMLElement[] = [];
 
   constructor() {
     inject(DestroyRef).onDestroy(() => {
@@ -139,9 +144,14 @@ export class AvisoAuricularesComponent {
       this.soltarLoops();
       this.despertarLoops();
       this.destapar();
+      this.soltarLaColina();
     });
     // El foco va a la invitación, así Enter alcanza; no si la landing arranca tapada (un deep-link).
     afterNextRender(() => {
+      this.inertes = [...(this.host.parentElement?.children ?? [])].filter(
+        (el): el is HTMLElement => el instanceof HTMLElement && el !== this.host && !el.inert,
+      );
+      for (const el of this.inertes) el.inert = true;
       if (!this.host.closest('.gone')) this.seguir().nativeElement.focus({ preventScroll: true });
       // El primer tiempo llega con el timer y no al montar: si la vista se va enseguida, no queda
       // un cuadro pedido al motor.
@@ -245,8 +255,7 @@ export class AvisoAuricularesComponent {
     this.elegido.emit(conSonido);
     const escena = this.host.parentElement;
     if (sinMovimiento() || !escena) {
-      this.momento.set('listo');
-      this.llego.emit();
+      this.llegar();
       return;
     }
     const r = this.host.getBoundingClientRect();
@@ -376,13 +385,24 @@ export class AvisoAuricularesComponent {
       this.destapar();
       // El aviso queda en cero hasta que lo oculta `listo`: devuelto a su tamaño, volvía entero un cuadro.
       this.viaje.emit(false);
-      this.momento.set('listo');
-      this.llego.emit();
+      this.llegar();
     };
     // El primer cuadro va ya, junto con la máscara: sin aire, el aviso desaparecía un cuadro.
     cero = performance.now();
     pintar(cero);
     this.momento.set('alejandose');
+  }
+
+  /** La colina queda a la vista: vuelve a ser tocable y a estar en el orden de foco. */
+  private llegar(): void {
+    this.soltarLaColina();
+    this.momento.set('listo');
+    this.llego.emit();
+  }
+
+  private soltarLaColina(): void {
+    for (const el of this.inertes) el.inert = false;
+    this.inertes = [];
   }
 
   private tapar(detras: (HTMLElement | SVGElement)[]): void {
