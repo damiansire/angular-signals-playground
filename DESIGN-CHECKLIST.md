@@ -1070,8 +1070,8 @@ Del minijuego de operadores (2026-11-08):
       carril a la izquierda, en su propio SVG (`--pm-nave-*`). Con el árbol abajo, junto al código,
       quedaba lejos de lo que dibuja. Cada cosa tiene su lugar: la ley en la barra de título de la
       pantalla (con las marcas del libro a la derecha), los pasos y "Mostrame" en un globo de la
-      nave que salta al cambiar de paso, y "Bitácora/Siguiente" como pestañas sobre el borde de abajo
-      de la pantalla. Abre con una portada (la ley grande, el árbol armado que crece desde la raíz y
+      nave que salta al cambiar de paso, "Bitácora" como pestaña sobre el borde de abajo de la
+      pantalla y "Siguiente" en el carril de la nave (ver abajo). Abre con una portada (la ley grande, el árbol armado que crece desde la raíz y
       "Leer"); "Leer" achica la portada, agranda la pantalla hasta la demo y la nave salta.
 - [ ] Un absoluto dentro de una grilla NO lleva `grid-row`/`grid-column`: su caja pasa a ser esa
       celda. El globo de la nave tenía `grid-row: 2` (su lugar en el celular) y con la nave al
@@ -1080,6 +1080,18 @@ Del minijuego de operadores (2026-11-08):
       (`fit-content`): a 1366 la letra de `min(1.3vw, 2.6vh)` mandaba el render abajo del árbol por
       unos píxeles, y a 3440 la pantalla estirada dejaba medio vidrio vacío. Medido con
       `getBoundingClientRect` a 375, 1366, 1920 y 3440: sin scroll horizontal y nada encimado.
+- [ ] "Siguiente" en la pantalla de la nave es de la nave: vidrio verde translúcido debajo de ella,
+      centrado en el carril y con tope de ancho (a 3440 era una barra finita de 500 px), con brillo
+      que lo cruza, halo que late y flechas que corren hacia adelante. Tocarlo hace despegar a la
+      nave (se echa atrás, llama a fondo, sale por la derecha POR DELANTE de la pantalla) y recién
+      ahí pasa la hoja; la página siguiente la trae desde la izquierda (`VueloDeLaNave`). El globo se
+      va con ella: quedaba hablando solo en el carril vacío. Sin loops con `prefers-reduced-motion`.
+- [ ] Si la nave sube de capa (`.esc-nave` en `z-index: 2` para volar sobre la pantalla), todo lo
+      que se toca en el carril sube también: su caja de SVG tapaba "Mostrame" del globo y el clic no
+      llegaba. Medido con input real por CDP, no con `.click()`.
+- [ ] La llama a fondo se estira desde la boca del motor (`translate(-68 0) scale(…)` a mano): con
+      `transformOrigin` de GSAP el origen sale de la caja de la llama, que chisporrotea, y a 3.4× la
+      llama quedaba despegada de la nave.
 - [ ] La mano se vuelve a medir cuando termina de entrar la demo: se medía con la pantalla todavía
       creciendo desde la portada, el marco no cambiaba de tamaño, el observador no avisaba y
       señalaba un hueco al lado de `<main>`.
