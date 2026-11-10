@@ -76,6 +76,11 @@ export interface IntroTusiHandle {
   dispose: () => void;
   /** Lo llama el motor del recorrido, que es el único que sabe si la landing se está viendo. */
   setVisible: (visible: boolean) => void;
+  /**
+   * Entra sin la salida de la colina: con una partida para retomar, el toque del aviso ya fue el
+   * gesto que deja sonar (ADR 0015).
+   */
+  entrarSinDespedida: () => void;
 }
 
 export function initIntroTusi(host: HTMLElement, options: IntroTusiOptions = {}): IntroTusiHandle {
@@ -604,6 +609,11 @@ export function initIntroTusi(host: HTMLElement, options: IntroTusiOptions = {})
 
   return {
     setVisible: aplicarVisibilidad,
+    entrarSinDespedida: (): void => {
+      if (started || picked || cerrado) return;
+      picked = true;
+      entrar();
+    },
     dispose: (): void => {
       cerrado = true;
       window.cancelAnimationFrame(rafId);

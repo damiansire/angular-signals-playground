@@ -645,8 +645,10 @@
                  color tapa la colina, así no se ve la mañana un instante antes de la noche. -->
             @defer (on immediate) {
               <app-aviso-auriculares
+                [retoma]="retomaDespuesDelAviso()"
                 (viaje)="angieMiraFijo($event)"
                 (llego)="alLlegarALaColina()"
+                (retomar)="retomarDondeQuedo()"
               />
             } @placeholder {
               <div class="ini__telon" aria-hidden="true"></div>

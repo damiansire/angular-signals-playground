@@ -5,6 +5,7 @@ import {
   ElementRef,
   afterNextRender,
   inject,
+  input,
   output,
   signal,
   viewChild,
@@ -39,7 +40,7 @@ import {
   type Lado,
 } from './aviso-auriculares';
 
-type Momento = 'esperando' | 'probando' | 'alejandose' | 'listo';
+type Momento = 'esperando' | 'probando' | 'alejandose' | 'retomando' | 'listo';
 
 /** Los lentes de sol, en el plano de la cara: centrados entre los ojos, uno en espejo del otro. */
 const LENTE_IZQUIERDO =
@@ -92,6 +93,13 @@ export class AvisoAuricularesComponent {
   readonly viaje = output<boolean>();
   /** La cámara llegó a la colina: recién ahí entra su título, que de cerca se vería gigante. */
   readonly llego = output<void>();
+  /**
+   * Hay una partida para retomar: el toque es solo el gesto que deja sonar, sin prueba ni colina
+   * (ADR 0015).
+   */
+  readonly retoma = input(false);
+  /** El toque ya dejó sonar: la historia puede seguir donde quedó. */
+  readonly retomar = output<void>();
 
   protected readonly momento = signal<Momento>('esperando');
   /** El aviso recomienda el sonido: arranca prendido, y apagarlo es una elección explícita. */
@@ -150,8 +158,22 @@ export class AvisoAuricularesComponent {
     e.stopPropagation();
     if ((e.target as Element | null)?.closest('.aa__mudo')) return;
     if (this.momento() !== 'esperando') return;
-    if (this.conSonido()) this.probar();
+    if (this.retoma()) this.seguirDondeQuedo();
+    else if (this.conSonido()) this.probar();
     else this.sinSonido();
+  }
+
+  /**
+   * El aviso sigue a la vista mientras la pantalla de inicio se desvanece entera: ocultarlo dejaba
+   * ver la colina de día un instante entre la noche del aviso y la de la historia.
+   */
+  private seguirDondeQuedo(): void {
+    const conSonido = this.conSonido();
+    sonido().alternar(conSonido);
+    if (conSonido) sonido().desbloquear();
+    this.momento.set('retomando');
+    this.elegido.emit(conSonido);
+    this.retomar.emit();
   }
 
   protected alternarSonido(e: MouseEvent): void {

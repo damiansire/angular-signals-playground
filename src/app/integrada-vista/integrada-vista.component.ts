@@ -80,7 +80,7 @@ import {
 } from '../libs/partida';
 import { CinematicaComponent } from './cinematicas/cinematica.component';
 import { PUNTOS_DEL_PROLOGO } from './puntos-del-prologo';
-import { entradaDeLaHistoria, puntoDelRecorrido } from './retomar';
+import { despuesDelAviso, entradaDeLaHistoria, puntoDelRecorrido } from './retomar';
 import { AvisoAuricularesComponent } from './aviso-auriculares/aviso-auriculares.component';
 import { BitacoraComponent, type CapituloDeBitacora } from './bitacora/bitacora.component';
 import {
@@ -187,6 +187,8 @@ export class IntegradaVistaComponent {
 
   /** La escena de la colina, para que el aviso le avise cuando se va. */
   private inicio: InicioAngie | null = null;
+  /** La pantalla de inicio, para entrar sin la colina cuando hay dónde retomar. */
+  private landing: IntroTusiHandle | null = null;
 
   /**
    * La cámara llegó desde el ojo de Angie a la colina: entra el título y empieza su música. Aunque hayan elegido
@@ -194,6 +196,17 @@ export class IntegradaVistaComponent {
    */
   protected alLlegarALaColina(): void {
     this.inicio?.revelar();
+  }
+
+  /** Con una partida para retomar, el aviso no lleva a la colina: sigue la historia donde quedó. */
+  protected readonly retomaDespuesDelAviso = computed(() => {
+    const { punto, prologo } = this.partida();
+    return despuesDelAviso(punto, PUNTOS_DEL_PROLOGO, prologo) !== 'colina';
+  });
+
+  protected retomarDondeQuedo(): void {
+    this.angieEsperando.set(false);
+    this.landing?.entrarSinDespedida();
   }
 
   /** El título, la bajada y el llamado de la colina, en letras: entran y se mueven de a una. */
@@ -706,6 +719,7 @@ export class IntegradaVistaComponent {
         );
       },
     });
+    this.landing = landing;
     this.destroyRef.onDestroy(landing.dispose);
     this.destroyRef.onDestroy(() => {
       // Un pedido en vuelo que llega después de desmontar no tiene dónde montarse.
