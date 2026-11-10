@@ -536,6 +536,11 @@ entrar desarma a Angie en luz y se hace noche, la costura con el prólogo.
       Probarlas con click REAL: el topbar invisible (opacidad 0, z 6) tapaba las fichas y se comía
       el click. Con el chrome en 0 el motor lo deja en `visibility: hidden`; comprobar con
       `elementFromPoint` en el centro de cada ficha.
+- [ ] En vertical las fichas van en fila: en columna, con una partida guardada ("Empezar de cero"
+      es la tercera), bajaban hasta 160 px y la última tapaba la "L" del título, que a 390×664
+      empieza en 115. Medir con una partida sembrada y el aviso tocado: sin ella hay dos fichas y
+      el choque no aparece. Medido letra por letra contra cada ficha a 390×664, 360×640 y
+      768×1024; a 750×342, 1024×700 y 1440×900, en columna como antes.
 - [ ] El título es el de la historia ("Las aventuras de Angie por el SignalVerso") y la bajada dice
       qué es. Medir título, bajada, sol y fichas sin solapes en los mismos seis anchos, y el
       título en dos renglones. Va en Baloo 2 (800 el título, 600 la bajada): redonda y gruesa,
