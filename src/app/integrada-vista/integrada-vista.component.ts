@@ -540,6 +540,14 @@ export class IntegradaVistaComponent {
                   marcas: this.marcasDelLibro(),
                   pie: this.pieDelLibro(),
                   alCumplir: () => this.cumplidas.update((c) => new Set(c).add(pagina.id)),
+                  pasar: (paso: 1 | -1) => this.pasarPagina(paso),
+                  atras: () => (i > 0 ? 'Anterior' : this.desdeLaBitacora() ? 'Bitácora' : null),
+                  siguiente: () =>
+                    !this.puedeSeguir()
+                      ? null
+                      : i + 1 < this.paginas().length
+                        ? 'Siguiente página'
+                        : this.libro().sigue,
                 }
               : {}),
           },
