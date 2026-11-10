@@ -26,7 +26,7 @@ import {
   profundidadDelViaje,
   profundidadDesdeElOjo,
   letrasDelLlamado,
-  loopsQueFrenaElViaje,
+  loopsQueSeRedibujan,
   planDeLaPrueba,
   tocarPrueba,
   type Lado,
@@ -206,8 +206,6 @@ export class AvisoAuricularesComponent {
     }
     const r = this.host.getBoundingClientRect();
     this.viaje.emit(true);
-    this.frenados = loopsQueFrenaElViaje(escena.getAnimations({ subtree: true }), this.host);
-    for (const a of this.frenados) a.playbackRate = 0;
     // Los ojos de frente: los del perfil también existen, apagados, y miden cero.
     const elOjo = [...escena.querySelectorAll<SVGGraphicsElement>('.ini__angie .mv__parpado')].find(
       (o) => o.getBoundingClientRect().width > 0,
@@ -271,15 +269,23 @@ export class AvisoAuricularesComponent {
       escena.style.removeProperty('scale');
       escena.style.removeProperty('transform-origin');
       // El aviso queda en cero hasta que lo oculta `listo`: devuelto a su tamaño, volvía entero un cuadro.
-      this.soltarLoops();
       this.viaje.emit(false);
       this.momento.set('listo');
       this.llego.emit();
+      this.redibujarLoops(escena);
     };
     // El primer cuadro va ya, junto con la máscara: sin aire, el aviso desaparecía un cuadro.
     cero = performance.now();
     pintar(cero);
     this.momento.set('alejandose');
+  }
+
+  private redibujarLoops(escena: HTMLElement): void {
+    this.frenados = loopsQueSeRedibujan(escena.getAnimations({ subtree: true }), this.host);
+    for (const a of this.frenados) a.playbackRate = 0;
+    this.cuadro = requestAnimationFrame(() => {
+      this.cuadro = requestAnimationFrame(() => this.soltarLoops());
+    });
   }
 
   private soltarLoops(): void {
