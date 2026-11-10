@@ -868,9 +868,9 @@ Del minijuego de operadores (2026-11-08):
       y elegir entre tres nombres sin saber qué hacen era adivinar. El puesto dice "en el código".
 - [ ] "tocá acá" va en un naranja más oscuro que el trazo (#b93d0c): el del óvalo daba 4.2:1 sobre
       el papel del código.
-- [ ] Con movimiento reducido el prólogo se termina solo, así que la hoja no aparece. Sus reglas
-      de `prefers-reduced-motion` (dibujos quietos en el momento que los explica) quedan por si eso
-      cambia.
+- [ ] Con movimiento reducido la hoja aparece igual, sobre la escena quieta (ADR 0013), con sus
+      dibujos quietos en el momento que los explica. El acierto no dispara: el nombre aparece y se
+      apaga al lado de la nave.
 - [ ] Lo que tiene que salir (`encargo`) va en una franja del color de la nave, de lado a lado
       justo debajo del título, con la diana: es lo primero que se lee. En una columna al costado,
       junto a los nombres, se perdía como una nota más. Los nombres del código (`nombres`) van en
@@ -906,7 +906,7 @@ Del minijuego de operadores (2026-11-08):
 
 **El comienzo en el celular** (2026-11-10, ADR 0012):
 
-- [ ] El prólogo se juega a cualquier ancho; solo el movimiento reducido lo termina. Abajo de 700 px
+- [ ] El prólogo se juega a cualquier ancho y con movimiento reducido (ADR 0013). Abajo de 700 px
       se salteaba, y con él el minijuego, el manual y el árbol: en el iPhone la Introducción no
       estaba.
 - [ ] Los rótulos dibujados en el SVG tienen piso en pantalla (`letraConPiso`): 12 px el del
@@ -924,6 +924,17 @@ Del minijuego de operadores (2026-11-08):
       con input real en WebKit y Edge a 390×664 (el alto real de Safari en el iPhone, no 844) y
       750×342: el minijuego, las cinco páginas y el árbol hasta "Seguir la historia", sin desborde
       horizontal. A 1440×900 y 1024×700 el libro no cambia.
+- [ ] En vertical la cámara toma la altura entera de la escena y solo el ancho que piden las naves
+      que están en el cuadro y la anomalía con 200 unidades a cada lado (`encuadreVertical`, entre
+      900 y 1600 de ancho): con la escena entera, a 390×664 todo pasaba en una franja de 220 px. Se
+      desliza (no corta) y la nave que se va no la arrastra: siguiéndola, se abría de golpe antes
+      del final. Con solo el punto del centro, la anomalía quedaba pegada al borde y las bolas
+      salían por la mitad. Apaisada no cambia: `0 0 1600 900` medido a 1440×900 y 750×342. Revisado
+      a 390×664 en 13 líneas, del regreso a casa a la figura final, con el título entero.
+- [ ] Con movimiento reducido el comienzo se juega quieto (ADR 0013): el reloj salta de parada en
+      parada (`saltoQuieto`) y los muelles no avanzan. Medido con input real a 1440×900 y 390×664
+      desde la colina: el minijuego, las cinco páginas y el árbol, y después la cinemática quieta
+      del capítulo 1.
 
 **El manual de a bordo** (0/1 a 0/5, pantallas enteras en el prólogo):
 
@@ -1099,8 +1110,7 @@ Del minijuego de operadores (2026-11-08):
 - [ ] Suelto, medido a 1280×640, 1024×700 y 600×800 con input real: rueda, teclas y los botones;
       la molécula no se mueve mientras está abierto, y sí al volver a la bitácora.
 - [ ] Con las escenas, medido con input real en la historia a 1440×900 y 1280×640, suelto a
-      1024×700 y 600×800, y suelto a 1440×900 con movimiento reducido (en la historia el prólogo
-      se termina solo): sin solapes con el HUD y sin desborde horizontal en las cinco páginas.
+      1024×700 y 600×800, y suelto a 1440×900 con movimiento reducido: sin solapes con el HUD y sin desborde horizontal en las cinco páginas.
 
 **El libro de leyes integrado a la pantalla** (el manual y Signal Space, `prologo__manual--libro`):
 

@@ -120,13 +120,10 @@ fecha y adónde fue. Los ids (H1, J1…) sirven para nombrarlos en una sesión (
   el componente vivo (`mascota-viva`) en todos lados.
 - **T10. La captura del README.** `public/preview.jpeg` y el README en
   inglés se rehacen cuando cambie la vista integrada.
-- **T11. Quien no ve el prólogo.** Sin movimiento (`prefers-reduced-motion`) el prólogo se saltea
-  entero, y con él el manual de a bordo (con menos de 700 px de ancho también, hasta ADR 0012): esas personas ya no ven 0/1 a
-  0/5, que antes estaban en la molécula. Cada etapa que pase a la historia agranda el hueco. Falta
-  decidir cómo se lee la historia sin la cinemática: por ejemplo, las páginas solas, sin la escena
-  detrás. El manual y el árbol de Signal Space ya están (2026-11-09): la bitácora los abre sueltos,
-  sin la escena. El viaje (ADR 0007) cierra el resto: con el prólogo salteado solo, sigue la primera
-  etapa, y las cinemáticas tienen su modo quieto.
+- **T11. Quien no ve el prólogo.** Cerrado (2026-11-10). Sin movimiento o con menos de 700 px de
+  ancho el prólogo se salteaba entero, y con él el manual de a bordo. Ahora se juega a cualquier
+  ancho (ADR 0012) y, sin movimiento, quieto, de parada en parada (ADR 0013). Lo que se sigue
+  perdiendo sin movimiento son las líneas de la historia entre paradas.
 
 ## Arreglos de docs
 
