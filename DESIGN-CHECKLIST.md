@@ -770,8 +770,10 @@ entrar desarma a Angie en luz y se hace noche, la costura con el prólogo.
       letras del título y del llamado, y quedaban rectángulos pálidos. La cámara que sale del ojo
       agranda la escena cientos de veces, y el navegador dibuja lo que anima (juncos, nubes, Angie,
       el halo del sol) a la escala más grande que alcanzó, y no la baja mientras siga animando:
-      quedaban capas a ×40 y la colina pedía 650–750 MB. Ahora los loops de la escena van a
-      velocidad 0 durante el viaje y arrancan al llegar. Se reproduce sin la PC de Damian: una
+      quedaban capas a ×40 y la colina pedía 650–750 MB. Al llegar, los loops de la escena van dos
+      cuadros a velocidad 0 y arrancan de nuevo, ya a escala 1. Durante el viaje NO se frenan:
+      quietos se redibujaban en cada cuadro a la escala del momento y el zoom pestañeaba en blanco
+      (contar cuadros lavados del screencast del zoom contra la versión anterior). Se reproduce sin la PC de Damian: una
       Opera aparte (Playwright, `executablePath` y perfil propio) con
       `--force-gpu-mem-available-mb=128`. Se mide con un trace `disabled-by-default-cc.debug`: el
       `LayerTreeHostImpl:snapshot` trae `gpu_memory_usage` y `contents_scale` de cada tile.
