@@ -152,8 +152,9 @@
   padding: 0.45rem 0.95rem 0.45rem 0.65rem;
   border: 2px solid rgba(255, 248, 236, 0.3);
   border-radius: 999px;
-  background: rgba(18, 23, 50, 0.5);
-  backdrop-filter: blur(6px);
+  /* Fondo casi opaco y sin desenfocar lo de atrás: en Opera Neon, una capa que lee el fondo en cada
+     cuadro hacía que el aviso se dibujara a pedazos mientras aparecía. */
+  background: rgba(18, 23, 50, 0.78);
   color: #fff8ec;
   font-family: var(--font-display, system-ui, sans-serif);
   font-weight: 800;
