@@ -13,7 +13,16 @@
     monospace;
 }
 
+/* El código y su árbol, lado a lado mientras entren; si no, el árbol baja. */
+.htt {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: stretch;
+  gap: 0.75rem;
+}
+
 .htt-codigo {
+  flex: 0 1 auto;
   display: flex;
   flex-direction: column;
   padding: 0.55rem 1.1rem;
@@ -28,10 +37,31 @@
   color: #f2ecff;
 }
 
-/* Un renglón por elemento; la sangría va como relleno, en `ch`: la que aparenta el código. */
+/* Un renglón por elemento; la sangría va como relleno, en `ch`: la que aparenta el código. La franja
+   de cada renglón asoma un poco a los costados, para que la marca no quede pegada al texto. */
 .htt-linea {
   display: block;
+  margin-inline: -0.45rem;
+  padding: 0 0.45rem 0 calc(var(--sangria, 0ch) + 0.45rem);
+  border-radius: 6px;
   white-space: nowrap;
+}
+/* Ya está en la pantalla: una franja lila con su raya, como un renglón leído. Al marcarse destella
+   en dorado, el color de lo que se toca. Si quedó fuera de su panel, en el rojo del aviso. */
+.htt-linea--vista {
+  background: rgb(155 135 245 / 16%);
+  box-shadow: inset 3px 0 0 #9b87f5;
+  animation: htt-marca 0.7s ease-out;
+}
+.htt-linea--afuera {
+  background: rgb(255 118 118 / 14%);
+  box-shadow: inset 3px 0 0 #ff7676;
+  animation: htt-marca 0.7s ease-out;
+}
+@keyframes htt-marca {
+  from {
+    background-color: rgb(255 210 122 / 38%);
+  }
 }
 .htt-texto {
   color: #f2ecff;
@@ -41,8 +71,8 @@
 }
 
 /* Los tags que abren: se tocan, en dorado y subrayados como los tokens de los desafíos; tocados,
-   claros, porque su pieza ya está en la pantalla. Tres clases más el elemento: le gana a la
-   pastilla oscura que la hoja le pone a todo botón (`.subhost button:not([class*='bg-'])`). */
+   blancos sobre la franja de su renglón, porque su pieza ya está en la pantalla. Tres clases más el
+   elemento: le gana a la pastilla oscura que la hoja le pone a todo botón (`.subhost button:not([class*='bg-'])`). */
 .htt .htt-codigo button.htt-tag,
 .htt .htt-codigo button.htt-hueco {
   display: inline-block;
@@ -66,7 +96,7 @@
 }
 .htt .htt-codigo button.htt-tag.htt-tag--visto {
   background: transparent;
-  color: #cbc0f0;
+  color: #fff8ec;
   text-decoration: none;
 }
 /* El hueco: el cierre fuera de lugar. Mientras se prueba, es un cierre más (no hay que delatarlo
@@ -86,8 +116,95 @@
   outline-offset: 2px;
 }
 
+/* ── El árbol de nodos ─────────────────────────────────────────────────────────────────────
+   En su vidrio, como el código. Cada nodo aparece con un rebote donde lo pone el navegador, y al
+   mover el cierre se muda con su rama. Lo que falta tocar arriba de lo tocado va punteado, como
+   los lugares vacíos de la pantalla. */
+/* Del alto del código (sus renglones, en la misma letra) y con el ancho que le da su proporción:
+   estirado a lo ancho de la consola, el árbol quedaba chico en el medio de un vidrio vacío. */
+.htt-arbol {
+  flex: 0 1 auto;
+  min-width: 12rem;
+  max-width: 100%;
+  height: 13.4em;
+  width: auto;
+  padding: 0.5rem 0.75rem;
+  border: 1.5px solid #5b4a96;
+  border-radius: 12px;
+  background: #1c1434;
+  font-size: clamp(0.85rem, 1vw, 1rem);
+  overflow: visible;
+}
+.htt-rama {
+  fill: none;
+  stroke: #7d6cc4;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  transition:
+    d 0.55s cubic-bezier(0.34, 1.4, 0.64, 1),
+    stroke-dashoffset 0.4s ease-out 0.1s,
+    stroke 0.2s;
+}
+.htt-rama--vista {
+  stroke-dashoffset: 0;
+}
+.htt-rama--afuera {
+  stroke: #ff7676;
+}
+.htt-nodo {
+  opacity: 0;
+  transition:
+    transform 0.55s cubic-bezier(0.34, 1.4, 0.64, 1),
+    opacity 0.2s;
+}
+.htt-nodo > * {
+  transform-box: fill-box;
+  transform-origin: center;
+  scale: 0.4;
+  transition: scale 0.35s cubic-bezier(0.34, 1.8, 0.64, 1);
+}
+.htt-nodo text {
+  font:
+    700 12px 'JetBrains Mono',
+    'Cascadia Mono',
+    Consolas,
+    monospace;
+}
+.htt-nodo--visto,
+.htt-nodo--fantasma {
+  opacity: 1;
+}
+.htt-nodo--visto > *,
+.htt-nodo--fantasma > * {
+  scale: 1;
+}
+/* Los paneles son oscuros como su vidrio: un borde lila los despega del fondo. */
+.htt-nodo--oscuro rect {
+  stroke: #9b87f5;
+  stroke-width: 1.3;
+}
+.htt-nodo--fantasma rect {
+  stroke: #7d6cc4;
+  stroke-width: 1.3;
+  stroke-dasharray: 4 3;
+}
+.htt-nodo--afuera rect {
+  stroke: #ff7676;
+  stroke-width: 2;
+  stroke-dasharray: 5 3;
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .htt .htt-codigo button {
+  .htt .htt-codigo button,
+  .htt-rama,
+  .htt-nodo,
+  .htt-nodo > * {
     transition: none;
+  }
+  .htt-linea--vista,
+  .htt-linea--afuera {
+    animation: none;
   }
 }

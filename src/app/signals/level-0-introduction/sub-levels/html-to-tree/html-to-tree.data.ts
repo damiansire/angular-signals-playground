@@ -116,3 +116,51 @@ export function balanceados(renglones: readonly Renglon[]): boolean {
   }
   return abiertos.length === 0;
 }
+
+/**
+ * Cómo se marca un renglón del código: `oculto` mientras falte tocar algún tag suyo, `visto` cuando
+ * todo lo que abre o cierra ya está en la pantalla, y `afuera` si lo que abre quedó fuera de su
+ * panel. Un cierre suelto (`</section>`) se marca con su elemento.
+ */
+export type EstadoDelRenglon = 'oculto' | 'visto' | 'afuera';
+
+export function estadoDelRenglon(
+  renglon: Renglon,
+  reveladas: readonly NodoId[],
+  fuera: readonly NodoId[],
+): EstadoDelRenglon {
+  const ids = renglon.piezas.flatMap((p) => (p.tipo === 'texto' ? [] : [p.id]));
+  if (!ids.every((id) => reveladas.includes(id))) return 'oculto';
+  return renglon.piezas.some((p) => p.tipo === 'abre' && fuera.includes(p.id)) ? 'afuera' : 'visto';
+}
+
+/** Un nodo del árbol como lo arma el navegador: `x` en anchos de hoja, `nivel` desde la raíz. */
+export interface NodoDelArbol {
+  readonly id: NodoId;
+  readonly padre: NodoId | null;
+  readonly nivel: number;
+  readonly x: number;
+}
+
+/**
+ * El árbol de los tags, de arriba hacia abajo: cada hoja ocupa un lugar en orden de documento y cada
+ * padre va centrado sobre sus hijos. Con el bug, `<article>` es una hoja más y el título y el
+ * párrafo cuelgan de `<main>`; arreglado, cuelgan de él.
+ */
+export function disponerArbol(renglones: readonly Renglon[]): {
+  readonly nodos: readonly NodoDelArbol[];
+  readonly hojas: number;
+} {
+  const padre = padres(renglones);
+  const hijos = (id: NodoId | null) => NODOS.filter((n) => n in padre && padre[n] === id);
+  const dispuestos = new Map<NodoId, NodoDelArbol>();
+  let hojas = 0;
+  const visitar = (id: NodoId, nivel: number): number => {
+    const xs = hijos(id).map((h) => visitar(h, nivel + 1));
+    const x = xs.length ? (xs[0] + xs[xs.length - 1]) / 2 : hojas++;
+    dispuestos.set(id, { id, padre: padre[id] ?? null, nivel, x });
+    return x;
+  };
+  for (const raiz of hijos(null)) visitar(raiz, 0);
+  return { nodos: NODOS.flatMap((id) => dispuestos.get(id) ?? []), hojas };
+}

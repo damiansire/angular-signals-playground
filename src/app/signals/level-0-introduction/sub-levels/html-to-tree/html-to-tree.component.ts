@@ -1,5 +1,13 @@
 import { Component, ChangeDetectionStrategy, signal, computed } from '@angular/core';
-import { NODOS, TAG, type NodoId, codigoDelArbol, fueraDelPanel } from './html-to-tree.data';
+import {
+  NODOS,
+  TAG,
+  type NodoId,
+  codigoDelArbol,
+  disponerArbol,
+  estadoDelRenglon,
+  fueraDelPanel,
+} from './html-to-tree.data';
 import { PaginaDelManualComponent } from '../../manual/pagina-del-manual.component';
 import { EscenaArbolComponent } from '../../manual/escena-arbol.component';
 import { siguienteSinTocar } from '../../manual/guia.logica';
@@ -10,6 +18,33 @@ interface PiezaVista {
   readonly texto: string;
   readonly id?: NodoId;
 }
+
+/** El árbol en unidades de su `viewBox`: un lugar por hoja y un piso por nivel. */
+const HOJA = 66;
+const PISO = 58;
+const NODO = { ancho: 62, alto: 24 };
+/**
+ * El ancho del árbol es el de su versión más ancha, la del bug: al mover el cierre los nodos se mudan
+ * adentro del mismo lienzo, en vez de cambiar de escala todos juntos.
+ */
+const HOJAS = Math.max(
+  disponerArbol(codigoDelArbol(false)).hojas,
+  disponerArbol(codigoDelArbol(true)).hojas,
+);
+
+/**
+ * El color de cada nodo es el de su pieza en la pantalla de la nave (`escena-arbol`): así se ve que
+ * el árbol y lo que se dibuja son lo mismo. Sobre los claros, el texto va oscuro.
+ */
+const COLOR: Readonly<Record<NodoId, { fondo: string; letra: string; oscuro?: true }>> = {
+  main: { fondo: '#2c2352', letra: '#f2ecff', oscuro: true },
+  section: { fondo: '#3e3170', letra: '#f2ecff', oscuro: true },
+  article: { fondo: '#3e3170', letra: '#f2ecff', oscuro: true },
+  h2: { fondo: '#ffd27a', letra: '#2b1b33' },
+  p1: { fondo: '#cbc0f0', letra: '#2b1b33' },
+  h3: { fondo: '#eb9b3c', letra: '#2b1b33' },
+  p2: { fondo: '#cbc0f0', letra: '#2b1b33' },
+};
 
 /**
  * La ley 1 en una sola pieza: la pantalla de la nave es el árbol, y la consola tiene el HTML con un
@@ -34,6 +69,7 @@ export class HtmlToTreeComponent {
   protected readonly renglones = computed(() =>
     this.codigo().map((r) => ({
       sangria: r.sangria,
+      estado: estadoDelRenglon(r, this.reveladas(), this.fuera()),
       piezas: r.piezas.map((p): PiezaVista => {
         if (p.tipo === 'texto') return { tipo: 'texto', texto: p.texto };
         const tag = TAG[p.id];
@@ -42,6 +78,65 @@ export class HtmlToTreeComponent {
       }),
     })),
   );
+
+  /**
+   * El mismo HTML visto como árbol, al lado del código. Se ve lo tocado; de lo que falta tocar, solo
+   * los ancestros de lo tocado, punteados, para que cada rama tenga de dónde colgar. La forma completa no
+   * se adelanta: con el bug, que el título cuelgue de `<main>` se descubre al tocarlo.
+   */
+  protected readonly arbol = computed(() => {
+    const { nodos, hojas } = disponerArbol(this.codigo());
+    const vistos = new Set(this.reveladas());
+    const fuera = new Set(this.fuera());
+    const padreDe = new Map(nodos.map((n) => [n.id, n.padre]));
+    const ancestros = new Set<NodoId>();
+    for (const id of vistos) {
+      for (let p = padreDe.get(id); p; p = padreDe.get(p)) ancestros.add(p);
+    }
+    // Sin nada tocado, la raíz espera punteada: un vidrio vacío parecía roto.
+    if (vistos.size === 0) {
+      for (const n of nodos) if (!n.padre) ancestros.add(n.id);
+    }
+    const corrimiento = ((HOJAS - hojas) * HOJA) / 2;
+    const centro = (n: { x: number; nivel: number }) => ({
+      x: corrimiento + n.x * HOJA + HOJA / 2,
+      y: n.nivel * PISO + NODO.alto / 2 + 2,
+    });
+    const lugar = new Map(nodos.map((n) => [n.id, centro(n)]));
+    return {
+      ancho: HOJAS * HOJA,
+      alto: 2 * PISO + NODO.alto + 4,
+      nodo: NODO,
+      nodos: nodos.map((n) => {
+        const { x, y } = centro(n);
+        const arriba = n.padre ? lugar.get(n.padre) : undefined;
+        const medio = arriba ? (arriba.y + y) / 2 : y;
+        return {
+          id: n.id,
+          tag: TAG[n.id],
+          x,
+          y,
+          color: COLOR[n.id],
+          oscuro: COLOR[n.id].oscuro ?? false,
+          visto: vistos.has(n.id),
+          fantasma: !vistos.has(n.id) && ancestros.has(n.id),
+          afuera: vistos.has(n.id) && fuera.has(n.id),
+          // Una rama curva del borde de abajo del padre al de arriba del hijo.
+          rama: arriba
+            ? `path("M ${arriba.x} ${arriba.y + NODO.alto / 2} C ${arriba.x} ${medio}, ${x} ${medio}, ${x} ${y - NODO.alto / 2}")`
+            : null,
+        };
+      }),
+    };
+  });
+  protected readonly descripcionDelArbol = computed(() => {
+    const vistos = new Set(this.reveladas());
+    const { nodos } = disponerArbol(this.codigo());
+    const ramas = nodos
+      .filter((n) => vistos.has(n.id) && n.padre)
+      .map((n) => `${TAG[n.id]} dentro de ${TAG[n.padre as NodoId]}`);
+    return ramas.length ? `Árbol de nodos: ${ramas.join(', ')}` : 'Árbol de nodos vacío';
+  });
 
   private readonly todas = computed(() => siguienteSinTocar(NODOS, this.reveladas()) === null);
   protected readonly sano = computed(() => this.arreglado() && this.todas());

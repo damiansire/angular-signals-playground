@@ -4,12 +4,18 @@
 
   <app-escena-arbol escena [reveladas]="reveladas()" [fuera]="fuera()" [sano]="sano()" />
 
-  <!-- El árbol se ve una sola vez, en la pantalla de la nave. Acá va lo que se toca: el HTML, con
-       cada tag que abre como botón y el cierre fuera de lugar como hueco. -->
+  <!-- Lo que se toca: el HTML, con cada tag que abre como botón y el cierre fuera de lugar como
+       hueco; cada renglón se marca cuando su pieza ya está en la pantalla. Al lado, el mismo HTML
+       como árbol de nodos: la pantalla de la nave es como se dibuja, el árbol es como se lee. -->
   <section consola class="htt">
     <div class="htt-codigo" role="group" aria-label="El HTML de la pantalla">
       @for (r of renglones(); track $index) {
-        <span class="htt-linea" [style.padding-left.ch]="r.sangria * 2">
+        <span
+          class="htt-linea"
+          [class.htt-linea--vista]="r.estado === 'visto'"
+          [class.htt-linea--afuera]="r.estado === 'afuera'"
+          [style.--sangria.ch]="r.sangria * 2"
+        >
           @for (p of r.piezas; track $index) {
             @switch (p.tipo) {
               @case ('abre') {
@@ -48,5 +54,52 @@
         </span>
       }
     </div>
+
+    @let a = arbol();
+    <svg
+      class="htt-arbol"
+      [attr.viewBox]="'-4 -4 ' + (a.ancho + 8) + ' ' + (a.alto + 8)"
+      [style.aspect-ratio]="(a.ancho + 8) / (a.alto + 8)"
+      role="img"
+      [attr.aria-label]="descripcionDelArbol()"
+    >
+      @for (n of a.nodos; track n.id) {
+        @if (n.rama) {
+          <path
+            class="htt-rama"
+            [class.htt-rama--vista]="n.visto || n.fantasma"
+            [class.htt-rama--afuera]="n.afuera"
+            [style.d]="n.rama"
+            pathLength="1"
+          />
+        }
+      }
+      @for (n of a.nodos; track n.id) {
+        <g
+          class="htt-nodo"
+          [class.htt-nodo--visto]="n.visto"
+          [class.htt-nodo--fantasma]="n.fantasma"
+          [class.htt-nodo--afuera]="n.afuera"
+          [class.htt-nodo--oscuro]="n.visto && n.oscuro"
+          [style.transform]="'translate(' + n.x + 'px, ' + n.y + 'px)'"
+        >
+          <rect
+            [attr.x]="-a.nodo.ancho / 2"
+            [attr.y]="-a.nodo.alto / 2"
+            [attr.width]="a.nodo.ancho"
+            [attr.height]="a.nodo.alto"
+            rx="12"
+            [attr.fill]="n.visto ? n.color.fondo : 'none'"
+          />
+          <text
+            text-anchor="middle"
+            dominant-baseline="central"
+            [attr.fill]="n.visto ? n.color.letra : '#b9aee0'"
+          >
+            {{ n.tag }}
+          </text>
+        </g>
+      }
+    </svg>
   </section>
 </app-pagina-del-manual>

@@ -3,6 +3,8 @@ import {
   type Renglon,
   balanceados,
   codigoDelArbol,
+  disponerArbol,
+  estadoDelRenglon,
   fueraDelPanel,
   padres,
   padresPorSangria,
@@ -74,5 +76,50 @@ describe('html-to-tree (dominio "el navegador lee los tags, no la sangría")', (
     const texto = (rs: readonly Renglon[]) =>
       rs.flatMap((r) => r.piezas).filter((p) => p.tipo === 'texto');
     expect(texto(ARREGLADO)).toEqual(texto(CON_BUG));
+  });
+
+  describe('el árbol de nodos', () => {
+    const nodo = (renglones: readonly Renglon[], id: string) =>
+      disponerArbol(renglones).nodos.find((n) => n.id === id);
+
+    it('con el bug, article es una hoja y el título cuelga de main, a su altura', () => {
+      expect(nodo(CON_BUG, 'article')?.nivel).toBe(1);
+      expect(nodo(CON_BUG, 'h3')).toEqual(jasmine.objectContaining({ padre: 'main', nivel: 1 }));
+      expect(disponerArbol(CON_BUG).hojas).toBe(5);
+    });
+
+    it('arreglado, el título y el párrafo bajan bajo article, centrado sobre ellos', () => {
+      expect(nodo(ARREGLADO, 'h3')).toEqual(
+        jasmine.objectContaining({ padre: 'article', nivel: 2 }),
+      );
+      expect(nodo(ARREGLADO, 'article')?.x).toBe(((nodo(ARREGLADO, 'h3')?.x ?? 0) + 3) / 2);
+      expect(disponerArbol(ARREGLADO).hojas).toBe(4);
+    });
+
+    it('trae todos los elementos, con main como única raíz', () => {
+      const { nodos } = disponerArbol(CON_BUG);
+      expect(nodos.map((n) => n.id)).toEqual([...NODOS]);
+      expect(nodos.filter((n) => n.padre === null).map((n) => n.id)).toEqual(['main']);
+    });
+  });
+
+  describe('el renglón marcado', () => {
+    const renglon = (renglones: readonly Renglon[], id: string) =>
+      renglones.find((r) => r.piezas.some((p) => p.tipo === 'abre' && p.id === id))!;
+
+    it('se marca recién cuando todo lo que abre o cierra está tocado', () => {
+      expect(estadoDelRenglon(renglon(CON_BUG, 'h2'), [], [])).toBe('oculto');
+      expect(estadoDelRenglon(renglon(CON_BUG, 'h2'), ['h2'], [])).toBe('visto');
+    });
+
+    it('un cierre suelto se marca con su elemento', () => {
+      const cierre = CON_BUG.find((r) => r.piezas.length === 1 && r.piezas[0].tipo === 'cierra')!;
+      expect(estadoDelRenglon(cierre, [], [])).toBe('oculto');
+      expect(estadoDelRenglon(cierre, ['section'], [])).toBe('visto');
+    });
+
+    it('lo que quedó fuera de su panel se marca aparte', () => {
+      expect(estadoDelRenglon(renglon(CON_BUG, 'h3'), ['h3'], ['h3', 'p2'])).toBe('afuera');
+    });
   });
 });
