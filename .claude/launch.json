@@ -6,6 +6,12 @@
       "runtimeExecutable": "npm",
       "runtimeArgs": ["start"],
       "port": 4200
+    },
+    {
+      "name": "signals-play-dev-4310",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["start", "--", "--port", "4310"],
+      "port": 4310
     }
   ]
 }
