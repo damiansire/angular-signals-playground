@@ -455,7 +455,7 @@ describe('IntegradaVistaComponent', () => {
       localStorage.setItem(
         CLAVE,
         JSON.stringify({
-          v: 3,
+          v: 4,
           establecidos: [],
           cinematicas: [],
           prologo: true,

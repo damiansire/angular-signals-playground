@@ -1,4 +1,6 @@
 import type { Punto } from '../libs/partida';
+import { leerPartida } from '../libs/partida';
+import { PUNTOS_DEL_PROLOGO } from './puntos-del-prologo';
 import { entradaDeLaHistoria, puntoDelRecorrido } from './retomar';
 
 const PUNTOS = ['anom-rxjs', 'anom-manual', 'voz-supongo'];
@@ -22,6 +24,15 @@ describe('retomar', () => {
     it('una línea que ya no es punto se ignora y arranca del principio', () => {
       const viejo: Punto = { lugar: 'prologo', linea: 'casa-helado' };
       expect(entradaDeLaHistoria(viejo, PUNTOS, false)).toEqual({ a: 'prologo', desde: null });
+    });
+
+    it('una partida anterior a la 4 con el comienzo visto entra al manual, no al capítulo 1', () => {
+      const vieja = JSON.stringify({ v: 3, establecidos: [], cinematicas: [], prologo: true });
+      const { punto, prologo } = leerPartida(vieja, [1]);
+      expect(entradaDeLaHistoria(punto, PUNTOS_DEL_PROLOGO, prologo)).toEqual({
+        a: 'prologo',
+        desde: 'anom-manual',
+      });
     });
 
     it('en pleno viaje, entrar lo sigue donde quedó, sin volver al comienzo', () => {
