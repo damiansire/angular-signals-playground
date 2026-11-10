@@ -267,19 +267,24 @@
   box-shadow: none;
   background: none;
 }
-/* Sin alto propio: la ventanilla es el hueco entre la ley y la consola. Su borde de arriba se funde
-   con el cielo de la ley, que es el del primer tono de la escena. */
+/* Sin alto propio: la ventanilla es el hueco que deja la consola. */
 :host(.pm-entera) .pm-ventana {
   min-height: 11rem;
   aspect-ratio: auto;
 }
-:host(.pm-entera) .pm-ventana::after {
-  content: '';
-  position: absolute;
-  inset: 0 0 auto;
-  height: 3rem;
-  background: linear-gradient(#130d2b, rgb(19 13 43 / 0%));
-  pointer-events: none;
+/* Con lugar, la escena llega hasta arriba de todo y la ley flota sobre su cielo, debajo de la barra
+   del juego (`--pm-arriba`, que pone quien la monta). Con la ley en una franja propia, encima de la
+   escena, el título cortaba la pantalla de la nave y lo que saltaba al tocar quedaba debajo. */
+@media (min-width: 761px) and (min-height: 501px) {
+  :host(.pm-entera) .pm-cabeza {
+    position: absolute;
+    inset: 0 0 auto;
+    padding-top: var(--pm-arriba, 0);
+    pointer-events: none;
+  }
+  :host(.pm-entera) .pm-cabeza :is(a, button) {
+    pointer-events: auto;
+  }
 }
 :host(.pm-entera) .pm-consola {
   padding-bottom: 0.85rem;
