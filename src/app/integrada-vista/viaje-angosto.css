@@ -1,0 +1,82 @@
+/* La hoja del viaje en un celular (el mismo corte que el libro de leyes en `manual-de-a-bordo.css`).
+   En escritorio "Anterior" y "Siguiente" flotan sobre el cielo, sticky al pie de la hoja, y la pista
+   de Angie fija en la esquina, arriba de ellos. A 390×664 (el alto real de Safari en el iPhone) la
+   página no entra y se baja con el dedo: los dos carteles quedaban encima del desafío ("cambiar el
+   valor" asomaba debajo de "Anterior" y el toque se lo llevaba el cartel) y la mascota pisaba la caja
+   punteada aun al final. Acá el pie es una consola fija abajo, afuera de lo que scrollea: la hoja
+   termina donde ella empieza, así que nada de la página queda nunca debajo. La pista va en el medio
+   de la consola, entre los dos botones. Archivo aparte por lo mismo que `angosto.css`: el
+   presupuesto de estilo se mide por archivo. */
+@media (max-width: 760px), (max-height: 500px) {
+  .prologo__manual.prologo__manual--viaje {
+    --consola: 4.5rem;
+    /* El pie sale de la hoja: "más abajo" sigue su scroll por nombre, no por el ancestro más cercano,
+       que para algo fijo es la ventana. */
+    scroll-timeline: --hoja block;
+    scroll-padding-bottom: 1rem;
+  }
+  .manual-suelto .prologo__manual.prologo__manual--viaje {
+    bottom: var(--consola);
+  }
+  .prologo__manual--viaje .prologo__manual-pie {
+    position: fixed;
+    inset: auto 0 0;
+    height: var(--consola);
+    margin: 0;
+    padding: 0 0.75rem;
+    /* La columna del medio es el lugar de la pista: centrada en la pantalla, "Siguiente página", más
+       largo que "Anterior", la pisaba. */
+    grid-template-columns: 1fr 3rem 1fr;
+    column-gap: 0.4rem;
+    background: #050309;
+    /* La página se corta contra la consola: la sombra la funde en vez de un borde seco. */
+    box-shadow: 0 -0.9rem 1.2rem -0.4rem #050309;
+    pointer-events: auto;
+  }
+  .prologo__manual--viaje .prologo__manual-pie .prologo__manual-boton {
+    padding-inline: 0.6rem;
+    /* Escala con lo que queda a cada lado de la pista: medido con "Siguiente página", el rótulo más
+       largo, entra de 360 a 760 px sin tocarla. */
+    font-size: min(0.9rem, (100vw - 9rem) / 18);
+    white-space: nowrap;
+  }
+  /* Encima del corte, en el medio: no tapa ningún botón de la consola. Toma la fila entera, porque un
+     absoluto en una grilla se ubica en su área, y en la columna del medio quedaba corrido. */
+  .prologo__manual--viaje .prologo__manual-abajo {
+    grid-area: 1 / 1 / 2 / -1;
+    position: absolute;
+    bottom: calc(100% + 0.4rem);
+    left: 50%;
+    translate: -50% 0;
+    white-space: nowrap;
+    animation-timeline: --hoja;
+  }
+  /* La pista, chica, en el medio de la consola. Centrada con márgenes y no con `translate`: un
+     `translate` la volvía bloque contenedor de su globo, que es fijo. */
+  .prologo__manual.prologo__manual--viaje app-concept-card {
+    inset: auto 0 0.25rem;
+    width: fit-content;
+    margin-inline: auto;
+  }
+  .prologo__manual--viaje app-concept-card .cc__mascot-viva {
+    width: 2.6rem;
+  }
+  .prologo__manual--viaje app-concept-card .cc__mascot {
+    gap: 2px;
+  }
+  /* Abierto, el globo va arriba de la consola, a lo ancho, con el pico hacia abajo: al costado de la
+     mascota no entraba y tapaba los dos botones. */
+  .prologo__manual--viaje app-concept-card .cc__brief {
+    position: fixed;
+    inset: auto 1rem calc(var(--consola) + 0.6rem);
+    max-width: none;
+    max-height: calc(100% - var(--consola) - 2rem);
+    overflow: auto;
+  }
+  .prologo__manual--viaje app-concept-card .cc__brief::after {
+    right: auto;
+    bottom: -7px;
+    left: calc(50% - 6px);
+    rotate: 90deg;
+  }
+}

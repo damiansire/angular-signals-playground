@@ -161,6 +161,7 @@ const PROLOGO_PEDIDO =
     './boot-fallo.css',
     './aviso-mas-abajo.css',
     './angosto.css',
+    './viaje-angosto.css',
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   // En `document`: un botón de la pantalla que se rehace al tocarlo deja el foco en el `body`.

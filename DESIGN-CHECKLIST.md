@@ -1202,6 +1202,15 @@ Del minijuego de operadores (2026-11-08):
 - [ ] La pista de Angie (`app-concept-card`, fija en la esquina) va por encima del pie de la hoja:
       a `bottom: 1rem` tapaba "Seguir el viaje" y el click caía en la card. Medirlo con
       `elementFromPoint` en el centro del botón.
+- [ ] En un celular (hasta 760 px de ancho o 500 de alto) el pie es una consola fija abajo, AFUERA
+      de lo que scrollea: "Anterior", la pista de Angie chica en el medio y "Siguiente". La hoja
+      termina donde empieza la consola, así que nada de la página queda nunca debajo. Antes, a
+      390×664, los carteles sticky flotaban sobre el desafío ("cambiar el valor" asomaba debajo de
+      "Anterior" y el toque se lo llevaba el cartel) y la mascota pisaba la caja punteada aun al
+      final. Con la pista abierta, su globo va arriba de la consola, a lo ancho. Medido con input
+      real a 390×664, 360×640, 480×900 y 750×342, capítulos 1 y 10: en cada posición del scroll,
+      `elementFromPoint` en el centro de cada control visible, y la consola y la pista contra todos
+      los controles y contra la caja del desafío. A 1440×900 y 1024×700, igual que antes.
 - [ ] Lo resuelto en una hoja del viaje se anota en la molécula con el mismo id ("0/0").
 - [ ] Recargar sigue en la misma página, sin repetir el comienzo ni la cinemática. La hoja del
       viaje no tiene "Cerrar" y Escape no la cierra: es una sola historia (ADR 0008).
