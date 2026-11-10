@@ -413,6 +413,12 @@
   opacity: 0;
   pointer-events: none;
 }
+/* Lo que la colina tapa no se pinta: el canvas, el título y el HUD de abajo seguían en capas propias,
+   unos 110 MB de memoria de video a 3440 px, y al alejarse desde el ojo esa memoria faltaba y la cara
+   de Angie aparecía a rayas. Apenas la colina se va (`.gone`), vuelven antes de que se funda. */
+.tusi:has(> .tusi__overlay:not(.gone)) > :not(.tusi__overlay) {
+  visibility: hidden;
+}
 /* Los loops del overlay y del cue seguían corriendo toda la sesión sobre opacidad 0, y los orbitales
    animan offset-distance, que no se compone en GPU: costo de estilo por cuadro para nadie. */
 /* `.intro.` y no solo `.intro--fuera`: el shorthand `animation` de `.tusi__mouse span` resetea el
