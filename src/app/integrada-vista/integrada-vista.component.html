@@ -815,6 +815,11 @@
         <!-- Sigue al scroll de la hoja: con todo a la vista no aparece. -->
         <span class="prologo__manual-abajo" aria-hidden="true">más abajo &darr;</span>
       </div>
+    } @else {
+      <!-- Solo en un celular, donde la página del libro no entra (ver `manual-de-a-bordo.css`). -->
+      <span class="prologo__manual-abajo prologo__manual-abajo--libro" aria-hidden="true">
+        más abajo &darr;
+      </span>
     }
   </section>
 </ng-template>

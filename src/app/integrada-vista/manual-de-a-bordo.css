@@ -335,6 +335,33 @@
   background: linear-gradient(118deg, rgb(255 255 255 / 4%) 0 20%, rgb(255 255 255 / 0%) 34%);
   pointer-events: none;
 }
+/* En un celular la página no entra (a 390×664, el alto real de Safari, sobran de 60 a 140 px) y se
+   baja con el dedo. Tres cosas que con la página entera no se notaban: el contenido pasaba por
+   debajo del HUD; el vidrio, absoluto adentro de lo que scrollea, subía con el contenido y su
+   negro tapaba el final de la página; y "Siguiente página" quedaba fuera de vista sin aviso. La
+   hoja arranca debajo del HUD, sin vidrio (las esquinas las pone el teléfono), y avisa que hay
+   más abajo. */
+.prologo__manual-abajo--libro {
+  display: none;
+}
+@media (max-width: 760px), (max-height: 500px) {
+  .prologo__manual.prologo__manual--libro {
+    top: 4.25rem;
+    padding-top: 0;
+  }
+  .prologo__manual--libro::after {
+    display: none;
+  }
+  .prologo__manual-abajo--libro {
+    display: block;
+    position: sticky;
+    bottom: 0.75rem;
+    z-index: 4;
+    align-self: center;
+    /* No suma alto: flota sobre el final de la página y se apaga al llegar. */
+    margin-top: -1.6rem;
+  }
+}
 .prologo__manual-donde {
   display: flex;
   flex-wrap: wrap;
