@@ -1065,6 +1065,24 @@ Del minijuego de operadores (2026-11-08):
       del handler se toca ahí, y completarlo no arregla el panel hasta la próxima corrida.
 - [ ] Los dos pasos de la consola dicen dónde se está: el que toca, en dorado; el hecho, en verde.
       La fila guarda el alto de "Mostrame" aunque ya no esté: al irse, la consola no se achica.
+- [ ] La ley 1 va sin franja abajo (`enPantalla` + `portada`): la consola está ADENTRO de la
+      pantalla de la nave, en tres columnas (código, árbol, lo que se dibuja), y la nave va en su
+      carril a la izquierda, en su propio SVG (`--pm-nave-*`). Con el árbol abajo, junto al código,
+      quedaba lejos de lo que dibuja. Cada cosa tiene su lugar: la ley en la barra de título de la
+      pantalla (con las marcas del libro a la derecha), los pasos y "Mostrame" en un globo de la
+      nave que salta al cambiar de paso, y "Bitácora/Siguiente" como pestañas sobre el borde de abajo
+      de la pantalla. Abre con una portada (la ley grande, el árbol armado que crece desde la raíz y
+      "Leer"); "Leer" achica la portada, agranda la pantalla hasta la demo y la nave salta.
+- [ ] Un absoluto dentro de una grilla NO lleva `grid-row`/`grid-column`: su caja pasa a ser esa
+      celda. El globo de la nave tenía `grid-row: 2` (su lugar en el celular) y con la nave al
+      costado caía debajo de ella, con la cola apuntando al vacío.
+- [ ] Las tres columnas entran lado a lado a 1366×768 y la pantalla es del ancho de lo que muestra
+      (`fit-content`): a 1366 la letra de `min(1.3vw, 2.6vh)` mandaba el render abajo del árbol por
+      unos píxeles, y a 3440 la pantalla estirada dejaba medio vidrio vacío. Medido con
+      `getBoundingClientRect` a 375, 1366, 1920 y 3440: sin scroll horizontal y nada encimado.
+- [ ] La mano se vuelve a medir cuando termina de entrar la demo: se medía con la pantalla todavía
+      creciendo desde la portada, el marco no cambiaba de tamaño, el observador no avisaba y
+      señalaba un hueco al lado de `<main>`.
 - [ ] El escenario llena la ventanilla con `xMidYMid slice` sobre un cielo más grande que la lámina
       (`CIELO_DEL_ESCENARIO`, centrado en la nave, su pantalla y el lápiz), y la ventanilla nunca es
       más apaisada que 3.5:1 (`28.5cqi` de alto mínimo): a 1280×640 quedaba en 4.6:1 y el recorte le
