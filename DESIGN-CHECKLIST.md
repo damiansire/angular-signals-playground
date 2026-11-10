@@ -214,7 +214,10 @@ puede alcanzar" son dos cosas distintas y hay que chequear las dos.
       a irse. Defecto resuelto (2026-11-10): debajo de la colina, los electrones y las Angie de las
       cards obligaban a rasterizar de nuevo, en cada cuadro, una capa del tamaño de la pantalla
       (~2000 tiles en 2,5 s; ahora ~300). Verificar contando `RasterTask` por capa en un trace de
-      `disabled-by-default-cc.debug` con la colina quieta.
+      `disabled-by-default-cc.debug` con la colina quieta. (2026-11-10) Lo mismo con la landing
+      de Tusi: mientras la colina la tapa (`.tusi__overlay` sin `.gone`), su canvas, título y HUD
+      van en `visibility: hidden`. Seguían en capas propias, ~30 MB de memoria de video a 3440 px
+      que le faltaban al zoom desde el ojo.
 - [ ] Consola limpia mientras se recorre: un `console.log` didáctico solo
       aparece cuando el usuario está en el sub-nivel que lo enseña.
 - [ ] Ningún loop de dibujo (rAF de canvas) corre sin algo que mover: parado en
@@ -636,6 +639,10 @@ entrar desarma a Angie en luz y se hace noche, la costura con el prólogo.
       tiemblan (`ini--radio`). Recién a los `T.sintonizar` entra el primer pensamiento. Con la voz
       del sol la estática se apaga y los anillos quedan enteros y quietos; cuando Angie contesta, se
       desvanecen. Los anillos van DEBAJO del globo del sol: encima, uno le cruzaba la frase.
+      (2026-11-10) Cada anillo SUENA al salir (`sonidoDeOnda`, `tocarOnda`): un tono que cae, con
+      temblor mientras hay interferencia y limpio y más suave con la voz del sol; con la respuesta
+      de Angie, ya no. Va pegado al anillo (`animationstart`/`animationiteration` del `ini-radio`,
+      no un reloj aparte), así no se desfasa. Defecto resuelto (Damian): las ondas salían mudas.
 - [ ] (2026-11-09) Los cuatro globos se escriben de a una letra, como los diálogos de un RPG
       (`TECLA_MS`, que es también `--tecla` en el CSS y lo que espera cada globo antes del toque,
       `loQueTardaEnEscribirse`). El globo entra entero y las letras lo llenan: no cambia de tamaño
@@ -682,7 +689,8 @@ entrar desarma a Angie en luz y se hace noche, la costura con el prólogo.
       Después la CÁMARA SE ALEJA como en Powers of Ten (2026-11-09, `cuadroDelViaje`): la noche
       era lo que Angie miraba, y se va adentro de su OJO. Dos tramos: (a) el CIERRE
       (`SE_CIERRA_MS`): el aviso SE ACHICA DESDE EL PRIMER CUADRO, despacio al principio en
-      escala (`v = u²`), hasta CERO en el negro del ojo (#0f0f11), y mientras se achica su borde se
+      escala (`v = u²`), hasta CERO en el negro del ojo (#0f0f11), en el medio de la pantalla (ver
+      "El círculo del aviso se cierra en el MEDIO"), y mientras se achica su borde se
       redondea en un círculo blando (máscara con `--aa-aire`) hasta el que cabe adentro
       (`aireQueCabe`); el negro aparece ALREDEDOR porque el aviso se aleja; el texto se va
       primero; (b) la cámara se ALEJA (`ALEJARSE_MS`) del ojo a la cara, a
@@ -779,6 +787,30 @@ entrar desarma a Angie en luz y se hace noche, la costura con el prólogo.
       Opera aparte (Playwright, `executablePath` y perfil propio) con
       `--force-gpu-mem-available-mb=128`. Se mide con un trace `disabled-by-default-cc.debug`: el
       `LayerTreeHostImpl:snapshot` trae `gpu_memory_usage` y `contents_scale` de cada tile.
+- [ ] (2026-11-10) El círculo del aviso se cierra en el MEDIO de la pantalla: la cámara lleva el ojo
+      de Angie al medio mientras el aviso se cierra y lo devuelve a su lugar a medida que se aleja,
+      parejo en escala (`corridaDeLaCamara`: a la mitad del viaje en escala, a la mitad del camino).
+      El aviso se achica alrededor de su propio medio, puesto sobre el ojo. Defecto resuelto
+      (Damian, monitor ultrawide): Angie queda a un costado y el aviso se iba achicando hacia allá,
+      "se va corriendo para el costado". Con el ojo en el medio la profundidad también baja
+      (×936 → ×522 a 3440×1300): las esquinas quedan más cerca.
+- [ ] (2026-11-10) El arranque del zoom desde el ojo no se ve a rayas con poca memoria de video.
+      Defecto resuelto (Damian, Opera Neon con YouTube abierto): en los primeros cuadros de la cara
+      gigante quedaban franjas y rectángulos sin dibujar, por donde asomaban las lomas. Tres causas
+      y sus arreglos: (1) lo que la gema tapa se pintaba igual: el cielo y las lomas pedían 250 MB a
+      ×500–×900 detrás de la cara; mientras la gema cubre la pantalla (`laGemaTapaLaPantalla`: las
+      cuatro esquinas, con margen ×1,15, adentro de sus piezas; la gema es convexa) lo que está
+      detrás de Angie va con `visibility: hidden`; (2) lo que no anima se redibujaba en cada cuadro a
+      la escala nueva: la escena va con `will-change: transform`, que el navegador dibuja una vez y
+      solo achica, y a cada mitad de escala se le saca un cuadro para que vuelva a la escala del
+      momento (no la baja sola y la memoria crecía ×4 por mitad); (3) la landing de abajo seguía en
+      capas propias bajo la colina (ver "Trabajo de fondo"). Probado y descartado: pausar todos los
+      loops del viaje (todo en una capa que se redibuja en cada cuadro: cuadros enteros en blanco);
+      `will-change` todo el viaje sin soltarlo (520 MB a los 2 s); soltarlo para siempre a la
+      primera mitad (desaparecía la cabeza dos cuadros); una deriva de la cámara durante el cierre
+      (más cuadros a medio dibujar). Medido con screencast en Opera aparte a 3440×1300: con
+      `--force-gpu-mem-available-mb=256`, picos blancos 30 (antes) → 7, y el tramo ojo → cara
+      entero; con la memoria normal, 0 picos y todos los cuadros enteros hasta la colina.
 
 ## Overlays que tapan el recorrido (prólogo, modales a pantalla completa)
 
@@ -1152,6 +1184,13 @@ Del minijuego de operadores (2026-11-08):
       del libro en la fila del HUD, y un corte de cielo entre el prólogo y la página. Excepción
       escrita: en el celular la página no entra y scrollea con "más abajo" (ver "El comienzo en el
       celular"). La hoja del viaje habla distinto (ADR 0010): ver "El viaje".
+- [ ] (2026-11-10) Con lugar (más de 760 de ancho y 500 de alto), la escena de la página llega hasta
+      arriba de todo y la ley flota sobre su cielo, debajo de la barra del juego (`--pm-arriba`, que
+      pone el libro). Defecto resuelto (Damian): la barra y la ley iban en una franja propia encima
+      de la escena, con un degradé oscuro que le bajaba encima: el título cortaba la pantalla de la
+      nave y lo que saltaba al tocar quedaba debajo de la franja. La ley no recibe toques salvo sus
+      botones. Medido a 2000×800 y 3440×1300: la pantalla de la nave entra entera. En el celular la
+      ley sigue en su lugar, arriba de la escena.
 - [ ] La tele se prende cuando la página ya está montada (`montarDiferido` avisa), y la primera
       página se pide al abrir el prólogo: prendida antes, el fogonazo pasaba mientras la página
       cargaba y se trababa un segundo. Si la página no llega en 4 s, se prende igual.
