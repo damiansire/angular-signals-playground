@@ -1100,8 +1100,19 @@ Del minijuego de operadores (2026-11-08):
       texto no se tocan (`getBoundingClientRect` entre todos los rótulos de la pantalla): con
       filas cada 34 unidades "capas caras" pisaba a layout y a paint, y "barato" quedaba pegado a
       "style"; la fila de DOM baja hasta despegarse del brillo del vidrio.
-- [ ] La ley 1 en el escenario: la consola dibuja el HTML a mano, sin `app-code` ni `app-tree` (el
-      árbol es la pantalla). Cada tag que abre es un botón dorado que revela su pieza; tocado, claro.
+- [ ] La ley 1 en el escenario: la consola dibuja el HTML a mano, sin `app-code` ni `app-tree`.
+      Cada tag que abre es un botón dorado que revela su pieza; tocado, blanco, y su renglón se
+      marca (franja lila con raya; en rojo si lo que abre quedó fuera de su panel; destella dorado
+      al marcarse). Un cierre suelto se marca con su elemento (`estadoDelRenglon`). (2026-11-11)
+      Al lado del código va el ÁRBOL DE NODOS, de arriba hacia abajo, con el color de cada pieza de
+      la pantalla: la pantalla es como se dibuja, el árbol es como se lee. Defecto resuelto
+      (Damian): sin él, "el HTML es un árbol" no se veía como árbol. Se ve lo tocado y, punteados,
+      sus ancestros (sin nada tocado, la raíz): el árbol entero de entrada delataba el bug. Con el
+      bug, `h3` y `p` cuelgan de `main` en rojo; al mover el cierre se mudan bajo `article` con su
+      rama. El lienzo mide lo de la versión más ancha (5 hojas): con el suyo, al arreglar todo
+      cambiaba de escala. Alto fijo en `em` (el del código) y ancho por su proporción: estirado a
+      lo ancho, el árbol quedaba chico en un vidrio vacío, y con `aspect-ratio` sin alto se iba a
+      una fila propia de 1868×752. Los paneles oscuros llevan borde lila: `main` no se veía.
       El bug es `<article></article>` cerrado enseguida, con `<h3>` y `<p>` sangrados adentro: al
       revelarlos aparecen donde los pone la sangría y CAEN al fondo del marco, el panel queda en una
       tira vacía, lo caído va rodeado en rojo y la nave se preocupa. Los lugares punteados de los
@@ -1110,8 +1121,8 @@ Del minijuego de operadores (2026-11-08):
       cierre más); en el paso 2 va dorado y, movido, verde: el título y el párrafo suben a su panel y
       recién ahí la nave festeja. El código no se envuelve (la sangría va en `ch`) y va a renglón
       1.4: son 10 renglones arreglado, contra 3 de la ley 5. A pantalla entera entra sin scroll a
-      1440×900, 1366×768, 1280×640 y suelto a 390×844: la ventanilla cede el renglón que suma el
-      arreglo. Antes el desafío era "parsear" un `<div>` adentro de un `<p>`, con otro código: no se
+      1440×900, 1366×768 y 1280×640: la ventanilla cede el renglón que suma el arreglo. Con el
+      árbol, suelto a 390×844 baja 50 px con "más abajo" (la excepción del celular). Antes el desafío era "parsear" un `<div>` adentro de un `<p>`, con otro código: no se
       entendía.
 - [ ] La ley 6 en el escenario (Signal Space): la pantalla de la nave es el árbol de la ley 5 y,
       arriba, la lectura "revisados N/7"; la caja ámbar del valor tiene un hilo hasta cada `<p>`
@@ -1191,15 +1202,29 @@ Del minijuego de operadores (2026-11-08):
       nave y lo que saltaba al tocar quedaba debajo de la franja. La ley no recibe toques salvo sus
       botones. Medido a 2000×800 y 3440×1300: la pantalla de la nave entra entera. En el celular la
       ley sigue en su lugar, arriba de la escena.
+- [ ] (2026-11-11) La ley no se pega a la barra: la barra termina a 1rem + 44 px y `--pm-arriba` le
+      suma `clamp(1.5rem, 5vh, 3.25rem)`. Defecto resuelto (Damian): a 4.25rem la ley quedaba a 8 px
+      de los íconos y se leía como parte de la barra. En el celular, 0.9rem de respiro bajo la franja.
+      Ancha y baja (consola al costado), la ley va en la columna de la consola, arriba, en un
+      renglón: flotando sobre el cielo, a 2000×780 el título pisaba la pantalla de la nave, y en la
+      columna con dos renglones 1280×640 desbordaba 115 px. En el escenario el planeta va a la
+      derecha de la pantalla (x 432): arriba a la izquierda le cruzaba el título. Medido con input
+      real en la historia a 1920×1080, 2000×780, 1440×900, 1366×768, 1280×1000, 1280×640 y
+      1024×768: sin scroll, sin desborde horizontal, título lejos del HUD y de la pantalla.
 - [ ] La tele se prende cuando la página ya está montada (`montarDiferido` avisa), y la primera
       página se pide al abrir el prólogo: prendida antes, el fogonazo pasaba mientras la página
       cargaba y se trababa un segundo. Si la página no llega en 4 s, se prende igual.
 - [ ] La tele recorta (`clip-path`), no achica: con `scale(0, …)` la nave de la ley 1 medía su
       matriz al nacer y no tenía inversa (`NaveDelManual.mirar` tiraba). El blanco es la imagen
       sobreexpuesta (`brightness`): pasando a blanco con `invert`, el medio era un velo gris.
-- [ ] "Anterior" y "Siguiente" van en la última fila de la consola (`pie` del token
-      `PAGINA_DEL_MANUAL`), nunca sobre el código ni en una franja sticky aparte. Son cartelitos de
-      papel: le ganan a la pastilla oscura global por especificidad.
+- [ ] "Anterior" y "Siguiente" van en la fila de los pasos de la consola (`pie` del token
+      `PAGINA_DEL_MANUAL`), "Anterior" a la izquierda de "Mostrame", nunca sobre el código ni en una
+      franja aparte. Son cartelitos de papel: le ganan a la pastilla oscura global por
+      especificidad. (2026-11-11, ADR 0014) "Siguiente" llega recién con la página cumplida, verde,
+      en el lugar de "Mostrame", con un salto y dos latidos; la flecha → tampoco pasa antes, y una
+      página cumplida queda cumplida al volver. Defecto resuelto (Damian): siempre a la vista, en su
+      propia fila al pie, se pasaba sin hacer nada y la fila existía solo para él. Medido con input
+      real: sin cumplir no está ni la flecha pasa; cumplida aparece; volviendo con ← sigue.
 - [ ] Medido con input real en la historia a 1440×900 y suelto a 390×844: las páginas integradas
       entran enteras, sin scroll, sin choque con el HUD y sin botón encima del código; Escape no
       cierra; "← Bitácora" vuelve. En el celular, ver "El comienzo en el celular".
