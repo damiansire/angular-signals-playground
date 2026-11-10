@@ -794,7 +794,7 @@ entrar desarma a Angie en luz y se hace noche, la costura con el prólogo.
       el halo del sol) a la escala más grande que alcanzó, y no la baja mientras siga animando:
       quedaban capas a ×40 y la colina pedía 650–750 MB. Al llegar, los loops de la escena se
       redibujan una vez más, ya a escala 1 (ver "El zoom desde el ojo no destella"). Durante el
-      viaje se redibujan cada vez que la escala baja a la mitad: con la del ojo todo el viaje, la colina
+      viaje se redibujan cada vez que la escala baja √2 (antes a la mitad): con la del ojo todo el viaje, la colina
       entraba en pantalla a ×955, se pasaba el límite y el zoom quedaba a medio dibujar; quietos
       todo el viaje, se redibujaban en cada cuadro y pestañeaba en blanco. Contar cuadros lavados
       del screencast del zoom (0–1 por corrida) contra la versión anterior. Se reproduce sin la PC de Damian: una
@@ -835,7 +835,7 @@ entrar desarma a Angie en luz y se hace noche, la costura con el prólogo.
       (`siguientePaso`): `frenar` (velocidad 0 con `will-change: transform` en cada loop, que
       mantiene su escala), `medir` (se saca esa fijación y la de la escena: se redibujan a la escala
       del cuadro, y el navegador espera a tenerlos listos) y `soltar`. Con la colina a la vista
-      (`QUIETOS_DESDE`, ×32) los loops van quietos y sin capa hasta llegar: `commitStyles` fija la
+      (×32; desde el 2026-11-11, todo el viaje) los loops van quietos y sin capa hasta llegar: `commitStyles` fija la
       pose, se les saca el efecto y al llegar se les devuelve, sin salto. Probado y descartado: no
       frenarlos (la colina a medio dibujar más de un segundo con poca memoria), reiniciarlos con
       pause()/play() (no bajan de escala: la colina sin dibujar aun después de llegar; además
@@ -846,6 +846,28 @@ entrar desarma a Angie en luz y se hace noche, la costura con el prólogo.
       del anterior y del siguiente, que se parecen entre sí): 3440×1300 con la memoria normal 0–1
       por corrida (antes 5–7), con `--force-gpu-mem-available-mb=256` 2 (antes 8–9), y 0 a
       1440×900 y 390×844. Al llegar, los 77 loops vuelven a velocidad 1 y la escena queda sin estilos.
+- [ ] (2026-11-11) El zoom desde el ojo no destella con poca memoria de video: a 3440×1300 con
+      `--force-gpu-mem-available-mb=256`, ningún cuadro con solo el fondo de `.ini` (#e9f3e6, el
+      "flash blanco"). Defecto resuelto (Damian, "un pequeño flash blanco durante el zoom"): 2–6 por
+      corrida, cada uno justo después de un redibujado de la escena. Causa: la memoria de tiles no
+      alcanzaba para redibujar la capa de la escena, y el navegador la muestra igual, sin tiles, con
+      su color de fondo. La llenaban (1) las piezas animadas de Angie, ~10 capas que a ×100–×500
+      cubren cada una la pantalla, porque los loops se aquietaban recién a ×32; (2) los pulsos de
+      pseudo-elementos (el aura de la idea, el halo del sol): `commitStyles` tira con un
+      pseudo-elemento, así que seguían animando con capa propia y obligaban a componer aparte todo lo
+      de encima (Angie, el título a pantalla entera); (3) la escena dibujada hasta 2× más grande de lo
+      que se ve (4× los píxeles) antes de cada redibujado. Arreglo: los loops quietos desde el primer
+      cuadro del viaje (todavía bajo el aviso: el cambio de pose no se ve); los pulsos de
+      pseudo-elementos apagados con `data-quieto` (`animation-name: none`, en `intro-tusi.css`), que
+      al llegar arrancan de cero, su pose base, sin salto; y redibujado cada √2 (2× los píxeles). A
+      mitad del viaje las capas grandes son la escena y la raíz, nada más (`LayerTree`). Probado y
+      descartado: `translateZ(0)` para conservar la capa de la escena (7–8 destellos); sostener la
+      pose del pseudo con una animación terminada (`fill: forwards` también pide capa); cada arreglo
+      solo (loops quietos con los pseudo animando: 3; pseudo apagados con loops desde ×32: 4; √2 con
+      los loops animando: 7). Medido con screencast por CDP (Edge headless, click real) y el detector
+      de cuadros sueltos: con 256 MB, 0 en 8 corridas (antes 2–6); con la memoria normal, 0 a
+      3440×1300, 1440×900 y 390×844. Con 128 MB sigue destellando en cada redibujado: la escena sola
+      ya no entra.
 
 ## Overlays que tapan el recorrido (prólogo, modales a pantalla completa)
 
