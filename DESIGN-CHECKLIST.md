@@ -745,6 +745,14 @@ entrar desarma a Angie en luz y se hace noche, la costura con el prólogo.
 - [ ] Después de que las luces de Angie suben a las estrellas arranca SIEMPRE el prólogo de las
       naves, aunque ya se haya visto: es la continuación de esa escena. Quien ya lo vio lo salta
       con su botón.
+- [ ] Ninguna capa que lee lo de atrás (`mix-blend-mode`, `backdrop-filter`) queda prendida en el
+      aviso ni en la colina mientras no hace falta. Las capas del atardecer multiplican recién con
+      `ini--atardecer` / `ini--noche`, y la ficha "Sonido" del aviso es casi opaca y sin
+      desenfoque. Defecto resuelto (2026-11-10, Opera Neon en Windows): aunque estuvieran en
+      opacidad 0, hacían que el navegador dibujara a pedazos lo animado de encima. Se borraban
+      letras de la ola del llamado, el cuerpo de Angie, el sol y las fichas, y el aviso se cortaba
+      al aparecer. En Chromium no se ve: se revisa en Opera Neon con capturas seguidas (cada
+      ~0,4 s), porque el corte dura un cuadro y una captura suelta no lo agarra.
 
 ## Overlays que tapan el recorrido (prólogo, modales a pantalla completa)
 
