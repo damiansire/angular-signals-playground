@@ -15,7 +15,9 @@ const url = process.argv[2] || 'https://damiansire.github.io/angular-signals-pla
 const salida = process.argv[3] || 'tarjeta-social.png';
 const navegador =
   process.env.EDGE ?? 'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe';
-const css = readFileSync(join(dirname(fileURLToPath(import.meta.url)), 'tarjeta.css'), 'utf8');
+const aca = dirname(fileURLToPath(import.meta.url));
+const css = readFileSync(join(aca, 'tarjeta.css'), 'utf8');
+const capa = readFileSync(join(aca, 'capa.svg'), 'utf8');
 const puerto = 9333;
 
 const proceso = spawn(
@@ -85,6 +87,18 @@ try {
   await dormir(13000);
   await cdp('Runtime.evaluate', {
     expression: `document.head.appendChild(Object.assign(document.createElement('style'), { textContent: ${JSON.stringify(css)} }))`,
+  });
+  // Para la tarjeta, Angie se pone la capa y sonríe: la capa detrás del cuerpo y los broches
+  // delante, los dos dentro del grupo que respira para que se muevan con ella.
+  await cdp('Runtime.evaluate', {
+    expression: `{
+      const angie = document.querySelector('.ini__angie app-mascota-viva');
+      angie.classList.add('mv--sonrie');
+      const capa = new DOMParser().parseFromString(${JSON.stringify(capa)}, 'image/svg+xml');
+      const respira = angie.querySelector('.mv__respira');
+      respira.prepend(document.importNode(capa.getElementById('tarjeta-capa'), true));
+      respira.append(document.importNode(capa.getElementById('tarjeta-broches'), true));
+    }`,
   });
   await dormir(600);
   // Si el aviso no se cerró o la bajada no terminó de entrar, la captura sale mal: mejor cortar.

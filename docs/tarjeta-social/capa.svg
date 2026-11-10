@@ -1,0 +1,43 @@
+<!-- La capa de la tarjeta social. Solo para la captura (ver capturar.mjs): va detrás del cuerpo de
+     Angie, dentro del grupo que respira, así se mueve con ella. Coordenadas del dibujo de 1080 de
+     mascota-viva. Violeta como la rosca de la lamparita y forro dorado como su luz: no suma colores. -->
+<svg xmlns="http://www.w3.org/2000/svg">
+<g id="tarjeta-capa">
+  <defs>
+    <linearGradient id="capa-tela" x1="0" y1="420" x2="0" y2="930" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#6d55f2" />
+      <stop offset=".55" stop-color="#5c44e4" />
+      <stop offset="1" stop-color="#3d2ecc" />
+    </linearGradient>
+    <linearGradient id="capa-forro" x1="990" y1="490" x2="1076" y2="660" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#ffd473" />
+      <stop offset="1" stop-color="#ffb900" />
+    </linearGradient>
+  </defs>
+  <!-- La espalda de la capa: corta, para no tapar la piedra, y el viento la levanta hacia la derecha. -->
+  <path
+    fill="url(#capa-tela)"
+    d="M300 430C262 540 250 650 262 770Q330 800 400 780Q470 812 540 786Q620 816 700 788Q780 816 860 782C936 762 1004 700 1050 612Q1068 560 1076 484C1020 500 962 492 912 462C890 450 875 440 860 430Z"
+  />
+  <!-- Pliegues: la tela cae desde los hombros. -->
+  <g fill="none" stroke="#3a2bb8" stroke-width="10" stroke-linecap="round" opacity=".55">
+    <path d="M300 520C288 600 284 680 292 760" />
+    <path d="M914 520C962 540 1012 532 1062 512" />
+    <path d="M896 620C944 650 992 646 1040 618" />
+  </g>
+  <!-- La punta se da vuelta con el viento y muestra el forro. -->
+  <path
+    fill="url(#capa-forro)"
+    d="M1076 484C1068 560 1040 620 990 668C1030 614 1048 558 1052 494C1060 492 1068 488 1076 484Z"
+  />
+</g>
+<!-- Broches dorados en los hombros: estos van delante del cuerpo, sobre el borde del escudo. -->
+<g id="tarjeta-broches">
+    <circle cx="278" cy="452" r="27" fill="#ffb900" />
+    <circle cx="278" cy="452" r="17" fill="#ffd473" />
+    <circle cx="271" cy="445" r="6" fill="#fff6d6" />
+    <circle cx="902" cy="458" r="27" fill="#ffb900" />
+    <circle cx="902" cy="458" r="17" fill="#ffd473" />
+    <circle cx="895" cy="451" r="6" fill="#fff6d6" />
+  </g>
+</svg>

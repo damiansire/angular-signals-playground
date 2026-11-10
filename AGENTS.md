@@ -137,5 +137,6 @@ corto: nada de reescrituras masivas ni cambios de stack.
   suelto).
 - `public/preview.jpeg` es la captura real que abre el README: si cambia la vista
   integrada, hay que regenerarla. La `og:image` es otra, `public/tarjeta-social.jpg`,
-  la colina con el título del juego, capturada con `docs/tarjeta-social/capturar.mjs`:
+  la colina con el título del juego y Angie con capa (`capa.svg`), capturada con
+  `docs/tarjeta-social/capturar.mjs`:
   si cambia la colina o el título, hay que regenerarla.
