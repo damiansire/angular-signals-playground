@@ -100,6 +100,12 @@ export class AvisoAuricularesComponent {
   readonly retoma = input(false);
   /** El toque ya dejó sonar: la historia puede seguir donde quedó. */
   readonly retomar = output<void>();
+  /**
+   * Quien retoma no pasa por la colina, que tenía su ficha para borrar la partida: la lleva el aviso.
+   * La confirmación es la de toda la vista, así dice lo mismo en todos lados.
+   */
+  readonly confirmandoBorrado = input(false);
+  readonly empezarDeCero = output<void>();
 
   protected readonly momento = signal<Momento>('esperando');
   /** El aviso recomienda el sonido: arranca prendido, y apagarlo es una elección explícita. */
@@ -156,7 +162,7 @@ export class AvisoAuricularesComponent {
   /** Tocar en cualquier lado continúa: buscar un botón era tarea. Menos en el control de sonido. */
   protected alTocar(e: MouseEvent): void {
     e.stopPropagation();
-    if ((e.target as Element | null)?.closest('.aa__mudo')) return;
+    if ((e.target as Element | null)?.closest('.aa__mudo, .aa__de-cero')) return;
     if (this.momento() !== 'esperando') return;
     if (this.retoma()) this.seguirDondeQuedo();
     else if (this.conSonido()) this.probar();
@@ -174,6 +180,11 @@ export class AvisoAuricularesComponent {
     this.momento.set('retomando');
     this.elegido.emit(conSonido);
     this.retomar.emit();
+  }
+
+  protected pedirEmpezarDeCero(e: MouseEvent): void {
+    e.stopPropagation();
+    this.empezarDeCero.emit();
   }
 
   protected alternarSonido(e: MouseEvent): void {

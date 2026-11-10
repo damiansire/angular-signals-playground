@@ -141,7 +141,8 @@
 
 /* ─── El sonido, arriba y aparte ──────────────────────────────────────────────────────────────── */
 
-.aa__mudo {
+.aa__mudo,
+.aa__de-cero {
   position: absolute;
   top: 16px;
   right: 16px;
@@ -149,6 +150,8 @@
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
+  /* El alto del parlante: con la vuelta, más chica, las dos fichas quedaban desparejas. */
+  min-height: 2.5rem;
   padding: 0.45rem 0.95rem 0.45rem 0.65rem;
   border: 2px solid rgba(255, 248, 236, 0.3);
   border-radius: 999px;
@@ -166,11 +169,41 @@
     scale 0.15s ease-out,
     opacity 0.25s ease-in;
 }
-.aa__mudo:hover {
+.aa__mudo:hover,
+.aa__de-cero:hover {
   border-color: #ffd46a;
 }
-.aa__mudo:active {
+.aa__mudo:active,
+.aa__de-cero:active {
   scale: 0.94;
+}
+.aa__de-cero {
+  right: auto;
+  left: 16px;
+}
+.aa__vuelta {
+  width: 1.2rem;
+  height: auto;
+}
+.aa__vuelta-arco {
+  fill: none;
+  stroke: #ffd46a;
+  stroke-width: 2.4;
+  stroke-linecap: round;
+}
+.aa__vuelta-punta {
+  fill: #ffd46a;
+}
+/* El "¿seguro?" en el rojo de lo que no se deshace, como en la colina y en la barra. */
+.aa__de-cero--confirmar {
+  border-color: #a3361c;
+  background: #a3361c;
+}
+.aa__de-cero--confirmar :is(.aa__vuelta-arco, .aa__vuelta-punta) {
+  stroke: #fff8ec;
+}
+.aa__de-cero--confirmar .aa__vuelta-punta {
+  fill: #fff8ec;
 }
 .aa__parlante {
   width: 1.6rem;
@@ -578,7 +611,8 @@
 .aa__seguir:focus-visible .aa__frase {
   border-bottom-color: rgba(255, 138, 201, 0.45);
 }
-.aa__mudo:focus-visible {
+.aa__mudo:focus-visible,
+.aa__de-cero:focus-visible {
   outline: 3px solid #fff8ec;
   outline-offset: 3px;
 }

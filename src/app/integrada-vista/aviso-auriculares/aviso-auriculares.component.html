@@ -51,6 +51,23 @@
     />
   </svg>
 </div>
+<!-- Con partida guardada el aviso sigue directo a la historia: borrarla va acá, en espejo con el
+     sonido, porque la colina que tenía su ficha ya no se ve. La confirmación es corta: a 375 px,
+     la de la colina se montaba sobre el sonido. -->
+@if (retoma()) {
+  <button
+    class="aa__de-cero"
+    type="button"
+    [class.aa__de-cero--confirmar]="confirmandoBorrado()"
+    (click)="pedirEmpezarDeCero($event)"
+  >
+    <svg class="aa__vuelta" viewBox="0 0 24 24" aria-hidden="true">
+      <path class="aa__vuelta-arco" d="M5.5 12a6.5 6.5 0 1 0 2-4.7" />
+      <path class="aa__vuelta-punta" d="M4 4.5v5h5z" />
+    </svg>
+    <span>{{ confirmandoBorrado() ? '¿Borrar todo?' : 'Empezar de cero' }}</span>
+  </button>
+}
 <!-- Arriba y aparte, para que tocar en cualquier lado siga siendo "continuar". -->
 <button
   class="aa__mudo"

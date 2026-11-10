@@ -29,8 +29,9 @@ recargar sin link "carga en la colina": carga en el aviso, que sigue directo.
 
 ## Consecuencias
 
-- Con partida guardada, la colina y su ficha de "Empezar de cero" no se ven. En el comienzo sigue
-  en su HUD, y al final del viaje en el último cuadro; en las hojas del viaje no hay ninguno a la
-  vista hasta llegar al fin. Queda pendiente darle un lugar ahí o en el aviso mismo.
+- Con partida guardada, la colina y su ficha de "Empezar de cero" no se ven, y en las hojas del
+  viaje no hay ninguno a la vista hasta llegar al fin. Por eso la ficha pasa al aviso: arriba a la
+  izquierda, en espejo con "Sonido", solo cuando hay algo para retomar, con el mismo segundo toque
+  que caduca.
 - La despedida de la colina (la radio, el sol, Angie hecha luz) se ve una sola vez, la primera.
 - Un link con `?nivel=` sigue mandando: abre la molécula sin aviso.
