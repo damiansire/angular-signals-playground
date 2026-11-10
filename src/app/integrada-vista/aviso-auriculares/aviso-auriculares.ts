@@ -226,6 +226,17 @@ function colinaEn(t: number, S0: number): number {
 }
 
 /**
+ * Cuánto de la distancia entre el ojo y el medio de la pantalla corre la cámara: entera mientras la
+ * colina está a `profundidad` (el aviso se cierra en el medio) y nada al llegar a 1 (la colina en su
+ * lugar). Va en escala, como el viaje: en pantalla, lineal, la colina ya llegaba de costado cuando
+ * todavía se veía solo la cara.
+ */
+export function corridaDeLaCamara(colina: number, profundidad: number): number {
+  if (profundidad <= 1) return 0;
+  return entre01(Math.log(colina) / Math.log(profundidad));
+}
+
+/**
  * De qué tan cerca arranca la colina: desde ADENTRO del ojo, con toda la pantalla de su negro.
  * `mancha` es el negro que se puede llenar, en el dibujo del ojo (lejos de su brillo y del párpado);
  * `dx` y `dy`, una esquina de la pantalla vista desde su centro, en ese mismo dibujo. La esquina
@@ -280,6 +291,45 @@ export function loopsQueSeRedibujan(animaciones: readonly Animation[], aviso: No
     if (!(efecto instanceof KeyframeEffect) || a.playbackRate === 0) return false;
     if (efecto.target && aviso.contains(efecto.target)) return false;
     return efecto.getComputedTiming().iterations === Infinity;
+  });
+}
+
+/**
+ * Cuánto más afuera de la pantalla se mira si la gema la tapa: lo medido es el cuadro anterior, y entre
+ * uno y otro la cámara se aleja unos pocos por ciento. Sin margen, el primer cuadro destapado mostraba
+ * el hueco donde debía estar la colina.
+ */
+const MARGEN_DE_TAPA = 1.15;
+
+/**
+ * Si la gema de Angie tapa la pantalla entera: cada esquina, algo más afuera, cae adentro de alguna
+ * de sus piezas. La gema es convexa, así que con las esquinas adentro está adentro todo. `piezas` son
+ * las de la pose que se ve; `pantalla`, el rectángulo en coordenadas de cliente.
+ */
+export function laGemaTapaLaPantalla(
+  piezas: readonly SVGGeometryElement[],
+  pantalla: {
+    readonly left: number;
+    readonly top: number;
+    readonly width: number;
+    readonly height: number;
+  },
+): boolean {
+  if (!piezas.length) return false;
+  const cx = pantalla.left + pantalla.width / 2;
+  const cy = pantalla.top + pantalla.height / 2;
+  const alPieza = piezas.map((p) => ({ p, m: p.getScreenCTM()?.inverse() }));
+  return [
+    [-1, -1],
+    [1, -1],
+    [-1, 1],
+    [1, 1],
+  ].every(([sx, sy]) => {
+    const x = cx + (sx * MARGEN_DE_TAPA * pantalla.width) / 2;
+    const y = cy + (sy * MARGEN_DE_TAPA * pantalla.height) / 2;
+    return alPieza.some(
+      ({ p, m }) => !!m && p.isPointInFill(new DOMPoint(x, y).matrixTransform(m)),
+    );
   });
 }
 

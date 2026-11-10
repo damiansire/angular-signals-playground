@@ -19,7 +19,9 @@ import {
   VIAJE_MS,
   aireQueCabe,
   aireQueCubre,
+  corridaDeLaCamara,
   cuadroDelViaje,
+  laGemaTapaLaPantalla,
   cuandoSeAbre,
   cuandoSuena,
   estrellasDelAlba,
@@ -108,12 +110,14 @@ export class AvisoAuricularesComponent {
   private readonly temporizadores = new Set<ReturnType<typeof setTimeout>>();
   private cuadro = 0;
   private frenados: Animation[] = [];
+  private tapados: (HTMLElement | SVGElement)[] = [];
 
   constructor() {
     inject(DestroyRef).onDestroy(() => {
       this.temporizadores.forEach(clearTimeout);
       cancelAnimationFrame(this.cuadro);
       this.soltarLoops();
+      this.destapar();
     });
     // El foco va a la invitación, así Enter alcanza; no si la landing arranca tapada (un deep-link).
     afterNextRender(() => {
@@ -218,12 +222,15 @@ export class AvisoAuricularesComponent {
       return { x: p.x - r.left, y: p.y - r.top };
     };
     let ojo = enPantalla() ?? { x: r.width / 2, y: r.height * 0.6 };
+    // El círculo se cierra en el medio de la pantalla y no donde está Angie: en un monitor ancho ella
+    // queda a un costado y el aviso se iba achicando hacia allá, corrido.
+    const medio = { x: r.width / 2, y: r.height / 2 };
     const esquinas = [
       [0, 0],
       [r.width, 0],
       [0, r.height],
       [r.width, r.height],
-    ].map(([x, y]) => [x - ojo.x, y - ojo.y] as const);
+    ].map(([x, y]) => [x - medio.x, y - medio.y] as const);
     const matriz = elOjo?.getScreenCTM();
     const profundidad = matriz
       ? profundidadDesdeElOjo(
@@ -232,40 +239,81 @@ export class AvisoAuricularesComponent {
           esquinas,
         )
       : profundidadDelViaje({ ancho: 10, alto: 10 }, r.width, r.height);
-    const cubre = aireQueCubre(ojo.x, ojo.y, r.width, r.height);
-    const cabe = aireQueCabe(ojo.x, ojo.y, r.width, r.height);
+    const cubre = aireQueCubre(medio.x, medio.y, r.width, r.height);
+    const cabe = aireQueCabe(medio.x, medio.y, r.width, r.height);
+    this.host.style.transformOrigin = `${medio.x}px ${medio.y}px`;
+    this.host.style.setProperty('--aa-x', `${medio.x}px`);
+    this.host.style.setProperty('--aa-y', `${medio.y}px`);
+    let corrida = { x: 0, y: 0 };
 
     /**
      * La cámara sigue al ojo: la cara de Angie se mueve sola, y a cientos de aumentos dos píxeles de
      * su vaivén dejaban el negro corrido y asomaba la cara. Con el ojo como punto fijo de la escala,
      * queda donde estaría sin acercar, y lo que se mueve es apenas lo que se mueve ella.
      */
-    const seguirElOjo = (escala: number): void => {
+    const seguirElOjo = (escala: number, colina: number): void => {
       const medido = enPantalla();
       if (medido) {
-        // Lo medido viene con la escala de este cuadro alrededor del ojo anterior: se deshace.
-        ojo = { x: ojo.x + (medido.x - ojo.x) / escala, y: ojo.y + (medido.y - ojo.y) / escala };
+        // Lo medido viene con la escala y la corrida del cuadro anterior: se deshacen.
+        ojo = {
+          x: ojo.x + (medido.x - corrida.x - ojo.x) / escala,
+          y: ojo.y + (medido.y - corrida.y - ojo.y) / escala,
+        };
       }
-      const origen = `${ojo.x}px ${ojo.y}px`;
-      escena.style.transformOrigin = origen;
-      this.host.style.transformOrigin = origen;
-      this.host.style.setProperty('--aa-x', `${ojo.x}px`);
-      this.host.style.setProperty('--aa-y', `${ojo.y}px`);
+      escena.style.transformOrigin = `${ojo.x}px ${ojo.y}px`;
+      // La cámara lleva el ojo al medio y lo devuelve a su lugar a medida que se aleja, parejo en
+      // escala como el viaje: a la mitad del camino en escala, a la mitad del camino en pantalla.
+      const k = corridaDeLaCamara(colina, profundidad);
+      corrida = { x: (medio.x - ojo.x) * k, y: (medio.y - ojo.y) * k };
+      escena.style.translate = `${corrida.x}px ${corrida.y}px`;
+      // El aviso, adentro de la escena, se achica alrededor de su medio puesto sobre el ojo.
+      this.host.style.translate = `${ojo.x - medio.x}px ${ojo.y - medio.y}px`;
     };
+
+    /**
+     * Mientras la gema de Angie tapa la pantalla, lo que está detrás de ella (cielo, lomas, sol,
+     * piedra) no se pinta. Estaba igual en capas propias a cientos de aumentos: unos 250 MB de memoria
+     * de video sin que se viera nada, y con poca la cara aparecía cortada a rayas por donde asomaba la
+     * colina.
+     */
+    const piezas = [
+      ...escena.querySelectorAll<SVGGeometryElement>(
+        // De perfil, la silueta de la gema; de frente, las piezas del escudo y la placa de la cara.
+        '.ini__angie .mv__perfil > [data-pieza]:first-child > path, ' +
+          '.ini__angie .mv__frente > path[data-pieza], .ini__angie .mv__frente[data-pieza] > g > path',
+      ),
+    ].filter((p) => p.getBoundingClientRect().width > 0);
+    let deAngie: Element | null = escena.querySelector('.ini__angie');
+    while (deAngie && deAngie.parentElement !== escena) deAngie = deAngie.parentElement;
+    const detras: (HTMLElement | SVGElement)[] = [];
+    for (let h = deAngie?.previousElementSibling; h; h = h.previousElementSibling) {
+      if (h instanceof HTMLElement || h instanceof SVGElement) detras.push(h);
+    }
 
     let escala = 1;
     let dibujadaA = Infinity;
+    let redibujando = false;
     let cero = 0;
     const pintar = (ahora: number): void => {
       const t = ahora - cero;
       const c = cuadroDelViaje(t, profundidad, cubre, cabe);
-      seguirElOjo(escala);
+      seguirElOjo(escala, c.colina);
+      if (laGemaTapaLaPantalla(piezas, r)) this.tapar(detras);
+      else this.destapar();
       escala = c.colina;
-      // Un cuadro quietos alcanza para que el navegador los mida de nuevo; al siguiente, sueltos.
-      if (this.frenados.length) this.soltarLoops();
-      else if (tocaRedibujar(escala, dibujadaA)) {
+      // La escena va en una capa propia (`will-change`) que el navegador dibuja una vez y solo achica:
+      // redibujada en cada cuadro a la escala nueva, la cara gigante salía a rayas. Esa capa no baja
+      // sola su escala y la memoria crecía, así que a cada mitad se le saca un cuadro y vuelve a la
+      // escala del momento. Los loops, igual: un cuadro quietos y el navegador los mide de nuevo.
+      if (redibujando) {
+        redibujando = false;
+        this.soltarLoops();
+        escena.style.willChange = 'transform';
+      } else if (tocaRedibujar(escala, dibujadaA)) {
         dibujadaA = escala;
+        redibujando = true;
         this.frenarLoops(escena);
+        escena.style.willChange = 'auto';
       }
       escena.style.scale = `${c.colina}`;
       this.host.style.scale = `${c.aviso}`;
@@ -276,6 +324,9 @@ export class AvisoAuricularesComponent {
       }
       escena.style.removeProperty('scale');
       escena.style.removeProperty('transform-origin');
+      escena.style.removeProperty('translate');
+      escena.style.removeProperty('will-change');
+      this.destapar();
       // El aviso queda en cero hasta que lo oculta `listo`: devuelto a su tamaño, volvía entero un cuadro.
       this.viaje.emit(false);
       this.momento.set('listo');
@@ -286,6 +337,17 @@ export class AvisoAuricularesComponent {
     cero = performance.now();
     pintar(cero);
     this.momento.set('alejandose');
+  }
+
+  private tapar(detras: (HTMLElement | SVGElement)[]): void {
+    if (this.tapados.length) return;
+    this.tapados = detras;
+    for (const h of detras) h.style.visibility = 'hidden';
+  }
+
+  private destapar(): void {
+    for (const h of this.tapados) h.style.removeProperty('visibility');
+    this.tapados = [];
   }
 
   private frenarLoops(escena: HTMLElement): void {

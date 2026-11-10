@@ -7,7 +7,9 @@ import {
   VIAJE_MS,
   aireQueCabe,
   aireQueCubre,
+  corridaDeLaCamara,
   cuadroDelViaje,
+  laGemaTapaLaPantalla,
   profundidadDelViaje,
   profundidadDesdeElOjo,
   type CuadroDelViaje,
@@ -247,6 +249,67 @@ describe('los loops que se redibujan al llegar la cámara', () => {
     const enPausa = animar(colina, Infinity);
     enPausa.playbackRate = 0;
     expect(loopsQueSeRedibujan([enPausa], aviso)).toEqual([]);
+  });
+});
+
+describe('cuándo la gema de Angie tapa la pantalla', () => {
+  let svg: SVGSVGElement;
+  const pieza = (d: string): SVGPathElement => {
+    const p = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    p.setAttribute('d', d);
+    svg.appendChild(p);
+    return p;
+  };
+  beforeEach(() => {
+    svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    svg.setAttribute('style', 'position: fixed; left: 0; top: 0; width: 400px; height: 300px');
+    document.body.appendChild(svg);
+  });
+  afterEach(() => svg.remove());
+  const pantalla = { left: 100, top: 100, width: 100, height: 50 };
+
+  it('la tapa cuando las cuatro esquinas, con margen, caen adentro', () => {
+    expect(laGemaTapaLaPantalla([pieza('M0 0H400V300H0Z')], pantalla)).toBeTrue();
+  });
+
+  it('no la tapa si una esquina asoma, aunque el resto esté adentro', () => {
+    expect(laGemaTapaLaPantalla([pieza('M0 0H195V300H0Z')], pantalla)).toBeFalse();
+  });
+
+  it('entre varias piezas: cada esquina en alguna alcanza', () => {
+    const izquierda = pieza('M0 0H150V300H0Z');
+    const derecha = pieza('M150 0H400V300H150Z');
+    expect(laGemaTapaLaPantalla([izquierda, derecha], pantalla)).toBeTrue();
+  });
+
+  it('sin piezas a la vista no la tapa', () => {
+    expect(laGemaTapaLaPantalla([], pantalla)).toBeFalse();
+  });
+});
+
+describe('la cámara lleva el ojo al medio de la pantalla', () => {
+  it('entero mientras se cierra el aviso, nada al llegar a la colina', () => {
+    expect(corridaDeLaCamara(900, 900)).toBe(1);
+    expect(corridaDeLaCamara(1, 900)).toBe(0);
+  });
+
+  it('va en escala: a la mitad del viaje en escala, a la mitad del camino', () => {
+    expect(corridaDeLaCamara(30, 900)).toBeCloseTo(0.5, 5);
+  });
+
+  it('a lo largo del viaje solo vuelve, nunca se pasa ni va y viene', () => {
+    let antes = Infinity;
+    for (let t = 0; t <= VIAJE_MS; t += 50) {
+      const k = corridaDeLaCamara(cuadroDelViaje(t, 900, 2000, 400).colina, 900);
+      expect(k).toBeGreaterThanOrEqual(0);
+      expect(k).toBeLessThanOrEqual(antes);
+      antes = k;
+    }
+    expect(antes).toBe(0);
+  });
+
+  it('sin profundidad no corre nada', () => {
+    expect(corridaDeLaCamara(1, 1)).toBe(0);
   });
 });
 
