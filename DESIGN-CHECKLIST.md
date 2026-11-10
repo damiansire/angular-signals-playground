@@ -767,8 +767,8 @@ eran de dibujo sino de que el recorrido seguía vivo por debajo del velo.
       está ahí. Va en `document`, y filtrando por overlay visible. Síntoma: la
       tecla "no hace nada" y encima scrollea lo de atrás.
 - [ ] Mostrar y terminar no pueden ocurrir en el mismo turno. Si el overlay
-      puede autocancelarse (movimiento reducido, pantalla angosta, falta de una
-      capacidad), destapar después de decidir: si no, queda el velo puesto sobre
+      puede autocancelarse (movimiento reducido, falta de una capacidad),
+      destapar después de decidir: si no, queda el velo puesto sobre
       una escena terminada, con los controles muertos y la app bloqueada.
 - [ ] Todo estado visual que el motor togglea por clase tiene que existir en el
       CSS. El motor marcaba `claro` y `oculto` sobre el botón de saltar y
@@ -903,6 +903,27 @@ Del minijuego de operadores (2026-11-08):
       no en el bundle inicial: importados desde la vista lo pasaban de 740 kB.
 - [ ] Al medir o clickear, los selectores van dentro de `.prologo__operadores`: los sub-niveles
       ocultos del recorrido también tienen `.ms__knob`, y el click caía en uno invisible.
+
+**El comienzo en el celular** (2026-11-10, ADR 0012):
+
+- [ ] El prólogo se juega a cualquier ancho; solo el movimiento reducido lo termina. Abajo de 700 px
+      se salteaba, y con él el minijuego, el manual y el árbol: en el iPhone la Introducción no
+      estaba.
+- [ ] Los rótulos dibujados en el SVG tienen piso en pantalla (`letraConPiso`): 12 px el del
+      disparo, 15 el del acierto. Con `meet`, a 390 px la escena queda a 0.24 y 19 unidades eran
+      4.6 px. Agrandado, el nombre se apaga antes (`opacidadDelRotulo`) y nunca hay dos a la vez:
+      con el tamaño de escritorio se pisaban. En escritorio el piso no alcanza: medido 19/4 a
+      1440×900 y 1024×700.
+- [ ] A 390 px la caja de diálogo parte la frase en dos renglones, abajo y sin tapar la escena: "un
+      renglón" vale desde el ancho de escritorio.
+- [ ] El libro de leyes, a 760 px de ancho o menos, o 500 de alto o menos, scrollea: la página no
+      entra. Arranca debajo del HUD (`top: 4.25rem`, sin padding): con padding arriba, la ley pasaba
+      por detrás de los botones. Sin el vidrio `::after`: en un scroller se iba con el contenido y
+      dejaba una franja negra a mitad de página. "más abajo ↓" va sticky en el borde de abajo, sobre
+      el renglón ya cortado, y se apaga al final (scroll-driven; sin soporte, no aparece). Medido
+      con input real en WebKit y Edge a 390×664 (el alto real de Safari en el iPhone, no 844) y
+      750×342: el minijuego, las cinco páginas y el árbol hasta "Seguir la historia", sin desborde
+      horizontal. A 1440×900 y 1024×700 el libro no cambia.
 
 **El manual de a bordo** (0/1 a 0/5, pantallas enteras en el prólogo):
 
@@ -1092,8 +1113,9 @@ Del minijuego de operadores (2026-11-08):
       página la pantalla se apaga (raya, punto) y la historia sigue con "Debería ser imposible…".
       Anti-patrones: un velo o un desenfoque sobre el prólogo, una tarjeta con marco alrededor de la
       página, una × o Escape que sale, scroll o "más abajo", botones encima del código, la cabeza
-      del libro en la fila del HUD, y un corte de cielo entre el prólogo y la página. La hoja del
-      viaje habla distinto (ADR 0010): ver "El viaje".
+      del libro en la fila del HUD, y un corte de cielo entre el prólogo y la página. Excepción
+      escrita: en el celular la página no entra y scrollea con "más abajo" (ver "El comienzo en el
+      celular"). La hoja del viaje habla distinto (ADR 0010): ver "El viaje".
 - [ ] La tele se prende cuando la página ya está montada (`montarDiferido` avisa), y la primera
       página se pide al abrir el prólogo: prendida antes, el fogonazo pasaba mientras la página
       cargaba y se trababa un segundo. Si la página no llega en 4 s, se prende igual.
@@ -1105,8 +1127,7 @@ Del minijuego de operadores (2026-11-08):
       papel: le ganan a la pastilla oscura global por especificidad.
 - [ ] Medido con input real en la historia a 1440×900 y suelto a 390×844: las páginas integradas
       entran enteras, sin scroll, sin choque con el HUD y sin botón encima del código; Escape no
-      cierra; "← Bitácora" vuelve. Por debajo de 700 px el prólogo se saltea (por diseño), así que a
-      390 el libro se lee suelto.
+      cierra; "← Bitácora" vuelve. En el celular, ver "El comienzo en el celular".
 - [ ] La mano guía señala lo próximo que hay que tocar y amaga el toque hasta que alguien lo toca
       (cada página dice qué con `guia`, un selector). Antes "Clickeá un tag" no decía cuál y nadie
       empezaba. Entra 1,2 s después de la ley para no robarle la mirada.
