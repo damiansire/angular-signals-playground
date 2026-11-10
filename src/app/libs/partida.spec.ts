@@ -18,6 +18,9 @@ import {
 /** La forma real del recorrido: 11 conceptos con su cantidad de sub-niveles. */
 const SUBS = [7, 3, 3, 2, 2, 2, 3, 4, 2, 2, 1];
 
+/** Donde retoma una partida anterior a la 4 que ya había visto el comienzo. */
+const DESDE_EL_MANUAL: Punto = { lugar: 'prologo', linea: 'anom-manual' };
+
 describe('partida', () => {
   it('ida y vuelta: lo que se escribe se lee igual', () => {
     let p = conEstablecido(PARTIDA_VACIA, 3, 1);
@@ -60,8 +63,8 @@ describe('partida', () => {
     expect(leerPartida(v1, SUBS)).toEqual({
       establecidos: ['0/3', '10/0'],
       cinematicas: [1],
-      prologo: true,
-      punto: null,
+      prologo: false,
+      punto: DESDE_EL_MANUAL,
       viaje: null,
     });
   });
@@ -77,9 +80,20 @@ describe('partida', () => {
     expect(leerPartida(v2, SUBS)).toEqual({
       establecidos: ['0/3', '3/1', '10/0'],
       cinematicas: [1, 12],
-      prologo: true,
-      punto: { lugar: 'recorrido', concepto: 3, sub: 1 },
+      prologo: false,
+      punto: DESDE_EL_MANUAL,
       viaje: null,
+    });
+    const sinComienzo = JSON.stringify({
+      v: 2,
+      establecidos: [],
+      cinematicas: [],
+      punto: { lugar: 'recorrido', concepto: 4, sub: 1 },
+    });
+    expect(leerPartida(sinComienzo, SUBS).punto).toEqual({
+      lugar: 'recorrido',
+      concepto: 3,
+      sub: 1,
     });
     const enLaIntro = JSON.stringify({
       v: 2,
@@ -100,8 +114,32 @@ describe('partida', () => {
     });
   });
 
-  it('lo que se escribe hoy lleva la versión 3', () => {
-    expect(JSON.parse(escribirPartida(PARTIDA_VACIA)).v).toBe(3);
+  it('una partida de la versión 3 con el comienzo visto lo retoma desde el manual y sigue el viaje', () => {
+    const v3 = JSON.stringify({
+      v: 3,
+      establecidos: ['1/0'],
+      cinematicas: [1],
+      prologo: true,
+      punto: { lugar: 'viaje' },
+      viaje: { concepto: 2, pagina: 1 },
+    });
+    expect(leerPartida(v3, SUBS)).toEqual({
+      establecidos: ['1/0'],
+      cinematicas: [1],
+      prologo: false,
+      punto: DESDE_EL_MANUAL,
+      viaje: { concepto: 2, pagina: 1 },
+    });
+  });
+
+  it('en la versión de hoy, el comienzo visto se respeta', () => {
+    const hoy = escribirPartida({ ...PARTIDA_VACIA, prologo: true, punto: { lugar: 'viaje' } });
+    expect(leerPartida(hoy, SUBS).prologo).toBeTrue();
+    expect(leerPartida(hoy, SUBS).punto).toEqual({ lugar: 'viaje' });
+  });
+
+  it('lo que se escribe hoy lleva la versión 4', () => {
+    expect(JSON.parse(escribirPartida(PARTIDA_VACIA)).v).toBe(4);
   });
 
   it('descarta ids que ya no existen en el recorrido y los que no tienen forma de id', () => {
@@ -166,7 +204,7 @@ describe('partida', () => {
   });
   describe('el punto donde quedó la historia', () => {
     const leer = (punto: unknown): Punto | null =>
-      leerPartida(JSON.stringify({ v: 3, establecidos: [], cinematicas: [], punto }), SUBS).punto;
+      leerPartida(JSON.stringify({ v: 4, establecidos: [], cinematicas: [], punto }), SUBS).punto;
 
     it('ida y vuelta para los tres lugares', () => {
       const puntos: Punto[] = [
@@ -207,7 +245,7 @@ describe('partida', () => {
 
   describe('dónde quedó el viaje', () => {
     const leer = (viaje: unknown): unknown =>
-      leerPartida(JSON.stringify({ v: 3, establecidos: [], cinematicas: [], viaje }), SUBS).viaje;
+      leerPartida(JSON.stringify({ v: 4, establecidos: [], cinematicas: [], viaje }), SUBS).viaje;
 
     it('ida y vuelta: la cinemática de un capítulo (-1) y una de sus páginas', () => {
       for (const viaje of [

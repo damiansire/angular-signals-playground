@@ -15,7 +15,7 @@ export const CLAVE_PARTIDA = 'signals-cuaderno';
  * Si el formato cambia de manera incompatible, se sube. Una versión con migración se lee y se
  * traduce; una sin migración arranca de cero.
  */
-const VERSION = 3;
+const VERSION = 4;
 
 /**
  * Cómo se lee hoy un lugar del recorrido guardado con una versión anterior, o `null` si eso ya no
@@ -27,6 +27,8 @@ const VERSION = 3;
  * - En la 3 (2026-11-09) el último sub-nivel de la Introducción pasó a ser el árbol de Signal
  *   Space, y la Introducción salió del recorrido: todo se corre un concepto para atrás. Lo resuelto
  *   en la historia no se marca en ningún lado.
+ * - La 4 (2026-11-10) tiene la forma de la 3: lo que cambia es qué dice `prologo` (ver
+ *   `DESDE_EL_MANUAL`).
  */
 interface Lugar {
   readonly concepto: number;
@@ -37,7 +39,16 @@ const sinLaIntroduccion = (l: Lugar): Lugar | null =>
 const MIGRACIONES: Readonly<Record<number, (l: Lugar) => Lugar | null>> = {
   1: (l) => (l.concepto === 0 && l.sub !== 5 ? null : sinLaIntroduccion(l)),
   2: sinLaIntroduccion,
+  3: (l) => l,
 };
+
+/**
+ * Hasta la versión 3, `prologo` podía venir de un comienzo que todavía no tenía el manual ni el
+ * árbol: la 3 se escribía encima de las 1 y 2 en cuanto la app las leía, y ya no se distinguen.
+ * Con ese `prologo` la entrada iba directo al capítulo 1, y la Introducción no aparecía nunca más.
+ * Una partida anterior con el comienzo visto lo retoma desde el manual; el viaje sigue donde estaba.
+ */
+const DESDE_EL_MANUAL: Punto = { lugar: 'prologo', linea: 'anom-manual' };
 
 /**
  * El capítulo 0 era la Introducción: su cinemática se fue con ella. 12 es el final y 13 la
@@ -135,11 +146,13 @@ export function leerPartida(crudo: string | null, subPorConcepto: readonly numbe
     }
   }
 
+  const prologo = dato['prologo'] === true;
+  const sinElManual = prologo && v !== VERSION;
   return {
     establecidos: [...establecidos].sort(compararIds),
     cinematicas: [...cinematicas].sort((a, b) => a - b),
-    prologo: dato['prologo'] === true,
-    punto: leerPunto(dato['punto'], subPorConcepto, migrar),
+    prologo: prologo && !sinElManual,
+    punto: sinElManual ? DESDE_EL_MANUAL : leerPunto(dato['punto'], subPorConcepto, migrar),
     viaje: leerViaje(dato['viaje'], subPorConcepto, migrar),
   };
 }
