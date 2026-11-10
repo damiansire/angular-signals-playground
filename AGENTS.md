@@ -135,5 +135,6 @@ corto: nada de reescrituras masivas ni cambios de stack.
   timer (p.ej. en `signals/level-6-resource/` o `level-10-debounced/`), va con
   timeout o cleanup explícito (`effect` con `onCleanup`, no un `setTimeout`
   suelto).
-- `public/preview.jpeg` es la captura real que abre el README y también la
-  `og:image`: si cambia la vista integrada, hay que regenerarla.
+- `public/preview.jpeg` es la captura real que abre el README: si cambia la vista
+  integrada, hay que regenerarla. La `og:image` es otra, `public/tarjeta-social.jpg`,
+  una ilustración que sale de `docs/tarjeta-social/tarjeta.html` (ahí dice cómo).

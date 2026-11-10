@@ -118,7 +118,7 @@ fecha y adónde fue. Los ids (H1, J1…) sirven para nombrarlos en una sesión (
 - **T9. Tres nombres para Angie.** El prólogo la llama "Angie", las cinemáticas "Mascota", y la
   intro de Tusi usa una imagen estática (`public/angular-mascot-idea.svg`). **Propuesta:** "Angie" y
   el componente vivo (`mascota-viva`) en todos lados.
-- **T10. La captura del README.** `public/preview.jpeg` (también es la `og:image`) y el README en
+- **T10. La captura del README.** `public/preview.jpeg` y el README en
   inglés se rehacen cuando cambie la vista integrada.
 - **T11. Quien no ve el prólogo.** Sin movimiento (`prefers-reduced-motion`) o con menos de 700 px de
   ancho, el prólogo se saltea entero, y con él el manual de a bordo: esas personas ya no ven 0/1 a
