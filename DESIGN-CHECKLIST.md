@@ -209,6 +209,12 @@ puede alcanzar" son dos cosas distintas y hay que chequear las dos.
       `interval`: al volver sigue desde donde quedó en vez de cobrar de golpe
       el tiempo inerte (8/2, 2026-09-29). Verificar midiendo (contar logs o
       ticks durante N segundos parado en otro nivel), no leyendo el código.
+- [ ] Lo que tapa la intro no se pinta: con la intro entera encima, `svg.mol` y `#content` van
+      en `visibility: hidden` y el SMIL de la molécula en pausa, y vuelven apenas la intro empieza
+      a irse. Defecto resuelto (2026-11-10): debajo de la colina, los electrones y las Angie de las
+      cards obligaban a rasterizar de nuevo, en cada cuadro, una capa del tamaño de la pantalla
+      (~2000 tiles en 2,5 s; ahora ~300). Verificar contando `RasterTask` por capa en un trace de
+      `disabled-by-default-cc.debug` con la colina quieta.
 - [ ] Consola limpia mientras se recorre: un `console.log` didáctico solo
       aparece cuando el usuario está en el sub-nivel que lo enseña.
 - [ ] Ningún loop de dibujo (rAF de canvas) corre sin algo que mover: parado en
@@ -758,6 +764,17 @@ entrar desarma a Angie en luz y se hace noche, la costura con el prólogo.
       letras de la ola del llamado, el cuerpo de Angie, el sol y las fichas, y el aviso se cortaba
       al aparecer. En Chromium no se ve: se revisa en Opera Neon con capturas seguidas (cada
       ~0,4 s), porque el corte dura un cuadro y una captura suelta no lo agarra.
+- [ ] La colina entra en la memoria de video de una PC cargada: quieta y en un monitor ultrawide
+      (3440×1300), sus tiles suman del orden de 150 MB, todos a escala ≤ 3. Defecto resuelto
+      (2026-11-10, Opera Neon en Windows, fijo y no de un cuadro): faltaban el cuerpo de Angie,
+      letras del título y del llamado, y quedaban rectángulos pálidos. La cámara que sale del ojo
+      agranda la escena cientos de veces, y el navegador dibuja lo que anima (juncos, nubes, Angie,
+      el halo del sol) a la escala más grande que alcanzó, y no la baja mientras siga animando:
+      quedaban capas a ×40 y la colina pedía 650–750 MB. Ahora los loops de la escena van a
+      velocidad 0 durante el viaje y arrancan al llegar. Se reproduce sin la PC de Damian: una
+      Opera aparte (Playwright, `executablePath` y perfil propio) con
+      `--force-gpu-mem-available-mb=128`. Se mide con un trace `disabled-by-default-cc.debug`: el
+      `LayerTreeHostImpl:snapshot` trae `gpu_memory_usage` y `contents_scale` de cada tile.
 
 ## Overlays que tapan el recorrido (prólogo, modales a pantalla completa)
 
