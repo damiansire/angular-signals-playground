@@ -265,14 +265,14 @@ export function profundidadDesdeElOjo(
 }
 
 /**
- * Los loops de la colina que se frenan dos cuadros al llegar la cámara. El navegador dibuja lo que
- * anima a la escala más grande que alcanzó, contando la de la escena, y no la baja mientras siga
- * animando: después de alejarse desde el ojo, los juncos, las nubes y Angie quedaban dibujados a
- * decenas de aumentos, cientos de megas de memoria de video, y con poca (Opera Neon con otras
- * pestañas) a la colina le faltaban pedazos. Frenados un instante dejan de animar, se vuelven a
- * dibujar a escala 1 y arrancan desde ahí. Durante el viaje no: quietos, se redibujaban en cada
- * cuadro a la escala del momento y el zoom pestañeaba en blanco. Los del aviso tampoco, que se va,
- * ni los que ya frenó la pausa de fondo: soltarlos sería despausarlos.
+ * Los loops de la colina que se frenan un instante para que el navegador los vuelva a dibujar. Lo
+ * que anima queda dibujado a la escala más grande que alcanzó, contando la de la escena, y no la
+ * baja mientras siga animando: después de alejarse desde el ojo, los juncos, las nubes y Angie
+ * quedaban a decenas de aumentos, cientos de megas de memoria de video, y con poca (Opera Neon con
+ * otras pestañas) a la colina le faltaban pedazos. Frenados un cuadro dejan de animar, se miden a la
+ * escala del momento y arrancan desde ahí. Quietos todo el viaje, en cambio, se redibujaban en cada
+ * cuadro y el zoom pestañeaba en blanco. Los del aviso no, que se va, ni los que ya frenó la pausa
+ * de fondo: soltarlos sería despausarlos.
  */
 export function loopsQueSeRedibujan(animaciones: readonly Animation[], aviso: Node): Animation[] {
   return animaciones.filter((a) => {
@@ -281,4 +281,14 @@ export function loopsQueSeRedibujan(animaciones: readonly Animation[], aviso: No
     if (efecto.target && aviso.contains(efecto.target)) return false;
     return efecto.getComputedTiming().iterations === Infinity;
   });
+}
+
+/**
+ * Si los loops de la colina se vuelven a dibujar en este cuadro del viaje: cada vez que la escala
+ * baja a la mitad de la que tenían. Con la del ojo todo el viaje, cada vez entraba más colina en
+ * pantalla a ×955, se pasaba el límite de memoria y quedaban tiles sin dibujar; a la mitad son unas
+ * diez veces en todo el viaje.
+ */
+export function tocaRedibujar(escala: number, dibujadaA: number): boolean {
+  return escala <= dibujadaA / 2;
 }

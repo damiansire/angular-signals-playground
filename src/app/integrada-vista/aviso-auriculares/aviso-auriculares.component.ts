@@ -27,6 +27,7 @@ import {
   profundidadDesdeElOjo,
   letrasDelLlamado,
   loopsQueSeRedibujan,
+  tocaRedibujar,
   planDeLaPrueba,
   tocarPrueba,
   type Lado,
@@ -253,12 +254,19 @@ export class AvisoAuricularesComponent {
     };
 
     let escala = 1;
+    let dibujadaA = Infinity;
     let cero = 0;
     const pintar = (ahora: number): void => {
       const t = ahora - cero;
       const c = cuadroDelViaje(t, profundidad, cubre, cabe);
       seguirElOjo(escala);
       escala = c.colina;
+      // Un cuadro quietos alcanza para que el navegador los mida de nuevo; al siguiente, sueltos.
+      if (this.frenados.length) this.soltarLoops();
+      else if (tocaRedibujar(escala, dibujadaA)) {
+        dibujadaA = escala;
+        this.frenarLoops(escena);
+      }
       escena.style.scale = `${c.colina}`;
       this.host.style.scale = `${c.aviso}`;
       this.host.style.setProperty('--aa-aire', `${c.aire}px`);
@@ -280,9 +288,14 @@ export class AvisoAuricularesComponent {
     this.momento.set('alejandose');
   }
 
-  private redibujarLoops(escena: HTMLElement): void {
+  private frenarLoops(escena: HTMLElement): void {
     this.frenados = loopsQueSeRedibujan(escena.getAnimations({ subtree: true }), this.host);
     for (const a of this.frenados) a.playbackRate = 0;
+  }
+
+  private redibujarLoops(escena: HTMLElement): void {
+    this.soltarLoops();
+    this.frenarLoops(escena);
     this.cuadro = requestAnimationFrame(() => {
       this.cuadro = requestAnimationFrame(() => this.soltarLoops());
     });

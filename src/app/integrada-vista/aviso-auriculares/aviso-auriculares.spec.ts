@@ -17,6 +17,7 @@ import {
   estrellasDelAlba,
   letrasDelLlamado,
   loopsQueSeRedibujan,
+  tocaRedibujar,
   planDeLaPrueba,
 } from './aviso-auriculares';
 
@@ -246,5 +247,29 @@ describe('los loops que se redibujan al llegar la cámara', () => {
     const enPausa = animar(colina, Infinity);
     enPausa.playbackRate = 0;
     expect(loopsQueSeRedibujan([enPausa], aviso)).toEqual([]);
+  });
+});
+
+describe('cuándo se redibujan los loops en el viaje de la cámara', () => {
+  it('en el primer cuadro: arrancan a la escala del ojo y no a la de la colina de antes', () => {
+    expect(tocaRedibujar(900, Infinity)).toBeTrue();
+  });
+
+  it('cada vez que la escala baja a la mitad, y no en cada cuadro, que pestañeaba', () => {
+    expect(tocaRedibujar(460, 900)).withContext('apenas se alejó').toBeFalse();
+    expect(tocaRedibujar(450, 900)).withContext('a la mitad').toBeTrue();
+  });
+
+  it('del ojo a la colina son unas diez veces, no cientos', () => {
+    let dibujadaA = Infinity;
+    let veces = 0;
+    for (let escala = 960; escala >= 1; escala *= 0.97) {
+      if (tocaRedibujar(escala, dibujadaA)) {
+        dibujadaA = escala;
+        veces++;
+      }
+    }
+    expect(veces).toBeGreaterThan(5);
+    expect(veces).toBeLessThan(15);
   });
 });
