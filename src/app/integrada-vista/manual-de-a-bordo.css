@@ -309,17 +309,20 @@
   z-index: 5;
   background: #050309;
 }
+/* La barra del juego no se lleva una franja: la escena de la página llega hasta arriba y la ley se
+   corre debajo de la barra (`--pm-arriba`, ver `pagina-del-manual.component.css`). */
 .prologo__manual.prologo__manual--libro {
+  --pm-arriba: 4.25rem;
   inset: 0;
   width: 100%;
-  padding: 4.25rem 0 0;
+  padding: 0;
   background: #130d2b;
   animation: none;
   overflow-x: hidden;
 }
 .manual-suelto .prologo__manual.prologo__manual--libro {
+  --pm-arriba: 1.25rem;
   inset: 0;
-  padding-top: 1.25rem;
 }
 /* El vidrio visto desde adentro: las esquinas redondeadas de la pantalla y un reflejo que casi no
    se ve. Encima de todo y sin tocarse. */
@@ -347,7 +350,10 @@
 @media (max-width: 760px), (max-height: 500px) {
   .prologo__manual.prologo__manual--libro {
     top: 4.25rem;
-    padding-top: 0;
+  }
+  /* Acá la ley va en su lugar, arriba de la escena: suelto, sin barra encima, solo un respiro. */
+  .manual-suelto .prologo__manual.prologo__manual--libro {
+    padding-top: 1.25rem;
   }
   .prologo__manual--libro::after {
     display: none;
