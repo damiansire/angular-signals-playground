@@ -123,18 +123,20 @@ function pintarCielo(svg: SVGSVGElement, semilla: number): void {
     });
     if (i % 6 === 0) titilan.push(e);
   }
-  // El planeta lejos, arriba: abajo se metía detrás de la nave y le borraba la silueta.
-  el(cielo, 'circle', { cx: 40, cy: 38, r: 22, fill: `url(#${id}-p)`, opacity: 0.85 });
+  // El planeta lejos, arriba: abajo se metía detrás de la nave y le borraba la silueta. En el
+  // escenario, a la derecha de la pantalla: arriba a la izquierda flota la ley, y le cruzaba el título.
+  const lejos = caja.ancho > ANCHO ? { x: 432, y: 46 } : { x: 40, y: 38 };
+  el(cielo, 'circle', { cx: lejos.x, cy: lejos.y, r: 22, fill: `url(#${id}-p)`, opacity: 0.85 });
   el(cielo, 'ellipse', {
-    cx: 40,
-    cy: 38,
+    cx: lejos.x,
+    cy: lejos.y,
     rx: 36,
     ry: 6,
     fill: 'none',
     stroke: '#ffd9a6',
     'stroke-opacity': 0.4,
     'stroke-width': 2,
-    transform: 'rotate(-14 40 38)',
+    transform: `rotate(-14 ${lejos.x} ${lejos.y})`,
   });
   el(svg, 'rect', {
     x: caja.x,
