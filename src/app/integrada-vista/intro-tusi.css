@@ -419,6 +419,14 @@
 .tusi:has(> .tusi__overlay:not(.gone)) > :not(.tusi__overlay) {
   visibility: hidden;
 }
+/* Mientras la cámara se aleja desde el ojo, los pulsos de los pseudo-elementos (el aura, el halo del
+   sol) van apagados: `commitStyles` no puede dejarlos quietos y, animando, cada uno tenía su capa y
+   todo lo de encima (Angie, el título) otra a pantalla entera. Con poca memoria de video no entraban
+   y la colina salía un cuadro en blanco. Arrancan de cero, que es la pose en que estuvieron. */
+.tusi__overlay [data-quieto~='antes']::before,
+.tusi__overlay [data-quieto~='despues']::after {
+  animation-name: none;
+}
 /* Los loops del overlay y del cue seguían corriendo toda la sesión sobre opacidad 0, y los orbitales
    animan offset-distance, que no se compone en GPU: costo de estilo por cuadro para nadie. */
 /* `.intro.` y no solo `.intro--fuera`: el shorthand `animation` de `.tusi__mouse span` resetea el

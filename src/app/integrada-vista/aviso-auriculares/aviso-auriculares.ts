@@ -334,13 +334,15 @@ export function laGemaTapaLaPantalla(
 }
 
 /**
- * Si los loops de la colina se vuelven a dibujar en este cuadro del viaje: cada vez que la escala
- * baja a la mitad de la que tenían. Con la del ojo todo el viaje, cada vez entraba más colina en
- * pantalla a ×955, se pasaba el límite de memoria y quedaban tiles sin dibujar; a la mitad son unas
- * diez veces en todo el viaje.
+ * Si la colina se vuelve a dibujar en este cuadro del viaje: cada vez que la escala baja √2 de la
+ * que tenía. Con la del ojo todo el viaje, cada vez entraba más colina en pantalla a ×955, se pasaba
+ * el límite de memoria y quedaban tiles sin dibujar. Entre un redibujado y otro la capa está dibujada
+ * más grande de lo que se ve: a la mitad llegaba a 4× los píxeles de la pantalla, y con poca memoria
+ * de video el redibujado no entraba y salía un cuadro en blanco; a √2 son 2×, unas veinte veces en
+ * todo el viaje.
  */
 export function tocaRedibujar(escala: number, dibujadaA: number): boolean {
-  return escala <= dibujadaA / 2;
+  return escala <= dibujadaA / Math.SQRT2;
 }
 
 /**
@@ -368,16 +370,6 @@ export function siguientePaso(
 }
 
 /**
- * Desde esta escala hasta llegar, los loops de la colina van quietos y sin capa propia: la colina
- * entera es una sola capa que solo se redibuja a cada mitad. Con la colina a la vista, redibujar
- * además cada loop (Angie, juncos, nubes, el sol) era demasiado para un cuadro y, aun por pasos,
- * salía vacía la pantalla al alejarse y al llegar. Antes no: adentro de la cara, quietos desde el
- * principio, la escena se redibujaba en cada cuadro del cierre del aviso, y al aquietarlos a ×128
- * el cuadro del cambio salía vacío. Se mide a 3440 px con screencast y poca memoria de video.
- */
-export const QUIETOS_DESDE = 32;
-
-/**
  * Las propiedades que mueve una animación, escritas como en CSS: las que `commitStyles` deja fijas
  * en el estilo del elemento mientras va quieta, y que hay que sacar cuando vuelve a moverse.
  */
@@ -385,4 +377,14 @@ export function propiedadesAnimadas(cuadros: readonly object[]): string[] {
   const internas = new Set(['offset', 'computedOffset', 'easing', 'composite']);
   const nombres = new Set(cuadros.flatMap((c) => Object.keys(c)).filter((k) => !internas.has(k)));
   return [...nombres].map((k) => k.replace(/[A-Z]/g, (m) => '-' + m.toLowerCase()));
+}
+
+/**
+ * La marca de `data-quieto` que apaga el pulso de un pseudo-elemento mientras viaja la cámara, o
+ * `null` si el loop es de un elemento (ese se aquieta con `commitStyles`).
+ */
+export function marcaDelPseudo(pseudo: string | null): string | null {
+  if (pseudo === '::before') return 'antes';
+  if (pseudo === '::after') return 'despues';
+  return null;
 }

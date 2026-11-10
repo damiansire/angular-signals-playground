@@ -29,9 +29,9 @@ import {
   profundidadDelViaje,
   profundidadDesdeElOjo,
   letrasDelLlamado,
-  QUIETOS_DESDE,
   loopsQueSeRedibujan,
   propiedadesAnimadas,
+  marcaDelPseudo,
   siguientePaso,
   tocaRedibujar,
   type PasoDelRedibujado,
@@ -130,6 +130,8 @@ export class AvisoAuricularesComponent {
   private frenados: Animation[] = [];
   /** Los loops que van quietos hasta llegar, con su efecto aparte para devolvérselo. */
   private quietos: { animacion: Animation; efecto: KeyframeEffect; fijas: string[] }[] = [];
+  /** Los pseudo-elementos con su pulso apagado hasta llegar. */
+  private apagados: { blanco: Element; marca: string }[] = [];
   private tapados: (HTMLElement | SVGElement)[] = [];
   /**
    * La colina de atrás, mientras el aviso la tapa. Es un diálogo modal: Tab salía de la invitación a
@@ -354,14 +356,13 @@ export class AvisoAuricularesComponent {
       escala = c.colina;
       // La escena va en una capa propia (`will-change`) que el navegador dibuja una vez y solo achica:
       // redibujada en cada cuadro a la escala nueva, la cara gigante salía a rayas. Esa capa no baja
-      // sola su escala y la memoria crecía, así que a cada mitad vuelve a la escala del momento, y
-      // los loops igual, hasta que con la colina a la vista se quedan quietos (`QUIETOS_DESDE`). Al
-      // llegar se redibuja una última vez, ya a escala 1, y los loops vuelven a moverse.
+      // sola su escala y la memoria crecía, así que cada √2 vuelve a la escala del momento. Los
+      // loops van quietos todo el viaje (`aquietarLoops`). Al llegar se redibuja una última vez, ya a
+      // escala 1, y los loops vuelven a moverse.
       paso = siguientePaso(paso, llego || tocaRedibujar(escala, dibujadaA));
       if (paso === 'frenar') {
         dibujadaA = escala;
-        if (!llego && !this.quietos.length && escala <= QUIETOS_DESDE) this.aquietarLoops(escena);
-        else this.frenarLoops(escena);
+        this.frenarLoops(escena);
       } else if (paso === 'medir') {
         this.medirLoops();
         escena.style.willChange = 'auto';
@@ -387,6 +388,8 @@ export class AvisoAuricularesComponent {
       this.viaje.emit(false);
       this.llegar();
     };
+    // Quietos desde el primer cuadro, todavía bajo el aviso, así el cambio de pose no se ve.
+    this.aquietarLoops(escena);
     // El primer cuadro va ya, junto con la máscara: sin aire, el aviso desaparecía un cuadro.
     cero = performance.now();
     pintar(cero);
@@ -426,8 +429,11 @@ export class AvisoAuricularesComponent {
 
   /**
    * Los loops quedan quietos en la pose de este cuadro y sin animación enganchada: así no tienen capa
-   * propia. Con velocidad 0 y no con pause(), que le saca al CSS el control de
-   * `animation-play-state` (ver la pausa de fondo en `molecule-engine.ts`).
+   * propia y la colina entera es una sola, que solo se redibuja cada √2 de escala. Animando, cada
+   * pieza de Angie era una capa que a ×100–×500 cubría la pantalla: con poca memoria de video no
+   * entraban al redibujar y la colina salía un cuadro en blanco. Con velocidad 0 y no con pause(),
+   * que le saca al CSS el control de `animation-play-state` (ver la pausa de fondo en
+   * `molecule-engine.ts`).
    */
   private aquietarLoops(escena: HTMLElement): void {
     for (const animacion of loopsQueSeRedibujan(
@@ -435,6 +441,14 @@ export class AvisoAuricularesComponent {
       this.host,
     )) {
       const efecto = animacion.effect as KeyframeEffect;
+      const marca = efecto.target ? marcaDelPseudo(efecto.pseudoElement) : null;
+      if (efecto.target && marca) {
+        // `commitStyles` no escribe en un pseudo-elemento, y una animación que sostiene su pose
+        // también le pide capa: se apaga entero (`data-quieto` en `intro-tusi.css`).
+        alternarMarca(efecto.target, marca, true);
+        this.apagados.push({ blanco: efecto.target, marca });
+        continue;
+      }
       animacion.playbackRate = 0;
       try {
         animacion.commitStyles();
@@ -448,7 +462,10 @@ export class AvisoAuricularesComponent {
     }
   }
 
-  /** Vuelven a moverse desde la pose en que quedaron: sin salto. */
+  /**
+   * Vuelven a moverse desde la pose en que quedaron: sin salto. Los pseudo-elementos arrancan su
+   * pulso de cero, que es la pose en que estuvieron apagados.
+   */
   private despertarLoops(): void {
     for (const { animacion, efecto, fijas } of this.quietos) {
       animacion.effect = efecto;
@@ -457,6 +474,8 @@ export class AvisoAuricularesComponent {
       animacion.playbackRate = 1;
     }
     this.quietos = [];
+    for (const { blanco, marca } of this.apagados) alternarMarca(blanco, marca, false);
+    this.apagados = [];
   }
 
   private medirLoops(): void {
@@ -486,4 +505,13 @@ export class AvisoAuricularesComponent {
     }, ms);
     this.temporizadores.add(id);
   }
+}
+
+/** Prende o apaga una marca de `data-quieto` sin tocar las otras del mismo elemento. */
+function alternarMarca(blanco: Element, marca: string, prendida: boolean): void {
+  const marcas = new Set((blanco.getAttribute('data-quieto') ?? '').split(' ').filter(Boolean));
+  if (prendida) marcas.add(marca);
+  else marcas.delete(marca);
+  if (marcas.size) blanco.setAttribute('data-quieto', [...marcas].join(' '));
+  else blanco.removeAttribute('data-quieto');
 }

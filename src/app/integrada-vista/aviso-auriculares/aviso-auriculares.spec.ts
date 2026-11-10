@@ -23,6 +23,7 @@ import {
   planDeLaPrueba,
   siguientePaso,
   propiedadesAnimadas,
+  marcaDelPseudo,
   type PasoDelRedibujado,
 } from './aviso-auriculares';
 
@@ -321,12 +322,18 @@ describe('cuándo se redibujan los loops en el viaje de la cámara', () => {
     expect(tocaRedibujar(900, Infinity)).toBeTrue();
   });
 
-  it('cada vez que la escala baja a la mitad, y no en cada cuadro, que pestañeaba', () => {
-    expect(tocaRedibujar(460, 900)).withContext('apenas se alejó').toBeFalse();
-    expect(tocaRedibujar(450, 900)).withContext('a la mitad').toBeTrue();
+  it('cada vez que la escala baja √2, y no en cada cuadro, que pestañeaba', () => {
+    expect(tocaRedibujar(640, 900)).withContext('apenas se alejó').toBeFalse();
+    expect(tocaRedibujar(636, 900)).withContext('a √2').toBeTrue();
   });
 
-  it('del ojo a la colina son unas diez veces, no cientos', () => {
+  it('nunca dibujada a más del doble de los píxeles que se ven: a 4× no entraba en memoria', () => {
+    const escala = 900 / 1.4;
+    expect(tocaRedibujar(escala, 900)).toBeFalse();
+    expect((900 / escala) ** 2).toBeLessThanOrEqual(2);
+  });
+
+  it('del ojo a la colina son unas veinte veces, no cientos', () => {
     let dibujadaA = Infinity;
     let veces = 0;
     for (let escala = 960; escala >= 1; escala *= 0.97) {
@@ -335,8 +342,8 @@ describe('cuándo se redibujan los loops en el viaje de la cámara', () => {
         veces++;
       }
     }
-    expect(veces).toBeGreaterThan(5);
-    expect(veces).toBeLessThan(15);
+    expect(veces).toBeGreaterThan(15);
+    expect(veces).toBeLessThan(25);
   });
 });
 
@@ -373,5 +380,16 @@ describe('lo que queda fijo mientras un loop va quieto', () => {
 
   it('cada una una sola vez, aunque aparezca en todos los cuadros', () => {
     expect(propiedadesAnimadas([{ opacity: '0' }, { opacity: '1' }])).toEqual(['opacity']);
+  });
+});
+
+describe('los pulsos de los pseudo-elementos mientras viaja la cámara', () => {
+  it('cada pseudo-elemento con su marca, para apagar solo ese', () => {
+    expect(marcaDelPseudo('::before')).toBe('antes');
+    expect(marcaDelPseudo('::after')).toBe('despues');
+  });
+
+  it('un loop de un elemento no lleva marca: se aquieta con commitStyles', () => {
+    expect(marcaDelPseudo(null)).toBeNull();
   });
 });
