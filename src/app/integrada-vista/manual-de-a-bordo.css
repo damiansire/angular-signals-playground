@@ -310,9 +310,10 @@
   background: #050309;
 }
 /* La barra del juego no se lleva una franja: la escena de la página llega hasta arriba y la ley se
-   corre debajo de la barra (`--pm-arriba`, ver `pagina-del-manual.component.css`). */
+   corre debajo de la barra (`--pm-arriba`, ver `pagina-del-manual.component.css`). La barra termina a
+   1rem + 44 px; a 4.25rem la ley quedaba a 8 px de sus íconos y se leía como parte de ella. */
 .prologo__manual.prologo__manual--libro {
-  --pm-arriba: 4.25rem;
+  --pm-arriba: calc(1rem + 44px + clamp(1.5rem, 5vh, 3.25rem));
   inset: 0;
   width: 100%;
   padding: 0;
@@ -321,7 +322,7 @@
   overflow-x: hidden;
 }
 .manual-suelto .prologo__manual.prologo__manual--libro {
-  --pm-arriba: 1.25rem;
+  --pm-arriba: clamp(1.75rem, 6vh, 3.5rem);
   inset: 0;
 }
 /* El vidrio visto desde adentro: las esquinas redondeadas de la pantalla y un reflejo que casi no
