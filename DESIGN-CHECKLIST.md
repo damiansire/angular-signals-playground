@@ -195,6 +195,12 @@ puede alcanzar" son dos cosas distintas y hay que chequear las dos.
 - [ ] Todo anillo de foco llega a 3:1 contra lo que tiene alrededor. Los acentos claros (ámbar,
       verde) sobre el crema no llegan: el anillo va doble, `var(--focus-ink)` en el `outline` (el
       contraste) y el acento en un `box-shadow` por dentro (la identidad).
+- [ ] El aviso de auriculares es un diálogo modal también para el teclado: mientras está arriba, lo
+      que tapa en `.tusi__overlay` (la colina: lamparita, sonido, pausa, "Entrar") va `inert`, y se
+      suelta recién cuando la cámara llega a la colina. Defecto resuelto (2026-11-11): Tab salía de
+      la invitación a la lamparita y a las fichas de la colina, invisibles detrás del aviso. Tabular
+      con teclas reales: con el aviso el ciclo es invitación, skip-link, "Empezar de cero" (si hay
+      partida) y sonido; en la colina vuelve a la lamparita.
 
 ## Trabajo de fondo (lo que corre cuando no lo estás mirando)
 
