@@ -69,6 +69,10 @@ export class NaveDelManual {
   private readonly gesto: SVGGElement;
   private readonly cuerpo: SVGGElement;
   private readonly llama: SVGGElement;
+  /** Lo que contiene a la llama: se estira con el motor a fondo, sin pisar su chisporroteo. */
+  private readonly tobera: SVGGElement;
+  /** Cuánto se estira la tobera, a lo largo y a lo ancho. */
+  private readonly motor = { x: 1, y: 1 };
   private readonly parpados: SVGGElement[] = [];
   private readonly pupilas: SVGGElement[] = [];
   private readonly cejas: SVGPathElement[] = [];
@@ -102,7 +106,8 @@ export class NaveDelManual {
     const c = this.cuerpo;
 
     // La llama detrás del motor: se estira y se encoge sola, y con un susto chisporrotea.
-    this.llama = el(el(c, 'g', { transform: 'translate(-68 0)' }), 'g');
+    this.tobera = el(c, 'g', { transform: 'translate(-68 0)' });
+    this.llama = el(this.tobera, 'g');
     el(this.llama, 'path', {
       d: 'M0 -9C-18 -10-36 -4-50 0C-36 4-18 10 0 9Z',
       fill: `url(#${id}-fuego)`,
@@ -317,6 +322,28 @@ export class NaveDelManual {
     });
   }
 
+  /**
+   * El motor: 1 es ralentí, más es a fondo (la llama se estira hacia atrás) y menos, frenando. Se
+   * estira la tobera, desde la boca del motor, para no pisar el chisporroteo de la llama.
+   */
+  propulsar(fuerza: number, duracion = 0.2): void {
+    if (this.quieta) return;
+    // A mano, alrededor del 0 de la tobera (la boca del motor): el origen de GSAP sale de la caja de
+    // la llama, que chisporrotea, y a fondo la llama se despegaba del motor.
+    gsap.to(this.motor, {
+      x: fuerza,
+      y: 1 + (fuerza - 1) * 0.18,
+      duration: duracion,
+      ease: 'power2.out',
+      overwrite: 'auto',
+      onUpdate: () =>
+        this.tobera.setAttribute(
+          'transform',
+          `translate(-68 0) scale(${this.motor.x.toFixed(3)} ${this.motor.y.toFixed(3)})`,
+        ),
+    });
+  }
+
   /** Un saltito de gusto: anticipa, sube, cae y se aplasta un poco. */
   saltito(alto = 14): gsap.core.Timeline | null {
     if (this.quieta) return null;
@@ -440,5 +467,6 @@ export class NaveDelManual {
     this.padre.removeEventListener('pointerdown', this.alTocar);
     gsap.ticker.remove(this.latir);
     this.parpadeo?.kill();
+    gsap.killTweensOf(this.motor);
   }
 }

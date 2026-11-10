@@ -46,6 +46,14 @@
     }
   </ng-template>
   <ng-template #consola><ng-content select="[consola]" /></ng-template>
+  <!-- En la pantalla de la nave la página pone sus botones: "Siguiente" es de la nave (ver `seguir`). -->
+  <ng-template #volver>
+    @if (datos?.atras?.(); as texto) {
+      <button type="button" class="pm-atras" (click)="datos?.pasar?.(-1)">
+        &larr; {{ texto }}
+      </button>
+    }
+  </ng-template>
 
   <!-- Una sola pieza: la nave es el escenario y su pantalla muestra lo que pasa. -->
   <section class="pm-escenario">
@@ -53,13 +61,33 @@
       <ng-content select="[escena]" />
       @if (enPantalla()) {
         @if (!enPortada()) {
-          <!-- Lo que hay que hacer lo dice la nave, con su ayuda al pie: cambia de paso, y el globo
-               salta. -->
-          <div class="pm-globo" aria-live="polite">
-            <ol class="pm-etapas">
-              <ng-container [ngTemplateOutlet]="pasos" />
-            </ol>
-            <ng-container [ngTemplateOutlet]="mostrame" />
+          <div class="pm-carril" [class.pm-carril--yendo]="yendo()">
+            <!-- Lo que hay que hacer lo dice la nave, con su ayuda al pie: cambia de paso, y el globo
+                 salta. -->
+            <div class="pm-globo" aria-live="polite">
+              <ol class="pm-etapas">
+                <ng-container [ngTemplateOutlet]="pasos" />
+              </ol>
+              <ng-container [ngTemplateOutlet]="mostrame" />
+            </div>
+            <!-- Cumplida la página, la nave puede seguir viaje: un vidrio que late, con flechas que
+                 corren hacia adelante. Tocarlo la hace salir volando, y la página siguiente la
+                 recibe desde la izquierda. -->
+            @if (datos?.siguiente?.(); as texto) {
+              <button
+                type="button"
+                class="pm-seguir"
+                [class.pm-seguir--yendo]="yendo()"
+                [disabled]="yendo()"
+                (click)="seguir()"
+              >
+                <span class="pm-seguir-texto">{{ texto }}</span>
+                <span class="pm-seguir-flechas" aria-hidden="true">
+                  <span style="--i: 0">&rsaquo;</span><span style="--i: 1">&rsaquo;</span
+                  ><span style="--i: 2">&rsaquo;</span>
+                </span>
+              </button>
+            }
           </div>
         }
         <div #pantalla class="pm-pantalla">
@@ -75,7 +103,7 @@
                 }
               }
               <div class="pm-portada-botones">
-                <ng-container [ngTemplateOutlet]="paginas" />
+                <ng-container [ngTemplateOutlet]="volver" />
                 <button type="button" class="pm-leer" (click)="leer()">
                   Leer <span aria-hidden="true">&rarr;</span>
                 </button>
@@ -97,9 +125,9 @@
               </header>
             }
             <ng-container [ngTemplateOutlet]="consola" />
-            <!-- Las páginas del libro, como pestañas sobre el borde de abajo de la pantalla. -->
+            <!-- Volver, como pestaña sobre el borde de abajo de la pantalla. -->
             <nav class="pm-paginas" aria-label="Páginas">
-              <ng-container [ngTemplateOutlet]="paginas" />
+              <ng-container [ngTemplateOutlet]="volver" />
             </nav>
           }
         </div>

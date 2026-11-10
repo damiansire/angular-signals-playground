@@ -20,6 +20,14 @@ export interface DatosDeLaPagina {
   readonly pie?: TemplateRef<unknown>;
   /** La página se cumplió (los dos pasos hechos): recién ahí el libro deja seguir. */
   readonly alCumplir?: () => void;
+  /**
+   * Para la página en la pantalla de la nave, que pone sus propios botones en vez del `pie`: pasar
+   * de hoja (después de que la nave sale volando) y qué dice cada botón, o `null` si no hay a dónde
+   * ir. "Siguiente" es `null` hasta que la página se cumple.
+   */
+  readonly pasar?: (paso: 1 | -1) => void;
+  readonly atras?: () => string | null;
+  readonly siguiente?: () => string | null;
 }
 
 export const PAGINA_DEL_MANUAL = new InjectionToken<DatosDeLaPagina>('PAGINA_DEL_MANUAL');

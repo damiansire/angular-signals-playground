@@ -101,6 +101,8 @@ const AVISO = '#ff7676';
       width: var(--pm-nave-ancho, 100%);
       height: var(--pm-nave-alto, 100%);
       overflow: visible;
+      /* Al seguir viaje, sale volando por delante de la pantalla, no por detrás. */
+      z-index: 2;
     }
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -395,6 +397,8 @@ export class EscenaArbolComponent extends EscenaDelManual {
       this.nave?.saltito(18);
       const svg = this.host.querySelector<SVGSVGElement>('.esc-nave');
       if (svg) chispas(svg, 0, -6);
+      // Con la llama más larga: la nave queda lista para seguir viaje.
+      this.nave?.propulsar(1.35, 0.4);
     });
   }
 }

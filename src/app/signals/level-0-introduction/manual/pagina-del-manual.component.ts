@@ -17,6 +17,7 @@ import {
 import { NgTemplateOutlet } from '@angular/common';
 import { gsap } from 'gsap';
 import { sinMovimiento } from './nave-del-manual';
+import { VueloDeLaNave } from './vuelo-de-la-nave';
 import { PAGINA_DEL_MANUAL } from './pagina-del-manual';
 import { ManoGuiaComponent, type Punta } from './mano-guia.component';
 import { puntaDeLaMano, sigueMostrando } from './guia.logica';
@@ -73,6 +74,9 @@ export class PaginaDelManualComponent {
   protected readonly enPortada = computed(() => this.portada() && !this.abierta());
   private readonly pantalla = viewChild<ElementRef<HTMLElement>>('pantalla');
   private readonly quieta = sinMovimiento();
+  private readonly vuelo = inject(VueloDeLaNave);
+  /** La nave ya está saliendo: "Siguiente" no se toca dos veces. */
+  protected readonly yendo = signal(false);
 
   protected readonly punta = signal<Punta | null>(null);
   protected readonly mostrando = signal(false);
@@ -178,6 +182,14 @@ export class PaginaDelManualComponent {
       },
       { injector: this.injector },
     );
+  }
+
+  /** "Siguiente": la nave sale volando por la derecha y recién ahí el libro pasa de hoja. */
+  protected async seguir(): Promise<void> {
+    if (this.yendo()) return;
+    this.yendo.set(true);
+    await this.vuelo.despegar();
+    this.datos?.pasar?.(1);
   }
 
   private objetivo(selector: string | null): HTMLElement | null {

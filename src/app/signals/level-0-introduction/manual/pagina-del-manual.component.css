@@ -408,7 +408,8 @@
   grid-row: 2;
   justify-self: center;
   position: relative;
-  z-index: 1;
+  /* Encima de la nave, que va en 2 para salir volando por delante de la pantalla. */
+  z-index: 3;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
@@ -455,16 +456,208 @@
   margin-left: 0;
 }
 
-/* Las páginas, como pestañas sobre el borde de abajo: la grilla estira la barra que pone el libro
-   a todo el ancho, y "Siguiente" se va a la derecha. */
+/* Volver, como pestaña de papel sobre el borde de abajo de la pantalla. "Siguiente" no va acá: es
+   de la nave. */
 .pm-paginas {
   position: absolute;
   inset: auto 1.25rem 0;
-  display: grid;
+  display: flex;
   translate: 0 50%;
 }
 .pm-paginas:empty {
   display: none;
+}
+/* Tres clases: le gana a la pastilla oscura de todo botón de la hoja (`.subhost button:not(...)`). */
+.pm .pm-pantalla .pm-atras {
+  padding: 0.45rem 1rem 0.5rem;
+  border: 2px solid #5d4a5e;
+  border-radius: 10px;
+  outline: 1.4px dashed #c9b49a;
+  outline-offset: -6px;
+  background: #fffaf2;
+  box-shadow: 3px 4px 0 rgb(6 3 14 / 40%);
+  rotate: 1.5deg;
+  font:
+    800 1rem / 1.2 'Baloo 2',
+    var(--font-display, system-ui, sans-serif);
+  color: #2b2230;
+  cursor: pointer;
+  transition:
+    rotate 0.2s,
+    translate 0.2s;
+}
+.pm .pm-pantalla .pm-atras:hover {
+  rotate: 0deg;
+  translate: 0 -2px;
+}
+.pm .pm-pantalla .pm-atras:active {
+  translate: 1px 2px;
+  box-shadow: 1px 2px 0 rgb(6 3 14 / 40%);
+}
+.pm .pm-pantalla .pm-atras:focus-visible {
+  outline: 3px solid #fff8ec;
+  outline-offset: 3px;
+}
+
+/* El carril de la nave: su globo y, cumplida la página, "Siguiente". En el celular van en la fila
+   de abajo de la nave; con la nave al costado, cada uno flota en el carril. */
+.pm-carril {
+  grid-row: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.85rem;
+  min-width: 0;
+}
+
+/* "Siguiente": vidrio verde por el que se ve el cielo, con un brillo que lo cruza, un halo que late
+   y flechas que corren hacia adelante, hacia donde va a salir la nave. Al tocarlo se desvanece
+   empujado hacia adelante, y la nave arranca. */
+.pm .pm-carril .pm-seguir {
+  position: relative;
+  z-index: 3;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.55rem;
+  max-width: 100%;
+  overflow: hidden;
+  padding: 0.65rem 1.25rem 0.7rem 1.4rem;
+  border: 1.5px solid rgb(180 255 215 / 75%);
+  border-radius: 999px;
+  background: linear-gradient(
+    120deg,
+    rgb(96 214 150 / 58%),
+    rgb(70 190 200 / 34%) 65%,
+    rgb(96 214 150 / 48%)
+  );
+  backdrop-filter: blur(8px) saturate(1.6);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 50%),
+    inset 0 -8px 16px -10px rgb(10 60 35 / 60%),
+    0 0 22px rgb(106 230 160 / 40%),
+    0 12px 28px -12px rgb(6 3 14 / 75%);
+  font:
+    800 clamp(1rem, 1.15vw, 2rem) / 1.15 'Baloo 2',
+    var(--font-display, system-ui, sans-serif);
+  letter-spacing: 0.01em;
+  color: #fff;
+  text-shadow: 0 2px 0 rgb(12 40 26 / 60%);
+  cursor: pointer;
+  animation:
+    pm-seguir-llega 0.5s cubic-bezier(0.34, 1.8, 0.64, 1) both,
+    pm-seguir-late 1.8s ease-out 0.5s infinite;
+  transition:
+    translate 0.2s,
+    background-color 0.2s,
+    opacity 0.3s;
+}
+.pm .pm-carril .pm-seguir::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(105deg, transparent 35%, rgb(255 255 255 / 45%) 50%, transparent 65%);
+  translate: -120% 0;
+  animation: pm-seguir-brillo 2.6s ease-in-out 0.8s infinite;
+  pointer-events: none;
+}
+.pm .pm-carril .pm-seguir:hover:not(:disabled) {
+  translate: 4px 0;
+  border-color: rgb(190 255 220 / 85%);
+}
+.pm .pm-carril .pm-seguir:active:not(:disabled) {
+  scale: 0.95 1.04;
+}
+.pm .pm-carril .pm-seguir:focus-visible {
+  outline: 3px solid #fff8ec;
+  outline-offset: 3px;
+}
+/* El globo es lo que dice la nave: se va con ella. */
+.pm-carril--yendo .pm-globo {
+  opacity: 0;
+  translate: 1.5rem 0;
+  transition:
+    opacity 0.25s,
+    translate 0.25s;
+}
+.pm .pm-carril .pm-seguir--yendo {
+  opacity: 0;
+  translate: 2.5rem 0;
+  cursor: default;
+}
+.pm-seguir-texto {
+  position: relative;
+}
+.pm-seguir-flechas {
+  position: relative;
+  display: inline-flex;
+  font-size: 1.35em;
+  line-height: 0.8;
+  letter-spacing: -0.12em;
+}
+.pm-seguir-flechas > span {
+  animation: pm-seguir-flecha 1.1s ease-in-out calc(var(--i) * 0.14s) infinite;
+}
+@keyframes pm-seguir-llega {
+  from {
+    opacity: 0;
+    scale: 0.4;
+    translate: -1.5rem 0;
+  }
+}
+@keyframes pm-seguir-late {
+  0% {
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 50%),
+      inset 0 -8px 16px -10px rgb(10 60 35 / 60%),
+      0 0 22px rgb(106 230 160 / 40%),
+      0 12px 28px -12px rgb(6 3 14 / 75%),
+      0 0 0 0 rgb(120 230 170 / 60%);
+  }
+  70%,
+  100% {
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 50%),
+      inset 0 -8px 16px -10px rgb(10 60 35 / 60%),
+      0 0 22px rgb(106 230 160 / 40%),
+      0 12px 28px -12px rgb(6 3 14 / 75%),
+      0 0 0 18px rgb(120 230 170 / 0%);
+  }
+}
+@keyframes pm-seguir-brillo {
+  0% {
+    translate: -120% 0;
+  }
+  45%,
+  100% {
+    translate: 120% 0;
+  }
+}
+@keyframes pm-seguir-flecha {
+  0%,
+  100% {
+    opacity: 0.3;
+    translate: -3px 0;
+  }
+  50% {
+    opacity: 1;
+    translate: 3px 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .pm .pm-carril .pm-seguir,
+  .pm .pm-carril .pm-seguir::before,
+  .pm-seguir-flechas > span {
+    animation: none;
+  }
+  .pm .pm-carril .pm-seguir::before {
+    display: none;
+  }
+  .pm .pm-carril .pm-seguir,
+  .pm .pm-pantalla .pm-atras {
+    rotate: none;
+    transition: none;
+  }
 }
 
 @media (min-width: 761px) {
@@ -482,6 +675,18 @@
   .pm-pantalla {
     grid-row: auto;
     grid-column: 2;
+  }
+  .pm-carril {
+    display: contents;
+  }
+  /* Abajo de la nave, a lo ancho del carril: lo que viene se toca donde está ella. La nave ocupa
+     los dos tercios de arriba de su caja. */
+  .pm .pm-carril .pm-seguir {
+    --pm-seguir-ancho: min(calc(var(--pm-nave-ancho) - 2rem), 13em);
+    position: absolute;
+    left: calc((var(--pm-nave-ancho) - var(--pm-seguir-ancho)) / 2);
+    top: calc(var(--pm-nave-arriba) + var(--pm-nave-alto) * 0.74);
+    width: var(--pm-seguir-ancho);
   }
   /* En el carril, justo arriba de la nave, con la cola hacia abajo. Sin fila propia: con
      `grid-row`, la caja de un absoluto es esa fila y el globo caía debajo de la nave. */

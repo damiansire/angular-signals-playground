@@ -1,6 +1,7 @@
 import { DestroyRef, Directive, ElementRef, afterNextRender, inject } from '@angular/core';
 import { gsap } from 'gsap';
 import { NaveDelManual, PALETA, azar, el, sinMovimiento } from './nave-del-manual';
+import { VueloDeLaNave } from './vuelo-de-la-nave';
 
 /** El lienzo de todas las láminas: el mismo `viewBox`, así la nave mide lo mismo en las cinco. */
 export const ANCHO = 400;
@@ -36,6 +37,8 @@ export abstract class EscenaDelManual {
   protected readonly quieta = sinMovimiento();
   protected nave: NaveDelManual | null = null;
   private ctx: gsap.Context | null = null;
+  private readonly pasoDeHoja = inject(VueloDeLaNave);
+  private soltarDespegue: (() => void) | null = null;
 
   constructor() {
     afterNextRender(() => {
@@ -47,12 +50,71 @@ export abstract class EscenaDelManual {
         const lugar = this.host.querySelector<SVGGElement>('[data-nave]');
         if (lugar) this.nave = new NaveDelManual(lugar);
         this.armar(svg);
+        if (lugar) {
+          this.soltarDespegue = this.pasoDeHoja.alDespegar(() => this.despegar(lugar));
+          if (this.pasoDeHoja.llegaVolando()) this.aterrizar(lugar);
+        }
       }, this.host);
     });
     inject(DestroyRef).onDestroy(() => {
+      this.soltarDespegue?.();
       this.nave?.apagar();
       this.ctx?.revert();
     });
+  }
+
+  /** Cuántos píxeles de pantalla vale una unidad del dibujo donde vive la nave. */
+  private escalaDe(lugar: SVGGElement): number | null {
+    const padre = lugar.parentNode;
+    const escala = padre instanceof SVGGraphicsElement ? padre.getScreenCTM()?.a : undefined;
+    return escala ? escala : null;
+  }
+
+  /**
+   * Pasar de página es seguir viaje: la nave se echa atrás, prende el motor a fondo y sale por la
+   * derecha, cruzando lo que tenga adelante. Resuelve cuando ya salió; si la página se desmonta a
+   * mitad de camino, igual resuelve, para que el libro no se quede esperando.
+   */
+  private despegar(lugar: SVGGElement): Promise<void> {
+    const nave = this.nave;
+    const escala = this.escalaDe(lugar);
+    if (!nave || !escala || !this.ctx || this.quieta) return Promise.resolve();
+    const caja = lugar.getBoundingClientRect();
+    const atras = 26 / escala;
+    const lejos = (innerWidth - caja.left + 80) / escala + atras;
+    nave.animo('contenta');
+    const salida = new Promise<void>((listo) => {
+      this.reaccion(() => {
+        gsap
+          .timeline({ onComplete: listo })
+          .add(() => nave.propulsar(0.55, 0.18))
+          .to(lugar, { x: `-=${atras}`, duration: 0.22, ease: 'power2.out' })
+          .add(() => {
+            nave.propulsar(3.4, 0.12);
+            nave.empujar(-60, 3);
+          })
+          .to(lugar, { x: `+=${lejos}`, duration: 0.62, ease: 'power3.in' });
+      });
+    });
+    return Promise.race([salida, new Promise<void>((listo) => setTimeout(listo, 1600))]);
+  }
+
+  /** La nave que viene de la página anterior entra por la izquierda, frena y se acomoda. */
+  private aterrizar(lugar: SVGGElement): void {
+    const nave = this.nave;
+    const escala = this.escalaDe(lugar);
+    if (!nave || !escala || this.quieta) return;
+    const lejos = (lugar.getBoundingClientRect().right + 80) / escala;
+    nave.propulsar(3, 0);
+    gsap
+      .timeline()
+      .from(lugar, { x: `-=${lejos}`, duration: 0.9, ease: 'power3.out' })
+      // Frena: la llama se encoge antes de llegar, y al parar se sacude por la inercia.
+      .add(() => nave.propulsar(0.5, 0.2), 0.45)
+      .add(() => {
+        nave.propulsar(1, 0.35);
+        nave.empujar(45, 2.5);
+      });
   }
 
   /** Para que cada lámina tenga su propio cielo, igual cada vez. */

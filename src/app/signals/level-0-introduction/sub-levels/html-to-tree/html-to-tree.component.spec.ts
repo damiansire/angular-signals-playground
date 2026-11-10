@@ -1,4 +1,7 @@
+import { signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { PAGINA_DEL_MANUAL } from '../../manual/pagina-del-manual';
+import { VueloDeLaNave } from '../../manual/vuelo-de-la-nave';
 import { HtmlToTreeComponent } from './html-to-tree.component';
 import { NODOS } from './html-to-tree.data';
 
@@ -91,5 +94,48 @@ describe('HtmlToTreeComponent', () => {
       click('[data-guia="cierre"]');
       expect(mano()).toBeNull();
     });
+  });
+});
+
+describe('HtmlToTreeComponent en el libro', () => {
+  it('"Siguiente" llega con la página cumplida, y pasa de hoja después de que la nave despega', async () => {
+    const cumplida = signal(false);
+    const pasar = jasmine.createSpy('pasar');
+    TestBed.configureTestingModule({
+      imports: [HtmlToTreeComponent],
+      providers: [
+        {
+          provide: PAGINA_DEL_MANUAL,
+          useValue: {
+            numero: 1,
+            ley: 'El HTML es un árbol de nodos.',
+            enLaNave: 'La pantalla de la nave es un árbol.',
+            pasar,
+            atras: () => 'Bitácora',
+            siguiente: () => (cumplida() ? 'Siguiente página' : null),
+          },
+        },
+      ],
+    });
+    const despegar = spyOn(TestBed.inject(VueloDeLaNave), 'despegar').and.callThrough();
+    const fixture = TestBed.createComponent(HtmlToTreeComponent);
+    const el = fixture.nativeElement as HTMLElement;
+    fixture.detectChanges();
+    (el.querySelector('.pm-leer') as HTMLButtonElement).click();
+    await new Promise((listo) => setTimeout(listo, 450));
+    fixture.detectChanges();
+    expect(el.querySelector('.pm-atras')?.textContent).toContain('Bitácora');
+    expect(el.querySelector('.pm-seguir')).toBeNull();
+
+    cumplida.set(true);
+    fixture.detectChanges();
+    const seguir = el.querySelector('.pm-seguir') as HTMLButtonElement;
+    expect(seguir.textContent).toContain('Siguiente página');
+    seguir.click();
+    seguir.click();
+    expect(despegar).toHaveBeenCalledTimes(1);
+    await fixture.whenStable();
+    await new Promise((listo) => setTimeout(listo, 1700));
+    expect(pasar).toHaveBeenCalledOnceWith(1);
   });
 });
