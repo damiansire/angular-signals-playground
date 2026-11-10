@@ -1,0 +1,21 @@
+/* Solo para la captura de la tarjeta social (ver capturar.mjs). En una miniatura de 500 px los
+   controles y el llamado a hacer click son ruido, y el título del juego a su tamaño de pantalla no
+   se leía: va más grande, y Angie también, sin taparle la bajada con la lamparita. */
+button:not(.ini__foco),
+.ini__llamado,
+.tusi__ov-capbar {
+  display: none !important;
+}
+.ini__texto {
+  top: 26px !important;
+}
+.ini__titulo {
+  font-size: 70px !important;
+}
+.ini__bajada {
+  font-size: 28px !important;
+}
+.ini__angie,
+.ini__piedra {
+  --w: 300px !important;
+}
