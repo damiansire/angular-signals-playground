@@ -778,9 +778,9 @@ entrar desarma a Angie en luz y se hace noche, la costura con el prólogo.
       letras del título y del llamado, y quedaban rectángulos pálidos. La cámara que sale del ojo
       agranda la escena cientos de veces, y el navegador dibuja lo que anima (juncos, nubes, Angie,
       el halo del sol) a la escala más grande que alcanzó, y no la baja mientras siga animando:
-      quedaban capas a ×40 y la colina pedía 650–750 MB. Al llegar, los loops de la escena van dos
-      cuadros a velocidad 0 y arrancan de nuevo, ya a escala 1. Durante el viaje se frenan un
-      cuadro cada vez que la escala baja a la mitad: con la del ojo todo el viaje, la colina
+      quedaban capas a ×40 y la colina pedía 650–750 MB. Al llegar, los loops de la escena se
+      redibujan una vez más, ya a escala 1 (ver "El zoom desde el ojo no destella"). Durante el
+      viaje se redibujan cada vez que la escala baja a la mitad: con la del ojo todo el viaje, la colina
       entraba en pantalla a ×955, se pasaba el límite y el zoom quedaba a medio dibujar; quietos
       todo el viaje, se redibujaban en cada cuadro y pestañeaba en blanco. Contar cuadros lavados
       del screencast del zoom (0–1 por corrida) contra la versión anterior. Se reproduce sin la PC de Damian: una
@@ -811,6 +811,27 @@ entrar desarma a Angie en luz y se hace noche, la costura con el prólogo.
       (más cuadros a medio dibujar). Medido con screencast en Opera aparte a 3440×1300: con
       `--force-gpu-mem-available-mb=256`, picos blancos 30 (antes) → 7, y el tramo ojo → cara
       entero; con la memoria normal, 0 picos y todos los cuadros enteros hasta la colina.
+- [ ] (2026-11-11) El zoom desde el ojo no destella: ningún cuadro con la pantalla vacía (solo el
+      fondo, sin Angie ni la colina) al alejarse ni al llegar. Defecto resuelto (Damian, "sigue
+      habiendo algún parpadeo, particularmente cuando salís del zoom"): a 3440×1300, un cuadro
+      vacío en cada mitad de escala (5–7 por corrida con la memoria normal, 8–9 con 256 MB), los
+      más visibles con la colina a la vista y al llegar. Causa: los loops se frenaban (velocidad 0)
+      en el mismo cuadro en que la escena soltaba su capa; el navegador se entera de que pararon
+      recién al mostrar ese cuadro y los vuelve a dibujar sin esperar. Arreglo, por pasos
+      (`siguientePaso`): `frenar` (velocidad 0 con `will-change: transform` en cada loop, que
+      mantiene su escala), `medir` (se saca esa fijación y la de la escena: se redibujan a la escala
+      del cuadro, y el navegador espera a tenerlos listos) y `soltar`. Con la colina a la vista
+      (`QUIETOS_DESDE`, ×32) los loops van quietos y sin capa hasta llegar: `commitStyles` fija la
+      pose, se les saca el efecto y al llegar se les devuelve, sin salto. Probado y descartado: no
+      frenarlos (la colina a medio dibujar más de un segundo con poca memoria), reiniciarlos con
+      pause()/play() (no bajan de escala: la colina sin dibujar aun después de llegar; además
+      pause()/play() le sacan al CSS el control de `animation-play-state`), frenarlos en otro cuadro
+      que la escena, redibujar cada ×1,41, `translateZ(0)` en la escena, y quietos desde el
+      principio o desde ×128 (cuadros vacíos mientras se cierra el aviso con poca memoria). Medido
+      con screencast por CDP (Edge headless, click real) y un detector de cuadros sueltos (distinto
+      del anterior y del siguiente, que se parecen entre sí): 3440×1300 con la memoria normal 0–1
+      por corrida (antes 5–7), con `--force-gpu-mem-available-mb=256` 2 (antes 8–9), y 0 a
+      1440×900 y 390×844. Al llegar, los 77 loops vuelven a velocidad 1 y la escena queda sin estilos.
 
 ## Overlays que tapan el recorrido (prólogo, modales a pantalla completa)
 
