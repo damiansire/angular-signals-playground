@@ -14,9 +14,11 @@ import {
   exploradora,
   formacionAfuera,
   fusionEn,
+  letraConPiso,
   mascota,
   momentosDe,
   naveAdentro,
+  opacidadDelRotulo,
   proyectiles,
   sincronia,
   zoom,
@@ -99,6 +101,26 @@ describe('prologo-escena', () => {
         expect(legibles.length).withContext(`t=${t}`).toBeLessThanOrEqual(2);
       }
     });
+
+    it('con la letra agrandada del celular, nunca hay dos nombres a la vez', () => {
+      for (const [tanda, desde] of [
+        [OPERADORES, M.rxjs],
+        [PIPES, M.pipes],
+      ] as const) {
+        const fin = desde + tanda[tanda.length - 1].d + 1400;
+        for (const t of muestras(desde, fin, 20)) {
+          const visibles = proyectiles(t, tanda, desde, T).filter(
+            (p) => opacidadDelRotulo(p, true) > 0.05,
+          );
+          expect(visibles.length).withContext(`t=${t}`).toBeLessThanOrEqual(1);
+        }
+      }
+    });
+
+    it('con la letra de escritorio, el nombre dura como siempre', () => {
+      const p = proyectiles(M.rxjs + 700, OPERADORES, M.rxjs, T)[0];
+      expect(opacidadDelRotulo(p, false)).toBe(Math.min(1, p.vida * 1.6));
+    });
   });
 
   describe('adentro', () => {
@@ -172,6 +194,24 @@ describe('prologo-escena', () => {
     it('la cámara se aleja hasta ver la figura entera', () => {
       expect(zoom(T.orden, T)).toBeGreaterThan(2);
       expect(zoom(T.fin, T)).toBeCloseTo(0.88, 5);
+    });
+  });
+
+  describe('las letras de la escena', () => {
+    it('en escritorio quedan como están: el piso no alcanza', () => {
+      // 1440 px para 1600 unidades: 19 unidades ya son 17 px.
+      expect(letraConPiso(19, 12, 0.9)).toBe(19);
+    });
+
+    it('en un celular vertical crecen hasta el piso en pantalla', () => {
+      const k = 390 / 1600;
+      const letra = letraConPiso(19, 12, k);
+      expect(letra * k).toBeCloseTo(12, 5);
+      expect(letra).toBeGreaterThan(19);
+    });
+
+    it('sin encuadre medido todavía, no inventa un tamaño', () => {
+      expect(letraConPiso(19, 12, 0)).toBe(19);
     });
   });
 });

@@ -41,9 +41,11 @@ import {
   exploradora,
   formacionAfuera,
   fusionEn,
+  letraConPiso,
   mascota,
   momentosDe,
   naveAdentro,
+  opacidadDelRotulo,
   proyectiles,
   sincronia,
   suave,
@@ -211,6 +213,16 @@ const PALETAS: readonly Paleta[] = [
 ];
 
 const TINTA = '#2b1b33';
+
+/**
+ * Los rótulos de operador dibujados en la escena, en unidades del viewBox, y lo mínimo que miden en
+ * pantalla: el del disparo de la ráfaga y el del acierto del minijuego, que es el premio y va más
+ * grande. En escritorio el piso no alcanza; en un celular vertical los agranda hasta leerse.
+ */
+const ROTULO_DISPARO = 19;
+const PISO_DISPARO_PX = 12;
+const ROTULO_ACIERTO = 30;
+const PISO_ACIERTO_PX = 15;
 
 /** Lo que dice una nave cuando la tocan. Insistir le gasta la paciencia. */
 const QUEJAS = ['¡ey!', '¡piloto a bordo!', '¡la pintura!', '¡estoy manejando!'];
@@ -1020,6 +1032,8 @@ export function initPrologoAnomalia(host: HTMLElement, opts: PrologoOpciones): (
   const humos = Array.from({ length: 5 }, () =>
     el(efectos, 'circle', { r: 10, fill: '#a99bb8', opacity: 0 }),
   );
+  /** Cuánto crecen los rótulos de los disparos sobre sus 19 unidades: lo fija `medir()`. */
+  let escalaRotulo = 1;
   const disparos = Array.from({ length: 6 }, () => {
     const g = el(efectos, 'g', { opacity: 0 });
     el(g, 'circle', { r: 22, fill: 'url(#pa-proyectil)' });
@@ -1027,7 +1041,7 @@ export function initPrologoAnomalia(host: HTMLElement, opts: PrologoOpciones): (
     const pff = el(g, 'circle', { r: 10, fill: 'none', stroke: '#9ff0d8', 'stroke-width': 2 });
     const rotulo = el(g, 'text', {
       'font-family': '"JetBrains Mono","Cascadia Mono",Consolas,monospace',
-      'font-size': 19,
+      'font-size': ROTULO_DISPARO,
       'font-weight': 600,
       fill: '#d8fff2',
       stroke: '#0b1630',
@@ -1109,6 +1123,13 @@ export function initPrologoAnomalia(host: HTMLElement, opts: PrologoOpciones): (
       y0: r.top,
     };
     if (mascotaEl) mascotaEl.style.width = `${Math.round(300 * k)}px`;
+    escalaRotulo = letraConPiso(ROTULO_DISPARO, PISO_DISPARO_PX, k) / ROTULO_DISPARO;
+    for (const d of disparos) {
+      fijar(d.rotulo, {
+        'font-size': r2(ROTULO_DISPARO * escalaRotulo),
+        'stroke-width': r2(4 * escalaRotulo),
+      });
+    }
   }
   const aPantalla = (p: Punto): Punto => ({
     x: encuadre.ox + p.x * encuadre.k,
@@ -1478,7 +1499,11 @@ export function initPrologoAnomalia(host: HTMLElement, opts: PrologoOpciones): (
       });
       fijar(d.pff, { r: r2(8 + pff * 40), opacity: r2(pff > 0 ? 1 - pff : 0) });
       if (d.rotulo.textContent !== p.txt) d.rotulo.textContent = p.txt;
-      fijar(d.rotulo, { x: 18, y: p.lado < 0 ? -14 : 30, opacity: r2(clamp01(p.vida * 1.6)) });
+      fijar(d.rotulo, {
+        x: r2(18 * escalaRotulo),
+        y: r2((p.lado < 0 ? -14 : 30) * escalaRotulo),
+        opacity: r2(opacidadDelRotulo(p, escalaRotulo > 1)),
+      });
     });
     // El retroceso de cada disparo: causa y reacción, la nave que dispara se sacude.
     for (const [tanda, desde, clave] of [
@@ -2058,15 +2083,16 @@ export function initPrologoAnomalia(host: HTMLElement, opts: PrologoOpciones): (
     const bala = el(base, 'g');
     el(bala, 'circle', { r: 26, fill: 'url(#pa-proyectil)' });
     el(bala, 'circle', { r: 7, fill: '#ffffff' });
+    const escala = letraConPiso(ROTULO_ACIERTO, PISO_ACIERTO_PX, encuadre.k) / ROTULO_ACIERTO;
     const rotulo = el(bala, 'text', {
-      x: 22,
-      y: -20,
+      x: r2(22 * escala),
+      y: r2(-20 * escala),
       'font-family': '"JetBrains Mono","Cascadia Mono",Consolas,monospace',
-      'font-size': 30,
+      'font-size': r2(ROTULO_ACIERTO * escala),
       'font-weight': 700,
       fill: PALETAS[i].luz,
       stroke: '#0b1630',
-      'stroke-width': 5,
+      'stroke-width': r2(5 * escala),
       'paint-order': 'stroke',
     });
     rotulo.textContent = operador;

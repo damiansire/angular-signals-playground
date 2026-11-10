@@ -22,6 +22,14 @@ export interface Punto {
 }
 
 export const clamp01 = (v: number): number => Math.max(0, Math.min(1, v));
+
+/**
+ * El tamaño de una letra dibujada en la escena, en unidades del `viewBox`, con un piso en píxeles
+ * de pantalla. La escena entra entera con `meet`: en un celular vertical cada unidad mide un cuarto
+ * de píxel, y los rótulos de los operadores quedaban de 5 px, ilegibles. `k` es píxeles por unidad.
+ */
+export const letraConPiso = (unidades: number, pisoPx: number, k: number): number =>
+  k > 0 ? Math.max(unidades, pisoPx / k) : unidades;
 export const suave = (v: number): number => (v < 0.5 ? 2 * v * v : 1 - Math.pow(-2 * v + 2, 2) / 2);
 /** La entrada con rebote de la skill (`back.out`), para lo que tiene que caer con peso. */
 export const conRebote = (v: number, s = 1.9): number => {
@@ -413,6 +421,17 @@ export const PIPES: readonly Disparo[] = [
   { nave: 2, txt: 'pipe', d: 2480, lado: 1 },
 ];
 export const VUELO = 1400;
+
+/**
+ * Cuánto se ve el nombre de un disparo. Con la letra de escritorio dura casi todo el vuelo; con la
+ * del piso de un celular (`agrandado`) es casi tres veces más ancha, y el "pipe" que se apagaba
+ * quedaba debajo del siguiente ("pippipe"). Agrandado, se apaga antes de que salga el próximo: los
+ * `pipe` salen cada 620 ms, el 44 % de un vuelo.
+ */
+export function opacidadDelRotulo(p: Proyectil, agrandado: boolean): number {
+  const visible = clamp01(p.vida * 1.6);
+  return agrandado ? Math.min(visible, clamp01((0.42 - p.p) / 0.12)) : visible;
+}
 
 export interface Proyectil extends Punto {
   readonly txt: string;
