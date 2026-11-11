@@ -151,8 +151,8 @@
     clip-path: inset(0 0 0 0);
   }
 }
-/* El aire entre la demo y el desafío lo pone la grilla: con el de la molécula (1.7rem) y los márgenes
-   de apilado de Tailwind, el desafío del capítulo 3 quedaba debajo de la barra a 1440×900. */
+/* El aire entre la demo y el desafío lo pone la grilla: con el de la armonización (1.7rem) y los
+   márgenes de apilado de Tailwind, el desafío del capítulo 3 quedaba debajo de la barra a 1440×900. */
 .prologo__manual--viaje .subhost > * {
   gap: 1rem;
 }

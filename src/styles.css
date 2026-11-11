@@ -113,9 +113,9 @@ body {
 
 /* ============================================================================
    Armonización material de los demos embebidos en /integrada-vista (dissolve).
-   Los sub-niveles del recorrido montan componentes standalone (editor de código,
-   contador, imágenes/GIF) que traen superficies dispares: sueltas en el campo del
-   átomo se leían como cajas ajenas. Estas reglas los homologan a UNA familia:
+   Las pantallas del viaje montan componentes standalone (editor de código,
+   contador, imágenes/GIF) que traen superficies dispares: sueltas sobre la hoja
+   se leían como cajas ajenas. Estas reglas los homologan a UNA familia:
    editor en carbón cálido, vidrio esmerilado entonado con el concepto, y las
    imágenes/GIF montadas como pantallas con bisel. Viven en el stylesheet GLOBAL
    (no en integrada-vista.component.css) porque ALCANZAN internals de componentes
@@ -134,8 +134,8 @@ body {
 }
 
 /* Familia material: carbón cálido (editor) o vidrio entonado (card clara), redondeados
-   y flotando sobre una sombra teñida con el concepto (--frame), que los hace leer
-   "proyectados desde el átomo", no paneles de otra app. */
+   y flotando sobre una sombra (--frame) que los hace leer como parte de la hoja, no
+   paneles de otra app. */
 .card--dissolve .subhost img,
 .card--dissolve .subhost app-count-increment section {
   --frame: 0 26px 64px -34px color-mix(in srgb, var(--glow, #9a9081) 68%, #000);

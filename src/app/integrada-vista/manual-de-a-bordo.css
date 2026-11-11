@@ -15,7 +15,7 @@
   user-select: none;
   -webkit-user-select: none;
   animation: prologo-velo 0.3s ease-out;
-  /* El prólogo frena la rueda y el dedo para que no se mueva el recorrido de atrás: acá se dejan
+  /* El prólogo frena la rueda y el dedo para que no se mueva la página de atrás: acá se dejan
      pasar, y el scroll no se encadena a la página. */
   overscroll-behavior: contain;
   touch-action: pan-y;
@@ -37,8 +37,8 @@
 .prologo__manual.card--dissolve {
   background: none;
 }
-/* El tope de 64rem es de la card de la molécula, que tiene la espina al lado. La página del manual
-   ocupa la hoja entera: con el tope quedaba una franja vacía a la derecha. */
+/* El tope de 64rem es para que un diagrama ancho no saque el desafío de la pantalla. La página del
+   manual ocupa la hoja entera: con el tope quedaba una franja vacía a la derecha. */
 .prologo__manual.card--dissolve .subhost > * > app-pagina-del-manual {
   max-width: none;
 }
@@ -211,10 +211,9 @@
   }
 }
 
-/* Abierto afuera del prólogo (el manual desde la bitácora, y cada etapa del viaje): va afuera del
-   escenario y a la altura de la bitácora, sin el HUD arriba. Detrás no está la escena del prólogo
-   sino el mapa crema: un velo lo dejaba leer a través, y "11 sin establecer" se pisaba con la
-   cabecera. Va el negro de la tele apagada, opaco. */
+/* Abierto afuera del prólogo (cada etapa del viaje): va afuera del escenario, sin el HUD arriba.
+   Detrás no está la escena del prólogo: un velo dejaba leer a través lo que hubiera atrás (con la
+   molécula, "11 sin establecer" se pisaba con la cabecera). Va el negro de la tele apagada, opaco. */
 .manual-suelto {
   position: fixed;
   inset: 0;

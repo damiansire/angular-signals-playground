@@ -27,13 +27,11 @@
   z-index: 1;
 }
 
-/* progreso arriba: fila compacta (kicker · pips · contador). Va en fila y no apilado a propósito:
-   sobre la molécula solo hay ~7% del alto libre y un bloque apilado la invadiría. Se desvanece al
-   completarse; de ahí en más la narración del hero es la que anuncia el círculo. */
+/* progreso arriba: fila compacta (kicker · pips · contador). Se desvanece al completarse; de ahí
+   en más la narración del hero es la que anuncia el círculo. */
 .tusi__counter {
   position: absolute;
   left: 50%;
-  /* atado al alto: con `top` fijo el aire contra la molécula caía a ~7px en laptops bajas */
   top: clamp(8px, 1.8vh, 18px);
   transform: translateX(-50%);
   z-index: 4;
