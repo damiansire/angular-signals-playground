@@ -183,7 +183,8 @@ export class AvisoAuricularesComponent {
 
   /**
    * El aviso sigue a la vista mientras la pantalla de inicio se desvanece entera: ocultarlo dejaba
-   * ver la colina de día un instante entre la noche del aviso y la de la historia.
+   * ver la colina de día un instante entre la noche del aviso y la de la historia. Al terminar el
+   * fundido se oculta: sus estrellas y su llamado seguían latiendo debajo, con opacidad cero.
    */
   private seguirDondeQuedo(): void {
     const conSonido = this.conSonido();
@@ -192,6 +193,27 @@ export class AvisoAuricularesComponent {
     this.momento.set('retomando');
     this.elegido.emit(conSonido);
     this.retomar.emit();
+    const fundido = this.fundidoDeLaPantalla();
+    if (fundido) {
+      void fundido.then(() => {
+        this.soltarLaColina();
+        this.momento.set('listo');
+      });
+    }
+  }
+
+  /**
+   * Termina cuando la pantalla de inicio, ya sin la colina (`.gone`), terminó de desvanecerse. Se
+   * espera a su transición y no a un tiempo copiado de su CSS; sin transición (movimiento reducido),
+   * ya terminó. `null` si nadie la está desvaneciendo: ocultarse dejaría ver la colina.
+   */
+  private fundidoDeLaPantalla(): Promise<unknown> | null {
+    const pantalla = this.host.closest<HTMLElement>('.gone');
+    if (!pantalla) return null;
+    const fundidos = pantalla
+      .getAnimations()
+      .filter((a) => a instanceof CSSTransition && a.transitionProperty === 'opacity');
+    return Promise.allSettled(fundidos.map((a) => a.finished));
   }
 
   protected pedirEmpezarDeCero(e: MouseEvent): void {
