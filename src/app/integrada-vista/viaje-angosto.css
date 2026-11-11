@@ -130,3 +130,16 @@
     margin-inline: 0;
   }
 }
+
+/* En un celular el título y la tripulación no entran lado a lado: la columna de las naves no baja de
+   18rem y el título se escribía debajo de ellas. Las naves van arriba, a lo ancho, como un cielo.
+   Acostado no: a lo ancho se comían un tercio del alto. */
+@media (max-width: 760px) and (min-height: 501px) {
+  .prologo__manual--viaje .etapa__cabeza {
+    grid-template-columns: minmax(0, 1fr);
+    row-gap: 0.25rem;
+  }
+  .prologo__manual--viaje .etapa__cabeza .etapa__cielo {
+    order: -1;
+  }
+}
