@@ -399,6 +399,15 @@ export function opacidadDeVecinos(diveDepth: number): number {
 }
 
 /**
+ * La posición del recorrido, en unidades de pantalla, para un `scrollTop` del stage de alto `alto`.
+ * `null` si el stage no tiene alto: oculto debajo de la intro o del viaje mide 0, y `0 / 0` daba
+ * `NaN`, que llegaba a los `transform` de la escena y ensuciaba la consola en cada carga.
+ */
+export function posicionDelScroll(scrollTop: number, alto: number): number | null {
+  return alto > 0 ? scrollTop / alto : null;
+}
+
+/**
  * Estado de cámara (zoom `K`, punto de foco `fx`/`fy`, profundidad de buceo `diveDepth`) en la
  * posición de scroll `w` (0..len dentro del concepto): nace → wide → bucea al átomo, y en la zona
  * de sub-niveles (`w >= 2`) se queda adentro. `isFirst` = concepto 0 (nace en el centro, sin padre).
@@ -1302,7 +1311,9 @@ export function initMolecule(
   }
 
   // ---- render(s): dibuja el estado del recorrido en la posición de scroll s (0..TOTAL) ----
-  function render(sIn: number): void {
+  function render(sIn: number | null): void {
+    // Sin geometría no hay nada que dibujar: la escena queda como estaba hasta que vuelva a medir.
+    if (sIn === null) return;
     const s = Math.max(0, Math.min(TOTAL - 0.0001, sIn));
     let c = 0;
     while (c < N - 1 && s >= off[c] + len[c]) c++;
@@ -1666,7 +1677,7 @@ export function initMolecule(
       const p = Math.min(1, (ts - start) / dur);
       const top = from + dist * easeInOut(p);
       stage.scrollTop = top;
-      render(top / unit());
+      render(posicionDelScroll(top, unit()));
       if (p < 1) {
         scrollAnimId = requestAnimationFrame(tick);
       } else {
@@ -1705,7 +1716,7 @@ export function initMolecule(
     cancelAnimationFrame(scrollAnimId);
     enTransito = false;
     stage.style.scrollSnapType = '';
-    render(stage.scrollTop / unit());
+    render(posicionDelScroll(stage.scrollTop, unit()));
   };
 
   let ticking = false;
@@ -1715,14 +1726,14 @@ export function initMolecule(
     ticking = true;
     raf(() => {
       ticking = false;
-      render(stage.scrollTop / unit());
+      render(posicionDelScroll(stage.scrollTop, unit()));
     });
   };
   const onResize = (): void => {
     track.style.height = (TOTAL + TRACK_TAIL) * unit() + 'px';
     // El snap reencaja la parada solo, pero la escena (el encuadre angosto/ancho, la cámara) quedaba
     // dibujada con la geometría vieja hasta el próximo scroll.
-    render(stage.scrollTop / unit());
+    render(posicionDelScroll(stage.scrollTop, unit()));
     orbitDirty = true; // cambió la geometría: que orbitLoop reubique la constelación
     requestOrbit();
   };
@@ -1819,7 +1830,7 @@ export function initMolecule(
     subsEstablecidos.add(`${concepto}/${sub}`);
     partida?.alEstablecer(concepto, sub);
     if (orbitFor === concepto) updateOrbitFill(C[concepto]);
-    render(stage.scrollTop / unit());
+    render(posicionDelScroll(stage.scrollTop, unit()));
   };
   stage.addEventListener(SISTEMA_ESTABLECIDO, onEstablished);
   stage.addEventListener('scroll', onScroll, { passive: true });

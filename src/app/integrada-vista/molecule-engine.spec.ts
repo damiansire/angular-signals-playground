@@ -4,6 +4,7 @@ import {
   initMolecule,
   cameraAt,
   opacidadDeVecinos,
+  posicionDelScroll,
   CONCEPT_COUNT,
   CAPITULO_DE_CONCEPTO,
   conceptoDeCapitulo,
@@ -156,6 +157,18 @@ describe('cameraAt — matemática de cámara del recorrido (pura, sin DOM)', ()
     expect(cam.K).toBeCloseTo(1.85, 5);
     expect(cam.fx).toBeCloseTo(150, 5);
     expect(cam.diveDepth).toBeCloseTo(0.5, 5);
+  });
+});
+
+describe('posicionDelScroll — la posición del recorrido sale del scroll del stage', () => {
+  it('divide el scroll por el alto de una pantalla', () => {
+    expect(posicionDelScroll(1800, 900)).toBe(2);
+    expect(posicionDelScroll(0, 900)).toBe(0);
+  });
+
+  it('sin alto (el stage oculto debajo del viaje) no hay posición, en vez de NaN', () => {
+    expect(posicionDelScroll(0, 0)).toBeNull();
+    expect(posicionDelScroll(120, 0)).toBeNull();
   });
 });
 
