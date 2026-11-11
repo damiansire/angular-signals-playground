@@ -376,6 +376,11 @@
   gap: 0.4rem 0.9rem;
   margin-top: 0.45rem;
 }
+/* En la portada va centrado, como la ley: a 390 "1 de 5" baja solo, y alineado a la izquierda quedaba
+   torcido debajo de la ley centrada. La vista estampa su encapsulación en la página montada. */
+.pm-portada .prologo__manual-donde {
+  justify-content: center;
+}
 /* Ir y volver, en la fila de los pasos de la consola, a la derecha: "Anterior" solo si hay adónde, y
    "Siguiente" recién con la página cumplida. */
 .prologo__manual-paginas {
