@@ -63,7 +63,7 @@ describe('DomIsAliveComponent', () => {
       expect(pantalla()).toContain('#status activo');
       expect(pantalla()).toContain('h1 Contador');
       expect(pantalla()).toContain('#titulo no encontró nada (null)');
-      expect(el.querySelector('.dia-null')).not.toBeNull();
+      expect(el.querySelector('.dia-linea:not(.dia-molde) .dia-null')).not.toBeNull();
       expect(etapas()[1].classList).toContain('pm-etapa--ahora');
       expect(etapas()[0].classList).toContain('pm-etapa--hecho');
     });
@@ -79,7 +79,7 @@ describe('DomIsAliveComponent', () => {
     it('con h1, el título cambia y se resuelve', () => {
       click('.dia-correr');
       click('.dia-hueco');
-      expect(el.querySelector('.dia-null')).toBeNull();
+      expect(el.querySelector('.dia-linea:not(.dia-molde) .dia-null')).toBeNull();
       expect(etapas()[1].classList).not.toContain('pm-etapa--hecho');
       click('.dia-correr');
       expect(pantalla()).toContain('h1 Listo');

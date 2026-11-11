@@ -85,6 +85,7 @@
           (click)="cambiarApi()"
         >
           <span class="ocd-linea" [innerHTML]="renglonDeLaApi()"></span>
+          <span class="ocd-linea ocd-molde" aria-hidden="true" [innerHTML]="moldeDeLaApi"></span>
         </button>
         @for (r of cuerpo; track $index) {
           <span class="ocd-linea" [innerHTML]="r"></span>

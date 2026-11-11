@@ -16,7 +16,7 @@ import {
   PANTALLA_VIVO,
   type CorridaVivo,
 } from '../../manual/escena-vivo.component';
-import { conCortes } from '../../../../libs/cortes-de-codigo';
+import { conCortes, masLargo } from '../../../../libs/cortes-de-codigo';
 
 /**
  * La ley 2 en una sola pieza: la pantalla de la nave tiene las tres líneas que cambian los nodos y,
@@ -47,6 +47,7 @@ export class DomIsAliveComponent {
     .map((m) => conCortes(codigoDe(m)));
   protected readonly antesDelSelector = conCortes('querySelector(');
   protected readonly despuesDelSelector = conCortes(").textContent = 'Listo'");
+  protected readonly selectorMasLargo = masLargo(SELECTORES_DEL_TITULO);
 
   /** El selector del hueco encuentra un nodo. */
   protected readonly encuentra = computed(() => encontrar(INITIAL_DOM, this.selector()) !== null);

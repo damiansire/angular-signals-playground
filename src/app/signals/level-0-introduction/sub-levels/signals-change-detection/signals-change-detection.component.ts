@@ -10,7 +10,7 @@ import {
 } from './signals-change-detection.data';
 import { PaginaDelManualComponent } from '../../manual/pagina-del-manual.component';
 import { EscenaSignalComponent, type Aviso } from '../../manual/escena-signal.component';
-import { conCortes } from '../../../../libs/cortes-de-codigo';
+import { conCortes, masLargo } from '../../../../libs/cortes-de-codigo';
 
 /**
  * La ley 6 en una sola pieza: la nave, el árbol de su pantalla y la caja del valor son la demo, y
@@ -46,6 +46,12 @@ export class SignalsChangeDetectionComponent {
 
   protected readonly renglonDeLaDeclaracion = computed(() => conCortes(this.declaracion().renglon));
   protected readonly escritura = computed(() => conCortes(this.declaracion().escritura));
+  protected readonly moldeDeLaDeclaracion = conCortes(
+    masLargo(DECLARACIONES.map((d) => d.renglon)),
+  );
+  protected readonly moldeDeLaEscritura = conCortes(
+    masLargo(DECLARACIONES.map((d) => d.escritura)),
+  );
 
   /** La última corrida fue con el signal, y el hueco sigue en el signal. */
   protected readonly sano = computed(

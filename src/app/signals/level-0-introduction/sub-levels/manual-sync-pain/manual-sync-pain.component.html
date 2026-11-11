@@ -101,6 +101,9 @@
             }
           } @else {
             <span class="msp-linea" [innerHTML]="faltan"></span>
+            @for (r of agregadas; track $index) {
+              <span class="msp-linea msp-molde" aria-hidden="true" [innerHTML]="r"></span>
+            }
           }
         </button>
         <span class="msp-linea">{{ '}' }}</span>

@@ -125,3 +125,11 @@
     transition: none;
   }
 }
+
+/* El molde: la versión más larga de lo que cambia, invisible y sin alto. El código mide eso desde el
+   arranque, así la pantalla no cambia de ancho al arreglar (y el haz no salta con ella). */
+.msp-molde {
+  height: 0;
+  overflow: hidden;
+  visibility: hidden;
+}

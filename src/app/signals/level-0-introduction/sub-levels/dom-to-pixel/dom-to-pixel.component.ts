@@ -9,7 +9,7 @@ import {
 } from './dom-to-pixel.data';
 import { PaginaDelManualComponent } from '../../manual/pagina-del-manual.component';
 import { EscenaCostoComponent, type CorridaDelCuadro } from '../../manual/escena-costo.component';
-import { conCortes } from '../../../../libs/cortes-de-codigo';
+import { conCortes, masLargo } from '../../../../libs/cortes-de-codigo';
 import { ESTACIONES } from '../../../../libs/render-pipeline';
 
 // La sangría va con espacios duros (U+00A0): con espacios comunes, al envolver en angosto el
@@ -58,6 +58,7 @@ export class DomToPixelComponent {
     conCortes('}'),
   ];
   protected readonly renglonDelCambio = computed(() => conCortes(this.cambio().renglon));
+  protected readonly moldeDelCambio = conCortes(masLargo(CAMBIOS.map((c) => c.renglon)));
   protected readonly barato = computed(() => esBarato(this.cambio()));
 
   protected readonly sano = computed(() => quedoFluida(this.cambio(), this.corrido()));

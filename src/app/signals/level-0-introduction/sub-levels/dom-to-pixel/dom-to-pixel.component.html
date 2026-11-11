@@ -81,6 +81,7 @@
           (click)="cambiarPropiedad()"
         >
           <span class="dtp-linea" [innerHTML]="renglonDelCambio()"></span>
+          <span class="dtp-linea dtp-molde" aria-hidden="true" [innerHTML]="moldeDelCambio"></span>
         </button>
         @for (r of cierre; track $index) {
           <span class="dtp-linea" [innerHTML]="r"></span>

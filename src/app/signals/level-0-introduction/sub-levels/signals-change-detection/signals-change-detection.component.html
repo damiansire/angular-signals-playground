@@ -77,8 +77,18 @@
           (click)="cambiarDeclaracion()"
         >
           <span class="scd-linea" [innerHTML]="renglonDeLaDeclaracion()"></span>
+          <span
+            class="scd-linea scd-molde"
+            aria-hidden="true"
+            [innerHTML]="moldeDeLaDeclaracion"
+          ></span>
         </button>
         <span class="scd-linea" [innerHTML]="escritura()"></span>
+        <span
+          class="scd-linea scd-molde"
+          aria-hidden="true"
+          [innerHTML]="moldeDeLaEscritura"
+        ></span>
       </div>
 
       <div class="scd-mando">

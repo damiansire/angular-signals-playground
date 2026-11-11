@@ -10,7 +10,7 @@ import {
 } from './old-change-detection.data';
 import { PaginaDelManualComponent } from '../../manual/pagina-del-manual.component';
 import { EscenaZonaComponent, type Llamada } from '../../manual/escena-zona.component';
-import { conCortes } from '../../../../libs/cortes-de-codigo';
+import { conCortes, masLargo } from '../../../../libs/cortes-de-codigo';
 
 // La sangría va con espacios duros (U+00A0): con espacios comunes, al envolver en angosto el
 // renglón se cortaba justo después de ellos y quedaba uno vacío arriba del código.
@@ -50,6 +50,7 @@ export class OldChangeDetectionComponent {
 
   protected readonly cuerpo = [conCortes(SANGRIA + 'this.total++;'), conCortes('});')];
   protected readonly renglonDeLaApi = computed(() => conCortes(this.api().renglon));
+  protected readonly moldeDeLaApi = conCortes(masLargo(APIS.map((a) => a.renglon)));
 
   protected readonly vieja = computed(() => quedoVieja(this.zona()));
   /** La última corrida fue con una API parcheada y la pantalla quedó al día. */
