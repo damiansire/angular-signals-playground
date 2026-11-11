@@ -352,7 +352,7 @@
 }
 /* Del ancho de lo que muestra: estirada hasta el borde, a 3440 de ancho le sobraba medio vidrio. */
 /* El marco es el de la pantalla que la nave proyectaba dentro de su lámina: borde grueso violeta con
-   su contorno de tinta y un brillo arriba, sin sombra que la levante del cielo. La une con la nave el
+   su contorno de tinta, sin sombra que la levante del cielo. La une con la nave el
    haz que traza la escena. */
 .pm-pantalla {
   grid-row: 3;
@@ -374,18 +374,6 @@
     0 0 0 10px #2b1b33;
   color: #f2ecff;
 }
-.pm-pantalla::before {
-  content: '';
-  position: absolute;
-  top: 0.55rem;
-  left: 1.1rem;
-  right: 45%;
-  height: 3px;
-  border-radius: 999px;
-  background: rgb(255 255 255 / 12%);
-  pointer-events: none;
-}
-
 /* Lo que le dice a la nave, debajo de la ley, sobre el mismo cielo. */
 .pm-cabeza-nave {
   margin: 0 0 0.35rem;
@@ -444,6 +432,15 @@
 }
 .pm-globo .pm-etapa--hecho {
   color: #4b7a62;
+}
+/* Lo cumplido se tacha: se lee de un vistazo qué falta. La raya entra como tinta, no de golpe. La
+   consigna la proyecta cada página: sin `::ng-deep` (acotado a este host) el estilo no la alcanza. */
+:host .pm-etapa ::ng-deep :is([hacer], [arreglo]) {
+  text-decoration: line-through 2px transparent;
+  transition: text-decoration-color 0.4s ease-out;
+}
+:host .pm-etapa--hecho ::ng-deep :is([hacer], [arreglo]) {
+  text-decoration-color: currentColor;
 }
 .pm .pm-globo .pm-mostrar {
   margin-left: 0;
@@ -699,29 +696,45 @@
   :host(.pm-pantalla.pm-en-portada) .pm-pantalla {
     margin-top: calc(var(--pm-arriba, 0px) + 1.25rem);
   }
+  /* El carril tiene la caja de la nave, y es su contenedor: el globo y "Siguiente" se miden contra
+     ella y no contra la ventanilla. Medido contra la ventanilla, el globo quedaba a la izquierda y
+     lejos de la nave, con la cola apuntando al cielo. */
   .pm-carril {
-    display: contents;
-  }
-  /* Abajo de la nave, a lo ancho del carril: lo que viene se toca donde está ella. La nave ocupa
-     los dos tercios de arriba de su caja. */
-  .pm .pm-carril .pm-seguir {
-    --pm-seguir-ancho: min(calc(var(--pm-nave-ancho) - 2rem), 13em);
+    /* Sin fila: un absoluto en una grilla se mide contra su fila, no contra la ventanilla. */
+    grid-row: auto;
     position: absolute;
-    left: calc((var(--pm-nave-ancho) - var(--pm-seguir-ancho)) / 2);
-    top: calc(var(--pm-nave-arriba) + var(--pm-nave-alto) * 0.74);
+    left: 0;
+    top: var(--pm-nave-arriba);
+    z-index: 3;
+    width: var(--pm-nave-ancho);
+    height: var(--pm-nave-alto);
+    container-type: size;
+    pointer-events: none;
+  }
+  .pm-carril > * {
+    pointer-events: auto;
+  }
+  /* Abajo de la nave, a lo ancho del carril: lo que viene se toca donde está ella. */
+  .pm .pm-carril .pm-seguir {
+    --pm-seguir-ancho: min(calc(100% - 2rem), 13em);
+    position: absolute;
+    left: calc((100% - var(--pm-seguir-ancho)) / 2);
+    top: 74%;
     width: var(--pm-seguir-ancho);
   }
-  /* En el carril, justo arriba de la nave, con la cola hacia abajo. Sin fila propia: con
-     `grid-row`, la caja de un absoluto es esa fila y el globo caía debajo de la nave. */
+  /* Justo arriba de la nave, centrado sobre ella, con la cola casi tocando la antena. La nave se
+     dibuja centrada en su caja y limitada por el ancho: la antena queda a 0,225 de ese ancho por
+     encima del centro (0,414 del alto, si la limita el alto). */
   .pm-globo {
     grid-row: auto;
     position: absolute;
-    left: 1rem;
-    bottom: calc(100% - var(--pm-nave-arriba) - 4rem);
-    max-width: calc(var(--pm-nave-ancho) - 2rem);
+    /* Centrado con márgenes y no con `translate`: al seguir viaje, el globo se va con uno. */
+    inset: auto 0 calc(50% + min(22.5cqw, 41.4cqh) + 1.4rem);
+    margin-inline: auto;
+    max-width: calc(100% - 2rem);
   }
   .pm-globo::after {
-    left: 45%;
+    left: calc(50% - 9px);
     top: 100%;
     bottom: auto;
     border-top: 0;
