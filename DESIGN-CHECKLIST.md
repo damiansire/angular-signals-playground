@@ -1105,6 +1105,14 @@ Del minijuego de operadores (2026-11-08):
       "Mostrame") a 3440×1300, 1440×900, 1366×768, 1280×640 y 390×844: sin desborde horizontal,
       sin nodos encimados, selección vacía durante el arrastre, letra de los nodos de 11,2 px o
       más, y sin scroll salvo en el celular, donde los árboles quedan debajo del código.
+- [ ] (2026-11-12) En la ley 1, que `</article>` se arrastra se dice: debajo de "Mové el
+      `</article>`", en el globo de la nave, una pista chica en cursiva y tinta suave (#6f6280 sobre
+      el crema, 5:1; 13 px a 1440 y en el celular) que se pliega cuando se lo arrastra o se lo mueve
+      con las flechas. Pedido de Damian: tocarlo lo llevaba solo a su lugar, y que se arrastraba
+      manteniendo el click no se adivinaba. Con puntero dice el click y las flechas; con el dedo
+      (`pointer: coarse`), "mantené apretado". Va en renglones fijos: el globo tiene el ancho de la
+      nave y cortaba en "o / usá". No tapa el código ni los árboles. Medido con input real a 1440×900
+      (mouse) y 390×844 (dedo): a la vista en el paso 2, alto 0 después de arrastrar.
 - [ ] Un absoluto dentro de una grilla NO lleva `grid-row`/`grid-column`: su caja pasa a ser esa
       celda. El globo de la nave tenía `grid-row: 2` (su lugar en el celular) y con la nave al
       costado caía debajo de ella, con la cola apuntando al vacío.
