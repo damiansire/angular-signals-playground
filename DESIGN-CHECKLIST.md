@@ -1087,37 +1087,40 @@ Del minijuego de operadores (2026-11-08):
 - [ ] La hoja es una columna flex con el cuerpo estirado: en una página corta el pie flotaba a
       mitad de la hoja, con media hoja vacía debajo.
 - [ ] Cada página lee igual (`app-pagina-del-manual`, en `signals/level-0-introduction/manual/`):
-      la ley suelta sobre el cielo, la nave como escenario y su consola abajo. Antes el código
+      la ley suelta sobre el cielo, la nave en su carril y su pantalla con el código y lo que
+      dibuja (ADR 0018; antes, la consola iba abajo). Antes el código
       quedaba chico arriba a la izquierda con un hueco al lado, "Leer el HTML" flotaba sin contexto,
       el desafío quedaba abajo de una raya y la mitad de abajo de la hoja, vacía.
 - [ ] La página del manual es UNA pieza, siempre (las seis leyes, la 6 en Signal Space): ya no hay
       forma de tres tarjetas ni input `integrada`, y con ella se fueron `[demo]`, `[desafio]`,
       `.pm-mesa` y el marco de papel de la escena. Anti-patrón: volver a traer una demo o un
       desafío de perilla al lado de la escena. La escena de la nave es
-      el escenario y su pantalla muestra los números, una sola vez; abajo, la consola de la nave, en
-      la paleta de su pantalla (vidrio `#1c1434`, borde `#5b4a96`, texto `#f2ecff`). Antes, la demo
+      el escenario y su pantalla muestra los números, una sola vez, al lado del código, sobre el
+      mismo vidrio (`#1c1434`, texto `#f2ecff`). Antes, la demo
       en papel repetía los números del panel y el desafío usaba otro código (`badge`, `total`): tres
       tarjetas sueltas. El desafío es el paso 2 de la misma consola, sobre el mismo código: el hueco
       del handler se toca ahí, y completarlo no arregla el panel hasta la próxima corrida.
-- [ ] Los dos pasos de la consola dicen dónde se está: el que toca, en dorado; el hecho, en verde.
-      La fila guarda el alto de "Mostrame" aunque ya no esté: al irse, la consola no se achica.
-- [ ] La ley 1 va sin franja abajo (`enPantalla` + `portada`): la consola está ADENTRO de la
-      pantalla de la nave, en tres columnas (código, árbol, lo que se dibuja), y la nave va en su
+- [ ] Los dos pasos del globo de la nave dicen dónde se está: el que toca, en dorado; el hecho, en verde.
+      La fila guarda el alto de "Mostrame" aunque ya no esté: al irse, el globo no se achica.
+- [ ] Las seis leyes van sin franja abajo (`enPantalla` + `portada`, ADR 0016 y 0018): la consola
+      está ADENTRO de la pantalla de la nave (en la 1, tres columnas: código, árbol, lo que se dibuja;
+      en las otras, el código con "correr" y lo que la lámina dibuja en `render`), y la nave va en su
       carril a la izquierda, en su propio SVG (`--pm-nave-*`). Con el árbol abajo, junto al código,
       quedaba lejos de lo que dibuja. Cada cosa tiene su lugar: la ley suelta sobre el cielo, arriba
       (ver el ítem que sigue), los pasos y "Mostrame" en un globo de la
       nave que salta al cambiar de paso, "Bitácora" como pestaña sobre el borde de abajo de la
-      pantalla y "Siguiente" en el carril de la nave (ver abajo). Abre con una portada (la ley grande, el árbol armado que crece desde la raíz y
-      "Leer"); "Leer" achica la portada, agranda la pantalla hasta la demo y la nave salta.
+      pantalla y "Siguiente" en el carril de la nave (ver abajo). Cada una abre con una portada
+      (su dibujo, la ley grande y "Leer"; en la 1, el árbol armado que crece desde la raíz); "Leer"
+      achica la portada, agranda la pantalla hasta la demo y la nave salta.
 - [ ] (2026-11-11) La ley 1 en la pantalla de la nave se ve como la 3, no como un modal. Defecto
       resuelto (Damian): un recuadro con borde y fondo propio encerraba la ley, el código, el árbol y
       el render, y se leía como una ventana aparte. Anti-patrones que se sacaron, y que no vuelven:
       la ley como barra de título adentro de la pantalla (con su raya debajo); una pantalla sin haz
       que la una con la nave; cajas dentro de la caja (código y árbol con borde y fondo propios
-      sobre el vidrio); una sombra larga que la levanta del cielo; un marco distinto al que proyecta
+      sobre el vidrio); una sombra larga que la levanta del cielo; un marco distinto al que proyectaba
       la nave en las otras leyes. Ahora la ley, lo que dice la nave y las marcas van sobre el cielo
       en su propia fila (`.pm` en grilla, la ventanilla en `subgrid` por detrás, así el cielo llega
-      hasta arriba); la pantalla lleva el marco de `pintarPantalla` como sombra (como borde
+      hasta arriba); la pantalla lleva el marco que dibujaba `pintarPantalla`, como sombra (como borde
       ocupaba 14 px y a 1440 las tres columnas ya no entraban); y la escena traza el haz de la
       nariz al borde de la pantalla (`trazoDelHaz`, función pura) cada vez que cambia una de las
       dos, también en la portada. Sin haz si la pantalla no queda adelante de la nariz (en el
@@ -1127,6 +1130,29 @@ Del minijuego de operadores (2026-11-08):
       cielo. Medido con input real (tags, cierre, "Siguiente página" hasta la ley 2) a 3440×1300,
       1440×900, 1366×768, 1280×640 y 390×844: sin desborde horizontal, globo, "Siguiente" y nave sin
       tocar la ley ni la pantalla, y sin scroll salvo en el celular (la excepción de siempre).
+- [ ] (2026-11-11, ADR 0018) Las leyes 2 a 6 van como la 1: la ley sobre el cielo, la nave en su
+      carril con el globo y "Siguiente", y la pantalla unida por el haz, con el código y "correr" a la
+      izquierda y lo que dibuja la lámina a la derecha (`render`). Pedido de Damian: "aplicalo a todas
+      las leyes", con portada. Anti-patrones que se sacaron de las cinco, y que no vuelven: la consola
+      como franja de abajo, separada de la pantalla que la dibuja; la pantalla pintada adentro de la
+      lámina, que el recorte del cielo cortaba según la ventanilla; el código en una caja con borde
+      sobre otra caja. Cada una abre con una portada que dibuja su pantalla (instrumentos, pipeline,
+      panel con el lugar viejo, cerca con la anomalía afuera, caja con sus hilos). Defectos resueltos
+      en la pasada: (1) la portada medía 52rem y con un título de dos renglones a 1440 la pantalla
+      llegaba al borde y le cortaba el planeta: ahora mide dos renglones del título, con piso de 24rem
+      (sin piso, a 390 las marcas se partían); (2) a 1280×640 la portada de dos renglones se pasaba 10
+      px de alto: el dibujo también se achica por el alto (`40vh`); (3) a 390 el hueco de la 5 y la 6
+      se partía con lugar de sobra (`setTimeout(() =>` y la llave sola abajo, `let total =` y `0;`):
+      los márgenes negativos del botón le restan a su ancho propio. El renglón del hueco mide su texto
+      (`min-width: max-content`); `nowrap` no alcanza, Edge igual corta en el `<wbr>`; (4) a 390 las
+      marcas partidas en la portada quedaban torcidas, alineadas a la izquierda bajo la ley centrada
+      (también en la ley 1): van centradas; (5) los rótulos del panel de la portada de la 4 sumaban
+      palabras al gate de prosa: van como datos (`filasDePortada`), como el árbol de la 5. Medido con
+      input real (portada, "Leer", correr, arreglar y correr hasta la página cumplida; la 6 desde la
+      bitácora) a 3440×1300, 1440×900, 1280×640 y 390×844: las cinco cumplen, sin desborde
+      horizontal, el haz de la nariz a la pantalla salvo en el celular, globo y "Siguiente" sin tocar la
+      ley ni la pantalla, y sin scroll salvo en el celular. Queda: la pantalla cambia de ancho cuando
+      el arreglo alarga el código (ley 3, 4 y 5), y el haz la sigue.
 - [ ] Un absoluto dentro de una grilla NO lleva `grid-row`/`grid-column`: su caja pasa a ser esa
       celda. El globo de la nave tenía `grid-row: 2` (su lugar en el celular) y con la nave al
       costado caía debajo de ella, con la cola apuntando al vacío.
@@ -1155,19 +1181,16 @@ Del minijuego de operadores (2026-11-08):
       cortaba el borde de arriba a la pantalla. A 1100 px de ancho o más y 800 o menos de alto, la
       consola va al costado: apiladas no entraban, y `increment()` quedaba debajo del pie. Ahí la
       escena se lleva la parte más ancha: más angosta que 1.3:1, el recorte le cortaba el fuego.
-- [ ] Por debajo de 560 px de escena, la lámina encuadra lo suyo (`cieloAngosto` con su franja:
-      la nave y su pantalla, o en la ley 5 la cerca con la anomalía y el fuego) sobre un cielo
-      PINTADO de 520 (`cieloCentradoEn(y, 520)`): a 390 las ventanillas de las leyes 3, 5 y 6 son
-      casi cuadradas o más altas que anchas, el cielo de 340 no alcanzaba, el encuadre se rendía y
-      el recorte se comía el borde derecho de la pantalla (la 3, 8 px de marco; la 5, la cerca y el
-      "0/7"; la 6, el último `<p>`). Medido con `getBoundingClientRect` de cada forma de la lámina
-      contra la caja del SVG, antes y después de correr: nada afuera salvo la punta del fuego de la
-      3 y la 6, que se desvanece.
+- [ ] (2026-11-11, ADR 0018) La lámina ya no dibuja la pantalla: lo de la pantalla va en el
+      `render` de la página, que lo encuadra entero a cualquier ancho. Con eso se fueron
+      `cieloAngosto` y el cielo pintado de 520: el recorte del cielo solo puede cortar cielo.
+      Anti-patrón: volver a dibujar algo que hay que leer (un número, un nodo, la cerca) en el SVG
+      del cielo, donde `slice` lo recorta según la ventanilla.
 - [ ] El subrayado del hueco no toma la sangría: va como espacio del botón, no del texto.
-- [ ] La ley 5 en el escenario: la anomalía va AFUERA de la cerca, a la izquierda, y el punto que
-      pasa por afuera viaja por debajo de la cerca hasta ella; dentro de la cerca solo quedaba
-      lugar detrás de la nave. Su cielo se centra en 111 (`cieloCentradoEn`): la cerca y la lectura
-      bajan más que la pantalla de la ley 4. El árbol se achica para dejarle a la pantalla un
+- [ ] La ley 5 en el escenario: la cerca de Zone.js rodea la app de la pantalla (el árbol y su
+      lectura, en `render`), no a la nave; la llamada entra a la cerca por arriba. La anomalía va
+      AFUERA de la cerca, a la izquierda, y el punto que pasa por afuera viaja por debajo de la cerca
+      hasta ella y sube. El árbol se achica para dejarle a la pantalla un
       renglón de lectura, `total` y `N/7` revisados: el valor solo se ve ahí, en rojo con "!"
       cuando quedó viejo, y cambia cuando el barrido enciende el árbol, no antes (sin movimiento,
       al toque). Antes la demo en papel tenía su propio árbol y su propio total, y el desafío
@@ -1197,11 +1220,8 @@ Del minijuego de operadores (2026-11-08):
       vuelo (a los tirones y la nave trabada, o de corrido). El hueco es la propiedad y rota de la
       más cara a la más barata (`left`, `textContent`, `color`, `transform`): la mano alterna el
       hueco y "correr" para que se vean las cuatro, y se resuelve recién al correr `transform`.
-      Rótulos de 13.5 unidades o más y, por debajo de 560 px de escena, el `viewBox` encuadra la
-      nave con su fuego y su pantalla (`cieloAngosto`): con el cielo de sobra, a 390 px la escena
-      quedaba a 0.69 y "capas caras" en 8 px; encuadrada, a 0.99, el más chico va en 13 px. En
-      angosto el código va más apretado y la página entera entra sin scroll: medido en el libro a
-      1440×900 y 390×844, con "correr" y "Siguiente página" a la vista. Las cajas de
+      Rótulos de 13.5 unidades o más. Las estelas del viaje van en el cielo, el pipeline en la
+      pantalla (`render`). Las cajas de
       texto no se tocan (`getBoundingClientRect` entre todos los rótulos de la pantalla): con
       filas cada 34 unidades "capas caras" pisaba a layout y a paint, y "barato" quedaba pegado a
       "style"; la fila de DOM baja hasta despegarse del brillo del vidrio.
@@ -1237,12 +1257,12 @@ Del minijuego de operadores (2026-11-08):
       los dos hilos, se encienden los dos `<p>` en verde y el resto se apaga. La cuenta cambia
       cuando el aviso llega o el barrido termina, no antes (sin movimiento, al toque): al toque,
       decía 2/7 con el árbol todavía en rosa. La lectura va ARRIBA
-      del árbol: abajo la cruzaban los hilos, que entran a los nodos desde abajo. Antes la demo en
+      del árbol: abajo la cruzaban los hilos, que entran a los nodos desde abajo. La caja va debajo
+      del árbol, entre sus dos lectores y dentro de la pantalla: entre la nave y la pantalla quedaba
+      en el cielo, y el haz la cruzaba. Antes la demo en
       papel tenía su propio árbol de pastillas con "count.set(1)" y "Reiniciar", y el desafío era
       un sistema de perilla aparte (`SIGNAL_NOTIFY_SYSTEM`): tres tarjetas que a 390 scrolleaban.
-      A 390 la consola es corta y la ventanilla queda más alta que ancha (412 px): con el cielo de
-      340 `cieloAngosto` se rendía y el recorte le comía a la pantalla el último `<p>` y la cuenta.
-      La lámina pinta un cielo de 520 y encuadra con ese alto. Medido con input real en la historia
+      Medido con input real en la historia
       a 1440×900 y suelto a 1440×900 (con movimiento reducido), 1280×640 y 390×844: entra sin
       scroll, "Mostrame" la resuelve, y "Seguir" vuelve a "Guarden esa pregunta.".
 - [ ] La ley va a la izquierda también entre 700 y 1099: la regla de la grilla la centraba.
@@ -1292,7 +1312,8 @@ Del minijuego de operadores (2026-11-08):
       encima de la historia. Al "¡Rápido, el manual de a bordo!" la cámara se acerca a la escena y
       todo queda negro; la pantalla se prende como una tele vieja (un punto, una raya de luz que
       se abre, el fogonazo que se asienta) y adentro la página es el mundo: el cielo y la nave de
-      borde a borde, la ley arriba sobre ese cielo, y la consola como franja de abajo. El vidrio se
+      borde a borde, la ley arriba sobre ese cielo, y la pantalla de la nave con el código y lo que
+      dibuja (ADR 0018; antes, la consola como franja de abajo). El vidrio se
       ve desde adentro: esquinas redondeadas y un reflejo que casi no se nota. Después de la última
       página la pantalla se apaga (raya, punto) y la historia sigue con "Debería ser imposible…".
       Anti-patrones: un velo o un desenfoque sobre el prólogo, una tarjeta con marco alrededor de la
@@ -1322,9 +1343,9 @@ Del minijuego de operadores (2026-11-08):
 - [ ] La tele recorta (`clip-path`), no achica: con `scale(0, …)` la nave de la ley 1 medía su
       matriz al nacer y no tenía inversa (`NaveDelManual.mirar` tiraba). El blanco es la imagen
       sobreexpuesta (`brightness`): pasando a blanco con `invert`, el medio era un velo gris.
-- [ ] "Anterior" y "Siguiente" van en la fila de los pasos de la consola (`pie` del token
-      `PAGINA_DEL_MANUAL`), "Anterior" a la izquierda de "Mostrame", nunca sobre el código ni en una
-      franja aparte. Son cartelitos de papel: le ganan a la pastilla oscura global por
+- [ ] "Anterior" y "Siguiente" nunca van sobre el código ni en una franja aparte: "Anterior" como
+      pestaña sobre el borde de abajo de la pantalla, "Siguiente" debajo de la nave (ADR 0016; antes,
+      en la fila de los pasos de la consola, con el `pie` del token `PAGINA_DEL_MANUAL`). Son cartelitos de papel: le ganan a la pastilla oscura global por
       especificidad. (2026-11-11, ADR 0014) "Siguiente" llega recién con la página cumplida, verde,
       en el lugar de "Mostrame", con un salto y dos latidos; la flecha → tampoco pasa antes, y una
       página cumplida queda cumplida al volver. Defecto resuelto (Damian): siempre a la vista, en su
