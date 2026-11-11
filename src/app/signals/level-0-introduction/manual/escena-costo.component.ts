@@ -1,4 +1,11 @@
-import { ChangeDetectionStrategy, Component, computed, effect, input } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  effect,
+  input,
+  untracked,
+} from '@angular/core';
 import { gsap } from 'gsap';
 import {
   ESTACIONES,
@@ -37,8 +44,19 @@ const ROTULO = { quieto: '#b9aee0', corre: '#f2ecff', salteado: '#8a7fb5' };
 interface Estacion {
   readonly punto: SVGCircleElement;
   readonly rotulo: SVGTextElement;
-  readonly tachado: SVGPathElement;
 }
+
+/** El veredicto de una corrida, como etiqueta: suelto al lado de style, se leía como de style. */
+interface Veredicto {
+  readonly grupo: SVGGElement;
+  readonly fondo: SVGRectElement;
+  readonly texto: SVGTextElement;
+}
+/** Hasta que se corre, lo que cuesta la propiedad del código no se sabe. */
+const SIN_CORRER = '¿?';
+const GRIS = '#8a7fb5';
+/** Lo que hay entre el final de "DOM" y el borde, en unidades del dibujo. */
+const LUGAR_DE_LA_PROPIEDAD = 72;
 
 /**
  * Lámina de la ley 3, que es el escenario de su página: la nave vuela y su pantalla (`render`, al
@@ -64,12 +82,21 @@ interface Estacion {
 })
 export class EscenaCostoComponent extends EscenaDelManual {
   readonly corrida = input<CorridaDelCuadro | null>(null);
+  /**
+   * La propiedad que está en el código. Si no es la de la última corrida, la pantalla no muestra
+   * esa corrida: mostraba `transform` y "barato" con `textContent` en el código.
+   */
+  readonly enElCodigo = input<string | null>(null);
   readonly sano = input(false);
 
   protected readonly semilla = 37;
   protected readonly cielo = CIELO_DEL_ESCENARIO;
   protected readonly descripcion = computed(() => {
     const c = this.corrida();
+    const enElCodigo = this.enElCodigo();
+    if (enElCodigo !== null && c?.propiedad !== enElCodigo) {
+      return `Pantalla de la nave: el pipeline de render, quieto; ${enElCodigo} todavía no corrió`;
+    }
     if (!c) return 'Pantalla de la nave: el pipeline de render, quieto';
     return (
       `Pantalla de la nave: ${c.propiedad} pasa por ${stagesTriggered(c.kind).join(', ')}; ` +
@@ -79,7 +106,8 @@ export class EscenaCostoComponent extends EscenaDelManual {
 
   private estaciones: Estacion[] = [];
   private flujo: SVGGElement | null = null;
-  private lectura: { propiedad: SVGTextElement; costo: SVGTextElement } | null = null;
+  private lectura: { propiedad: SVGTextElement; costo: Veredicto } | null = null;
+  private pintada: CorridaDelCuadro | null = null;
   private paisaje: SVGGElement | null = null;
   private vuelo: gsap.core.Tween | null = null;
   private dibujo: gsap.core.Timeline | null = null;
@@ -94,6 +122,16 @@ export class EscenaCostoComponent extends EscenaDelManual {
       this.reaccion(() => this.pintar(corrida, this.quieta ? 0 : 1));
     });
     effect(() => {
+      const enElCodigo = this.enElCodigo();
+      if (!this.lista || enElCodigo === null) return;
+      if (this.pintada?.propiedad === enElCodigo) return;
+      // Dar toda la vuelta a la rueda vuelve a lo último que corrió: eso sí se sabe.
+      const corrida = untracked(this.corrida);
+      this.reaccion(() =>
+        corrida?.propiedad === enElCodigo ? this.pintar(corrida, 0) : this.sinCorrer(enElCodigo),
+      );
+    });
+    effect(() => {
       if (this.sano() && this.lista) this.reaccion(() => this.festejar());
     });
   }
@@ -103,9 +141,13 @@ export class EscenaCostoComponent extends EscenaDelManual {
     this.armarPipeline(el(render, 'g'));
     this.volar(null);
     const corrida = this.corrida();
-    if (corrida) {
+    const enElCodigo = this.enElCodigo();
+    if (corrida && (enElCodigo === null || corrida.propiedad === enElCodigo)) {
       this.vista = corrida.n;
       this.pintar(corrida, 0);
+    } else if (enElCodigo !== null) {
+      this.vista = corrida?.n ?? 0;
+      this.sinCorrer(enElCodigo);
     }
   }
 
@@ -180,14 +222,7 @@ export class EscenaCostoComponent extends EscenaDelManual {
         fill: i === 0 ? '#c4d4ff' : ROTULO.quieto,
       });
       rotulo.textContent = nombre;
-      const largo = nombre.length * 8.7;
-      const tachado = el(pantalla, 'path', {
-        d: `M${ROTULO_X - 2} ${fila(i)}h${largo + 4}`,
-        stroke: ROTULO.salteado,
-        'stroke-width': 1.6,
-        opacity: 0,
-      });
-      return { punto, rotulo, tachado };
+      return { punto, rotulo };
     });
 
     // Arriba a la derecha, al lado de DOM y style: qué se tocó y cuánto costó.
@@ -200,17 +235,19 @@ export class EscenaCostoComponent extends EscenaDelManual {
       'font-weight': 700,
       fill: '#b9aee0',
     });
-    // A 20 unidades, "barato" quedaba pegado a "style".
-    const costo = el(pantalla, 'text', {
-      x: 378,
-      y: fila(1) + 5.5,
+    // Una etiqueta y no una palabra suelta: al lado de style, "barato" se leía como de style.
+    const grupo = el(pantalla, 'g', { opacity: 0 });
+    const fondo = el(grupo, 'rect', { y: fila(1) - 11, height: 22, rx: 11, 'stroke-width': 1.4 });
+    const texto = el(grupo, 'text', {
+      x: 371,
+      y: fila(1) + 5,
       'text-anchor': 'end',
       'font-family': 'Georgia, serif',
       'font-style': 'italic',
       'font-weight': 700,
-      'font-size': 17,
+      'font-size': 15,
     });
-    this.lectura = { propiedad, costo };
+    this.lectura = { propiedad, costo: { grupo, fondo, texto } };
   }
 
   /**
@@ -226,7 +263,8 @@ export class EscenaCostoComponent extends EscenaDelManual {
     this.dibujo?.kill();
     this.flujo?.replaceChildren();
 
-    // Todo vuelve a quieto, y las que el cambio no dispara quedan tachadas desde el arranque.
+    this.pintada = corrida;
+    // Todo vuelve a quieto, y las que el cambio no dispara quedan huecas desde el arranque.
     this.estaciones.forEach((e, i) => {
       if (i > 0) {
         gsap.set(e.punto, {
@@ -241,11 +279,10 @@ export class EscenaCostoComponent extends EscenaDelManual {
       gsap.set(e.rotulo, {
         attr: { fill: i === 0 ? '#c4d4ff' : corre[i] ? ROTULO.quieto : ROTULO.salteado },
       });
-      gsap.set(e.tachado, { opacity: corre[i] ? 0 : 1 });
     });
     if (this.lectura) {
-      this.lectura.propiedad.textContent = corrida.propiedad;
-      this.lectura.costo.textContent = '';
+      this.rotularPropiedad(corrida.propiedad);
+      gsap.set(this.lectura.costo.grupo, { opacity: 0 });
     }
 
     const dibujo = gsap.timeline();
@@ -288,12 +325,11 @@ export class EscenaCostoComponent extends EscenaDelManual {
     dibujo.add(() => {
       pulso?.remove();
       if (this.lectura) {
-        this.lectura.costo.textContent = costo;
-        this.lectura.costo.setAttribute('fill', color);
+        this.veredicto(costo, color);
         if (t) {
           gsap.fromTo(
-            this.lectura.costo,
-            { scale: 0.5, transformOrigin: '100% 100%' },
+            this.lectura.costo.grupo,
+            { scale: 0.5, transformOrigin: '100% 50%' },
             { scale: 1, duration: 0.3, ease: 'back.out(3)' },
           );
         }
@@ -301,6 +337,55 @@ export class EscenaCostoComponent extends EscenaDelManual {
       this.volar(costo, t);
     }, total);
     if (!t) dibujo.progress(1);
+  }
+
+  /**
+   * Lo que se tocó, al lado de DOM. Achica la letra si no entra: a 13,5 "textContent" se montaba
+   * sobre "DOM".
+   */
+  private rotularPropiedad(texto: string): void {
+    const rotulo = this.lectura?.propiedad;
+    if (!rotulo) return;
+    rotulo.textContent = texto;
+    rotulo.setAttribute(
+      'font-size',
+      String(Math.min(13.5, LUGAR_DE_LA_PROPIEDAD / (texto.length * 0.6))),
+    );
+  }
+
+  /** La etiqueta del costo, del ancho de lo que dice. */
+  private veredicto(texto: string, color: string): void {
+    const costo = this.lectura?.costo;
+    if (!costo) return;
+    costo.texto.textContent = texto;
+    costo.texto.setAttribute('fill', color);
+    const ancho = texto.length * 8 + 16;
+    costo.fondo.setAttribute('x', String(379 - ancho));
+    costo.fondo.setAttribute('width', String(ancho));
+    costo.fondo.setAttribute('fill', `color-mix(in srgb, ${color} 14%, transparent)`);
+    costo.fondo.setAttribute('stroke', color);
+    gsap.set(costo.grupo, { opacity: 1 });
+  }
+
+  /**
+   * La propiedad del código todavía no corrió: la pantalla vuelve a quieta, sin el flujo de la
+   * corrida anterior, con la propiedad nueva y su costo por saber.
+   */
+  private sinCorrer(propiedad: string): void {
+    this.pintada = null;
+    this.dibujo?.kill();
+    this.flujo?.replaceChildren();
+    this.estaciones.forEach((e, i) => {
+      if (i > 0) {
+        gsap.set(e.punto, {
+          attr: { fill: QUIETO.fill, stroke: QUIETO.stroke, 'stroke-dasharray': 'none', r: 7 },
+        });
+      }
+      gsap.set(e.rotulo, { attr: { fill: i === 0 ? '#c4d4ff' : ROTULO.quieto } });
+    });
+    this.rotularPropiedad(propiedad);
+    this.veredicto(SIN_CORRER, GRIS);
+    this.volar(null);
   }
 
   private encender(e: Estacion, i: number, color: string, t: number): void {

@@ -64,6 +64,16 @@ describe('DomToPixelComponent', () => {
       expect(etapas()[1].classList).toContain('pm-etapa--ahora');
     });
 
+    it('al cambiar la propiedad, la pantalla no sigue mostrando la corrida anterior', () => {
+      click('.dtp-correr');
+      expect(pantalla()).toContain('left pasa por');
+      click('.dtp-hueco');
+      expect(pantalla()).toContain('textContent todavía no corrió');
+      expect(pantalla()).not.toContain('left');
+      click('.dtp-correr');
+      expect(pantalla()).toContain('textContent pasa por');
+    });
+
     it('con transform salta las capas caras y se resuelve recién al correr', () => {
       click('.dtp-correr');
       click('.dtp-hueco');

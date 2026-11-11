@@ -64,7 +64,13 @@
   <p hacer>Corré.</p>
   <p arreglo>Cambiá la propiedad.</p>
 
-  <app-escena-costo escena [render]="render" [corrida]="corrida()" [sano]="sano()" />
+  <app-escena-costo
+    escena
+    [render]="render"
+    [corrida]="corrida()"
+    [enElCodigo]="cambio().propiedad"
+    [sano]="sano()"
+  />
 
   <!-- El pipeline se ve una sola vez, en la pantalla de la nave. Acá va lo que se toca: el cuadro
        que corre una y otra vez, con la propiedad como hueco, y la corrida. -->
