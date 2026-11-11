@@ -31,3 +31,11 @@ export function conCortes(codigo: string): string {
 
 /** Un carácter que el código mostrado nunca trae, para marcar dónde va cada corte. */
 const MARCA = '\u0000';
+
+/**
+ * El renglón más largo de sus variantes (el primero, si empatan): el molde con que el código reserva
+ * su ancho, así no cambia de tamaño cuando el renglón cambia.
+ */
+export function masLargo(variantes: readonly string[]): string {
+  return variantes.reduce((largo, v) => (v.length > largo.length ? v : largo), '');
+}

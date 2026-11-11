@@ -1,4 +1,4 @@
-import { conCortes } from './cortes-de-codigo';
+import { conCortes, masLargo } from './cortes-de-codigo';
 
 describe('conCortes: puntos de corte para mostrar código angosto', () => {
   it('ofrece cortar después de ".", "(" y "=", no a mitad de un identificador', () => {
@@ -36,5 +36,18 @@ describe('conCortes: puntos de corte para mostrar código angosto', () => {
       '// sin provide<wbr>Zone<wbr>Change<wbr>Detection()',
     );
     expect(conCortes('bootstrapApplication(App')).toBe('bootstrapApplication(<wbr>App');
+  });
+});
+
+describe('masLargo: el molde del ancho del código', () => {
+  it('elige la variante más larga, y la primera si empatan', () => {
+    expect(masLargo(['let total = 0;', 'const total = signal(0);'])).toBe(
+      'const total = signal(0);',
+    );
+    expect(masLargo(['#titulo', 'h1', '.titulo'])).toBe('#titulo');
+  });
+
+  it('sin variantes, nada', () => {
+    expect(masLargo([])).toBe('');
   });
 });
