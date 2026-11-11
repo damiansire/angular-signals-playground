@@ -14,7 +14,7 @@ import { gsap } from 'gsap';
 import { sinMovimiento } from '../../libs/muelle';
 import { chispas } from '../../libs/rastros';
 import { PALETAS, el, gradientesDeNaves } from './nave-del-prologo';
-import { dibujarObjeto, type ObjetoDelMundo } from './objetos-del-mundo';
+import { dibujarObjeto, type EtapaDelMundo, type ObjetoDelMundo } from './objetos-del-mundo';
 import { Tripulante } from './tripulante';
 
 /** Quién habla en el viaje: las tres naves que entraron en la anomalía. */
@@ -35,7 +35,7 @@ const DISPOSICIONES = {
       { x: 262, y: 146, s: 0.68 },
     ],
     objeto: { x: 1250, y: 100, s: 0.74 },
-    lejos: { x0: 640, x1: 1100 },
+    lejos: { x0: 640, x1: 1100, abre: 1 },
   },
   angosto: {
     caja: { w: 800, h: 260 },
@@ -45,7 +45,8 @@ const DISPOSICIONES = {
       { x: 140, y: 196, s: 0.9 },
     ],
     objeto: { x: 650, y: 130, s: 0.95 },
-    lejos: { x0: 470, x1: 520 },
+    // A 340 px la molécula entera tocaba la nariz del capitán y el objeto: va más cerrada.
+    lejos: { x0: 470, x1: 510, abre: 0.6 },
   },
 } as const;
 type Disposicion = (typeof DISPOSICIONES)[keyof typeof DISPOSICIONES];
@@ -84,7 +85,7 @@ let instancias = 0;
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TripulacionComponent {
-  readonly capitulo = input.required<number>();
+  readonly capitulo = input.required<EtapaDelMundo>();
   readonly acento = input('#eb9b3c');
 
   private readonly lienzo = viewChild.required<ElementRef<SVGSVGElement>>('lienzo');
@@ -146,7 +147,7 @@ export class TripulacionComponent {
       const x = d.lejos.x0 + ((k + 0.5) / 2) * (d.lejos.x1 - d.lejos.x0);
       const y = d.caja.h * (k === 0 ? 0.34 : 0.66);
       const pts = [0, 1, 2].map((j) => ({
-        x: x + (j - 1) * (46 + azar(k * 5 + j) * 30),
+        x: x + (j - 1) * (46 + azar(k * 5 + j) * 30) * d.lejos.abre,
         y: y + (azar(k * 7 + j) - 0.5) * 50,
       }));
       el(lejos, 'path', {
@@ -210,6 +211,11 @@ export class TripulacionComponent {
     this.mirar(clienteX, clienteY);
     const n = this.naves[this.toques++ % this.naves.length];
     n?.respingo();
+  }
+
+  /** Algo cambió sin estar resuelto todavía: el objeto se entera, sin festejo. */
+  avisarAlObjeto(fuerza = 0.6): void {
+    this.objeto?.reaccionar(fuerza);
   }
 
   /** Lo resuelto: el objeto lo cuenta, las naves saltan una tras otra y saltan chispas. */

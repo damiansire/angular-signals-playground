@@ -488,7 +488,74 @@ const quienLee: Dibujo = (l) => {
   };
 };
 
-const DIBUJOS: Record<number, Dibujo> = {
+/**
+ * La práctica · el carrito: la bodega flotante de la tripulación, con la carga apilada. Cada cambio
+ * de cantidad la sacude y la caja de arriba salta, como la caja que avisa del capítulo 1.
+ */
+const bodega: Dibujo = (l) => {
+  // Con el asa es más ancha que los otros objetos: un poco más chica, para que ocupe lo mismo.
+  const g = el(l.g, 'g', { transform: 'scale(0.86)' });
+  sombra(g, 70, 84);
+  const cuerpo = el(g, 'g');
+  // La carga va detrás del frente de la bodega, asomando: así se lee como algo que se llenó.
+  const cajas = [
+    { x: -42, y: -40, w: 44, h: 40, a: '#ffd58c', b: '#e98f2c' },
+    { x: 4, y: -34, w: 40, h: 34, a: '#c8f0e3', b: '#4fb39b' },
+    { x: -22, y: -74, w: 38, h: 34, a: '#f1ebff', b: '#b9a6ea' },
+  ].map((c, k) => {
+    const g = el(cuerpo, 'g');
+    el(g, 'rect', {
+      x: c.x,
+      y: c.y,
+      width: c.w,
+      height: c.h,
+      rx: 8,
+      fill: degradado(l, `carga-${k}`, c.a, c.b),
+      ...trazo,
+    });
+    el(g, 'path', {
+      d: `M${c.x + 8} ${c.y + 9}H${c.x + c.w - 8}`,
+      stroke: '#fff',
+      'stroke-opacity': 0.6,
+      'stroke-width': 4,
+      'stroke-linecap': 'round',
+    });
+    return g;
+  });
+  el(cuerpo, 'path', {
+    d: 'M-74 -8H74L62 52Q60 60 52 60H-52Q-60 60 -62 52Z',
+    fill: degradado(l, 'bodega', '#fffdf7', '#e6dcc4'),
+    ...trazo,
+  });
+  for (const x of [-34, 0, 34]) {
+    el(cuerpo, 'path', { d: `M${x} 4V48`, stroke: '#c9bfa9', 'stroke-width': 3 });
+  }
+  // El asa por donde la empujan, y el propulsor de abajo en vez de ruedas: estamos en el espacio.
+  el(cuerpo, 'path', {
+    d: 'M74 -8L92 -34H106',
+    fill: 'none',
+    stroke: TINTA,
+    'stroke-width': 5,
+    'stroke-linecap': 'round',
+    'stroke-linejoin': 'round',
+  });
+  el(cuerpo, 'path', { d: 'M-30 60Q0 76 30 60', fill: l.acento, ...trazo });
+  return (f) => {
+    rebote(cuerpo, f, '0 60');
+    gsap.fromTo(
+      cajas[2],
+      { y: -18 * f, rotation: -8 * f, svgOrigin: '-3 -40' },
+      { y: 0, rotation: 0, duration: 0.6, ease: 'bounce.out' },
+    );
+    anillos(g, 0, -90, l.acento, 1);
+  };
+};
+
+/** Dónde pasa una escena con tripulación: un capítulo del viaje, o la práctica del carrito. */
+export type EtapaDelMundo = number | 'carrito';
+
+const DIBUJOS: Record<EtapaDelMundo, Dibujo> = {
+  carrito: bodega,
   1: caja,
   2: molecula,
   3: baliza,
@@ -503,7 +570,7 @@ const DIBUJOS: Record<number, Dibujo> = {
 };
 
 export function dibujarObjeto(
-  capitulo: number,
+  capitulo: EtapaDelMundo,
   g: SVGGElement,
   defs: SVGDefsElement,
   id: string,
