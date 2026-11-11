@@ -131,17 +131,6 @@
   line-height: 1.45;
   margin: 0 0 0.55rem;
 }
-/* En la vista molécula el árbol se DISUELVE igual que el código y las instrucciones: pierde su
-   hoja blanca (borde + sombra + grilla punteada) que en modo standalone lo hace lindo pero acá
-   se lee como una ventana pegada sobre la escena. Sin marco, sus nodos flotan en el campo del
-   átomo y la molécula viva de fondo puede verse a través. */
-.card--dissolve .subhost .tree-card {
-  background: none;
-  background-image: none;
-  border: none;
-  box-shadow: none;
-  padding: 0;
-}
 /* De-encajonar los paneles claros de las demos. La mayoría de los sub-niveles envuelven su
    contenido en un panel claro (bg-white / bg-gray-50 + sombra + esquinas): en modo standalone
    lo hace lindo, pero sin marco se lee como una "ventanita" flotando sobre el campo del átomo
