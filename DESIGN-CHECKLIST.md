@@ -1438,8 +1438,21 @@ Del minijuego de operadores (2026-11-08):
       trazo a mano en el acento, y la caja de diálogo abajo. Sin tarjeta: el ejercicio va sobre el
       papel. Antes era una tarjeta blanca sobre negro, y el viaje parecía otra aplicación.
 - [ ] El desafío (`app-manipulable-system`) es un aparato del mundo: trazo de tinta, papel claro y
-      la sombra dura de las cinemáticas, a lo ancho. El código, en la tinta cálida de las barras: el
-      gris azulado de un editor se leía como una ventana pegada en el papel.
+      la sombra dura de las cinemáticas. En dos columnas, el código a la izquierda y la lectura con
+      su botón a la derecha: a lo ancho y apilado dejaba la mitad derecha vacía y era lo que más
+      empujaba la hoja.
+- [ ] El código (`app-code`) es la pantalla de la nave: tinta cálida, trazo y sombra dura, tres
+      luces con el tono de las tres naves en vez de los semáforos de un editor, y el renglón activo
+      con una marca del acento de la etapa que entra con rebote. Nada de filas azul marino ni verde
+      lleno: se leía como otra aplicación pegada en el papel.
+- [ ] Los campos de texto de la hoja llevan trazo de tinta, papel claro y sombra dura, y el foco en
+      el acento de la etapa. El título de la pantalla no se repite debajo del de la hoja: se oculta
+      desde el CSS global, porque con el estampado de la vista un título dibujado tarde quedaba
+      afuera.
+- [ ] Ningún aparato viejo queda en la hoja: la caja de una variable es la caja naranja del signal
+      (su valor salta al cambiar), las dependencias son una ficha de papel con su nombre en tinta
+      sobre el borde, y el historial son renglones que entran con un salto (los últimos cuatro: con
+      todos crecía con cada click). Sin paneles `bg-gray-800` ni botones azules de Tailwind.
 - [ ] Cada página del viaje tiene su línea al llegar y otra al resolver (`guion-del-viaje.ts`, con
       spec: las 33 páginas, las reglas del guion y dos naves distintas por página, porque es una
       charla). Las naves miran lo que se toca, una se entera con un respingo, festejan lo resuelto
@@ -1466,9 +1479,12 @@ Del minijuego de operadores (2026-11-08):
 - [ ] La pista de Angie se ve: arranca invisible y la revela la entrada del sub-nivel (`.warp`), que
       en la hoja no corre, y en el viaje no aparecía nunca. Aparece cuando la página ya asentó:
       mientras entra deslizándose es el bloque contenedor de su `fixed`, y flotaba en el medio.
-- [ ] Medido con input real a 1440×900, 1366×768 (scroll de 80 px con "más abajo"; 57 antes de la
-      franja de la tripulación), 1024×768 y 480×900 (una columna): sin desborde horizontal; "Seguir el viaje" en la última página lleva a
-      la cinemática del capítulo siguiente.
+- [ ] La hoja entra sin scroll a 1440×900 en las 33 páginas, medido con input real página por
+      página (`scrollHeight - clientHeight` de la hoja y el borde de abajo de la pantalla contra el
+      de arriba de la barra de diálogo). El título y la tripulación comparten una franja: con las
+      naves en una franja propia arriba del título, 4 de cada 5 páginas pedían scroll. Lo que más
+      empujaba: el desafío apilado, el historial de tarjetas altas y el código de doce renglones.
+      "Seguir el viaje" en la última página lleva a la cinemática del capítulo siguiente.
 - [ ] La pista de Angie (`app-concept-card`, fija en la esquina) va por encima del pie de la hoja:
       a `bottom: 1rem` tapaba "Seguir el viaje" y el click caía en la card. Medirlo con
       `elementFromPoint` en el centro del botón.
@@ -1481,7 +1497,10 @@ Del minijuego de operadores (2026-11-08):
       real a 390×664, 360×640, 480×900 y 750×342, capítulos 1 y 10: en cada posición del scroll,
       `elementFromPoint` en el centro de cada control visible, y la consola y la pista contra todos
       los controles y contra la caja del desafío. A 1440×900 y 1024×700, igual que antes.
-- [ ] Lo resuelto en una hoja del viaje se anota en la molécula con el mismo id ("0/0").
+- [ ] La molécula no existe (ADR 0019): la colina no baja con la rueda, AvPág ni las flechas
+      (`scrollTop` del escenario en 0), y `?nivel=4&sub-nivel=2` abre esa página en la hoja y la
+      barra de direcciones la sigue al pasar de página. Lo que queda de ella se oculta con
+      `visibility`: con `display: none` el SVG medía 0 y la cámara volvía a dibujarse con NaN.
 - [ ] Recargar sigue en la misma página, sin repetir el comienzo ni la cinemática. La hoja del
       viaje no tiene "Cerrar" y Escape no la cierra: es una sola historia (ADR 0008).
 - [ ] Entrar nunca abre la molécula: una partida que quedó en ella (`recorrido`, `construccion`)
@@ -1490,8 +1509,7 @@ Del minijuego de operadores (2026-11-08):
       introducción se había borrado.
 - [ ] Después del capítulo 11 va la revelación, después el final, y al terminar la historia queda
       en su último cuadro, con "Empezar de cero" arriba en lugar de "Saltar" y sin el ▸. Recargar
-      vuelve a ese cuadro, sin repetir la revelación. En la molécula (solo con un link), el final
-      también llega después de la revelación.
+      vuelve a ese cuadro, sin repetir la revelación.
 
 ## Cinemáticas de capítulo (que se sienta un juego, no un video)
 
