@@ -33,6 +33,11 @@ describe('GUION_DEL_VIAJE', () => {
     expect(problemas).toEqual([]);
   });
 
+  it('ningún texto se repite: la caja de diálogo reconoce cada línea por su texto', () => {
+    const textos = Object.values(GUION_DEL_VIAJE).flatMap((g) => [g.llegada.txt, g.resuelta.txt]);
+    expect(textos.filter((t, i) => textos.indexOf(t) !== i)).toEqual([]);
+  });
+
   it('la llegada y lo resuelto los dice otra nave: es una charla, no un monólogo', () => {
     const solas = Object.entries(GUION_DEL_VIAJE).filter(
       ([, g]) => g.llegada.quien === g.resuelta.quien,

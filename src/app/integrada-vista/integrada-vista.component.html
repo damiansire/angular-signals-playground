@@ -723,9 +723,10 @@
     @if (libro().concepto !== undefined) {
       <div class="prologo__manual-pie">
         <!-- La caja de diálogo de las cinemáticas: la tripulación dice qué encontró al llegar y qué
-             entendió al resolver. -->
+             entendió al resolver. La lista de uno es para que cada línea nueva se monte de cero y las
+             palabras vuelvan a entrar; va por texto porque por identidad Angular avisa (NG0956). -->
         <div class="etapa__dialogo" aria-live="polite">
-          @for (l of lineaDeEtapa() ? [lineaDeEtapa()!] : []; track l) {
+          @for (l of lineaDeEtapa() ? [lineaDeEtapa()!] : []; track l.txt) {
             <div class="etapa__linea" [style.--c]="luzDe(l.quien)">
               <span class="etapa__retrato" aria-hidden="true">
                 <app-retrato-de-nave [indice]="naveDe(l.quien)" />
