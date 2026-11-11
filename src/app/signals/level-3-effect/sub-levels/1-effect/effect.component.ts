@@ -67,12 +67,9 @@ export class EffectComponent {
     // se limpia al destruir el componente y se pausa con prefers-reduced-motion (la vida se atenúa,
     // el demo sigue andando con clicks).
     //
-    // El latido SOLO corre con el capítulo activo. La vista integrada pre-monta las 12 cards y nunca
-    // las destruye: marca `inert` la que no se está viendo (ver molecule-engine, `card.inert = !live`).
-    // Sin este guard el intervalo late desde que carga la página, aunque estés en otro nivel, y sus
-    // effects ensucian la consola con "The current count is: N" a lo largo de todo el recorrido.
-    // Con la pausa de la vida de fondo del recorrido (`.fondo-en-pausa`) tampoco late: es vida, igual
-    // que lo que apaga reduced-motion.
+    // El latido SOLO corre con la pantalla a la vista: tapada (un ancestro `inert`) o con la pausa de
+    // la vida de fondo del recorrido (`.fondo-en-pausa`) no late. Es vida, igual que lo que apaga
+    // reduced-motion, y cada latido deja "The current count is: N" en la consola.
     const host = inject(ElementRef).nativeElement as HTMLElement;
     const prefersReducedMotion =
       typeof window !== 'undefined' &&
