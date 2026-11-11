@@ -13,41 +13,6 @@ export function saltosDelPaisaje(costo: Costo): number {
   return costo === 'barato' ? 0 : costo === 'medio' ? 14 : 5;
 }
 
-/** La franja de la lámina que una escena angosta no puede recortar: desde dónde, cuánto y su centro. */
-export interface LoQueImporta {
-  readonly x: number;
-  readonly ancho: number;
-  readonly centro: number;
-}
-
-/** El de la mayoría: la nave, con su fuego, y su pantalla con su marco. */
-const LO_QUE_IMPORTA: LoQueImporta = { x: 4, ancho: 394, centro: 130 };
-/** El cielo entero del escenario mide 340 de alto: más alto, quedaría sin pintar. */
-export const ALTO_DEL_CIELO = 340;
-/** Por debajo de este ancho (px) la escena encuadra la nave y su pantalla, sin cielo de sobra. */
-export const ESCENA_ANGOSTA = 560;
-
-/**
- * El `viewBox` de una escena angosta: justo el ancho de la nave y su pantalla, y el alto que pida la
- * ventanilla. Con el cielo de sobra del escenario, a 390 px la escena quedaba a 0.69 y los rótulos
- * de la pantalla en 8 px; encuadrada, a 0.99. `null` es "el de siempre": ancha, o tan alta que el
- * cielo pintado (`altoDelCielo`) no la cubriría.
- */
-export function cieloAngosto(
-  ancho: number,
-  alto: number,
-  {
-    altoDelCielo = ALTO_DEL_CIELO,
-    importa = LO_QUE_IMPORTA,
-  }: { altoDelCielo?: number; importa?: LoQueImporta } = {},
-): string | null {
-  if (ancho <= 0 || alto <= 0 || ancho >= ESCENA_ANGOSTA) return null;
-  const h = (importa.ancho * alto) / ancho;
-  if (h > altoDelCielo) return null;
-  const y = importa.centro - h / 2;
-  return `${importa.x} ${y.toFixed(1)} ${importa.ancho} ${h.toFixed(1)}`;
-}
-
 /** Un borde de la pantalla, en las coordenadas del dibujo de la nave. */
 export interface BordeDeLaPantalla {
   readonly izquierda: number;
@@ -56,9 +21,9 @@ export interface BordeDeLaPantalla {
 }
 
 /**
- * El haz que une la nariz de la nave con su pantalla, cuando la pantalla está en otro elemento (la
- * ley 1): un triángulo de la nariz al borde izquierdo, que entra por debajo de las esquinas como el
- * de `pintarPantalla` (30 de 178 arriba y abajo). Sin él, la pantalla flotaba suelta y se leía como
+ * El haz que une la nariz de la nave con su pantalla, que está en otro elemento (el `render` de la
+ * página): un triángulo de la nariz al borde izquierdo, que entra por debajo de las esquinas (30 de
+ * 178 arriba y abajo), como el de la lámina que tenía la pantalla adentro. Sin él, la pantalla flotaba suelta y se leía como
  * una ventana aparte. `null` si la pantalla no queda adelante de la nariz (en el celular va abajo).
  */
 export function trazoDelHaz(

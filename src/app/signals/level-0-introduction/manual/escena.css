@@ -14,3 +14,15 @@
   -webkit-user-select: none;
   touch-action: manipulation;
 }
+
+/* La nave, en el carril que le deja la página (`--pm-nave-*`). */
+.esc-nave {
+  position: absolute;
+  left: 0;
+  top: var(--pm-nave-arriba, 0);
+  width: var(--pm-nave-ancho, 100%);
+  height: var(--pm-nave-alto, 100%);
+  overflow: visible;
+  /* Al seguir viaje, sale volando por delante de la pantalla, no por detrás. */
+  z-index: 2;
+}

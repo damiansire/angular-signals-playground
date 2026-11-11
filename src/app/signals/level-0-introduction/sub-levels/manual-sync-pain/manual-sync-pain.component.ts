@@ -31,9 +31,16 @@ const renglon = (texto: string) => conCortes(SANGRIA + texto);
   templateUrl: './manual-sync-pain.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [PaginaDelManualComponent, EscenaAManoComponent],
-  styleUrl: './manual-sync-pain.component.css',
+  styleUrls: ['./manual-sync-pain.component.css', '../../manual/portada.css'],
 })
 export class ManualSyncPainComponent {
+  /** El panel de la portada: el lápiz escribió los dos primeros, y el tercero quedó viejo. */
+  protected readonly filasDePortada = [
+    { rotulo: '#count', valor: '3', vieja: false },
+    { rotulo: '#mult2', valor: 'No', vieja: false },
+    { rotulo: '#mult3', valor: 'No', vieja: true },
+  ];
+
   protected readonly panel = signal<PanelAMano>(PANEL_INICIAL);
   protected readonly completo = signal(false);
   /** Con qué handler corrió el último `increment()`: el arreglo vale cuando ya corrió. */

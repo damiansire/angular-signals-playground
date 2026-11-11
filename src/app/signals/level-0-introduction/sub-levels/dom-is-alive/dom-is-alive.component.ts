@@ -11,12 +11,16 @@ import {
   siguienteSelector,
 } from './dom-is-alive.data';
 import { PaginaDelManualComponent } from '../../manual/pagina-del-manual.component';
-import { EscenaVivoComponent, type CorridaVivo } from '../../manual/escena-vivo.component';
+import {
+  EscenaVivoComponent,
+  PANTALLA_VIVO,
+  type CorridaVivo,
+} from '../../manual/escena-vivo.component';
 import { conCortes } from '../../../../libs/cortes-de-codigo';
 
 /**
- * La ley 2 en una sola pieza: la pantalla de la nave muestra los nodos, rotulados con su selector, y
- * la consola tiene las tres líneas que los cambian. Probar es correrlas: la del título busca un
+ * La ley 2 en una sola pieza: la pantalla de la nave tiene las tres líneas que cambian los nodos y,
+ * al lado, los nodos, rotulados con su selector. Probar es correrlas: la del título busca un
  * selector que no está, recibe `null` y no cambia nada. Arreglar es cambiar ese selector por el del
  * nodo y volver a correr.
  */
@@ -25,9 +29,10 @@ import { conCortes } from '../../../../libs/cortes-de-codigo';
   templateUrl: './dom-is-alive.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [PaginaDelManualComponent, EscenaVivoComponent],
-  styleUrl: './dom-is-alive.component.css',
+  styleUrls: ['./dom-is-alive.component.css', '../../manual/portada.css'],
 })
 export class DomIsAliveComponent {
+  protected readonly pantallaVivo = PANTALLA_VIVO;
   protected readonly selector = signal<SelectorDelTitulo>(SELECTORES_DEL_TITULO[0]);
   protected readonly dom = signal<readonly DomNodeState[]>(INITIAL_DOM);
   protected readonly corrida = signal<CorridaVivo | null>(null);

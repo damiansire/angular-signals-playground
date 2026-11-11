@@ -23,9 +23,20 @@ import { conCortes } from '../../../../libs/cortes-de-codigo';
   templateUrl: './signals-change-detection.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [PaginaDelManualComponent, EscenaSignalComponent],
-  styleUrl: './signals-change-detection.component.css',
+  styleUrls: ['./signals-change-detection.component.css', '../../manual/portada.css'],
 })
 export class SignalsChangeDetectionComponent {
+  /** El árbol de la portada: los dos `<p>` (verdes) son los que leen el valor de la caja. */
+  protected readonly nodosDePortada = [
+    { x: 150, y: 22, i: 1, lee: false },
+    { x: 110, y: 52, i: 2, lee: false },
+    { x: 190, y: 52, i: 2, lee: false },
+    { x: 90, y: 80, i: 3, lee: false },
+    { x: 130, y: 80, i: 3, lee: true },
+    { x: 170, y: 80, i: 3, lee: false },
+    { x: 210, y: 80, i: 3, lee: true },
+  ];
+
   protected readonly declaracion = signal<Declaracion>(DECLARACIONES[0]);
   protected readonly arbol = signal<EstadoDelArbol>(ARBOL_INICIAL);
   /** Ya se vio el barrido entero: el paso de arreglar se prende. */

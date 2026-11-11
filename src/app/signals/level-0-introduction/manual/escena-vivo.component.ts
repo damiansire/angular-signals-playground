@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, effect, input } from '@angular/core';
 import { gsap } from 'gsap';
-import { CIELO_DEL_ESCENARIO, EscenaDelManual, chispas, pintarPantalla } from './escena-del-manual';
+import { CIELO_DEL_ESCENARIO, EscenaDelManual } from './escena-del-manual';
 import { PALETA, el } from './nave-del-manual';
 
 /** Lo que la lámina necesita de cada nodo de la demo. */
@@ -34,7 +34,6 @@ const WIDGETS: Record<string, Widget> = {
   status: { x: 304, y: 90, ancho: 74, alto: 106, tx: 341, ty: 184, letra: 13 },
 };
 const LAMPARA = { x: 341, y: 136 };
-const NARIZ = { x: 182, y: 148 };
 const MONO = "'JetBrains Mono', Consolas, monospace";
 /**
  * Lo que no encontró nada cae debajo de la pantalla y queda ahí, a la vista. Del lado derecho: en
@@ -47,23 +46,27 @@ const ENTRE_LINEAS = 0.32;
 /** Lo que ocupa una ficha con este texto, en letra de 12. */
 const anchoDeFicha = (texto: string): number => texto.length * 7.3 + 14;
 
+/** Lo que dibuja la pantalla: los instrumentos, y debajo, a la derecha, lo que cae. */
+export const PANTALLA_VIVO = '214 22 174 216';
+
 /**
- * Lámina de la ley 2, que es el escenario de su página: la pantalla de la nave muestra los tres
- * nodos, rotulados con su selector. Cada línea que corre sale de la nariz como una ficha con su
+ * Lámina de la ley 2, que es el escenario de su página: la pantalla de la nave (`render`, al lado
+ * del código) muestra los tres nodos, rotulados con su selector. Cada línea que corre sale de la nariz como una ficha con su
  * selector y viaja al nodo que lleva ese rótulo; al llegar le cambia el valor. La que no encuentra
  * nodo busca por la pantalla, se vuelve `null` y cae debajo, y la nave se preocupa.
  */
 @Component({
   selector: 'app-escena-vivo',
   template: `<svg
-    class="esc"
-    [attr.viewBox]="cielo"
-    preserveAspectRatio="xMidYMid slice"
-    role="img"
-    [attr.aria-label]="descripcion()"
-  >
-    <g data-nave transform="translate(112 150) scale(1.05)"></g>
-  </svg>`,
+      class="esc"
+      [attr.viewBox]="cielo"
+      preserveAspectRatio="xMidYMid slice"
+      role="img"
+      [attr.aria-label]="descripcion()"
+    ></svg>
+    <svg class="esc-nave" viewBox="-125 -62 214 116" aria-hidden="true">
+      <g data-nave></g>
+    </svg>`,
   styleUrl: './escena.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -110,8 +113,8 @@ export class EscenaVivoComponent extends EscenaDelManual {
     });
   }
 
-  protected armar(svg: SVGSVGElement): void {
-    const pantalla = pintarPantalla(svg, NARIZ);
+  protected armar(render: SVGSVGElement): void {
+    const pantalla = el(render, 'g');
     for (const [id, w] of Object.entries(WIDGETS)) {
       const g = el(pantalla, 'g');
       el(g, 'rect', {
@@ -165,7 +168,8 @@ export class EscenaVivoComponent extends EscenaDelManual {
       'stroke-width': 2.4,
       'stroke-linecap': 'round',
     });
-    this.capa = el(svg, 'g', { 'pointer-events': 'none' });
+    // Encima de los instrumentos, y sin recorte: las fichas salen de la nariz, fuera de la pantalla.
+    this.capa = el(render, 'g', { 'pointer-events': 'none' });
     for (const n of this.nodos()) this.pintar(n.id, n.text, true);
     // Una página que vuelve a montarse con una corrida ya hecha muestra cómo quedó, sin viajar.
     const corrida = this.corrida();
@@ -209,7 +213,7 @@ export class EscenaVivoComponent extends EscenaDelManual {
     });
     tl.add(() => {
       if (fallo) {
-        nave?.mirar(CAIDO.x, CAIDO.y);
+        this.mirarLaPantalla(CAIDO.x, CAIDO.y);
         nave?.animo('preocupada');
       } else {
         nave?.animo('contenta');
@@ -242,13 +246,15 @@ export class EscenaVivoComponent extends EscenaDelManual {
       fill: PALETA.luz,
     });
     texto.textContent = selector;
-    gsap.set(g, { x: NARIZ.x, y: NARIZ.y, opacity: 0, scale: 0.6 });
+    const nariz = this.narizEnLaPantalla();
+    gsap.set(g, { x: nariz.x, y: nariz.y, opacity: 0, scale: 0.6 });
     return { g, caja, texto };
   }
 
   /** De la nariz al nodo, por arriba del haz. */
   private viaje(g: SVGGElement, fin: { x: number; y: number }, duracion: number): gsap.core.Tween {
-    const ctrl = { x: (NARIZ.x + fin.x) / 2, y: Math.min(NARIZ.y, fin.y) - 50 };
+    const nariz = this.narizEnLaPantalla();
+    const ctrl = { x: (nariz.x + fin.x) / 2, y: Math.min(nariz.y, fin.y) - 50 };
     const p = { t: 0 };
     return gsap.to(p, {
       t: 1,
@@ -257,8 +263,8 @@ export class EscenaVivoComponent extends EscenaDelManual {
       onUpdate: () => {
         const t = p.t;
         gsap.set(g, {
-          x: (1 - t) ** 2 * NARIZ.x + 2 * (1 - t) * t * ctrl.x + t ** 2 * fin.x,
-          y: (1 - t) ** 2 * NARIZ.y + 2 * (1 - t) * t * ctrl.y + t ** 2 * fin.y,
+          x: (1 - t) ** 2 * nariz.x + 2 * (1 - t) * t * ctrl.x + t ** 2 * fin.x,
+          y: (1 - t) ** 2 * nariz.y + 2 * (1 - t) * t * ctrl.y + t ** 2 * fin.y,
         });
       },
     });
@@ -274,7 +280,7 @@ export class EscenaVivoComponent extends EscenaDelManual {
     return gsap
       .timeline()
       .add(() => {
-        nave?.mirar(fin.x, fin.y);
+        this.mirarLaPantalla(fin.x, fin.y);
         nave?.empujar(30, 2);
       })
       .to(g, { opacity: 1, scale: 1, duration: 0.12 })
@@ -299,7 +305,7 @@ export class EscenaVivoComponent extends EscenaDelManual {
     return (
       gsap
         .timeline()
-        .add(() => nave?.mirar(centro.x, centro.y))
+        .add(() => this.mirarLaPantalla(centro.x, centro.y))
         .to(g, { opacity: 1, scale: 1, duration: 0.12 })
         .add(this.viaje(g, centro, 0.45), '<')
         // Busca: pasa por arriba de los tres rótulos, de un lado al otro, y ninguno es el suyo.
@@ -312,7 +318,7 @@ export class EscenaVivoComponent extends EscenaDelManual {
         })
         .fromTo(g, { scale: 1.3 }, { scale: 1, duration: 0.2, ease: 'back.out(3)' })
         .to(g, { x: CAIDO.x, y: CAIDO.y, duration: 0.5, ease: 'bounce.out' })
-        .add(() => nave?.mirar(CAIDO.x, CAIDO.y), '<')
+        .add(() => this.mirarLaPantalla(CAIDO.x, CAIDO.y), '<')
     );
   }
 
@@ -359,8 +365,7 @@ export class EscenaVivoComponent extends EscenaDelManual {
     gsap.delayedCall(tarde, () => {
       this.nave?.animo('contenta');
       this.nave?.saltito(18);
-      const svg = this.host.querySelector('svg');
-      if (svg) chispas(svg, 140, 118);
+      this.chispasDeLaNave();
     });
   }
 }

@@ -1,14 +1,7 @@
-import { ChangeDetectionStrategy, Component, computed, effect, input, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, effect, input } from '@angular/core';
 import { gsap } from 'gsap';
 import { CD_EDGES, CD_NODES } from '../../../libs/cd-tree';
-import {
-  EscenaDelManual,
-  alCambiarDeTamano,
-  chispas,
-  cieloCentradoEn,
-  pintarPantalla,
-} from './escena-del-manual';
-import { type LoQueImporta, cieloAngosto } from './escenas.logica';
+import { CIELO_DEL_ESCENARIO, EscenaDelManual } from './escena-del-manual';
 import { PALETA, el } from './nave-del-manual';
 
 /** Una llamada de la demo o del desafío; `n` sube con cada una, aunque se repita la misma API. */
@@ -19,10 +12,15 @@ export interface Llamada {
   readonly parcheada: boolean;
 }
 
-const NARIZ = { x: 182, y: 148 };
-// Afuera de la cerca, a la izquierda: abajo, el escenario apaisado la cortaba. Entre el planeta y
-// el fuego de la nave, sin pisar ninguno.
-const ANOMALIA = { x: 4, y: 100 };
+/**
+ * Lo que dibuja la pantalla: la cerca con el árbol y su lectura adentro, y a su izquierda, afuera,
+ * la anomalía. Arriba entra la llamada; abajo pasa lo que la cerca no ve.
+ */
+export const PANTALLA_ZONA = '182 0 218 236';
+/** La cerca de Zone.js: rodea la app de la pantalla (el árbol y su lectura), y nada más. */
+const CERCA = { x: 212, y: 22, ancho: 182, alto: 190 } as const;
+// Afuera de la cerca, a la izquierda: lo que Zone.js no parchea no existe para ella.
+const ANOMALIA = { x: 194, y: 110 };
 /** El árbol de la demo, en la pantalla de la nave; abajo le queda lugar a la lectura. */
 const aPantalla = (x: number, y: number): { x: number; y: number } => ({
   x: 232 + (x - 50) * 0.56,
@@ -31,14 +29,6 @@ const aPantalla = (x: number, y: number): { x: number; y: number } => ({
 const REVISADO = '#7fdcae';
 const LECTURA = { x: 222, y: 172, ancho: 158, alto: 28 } as const;
 const TOTAL_DE_NODOS = CD_NODES.length;
-/**
- * En angosto se encuadra la cerca entera, con la anomalía de afuera y el fuego aunque laten (x -16 a
- * 396): con el cielo de sobra, a 390 px la cerca y el "0/7" de la lectura quedaban cortados a la
- * derecha y la anomalía a la izquierda. Centrada en la cerca y su rótulo, como el cielo ancho.
- */
-const LO_QUE_IMPORTA: LoQueImporta = { x: -16, ancho: 412, centro: 111 };
-/** A 390 la ventanilla queda casi cuadrada: el cielo de 340 no alcanzaba para encuadrarla. */
-const ALTO_PINTADO = 520;
 
 /** Lo que dice la lectura de la pantalla. */
 interface Lectura {
@@ -48,8 +38,8 @@ interface Lectura {
 }
 
 /**
- * Lámina de la ley 5, que es el escenario de su página: Zone.js es la cerca punteada alrededor de
- * la nave. Cuando pasa algo que parchea, entra la llamada, un barrido revisa el árbol entero de la
+ * Lámina de la ley 5, que es el escenario de su página: en la pantalla de la nave (`render`, al lado
+ * del código), Zone.js es la cerca punteada alrededor de la app. Cuando pasa algo que parchea, entra la llamada, un barrido revisa el árbol entero de la
  * pantalla, de arriba abajo, y la lectura de abajo se pone al día. Lo que no parchea pasa por afuera
  * de la cerca y nadie revisa nada: la lectura queda vieja y la nave mira la anomalía, que titila
  * afuera, sin que la cerca la vea.
@@ -57,14 +47,15 @@ interface Lectura {
 @Component({
   selector: 'app-escena-zona',
   template: `<svg
-    class="esc"
-    [attr.viewBox]="cielo()"
-    preserveAspectRatio="xMidYMid slice"
-    role="img"
-    [attr.aria-label]="descripcion()"
-  >
-    <g data-nave transform="translate(112 150) scale(1.05)"></g>
-  </svg>`,
+      class="esc"
+      [attr.viewBox]="cielo"
+      preserveAspectRatio="xMidYMid slice"
+      role="img"
+      [attr.aria-label]="descripcion()"
+    ></svg>
+    <svg class="esc-nave" viewBox="-125 -62 214 116" aria-hidden="true">
+      <g data-nave></g>
+    </svg>`,
   styleUrl: './escena.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -79,9 +70,7 @@ export class EscenaZonaComponent extends EscenaDelManual {
   readonly sano = input(false);
 
   protected readonly semilla = 53;
-  // Centrado en la cerca y su rótulo (y 4 a 218), no en la nave: si no, el rótulo quedaba afuera.
-  // El primer cuadro va con el cielo alto, que es el que se pinta; después, el que pida el ancho.
-  protected readonly cielo = signal(cieloCentradoEn(111, ALTO_PINTADO));
+  protected readonly cielo = CIELO_DEL_ESCENARIO;
   protected readonly descripcion = computed(
     () =>
       `Pantalla de la nave: total ${this.enPantalla()}${this.vieja() ? ' (viejo)' : ''}, ` +
@@ -100,12 +89,6 @@ export class EscenaZonaComponent extends EscenaDelManual {
 
   constructor() {
     super();
-    alCambiarDeTamano(this.host, (ancho, alto) =>
-      this.cielo.set(
-        cieloAngosto(ancho, alto, { altoDelCielo: ALTO_PINTADO, importa: LO_QUE_IMPORTA }) ??
-          cieloCentradoEn(111),
-      ),
-    );
     effect(() => {
       const llamada = this.llamada();
       const lectura: Lectura = {
@@ -134,8 +117,8 @@ export class EscenaZonaComponent extends EscenaDelManual {
     });
   }
 
-  protected armar(svg: SVGSVGElement): void {
-    const pantalla = pintarPantalla(svg, NARIZ);
+  protected armar(render: SVGSVGElement): void {
+    const pantalla = el(render, 'g');
     const ramas = el(pantalla, 'g', { stroke: '#6c5ca8', 'stroke-width': 2 });
     for (const e of CD_EDGES) {
       const a = CD_NODES.find((n) => n.id === e.from)!;
@@ -158,23 +141,22 @@ export class EscenaZonaComponent extends EscenaDelManual {
     }
     this.armarLectura(pantalla);
 
-    // La cerca de Zone.js: rodea la nave y su pantalla, y nada más.
-    const cerca = el(svg, 'g', { 'pointer-events': 'none' });
+    const cerca = el(render, 'g', { 'pointer-events': 'none' });
     el(cerca, 'rect', {
-      x: 26,
-      y: 12,
-      width: 366,
-      height: 206,
-      rx: 22,
+      x: CERCA.x,
+      y: CERCA.y,
+      width: CERCA.ancho,
+      height: CERCA.alto,
+      rx: 18,
       fill: 'none',
       stroke: '#b59cff',
       'stroke-width': 2,
       'stroke-dasharray': '7 6',
     });
-    // El rótulo va colgado de la cerca, como un cartel: adentro tapaba el planeta.
+    // El rótulo va colgado de la cerca, como un cartel: adentro tapaba el árbol.
     el(cerca, 'rect', {
-      x: 96,
-      y: 4,
+      x: CERCA.x + 14,
+      y: CERCA.y - 8.5,
       width: 48,
       height: 17,
       rx: 8.5,
@@ -183,8 +165,8 @@ export class EscenaZonaComponent extends EscenaDelManual {
       'stroke-width': 1.4,
     });
     const rotulo = el(cerca, 'text', {
-      x: 120,
-      y: 16.5,
+      x: CERCA.x + 38,
+      y: CERCA.y + 4,
       'text-anchor': 'middle',
       'font-family': "'JetBrains Mono', Consolas, monospace",
       'font-size': 11,
@@ -194,7 +176,7 @@ export class EscenaZonaComponent extends EscenaDelManual {
     rotulo.textContent = 'zone';
 
     // La anomalía, afuera de la cerca: lo que Zone.js no parchea no existe para ella.
-    this.anomalia = el(svg, 'g', {
+    this.anomalia = el(render, 'g', {
       transform: `translate(${ANOMALIA.x} ${ANOMALIA.y})`,
       'pointer-events': 'none',
     });
@@ -215,7 +197,7 @@ export class EscenaZonaComponent extends EscenaDelManual {
       });
     }
 
-    this.capa = el(svg, 'g', { 'pointer-events': 'none' });
+    this.capa = el(render, 'g', { 'pointer-events': 'none' });
     this.vista = this.llamada()?.n ?? 0;
     if (this.revisados() > 0) this.encender(0);
     this.leer({ valor: this.enPantalla(), vieja: this.vieja(), revisados: this.revisados() });
@@ -354,7 +336,7 @@ export class EscenaZonaComponent extends EscenaDelManual {
       });
     }
     this.nave?.animo('tranquila');
-    this.nave?.mirar(300, 110);
+    this.mirarLaPantalla(300, 110);
   }
 
   /**
@@ -404,10 +386,11 @@ export class EscenaZonaComponent extends EscenaDelManual {
       .timeline()
       .fromTo(
         chip,
-        { x: 150, y: 0, opacity: 0 },
-        { x: 150, y: 34, opacity: 1, duration: 0.25, ease: 'back.out(2)' },
+        { x: 300, y: -6, opacity: 0 },
+        { x: 300, y: 10, opacity: 1, duration: 0.25, ease: 'back.out(2)' },
       )
-      .to(chip, { x: 300, y: 34, duration: 0.3, ease: 'power2.in' })
+      // Entra a la cerca por arriba, hasta la raíz del árbol.
+      .to(chip, { y: 44, duration: 0.3, ease: 'power2.in' })
       .to(chip, { opacity: 0, duration: 0.15 })
       .add(() => {
         chip.remove();
@@ -423,22 +406,22 @@ export class EscenaZonaComponent extends EscenaDelManual {
       p: 1,
       duration: 0.7,
       delay: 0.7,
-      onUpdate: () => nave?.mirar(300, 60 + mirada.p * 100),
+      onUpdate: () => this.mirarLaPantalla(300, 60 + mirada.p * 100),
     });
   }
 
   /** Algo que Zone.js no parchea: pasa por afuera, nadie revisa, y la nave se da cuenta. */
   private pasarPorAfuera(): void {
     const nave = this.nave;
-    nave?.mirar(ANOMALIA.x, ANOMALIA.y);
+    this.mirarLaPantalla(ANOMALIA.x, ANOMALIA.y);
     nave?.animo('preocupada');
     if (this.quieta || !this.capa || !this.anomalia) return;
     const punto = el(this.capa, 'circle', { r: 5, fill: '#ff8ac9', cx: 0, cy: 0 });
     gsap
       .timeline({ onComplete: () => punto.remove() })
       // Por debajo de la cerca, de punta a punta, y recién afuera de ella sube a la anomalía.
-      .fromTo(punto, { x: 430, y: 223, opacity: 0 }, { opacity: 1, duration: 0.1 })
-      .to(punto, { x: -16, duration: 0.6, ease: 'power1.in' })
+      .fromTo(punto, { x: 404, y: 222, opacity: 0 }, { opacity: 1, duration: 0.1 })
+      .to(punto, { x: ANOMALIA.x, duration: 0.6, ease: 'power1.in' })
       .to(punto, { x: ANOMALIA.x, y: ANOMALIA.y, duration: 0.35, ease: 'power1.out' })
       .to(punto, {
         opacity: 0,
@@ -456,7 +439,6 @@ export class EscenaZonaComponent extends EscenaDelManual {
   private festejar(): void {
     this.nave?.animo('contenta');
     this.nave?.saltito(18);
-    const svg = this.host.querySelector('svg');
-    if (svg) chispas(svg, 140, 118);
+    this.chispasDeLaNave();
   }
 }

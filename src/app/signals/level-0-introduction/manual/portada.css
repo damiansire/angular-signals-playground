@@ -1,0 +1,78 @@
+/* El dibujo de la portada de cada ley (`[portada]` de `app-pagina-del-manual`), con prefijo `pmp-`:
+   se embebe en la vista integrada, que estampa su encapsulación. Cada pieza llega con un rebote, en
+   orden (`--i`), y después flota a su ritmo, como algo vivo en la pantalla. */
+.pmp {
+  /* También por el alto: a 1280×640, con el título en dos renglones, la portada se pasaba 10 px. */
+  width: min(100%, clamp(16rem, min(22vw, 40vh), 36rem));
+  height: auto;
+  margin-bottom: 0.4rem;
+  overflow: visible;
+}
+.pmp text {
+  font:
+    700 11px 'JetBrains Mono',
+    'Cascadia Mono',
+    Consolas,
+    monospace;
+}
+.pmp-pieza {
+  transform-box: fill-box;
+  transform-origin: center;
+  opacity: 0;
+  animation:
+    pmp-llega 0.34s cubic-bezier(0.34, 1.9, 0.64, 1) forwards,
+    pmp-flota 2.6s ease-in-out infinite alternate;
+  animation-delay: calc(0.3s + var(--i, 0) * 0.11s), calc(1.2s + var(--i, 0) * 0.37s);
+}
+/* Lo que se traza (una rama, un flujo, un hilo): se dibuja desde su punta. */
+.pmp-trazo {
+  fill: none;
+  stroke-linecap: round;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: pmp-traza 0.5s ease-out forwards;
+  animation-delay: calc(0.3s + var(--i, 0) * 0.11s);
+}
+@keyframes pmp-llega {
+  from {
+    opacity: 0;
+    scale: 0.3;
+  }
+  to {
+    opacity: 1;
+    scale: 1;
+  }
+}
+@keyframes pmp-flota {
+  from {
+    translate: 0 -1.5px;
+  }
+  to {
+    translate: 0 1.5px;
+  }
+}
+@keyframes pmp-traza {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .pmp-pieza {
+    animation: none;
+    opacity: 1;
+  }
+  .pmp-trazo {
+    animation: none;
+    stroke-dashoffset: 0;
+  }
+}
+
+/* Las letras de lo que muestra la pantalla: un número de instrumento y un título de panel. */
+.pmp text.pmp-num {
+  font:
+    400 30px Georgia,
+    serif;
+}
+.pmp text.pmp-letrero {
+  font: 700 15px var(--font-display, system-ui, sans-serif);
+}

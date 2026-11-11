@@ -1,38 +1,104 @@
-<app-pagina-del-manual [guia]="guia()" [respiro]="1800" [paso]="paso()" [resuelta]="sano()">
+<app-pagina-del-manual
+  [guia]="guia()"
+  [respiro]="1800"
+  [paso]="paso()"
+  [resuelta]="sano()"
+  [enPantalla]="true"
+  [portada]="true"
+>
+  <!-- La portada: el pipeline, con las capas caras marcadas y el cambio barato que las salta. -->
+  <svg portada class="pmp" viewBox="0 0 300 128" aria-hidden="true">
+    <g class="pmp-pieza" style="--i: 0">
+      <rect
+        x="118"
+        y="44"
+        width="124"
+        height="58"
+        rx="10"
+        fill="rgb(255 118 118 / 8%)"
+        stroke="rgb(255 118 118 / 55%)"
+        stroke-width="1.4"
+        stroke-dasharray="4 4"
+      />
+      <text x="180" y="120" text-anchor="middle" fill="#ffb3b3">capas caras</text>
+    </g>
+    <path
+      class="pmp-trazo"
+      d="M30 70H88"
+      stroke="#5fd39a"
+      stroke-width="4"
+      pathLength="1"
+      style="--i: 1"
+    />
+    <path
+      class="pmp-trazo"
+      d="M92 62C122 10 238 10 268 62"
+      stroke="#5fd39a"
+      stroke-width="4"
+      pathLength="1"
+      style="--i: 3"
+    />
+    @for (e of estacionesDePortada; track e.x) {
+      <g class="pmp-pieza" [style.--i]="e.i">
+        <circle
+          [attr.cx]="e.x"
+          cy="70"
+          r="8"
+          [attr.fill]="e.relleno"
+          [attr.stroke]="e.borde"
+          stroke-width="2"
+          [attr.stroke-dasharray]="e.salteada ? '2.5 2.5' : null"
+        />
+        <text
+          [attr.x]="e.x"
+          y="94"
+          text-anchor="middle"
+          [attr.fill]="e.salteada ? '#8a7fb5' : '#f2ecff'"
+        >
+          {{ e.nombre }}
+        </text>
+      </g>
+    }
+  </svg>
+
   <p hacer>Corré.</p>
   <p arreglo>Cambiá la propiedad.</p>
 
-  <app-escena-costo escena [corrida]="corrida()" [sano]="sano()" />
+  <app-escena-costo escena [render]="render" [corrida]="corrida()" [sano]="sano()" />
 
   <!-- El pipeline se ve una sola vez, en la pantalla de la nave. Acá va lo que se toca: el cuadro
        que corre una y otra vez, con la propiedad como hueco, y la corrida. -->
   <section consola class="dtp">
-    <div class="dtp-codigo" role="group" aria-label="El código de cada cuadro">
-      <span class="dtp-linea" [innerHTML]="arranque"></span>
-      <button
-        type="button"
-        class="dtp-hueco"
-        [class.dtp-hueco--barato]="barato()"
-        [attr.aria-label]="'Cambiar la propiedad: ' + cambio().propiedad"
-        data-guia="propiedad"
-        (click)="cambiarPropiedad()"
-      >
-        <span class="dtp-linea" [innerHTML]="renglonDelCambio()"></span>
-      </button>
-      @for (r of cierre; track $index) {
-        <span class="dtp-linea" [innerHTML]="r"></span>
-      }
+    <div class="dtp-izq">
+      <div class="dtp-codigo" role="group" aria-label="El código de cada cuadro">
+        <span class="dtp-linea" [innerHTML]="arranque"></span>
+        <button
+          type="button"
+          class="dtp-hueco"
+          [class.dtp-hueco--barato]="barato()"
+          [attr.aria-label]="'Cambiar la propiedad: ' + cambio().propiedad"
+          data-guia="propiedad"
+          (click)="cambiarPropiedad()"
+        >
+          <span class="dtp-linea" [innerHTML]="renglonDelCambio()"></span>
+        </button>
+        @for (r of cierre; track $index) {
+          <span class="dtp-linea" [innerHTML]="r"></span>
+        }
+      </div>
+
+      <div class="dtp-mando">
+        <button
+          type="button"
+          class="dtp-correr"
+          [attr.data-cuenta]="corrida()?.n ?? 0"
+          (click)="correr()"
+        >
+          &#9654; correr
+        </button>
+      </div>
     </div>
 
-    <div class="dtp-mando">
-      <button
-        type="button"
-        class="dtp-correr"
-        [attr.data-cuenta]="corrida()?.n ?? 0"
-        (click)="correr()"
-      >
-        &#9654; correr
-      </button>
-    </div>
+    <svg #render class="dtp-render" viewBox="214 26 174 178" aria-hidden="true"></svg>
   </section>
 </app-pagina-del-manual>

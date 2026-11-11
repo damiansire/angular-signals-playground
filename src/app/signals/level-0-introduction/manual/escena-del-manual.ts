@@ -1,5 +1,6 @@
-import { DestroyRef, Directive, ElementRef, afterNextRender, inject } from '@angular/core';
+import { DestroyRef, Directive, ElementRef, afterNextRender, inject, input } from '@angular/core';
 import { gsap } from 'gsap';
+import { trazoDelHaz } from './escenas.logica';
 import { NaveDelManual, PALETA, azar, el, sinMovimiento } from './nave-del-manual';
 import { VueloDeLaNave } from './vuelo-de-la-nave';
 
@@ -25,42 +26,139 @@ export const CIELO_DEL_ESCENARIO = cieloCentradoEn(129);
 /** Dónde vive la pantalla de la nave en cada lámina: a la derecha, proyectada desde la nariz. */
 export const PANTALLA = { x: 214, y: 26, ancho: 174, alto: 178 } as const;
 
+/** La punta de la nave en su propio dibujo (`.esc-nave`): de ahí sale el haz hacia la pantalla. */
+export const NARIZ_DE_LA_NAVE = { x: 66, y: 0 } as const;
+
 /**
- * La base de las cinco láminas: la noche de la ventanilla, la nave del capitán y su pantalla, con
- * el ciclo de vida de GSAP atado al componente. Cada lámina dibuja lo suyo en `armar` y reacciona a
- * la demo con `reaccion`, que corre dentro del mismo contexto: al desmontar la página se revierte
- * todo, también los bucles.
+ * La base de las láminas: la noche de la ventanilla, la nave del capitán en su carril y lo que
+ * muestra su pantalla, con el ciclo de vida de GSAP atado al componente. La nave va en su propio
+ * SVG (`.esc-nave`, en el carril que le deja la página con `--pm-nave-*`), y la pantalla es de la
+ * página (`[data-pantalla]`, hermana de la escena en la ventanilla): la lámina dibuja adentro, en
+ * `render`, y traza el haz que la une con la nariz. En el mismo cielo, la pantalla en HTML se le
+ * encimaba a la nave según la proporción de la ventana. Cada lámina dibuja lo suyo en `armar` y
+ * reacciona a la demo con `reaccion`, que corre dentro del mismo contexto: al desmontar la página se
+ * revierte todo, también los bucles.
  */
 @Directive()
 export abstract class EscenaDelManual {
+  /**
+   * Dónde se dibuja la pantalla: un SVG con el `viewBox` de `PANTALLA`, que pone la página. Como
+   * `Element`: el chequeo de plantillas tipa toda referencia a un elemento como `HTMLElement`.
+   */
+  readonly render = input.required<Element>();
   protected readonly host: HTMLElement = inject(ElementRef).nativeElement;
   protected readonly quieta = sinMovimiento();
   protected nave: NaveDelManual | null = null;
   private ctx: gsap.Context | null = null;
   private readonly pasoDeHoja = inject(VueloDeLaNave);
   private soltarDespegue: (() => void) | null = null;
+  private haz: SVGPathElement | null = null;
 
   constructor() {
+    const destruir = inject(DestroyRef);
     afterNextRender(() => {
-      const svg = this.host.querySelector('svg');
-      if (!svg) return;
+      const cielo = this.host.querySelector<SVGSVGElement>('svg.esc');
+      const render = this.render();
+      if (!cielo || !(render instanceof SVGSVGElement)) return;
       this.ctx = gsap.context(() => {
-        pintarCielo(svg, this.semilla);
-        // La nave puede ir en un SVG propio, al costado del cielo (la ley 1 la aparta de su pantalla).
+        pintarCielo(cielo, this.semilla);
         const lugar = this.host.querySelector<SVGGElement>('[data-nave]');
         if (lugar) this.nave = new NaveDelManual(lugar);
-        this.armar(svg);
+        this.armarHaz();
+        this.armar(render, cielo);
         if (lugar) {
           this.soltarDespegue = this.pasoDeHoja.alDespegar(() => this.despegar(lugar));
           if (this.pasoDeHoja.llegaVolando()) this.aterrizar(lugar);
         }
       }, this.host);
+      // El haz sigue a las dos: la ventanilla cambia, y la pantalla crece desde la portada.
+      const observador = new ResizeObserver(() => this.trazarHaz());
+      observador.observe(this.host);
+      const pantalla = this.pantalla();
+      if (pantalla) observador.observe(pantalla);
+      destruir.onDestroy(() => observador.disconnect());
     });
-    inject(DestroyRef).onDestroy(() => {
+    destruir.onDestroy(() => {
       this.soltarDespegue?.();
       this.nave?.apagar();
       this.ctx?.revert();
     });
+  }
+
+  private pantalla(): HTMLElement | null {
+    return this.host.parentElement?.querySelector<HTMLElement>('[data-pantalla]') ?? null;
+  }
+
+  protected naveSvg(): SVGSVGElement | null {
+    return this.host.querySelector<SVGSVGElement>('.esc-nave');
+  }
+
+  /** El haz va en el SVG de la nave, debajo de ella, y se prende cuando la nave ya llegó. */
+  private armarHaz(): void {
+    const svg = this.naveSvg();
+    if (!svg) return;
+    this.haz = el(svg, 'path', { fill: PALETA.luz, opacity: 0, 'pointer-events': 'none' });
+    svg.insertBefore(this.haz, svg.querySelector('[data-nave]'));
+    this.trazarHaz();
+    gsap.to(this.haz, { opacity: 0.1, duration: 0.6, delay: this.quieta ? 0 : 0.9 });
+  }
+
+  private trazarHaz(): void {
+    const svg = this.haz?.ownerSVGElement;
+    const caja = this.pantalla()?.getBoundingClientRect();
+    const aDibujo = svg?.getScreenCTM()?.inverse();
+    if (!this.haz || !caja || !aDibujo) return;
+    const punto = (x: number, y: number) => new DOMPoint(x, y).matrixTransform(aDibujo);
+    const arriba = punto(caja.left, caja.top);
+    const abajo = punto(caja.left, caja.bottom);
+    const d = trazoDelHaz(NARIZ_DE_LA_NAVE, {
+      izquierda: arriba.x,
+      arriba: arriba.y,
+      abajo: abajo.y,
+    });
+    this.haz.setAttribute('d', d ?? '');
+  }
+
+  /** Un punto de un SVG en las coordenadas de otro: la nave y su pantalla son dibujos distintos. */
+  private convertir(
+    x: number,
+    y: number,
+    desde: SVGGraphicsElement | null,
+    hasta: SVGGraphicsElement | null,
+  ): { x: number; y: number } | null {
+    const de = desde?.getScreenCTM();
+    const a = hasta?.getScreenCTM();
+    if (!de || !a) return null;
+    const p = new DOMPoint(x, y).matrixTransform(de).matrixTransform(a.inverse());
+    return { x: p.x, y: p.y };
+  }
+
+  private renderSvg(): SVGSVGElement | null {
+    const render = this.render();
+    return render instanceof SVGSVGElement ? render : null;
+  }
+
+  /** La nave mira un punto de la pantalla (en el `viewBox` de `render`). */
+  protected mirarLaPantalla(x: number, y: number): void {
+    const p = this.convertir(x, y, this.renderSvg(), this.naveSvg());
+    if (p) this.nave?.mirar(p.x, p.y);
+  }
+
+  /** Dónde queda la nariz de la nave en el dibujo de la pantalla: de ahí sale lo que manda. */
+  protected narizEnLaPantalla(): { x: number; y: number } {
+    const { x, y } = NARIZ_DE_LA_NAVE;
+    return (
+      this.convertir(x, y, this.naveSvg(), this.renderSvg()) ?? {
+        x: PANTALLA.x - 30,
+        y: PANTALLA.y + PANTALLA.alto / 2,
+      }
+    );
+  }
+
+  /** Estrellitas que saltan de la nave: el festejo de una página sana. */
+  protected chispasDeLaNave(): void {
+    const svg = this.naveSvg();
+    if (svg) chispas(svg, 0, -6);
   }
 
   /** Cuántos píxeles de pantalla vale una unidad del dibujo donde vive la nave. */
@@ -121,13 +219,17 @@ export abstract class EscenaDelManual {
   /** Para que cada lámina tenga su propio cielo, igual cada vez. */
   protected abstract readonly semilla: number;
 
-  /** La nave arranca a seguir viaje: lo que la lámina ata a ella (el haz de la ley 1) se apaga. */
-  protected alPartir(): void {
-    // La mayoría de las láminas no ata nada a la nave fuera de su propio dibujo.
+  /** La nave arranca a seguir viaje: el haz que la une con su pantalla se apaga. */
+  private alPartir(): void {
+    if (this.haz) gsap.to(this.haz, { opacity: 0, duration: 0.2, overwrite: 'auto' });
   }
 
-  /** Lo propio de la lámina, ya con la nave armada. Corre una vez, con el SVG en pantalla. */
-  protected abstract armar(svg: SVGSVGElement): void;
+  /**
+   * Lo propio de la lámina, ya con la nave armada: lo de la pantalla en `pantalla` (el `render` de
+   * la página, con el `viewBox` de `PANTALLA`) y lo del cielo, si tiene, en `cielo`. Corre una vez,
+   * con los SVG a la vista.
+   */
+  protected abstract armar(pantalla: SVGSVGElement, cielo: SVGSVGElement): void;
 
   /** Una reacción a la demo. Antes de que la lámina esté armada no hay nada que mover. */
   protected reaccion(fn: () => void): void {
@@ -230,38 +332,6 @@ function pintarCielo(svg: SVGSVGElement, semilla: number): void {
   }
 }
 
-/** La pantalla que proyecta la nave: marco, vidrio y el haz que la une con la nariz. */
-export function pintarPantalla(svg: SVGSVGElement, desde: { x: number; y: number }): SVGGElement {
-  const { x, y, ancho, alto } = PANTALLA;
-  const haz = el(svg, 'path', {
-    d: `M${desde.x} ${desde.y}L${x} ${y + 30}L${x} ${y + alto - 30}Z`,
-    fill: PALETA.luz,
-    opacity: 0.1,
-  });
-  svg.insertBefore(haz, svg.querySelector('[data-nave]'));
-  const marco = el(svg, 'g');
-  svg.insertBefore(marco, svg.querySelector('[data-nave]'));
-  el(marco, 'rect', {
-    x: x - 4,
-    y: y - 4,
-    width: ancho + 8,
-    height: alto + 8,
-    rx: 16,
-    fill: '#3a2c5c',
-    stroke: PALETA.tinta,
-    'stroke-width': 2.5,
-  });
-  el(marco, 'rect', { x, y, width: ancho, height: alto, rx: 12, fill: '#1c1434' });
-  el(marco, 'path', {
-    d: `M${x + 12} ${y + 8}H${x + ancho - 40}`,
-    stroke: '#fff',
-    'stroke-opacity': 0.12,
-    'stroke-width': 3,
-    'stroke-linecap': 'round',
-  });
-  return el(marco, 'g');
-}
-
 /** Estrellitas que saltan desde un punto: el festejo de un desafío sano. */
 export function chispas(padre: SVGGElement | SVGSVGElement, x: number, y: number, n = 9): void {
   if (sinMovimiento()) return;
@@ -289,22 +359,4 @@ export function chispas(padre: SVGGElement | SVGSVGElement, x: number, y: number
       },
     );
   }
-}
-
-/**
- * Avisa el tamaño de la escena cada vez que cambia, desde que está pintada. Va en el constructor de
- * la lámina: necesita su contexto de inyección para desconectarse al desmontar.
- */
-export function alCambiarDeTamano(
-  host: HTMLElement,
-  alMedir: (ancho: number, alto: number) => void,
-): void {
-  const destruir = inject(DestroyRef);
-  afterNextRender(() => {
-    const observador = new ResizeObserver(([caja]) =>
-      alMedir(caja.contentRect.width, caja.contentRect.height),
-    );
-    observador.observe(host);
-    destruir.onDestroy(() => observador.disconnect());
-  });
 }

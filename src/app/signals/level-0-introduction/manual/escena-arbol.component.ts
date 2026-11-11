@@ -1,21 +1,6 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  DestroyRef,
-  afterNextRender,
-  computed,
-  effect,
-  inject,
-  input,
-} from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, effect, input } from '@angular/core';
 import { gsap } from 'gsap';
-import {
-  CIELO_DEL_ESCENARIO,
-  EscenaDelManual,
-  alCambiarDeTamano,
-  chispas,
-} from './escena-del-manual';
-import { trazoDelHaz } from './escenas.logica';
+import { CIELO_DEL_ESCENARIO, EscenaDelManual } from './escena-del-manual';
 import { PALETA, el } from './nave-del-manual';
 
 interface Pieza {
@@ -84,8 +69,6 @@ const INDICE = new Map(PIEZAS.map((p, i) => [p.id, i]));
 /** Un panel sin hijos es una tira: vacío, no ocupa nada. */
 const ALTO_VACIO = 9;
 const AVISO = '#ff7676';
-/** La punta de la nave en su propio dibujo: de ahí sale el haz hacia la pantalla. */
-const NARIZ = { x: 66, y: 0 };
 
 /**
  * Lámina de la ley 1, que es el escenario de su página: lo que se dibuja (`render`, una columna de
@@ -93,11 +76,6 @@ const NARIZ = { x: 66, y: 0 };
  * pieza va a donde la ponen los tags, no la sangría: si un panel se cierra antes de tiempo, queda
  * chico y vacío, sus hijos caen fuera de él y la nave se preocupa. Moviendo el cierre, suben a su
  * lugar.
- *
- * La nave va en su propio SVG, en el carril que le deja la página (`--pm-nave-*`): con la pantalla
- * en HTML, en el mismo cielo la pantalla se le encimaba según la proporción de la ventana. El haz
- * que la une con la pantalla (`[data-pantalla]`, hermana de la escena en la ventanilla) se traza
- * cada vez que cambia una de las dos: sin él, la pantalla se leía como una ventana aparte.
  */
 @Component({
   selector: 'app-escena-arbol',
@@ -108,30 +86,13 @@ const NARIZ = { x: 66, y: 0 };
       role="img"
       [attr.aria-label]="descripcion()"
     ></svg>
-    <svg class="esc-nave" viewBox="-125 -62 214 116">
+    <svg class="esc-nave" viewBox="-125 -62 214 116" aria-hidden="true">
       <g data-nave></g>
     </svg>`,
   styleUrl: './escena.css',
-  styles: `
-    .esc-nave {
-      position: absolute;
-      left: 0;
-      top: var(--pm-nave-arriba, 0);
-      width: var(--pm-nave-ancho, 100%);
-      height: var(--pm-nave-alto, 100%);
-      overflow: visible;
-      /* Al seguir viaje, sale volando por delante de la pantalla, no por detrás. */
-      z-index: 2;
-    }
-  `,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class EscenaArbolComponent extends EscenaDelManual {
-  /**
-   * Dónde se dibuja la pantalla: un SVG con el `viewBox` de `PANTALLA`, que pone la página. Como
-   * `Element`: el chequeo de plantillas tipa toda referencia a un elemento como `HTMLElement`.
-   */
-  readonly render = input.required<Element>();
   /** Los elementos revelados, por id. */
   readonly reveladas = input<readonly string[]>([]);
   /** Los elementos que los tags dejan fuera del panel donde los pone la sangría. */
@@ -161,20 +122,9 @@ export class EscenaArbolComponent extends EscenaDelManual {
   private etiquetas: SVGGElement | null = null;
   private vistas = new Set<string>();
   private caidasVistas = new Set<string>();
-  private haz: SVGPathElement | null = null;
-  private readonly destruir = inject(DestroyRef);
 
   constructor() {
     super();
-    alCambiarDeTamano(this.host, () => this.trazarHaz());
-    // La pantalla cambia de tamaño sola: la portada se va y crece hasta la demo.
-    afterNextRender(() => {
-      const pantalla = this.pantalla();
-      if (!pantalla) return;
-      const observador = new ResizeObserver(() => this.trazarHaz());
-      observador.observe(pantalla);
-      this.destruir.onDestroy(() => observador.disconnect());
-    });
     effect(() => {
       const ahora = new Set(this.armadas());
       const fuera = new Set(this.fuera());
@@ -188,10 +138,7 @@ export class EscenaArbolComponent extends EscenaDelManual {
     });
   }
 
-  protected armar(): void {
-    this.armarHaz();
-    const render = this.render();
-    if (!(render instanceof SVGSVGElement)) return;
+  protected armar(render: SVGSVGElement): void {
     const pantalla = el(render, 'g');
     // El lugar de cada pieza, punteado: la pantalla vacía se lee como algo por armar. Los de adentro
     // del marco van encima de él: un panel que quedó chico deja a la vista los lugares que perdió.
@@ -262,36 +209,6 @@ export class EscenaArbolComponent extends EscenaDelManual {
     this.piezas[0].after(fantasma, aviso);
     this.etiquetas = el(render, 'g', { 'pointer-events': 'none' });
     this.mostrar(new Set(this.armadas()), new Set(this.fuera()), true);
-  }
-
-  private pantalla(): HTMLElement | null {
-    return this.host.parentElement?.querySelector<HTMLElement>('[data-pantalla]') ?? null;
-  }
-
-  /** El haz va en el SVG de la nave, debajo de ella, y se prende cuando la nave ya llegó. */
-  private armarHaz(): void {
-    const svg = this.host.querySelector<SVGSVGElement>('.esc-nave');
-    if (!svg) return;
-    this.haz = el(svg, 'path', { fill: PALETA.luz, opacity: 0, 'pointer-events': 'none' });
-    svg.insertBefore(this.haz, svg.querySelector('[data-nave]'));
-    this.trazarHaz();
-    gsap.to(this.haz, { opacity: 0.1, duration: 0.6, delay: this.quieta ? 0 : 0.9 });
-  }
-
-  private trazarHaz(): void {
-    const svg = this.haz?.ownerSVGElement;
-    const caja = this.pantalla()?.getBoundingClientRect();
-    const aDibujo = svg?.getScreenCTM()?.inverse();
-    if (!this.haz || !caja || !aDibujo) return;
-    const punto = (x: number, y: number) => new DOMPoint(x, y).matrixTransform(aDibujo);
-    const arriba = punto(caja.left, caja.top);
-    const abajo = punto(caja.left, caja.bottom);
-    const d = trazoDelHaz(NARIZ, { izquierda: arriba.x, arriba: arriba.y, abajo: abajo.y });
-    this.haz.setAttribute('d', d ?? '');
-  }
-
-  protected override alPartir(): void {
-    if (this.haz) gsap.to(this.haz, { opacity: 0, duration: 0.2, overwrite: 'auto' });
   }
 
   private mostrar(
@@ -390,16 +307,6 @@ export class EscenaArbolComponent extends EscenaDelManual {
     );
   }
 
-  /** La nave mira un punto de la pantalla, que vive en otro SVG: se pasa por las coordenadas de la ventana. */
-  private mirarLaPantalla(x: number, y: number): void {
-    const render = this.render();
-    const desde = render instanceof SVGSVGElement ? render.getScreenCTM() : null;
-    const hasta = this.host.querySelector<SVGSVGElement>('.esc-nave')?.getScreenCTM();
-    if (!desde || !hasta) return;
-    const p = new DOMPoint(x, y).matrixTransform(desde).matrixTransform(hasta.inverse());
-    this.nave?.mirar(p.x, p.y);
-  }
-
   /** El nombre del tag sube un momento sobre la pieza que acaba de llegar, donde termina. */
   private rotular(p: Pieza, cae: boolean): void {
     if (!this.etiquetas) return;
@@ -456,8 +363,7 @@ export class EscenaArbolComponent extends EscenaDelManual {
     gsap.delayedCall(this.quieta ? 0 : 0.8, () => {
       this.nave?.animo('contenta');
       this.nave?.saltito(18);
-      const svg = this.host.querySelector<SVGSVGElement>('.esc-nave');
-      if (svg) chispas(svg, 0, -6);
+      this.chispasDeLaNave();
       // Con la llama más larga: la nave queda lista para seguir viaje.
       this.nave?.propulsar(1.35, 0.4);
     });

@@ -1,9 +1,79 @@
-<app-pagina-del-manual [guia]="guia()" [respiro]="900" [paso]="paso()" [resuelta]="sano()">
+<app-pagina-del-manual
+  [guia]="guia()"
+  [respiro]="900"
+  [paso]="paso()"
+  [resuelta]="sano()"
+  [enPantalla]="true"
+  [portada]="true"
+>
+  <!-- La portada: el panel con sus tres lugares; el lápiz escribió dos, y el tercero quedó viejo. -->
+  <svg portada class="pmp" viewBox="0 0 300 128" aria-hidden="true">
+    @for (f of filasDePortada; track f.rotulo; let i = $index) {
+      <g class="pmp-pieza" [style.--i]="i">
+        <rect
+          x="70"
+          [attr.y]="4 + i * 42"
+          width="160"
+          height="34"
+          rx="8"
+          [attr.fill]="f.vieja ? '#4a2440' : '#2f2556'"
+          [attr.stroke]="f.vieja ? '#ff7676' : '#9b87f5'"
+          stroke-width="1.4"
+        />
+        <text x="82" [attr.y]="25 + i * 42" fill="#b9aee0">{{ f.rotulo }}</text>
+        <text
+          x="196"
+          [attr.y]="30 + i * 42"
+          text-anchor="end"
+          class="pmp-letrero"
+          [attr.fill]="f.vieja ? '#ffb3b3' : '#f2ecff'"
+        >
+          {{ f.valor }}
+        </text>
+        @if (f.vieja) {
+          <circle cx="214" cy="105" r="8" fill="#ff7676" stroke="#2b1b33" stroke-width="1.5" />
+          <path d="M214 101v4.5" stroke="#2b1b33" stroke-width="2.4" stroke-linecap="round" />
+          <circle cx="214" cy="109" r="1.4" fill="#2b1b33" />
+        }
+      </g>
+    }
+    <g class="pmp-pieza" style="--i: 3" transform="translate(246 70) rotate(-35)">
+      <rect
+        x="-4"
+        y="-34"
+        width="8"
+        height="28"
+        rx="1.5"
+        fill="#ffd27a"
+        stroke="#2b1b33"
+        stroke-width="1.6"
+      />
+      <rect
+        x="-4"
+        y="-40"
+        width="8"
+        height="7"
+        rx="2"
+        fill="#ff8a9a"
+        stroke="#2b1b33"
+        stroke-width="1.6"
+      />
+      <path
+        d="M-4 -6 0 2 4 -6Z"
+        fill="#f3d9b0"
+        stroke="#2b1b33"
+        stroke-width="1.6"
+        stroke-linejoin="round"
+      />
+    </g>
+  </svg>
+
   <p hacer>Sumá y mirá el panel.</p>
   <p arreglo>Completá el handler y sumá.</p>
 
   <app-escena-a-mano
     escena
+    [render]="render"
     [lugares]="lugaresDelPanel()"
     [cuenta]="panel().count"
     [sano]="sano()"
@@ -12,33 +82,37 @@
   <!-- Los números se ven una sola vez, en el panel de la nave. Acá va lo que se toca: el handler,
        con su hueco, y la corrida. -->
   <section consola class="msp">
-    <div class="msp-codigo" role="group" aria-label="El handler de increment">
-      @for (r of antes; track $index) {
-        <span class="msp-linea" [innerHTML]="r"></span>
-      }
-      <button
-        type="button"
-        class="msp-hueco"
-        [class.msp-hueco--lleno]="completo()"
-        [attr.aria-pressed]="completo()"
-        data-guia="completo"
-        (click)="alternarHandler()"
-      >
-        @if (completo()) {
-          @for (r of agregadas; track $index) {
-            <span class="msp-linea" [innerHTML]="r"></span>
-          }
-        } @else {
-          <span class="msp-linea" [innerHTML]="faltan"></span>
+    <div class="msp-izq">
+      <div class="msp-codigo" role="group" aria-label="El handler de increment">
+        @for (r of antes; track $index) {
+          <span class="msp-linea" [innerHTML]="r"></span>
         }
-      </button>
-      <span class="msp-linea">{{ '}' }}</span>
+        <button
+          type="button"
+          class="msp-hueco"
+          [class.msp-hueco--lleno]="completo()"
+          [attr.aria-pressed]="completo()"
+          data-guia="completo"
+          (click)="alternarHandler()"
+        >
+          @if (completo()) {
+            @for (r of agregadas; track $index) {
+              <span class="msp-linea" [innerHTML]="r"></span>
+            }
+          } @else {
+            <span class="msp-linea" [innerHTML]="faltan"></span>
+          }
+        </button>
+        <span class="msp-linea">{{ '}' }}</span>
+      </div>
+
+      <div class="msp-mando">
+        <button type="button" class="msp-inc" [attr.data-cuenta]="panel().count" (click)="sumar()">
+          increment()
+        </button>
+      </div>
     </div>
 
-    <div class="msp-mando">
-      <button type="button" class="msp-inc" [attr.data-cuenta]="panel().count" (click)="sumar()">
-        increment()
-      </button>
-    </div>
+    <svg #render class="msp-render" viewBox="214 26 174 222" aria-hidden="true"></svg>
   </section>
 </app-pagina-del-manual>

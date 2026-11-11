@@ -1,16 +1,8 @@
-import { ChangeDetectionStrategy, Component, computed, effect, input, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, effect, input } from '@angular/core';
 import { gsap } from 'gsap';
 import { CD_EDGES, CD_NODES, SIGNAL_DEPENDENTS } from '../../../libs/cd-tree';
-import {
-  CIELO_DEL_ESCENARIO,
-  EscenaDelManual,
-  alCambiarDeTamano,
-  chispas,
-  cieloCentradoEn,
-  pintarPantalla,
-} from './escena-del-manual';
+import { CIELO_DEL_ESCENARIO, EscenaDelManual } from './escena-del-manual';
 import { PALETA, el } from './nave-del-manual';
-import { cieloAngosto } from './escenas.logica';
 
 /** Un cambio de valor; `n` sube con cada uno, aunque el modo se repita. */
 export interface Aviso {
@@ -19,9 +11,10 @@ export interface Aviso {
   readonly signal: boolean;
 }
 
-const NARIZ = { x: 182, y: 148 };
-/** La caja del valor, abajo y entre la nave y su pantalla: de ahí salen los hilos de lectura. */
-const CAJA = { x: 150, y: 218 };
+/** Lo que dibuja la pantalla: arriba la lectura, el árbol, y debajo la caja del valor. */
+export const PANTALLA_SIGNAL = '214 26 174 214';
+/** La caja del valor, debajo del árbol y entre sus dos lectores: de ahí suben los hilos. */
+const CAJA = { x: 320, y: 214 };
 /**
  * El árbol de la demo, en la pantalla de la nave, corrido hacia abajo: arriba va la lectura. Los
  * hilos entran a los nodos desde abajo, así que la lectura abajo los cruzaba.
@@ -36,16 +29,10 @@ const ENTERADO = '#7fdcae';
 /** Revisado por el barrido de casa: se nota que pasó por ahí, pero no es la luz de un aviso. */
 const BARRIDO = '#b0508f';
 const TOTAL_DE_NODOS = CD_NODES.length;
-/**
- * El cielo se pinta más alto que el del escenario: a 390 px la consola es corta y la ventanilla queda
- * más alta que ancha. Con el de 340, encuadrar la nave dejaba franjas sin pintar, y sin encuadrar el
- * recorte le comía a la pantalla el último `<p>` y la cuenta de revisados.
- */
-const ALTO_PINTADO = 520;
-const CIELO_PINTADO = cieloCentradoEn(129, ALTO_PINTADO);
 
 /**
- * Lámina de la ley 6, que es el escenario de su página: ya no hay cerca de Zone.js. El valor es una
+ * Lámina de la ley 6, que es el escenario de su página: en la pantalla de la nave (`render`, al lado
+ * del código), ya no hay cerca de Zone.js. El valor es una
  * caja ámbar con un hilo hasta cada nodo que lo lee, y la lectura de arriba de la pantalla cuenta
  * cuántos nodos se revisaron. Si el valor es un signal, el aviso viaja solo por esos hilos y se
  * encienden los dos `<p>`; el resto del árbol ni se mueve. Si no, vuelve la costumbre de casa:
@@ -54,14 +41,15 @@ const CIELO_PINTADO = cieloCentradoEn(129, ALTO_PINTADO);
 @Component({
   selector: 'app-escena-signal',
   template: `<svg
-    class="esc"
-    [attr.viewBox]="cielo()"
-    preserveAspectRatio="xMidYMid slice"
-    role="img"
-    [attr.aria-label]="descripcion()"
-  >
-    <g data-nave transform="translate(112 150) scale(1.05)"></g>
-  </svg>`,
+      class="esc"
+      [attr.viewBox]="cielo"
+      preserveAspectRatio="xMidYMid slice"
+      role="img"
+      [attr.aria-label]="descripcion()"
+    ></svg>
+    <svg class="esc-nave" viewBox="-125 -62 214 116" aria-hidden="true">
+      <g data-nave></g>
+    </svg>`,
   styleUrl: './escena.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -72,11 +60,7 @@ export class EscenaSignalComponent extends EscenaDelManual {
   readonly sano = input(false);
 
   protected readonly semilla = 61;
-  /**
-   * El primer cuadro va con el cielo alto, que es el que se pinta; después, en angosto, encuadra la
-   * nave y su pantalla, y si no, el cielo de sobra del escenario.
-   */
-  protected readonly cielo = signal(CIELO_PINTADO);
+  protected readonly cielo = CIELO_DEL_ESCENARIO;
   private readonly revisados = computed(() => {
     const aviso = this.aviso();
     return aviso ? (aviso.signal ? SIGNAL_DEPENDENTS.length : TOTAL_DE_NODOS) : 0;
@@ -96,12 +80,6 @@ export class EscenaSignalComponent extends EscenaDelManual {
 
   constructor() {
     super();
-    // Corre después de `armar`, que ya pintó el cielo alto: el `viewBox` que siga cae adentro.
-    alCambiarDeTamano(this.host, (ancho, alto) =>
-      this.cielo.set(
-        cieloAngosto(ancho, alto, { altoDelCielo: ALTO_PINTADO }) ?? CIELO_DEL_ESCENARIO,
-      ),
-    );
     effect(() => {
       const aviso = this.aviso();
       const valor = this.valor();
@@ -122,8 +100,8 @@ export class EscenaSignalComponent extends EscenaDelManual {
     });
   }
 
-  protected armar(svg: SVGSVGElement): void {
-    const pantalla = pintarPantalla(svg, NARIZ);
+  protected armar(render: SVGSVGElement): void {
+    const pantalla = el(render, 'g');
     this.armarLectura(pantalla);
     const ramas = el(pantalla, 'g', { stroke: '#6c5ca8', 'stroke-width': 2 });
     for (const e of CD_EDGES) {
@@ -135,12 +113,13 @@ export class EscenaSignalComponent extends EscenaDelManual {
     }
 
     // Los hilos de lectura van debajo de los nodos: llegan a ellos, no los cruzan.
-    const hilos = el(svg, 'g', { fill: 'none', 'pointer-events': 'none' });
+    const hilos = el(render, 'g', { fill: 'none', 'pointer-events': 'none' });
     for (const id of SIGNAL_DEPENDENTS) {
       const n = CD_NODES.find((x) => x.id === id)!;
       const q = aPantalla(n.x, n.y);
-      // Curva de abajo hacia el nodo, para que el hilo no tape las ramas del árbol.
-      const d = `M${CAJA.x + 14} ${CAJA.y - 4}C${CAJA.x + 70} ${CAJA.y + 6} ${q.x - 30} ${q.y + 40} ${q.x} ${q.y + 8}`;
+      // Sale de la tapa de la caja, del lado de su lector, y le entra desde abajo: no cruza ramas.
+      const x = CAJA.x + Math.sign(q.x - CAJA.x) * 8;
+      const d = `M${x} ${CAJA.y - 16}C${x} ${CAJA.y - 34} ${q.x} ${q.y + 30} ${q.x} ${q.y + 9}`;
       this.hilos.push(
         el(hilos, 'path', {
           d,
@@ -165,10 +144,10 @@ export class EscenaSignalComponent extends EscenaDelManual {
       this.nodos.set(n.id, { circulo, depth: n.depth });
     }
     // La pantalla se pintó antes que los hilos: se sube para que los nodos queden arriba.
-    svg.appendChild(pantalla);
+    render.appendChild(pantalla);
 
     // El `translate` va en un grupo de afuera: GSAP pisa el `transform` del grupo que anima.
-    const lugar = el(svg, 'g', { transform: `translate(${CAJA.x} ${CAJA.y})` });
+    const lugar = el(render, 'g', { transform: `translate(${CAJA.x} ${CAJA.y})` });
     el(lugar, 'ellipse', { cx: 0, cy: 18, rx: 20, ry: 4, fill: 'rgba(25,8,40,.55)' });
     this.caja = el(lugar, 'g');
     el(this.caja, 'rect', {
@@ -192,7 +171,7 @@ export class EscenaSignalComponent extends EscenaDelManual {
     });
     this.valorEnLaCaja.textContent = String(this.valor());
 
-    this.capa = el(svg, 'g', { 'pointer-events': 'none' });
+    this.capa = el(render, 'g', { 'pointer-events': 'none' });
     const aviso = this.aviso();
     this.visto = aviso?.n ?? 0;
     this.leer(aviso, 0);
@@ -277,7 +256,7 @@ export class EscenaSignalComponent extends EscenaDelManual {
   private avisar(): void {
     const nave = this.nave;
     nave?.animo('atenta');
-    nave?.mirar(CAJA.x, CAJA.y);
+    this.mirarLaPantalla(CAJA.x, CAJA.y);
     if (this.quieta || !this.caja || !this.capa) {
       this.pintarLectores(0);
       nave?.animo('contenta');
@@ -322,7 +301,7 @@ export class EscenaSignalComponent extends EscenaDelManual {
       });
     });
     // La mirada sigue el aviso hasta la pantalla, y la nave se alivia: esta vez no hubo barrido.
-    gsap.delayedCall(0.5, () => nave?.mirar(300, 170));
+    gsap.delayedCall(0.5, () => this.mirarLaPantalla(300, 150));
     gsap.delayedCall(0.95, () => {
       nave?.animo('contenta');
       nave?.saltito(8);
@@ -366,7 +345,7 @@ export class EscenaSignalComponent extends EscenaDelManual {
   private barrerComoEnCasa(): void {
     const nave = this.nave;
     nave?.animo('preocupada');
-    nave?.mirar(300, 120);
+    this.mirarLaPantalla(300, 120);
     this.pintarBarrido(this.quieta ? 0 : 1);
     if (this.quieta) return;
     this.saltarLaCaja();
@@ -376,7 +355,6 @@ export class EscenaSignalComponent extends EscenaDelManual {
   private festejar(): void {
     this.nave?.animo('contenta');
     this.nave?.saltito(18);
-    const svg = this.host.querySelector('svg');
-    if (svg) chispas(svg, 140, 118);
+    this.chispasDeLaNave();
   }
 }

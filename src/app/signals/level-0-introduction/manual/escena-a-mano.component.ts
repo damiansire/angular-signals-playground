@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, effect, input } from '@angular/core';
 import { gsap } from 'gsap';
-import { CIELO_DEL_ESCENARIO, EscenaDelManual, chispas, pintarPantalla } from './escena-del-manual';
+import { CIELO_DEL_ESCENARIO, EscenaDelManual } from './escena-del-manual';
 import { PALETA, el } from './nave-del-manual';
 
 /** Un lugar del panel: lo que muestra y si quedó viejo. */
@@ -24,12 +24,15 @@ const TONOS = {
 } as const;
 
 const FILA = { x: 226, ancho: 150, alto: 44, y0: 40, paso: 54 } as const;
-const NARIZ = { x: 182, y: 148 };
-// Apoyado en la esquina de la pantalla: más abajo, el escenario apaisado lo cortaba.
+// Apoyado debajo del último lugar, a la derecha: a la vista, sin tapar ningún número.
 const REPOSO = { x: 360, y: 236 };
 
+/** Lo que dibuja la pantalla: los tres lugares y, debajo, el lápiz que descansa. */
+export const PANTALLA_A_MANO = '214 26 174 222';
+
 /**
- * Lámina de la ley 4, que es el escenario de su página: el panel de la nave tiene tres lugares que
+ * Lámina de la ley 4, que es el escenario de su página: el panel de la nave (`render`, al lado del
+ * handler) tiene tres lugares que
  * dependen del mismo número, rotulados con el selector que los busca, y el handler los actualiza a
  * mano. Con cada `increment()` el lápiz pasa por los lugares que el handler nombra; el que se
  * olvida queda con el número viejo, en rojo, y la nave lo mira preocupada.
@@ -37,14 +40,15 @@ const REPOSO = { x: 360, y: 236 };
 @Component({
   selector: 'app-escena-a-mano',
   template: `<svg
-    class="esc"
-    [attr.viewBox]="cielo"
-    preserveAspectRatio="xMidYMid slice"
-    role="img"
-    [attr.aria-label]="descripcion()"
-  >
-    <g data-nave transform="translate(112 150) scale(1.05)"></g>
-  </svg>`,
+      class="esc"
+      [attr.viewBox]="cielo"
+      preserveAspectRatio="xMidYMid slice"
+      role="img"
+      [attr.aria-label]="descripcion()"
+    ></svg>
+    <svg class="esc-nave" viewBox="-125 -62 214 116" aria-hidden="true">
+      <g data-nave></g>
+    </svg>`,
   styleUrl: './escena.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -89,8 +93,8 @@ export class EscenaAManoComponent extends EscenaDelManual {
     });
   }
 
-  protected armar(svg: SVGSVGElement): void {
-    const pantalla = pintarPantalla(svg, NARIZ);
+  protected armar(render: SVGSVGElement): void {
+    const pantalla = el(render, 'g');
     this.lugares().forEach((l, i) => {
       const y = FILA.y0 + i * FILA.paso;
       const caja = el(pantalla, 'rect', {
@@ -136,8 +140,8 @@ export class EscenaAManoComponent extends EscenaDelManual {
       this.filas.set(l.id, { caja, valor, marca, y });
     });
 
-    // El lápiz que escribe a mano: descansa abajo de la pantalla, a la vista.
-    this.lapiz = el(svg, 'g', { 'pointer-events': 'none' });
+    // El lápiz que escribe a mano: descansa abajo de los lugares, a la vista.
+    this.lapiz = el(render, 'g', { 'pointer-events': 'none' });
     const cuerpo = el(this.lapiz, 'g', { transform: 'rotate(-35)' });
     el(cuerpo, 'rect', {
       x: -4,
@@ -212,10 +216,10 @@ export class EscenaAManoComponent extends EscenaDelManual {
     const viejo = lugares.find((l) => l.viejo);
     const fila = viejo && this.filas.get(viejo.id);
     if (fila) {
-      this.nave?.mirar(FILA.x + FILA.ancho, fila.y + 20);
+      this.mirarLaPantalla(FILA.x + FILA.ancho, fila.y + 20);
       this.nave?.animo('preocupada');
     } else {
-      this.nave?.mirar(FILA.x + 60, 110);
+      this.mirarLaPantalla(FILA.x + 60, 110);
       this.nave?.animo('tranquila');
     }
   }
@@ -239,7 +243,7 @@ export class EscenaAManoComponent extends EscenaDelManual {
       }
       const x = FILA.x + FILA.ancho - 58;
       tl.to(lapiz, { x, y: fila.y + 30, duration: 0.2, ease: 'power2.inOut' })
-        .add(() => this.nave?.mirar(x, fila.y + 20))
+        .add(() => this.mirarLaPantalla(x, fila.y + 20))
         .to(lapiz, { x: x + 10, duration: 0.05, ease: 'none', yoyo: true, repeat: 3 })
         .add(() => this.pintar(l))
         .fromTo(
@@ -255,7 +259,6 @@ export class EscenaAManoComponent extends EscenaDelManual {
   private festejar(): void {
     this.nave?.animo('contenta');
     this.nave?.saltito(18);
-    const svg = this.host.querySelector('svg');
-    if (svg) chispas(svg, 140, 118);
+    this.chispasDeLaNave();
   }
 }

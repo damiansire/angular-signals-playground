@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, effect, input, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, effect, input } from '@angular/core';
 import { gsap } from 'gsap';
 import {
   ESTACIONES,
@@ -8,16 +8,9 @@ import {
   renderCost,
   stagesTriggered,
 } from '../../../libs/render-pipeline';
-import {
-  CIELO_DEL_ESCENARIO,
-  EscenaDelManual,
-  alCambiarDeTamano,
-  chispas,
-  cieloCentradoEn,
-  pintarPantalla,
-} from './escena-del-manual';
+import { CIELO_DEL_ESCENARIO, EscenaDelManual } from './escena-del-manual';
 import { PALETA, azar, el } from './nave-del-manual';
-import { type Costo, cieloAngosto, saltosDelPaisaje } from './escenas.logica';
+import { type Costo, saltosDelPaisaje } from './escenas.logica';
 
 /** Una corrida del cuadro; `n` sube con cada una, aunque se repita la misma propiedad. */
 export interface CorridaDelCuadro {
@@ -26,13 +19,7 @@ export interface CorridaDelCuadro {
   readonly propiedad: string;
 }
 
-const NARIZ = { x: 182, y: 148 };
 const MONO = "'JetBrains Mono', Consolas, monospace";
-/**
- * El cielo se pinta más alto que el del escenario: a 390 px la ventanilla mide 390×360, y con el de
- * 340 el encuadre angosto se rendía y el recorte le cortaba el marco a la pantalla y el fuego a la nave.
- */
-const ALTO_PINTADO = 520;
 /**
  * El pipeline en vertical, en la pantalla de la nave: una fila por estación. Los rótulos van más
  * grandes que en las otras pantallas (13.5 unidades el más chico): en un teléfono la escena se
@@ -54,8 +41,8 @@ interface Estacion {
 }
 
 /**
- * Lámina de la ley 3, que es el escenario de su página: la nave vuela y su pantalla es el pipeline
- * de render, de DOM a composite, con las capas caras (layout y paint) marcadas. Cada corrida del
+ * Lámina de la ley 3, que es el escenario de su página: la nave vuela y su pantalla (`render`, al
+ * lado del código) es el pipeline de render, de DOM a composite, con las capas caras (layout y paint) marcadas. Cada corrida del
  * cuadro dibuja su flujo de arriba abajo: un cambio caro pasa por todas; transform salta por el
  * carril de la izquierda, por encima de las caras. Y lo que cuesta se nota en el vuelo: barato, el
  * paisaje pasa de corrido; caro, a los tirones, y la nave se traba.
@@ -63,14 +50,15 @@ interface Estacion {
 @Component({
   selector: 'app-escena-costo',
   template: `<svg
-    class="esc"
-    [attr.viewBox]="cielo()"
-    preserveAspectRatio="xMidYMid slice"
-    role="img"
-    [attr.aria-label]="descripcion()"
-  >
-    <g data-nave transform="translate(112 150) scale(1.05)"></g>
-  </svg>`,
+      class="esc"
+      [attr.viewBox]="cielo"
+      preserveAspectRatio="xMidYMid slice"
+      role="img"
+      [attr.aria-label]="descripcion()"
+    ></svg>
+    <svg class="esc-nave" viewBox="-125 -62 214 116" aria-hidden="true">
+      <g data-nave></g>
+    </svg>`,
   styleUrl: './escena.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -79,11 +67,7 @@ export class EscenaCostoComponent extends EscenaDelManual {
   readonly sano = input(false);
 
   protected readonly semilla = 37;
-  /**
-   * En angosto, encuadra la nave y su pantalla; si no, el cielo de sobra del escenario. El primer
-   * cuadro va con el cielo alto, que es el que se pinta.
-   */
-  protected readonly cielo = signal(cieloCentradoEn(129, ALTO_PINTADO));
+  protected readonly cielo = CIELO_DEL_ESCENARIO;
   protected readonly descripcion = computed(() => {
     const c = this.corrida();
     if (!c) return 'Pantalla de la nave: el pipeline de render, quieto';
@@ -103,12 +87,6 @@ export class EscenaCostoComponent extends EscenaDelManual {
 
   constructor() {
     super();
-    // El cielo se pinta con el `viewBox` alto, que contiene al angosto: cambiarlo no deja huecos.
-    alCambiarDeTamano(this.host, (ancho, alto) =>
-      this.cielo.set(
-        cieloAngosto(ancho, alto, { altoDelCielo: ALTO_PINTADO }) ?? CIELO_DEL_ESCENARIO,
-      ),
-    );
     effect(() => {
       const corrida = this.corrida();
       if (!this.lista || !corrida || corrida.n === this.vista) return;
@@ -120,10 +98,9 @@ export class EscenaCostoComponent extends EscenaDelManual {
     });
   }
 
-  protected armar(svg: SVGSVGElement): void {
-    this.armarPaisaje(svg);
-    const pantalla = pintarPantalla(svg, NARIZ);
-    this.armarPipeline(pantalla);
+  protected armar(render: SVGSVGElement, cielo: SVGSVGElement): void {
+    this.armarPaisaje(cielo);
+    this.armarPipeline(el(render, 'g'));
     this.volar(null);
     const corrida = this.corrida();
     if (corrida) {
@@ -133,9 +110,8 @@ export class EscenaCostoComponent extends EscenaDelManual {
   }
 
   /** Las estelas del viaje, en todo el cielo: dos tiras iguales, una detrás de la otra. */
-  private armarPaisaje(svg: SVGSVGElement): void {
-    this.paisaje = el(svg, 'g', { opacity: 0.55 });
-    svg.insertBefore(this.paisaje, svg.querySelector('[data-nave]'));
+  private armarPaisaje(cielo: SVGSVGElement): void {
+    this.paisaje = el(cielo, 'g', { opacity: 0.55 });
     for (const copia of [0, 800]) {
       for (let i = 0; i < 16; i++) {
         const x = -200 + copia + azar(i * 4.1 + 2) * 800;
@@ -369,7 +345,7 @@ export class EscenaCostoComponent extends EscenaDelManual {
     }
     const nave = this.nave;
     if (!nave) return;
-    nave.mirar(300, 110);
+    this.mirarLaPantalla(300, 110);
     if (!costo) return;
     nave.animo(costo === 'barato' ? 'contenta' : costo === 'medio' ? 'atenta' : 'preocupada');
     if (!t) return;
@@ -385,8 +361,7 @@ export class EscenaCostoComponent extends EscenaDelManual {
     gsap.delayedCall(espera, () => {
       this.nave?.animo('contenta');
       this.nave?.saltito(18);
-      const svg = this.host.querySelector('svg');
-      if (svg) chispas(svg, 140, 118);
+      this.chispasDeLaNave();
     });
   }
 }

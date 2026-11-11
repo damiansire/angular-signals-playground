@@ -1,35 +1,98 @@
-<app-pagina-del-manual [guia]="guia()" [respiro]="1600" [paso]="paso()" [resuelta]="sano()">
+<app-pagina-del-manual
+  [guia]="guia()"
+  [respiro]="1600"
+  [paso]="paso()"
+  [resuelta]="sano()"
+  [enPantalla]="true"
+  [portada]="true"
+>
+  <!-- La portada: el mismo árbol, pero con la caja del valor y un hilo hasta cada `<p>` que lo lee. -->
+  <svg portada class="pmp" viewBox="0 0 300 128" aria-hidden="true">
+    <path
+      class="pmp-trazo"
+      d="M150 22L110 52M150 22L190 52M110 52L90 80M110 52L130 80M190 52L170 80M190 52L210 80"
+      stroke="#6c5ca8"
+      stroke-width="2"
+      pathLength="1"
+      style="--i: 0"
+    />
+    @for (n of nodosDePortada; track $index) {
+      <circle
+        class="pmp-pieza"
+        [attr.cx]="n.x"
+        [attr.cy]="n.y"
+        r="8"
+        [attr.fill]="n.lee ? '#7fdcae' : '#3e3170'"
+        stroke="#8f80cc"
+        stroke-width="1.6"
+        [style.--i]="n.i"
+      />
+    }
+    <path
+      class="pmp-trazo"
+      d="M164 104C164 96 130 108 130 89M176 104C176 96 210 108 210 89"
+      stroke="#ffd27a"
+      stroke-width="1.6"
+      fill="none"
+      pathLength="1"
+      style="--i: 5"
+    />
+    <g class="pmp-pieza" style="--i: 4" transform="translate(170 112)">
+      <rect
+        x="-14"
+        y="-10"
+        width="28"
+        height="22"
+        rx="6"
+        fill="#eb9b3c"
+        stroke="#2b1b33"
+        stroke-width="1.8"
+      />
+      <text y="6" text-anchor="middle" class="pmp-letrero" fill="#2b1b33">1</text>
+    </g>
+  </svg>
+
   <p hacer>Corré.</p>
   <p arreglo>Hacelo signal.</p>
 
-  <app-escena-signal escena [aviso]="aviso()" [valor]="arbol().total" [sano]="sano()" />
+  <app-escena-signal
+    escena
+    [render]="render"
+    [aviso]="aviso()"
+    [valor]="arbol().total"
+    [sano]="sano()"
+  />
 
   <!-- El árbol y cuántos nodos se revisaron se ven una sola vez, en la pantalla de la nave. Acá va
        lo que se toca: el código, con la declaración como hueco, y la corrida. -->
   <section consola class="scd">
-    <div class="scd-codigo" role="group" aria-label="El código que cambia el valor">
-      <button
-        type="button"
-        class="scd-hueco"
-        [class.scd-hueco--signal]="declaracion().esSignal"
-        [attr.aria-label]="'Cambiar la declaración: ' + declaracion().renglon"
-        data-guia="declaracion"
-        (click)="cambiarDeclaracion()"
-      >
-        <span class="scd-linea" [innerHTML]="renglonDeLaDeclaracion()"></span>
-      </button>
-      <span class="scd-linea" [innerHTML]="escritura()"></span>
+    <div class="scd-izq">
+      <div class="scd-codigo" role="group" aria-label="El código que cambia el valor">
+        <button
+          type="button"
+          class="scd-hueco"
+          [class.scd-hueco--signal]="declaracion().esSignal"
+          [attr.aria-label]="'Cambiar la declaración: ' + declaracion().renglon"
+          data-guia="declaracion"
+          (click)="cambiarDeclaracion()"
+        >
+          <span class="scd-linea" [innerHTML]="renglonDeLaDeclaracion()"></span>
+        </button>
+        <span class="scd-linea" [innerHTML]="escritura()"></span>
+      </div>
+
+      <div class="scd-mando">
+        <button
+          type="button"
+          class="scd-correr"
+          [attr.data-cuenta]="arbol().total"
+          (click)="correrCodigo()"
+        >
+          &#9654; correr
+        </button>
+      </div>
     </div>
 
-    <div class="scd-mando">
-      <button
-        type="button"
-        class="scd-correr"
-        [attr.data-cuenta]="arbol().total"
-        (click)="correrCodigo()"
-      >
-        &#9654; correr
-      </button>
-    </div>
+    <svg #render class="scd-render" viewBox="214 26 174 214" aria-hidden="true"></svg>
   </section>
 </app-pagina-del-manual>

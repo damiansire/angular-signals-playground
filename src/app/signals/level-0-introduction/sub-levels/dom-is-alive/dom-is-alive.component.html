@@ -1,47 +1,124 @@
-<app-pagina-del-manual [guia]="guia()" [respiro]="2200" [paso]="paso()" [resuelta]="sano()">
+<app-pagina-del-manual
+  [guia]="guia()"
+  [respiro]="2200"
+  [paso]="paso()"
+  [resuelta]="sano()"
+  [enPantalla]="true"
+  [portada]="true"
+>
+  <!-- La portada: los tres instrumentos de la pantalla, y una línea que sale hacia el suyo. -->
+  <svg portada class="pmp" viewBox="0 0 300 128" aria-hidden="true">
+    <path
+      class="pmp-trazo"
+      d="M58 86Q84 60 112 82"
+      stroke="#ffd27a"
+      stroke-width="2"
+      pathLength="1"
+      style="--i: 4"
+    />
+    <g class="pmp-pieza" style="--i: 0">
+      <rect
+        x="92"
+        y="6"
+        width="168"
+        height="36"
+        rx="8"
+        fill="#2f2556"
+        stroke="#9b87f5"
+        stroke-width="1.4"
+      />
+      <text x="176" y="30" text-anchor="middle" class="pmp-letrero" fill="#ffd27a">Contador</text>
+    </g>
+    <g class="pmp-pieza" style="--i: 1">
+      <rect
+        x="92"
+        y="50"
+        width="80"
+        height="72"
+        rx="8"
+        fill="#2f2556"
+        stroke="#9b87f5"
+        stroke-width="1.4"
+      />
+      <text x="100" y="64" fill="#b9aee0">#count</text>
+      <text x="132" y="106" text-anchor="middle" class="pmp-num" fill="#f2ecff">1</text>
+    </g>
+    <g class="pmp-pieza" style="--i: 2">
+      <rect
+        x="180"
+        y="50"
+        width="80"
+        height="72"
+        rx="8"
+        fill="#2f2556"
+        stroke="#9b87f5"
+        stroke-width="1.4"
+      />
+      <text x="188" y="64" fill="#b9aee0">#status</text>
+      <circle cx="220" cy="92" r="13" fill="#5fd39a" stroke="#2b1b33" stroke-width="2" />
+    </g>
+    <g class="pmp-pieza" style="--i: 3">
+      <rect
+        x="2"
+        y="78"
+        width="60"
+        height="20"
+        rx="10"
+        fill="#2b1b33"
+        stroke="#ffd27a"
+        stroke-width="1.2"
+      />
+      <text x="32" y="92" text-anchor="middle" fill="#ffd27a">#count</text>
+    </g>
+  </svg>
+
   <p hacer>Corré.</p>
   <!-- Nombra el selector que dio null, tal como está en el código: el que hay que tocar. -->
   <p arreglo>
     Cambiá <code>'{{ fallido() }}'</code>.
   </p>
 
-  <app-escena-vivo escena [nodos]="dom()" [corrida]="corrida()" [sano]="sano()" />
+  <app-escena-vivo escena [render]="render" [nodos]="dom()" [corrida]="corrida()" [sano]="sano()" />
 
-  <!-- Los nodos se ven una sola vez, en la pantalla de la nave. Acá va lo que se toca: las tres
-       líneas, con el selector del título como hueco, y la corrida. -->
+  <!-- La pantalla de la nave: las tres líneas, con el selector del título como hueco, y la corrida;
+       al lado, los nodos, una sola vez (`escena-vivo` los dibuja en `render`). -->
   <section consola class="dia">
-    <div class="dia-codigo" role="group" aria-label="Las líneas que cambian los nodos">
-      @for (r of fijas; track $index) {
-        <span class="dia-linea" [innerHTML]="r"></span>
-      }
-      <button
-        type="button"
-        class="dia-hueco"
-        [class.dia-hueco--encuentra]="encuentra()"
-        [attr.aria-label]="'Cambiar el selector: ' + selector()"
-        (click)="cambiarSelector()"
-      >
-        <!-- La mano señala el selector, no la punta del renglón: lo que se cambia es eso. -->
-        <span class="dia-linea"
-          ><span [innerHTML]="antesDelSelector"></span
-          ><span class="dia-sel" data-guia="selector">'{{ selector() }}'</span
-          ><span [innerHTML]="despuesDelSelector"></span>
-          @if (dioNull()) {
-            <span class="dia-null">// null</span>
-          }
-        </span>
-      </button>
+    <div class="dia-izq">
+      <div class="dia-codigo" role="group" aria-label="Las líneas que cambian los nodos">
+        @for (r of fijas; track $index) {
+          <span class="dia-linea" [innerHTML]="r"></span>
+        }
+        <button
+          type="button"
+          class="dia-hueco"
+          [class.dia-hueco--encuentra]="encuentra()"
+          [attr.aria-label]="'Cambiar el selector: ' + selector()"
+          (click)="cambiarSelector()"
+        >
+          <!-- La mano señala el selector, no la punta del renglón: lo que se cambia es eso. -->
+          <span class="dia-linea"
+            ><span [innerHTML]="antesDelSelector"></span
+            ><span class="dia-sel" data-guia="selector">'{{ selector() }}'</span
+            ><span [innerHTML]="despuesDelSelector"></span>
+            @if (dioNull()) {
+              <span class="dia-null">// null</span>
+            }
+          </span>
+        </button>
+      </div>
+
+      <div class="dia-mando">
+        <button
+          type="button"
+          class="dia-correr"
+          [attr.data-cuenta]="cuenta()"
+          (click)="correrCodigo()"
+        >
+          &#9654; correr
+        </button>
+      </div>
     </div>
 
-    <div class="dia-mando">
-      <button
-        type="button"
-        class="dia-correr"
-        [attr.data-cuenta]="cuenta()"
-        (click)="correrCodigo()"
-      >
-        &#9654; correr
-      </button>
-    </div>
+    <svg #render class="dia-render" [attr.viewBox]="pantallaVivo" aria-hidden="true"></svg>
   </section>
 </app-pagina-del-manual>

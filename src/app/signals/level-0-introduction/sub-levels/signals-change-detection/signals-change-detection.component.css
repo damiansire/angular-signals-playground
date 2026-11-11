@@ -1,26 +1,44 @@
 /* Clases con prefijo `scd-`: se embebe en la vista integrada, que estampa su enc; sin prefijo,
-   las clases del motor de la molécula pisarían las nuestras. Va en la consola de la nave: la misma
+   las clases del motor de la molécula pisarían las nuestras. Va en la pantalla de la nave: la misma
    paleta que su pantalla (vidrio violeta, borde lila, texto claro), como la ley 5. */
 :host {
   display: block;
 }
 
 .scd {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
   align-items: center;
-  gap: 1rem 1.5rem;
+  gap: 1rem 1.75rem;
+  /* Crece con la ventana, como el código de la ley 1: a 3440 de ancho, con un tope de 1rem quedaba
+     chico en el medio del vidrio. */
+  font-size: clamp(0.85rem, min(1.1vw, 2.3vh), 1.9rem);
+}
+.scd-izq {
+  flex: 0 1 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1rem;
+  min-width: 0;
+}
+/* Lo que muestra la pantalla, del alto del código y la corrida juntos. */
+.scd-render {
+  flex: 0 1 auto;
+  height: 15em;
+  aspect-ratio: 174 / 214;
+  max-width: 100%;
+  overflow: visible;
 }
 
+/* Sobre el vidrio de la pantalla, sin caja propia: con borde y fondo era una caja dentro de otra. */
 .scd-codigo {
   display: flex;
   flex-direction: column;
-  padding: 0.85rem 1.1rem;
-  border: 1.5px solid #5b4a96;
-  border-radius: 12px;
-  background: #1c1434;
+  padding: 0.35rem 0.4rem;
   font:
-    500 clamp(0.85rem, 1vw, 1rem) / 1.65 'JetBrains Mono',
+    500 1em / 1.65 'JetBrains Mono',
     'Cascadia Mono',
     Consolas,
     monospace;
@@ -32,6 +50,11 @@
    corrida, no en la columna 0 como si fuera otra sentencia. */
 .scd-linea {
   display: block;
+  /* Son dos renglones cortos (27 caracteres el más largo): a 390, con el árbol al lado, el hueco
+     partía `let total = 0;` en dos (los márgenes negativos del botón le restan a su ancho propio).
+     Así no se parten, y si no entran al lado del árbol, él baja. `nowrap` no alcanza: Edge igual
+     corta en el `<wbr>`. */
+  min-width: max-content;
   padding-left: 4ch;
   text-indent: -4ch;
 }
@@ -78,7 +101,7 @@
   background: #ffd27a;
   box-shadow: 0 4px 0 #2b1b33;
   font:
-    700 1.05rem / 1.2 'JetBrains Mono',
+    700 1em / 1.2 'JetBrains Mono',
     'Cascadia Mono',
     Consolas,
     monospace;
@@ -99,14 +122,6 @@
 .scd .scd-mando button.scd-correr:focus-visible {
   outline: 3px solid #fff8ec;
   outline-offset: 3px;
-}
-
-/* Muy angosto, o con la consola al lado de la escena (ancha y baja, ver `pagina-del-manual`), la
-   corrida va debajo del código. */
-@media (max-width: 479px), (min-width: 1100px) and (max-height: 800px) {
-  .scd {
-    grid-template-columns: minmax(0, 1fr);
-  }
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -27,9 +27,20 @@ const SANGRIA = '  ';
   templateUrl: './old-change-detection.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [PaginaDelManualComponent, EscenaZonaComponent],
-  styleUrl: './old-change-detection.component.css',
+  styleUrls: ['./old-change-detection.component.css', '../../manual/portada.css'],
 })
 export class OldChangeDetectionComponent {
+  /** El dibujo de la portada: el árbol, revisado entero, nodo por nodo desde la raíz. */
+  protected readonly nodosDePortada = [
+    { x: 170, y: 38, i: 2 },
+    { x: 130, y: 70, i: 3 },
+    { x: 210, y: 70, i: 3 },
+    { x: 110, y: 100, i: 4 },
+    { x: 150, y: 100, i: 4 },
+    { x: 190, y: 100, i: 5 },
+    { x: 230, y: 100, i: 5 },
+  ];
+
   protected readonly api = signal<ApiAsync>(APIS[0]);
   protected readonly zona = signal<EstadoDeLaZona>(ZONA_INICIAL);
   /** Ya se vio la pantalla vieja: el paso de arreglar se prende. */

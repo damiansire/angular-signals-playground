@@ -1,9 +1,69 @@
-<app-pagina-del-manual [guia]="guia()" [respiro]="1600" [paso]="paso()" [resuelta]="sano()">
+<app-pagina-del-manual
+  [guia]="guia()"
+  [respiro]="1600"
+  [paso]="paso()"
+  [resuelta]="sano()"
+  [enPantalla]="true"
+  [portada]="true"
+>
+  <!-- La portada: la cerca de Zone.js con el árbol revisado adentro, y la anomalía afuera. -->
+  <svg portada class="pmp" viewBox="0 0 300 128" aria-hidden="true">
+    <g class="pmp-pieza" style="--i: 0">
+      <rect
+        x="70"
+        y="12"
+        width="200"
+        height="110"
+        rx="16"
+        fill="none"
+        stroke="#b59cff"
+        stroke-width="2"
+        stroke-dasharray="7 6"
+      />
+      <rect
+        x="84"
+        y="3"
+        width="48"
+        height="17"
+        rx="8.5"
+        fill="#2a1d4a"
+        stroke="#b59cff"
+        stroke-width="1.4"
+      />
+      <text x="108" y="15.5" text-anchor="middle" fill="#cbb9ff">zone</text>
+    </g>
+    <path
+      class="pmp-trazo"
+      d="M170 38L130 70M170 38L210 70M130 70L110 100M130 70L150 100M210 70L190 100M210 70L230 100"
+      stroke="#6c5ca8"
+      stroke-width="2"
+      pathLength="1"
+      style="--i: 1"
+    />
+    @for (n of nodosDePortada; track $index) {
+      <circle
+        class="pmp-pieza"
+        [attr.cx]="n.x"
+        [attr.cy]="n.y"
+        r="8"
+        fill="#7fdcae"
+        stroke="#2b1b33"
+        stroke-width="1.6"
+        [style.--i]="n.i"
+      />
+    }
+    <g class="pmp-pieza" style="--i: 6" transform="translate(32 70)">
+      <circle r="13" fill="#ff5fa8" opacity="0.25" />
+      <path d="M0 -8 2.2 -2.2 8 0 2.2 2.2 0 8-2.2 2.2-8 0-2.2 -2.2Z" fill="#ff8ac9" />
+    </g>
+  </svg>
+
   <p hacer>Corré.</p>
   <p arreglo>Cambiá la API.</p>
 
   <app-escena-zona
     escena
+    [render]="render"
     [llamada]="llamada()"
     [enPantalla]="zona().enPantalla"
     [vieja]="vieja()"
@@ -14,31 +74,35 @@
   <!-- El árbol y el valor se ven una sola vez, en la pantalla de la nave. Acá va lo que se toca:
        el código, con la API como hueco, y la corrida. -->
   <section consola class="ocd">
-    <div class="ocd-codigo" role="group" aria-label="El código que cambia el valor">
-      <button
-        type="button"
-        class="ocd-hueco"
-        [class.ocd-hueco--parcheada]="api().parcheada"
-        [attr.aria-label]="'Cambiar la API: ' + api().nombre"
-        data-guia="api"
-        (click)="cambiarApi()"
-      >
-        <span class="ocd-linea" [innerHTML]="renglonDeLaApi()"></span>
-      </button>
-      @for (r of cuerpo; track $index) {
-        <span class="ocd-linea" [innerHTML]="r"></span>
-      }
+    <div class="ocd-izq">
+      <div class="ocd-codigo" role="group" aria-label="El código que cambia el valor">
+        <button
+          type="button"
+          class="ocd-hueco"
+          [class.ocd-hueco--parcheada]="api().parcheada"
+          [attr.aria-label]="'Cambiar la API: ' + api().nombre"
+          data-guia="api"
+          (click)="cambiarApi()"
+        >
+          <span class="ocd-linea" [innerHTML]="renglonDeLaApi()"></span>
+        </button>
+        @for (r of cuerpo; track $index) {
+          <span class="ocd-linea" [innerHTML]="r"></span>
+        }
+      </div>
+
+      <div class="ocd-mando">
+        <button
+          type="button"
+          class="ocd-correr"
+          [attr.data-cuenta]="zona().total"
+          (click)="correrCodigo()"
+        >
+          &#9654; correr
+        </button>
+      </div>
     </div>
 
-    <div class="ocd-mando">
-      <button
-        type="button"
-        class="ocd-correr"
-        [attr.data-cuenta]="zona().total"
-        (click)="correrCodigo()"
-      >
-        &#9654; correr
-      </button>
-    </div>
+    <svg #render class="ocd-render" viewBox="182 0 218 236" aria-hidden="true"></svg>
   </section>
 </app-pagina-del-manual>

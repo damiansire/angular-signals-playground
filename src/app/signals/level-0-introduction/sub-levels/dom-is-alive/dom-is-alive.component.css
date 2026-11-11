@@ -1,31 +1,50 @@
 /* Clases con prefijo `dia-`: se embebe en la vista integrada, que estampa su encapsulación; sin
-   prefijo, las clases del motor de la molécula pisarían las nuestras. Va en la consola de la nave:
-   la misma paleta que su pantalla (vidrio violeta, borde lila, texto claro), como las leyes 4 y 5. */
+   prefijo, las clases del motor de la molécula pisarían las nuestras. Va en la pantalla de la nave,
+   en su paleta (vidrio violeta, texto claro), como las otras leyes. */
 :host {
   display: block;
 }
 
 .dia {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
   align-items: center;
-  gap: 1rem 1.5rem;
+  gap: 1rem 1.75rem;
+  /* Crece con la ventana, como el código de la ley 1: a 3440 de ancho, con un tope de 1rem quedaba
+     chico en el medio del vidrio. */
+  font-size: clamp(0.85rem, min(1.1vw, 2.3vh), 1.9rem);
+}
+.dia-izq {
+  flex: 0 1 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1rem;
+  min-width: 0;
 }
 
+/* Sobre el vidrio de la pantalla, sin caja propia: con borde y fondo era una caja dentro de otra. */
 .dia-codigo {
   display: flex;
   flex-direction: column;
-  padding: 0.85rem 1.1rem;
-  border: 1.5px solid #5b4a96;
-  border-radius: 12px;
-  background: #1c1434;
+  padding: 0.35rem 0.4rem;
   font:
-    500 clamp(0.85rem, 1vw, 1rem) / 1.65 'JetBrains Mono',
+    500 1em / 1.65 'JetBrains Mono',
     'Cascadia Mono',
     Consolas,
     monospace;
   color: #f2ecff;
   overflow-wrap: break-word;
+}
+
+/* Lo que muestra la pantalla: los nodos, del alto de las líneas y la corrida juntas. */
+.dia-render {
+  flex: 0 1 auto;
+  height: 15em;
+  aspect-ratio: 174 / 216;
+  max-width: 100%;
+  overflow: visible;
 }
 
 /* Un renglón por bloque con sangría colgante: la continuación de un renglón largo arranca
@@ -89,7 +108,7 @@
   background: #ffd27a;
   box-shadow: 0 4px 0 #2b1b33;
   font:
-    700 1.05rem / 1.2 'JetBrains Mono',
+    700 1em / 1.2 'JetBrains Mono',
     'Cascadia Mono',
     Consolas,
     monospace;
@@ -110,14 +129,6 @@
 .dia .dia-mando button.dia-correr:focus-visible {
   outline: 3px solid #fff8ec;
   outline-offset: 3px;
-}
-
-/* Muy angosto, o con la consola al lado de la escena (ancha y baja, ver `pagina-del-manual`), la
-   corrida va debajo del código. */
-@media (max-width: 479px), (min-width: 1100px) and (max-height: 800px) {
-  .dia {
-    grid-template-columns: minmax(0, 1fr);
-  }
 }
 
 @media (prefers-reduced-motion: reduce) {
