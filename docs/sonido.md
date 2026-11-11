@@ -56,8 +56,8 @@ cansador"; tiene que haber otra música, "compatible con el estudio".
 - [x] Más baja que la música de la colina, en cada voz.
 - [ ] **A revisar de oído:** que se pueda leer un rato largo sin que moleste, y que el paso del
       zumbido a la música (y de vuelta) se sienta natural.
-- [ ] **Abierto:** las hojas de las etapas del viaje también se leen un rato largo. ¿Llevan esta
-      misma música o una propia?
+- [x] Es solo del manual de a bordo (decidido con Damian el 2026-11-11): las hojas de las etapas
+      del viaje y el árbol de Signal Space no la llevan.
 
 ## Para la revisión
 
