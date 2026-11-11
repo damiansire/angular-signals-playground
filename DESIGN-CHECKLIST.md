@@ -1524,6 +1524,14 @@ verificable con `/cine/<n>?cuadro=<beat>` (fotograma congelado) o `/cine/<n>` (r
       retrato apretado, el símbolo a escala 1:1): con el `viewBox` entero, llama incluida, la nave
       quedaba chiquita en el círculo. Lo que pinta una escena con el color de una nave sigue a su
       casco (la mano de Nave B del 5 es salmón, no lavanda).
+- [ ] (2026-11-11) Las escenas pasan en el cielo del prólogo (`--cielo`: el degradado, las dos
+      nebulosas y estrellas en mosaicos de tamaños primos entre sí, pintadas una vez) y la barra
+      dice el nombre de la etapa, no "Capítulo N". De noche, todo trazo SUELTO (hilos, cables,
+      bocetos, etiquetas que flotan) va claro; la tinta oscura queda solo de contorno de algo
+      relleno. El título lleva sombra dura de noche: es del mismo crema que las cajas, y donde una
+      pasaba por detrás la letra se borraba (el 4, "¿Cambió…"). Las moléculas lejanas van a media
+      opacidad: enteras brillaban más que el héroe. Revisar las 12 en `?cuadro=fin` y la tarjeta
+      del título a ~1,8 s de `/cine/<n>`.
 - [ ] Una línea en pantalla por vez y nunca más de ocho palabras (lo verifica
       `cinematica-guion.spec.ts`). El texto va en la caja de diálogo, NUNCA dentro de la escena.
       La caja del prólogo de las naves escala con el ancho Y con el alto (`min(2.1vw, 4.2vh)`): a
