@@ -139,7 +139,7 @@
   pointer-events: none;
 }
 
-/* Un signal es un átomo: la misma órbita de la molécula del recorrido. */
+/* Un signal es un átomo: la misma órbita que el átomo de las cinemáticas. */
 .ci__orbita {
   position: absolute;
   inset: -9px;
