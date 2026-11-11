@@ -7,13 +7,12 @@ signals, `computed`, `effect` and change detection actually behave.
 
 **[▶ Open the live playground](https://damiansire.github.io/angular-signals-playground/)** — no install, runs in the browser.
 
-![The integrated "reactive molecule" tour, inside the Inputs & Outputs concept: the real demo, its code and a challenge to touch, with the numbered sub-levels on the left rail](public/preview.jpeg)
+![A stage of the trip, in the Inputs & Outputs chapter: the crew in the sky, the real demo with its code and a challenge to touch, and the crew's line at the bottom](public/preview.jpeg)
 
-The default entry (`/`) is the **integrated view**: a "reactive molecule" tour
-where each of the 11 chapters is an atom. Scroll to dive into an atom and its
-sub-levels orbit the card, each one embedding the _real_ demo component of that
-lesson. Deep-links are shareable: `?nivel=1&sub-nivel=2` reopens exactly where
-you were.
+The default entry (`/`) is the **integrated view**: a story you play. After the
+hill and a prologue, the trip goes stage by stage through the 11 chapters, and
+each stage is a sheet that embeds the _real_ demo component of that lesson.
+Deep-links are shareable: `?nivel=1&sub-nivel=2` reopens that same sheet.
 
 ## Played like a small RPG
 
@@ -30,10 +29,8 @@ them the rules. Each concept is a chapter of that trip:
   evidence, turns red if the system is broken and green once you fix it. No "well done" banner:
   the numbers are the answer.
 - **Saved progress.** What you establish is stored in your browser (`localStorage`,
-  `signals-cuaderno`): reload and the molecule keeps its bonds. The prologue still plays after
-  the hill every time, because it continues that scene; "Saltar intro →" skips it.
-- **The logbook** ("Bitácora", top bar): the chapters you established, the rule of the world you
-  wrote in each one, and replays of the cinematics and the prologue.
+  `signals-cuaderno`): reload and the trip picks up where you left it. "Empezar de cero", on the
+  first screen, wipes it.
 - **Sound that works on any machine.** Everything is synthesized with one Web Audio context
   (characters "talk" with RPG-style blips); without audio support it simply stays silent. One
   switch mutes everything.
@@ -116,9 +113,8 @@ whose CI run went green.
 
 ```
 src/app/
-├── integrada-vista/  # The default entry (/): the "reactive molecule" tour of the 11 chapters
-│   ├── cinematicas/  # Chapter cinematics: player, scripts and one lazy scene per chapter
-│   └── bitacora/     # The logbook: established chapters, their rules, replays
+├── integrada-vista/  # The default entry (/): the hill, the prologue and the trip through the 11 chapters
+│   └── cinematicas/  # Chapter cinematics: player, scripts and one lazy scene per chapter
 ├── signals/          # The learning levels (0–11) and their sub-levels
 ├── practice/         # Applied examples that use what you learned (/practica/*)
 ├── components/       # Feature components (histories, trees, forms…)
@@ -143,7 +139,7 @@ This is a **teaching playground**, not a library:
 
 - It is **not** a reusable component or state library to `npm install`. The demos are meant to be read and run, not consumed as a dependency.
 - It does **not** try to cover all of Angular, only the **signals** surface (reactivity, `computed`, `effect`, `resource`, zoneless).
-- The integrated "molecule" view is a visual explainer, not a production UI pattern to copy verbatim.
+- The integrated view is a visual explainer, not a production UI pattern to copy verbatim.
 
 ## Contributing
 
