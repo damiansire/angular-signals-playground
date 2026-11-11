@@ -56,17 +56,14 @@ export class CodeComponent {
   characterIndentSize = 12;
 
   lineClasses(item: CodeLine): string {
-    const state = item.selected
-      ? 'bg-green-700 text-white'
-      : 'bg-gray-800 text-gray-300 hover:bg-green-800 hover:text-white';
-    return `${this.textSize()} ${state}`;
+    const tocable = this.selectBy() === 'Line' ? ' renglon--tocable' : '';
+    return `${this.textSize()}${item.selected ? ' renglon--activo' : ''}${tocable}`;
   }
 
   // --- Modo estático (equivalente al antiguo code-legacy) ---
 
   staticLineClasses(item: CodeLine): string {
-    const state = item.active ? 'bg-green-700 text-white' : 'bg-gray-800 text-gray-300';
-    return `${this.textSize()} ${state}`;
+    return `${this.textSize()}${item.active ? ' renglon--activo' : ''}`;
   }
 
   /**

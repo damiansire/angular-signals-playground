@@ -87,7 +87,7 @@ describe('CodeComponent', () => {
     fixture.detectChanges();
 
     const marcados = Array.from<HTMLElement>(
-      fixture.nativeElement.querySelectorAll('.bg-green-700'),
+      fixture.nativeElement.querySelectorAll('.token--marcado'),
     ).map((el) => el.textContent!.trim());
     expect(marcados).toEqual(['<h2>', 'Introduction', '</h2>']);
   });
@@ -166,9 +166,11 @@ describe('CodeComponent', () => {
       expect(vacio.textContent).toBe(' ');
     });
 
-    it('staticLineClasses resalta en verde cuando la linea esta active', () => {
-      expect(component.staticLineClasses({ id: 'a', active: true })).toContain('bg-green-700');
-      expect(component.staticLineClasses({ id: 'b', active: false })).toContain('bg-gray-800');
+    it('staticLineClasses marca el renglón solo cuando está active', () => {
+      expect(component.staticLineClasses({ id: 'a', active: true })).toContain('renglon--activo');
+      expect(component.staticLineClasses({ id: 'b', active: false })).not.toContain(
+        'renglon--activo',
+      );
     });
 
     it('trata las líneas con texto como interactivas y las vacías/sin `line` como no interactivas', () => {

@@ -1,8 +1,9 @@
-<div class="rounded-md overflow-hidden shadow-md bg-gray-800 select-none">
-  <div class="flex items-center gap-1.5 border-b border-gray-700/80 bg-gray-900/60 px-4 py-2">
-    <span class="h-2.5 w-2.5 rounded-full bg-red-400/70"></span>
-    <span class="h-2.5 w-2.5 rounded-full bg-yellow-400/70"></span>
-    <span class="h-2.5 w-2.5 rounded-full bg-green-400/70"></span>
+<div class="codigo">
+  <!-- La pantalla de la nave, no una ventana de editor: las tres luces son las tres naves. -->
+  <div class="codigo__marco" aria-hidden="true">
+    <span class="codigo__luz"></span>
+    <span class="codigo__luz"></span>
+    <span class="codigo__luz"></span>
   </div>
   <div class="p-4">
     @if (isStatic()) {
@@ -14,7 +15,7 @@
              espacios del template se volvían un espacio común delante de la sangría, y al envolver
              el navegador cortaba ahí y dejaba un renglón vacío. -->
         <div
-          class="text-2xl font-mono whitespace-pre-wrap break-words py-1.5 rounded"
+          class="renglon font-mono whitespace-pre-wrap break-words"
           [class]="staticLineClasses(item)"
           [style.--sangria]="sangria(item)"
           [innerHTML]="renglonHtml(item)"
@@ -23,7 +24,7 @@
     } @else {
       @for (item of codeLines(); track $index) {
         <div
-          class="text-2xl font-mono whitespace-pre-wrap break-words py-1.5 flex rounded"
+          class="renglon font-mono whitespace-pre-wrap break-words flex"
           [class]="lineClasses(item)"
           [class.cursor-pointer]="selectBy() === 'Line'"
           [attr.tabindex]="selectBy() === 'Line' ? 0 : null"
@@ -36,20 +37,17 @@
             <div
               [attr.data-el-id]="element.id"
               [attr.data-el-dueno]="element.dueno"
-              [class.bg-green-700]="estaMarcado(element)"
-              [class.rounded-l-none]="pegadoAlAnterior(item, i)"
-              [class.rounded-r-none]="pegadoAlSiguiente(item, i)"
-              class="rounded px-0.5 transition-colors"
+              [class.token--marcado]="estaMarcado(element)"
+              [class.token--sigue]="pegadoAlAnterior(item, i)"
+              [class.token--continua]="pegadoAlSiguiente(item, i)"
+              class="token"
               [class.cursor-pointer]="isElementClickable(element)"
               [attr.tabindex]="isElementInteractive(element) ? 0 : null"
               [attr.role]="isElementInteractive(element) ? 'button' : null"
               (click)="selectBy() === 'Element' ? onElementClick(item, element) : null"
               (keyup.enter)="selectBy() === 'Element' ? onElementClick(item, element) : null"
             >
-              <span
-                [class.text-green-400]="element.reservedWord"
-                [class.font-semibold]="element.reservedWord"
-              >
+              <span [class.palabra-clave]="element.reservedWord">
                 {{ element.text }}
               </span>
             </div>

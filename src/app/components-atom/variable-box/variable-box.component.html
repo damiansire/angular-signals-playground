@@ -1,10 +1,4 @@
-<div
-  class="flex items-center space-x-2 p-2 rounded-md bg-gray-800 cursor-pointer select-none"
-  tabindex="0"
-  role="button"
-  (click)="onClick()"
-  (keyup.enter)="onClick()"
->
-  <span class="text-[#eb9b3c] font-bold">{{ variableName() }}</span>
-  <span class="text-white">{{ variableValue() }}</span>
+<div class="caja" tabindex="0" role="button" (click)="onClick()" (keyup.enter)="onClick()">
+  <span class="caja__nombre">{{ variableName() }}</span>
+  <span #valor class="caja__valor">{{ variableValue() }}</span>
 </div>

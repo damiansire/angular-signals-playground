@@ -1,0 +1,44 @@
+/* La caja naranja que la tripulación encontró: trazo de tinta y sombra dura. Tocarla la hunde. */
+.caja {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.6rem;
+  padding: 0.45rem 0.9rem;
+  border: 2.5px solid #201d16;
+  border-radius: 14px;
+  background: linear-gradient(180deg, #ffd58c, #e98f2c);
+  box-shadow: 0 5px 0 rgb(32 29 22 / 20%);
+  color: #201d16;
+  cursor: pointer;
+  user-select: none;
+  transition:
+    transform 0.12s ease,
+    box-shadow 0.12s ease;
+}
+.caja:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 0 rgb(32 29 22 / 20%);
+}
+.caja:active {
+  transform: translateY(3px);
+  box-shadow: 0 2px 0 rgb(32 29 22 / 20%);
+}
+.caja:focus-visible {
+  outline: 3px solid #201d16;
+  outline-offset: 3px;
+}
+.caja__nombre {
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+.caja__valor {
+  display: inline-block;
+  font-size: 1.3rem;
+  font-weight: 800;
+}
+@media (prefers-reduced-motion: reduce) {
+  .caja {
+    transition: none;
+  }
+}
