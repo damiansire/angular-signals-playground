@@ -69,7 +69,7 @@ describe('EventHistoryComponent', () => {
 
     expect(history.map((item) => item.newState)).toEqual([1, 2, 3]);
 
-    const values = Array.from(fixture.nativeElement.querySelectorAll('.text-lg.font-medium')).map(
+    const values = Array.from(fixture.nativeElement.querySelectorAll('.historial__valor')).map(
       (el) => (el as HTMLElement).textContent?.trim(),
     );
     expect(values).toEqual(['3', '2', '1']);
@@ -83,7 +83,7 @@ describe('EventHistoryComponent', () => {
     fixture.componentRef.setInput('history', history);
     fixture.detectChanges();
 
-    const row = fixture.nativeElement.querySelector('.bg-gray-100') as HTMLElement;
+    const row = fixture.nativeElement.querySelector('.historial__fila') as HTMLElement;
     const label = row.querySelector('span') as HTMLElement;
     const triggerHeading = row.querySelector('h3') as HTMLElement;
 
@@ -97,7 +97,7 @@ describe('EventHistoryComponent', () => {
     expect(label.getBoundingClientRect().height).toBeLessThanOrEqual(lineHeight + 1);
 
     // El bloque de trigger no queda pegado al valor: hay separacion horizontal real entre ambos.
-    const valueBlock = row.querySelector('.items-baseline') as HTMLElement;
+    const valueBlock = row.querySelector('.historial__valor') as HTMLElement;
     expect(triggerHeading.getBoundingClientRect().left).toBeGreaterThan(
       valueBlock.getBoundingClientRect().right,
     );

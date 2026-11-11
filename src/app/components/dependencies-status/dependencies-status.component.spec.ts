@@ -46,7 +46,7 @@ describe('DependenciesStatusComponent', () => {
   it('renderiza un chip por cada dependency', () => {
     fixture.componentRef.setInput('dependencies', ['x', 'y', 'z']);
     fixture.detectChanges();
-    const chips = fixture.nativeElement.querySelectorAll('.bg-gray-700');
+    const chips = fixture.nativeElement.querySelectorAll('.baliza__chip');
     expect(chips.length).toBe(3);
   });
 });

@@ -1,0 +1,77 @@
+/* Cada corrida es un renglón de bitácora: papel, trazo de tinta, y la corrida nueva arriba, que
+   entra con un salto. Un renglón y no una tarjeta: cuatro tarjetas altas sacaban el desafío de la
+   pantalla. */
+.historial__titulo {
+  margin: 0 0 0.6rem;
+  font-family: var(--font-editorial, Georgia, serif);
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: #201d16;
+}
+.historial {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+.historial__fila {
+  display: grid;
+  grid-template-columns: auto 1fr auto auto;
+  align-items: center;
+  column-gap: 0.5rem;
+  padding: 0.4rem 0.75rem;
+  border: 2px solid #201d16;
+  border-radius: 12px;
+  background: #fffdf7;
+  box-shadow: 0 3px 0 rgb(32 29 22 / 12%);
+  animation: historial-entra 0.34s cubic-bezier(0.34, 1.6, 0.64, 1);
+}
+.historial__fila:first-child {
+  background: #fff3d9;
+}
+@keyframes historial-entra {
+  from {
+    transform: translateY(-8px) scale(0.94);
+    opacity: 0;
+  }
+}
+.historial__rotulo {
+  margin: 0;
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #6b6252;
+  white-space: nowrap;
+}
+.historial__valor {
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: #201d16;
+}
+.historial__flecha {
+  color: #8a8069;
+}
+.historial__chip {
+  padding: 0.1rem 0.55rem;
+  border: 1.5px solid #201d16;
+  border-radius: 999px;
+  background: #efe7d4;
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 0.74rem;
+  font-weight: 700;
+  color: #201d16;
+  white-space: nowrap;
+}
+.historial__vacio {
+  margin: 0;
+  padding: 0.7rem;
+  border: 2px dashed #b8ab90;
+  border-radius: 12px;
+  text-align: center;
+  font-size: 0.85rem;
+  color: #6b6252;
+}
+@media (prefers-reduced-motion: reduce) {
+  .historial__fila {
+    animation: none;
+  }
+}

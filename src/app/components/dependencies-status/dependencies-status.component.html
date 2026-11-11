@@ -1,26 +1,22 @@
-<div class="rounded-md p-4 shadow-md relative">
-  <div
-    class="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2 px-4 py-2 bg-blue-500 text-white rounded-md"
-  >
-    {{ computedName() }}
-  </div>
+<div class="baliza">
+  <div class="baliza__nombre">{{ computedName() }}</div>
 
   @if (signalsInside().length) {
-    <div class="mt-4 rounded-md p-4 bg-gray-800">
-      <h2 class="text-xl font-semibold text-blue-400 mb-2">Signals Inside</h2>
-      <div class="text-white flex flex-wrap gap-2">
+    <div class="baliza__grupo">
+      <h2 class="baliza__rotulo">Signals Inside</h2>
+      <div class="baliza__chips">
         @for (dependency of signalsInside(); track $index) {
-          <span class="px-2 py-1 bg-gray-700 rounded-md">{{ dependency }}</span>
+          <span class="baliza__chip">{{ dependency }}</span>
         }
       </div>
     </div>
   }
 
-  <div class="mt-4 rounded-md p-4 bg-gray-800">
-    <h2 class="text-xl font-semibold text-blue-400 mb-2">Dependencias</h2>
-    <div class="text-white flex flex-wrap gap-2">
+  <div class="baliza__grupo">
+    <h2 class="baliza__rotulo">Dependencias</h2>
+    <div class="baliza__chips">
       @for (dependency of dependencies(); track $index) {
-        <span class="px-2 py-1 bg-gray-700 rounded-md">{{ dependency }}</span>
+        <span class="baliza__chip">{{ dependency }}</span>
       }
     </div>
   </div>

@@ -1,0 +1,65 @@
+/* Lo que el effect o el computed escucha, en una ficha de papel con su nombre en una etiqueta de
+   tinta sobre el borde. El panel azul marino de antes se leía como otra aplicación. */
+.baliza {
+  position: relative;
+  min-width: 11rem;
+  padding: 1.15rem 0.85rem 0.7rem;
+  border: 2.5px solid #201d16;
+  border-radius: 14px;
+  background: #fffdf7;
+  box-shadow: 0 5px 0 rgb(32 29 22 / 14%);
+}
+.baliza__nombre {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translate(-50%, -55%);
+  padding: 0.18rem 0.75rem;
+  border-radius: 999px;
+  background: #201d16;
+  color: #f2c27a;
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 0.78rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.baliza__grupo + .baliza__grupo {
+  margin-top: 0.55rem;
+}
+.baliza__rotulo {
+  margin: 0 0 0.3rem;
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #6b6252;
+}
+.baliza__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  min-height: 1.6rem;
+}
+.baliza__chip {
+  padding: 0.12rem 0.55rem;
+  border: 2px solid #201d16;
+  border-radius: 999px;
+  background: #ffd58c;
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #201d16;
+  animation: baliza-chip 0.3s cubic-bezier(0.34, 1.7, 0.64, 1);
+}
+@keyframes baliza-chip {
+  from {
+    transform: scale(0.6);
+    opacity: 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .baliza__chip {
+    animation: none;
+  }
+}
