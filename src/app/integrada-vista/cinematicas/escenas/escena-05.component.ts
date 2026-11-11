@@ -518,8 +518,9 @@ import { ChangeDetectionStrategy, Component, ViewEncapsulation } from '@angular/
       opacity: 0;
       transform: translate(1.4cqw, -2.4cqh);
     }
+    /* Es la mano de Nave B: el tono de su casco. */
     .cine-e5__mano path {
-      fill: #c9b6ea;
+      fill: #efa088;
       stroke: #201d16;
       stroke-width: 1.6;
       stroke-linejoin: round;

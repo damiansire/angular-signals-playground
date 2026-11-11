@@ -34,9 +34,11 @@
   --tinta-suave: #6b6252;
   --papel: #fbf8ef;
   --barra: #1b1813;
+  /* Las voces de la tripulación, del tono de cada casco (`VOZ_DE_NAVE`): nombre y retrato dicen
+     la misma nave. */
   --c-cap: #f2c27a;
-  --c-naveA: #9fc3e6;
-  --c-naveB: #c9b6ea;
+  --c-naveA: #c9b6ea;
+  --c-naveB: #f2a58e;
   --c-nave4: #ff8ac9;
   --c-mascota: #f4ece0;
   --c-todos: #f6d9c0;
