@@ -98,6 +98,31 @@ export class TripulacionComponent {
   private observador: ResizeObserver | null = null;
   private toques = 0;
   private montado = false;
+  private vigiaDeLaPausa: MutationObserver | null = null;
+  private movimiento: MediaQueryList | null = null;
+
+  /**
+   * La vida de las naves sigue a la preferencia de movimiento y a la pausa de la barra, en vivo. La
+   * pausa la marca el recorrido con `.fondo-en-pausa` en un ancestro: se miran las clases de todos,
+   * porque este componente no sabe en qué pantalla vive.
+   */
+  private readonly sincronizarVida = (): void => {
+    const svg = this.lienzo().nativeElement;
+    const viva = !sinMovimiento() && !svg.closest('.fondo-en-pausa');
+    for (const n of this.naves) n.vivo(viva);
+    this.objeto?.vivo(viva);
+  };
+
+  private vigilarLaPausa(): void {
+    const svg = this.lienzo().nativeElement;
+    this.vigiaDeLaPausa = new MutationObserver(this.sincronizarVida);
+    for (let a = svg.parentElement; a; a = a.parentElement) {
+      this.vigiaDeLaPausa.observe(a, { attributes: true, attributeFilter: ['class'] });
+    }
+    this.movimiento =
+      typeof matchMedia === 'function' ? matchMedia('(prefers-reduced-motion: reduce)') : null;
+    this.movimiento?.addEventListener('change', this.sincronizarVida);
+  }
 
   constructor() {
     afterNextRender(() => {
@@ -111,6 +136,7 @@ export class TripulacionComponent {
         }
       });
       this.observador.observe(svg);
+      this.vigilarLaPausa();
     });
     // Cambia la etapa sin desmontar la hoja: el objeto es otro, la tripulación es la misma.
     effect(() => {
@@ -120,6 +146,8 @@ export class TripulacionComponent {
     });
     inject(DestroyRef).onDestroy(() => {
       this.observador?.disconnect();
+      this.vigiaDeLaPausa?.disconnect();
+      this.movimiento?.removeEventListener('change', this.sincronizarVida);
       this.apagar();
     });
   }
@@ -184,6 +212,7 @@ export class TripulacionComponent {
     }
     this.naves = naves;
     this.montado = true;
+    this.sincronizarVida();
   }
 
   private dibujarObjeto(): void {
@@ -196,6 +225,7 @@ export class TripulacionComponent {
       `${this.id}-obj`,
       this.acento(),
     );
+    this.sincronizarVida();
   }
 
   /** Todas miran adonde va el puntero. */

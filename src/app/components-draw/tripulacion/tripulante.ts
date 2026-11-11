@@ -76,7 +76,31 @@ export class Tripulante {
 
     this.nave.pose.addEventListener('pointerdown', this.alTocar);
     this.sacarDelMotor = motorDeMuelles().agregar(this.cuadro);
-    if (!sinMovimiento()) this.vivir();
+    this.vivo(!sinMovimiento());
+  }
+
+  private viva = false;
+
+  /**
+   * Respira o se queda quieta. Lo decide quien la contiene, en vivo: con movimiento reducido o con la
+   * vida de fondo en pausa (WCAG 2.2.2) la nave no flota, no chisporrotea y no parpadea. Decidido
+   * solo al nacer, cambiar la preferencia con la página abierta no la frenaba.
+   */
+  vivo(si: boolean): void {
+    if (si === this.viva) return;
+    this.viva = si;
+    if (si) {
+      this.vivir();
+      return;
+    }
+    for (const t of this.vivas) t.kill();
+    this.vivas = [];
+    this.parpadeo?.kill();
+    this.parpadeo = null;
+    this.cara.parpado = 1;
+    this.pintarCara();
+    gsap.set(this.nave.pose, { y: 0, rotation: 0 });
+    gsap.set(this.nave.llama, { scaleX: 1 });
   }
 
   /** Respira, chisporrotea y parpadea a intervalos irregulares: quieta se ve de cartón. */

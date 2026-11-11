@@ -11,6 +11,8 @@ import { TINTA, el } from './nave-del-prologo';
 export interface ObjetoDelMundo {
   /** Algo pasó en la etapa: el objeto lo cuenta a su manera. */
   reaccionar(fuerza?: number): void;
+  /** Flota o se queda quieto: con movimiento reducido o la vida de fondo en pausa, quieto. */
+  vivo(si: boolean): void;
   apagar(): void;
 }
 
@@ -580,15 +582,24 @@ export function dibujarObjeto(
   const cuerpo = el(g, 'g');
   const reaccion = dibujo({ g: cuerpo, defs, id, acento });
   // Flota apenas, como todo en el mundo: quieto se ve pegado al papel.
-  const flote = sinMovimiento()
-    ? null
-    : gsap.to(cuerpo, { y: -4, duration: 2.4, ease: 'sine.inOut', yoyo: true, repeat: -1 });
+  const flote = gsap.to(cuerpo, {
+    y: -4,
+    duration: 2.4,
+    ease: 'sine.inOut',
+    yoyo: true,
+    repeat: -1,
+    paused: sinMovimiento(),
+  });
   return {
+    vivo: (si) => {
+      if (si) flote.resume();
+      else flote.pause(0);
+    },
     reaccionar: (fuerza = 1) => {
       if (!sinMovimiento()) reaccion(fuerza);
     },
     apagar: () => {
-      flote?.kill();
+      flote.kill();
       gsap.killTweensOf(cuerpo.querySelectorAll('*'));
       g.replaceChildren();
     },
