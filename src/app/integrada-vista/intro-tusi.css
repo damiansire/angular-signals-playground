@@ -432,7 +432,9 @@
 /* `.intro.` y no solo `.intro--fuera`: el shorthand `animation` de `.tusi__mouse span` resetea el
    play-state y, con una clase menos, le ganaba por especificidad. */
 .tusi__overlay.gone *,
-.intro.intro--fuera * {
+.intro.intro--fuera *,
+.intro.intro--fuera *::before,
+.intro.intro--fuera *::after {
   animation-play-state: paused;
 }
 

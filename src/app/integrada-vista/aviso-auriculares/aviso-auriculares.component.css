@@ -813,3 +813,10 @@
     opacity: 0;
   }
 }
+
+/* Al retomar, el aviso se queda en la colina mientras ella se desvanece, y la colina queda debajo
+   del viaje. Tapada (`intro--fuera`), su pausa no lo alcanza: es otro componente. Sin esto, sus
+   estrellas y su llamado latían toda la sesión debajo de la hoja. */
+:host-context(.intro.intro--fuera) * {
+  animation-play-state: paused;
+}
