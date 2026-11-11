@@ -1104,11 +1104,29 @@ Del minijuego de operadores (2026-11-08):
 - [ ] La ley 1 va sin franja abajo (`enPantalla` + `portada`): la consola está ADENTRO de la
       pantalla de la nave, en tres columnas (código, árbol, lo que se dibuja), y la nave va en su
       carril a la izquierda, en su propio SVG (`--pm-nave-*`). Con el árbol abajo, junto al código,
-      quedaba lejos de lo que dibuja. Cada cosa tiene su lugar: la ley en la barra de título de la
-      pantalla (con las marcas del libro a la derecha), los pasos y "Mostrame" en un globo de la
+      quedaba lejos de lo que dibuja. Cada cosa tiene su lugar: la ley suelta sobre el cielo, arriba
+      (ver el ítem que sigue), los pasos y "Mostrame" en un globo de la
       nave que salta al cambiar de paso, "Bitácora" como pestaña sobre el borde de abajo de la
       pantalla y "Siguiente" en el carril de la nave (ver abajo). Abre con una portada (la ley grande, el árbol armado que crece desde la raíz y
       "Leer"); "Leer" achica la portada, agranda la pantalla hasta la demo y la nave salta.
+- [ ] (2026-11-11) La ley 1 en la pantalla de la nave se ve como la 3, no como un modal. Defecto
+      resuelto (Damian): un recuadro con borde y fondo propio encerraba la ley, el código, el árbol y
+      el render, y se leía como una ventana aparte. Anti-patrones que se sacaron, y que no vuelven:
+      la ley como barra de título adentro de la pantalla (con su raya debajo); una pantalla sin haz
+      que la una con la nave; cajas dentro de la caja (código y árbol con borde y fondo propios
+      sobre el vidrio); una sombra larga que la levanta del cielo; un marco distinto al que proyecta
+      la nave en las otras leyes. Ahora la ley, lo que dice la nave y las marcas van sobre el cielo
+      en su propia fila (`.pm` en grilla, la ventanilla en `subgrid` por detrás, así el cielo llega
+      hasta arriba); la pantalla lleva el marco de `pintarPantalla` como sombra (como borde
+      ocupaba 14 px y a 1440 las tres columnas ya no entraban); y la escena traza el haz de la
+      nariz al borde de la pantalla (`trazoDelHaz`, función pura) cada vez que cambia una de las
+      dos, también en la portada. Sin haz si la pantalla no queda adelante de la nariz (en el
+      celular va abajo), y se apaga cuando la nave sale volando. Baja (800 de alto o menos), la nave
+      va más abajo (`--pm-nave-arriba` 50%): al 44%, a 1280×640 el globo tapaba "Manual de a bordo".
+      En la portada la ventanilla también ocupa las dos filas: si no, abajo quedaba una franja sin
+      cielo. Medido con input real (tags, cierre, "Siguiente página" hasta la ley 2) a 3440×1300,
+      1440×900, 1366×768, 1280×640 y 390×844: sin desborde horizontal, globo, "Siguiente" y nave sin
+      tocar la ley ni la pantalla, y sin scroll salvo en el celular (la excepción de siempre).
 - [ ] Un absoluto dentro de una grilla NO lleva `grid-row`/`grid-column`: su caja pasa a ser esa
       celda. El globo de la nave tenía `grid-row: 2` (su lugar en el celular) y con la nave al
       costado caía debajo de ella, con la cola apuntando al vacío.
