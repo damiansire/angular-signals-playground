@@ -54,10 +54,6 @@
      viewport y quedaban bajo el fold (design-review). El zoom bajó de 1.2 a 1.0 para que entren sin
      depender del scroll interno de la card; sigue legible porque la card es ancha. */
   zoom: 1;
-  /* Todo sub-nivel arranca en el borde de la card, y a 1280-1440 px el título vertical del
-     concepto (la espina) se metía 20 px adentro: se comía la "D" de DESAFÍO y el borde del código.
-     A 1920 no llega; el aire extra no molesta. */
-  padding-left: 1.5rem;
 }
 .card--dissolve .subhost > * > :not(app-concept-card) {
   width: 100%;

@@ -37,11 +37,6 @@
 .prologo__manual.card--dissolve {
   background: none;
 }
-/* La armonización corre el contenido 1.5rem para salvar la espina de la molécula. Acá no hay espina,
-   y el corrimiento dejaba dos bordes izquierdos en la hoja. */
-.prologo__manual.card--dissolve .subhost > * {
-  padding-left: 0;
-}
 /* El tope de 64rem es de la card de la molécula, que tiene la espina al lado. La página del manual
    ocupa la hoja entera: con el tope quedaba una franja vacía a la derecha. */
 .prologo__manual.card--dissolve .subhost > * > app-pagina-del-manual {

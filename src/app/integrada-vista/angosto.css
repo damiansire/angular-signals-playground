@@ -38,7 +38,6 @@
 @media (max-width: 600px) {
   .card--dissolve .subhost > * {
     gap: 1.1rem;
-    padding-left: 0;
   }
   .card--dissolve .subhost app-code div {
     overflow-wrap: break-word;
