@@ -1357,7 +1357,9 @@ Del minijuego de operadores (2026-11-08):
 - [ ] Ningún aparato viejo queda en la hoja: la caja de una variable es la caja naranja del signal
       (su valor salta al cambiar), las dependencias son una ficha de papel con su nombre en tinta
       sobre el borde, y el historial son renglones que entran con un salto (los últimos cuatro: con
-      todos crecía con cada click). Sin paneles `bg-gray-800` ni botones azules de Tailwind.
+      todos crecía con cada click). Sin paneles `bg-gray-800` ni botones azules de Tailwind. El
+      contador hijo del capítulo 7 (`app-counter-input`) seguía en gris azulado y salía así en la
+      captura del README: es un aparato con la tinta de la pantalla del código.
 - [ ] Cada página del viaje tiene su línea al llegar y otra al resolver (`guion-del-viaje.ts`, con
       spec: las 33 páginas, las reglas del guion y dos naves distintas por página, porque es una
       charla). Las naves miran lo que se toca, una se entera con un respingo, festejan lo resuelto
