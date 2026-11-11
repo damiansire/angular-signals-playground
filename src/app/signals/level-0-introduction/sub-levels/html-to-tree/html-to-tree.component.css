@@ -39,25 +39,30 @@
   color: #f2ecff;
 }
 
-/* Un renglón por elemento; la sangría va como relleno, en `ch`: la que aparenta el código. La franja
-   de cada renglón asoma un poco a los costados, para que la marca no quede pegada al texto. */
+/* Un renglón por elemento; la sangría va como margen, en `ch`: la que aparenta el código. La marca
+   abraza solo el código del renglón, desde la sangría hasta su último carácter: estirada a lo ancho
+   de la columna, con una raya al costado, los renglones marcados se pegaban en un bloque, con una
+   comilla rara al principio y un vacío al final. El borde transparente separa una marca de la otra
+   sin cambiar el alto del renglón (1,24 + 2 × 0,08 = 1,4). */
 .htt-linea {
   display: block;
-  margin-inline: -0.45rem;
-  padding: 0 0.45rem 0 calc(var(--sangria, 0ch) + 0.45rem);
-  border-radius: 6px;
+  width: fit-content;
+  margin-left: calc(var(--sangria, 0ch) - 0.4rem);
+  padding: 0 0.4rem;
+  border-block: 0.08em solid transparent;
+  border-radius: 0.45em;
+  background-clip: padding-box;
+  line-height: 1.24;
   white-space: nowrap;
 }
-/* Ya está en la pantalla: una franja lila con su raya, como un renglón leído. Al marcarse destella
-   en dorado, el color de lo que se toca. Si quedó fuera de su panel, en el rojo del aviso. */
+/* Ya está en la pantalla: lila, como un renglón leído. Al marcarse destella en dorado, el color de
+   lo que se toca. Si quedó fuera de su panel, en el rojo del aviso. */
 .htt-linea--vista {
-  background: rgb(155 135 245 / 16%);
-  box-shadow: inset 3px 0 0 #9b87f5;
+  background-color: rgb(155 135 245 / 18%);
   animation: htt-marca 0.7s ease-out;
 }
 .htt-linea--afuera {
-  background: rgb(255 118 118 / 14%);
-  box-shadow: inset 3px 0 0 #ff7676;
+  background-color: rgb(255 118 118 / 16%);
   animation: htt-marca 0.7s ease-out;
 }
 @keyframes htt-marca {
