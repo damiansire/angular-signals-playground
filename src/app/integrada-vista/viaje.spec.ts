@@ -1,14 +1,16 @@
 import { signalsRoutesTree } from '../app.routes';
 import type { RouteItem } from '../interfaces/route-item.interface';
-import { CAPITULO_DE_CONCEPTO } from './molecule-engine';
+import { CAPITULO_DE_CONCEPTO, conceptoDeCapitulo } from './molecule-engine';
 import {
   ETAPAS_DEL_VIAJE,
   esElFin,
   etapaDe,
   finDelViaje,
+  lugarDelLink,
   paginasDeEtapa,
   siguienteEtapa,
 } from './viaje';
+import { buildWhereQuery, parseWhereQuery } from './url-sync';
 
 describe('el viaje', () => {
   it('cada capítulo del recorrido tiene su etapa, en el mismo orden', () => {
@@ -50,6 +52,30 @@ describe('el viaje', () => {
     expect(siguienteEtapa(0, subs)).toEqual({ concepto: 1, pagina: -1 });
     expect(siguienteEtapa(1, subs)).toEqual({ concepto: 3, pagina: -1 });
     expect(siguienteEtapa(3, subs)).toEqual({ concepto: 4, pagina: -1 });
+  });
+
+  it('un link abre la página de la hoja, o la cinemática si trae solo el nivel', () => {
+    const subs = [7, 3, 0, 2];
+    expect(lugarDelLink(1, 2, subs)).toEqual({ concepto: 1, pagina: 1 });
+    expect(lugarDelLink(1, 0, subs)).toEqual({ concepto: 1, pagina: -1 });
+    expect(lugarDelLink(1, 9, subs)).toEqual({ concepto: 1, pagina: 2 });
+    expect(lugarDelLink(2, 1, subs)).toBeNull();
+    expect(lugarDelLink(8, 1, subs)).toBeNull();
+  });
+
+  it('lo que el viaje escribe en la barra, el link lo vuelve a abrir en el mismo lugar', () => {
+    const subs = [7, 3, 0, 2];
+    for (const lugar of [
+      { concepto: 0, pagina: 4 },
+      { concepto: 3, pagina: 0 },
+      { concepto: 1, pagina: -1 },
+    ]) {
+      const link = parseWhereQuery(
+        buildWhereQuery(CAPITULO_DE_CONCEPTO[lugar.concepto], lugar.pagina),
+      );
+      expect(link).not.toBeNull();
+      expect(lugarDelLink(conceptoDeCapitulo(link!.concept)!, link!.sub, subs)).toEqual(lugar);
+    }
   });
 
   it('después del cierre viene el fin, que es otro lugar: recargar no repite la revelación', () => {

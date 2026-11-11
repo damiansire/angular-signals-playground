@@ -809,7 +809,11 @@
         <span class="prologo__manual-libro"
           ><b>{{ libro().nombre }}</b></span
         >
-        <ng-container [ngTemplateOutlet]="marcasDelLibro" />
+        <span class="etapa__derecha">
+          <!-- Era el link de la molécula: retirada, la práctica se abre desde la hoja. -->
+          <a class="etapa__practica" routerLink="/practica/carrito">Practicá</a>
+          <ng-container [ngTemplateOutlet]="marcasDelLibro" />
+        </span>
       </header>
     }
     <div #cuerpoDelManual class="prologo__manual-cuerpo">

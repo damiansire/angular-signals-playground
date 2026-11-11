@@ -101,7 +101,14 @@ import {
   CAPITULO_REVELACION,
   type Cinematica,
 } from './cinematicas/cinematica-guion';
-import { esElFin, etapaDe, finDelViaje, paginasDeEtapa, siguienteEtapa } from './viaje';
+import {
+  esElFin,
+  etapaDe,
+  finDelViaje,
+  lugarDelLink,
+  paginasDeEtapa,
+  siguienteEtapa,
+} from './viaje';
 
 /**
  * Cuánto tiene que quedarse el recorrido en la parada de un capítulo para que arranque su
@@ -753,6 +760,12 @@ export class IntegradaVistaComponent {
         .find((a) => a.startsWith('_ngcontent')) ?? null);
     const subCounts = this.subComponents.map((subs) => subs.length);
     this.partida.set(cargarPartida(this.almacen, subCounts));
+    // La molécula ya no existe (ADR 0019): un link `?nivel=` lleva a la misma pantalla, en la hoja
+    // del viaje. Se guarda como el lugar del viaje, y el aviso sigue directo ahí (ADR 0015).
+    const link = this.initialFromUrl();
+    const lugarPedido = link && lugarDelLink(link.concept, link.sub, subCounts);
+    if (lugarPedido)
+      this.guardar(conViaje(conPunto(this.partida(), { lugar: 'viaje' }), lugarPedido));
     this.destroyRef.onDestroy(() => {
       if (this.esperaCinematica) clearTimeout(this.esperaCinematica);
     });
@@ -766,8 +779,8 @@ export class IntegradaVistaComponent {
       subCounts,
       enc,
       this.onWhere,
-      // La molécula solo se abre con un link: sin él, la historia sigue desde la colina (ADR 0008).
-      this.initialFromUrl(),
+      // Nunca abre la molécula: ni un link (ADR 0019).
+      null,
       (visible) => landing?.setVisible(visible),
       {
         establecidos: new Set(this.partida().establecidos),
@@ -966,6 +979,7 @@ export class IntegradaVistaComponent {
     try {
       while (lugar.concepto < subs.length) {
         this.guardar(conViaje(conPunto(this.partida(), { lugar: 'viaje' }), lugar));
+        this.mostrarEnLaBarra(lugar);
         const capitulo = CAPITULO_DE_CONCEPTO[lugar.concepto];
         if (lugar.pagina < 0) {
           await this.verEntera(capitulo);
@@ -986,6 +1000,15 @@ export class IntegradaVistaComponent {
     } finally {
       this.viajando = false;
     }
+  }
+
+  /**
+   * El lugar del viaje en la barra de direcciones, sin navegar: copiar el link lleva a la misma
+   * página (`lugarDelLink`). La cinemática de un capítulo es el link con solo el nivel.
+   */
+  private mostrarEnLaBarra(lugar: LugarDelViaje): void {
+    const capitulo = CAPITULO_DE_CONCEPTO[lugar.concepto] ?? -1;
+    this.location.replaceState('/', buildWhereQuery(capitulo, lugar.pagina));
   }
 
   /**

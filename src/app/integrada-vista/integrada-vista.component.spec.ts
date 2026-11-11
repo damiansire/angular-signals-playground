@@ -250,44 +250,19 @@ describe('IntegradaVistaComponent', () => {
     });
   });
 
-  describe('navegación por teclado', () => {
-    const esperar = (ms: number) => new Promise((r) => setTimeout(r, ms));
-    const flecha = (prevenida: boolean): void => {
+  describe('la colina no baja (ADR 0019)', () => {
+    it('una flecha libre no mueve el escenario: la molécula ya no se recorre', async () => {
+      const fixture = await montar();
+      const stage = fixture.nativeElement.querySelector('#stage') as HTMLElement;
+      await hastaElArranque(fixture.nativeElement);
+      const antes = stage.scrollTop;
+
       const e = new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true, cancelable: true });
-      if (prevenida) e.preventDefault();
       window.dispatchEvent(e);
-    };
+      await new Promise((r) => setTimeout(r, 700)); // más que el glide más largo que había (620 ms)
 
-    it('una flecha ya consumida (un overlay modal) no mueve el recorrido; una libre sí', async () => {
-      const fixture = await montar();
-      const stage = fixture.nativeElement.querySelector('#stage') as HTMLElement;
-      await hastaElArranque(fixture.nativeElement);
-      const antes = stage.scrollTop;
-
-      flecha(true);
-      await esperar(700); // más que el glide más largo (620 ms): que no pase nada lleva tiempo
-      expect(stage.scrollTop).withContext('flecha consumida').toBe(antes);
-
-      flecha(false);
-      await hasta(() => stage.scrollTop > antes);
-      expect(stage.scrollTop).withContext('flecha libre').toBeGreaterThan(antes);
-
-      fixture.destroy();
-    });
-
-    it('un `load` tardío no tira de vuelta al arranque a quien ya navegó', async () => {
-      const fixture = await montar();
-      const stage = fixture.nativeElement.querySelector('#stage') as HTMLElement;
-      await hastaElArranque(fixture.nativeElement);
-      const antes = stage.scrollTop;
-      flecha(false);
-      await hasta(() => stage.scrollTop > antes);
-      const navegado = stage.scrollTop;
-      expect(navegado).withContext('la flecha movió el recorrido').toBeGreaterThan(antes);
-
-      window.dispatchEvent(new Event('load'));
-
-      expect(stage.scrollTop).toBe(navegado);
+      expect(stage.scrollTop).toBe(antes);
+      expect(e.defaultPrevented).toBeFalse();
       fixture.destroy();
     });
   });
@@ -426,26 +401,6 @@ describe('IntegradaVistaComponent', () => {
       localStorage.removeItem(CLAVE);
     });
 
-    it('al volver, lo establecido en otra visita vuelve a soldar sus enlaces', async () => {
-      localStorage.setItem(
-        CLAVE,
-        JSON.stringify({ v: 1, establecidos: ['1/0', '3/2'], cinematicas: [], prologo: true }),
-      );
-      // Abrir en el último capítulo deja detrás todos los enlaces, que es donde se ve la deuda.
-      history.replaceState(null, '', `${location.pathname}?nivel=11`);
-      const fixture = await montar();
-      await hastaElArranque(fixture.nativeElement);
-
-      const enlaces = [...fixture.nativeElement.querySelectorAll('#bonds .bond')] as Element[];
-      const soldados = enlaces
-        .map((e, j) => (e.classList.contains('on') ? j : -1))
-        .filter((j) => j >= 0 && j < 9);
-      // La partida es de la versión 1, de cuando existía la Introducción: todo se corre uno.
-      expect(soldados).toEqual([0, 2]);
-
-      fixture.destroy();
-    });
-
     it('establecer un sistema escribe la partida con su concepto y su sub-nivel', async () => {
       const fixture = await montar();
       await hastaElArranque(fixture.nativeElement);
@@ -497,7 +452,7 @@ describe('IntegradaVistaComponent', () => {
       fixture.destroy();
     });
 
-    it('moverse por el recorrido guarda el lugar para retomar', async () => {
+    it('un link a un capítulo guarda el viaje en su cinemática', async () => {
       history.replaceState(null, '', `${location.pathname}?nivel=4`);
       const fixture = await montar();
       await hastaElArranque(fixture.nativeElement);
@@ -505,7 +460,8 @@ describe('IntegradaVistaComponent', () => {
 
       const guardado = JSON.parse(localStorage.getItem(CLAVE) ?? '{}');
       // `nivel` es el número de capítulo, no la posición: el 4 es el cuarto concepto desde 0 = 3.
-      expect(guardado.punto).toEqual({ lugar: 'recorrido', concepto: 3, sub: -1 });
+      expect(guardado.punto).toEqual({ lugar: 'viaje' });
+      expect(guardado.viaje).toEqual({ concepto: 3, pagina: -1 });
       fixture.destroy();
     });
 

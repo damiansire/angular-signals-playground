@@ -69,6 +69,22 @@ export function esElFin(
   return lugar.concepto >= subPorConcepto.length && lugar.pagina >= 0;
 }
 
+/**
+ * Dónde abre el viaje un link `?nivel=X(&sub-nivel=Z)`: la página Z del concepto, o su cinemática si
+ * el link trae solo el nivel. La molécula ya no existe (ADR 0019): los links que la abrían llevan a
+ * la misma pantalla, en la hoja. Un sub-nivel de más cae en la última página; un concepto sin
+ * pantallas no es un lugar.
+ */
+export function lugarDelLink(
+  concepto: number,
+  sub: number,
+  subPorConcepto: readonly number[],
+): { readonly concepto: number; readonly pagina: number } | null {
+  const paginas = subPorConcepto[concepto];
+  if (!paginas) return null;
+  return { concepto, pagina: sub > 0 ? Math.min(sub, paginas) - 1 : -1 };
+}
+
 export function siguienteEtapa(
   concepto: number,
   subPorConcepto: readonly number[],

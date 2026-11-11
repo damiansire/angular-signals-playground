@@ -23,11 +23,13 @@
   box-sizing: border-box;
 }
 
-/* La pantalla ES la página: el stage ocupa todo el viewport. */
+/* La pantalla ES la página: el stage ocupa todo el viewport. No scrollea: debajo de la colina
+   estaba la molécula, y la molécula ya no existe (ADR 0019). Con scroll, la rueda en la colina
+   bajaba a los átomos. */
 .stage {
   position: relative;
   height: 100vh;
-  overflow-y: auto;
+  overflow-y: hidden;
   overflow-x: hidden;
   background: radial-gradient(90% 72% at 50% 46%, #fbf9f2, #e6f1ea 88%);
   /* Scrollbar nativa oculta: es una escena inmersiva, no una lista. `scrollbar-width:thin`
@@ -40,6 +42,11 @@
      `scroll-snap-stop: always` (abajo) realmente frene en CADA sub-nivel; con
      `proximity` un gesto largo de trackpad podía saltear varios de una. */
   scroll-snap-type: y mandatory;
+}
+/* Lo que era de la molécula no se ve: el motor todavía los mide, y con `display: none` el SVG medía
+   0 y la cámara se dibujaba con NaN. Oculto tampoco recibe toques ni foco. */
+.holder > :is(.mol, .topbar, .rail, .space-spine, .rec-guide) {
+  visibility: hidden;
 }
 .stage::-webkit-scrollbar {
   display: none;

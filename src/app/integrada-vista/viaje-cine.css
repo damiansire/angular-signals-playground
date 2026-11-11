@@ -52,6 +52,34 @@
   font-weight: 600;
   color: #efe6d6;
 }
+/* La práctica, a mano y sin competir con el nombre de la etapa: un renglón de la barra, no un botón. */
+.etapa__derecha {
+  display: flex;
+  align-items: center;
+  gap: clamp(0.75rem, 2vw, 1.5rem);
+}
+.prologo__manual--viaje .etapa__practica {
+  font:
+    600 12px/1 ui-monospace,
+    'SFMono-Regular',
+    Menlo,
+    Consolas,
+    monospace;
+  letter-spacing: 0.12em;
+  color: #f2c27a;
+  text-decoration: none;
+  border-bottom: 1.5px dashed rgb(242 194 122 / 45%);
+  padding-bottom: 2px;
+}
+.prologo__manual--viaje .etapa__practica:hover {
+  color: #ffd99a;
+  border-bottom-style: solid;
+}
+.prologo__manual--viaje .etapa__practica:focus-visible {
+  outline: 2px solid #f2c27a;
+  outline-offset: 4px;
+  border-radius: 2px;
+}
 .prologo__manual--viaje .prologo__manual-donde {
   margin: 0;
 }

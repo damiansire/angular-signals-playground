@@ -103,6 +103,10 @@ fecha y adónde fue. Los ids (H1, J1…) sirven para nombrarlos en una sesión (
   sus títulos son técnicos ("Read-only signals: asReadonly()"). **Propuesta:** pasarlas al formato
   de las páginas del manual (qué hacer, la demo, la escena de la nave y el desafío), una etapa por
   vez, como se hizo con la Introducción.
+- **T15. Borrar el motor de la molécula.** Desde [0019](../adr/0019-la-molecula-se-retira.md) la
+  molécula no se ve en ningún camino, pero `molecule-engine.ts` sigue montado: maneja también la
+  visibilidad de la colina, la pausa de las animaciones y lo establecido. **Propuesta:** pasar esas
+  tres cosas a la vista y borrar el motor, el riel, la bitácora y el CSS de la card.
 - **T6. El gate de prosa.** `scripts/prose-budget.mjs` mide solo los `*.component.html` que están
   bajo `src/app/signals/**/sub-levels/`. Si las pantallas se mudan, mide cero y pasa sin avisar.
   Además, una pantalla movida o renombrada arranca sin crédito de línea base, con 8 palabras. La
