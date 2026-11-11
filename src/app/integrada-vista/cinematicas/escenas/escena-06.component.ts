@@ -132,7 +132,7 @@ import { ChangeDetectionStrategy, Component, ViewEncapsulation } from '@angular/
         <div class="cine-e6__ventana">
           <div class="cine-e6__iris">
             <svg class="cine-e6__exploradora" viewBox="-70 -40 140 80">
-              <use href="#cine-nave" x="-70" y="-40" width="140" height="80" />
+              <use href="#cine-nave-4" x="-70" y="-40" width="140" height="80" />
             </svg>
           </div>
         </div>
@@ -225,7 +225,7 @@ import { ChangeDetectionStrategy, Component, ViewEncapsulation } from '@angular/
       >
         <div class="k-cuerpo">
           <svg class="k-flota" viewBox="-70 -40 140 80">
-            <use href="#cine-nave" x="-70" y="-40" width="140" height="80" />
+            <use href="#cine-nave-b" x="-70" y="-40" width="140" height="80" />
           </svg>
         </div>
       </div>

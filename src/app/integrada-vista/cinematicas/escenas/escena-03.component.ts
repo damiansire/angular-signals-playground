@@ -129,7 +129,7 @@ import { ChangeDetectionStrategy, Component, ViewEncapsulation } from '@angular/
       <div class="k-actor k-nave" style="--x: 26; --y: 52; --w: 7.6; --i: 2">
         <div class="k-cuerpo">
           <svg class="k-flota" viewBox="-70 -40 140 80">
-            <use href="#cine-nave" x="-70" y="-40" width="140" height="80" />
+            <use href="#cine-nave-b" x="-70" y="-40" width="140" height="80" />
             <g class="cine-e3__baliza cine-e3__baliza--vieja">
               <circle class="cine-e3__brillo" cx="0" cy="-41" r="46" />
               <path class="cine-e3__montura" d="M -22 -22.8 L 22 -9.9 L 18 -26 L -18 -26 Z" />

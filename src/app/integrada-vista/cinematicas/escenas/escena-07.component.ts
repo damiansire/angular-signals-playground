@@ -189,7 +189,7 @@ import { ChangeDetectionStrategy, Component, ViewEncapsulation } from '@angular/
         <div class="k-cuerpo">
           <span class="cine-e7__recibe"></span>
           <svg class="k-flota" viewBox="-70 -40 140 80">
-            <use href="#cine-nave" x="-70" y="-40" width="140" height="80" />
+            <use href="#cine-nave-b" x="-70" y="-40" width="140" height="80" />
           </svg>
         </div>
       </div>

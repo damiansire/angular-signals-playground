@@ -12,10 +12,16 @@ import {
   input,
   output,
   signal,
+  viewChild,
 } from '@angular/core';
 import { NgComponentOutlet } from '@angular/common';
 
 import { sonido } from '../../libs/sonido';
+import {
+  dibujarNave,
+  el,
+  gradientesDeNaves,
+} from '../../components-draw/tripulacion/nave-del-prologo';
 import { variablesDeResorteSiSoporta } from '../../libs/resorte';
 import {
   CAPITULO_FINAL,
@@ -185,6 +191,7 @@ export class CinematicaComponent {
 
     const injector = inject(Injector);
     afterNextRender(() => {
+      this.dibujarNaves();
       // El iris se abre sobre la escena ya dibujada: primero se carga su chunk y se espera un
       // render, recién ahí arranca el reloj.
       void cargarEscena(this.cinematica().capitulo)
@@ -195,6 +202,37 @@ export class CinematicaComponent {
         })
         .catch(() => this.abrir());
     });
+  }
+
+  private readonly defs = viewChild.required<ElementRef<SVGSVGElement>>('defs');
+
+  /**
+   * Las naves de la tripulación, las mismas del prólogo y del viaje, en los símbolos que usan todas
+   * las escenas. Antes eran la flecha del prólogo viejo, y la historia mostraba dos tripulaciones.
+   */
+  private dibujarNaves(): void {
+    const defs = this.defs().nativeElement.querySelector('defs');
+    if (!defs) return;
+    gradientesDeNaves(defs, 'cine');
+    const simbolos: readonly (readonly [string, number])[] = [
+      ['cine-nave-cap', 0],
+      ['cine-nave', 1],
+      ['cine-nave-b', 2],
+      ['cine-nave-4', 3],
+    ];
+    for (const [id, i] of simbolos) {
+      const simbolo = defs.querySelector(`#${id}`);
+      if (!simbolo || simbolo.childElementCount > 0) continue;
+      dibujarNave(el(simbolo, 'g'), i, defs, 'cine').pose.removeAttribute('style');
+    }
+  }
+
+  /** El retrato de quien habla: su nave, con su paleta. */
+  protected simboloDe(quien: Hablante): string {
+    if (quien === 'cap') return '#cine-nave-cap';
+    if (quien === 'naveB') return '#cine-nave-b';
+    if (quien === 'nave4') return '#cine-nave-4';
+    return '#cine-nave';
   }
 
   protected nombreDe(quien: Hablante): string {
