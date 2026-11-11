@@ -6,6 +6,11 @@ resuelve se agrega acá como ítem permanente, y cada revisión verifica TODOS l
 ("parece un modal") sobrevivió a 8 rondas de revisión porque cada ronda
 auditaba solo lo último reportado.
 
+**La molécula se borró (ADR 0021, 2026-11-12).** Los ítems de la card, la barra única, el riel, los
+átomos, la órbita y la guía describen una pantalla que ya no existe: no se verifican. Lo que vale de
+ellos para las pantallas embebidas (sin costura, sin scroll anidado, legibilidad) se mide en la hoja
+del viaje, que lleva la misma `.card--dissolve`.
+
 ## Gramática de modal (la card debe sentirse parte de la escena, no una ventana)
 
 - [ ] Sin scroll anidado dentro de la card/sub-nivel: el scroll es de la
@@ -215,9 +220,18 @@ puede alcanzar" son dos cosas distintas y hay que chequear las dos.
       `interval`: al volver sigue desde donde quedó en vez de cobrar de golpe
       el tiempo inerte (8/2, 2026-09-29). Verificar midiendo (contar logs o
       ticks durante N segundos parado en otro nivel), no leyendo el código.
-- [ ] Lo que tapa la intro no se pinta: con la intro entera encima, `svg.mol` y `#content` van
-      en `visibility: hidden` y el SMIL de la molécula en pausa, y vuelven apenas la intro empieza
-      a irse. Defecto resuelto (2026-11-10): debajo de la colina, los electrones y las Angie de las
+- [ ] Lo que queda tapado no se pinta. Desde 2026-11-12 (ADR 0021) es la colina la que queda
+      debajo: mientras una cinemática o la hoja de una etapa ocupan la pantalla, `.intro` lleva
+      `intro--fuera` (animaciones en pausa), queda `inert` y su canvas deja de pedir cuadros; vuelve
+      al cerrarse. El prólogo no la tapa: vive adentro. Verificar con una cinemática abierta:
+      `getComputedStyle` de un loop de la colina en `paused` y cero rAF del canvas en un segundo.
+      Contar con `.intro.getAnimations({subtree: true})` las infinitas en `running` (cero), no
+      mirar un loop suelto: la pausa de `.intro.intro--fuera *` no llega a los pseudo-elementos
+      (el halo del sol, el aura de la idea) ni a otro componente. Defecto resuelto (2026-11-12):
+      al retomar una partida, el aviso de auriculares se queda en `retomando` adentro de la colina
+      y sus 130 loops (estrellas, llamado) latían toda la sesión debajo de la hoja; lo frena su
+      propio `:host-context(.intro.intro--fuera)`.
+      Antes (2026-11-10) era la molécula debajo de la intro: debajo de la colina, los electrones y las Angie de las
       cards obligaban a rasterizar de nuevo, en cada cuadro, una capa del tamaño de la pantalla
       (~2000 tiles en 2,5 s; ahora ~300). Verificar contando `RasterTask` por capa en un trace de
       `disabled-by-default-cc.debug` con la colina quieta. (2026-11-10) Lo mismo con la landing
@@ -234,8 +248,8 @@ puede alcanzar" son dos cosas distintas y hay que chequear las dos.
       shorthand `animation` más específico resetea el play-state y le gana.
 - [ ] `prefers-reduced-motion` se prueba cambiándolo EN VIVO, no solo al cargar:
       el CSS reacciona solo, el SMIL y los canvas no.
-- [ ] La vida de fondo se pausa desde el topbar (WCAG 2.2.2) y la pausa se recuerda
-      (`signals-pausa`). Pausar NO es congelar: `animation-play-state: paused` deja una entrada que
+- [ ] La vida de fondo se pausa desde el botón de la colina, junto al sonido (WCAG 2.2.2; el del
+      topbar se fue con la molécula, ADR 0021), y la pausa se recuerda (`signals-pausa`). Pausar NO es congelar: `animation-play-state: paused` deja una entrada que
       todavía no arrancó en su primer cuadro, invisible (con la pausa puesta la bitácora quedaba
       afuera de la pantalla y el recorrido, inerte detrás). Los loops se frenan con velocidad 0 y lo
       que tiene fin salta a su estado final, también lo que arranca después; prólogo, cinemáticas y

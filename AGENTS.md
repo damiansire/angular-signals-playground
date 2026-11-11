@@ -52,8 +52,8 @@ Esto es lo que funciona:
   superposición, además de mirar: medí el overlap con
   `getBoundingClientRect()` contra TODOS los vecinos (título, contador, dots,
   órbita), no contra uno solo.
-- **Gate de diseño:** todo cambio que toque el motor visual (`molecule-engine`,
-  CSS de `integrada-vista/`) cierra con una pasada completa contra
+- **Gate de diseño:** todo cambio que toque la parte visual de `integrada-vista/`
+  (sus módulos imperativos o su CSS) cierra con una pasada completa contra
   `DESIGN-CHECKLIST.md`, todos los ítems, ANTES de declararlo bueno. Que quien
   lo hizo diga "quedó bien" no es veredicto.
 - **NO verifiques la navegación con eventos SINTÉTICOS.** `btn.click()` y
