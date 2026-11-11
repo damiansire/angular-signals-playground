@@ -1151,8 +1151,15 @@ Del minijuego de operadores (2026-11-08):
       input real (portada, "Leer", correr, arreglar y correr hasta la página cumplida; la 6 desde la
       bitácora) a 3440×1300, 1440×900, 1280×640 y 390×844: las cinco cumplen, sin desborde
       horizontal, el haz de la nariz a la pantalla salvo en el celular, globo y "Siguiente" sin tocar la
-      ley ni la pantalla, y sin scroll salvo en el celular. Queda: la pantalla cambia de ancho cuando
-      el arreglo alarga el código (ley 3, 4 y 5), y el haz la sigue.
+      ley ni la pantalla, y sin scroll salvo en el celular.
+- [ ] (2026-11-11) La pantalla de la nave no cambia de ancho al arreglar ni al correr: el código
+      lleva un molde invisible y sin alto con la versión más larga de lo que cambia (`masLargo`,
+      función pura en `libs/cortes-de-codigo`): la propiedad de la 3, los dos renglones que faltan
+      en la 4, la API de la 5, la declaración y la escritura de la 6, y el selector con `// null` de
+      la 2. Defecto resuelto: a 1440 la pantalla pasaba de 623 a 810 px en la 3 y de 701 a 878 en la
+      4 al arreglar, se recentraba y el haz saltaba con ella. Medido con input real en la demo,
+      después de correr y resuelta, a 3440×1300, 1440×900 y 1280×640: el mismo rectángulo en los
+      tres estados en las cinco leyes. A 390 solo cambia el alto (la 4 suma dos renglones).
 - [ ] Un absoluto dentro de una grilla NO lleva `grid-row`/`grid-column`: su caja pasa a ser esa
       celda. El globo de la nave tenía `grid-row: 2` (su lugar en el celular) y con la nave al
       costado caía debajo de ella, con la cola apuntando al vacío.
