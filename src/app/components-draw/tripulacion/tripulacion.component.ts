@@ -13,7 +13,7 @@ import {
 import { gsap } from 'gsap';
 import { sinMovimiento } from '../../libs/muelle';
 import { chispas } from '../../libs/rastros';
-import { PALETAS, el, gradientesDeNaves } from './nave-del-prologo';
+import { VOZ_DE_NAVE, el, gradientesDeNaves } from './nave-del-prologo';
 import { dibujarObjeto, type EtapaDelMundo, type ObjetoDelMundo } from './objetos-del-mundo';
 import { Tripulante } from './tripulante';
 
@@ -269,9 +269,9 @@ export class TripulacionComponent {
   }
 }
 
-/** La paleta de cada voz, para el retrato del diálogo. */
+/** El color de cada voz, para el nombre y el borde del retrato en el diálogo. */
 export const LUZ_DE: Record<QuienDelViaje, string> = {
-  cap: PALETAS[0].luz,
-  naveA: PALETAS[1].luz,
-  naveB: PALETAS[2].luz,
+  cap: VOZ_DE_NAVE[0],
+  naveA: VOZ_DE_NAVE[1],
+  naveB: VOZ_DE_NAVE[2],
 };

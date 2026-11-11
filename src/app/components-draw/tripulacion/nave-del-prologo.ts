@@ -37,6 +37,13 @@ export const PALETAS: readonly Paleta[] = [
   { claro: '#f637e3', medio: '#e90465', oscuro: '#ba005e', acento: '#ffc65c', luz: '#ff8ac9' },
 ];
 
+/**
+ * El color del nombre de cada nave en la caja de diálogo: el tono de su casco, aclarado para leerse
+ * sobre la barra oscura. Antes el nombre usaba la luz de la antena, y Nave A, violeta, hablaba en
+ * rosa: el retrato decía una nave y el nombre otra. Las cinemáticas repiten estos valores en CSS.
+ */
+export const VOZ_DE_NAVE = ['#f2c27a', '#c9b6ea', '#f2a58e', '#ff8ac9'] as const;
+
 export const TINTA = '#2b1b33';
 
 /** Las partes de una nave dibujada que se animan por separado. */
