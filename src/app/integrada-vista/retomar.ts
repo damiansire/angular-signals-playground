@@ -38,17 +38,3 @@ export function despuesDelAviso(
   const entrada = entradaDeLaHistoria(punto, puntosDelPrologo, prologoVisto);
   return entrada.a === 'prologo' && entrada.desde === null ? 'colina' : entrada;
 }
-
-/**
- * El lugar que se guarda cuando el recorrido avisa dónde está. Volver a la landing desde el
- * recorrido es estar en la construcción. Mientras la historia todavía no llegó al recorrido, la
- * landing no pisa el punto del prólogo: la vista la reporta al arrancar, antes de entrar.
- */
-export function puntoDelRecorrido(
-  actual: Punto | null,
-  concepto: number,
-  sub: number,
-): Punto | null {
-  if (concepto >= 0) return { lugar: 'recorrido', concepto, sub };
-  return actual?.lugar === 'recorrido' ? { lugar: 'construccion' } : actual;
-}

@@ -1,5 +1,5 @@
-/* Cómo se acomoda el recorrido por debajo de 1200 px: el topbar en dos pisos, la fila demo|código
-   que envuelve, la espina en tablet y la columna única del celular. Archivo aparte por lo mismo que
+/* Cómo se acomodan las pantallas embebidas por debajo de 1200 px: la fila demo|código que envuelve
+   y la columna única del celular. Archivo aparte por lo mismo que
    `intro-tusi.css` y `boot-fallo.css`: el presupuesto de estilo se mide por archivo. Va último en
    `styleUrls` porque varias reglas pisan a las de `integrada-vista.component.css` con la misma
    especificidad y ganan por orden. */
@@ -32,126 +32,10 @@
   }
 }
 
-/* Nada del topbar se parte por dentro: con poco lugar el contador quedaba "1 /" arriba y "3" abajo,
-   y los links en otro renglón. El contador y los controles son de un renglón. */
-.tb-count,
-.tb-links {
-  white-space: nowrap;
-}
-/* Por debajo de 1200 px el topbar va en dos pisos: arriba el contador y el título entero; abajo la
-   pregunta del recorrido y los controles, a la derecha como en escritorio (a la izquierda quedaba
-   encima de la primera parada del riel y se leía como su viñeta). En uno solo no entraban los tres:
-   el título más largo ("toSignal() · toObservable() · untracked()") se abreviaba hasta 1199, o había
-   que sacar la pregunta, que es el único texto permanente del recorrido. El fondo es pleno en los
-   dos pisos: el degradado se aclaraba justo debajo de la pregunta. */
-@media (max-width: 1199px) {
-  .topbar {
-    flex-wrap: wrap;
-    row-gap: 0.1rem;
-    padding-block: 0.55rem 0.4rem;
-    background: linear-gradient(180deg, #f7f5ed 88%, transparent);
-  }
-  .tb-back {
-    display: none;
-  }
-  .tb-center {
-    flex: 1 1 100%;
-  }
-  .topbar.contextual .tb-title {
-    max-width: none;
-  }
-  .tb-links {
-    display: flex;
-    flex: 1 1 100%;
-    align-items: center;
-    min-width: 0;
-  }
-  .tb-q {
-    min-width: 0;
-    margin-left: auto;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-}
-@media (max-width: 600px) {
-  .topbar {
-    padding-inline: 1rem;
-  }
-  .topbar.contextual .tb-title {
-    font-size: 1.1rem;
-  }
-}
-/* En un celular chico no entraban el título más largo ni la pregunta con los controles. Pasarlos a
-   dos renglones subía el topbar a 100 px: tapaba el arranque de la card y la primera parada del
-   riel. Queda en dos pisos de un renglón: el título un punto más chico, y Bitácora y Practicá como
-   íconos con blanco de 30 px (la etiqueta sigue siendo su nombre accesible, como la pausa). */
-@media (max-width: 400px) {
-  .tb-center {
-    gap: 0.4rem;
-  }
-  /* Escala con el ancho: medido con el título más largo (8/2), entra entero de 360 a 400 px. */
-  .topbar.contextual .tb-title {
-    font-size: min(0.98rem, 3.85vw);
-  }
-  .tb-links > :is(a, button) + :is(a, button) {
-    margin-left: 0.3rem;
-  }
-  .tb-bitacora,
-  .tb-links > a[href*='practica'] {
-    display: inline-grid;
-    place-items: center;
-    width: 30px;
-    height: 30px;
-    font-size: 0;
-  }
-  .tb-bitacora::before,
-  .tb-links > a[href*='practica']::before {
-    content: '';
-    width: 20px;
-    height: 20px;
-    background: currentColor;
-    -webkit-mask: var(--icono) center / contain no-repeat;
-    mask: var(--icono) center / contain no-repeat;
-  }
-  .tb-bitacora {
-    --icono: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2z'/%3E%3Cpath d='M4 21V5M9 8h6M9 12h5'/%3E%3C/svg%3E");
-  }
-  .tb-links > a[href*='practica'] {
-    --icono: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 20h4L19 9l-4-4L4 16z'/%3E%3Cpath d='M14 6l4 4'/%3E%3C/svg%3E");
-  }
-}
-
-/* Entre 601 y 1199 px la espina vertical queda a 60px del borde y la card arranca antes: el
-   contenido le quedaba debajo. La espina se achica y los sub-niveles se corren solo lo que falte
-   (casi siempre el 1.5rem de escritorio alcanza), todos igual, así el contenido arranca en la misma
-   x en cualquier sub-nivel. Correrlo lo que ocupa la espina entera apretaba los demos y sacaba de la
-   pantalla el desafío de 8/2. El borde de la card sale de su ancho (92% del contenido, que tiene
-   0.6rem de padding) y su 2.4rem de padding. */
-@media (min-width: 601px) and (max-width: 1199px) {
-  :host {
-    --spine-size: clamp(2rem, 4.2vh, 2.6rem);
-  }
-  .card--dissolve .subhost > * {
-    padding-left: max(
-      1.5rem,
-      calc(
-        var(--spine-left) + var(--spine-size) + 0.5rem - (0.6rem + (100vw - 1.2rem) * 0.04) - 2.4rem
-      )
-    );
-  }
-}
 /* Celular: instrucciones, demo y código van en una columna, y el código corta por palabra, nunca
-   por carácter. Nada embebido es más ancho que la card (cajas de ancho fijo de Tailwind, filas que
-   no envolvían): la card recorta, así que lo que se salía quedaba cortado ("multiplie"). Abajo
-   queda lugar para que el final no termine debajo de la mascota de la pista, que flota fija en la
-   esquina. La espina se guarda: a una columna no hay dónde ponerla sin pisar el contenido. A este
-   ancho el sub-nivel no entra en la card y ella scrollea por dentro: es la excepción al "sin
-   scroll anidado" del checklist. */
+   por carácter. Nada embebido es más ancho que la hoja (cajas de ancho fijo de Tailwind, filas que
+   no envolvían): lo que se salía quedaba cortado ("multiplie"). */
 @media (max-width: 600px) {
-  .card {
-    --pad-abajo: 5.5rem;
-    padding: 1.2rem 1rem var(--pad-abajo);
-  }
   .card--dissolve .subhost > * {
     gap: 1.1rem;
     padding-left: 0;
@@ -170,9 +54,6 @@
   }
   .card--dissolve .subhost .flex {
     flex-wrap: wrap;
-  }
-  .space-spine {
-    display: none;
   }
 }
 

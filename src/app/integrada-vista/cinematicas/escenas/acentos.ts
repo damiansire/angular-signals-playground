@@ -1,6 +1,6 @@
 /**
- * El color de cada capítulo en las cinemáticas: el mismo acento que su átomo en la molécula del
- * recorrido (`COL` y `RAW[i].accent` en molecule-engine.ts). El final usa el dorado del cierre.
+ * El color de cada capítulo en las cinemáticas y en su etapa del viaje: el acento que tenía su átomo
+ * en la molécula, ya retirada (ADR 0021). El final usa el dorado del cierre.
  */
 export const ACENTOS: readonly string[] = [
   '#9a9081', // 0 · Introducción (ink)

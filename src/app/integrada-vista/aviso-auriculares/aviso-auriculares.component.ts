@@ -432,8 +432,7 @@ export class AvisoAuricularesComponent {
    * propia y la colina entera es una sola, que solo se redibuja cada √2 de escala. Animando, cada
    * pieza de Angie era una capa que a ×100–×500 cubría la pantalla: con poca memoria de video no
    * entraban al redibujar y la colina salía un cuadro en blanco. Con velocidad 0 y no con pause(),
-   * que le saca al CSS el control de `animation-play-state` (ver la pausa de fondo en
-   * `molecule-engine.ts`).
+   * que le saca al CSS el control de `animation-play-state` (ver `pausa-del-fondo.ts`).
    */
   private aquietarLoops(escena: HTMLElement): void {
     for (const animacion of loopsQueSeRedibujan(

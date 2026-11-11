@@ -13,774 +13,659 @@
 }
 
 <div class="stage" id="stage">
-  <div class="track" id="track">
-    <div class="holder">
-      <svg class="mol" viewBox="0 0 820 600" aria-hidden="true">
-        <defs>
-          <filter id="glow" x="-80%" y="-80%" width="260%" height="260%">
-            <feGaussianBlur stdDeviation="3.5" result="b" />
-            <feMerge>
-              <feMergeNode in="b" />
-              <feMergeNode in="SourceGraphic" />
-            </feMerge>
-          </filter>
-        </defs>
-        <g id="stars"></g>
-        <!-- El motor escribe la cámara en #scene; la sacudida de un golpe va en su propio grupo para
-             que los dos no se pisen. -->
-        <g id="sacudida">
-          <g id="scene">
-            <g id="bonds"></g>
-            <g id="atoms"></g>
-            <g id="ripples"></g>
-          </g>
-        </g>
-      </svg>
-      <div class="content" id="content"></div>
+  <!-- Landing "par de Tusi": se construye sola por choques (ver intro-tusi.ts). -->
+  <div class="intro" id="intro">
+    <div class="tusi">
+      <canvas class="tusi__canvas"></canvas>
 
-      <div class="topbar">
-        <a class="tb-back" routerLink="/">← Recorrido</a>
-        <span class="tb-center"
-          ><span class="tb-count" aria-hidden="true"></span
-          ><span class="tb-title">El recorrido</span></span
-        >
-        <!-- La pregunta que abre el nivel 0 acompaña los doce capítulos y se transforma en la
-             respuesta en el 11. Es el único texto permanente del recorrido, y son seis palabras. -->
-        <span class="tb-links">
-          <span class="tb-q" id="tbQ"></span>
-          <button class="tb-bitacora" type="button" (click)="abrirBitacora()">Bitácora</button>
-          <button
-            class="tb-bitacora"
-            type="button"
-            [style.color]="confirmandoBorrado() ? colorDeBorrar : null"
-            (click)="pedirEmpezarDeCero()"
-          >
-            {{ confirmandoBorrado() ? '¿Seguro? Se borra todo' : 'Empezar de cero' }}
-          </button>
-          <a routerLink="/practica/carrito">Practicá</a>
-        </span>
-      </div>
-      <!-- Riel = panel del recorrido (variante B): eje a la izquierda (línea) y a la derecha número +
-           nombre por parada, agrupadas en actos, con el contador "te faltan N". El motor llena
-           #railTicks (paradas + cabeceras de acto) y #railSeg, y marca hecho / estás acá / bloqueado.
-           Al bucear, el cuerpo se desvanece (cross-fade con la barra de sub-niveles, anclada al riel).
-           Cada parada es un botón: navega al concepto (click / Enter / Espacio), además del scroll y
-           teclado (↑/↓). Lo decorativo (cabecera de progreso, línea del eje) va aria-hidden. -->
-      <aside class="rail" aria-label="Índice del recorrido">
-        <div class="rail-body">
-          <div class="rail-head" aria-hidden="true">
-            <span class="rail-kicker">Tu recorrido</span>
-            <span class="rail-count" id="railCount"></span>
-            <span class="rail-seg" id="railSeg"></span>
-          </div>
-          <div class="rail-axis">
-            <span class="rail-line" aria-hidden="true">
-              <span class="rail-fill" id="railFill"></span>
-            </span>
-            <ol class="rail-ticks" id="railTicks" aria-label="Conceptos del recorrido"></ol>
-          </div>
-        </div>
-      </aside>
-
-      <!-- Título vertical del concepto (espina de identidad), pegado al riel. Solo en modo
-           dissolve; el motor le pone el nombre y lo muestra al bucear. -->
-      <div class="space-spine" id="spaceSpine" aria-hidden="true"></div>
-
-      <!-- La mascota-guía acompaña la vista mapa del recorrido: el motor le pone el tip del concepto
-           actual (campo `tip` en RAW de molecule-engine) y su opacidad (se apaga al bucear y mientras
-           el intro está visible). Va abajo-derecha porque el riel ocupa la izquierda. El globo es
-           decorativo (el nombre del concepto ya vive en el topbar y en la espina vertical); la mascota
-           responde al toque, así que es un botón de verdad y también se la puede saludar con teclado. -->
-      <div class="rec-guide">
-        <button
-          class="rec-guide__toque"
-          type="button"
-          inert
-          aria-label="Saludar a la mascota"
-          (click)="alTocarGuia($event)"
-        >
-          <app-mascota-viva #guia class="rec-guide__mascot" (aterrizo)="sacudirGlobo()" />
-        </button>
-        <p class="rec-guide__bubble" aria-hidden="true"></p>
-      </div>
-
-      <!-- Landing "par de Tusi": se construye sola por choques (ver intro-tusi.ts). El motor fadea el
-           `.intro` con el scroll, así el handoff al recorrido sigue automático. -->
-      <div class="intro" id="intro">
-        <div class="tusi">
-          <canvas class="tusi__canvas"></canvas>
-
-          <!-- progreso arriba: cuenta las líneas REALES que se van sumando (el mecanismo, no un %
+      <!-- progreso arriba: cuenta las líneas REALES que se van sumando (el mecanismo, no un %
                abstracto). Fila compacta para no invadir la molécula; se desvanece al completarse,
                porque a partir de ahí la narración de abajo es la que anuncia el círculo. -->
-          <div
-            class="tusi__counter"
-            role="progressbar"
-            aria-valuemin="0"
-            aria-valuemax="8"
-            aria-valuenow="1"
-            aria-label="Líneas formadas"
-          >
-            <span class="tusi__counter-kick">Se está formando algo</span>
-            <!-- los 8 pips van en el template, no creados por JS: un elemento creado con
+      <div
+        class="tusi__counter"
+        role="progressbar"
+        aria-valuemin="0"
+        aria-valuemax="8"
+        aria-valuenow="1"
+        aria-label="Líneas formadas"
+      >
+        <span class="tusi__counter-kick">Se está formando algo</span>
+        <!-- los 8 pips van en el template, no creados por JS: un elemento creado con
                  createElement no recibe el atributo de encapsulación y el CSS del componente no le
                  aplicaría (quedaban en 0×0). -->
-            <span class="tusi__pips" aria-hidden="true">
-              <span class="tusi__pip"></span>
-              <span class="tusi__pip"></span>
-              <span class="tusi__pip"></span>
-              <span class="tusi__pip"></span>
-              <span class="tusi__pip"></span>
-              <span class="tusi__pip"></span>
-              <span class="tusi__pip"></span>
-              <span class="tusi__pip"></span>
-            </span>
-            <span class="tusi__counter-sub"><b class="tusi__counter-n">1</b> de 8 líneas</span>
-          </div>
+        <span class="tusi__pips" aria-hidden="true">
+          <span class="tusi__pip"></span>
+          <span class="tusi__pip"></span>
+          <span class="tusi__pip"></span>
+          <span class="tusi__pip"></span>
+          <span class="tusi__pip"></span>
+          <span class="tusi__pip"></span>
+          <span class="tusi__pip"></span>
+          <span class="tusi__pip"></span>
+        </span>
+        <span class="tusi__counter-sub"><b class="tusi__counter-n">1</b> de 8 líneas</span>
+      </div>
 
-          <div class="tusi__hero">
-            <div class="tusi__narrate">
-              <p class="tusi__epigraph" aria-live="polite">
-                Las cosas son sencillas si las analizás por partes
-              </p>
-              <button class="tusi__help" type="button">No la veo, ayudame</button>
-            </div>
-            <h1 class="tusi__title">Angular Signals</h1>
-            <div class="tusi__scroll">
-              <div class="tusi__mouse"><span></span></div>
-              <p class="tusi__cue">Esta página es scrolleable</p>
-            </div>
-          </div>
+      <div class="tusi__hero">
+        <div class="tusi__narrate">
+          <p class="tusi__epigraph" aria-live="polite">
+            Las cosas son sencillas si las analizás por partes
+          </p>
+          <button class="tusi__help" type="button">No la veo, ayudame</button>
+        </div>
+        <h1 class="tusi__title">Angular Signals</h1>
+        <div class="tusi__scroll">
+          <div class="tusi__mouse"><span></span></div>
+          <p class="tusi__cue">Esta página es scrolleable</p>
+        </div>
+      </div>
 
-          <!-- La mascota de Angular deja la moraleja del intro (el caos que se ordena), fija al costado
+      <!-- La mascota de Angular deja la moraleja del intro (el caos que se ordena), fija al costado
                para que se lea siempre, no atada al final del build. La imagen es decorativa: el mensaje
                vive en el texto del globo. Va abajo-izquierda porque el HUD ocupa abajo-derecha. -->
-          <div class="tusi__saying">
-            <img
-              class="tusi__mascot"
-              src="angular-mascot-idea.svg"
-              alt=""
-              aria-hidden="true"
-              width="240"
-              height="300"
-            />
-            <p class="tusi__bubble">
-              Hasta en lo más caótico hay un orden, si sabes cómo funciona.
-            </p>
-          </div>
+      <div class="tusi__saying">
+        <img
+          class="tusi__mascot"
+          src="angular-mascot-idea.svg"
+          alt=""
+          aria-hidden="true"
+          width="240"
+          height="300"
+        />
+        <p class="tusi__bubble">Hasta en lo más caótico hay un orden, si sabes cómo funciona.</p>
+      </div>
 
-          <div class="tusi__hud">
-            <button data-role="sound" type="button" aria-label="Silenciar" title="Sonido">
-              🔊
+      <div class="tusi__hud">
+        <button data-role="sound" type="button" aria-label="Silenciar" title="Sonido">🔊</button>
+        <button data-role="reset" type="button" aria-label="Reiniciar animación" title="Reiniciar">
+          ↻
+        </button>
+        <button data-role="pause" type="button" aria-label="Pausar animación" title="Pausar">
+          ⏸
+        </button>
+        <div class="tusi__speed-wrap">
+          <button
+            data-role="speed"
+            type="button"
+            aria-haspopup="true"
+            aria-expanded="false"
+            aria-label="Velocidad de la intro"
+            title="Velocidad"
+          >
+            vel <b class="tusi__speed-val">×1</b>
+          </button>
+          <div class="tusi__menu" role="menu" aria-label="Velocidad de la intro">
+            <div class="tusi__menu-h">Velocidad</div>
+            <button role="menuitemradio" aria-checked="false" data-speed="0.25" type="button">
+              <span class="tusi__ck"></span>×0.25
             </button>
-            <button
-              data-role="reset"
-              type="button"
-              aria-label="Reiniciar animación"
-              title="Reiniciar"
-            >
-              ↻
+            <button role="menuitemradio" aria-checked="false" data-speed="0.5" type="button">
+              <span class="tusi__ck"></span>×0.5
             </button>
-            <button data-role="pause" type="button" aria-label="Pausar animación" title="Pausar">
-              ⏸
+            <button role="menuitemradio" aria-checked="true" data-speed="1" type="button">
+              <span class="tusi__ck"></span>×1 (normal)
             </button>
-            <div class="tusi__speed-wrap">
-              <button
-                data-role="speed"
-                type="button"
-                aria-haspopup="true"
-                aria-expanded="false"
-                aria-label="Velocidad de la intro"
-                title="Velocidad"
-              >
-                vel <b class="tusi__speed-val">×1</b>
-              </button>
-              <div class="tusi__menu" role="menu" aria-label="Velocidad de la intro">
-                <div class="tusi__menu-h">Velocidad</div>
-                <button role="menuitemradio" aria-checked="false" data-speed="0.25" type="button">
-                  <span class="tusi__ck"></span>×0.25
-                </button>
-                <button role="menuitemradio" aria-checked="false" data-speed="0.5" type="button">
-                  <span class="tusi__ck"></span>×0.5
-                </button>
-                <button role="menuitemradio" aria-checked="true" data-speed="1" type="button">
-                  <span class="tusi__ck"></span>×1 (normal)
-                </button>
-                <button role="menuitemradio" aria-checked="false" data-speed="2" type="button">
-                  <span class="tusi__ck"></span>×2
-                </button>
-                <button role="menuitemradio" aria-checked="false" data-speed="4" type="button">
-                  <span class="tusi__ck"></span>×4
-                </button>
-                <button role="menuitemradio" aria-checked="false" data-speed="8" type="button">
-                  <span class="tusi__ck"></span>×8
-                </button>
-              </div>
-            </div>
-          </div>
-
-          <!-- Pantalla de inicio: una mañana en la colina con Angie esperando. "Entrar" la desarma en
-               luz que sube al cielo, el cielo se hace noche y ahí empieza el prólogo (inicio-angie.ts).
-               El click además desbloquea el audio (intro-tusi.ts). -->
-          <div class="tusi__overlay ini">
-            <svg
-              class="ini__paisaje"
-              viewBox="0 0 1920 1080"
-              preserveAspectRatio="xMidYMax slice"
-              aria-hidden="true"
-            >
-              <defs>
-                <linearGradient id="ini-cielo" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0" stop-color="#bfe3df" />
-                  <stop offset=".55" stop-color="#e9f3e6" />
-                  <stop offset="1" stop-color="#fdf3dc" />
-                </linearGradient>
-                <linearGradient id="ini-lejos" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0" stop-color="#b5d9cb" />
-                  <stop offset="1" stop-color="#cfe6d9" />
-                </linearGradient>
-                <linearGradient id="ini-medio" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0" stop-color="#8cc8ad" />
-                  <stop offset="1" stop-color="#a9d6bf" />
-                </linearGradient>
-                <linearGradient id="ini-colina" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0" stop-color="#6cb895" />
-                  <stop offset=".4" stop-color="#4fa07f" />
-                  <stop offset="1" stop-color="#2f7d64" />
-                </linearGradient>
-                <radialGradient id="ini-charco" cx=".5" cy=".5" r=".5">
-                  <stop offset="0" stop-color="#fff4cf" stop-opacity=".7" />
-                  <stop offset="1" stop-color="#fff4cf" stop-opacity="0" />
-                </radialGradient>
-                <radialGradient id="ini-vineta" cx=".5" cy=".45" r=".75">
-                  <stop offset=".6" stop-color="#2a2316" stop-opacity="0" />
-                  <stop offset="1" stop-color="#2a2316" stop-opacity=".22" />
-                </radialGradient>
-              </defs>
-
-              <rect
-                data-material="cielo"
-                x="-200"
-                y="-400"
-                width="2320"
-                height="1480"
-                fill="url(#ini-cielo)"
-              />
-
-              <g class="ini__nubes" data-material="cielo" fill="#ffffff">
-                <path
-                  opacity=".85"
-                  d="M300 250c20-40 90-48 120-14 18-34 84-36 104 8 40-6 66 22 58 52H262c-26-18-6-52 38-46Z"
-                />
-                <path
-                  opacity=".7"
-                  d="M820 150c14-26 62-30 82-8 14-22 58-22 70 6 28-4 46 16 40 34H794c-18-12-4-34 26-32Z"
-                />
-                <path
-                  opacity=".75"
-                  d="M1560 380c18-34 78-40 104-12 16-30 72-30 90 6 34-4 56 18 50 44h-272c-22-16-6-44 28-38Z"
-                />
-              </g>
-
-              <path
-                fill="url(#ini-lejos)"
-                d="M-40 760C140 650 300 640 470 700S760 640 920 690s300-40 470 0 330 70 570 10V1080H-40Z"
-              />
-              <path
-                fill="url(#ini-medio)"
-                d="M-40 830C120 760 280 770 420 800s240-30 380 0 680-20 820 10 260 0 340-30V1080H-40Z"
-              />
-              <path data-material="pasto" fill="url(#ini-colina)" [attr.d]="paisaje.colina" />
-              <!-- La luz viene del átomo de arriba a la derecha y cae donde pisa Angie. -->
-              <ellipse cx="990" cy="800" rx="260" ry="34" fill="url(#ini-charco)" />
-              <g data-material="pasto">
-                @for (f of paisaje.flores; track $index) {
-                  <circle [attr.cx]="f.x" [attr.cy]="f.y" [attr.r]="f.r" [attr.fill]="f.color" />
-                }
-              </g>
-              <g data-material="pasto">
-                @for (m of paisaje.matas; track $index) {
-                  <path [attr.d]="m.d" [attr.fill]="m.tono" />
-                }
-              </g>
-
-              <g
-                class="ini__juncos ini__juncos--izq"
-                data-material="pasto"
-                fill="none"
-                stroke="#1f5e4c"
-                stroke-linecap="round"
-              >
-                @for (j of paisaje.juncosIzq; track $index) {
-                  <path [attr.d]="j.d" [attr.stroke-width]="j.ancho" />
-                }
-              </g>
-              <g
-                class="ini__juncos ini__juncos--der"
-                data-material="pasto"
-                fill="none"
-                stroke="#1f5e4c"
-                stroke-linecap="round"
-              >
-                @for (j of paisaje.juncosDer; track $index) {
-                  <path [attr.d]="j.d" [attr.stroke-width]="j.ancho" />
-                }
-              </g>
-              <rect
-                x="-200"
-                y="-400"
-                width="2320"
-                height="1480"
-                fill="url(#ini-vineta)"
-                pointer-events="none"
-              />
-            </svg>
-
-            <!-- La piedra del borde de la loma, donde Angie se sienta a pensar. Dibujada en el mismo
-                 lado de 1080 que ella: el borde de arriba está en y = 790, a la altura de sus caderas, bajo sus pies (x = 560). -->
-            <div class="ini__piedra" aria-hidden="true">
-              <svg viewBox="0 0 1080 1080">
-                <ellipse cx="575" cy="1000" rx="320" ry="30" fill="rgba(30, 60, 45, 0.3)" />
-                <path
-                  fill="#737c87"
-                  d="M282 994C262 930 276 830 334 794C400 766 500 760 570 760C660 760 764 768 816 802C868 838 880 930 866 996C710 1016 440 1016 282 994Z"
-                />
-                <path
-                  fill="#929ba5"
-                  d="M300 972C290 906 304 832 346 802C420 790 500 788 570 788C660 788 752 794 806 814C846 846 854 920 846 976C694 992 452 992 300 972Z"
-                />
-                <path
-                  fill="#b9c0c6"
-                  d="M340 794C400 770 500 763 570 763C660 763 760 771 808 802C760 792 660 788 570 788C480 788 400 790 340 794Z"
-                />
-                <path
-                  fill="#6a737d"
-                  d="M718 880C760 876 800 894 812 930C778 912 746 902 718 880Z"
-                />
-                <path
-                  fill="#6a737d"
-                  d="M360 916C384 940 416 954 452 956C414 964 378 950 360 916Z"
-                />
-                <path
-                  fill="#5aab89"
-                  d="M340 796C376 774 418 768 452 772C428 782 402 788 382 800C366 810 348 810 340 796Z"
-                />
-                <path
-                  fill="#4fa07f"
-                  d="M272 1002C282 978 294 968 300 988C308 966 320 964 322 990C332 974 344 976 342 1004Z"
-                />
-                <path
-                  fill="#4fa07f"
-                  d="M820 1002C828 980 840 972 846 992C854 972 866 970 868 996C876 982 886 986 882 1006Z"
-                />
-              </svg>
-            </div>
-
-            <!-- Atardecer y penumbra tiñen lo de abajo (multiplicar): la colina queda como silueta
-                 en vez de borrarse bajo una cortina. Van antes del sol, que sigue siendo la luz. -->
-            <div class="ini__ocaso" aria-hidden="true"></div>
-            <div class="ini__penumbra" aria-hidden="true"></div>
-
-            <!-- El sol: la luz de la escena sale de ahí, y ahí vuelven las luces de Angie. Respira, y
-                 sus rayos se estiran de a uno, en ola, mientras gira despacio. -->
-            <div class="ini__sol" aria-hidden="true">
-              <svg class="ini__sol-dibujo" viewBox="-100 -100 200 200">
-                <defs>
-                  <radialGradient id="ini-sol-nucleo" cx="42%" cy="38%" r="70%">
-                    <stop offset="0" stop-color="#fffbe6" />
-                    <stop offset=".38" stop-color="#ffe07a" />
-                    <stop offset=".78" stop-color="#ffb23c" />
-                    <stop offset="1" stop-color="#f59a28" />
-                  </radialGradient>
-                  <radialGradient id="ini-sol-corona">
-                    <stop offset=".55" stop-color="#ffd46a" stop-opacity=".55" />
-                    <stop offset="1" stop-color="#ffd46a" stop-opacity="0" />
-                  </radialGradient>
-                  <linearGradient
-                    id="ini-sol-rayo"
-                    x1="0"
-                    y1="-36"
-                    x2="0"
-                    y2="-84"
-                    gradientUnits="userSpaceOnUse"
-                  >
-                    <stop offset="0" stop-color="#ffc24d" />
-                    <stop offset="1" stop-color="#ffdd85" stop-opacity=".25" />
-                  </linearGradient>
-                </defs>
-                <g class="ini__sol-giro">
-                  @for (r of paisaje.rayos; track $index) {
-                    <g [attr.transform]="'rotate(' + r.angulo + ')'">
-                      <path
-                        class="ini__sol-rayo"
-                        [class.ini__sol-rayo--corto]="r.corto"
-                        [style.--i]="$index"
-                        d="M-7 -37Q0 -41 7 -37L2 -80Q0 -84 -2 -80Z"
-                      />
-                    </g>
-                  }
-                </g>
-                <circle class="ini__sol-corona" r="48" fill="url(#ini-sol-corona)" />
-                <g class="ini__sol-cuerpo">
-                  <circle r="33" fill="url(#ini-sol-nucleo)" />
-                  <circle
-                    r="31.5"
-                    fill="none"
-                    stroke="#dc7814"
-                    stroke-opacity=".22"
-                    stroke-width="3"
-                  />
-                  <path
-                    d="M-21 -12Q-15 -24 -2 -26"
-                    fill="none"
-                    stroke="#fff"
-                    stroke-opacity=".7"
-                    stroke-width="5"
-                    stroke-linecap="round"
-                  />
-                </g>
-              </svg>
-              <!-- Las ondas de radio que salen del sol antes de que su voz se entienda. Van debajo
-                   del globo: encima, un anillo le cruzaba la frase. -->
-              <span class="ini__radio"><i></i><i></i><i></i><i></i></span>
-              <!-- La voz que llega desde el sol, de lejos: el borde cortado es el de las
-                   transmisiones de las cinemáticas. -->
-              <p class="ini__voz-sol" [style.--tecla]="tecla" [style.--n]="intercambio.sol.letras">
-                <ng-container
-                  *ngTemplateOutlet="escrito; context: { $implicit: intercambio.sol.renglones[0] }"
-                />
-              </p>
-            </div>
-
-            <!-- La noche que llega con la despedida: es el mismo cielo del prólogo. -->
-            <div class="ini__noche" aria-hidden="true">
-              <div class="ini__cielo-noche">
-                @for (e of paisaje.estrellas; track $index) {
-                  <span
-                    class="ini__estrella"
-                    [style.left.%]="e.x"
-                    [style.top.%]="e.y"
-                    [style.width.px]="e.tam"
-                    [style.height.px]="e.tam"
-                    [style.--d]="e.retraso + 'ms'"
-                  ></span>
-                }
-              </div>
-            </div>
-
-            <!-- La entrada es la idea de Angie: su lamparita. Un botón real encima del dibujo, así
-                 se llega con Tab y tiene nombre, y el llamado de abajo es su etiqueta. -->
-            <div class="ini__angie">
-              <span class="ini__aura" aria-hidden="true"></span>
-              <app-mascota-viva #angieInicio [vidaPropia]="angieEsperando()" />
-              <!-- Al tocarla, antes de irse lo piensa: así la salida es una decisión suya y no
-                   algo que le pasa. -->
-              <p class="ini__piensa" aria-hidden="true">
-                <span class="ini__rastro"></span>
-                <span class="ini__rastro"></span>
-                <!-- Antes de pensar le contesta al sol en voz alta: un globo de diálogo, no una nube. -->
-                <span
-                  class="ini__dice"
-                  [style.--tecla]="tecla"
-                  [style.--n]="intercambio.angie.letras"
-                >
-                  @for (renglon of intercambio.angie.renglones; track $index) {
-                    <span class="ini__renglon-dicho">
-                      <ng-container *ngTemplateOutlet="escrito; context: { $implicit: renglon }" />
-                    </span>
-                  }
-                </span>
-                <!-- Dos pensamientos en la misma nube: primero los presiente (mientras suena la radio),
-                     y después de hablar con el sol, decide. -->
-                <span
-                  class="ini__burbuja"
-                  [style.--tecla]="tecla"
-                  [style.--n1]="intercambio.piensa[0].letras"
-                  [style.--n2]="intercambio.piensa[1].letras"
-                >
-                  @for (frase of intercambio.piensa; track $index) {
-                    <span class="ini__frase">
-                      <ng-container
-                        *ngTemplateOutlet="escrito; context: { $implicit: frase.renglones[0] }"
-                      /><span class="ini__puntos"><i>.</i><i>.</i><i>.</i></span>
-                    </span>
-                  }
-                </span>
-              </p>
-              <!-- Un renglón de un globo, de a una letra como los diálogos de un RPG. Las palabras
-                   no se parten al bajar de renglón. -->
-              <ng-template #escrito let-renglon>
-                @for (palabra of renglon; track $index) {
-                  <span class="ini__escrita">
-                    @for (l of palabra.letras; track $index) {
-                      <span class="ini__tecla" [style.--i]="l.i">{{ l.c }}</span>
-                    }
-                  </span>
-                }
-              </ng-template>
-              <!-- Lo que se dice y se piensa, para quien escucha la pantalla: los globos son dibujo. -->
-              <p class="ini__dicho sr-only" aria-live="polite"></p>
-              <button
-                id="ini-foco"
-                class="ini__foco"
-                data-role="entrar"
-                type="button"
-                aria-label="Entrar"
-              ></button>
-            </div>
-
-            <div class="ini__texto">
-              <!-- Letra por letra para que entren de a una; el lector lee la frase entera. -->
-              <p class="ini__titulo">
-                <span class="sr-only">Las aventuras de Angie por el SignalVerso</span>
-                @for (renglon of titulo; track $index) {
-                  <span class="ini__renglon" aria-hidden="true">
-                    @for (palabra of renglon; track $index) {
-                      <span class="ini__palabra" [class.ini__acento]="palabra.acento">
-                        @for (l of palabra.letras; track $index) {
-                          <span class="ini__letra" [style.--i]="l.i">{{ l.c }}</span>
-                        }
-                      </span>
-                    }
-                  </span>
-                }
-              </p>
-              <p class="ini__bajada">
-                <span class="sr-only">Una introducción interactiva a los Signals</span>
-                @for (palabra of bajada; track $index) {
-                  <span class="ini__palabra-bajada" aria-hidden="true" [style.--p]="$index">{{
-                    palabra.texto
-                  }}</span>
-                }
-              </p>
-            </div>
-
-            <div class="ini__luces" aria-hidden="true"></div>
-
-            <div class="tusi__ov-capbar">
-              <!-- El cursor hace click y la frase se mueve detrás: el mismo gesto del aviso. -->
-              <label class="ini__llamado" for="ini-foco">
-                <span class="sr-only ini__con-mouse">Hacé click para iniciar las aventuras</span>
-                <span class="sr-only ini__tactil">Tocá para iniciar las aventuras</span>
-                <span class="ini__raton" aria-hidden="true">
-                  <i></i><i></i>
-                  <svg viewBox="0 0 24 30">
-                    <path d="M3 2V24L8.6 18.8L12.6 27.6L16.8 25.8L12.8 17.2H20.6Z" />
-                  </svg>
-                </span>
-                <span class="ini__frase-llamado ini__con-mouse" aria-hidden="true">
-                  @for (palabra of llamado; track $index) {
-                    <span class="ini__palabra">
-                      @for (l of palabra.letras; track $index) {
-                        <span class="ini__ola" [style.--i]="l.i">{{ l.c }}</span>
-                      }
-                    </span>
-                  }
-                </span>
-                <span class="ini__frase-llamado ini__tactil" aria-hidden="true">
-                  @for (palabra of llamadoTactil; track $index) {
-                    <span class="ini__palabra">
-                      @for (l of palabra.letras; track $index) {
-                        <span class="ini__ola" [style.--i]="l.i">{{ l.c }}</span>
-                      }
-                    </span>
-                  }
-                </span>
-                <span class="ini__chispa" aria-hidden="true">✦</span>
-              </label>
-            </div>
-
-            <!-- Sonido y pausa: dos fichas chicas en la esquina libre (el sol ocupa la otra), no una
-                 barra al pie que competía con el llamado. Su texto aparece al apuntarlas. -->
-            <div class="ini__ajustes">
-              <button
-                class="tusi__ov-sound"
-                data-role="ov-sound"
-                type="button"
-                aria-pressed="true"
-                aria-label="Silenciar el sonido de la intro"
-              >
-                <svg class="ini__ico" viewBox="0 0 24 24" aria-hidden="true">
-                  <path class="ini__ico-lleno" d="M4 9h3.5L12 5v14l-4.5-4H4z" />
-                  <path class="ini__ico-on" d="M15.5 9a4 4 0 0 1 0 6M18 6.5a7.5 7.5 0 0 1 0 11" />
-                  <path class="ini__ico-off" d="m16 9.5 5 5m0-5-5 5" />
-                </svg>
-                <span class="ini__globo tusi__ov-sound-txt"
-                  >Sonido activado · tocá para silenciar</span
-                >
-              </button>
-              <!-- La pausa de la vida de fondo, también acá: en la landing el topbar todavía no se ve.
-                   La maneja el motor, con el mismo estado que el botón del topbar. -->
-              <button class="tusi__ov-sound tusi__ov-pausa" type="button">
-                <svg class="ini__ico" viewBox="0 0 24 24" aria-hidden="true">
-                  <path class="ini__ico-on" d="M9 6.5v11M15 6.5v11" />
-                  <path class="ini__ico-lleno ini__ico-off" d="M8.5 5.5v13l10-6.5z" />
-                </svg>
-                <span class="ini__globo tusi__ov-pausa-txt"
-                  >Animaciones activas · tocá para pausar</span
-                >
-              </button>
-              <!-- Con una partida guardada, entrar sigue donde quedó: acá se puede volver al principio. -->
-              @if (partida().punto) {
-                <button
-                  class="tusi__ov-sound ini__reinicio"
-                  type="button"
-                  [class.ini__reinicio--confirmar]="confirmandoBorrado()"
-                  (click)="pedirEmpezarDeCero()"
-                >
-                  <svg class="ini__ico" viewBox="0 0 24 24" aria-hidden="true">
-                    <path class="ini__ico-on" d="M5.5 12a6.5 6.5 0 1 0 2-4.7" />
-                    <path class="ini__ico-lleno" d="M4 4.5v5h5z" />
-                  </svg>
-                  <span class="ini__globo">{{
-                    confirmandoBorrado() ? '¿Borrar todo? Tocá otra vez' : 'Empezar de cero'
-                  }}</span>
-                </button>
-              }
-            </div>
-
-            <!-- Antes que nada, de noche: el aviso de auriculares. Su toque abre el audio de toda la
-                 intro, y al irse la cámara se aleja desde el ojo de Angie hasta la colina. -->
-            <!-- Diferido: el bundle inicial no tenía lugar. Mientras llega, el telón liso del mismo
-                 color tapa la colina, así no se ve la mañana un instante antes de la noche. -->
-            @defer (on immediate) {
-              <app-aviso-auriculares
-                [retoma]="retomaDespuesDelAviso()"
-                [confirmandoBorrado]="confirmandoBorrado()"
-                (viaje)="angieMiraFijo($event)"
-                (llego)="alLlegarALaColina()"
-                (retomar)="retomarDondeQuedo()"
-                (empezarDeCero)="pedirEmpezarDeCero()"
-              />
-            } @placeholder {
-              <div class="ini__telon" aria-hidden="true"></div>
-            }
-          </div>
-        </div>
-        <!-- Prólogo "la anomalía": la cinemática que enmarca el recorrido (ver prologo-anomalia.ts).
-           Se destapa al tocar Entrar, porque ese click es el gesto que el navegador exige para
-           dejar sonar, y al terminar le pasa la posta a la construcción de Tusi. -->
-        <div
-          class="prologo"
-          [class.prologo--operadores]="hueco() !== null"
-          [class.prologo--disparo]="disparando()"
-          [class.prologo--manual]="paginaEnElPrologo() !== null"
-          hidden
-        >
-          <svg
-            class="prologo__escena"
-            role="img"
-            aria-label="Prólogo animado: cuatro naves vuelven a casa, una anomalía se traga a tres, y del otro lado lo que parecía caos es un patrón con orden"
-          ></svg>
-          <!-- Angie es la misma de la colina, con sus muelles: nace del choque de las dos moléculas. -->
-          <div class="prologo__mascot" aria-hidden="true">
-            <app-mascota-viva [vidaPropia]="angiePrologo()" />
-          </div>
-          <p class="prologo__voz" aria-live="polite"></p>
-          <div class="prologo__dialogo" aria-live="polite">
-            <p class="prologo__globo" data-quien="">
-              <span class="prologo__quien"></span><span class="prologo__frase"></span>
-            </p>
-            <p class="prologo__globo" data-quien="">
-              <span class="prologo__quien"></span><span class="prologo__frase"></span>
-            </p>
-          </div>
-          <!-- "¡Activen todos los operadores!": cada nave tiene un hueco en su código. La historia
-               espera acá con la escena viva, y cada hueco se puede saltear. La hoja llega diferida:
-               casi nadie la necesita en el primer segundo. -->
-          @if (huecoActual(); as h) {
-            <!-- El velo: la escena sigue viva detrás, pero el hueco es lo único que hay que hacer. -->
-            <div class="prologo__velo" aria-hidden="true"></div>
-            @defer (on immediate) {
-              <app-hoja-del-hueco
-                [hueco]="h"
-                [paso]="hueco()! + 1"
-                [total]="huecos().length"
-                (sistema-establecido)="alArreglarHueco($event)"
-                (saltar)="siguienteHueco()"
-              />
-            }
-          }
-          <!-- "¡Rápido, el manual de a bordo!": la cámara entra en la pantalla de la nave, que se
-               prende como una tele vieja, y cada página es esa pantalla entera. No se cierra: se
-               sigue hasta la última, y la historia continúa. -->
-          @if (paginaEnElPrologo(); as p) {
-            <div class="prologo__tele" aria-hidden="true"></div>
-            <ng-container *ngTemplateOutlet="hojaDelManualTpl; context: { $implicit: p }" />
-          }
-          <p class="prologo__titulo" aria-hidden="true">Angular Signals</p>
-          <!-- Íconos y no palabras: la barra es del juego, no un menú. El nombre de cada uno va en
-               `aria-label` y `title`, que el prólogo reescribe con el estado; el ícono lo elige
-               `aria-pressed`. -->
-          <div class="prologo__hud prologo__hud--controles">
-            <button
-              class="prologo__pause prologo__icono"
-              type="button"
-              aria-pressed="false"
-              aria-label="Pausa"
-              title="Pausa"
-            >
-              <svg class="ico ico--suelto" viewBox="0 0 24 24" aria-hidden="true">
-                <path d="M8 5v14M16 5v14" />
-              </svg>
-              <svg class="ico ico--apretado" viewBox="0 0 24 24" aria-hidden="true">
-                <path d="M7 4.5v15l12-7.5z" />
-              </svg>
+            <button role="menuitemradio" aria-checked="false" data-speed="2" type="button">
+              <span class="tusi__ck"></span>×2
             </button>
-            <button
-              class="prologo__sound prologo__icono"
-              type="button"
-              aria-pressed="true"
-              aria-label="Sonido: sí"
-              title="Sonido: sí"
-            >
-              <svg class="ico ico--apretado" viewBox="0 0 24 24" aria-hidden="true">
-                <path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z" />
-                <path d="M15.5 9a4 4 0 0 1 0 6M18.5 6.5a7.5 7.5 0 0 1 0 11" />
-              </svg>
-              <svg class="ico ico--suelto" viewBox="0 0 24 24" aria-hidden="true">
-                <path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z" />
-                <path d="M16 9.5l5 5M21 9.5l-5 5" />
-              </svg>
+            <button role="menuitemradio" aria-checked="false" data-speed="4" type="button">
+              <span class="tusi__ck"></span>×4
             </button>
-            <button
-              class="prologo__full prologo__icono"
-              type="button"
-              aria-pressed="false"
-              aria-label="Pantalla completa"
-              title="Pantalla completa"
-            >
-              <svg class="ico ico--suelto" viewBox="0 0 24 24" aria-hidden="true">
-                <path d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5" />
-              </svg>
-              <svg class="ico ico--apretado" viewBox="0 0 24 24" aria-hidden="true">
-                <path d="M9 4v5H4M20 9h-5V4M15 20v-5h5M4 15h5v5" />
-              </svg>
-            </button>
-          </div>
-          <div class="prologo__hud prologo__hud--salida">
-            <!-- Borrar todo pide confirmación con palabras: un ícono solo no alcanza para avisar. -->
-            <button
-              class="prologo__reinicio"
-              type="button"
-              [class.prologo__icono]="!confirmandoBorrado()"
-              [class.prologo__reinicio--confirmar]="confirmandoBorrado()"
-              [attr.aria-label]="confirmandoBorrado() ? null : 'Empezar de cero'"
-              [attr.title]="confirmandoBorrado() ? null : 'Empezar de cero'"
-              (click)="pedirEmpezarDeCero()"
-            >
-              @if (confirmandoBorrado()) {
-                ¿Seguro? Se borra todo
-              } @else {
-                <svg class="ico" viewBox="0 0 24 24" aria-hidden="true">
-                  <path d="M4.5 12a7.5 7.5 0 1 0 2.2-5.3M4.5 4.5v4h4" />
-                </svg>
-              }
+            <button role="menuitemradio" aria-checked="false" data-speed="8" type="button">
+              <span class="tusi__ck"></span>×8
             </button>
           </div>
         </div>
       </div>
-      <div class="caption"><p class="s" id="capS">Molécula · escena 1</p></div>
+
+      <!-- Pantalla de inicio: una mañana en la colina con Angie esperando. "Entrar" la desarma en
+               luz que sube al cielo, el cielo se hace noche y ahí empieza el prólogo (inicio-angie.ts).
+               El click además desbloquea el audio (intro-tusi.ts). -->
+      <div class="tusi__overlay ini">
+        <svg
+          class="ini__paisaje"
+          viewBox="0 0 1920 1080"
+          preserveAspectRatio="xMidYMax slice"
+          aria-hidden="true"
+        >
+          <defs>
+            <linearGradient id="ini-cielo" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0" stop-color="#bfe3df" />
+              <stop offset=".55" stop-color="#e9f3e6" />
+              <stop offset="1" stop-color="#fdf3dc" />
+            </linearGradient>
+            <linearGradient id="ini-lejos" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0" stop-color="#b5d9cb" />
+              <stop offset="1" stop-color="#cfe6d9" />
+            </linearGradient>
+            <linearGradient id="ini-medio" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0" stop-color="#8cc8ad" />
+              <stop offset="1" stop-color="#a9d6bf" />
+            </linearGradient>
+            <linearGradient id="ini-colina" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0" stop-color="#6cb895" />
+              <stop offset=".4" stop-color="#4fa07f" />
+              <stop offset="1" stop-color="#2f7d64" />
+            </linearGradient>
+            <radialGradient id="ini-charco" cx=".5" cy=".5" r=".5">
+              <stop offset="0" stop-color="#fff4cf" stop-opacity=".7" />
+              <stop offset="1" stop-color="#fff4cf" stop-opacity="0" />
+            </radialGradient>
+            <radialGradient id="ini-vineta" cx=".5" cy=".45" r=".75">
+              <stop offset=".6" stop-color="#2a2316" stop-opacity="0" />
+              <stop offset="1" stop-color="#2a2316" stop-opacity=".22" />
+            </radialGradient>
+          </defs>
+
+          <rect
+            data-material="cielo"
+            x="-200"
+            y="-400"
+            width="2320"
+            height="1480"
+            fill="url(#ini-cielo)"
+          />
+
+          <g class="ini__nubes" data-material="cielo" fill="#ffffff">
+            <path
+              opacity=".85"
+              d="M300 250c20-40 90-48 120-14 18-34 84-36 104 8 40-6 66 22 58 52H262c-26-18-6-52 38-46Z"
+            />
+            <path
+              opacity=".7"
+              d="M820 150c14-26 62-30 82-8 14-22 58-22 70 6 28-4 46 16 40 34H794c-18-12-4-34 26-32Z"
+            />
+            <path
+              opacity=".75"
+              d="M1560 380c18-34 78-40 104-12 16-30 72-30 90 6 34-4 56 18 50 44h-272c-22-16-6-44 28-38Z"
+            />
+          </g>
+
+          <path
+            fill="url(#ini-lejos)"
+            d="M-40 760C140 650 300 640 470 700S760 640 920 690s300-40 470 0 330 70 570 10V1080H-40Z"
+          />
+          <path
+            fill="url(#ini-medio)"
+            d="M-40 830C120 760 280 770 420 800s240-30 380 0 680-20 820 10 260 0 340-30V1080H-40Z"
+          />
+          <path data-material="pasto" fill="url(#ini-colina)" [attr.d]="paisaje.colina" />
+          <!-- La luz viene del átomo de arriba a la derecha y cae donde pisa Angie. -->
+          <ellipse cx="990" cy="800" rx="260" ry="34" fill="url(#ini-charco)" />
+          <g data-material="pasto">
+            @for (f of paisaje.flores; track $index) {
+              <circle [attr.cx]="f.x" [attr.cy]="f.y" [attr.r]="f.r" [attr.fill]="f.color" />
+            }
+          </g>
+          <g data-material="pasto">
+            @for (m of paisaje.matas; track $index) {
+              <path [attr.d]="m.d" [attr.fill]="m.tono" />
+            }
+          </g>
+
+          <g
+            class="ini__juncos ini__juncos--izq"
+            data-material="pasto"
+            fill="none"
+            stroke="#1f5e4c"
+            stroke-linecap="round"
+          >
+            @for (j of paisaje.juncosIzq; track $index) {
+              <path [attr.d]="j.d" [attr.stroke-width]="j.ancho" />
+            }
+          </g>
+          <g
+            class="ini__juncos ini__juncos--der"
+            data-material="pasto"
+            fill="none"
+            stroke="#1f5e4c"
+            stroke-linecap="round"
+          >
+            @for (j of paisaje.juncosDer; track $index) {
+              <path [attr.d]="j.d" [attr.stroke-width]="j.ancho" />
+            }
+          </g>
+          <rect
+            x="-200"
+            y="-400"
+            width="2320"
+            height="1480"
+            fill="url(#ini-vineta)"
+            pointer-events="none"
+          />
+        </svg>
+
+        <!-- La piedra del borde de la loma, donde Angie se sienta a pensar. Dibujada en el mismo
+                 lado de 1080 que ella: el borde de arriba está en y = 790, a la altura de sus caderas, bajo sus pies (x = 560). -->
+        <div class="ini__piedra" aria-hidden="true">
+          <svg viewBox="0 0 1080 1080">
+            <ellipse cx="575" cy="1000" rx="320" ry="30" fill="rgba(30, 60, 45, 0.3)" />
+            <path
+              fill="#737c87"
+              d="M282 994C262 930 276 830 334 794C400 766 500 760 570 760C660 760 764 768 816 802C868 838 880 930 866 996C710 1016 440 1016 282 994Z"
+            />
+            <path
+              fill="#929ba5"
+              d="M300 972C290 906 304 832 346 802C420 790 500 788 570 788C660 788 752 794 806 814C846 846 854 920 846 976C694 992 452 992 300 972Z"
+            />
+            <path
+              fill="#b9c0c6"
+              d="M340 794C400 770 500 763 570 763C660 763 760 771 808 802C760 792 660 788 570 788C480 788 400 790 340 794Z"
+            />
+            <path fill="#6a737d" d="M718 880C760 876 800 894 812 930C778 912 746 902 718 880Z" />
+            <path fill="#6a737d" d="M360 916C384 940 416 954 452 956C414 964 378 950 360 916Z" />
+            <path
+              fill="#5aab89"
+              d="M340 796C376 774 418 768 452 772C428 782 402 788 382 800C366 810 348 810 340 796Z"
+            />
+            <path
+              fill="#4fa07f"
+              d="M272 1002C282 978 294 968 300 988C308 966 320 964 322 990C332 974 344 976 342 1004Z"
+            />
+            <path
+              fill="#4fa07f"
+              d="M820 1002C828 980 840 972 846 992C854 972 866 970 868 996C876 982 886 986 882 1006Z"
+            />
+          </svg>
+        </div>
+
+        <!-- Atardecer y penumbra tiñen lo de abajo (multiplicar): la colina queda como silueta
+                 en vez de borrarse bajo una cortina. Van antes del sol, que sigue siendo la luz. -->
+        <div class="ini__ocaso" aria-hidden="true"></div>
+        <div class="ini__penumbra" aria-hidden="true"></div>
+
+        <!-- El sol: la luz de la escena sale de ahí, y ahí vuelven las luces de Angie. Respira, y
+                 sus rayos se estiran de a uno, en ola, mientras gira despacio. -->
+        <div class="ini__sol" aria-hidden="true">
+          <svg class="ini__sol-dibujo" viewBox="-100 -100 200 200">
+            <defs>
+              <radialGradient id="ini-sol-nucleo" cx="42%" cy="38%" r="70%">
+                <stop offset="0" stop-color="#fffbe6" />
+                <stop offset=".38" stop-color="#ffe07a" />
+                <stop offset=".78" stop-color="#ffb23c" />
+                <stop offset="1" stop-color="#f59a28" />
+              </radialGradient>
+              <radialGradient id="ini-sol-corona">
+                <stop offset=".55" stop-color="#ffd46a" stop-opacity=".55" />
+                <stop offset="1" stop-color="#ffd46a" stop-opacity="0" />
+              </radialGradient>
+              <linearGradient
+                id="ini-sol-rayo"
+                x1="0"
+                y1="-36"
+                x2="0"
+                y2="-84"
+                gradientUnits="userSpaceOnUse"
+              >
+                <stop offset="0" stop-color="#ffc24d" />
+                <stop offset="1" stop-color="#ffdd85" stop-opacity=".25" />
+              </linearGradient>
+            </defs>
+            <g class="ini__sol-giro">
+              @for (r of paisaje.rayos; track $index) {
+                <g [attr.transform]="'rotate(' + r.angulo + ')'">
+                  <path
+                    class="ini__sol-rayo"
+                    [class.ini__sol-rayo--corto]="r.corto"
+                    [style.--i]="$index"
+                    d="M-7 -37Q0 -41 7 -37L2 -80Q0 -84 -2 -80Z"
+                  />
+                </g>
+              }
+            </g>
+            <circle class="ini__sol-corona" r="48" fill="url(#ini-sol-corona)" />
+            <g class="ini__sol-cuerpo">
+              <circle r="33" fill="url(#ini-sol-nucleo)" />
+              <circle r="31.5" fill="none" stroke="#dc7814" stroke-opacity=".22" stroke-width="3" />
+              <path
+                d="M-21 -12Q-15 -24 -2 -26"
+                fill="none"
+                stroke="#fff"
+                stroke-opacity=".7"
+                stroke-width="5"
+                stroke-linecap="round"
+              />
+            </g>
+          </svg>
+          <!-- Las ondas de radio que salen del sol antes de que su voz se entienda. Van debajo
+                   del globo: encima, un anillo le cruzaba la frase. -->
+          <span class="ini__radio"><i></i><i></i><i></i><i></i></span>
+          <!-- La voz que llega desde el sol, de lejos: el borde cortado es el de las
+                   transmisiones de las cinemáticas. -->
+          <p class="ini__voz-sol" [style.--tecla]="tecla" [style.--n]="intercambio.sol.letras">
+            <ng-container
+              *ngTemplateOutlet="escrito; context: { $implicit: intercambio.sol.renglones[0] }"
+            />
+          </p>
+        </div>
+
+        <!-- La noche que llega con la despedida: es el mismo cielo del prólogo. -->
+        <div class="ini__noche" aria-hidden="true">
+          <div class="ini__cielo-noche">
+            @for (e of paisaje.estrellas; track $index) {
+              <span
+                class="ini__estrella"
+                [style.left.%]="e.x"
+                [style.top.%]="e.y"
+                [style.width.px]="e.tam"
+                [style.height.px]="e.tam"
+                [style.--d]="e.retraso + 'ms'"
+              ></span>
+            }
+          </div>
+        </div>
+
+        <!-- La entrada es la idea de Angie: su lamparita. Un botón real encima del dibujo, así
+                 se llega con Tab y tiene nombre, y el llamado de abajo es su etiqueta. -->
+        <div class="ini__angie">
+          <span class="ini__aura" aria-hidden="true"></span>
+          <app-mascota-viva #angieInicio [vidaPropia]="angieEsperando()" />
+          <!-- Al tocarla, antes de irse lo piensa: así la salida es una decisión suya y no
+                   algo que le pasa. -->
+          <p class="ini__piensa" aria-hidden="true">
+            <span class="ini__rastro"></span>
+            <span class="ini__rastro"></span>
+            <!-- Antes de pensar le contesta al sol en voz alta: un globo de diálogo, no una nube. -->
+            <span class="ini__dice" [style.--tecla]="tecla" [style.--n]="intercambio.angie.letras">
+              @for (renglon of intercambio.angie.renglones; track $index) {
+                <span class="ini__renglon-dicho">
+                  <ng-container *ngTemplateOutlet="escrito; context: { $implicit: renglon }" />
+                </span>
+              }
+            </span>
+            <!-- Dos pensamientos en la misma nube: primero los presiente (mientras suena la radio),
+                     y después de hablar con el sol, decide. -->
+            <span
+              class="ini__burbuja"
+              [style.--tecla]="tecla"
+              [style.--n1]="intercambio.piensa[0].letras"
+              [style.--n2]="intercambio.piensa[1].letras"
+            >
+              @for (frase of intercambio.piensa; track $index) {
+                <span class="ini__frase">
+                  <ng-container
+                    *ngTemplateOutlet="escrito; context: { $implicit: frase.renglones[0] }"
+                  /><span class="ini__puntos"><i>.</i><i>.</i><i>.</i></span>
+                </span>
+              }
+            </span>
+          </p>
+          <!-- Un renglón de un globo, de a una letra como los diálogos de un RPG. Las palabras
+                   no se parten al bajar de renglón. -->
+          <ng-template #escrito let-renglon>
+            @for (palabra of renglon; track $index) {
+              <span class="ini__escrita">
+                @for (l of palabra.letras; track $index) {
+                  <span class="ini__tecla" [style.--i]="l.i">{{ l.c }}</span>
+                }
+              </span>
+            }
+          </ng-template>
+          <!-- Lo que se dice y se piensa, para quien escucha la pantalla: los globos son dibujo. -->
+          <p class="ini__dicho sr-only" aria-live="polite"></p>
+          <button
+            id="ini-foco"
+            class="ini__foco"
+            data-role="entrar"
+            type="button"
+            aria-label="Entrar"
+          ></button>
+        </div>
+
+        <div class="ini__texto">
+          <!-- Letra por letra para que entren de a una; el lector lee la frase entera. -->
+          <p class="ini__titulo">
+            <span class="sr-only">Las aventuras de Angie por el SignalVerso</span>
+            @for (renglon of titulo; track $index) {
+              <span class="ini__renglon" aria-hidden="true">
+                @for (palabra of renglon; track $index) {
+                  <span class="ini__palabra" [class.ini__acento]="palabra.acento">
+                    @for (l of palabra.letras; track $index) {
+                      <span class="ini__letra" [style.--i]="l.i">{{ l.c }}</span>
+                    }
+                  </span>
+                }
+              </span>
+            }
+          </p>
+          <p class="ini__bajada">
+            <span class="sr-only">Una introducción interactiva a los Signals</span>
+            @for (palabra of bajada; track $index) {
+              <span class="ini__palabra-bajada" aria-hidden="true" [style.--p]="$index">{{
+                palabra.texto
+              }}</span>
+            }
+          </p>
+        </div>
+
+        <div class="ini__luces" aria-hidden="true"></div>
+
+        <div class="tusi__ov-capbar">
+          <!-- El cursor hace click y la frase se mueve detrás: el mismo gesto del aviso. -->
+          <label class="ini__llamado" for="ini-foco">
+            <span class="sr-only ini__con-mouse">Hacé click para iniciar las aventuras</span>
+            <span class="sr-only ini__tactil">Tocá para iniciar las aventuras</span>
+            <span class="ini__raton" aria-hidden="true">
+              <i></i><i></i>
+              <svg viewBox="0 0 24 30">
+                <path d="M3 2V24L8.6 18.8L12.6 27.6L16.8 25.8L12.8 17.2H20.6Z" />
+              </svg>
+            </span>
+            <span class="ini__frase-llamado ini__con-mouse" aria-hidden="true">
+              @for (palabra of llamado; track $index) {
+                <span class="ini__palabra">
+                  @for (l of palabra.letras; track $index) {
+                    <span class="ini__ola" [style.--i]="l.i">{{ l.c }}</span>
+                  }
+                </span>
+              }
+            </span>
+            <span class="ini__frase-llamado ini__tactil" aria-hidden="true">
+              @for (palabra of llamadoTactil; track $index) {
+                <span class="ini__palabra">
+                  @for (l of palabra.letras; track $index) {
+                    <span class="ini__ola" [style.--i]="l.i">{{ l.c }}</span>
+                  }
+                </span>
+              }
+            </span>
+            <span class="ini__chispa" aria-hidden="true">✦</span>
+          </label>
+        </div>
+
+        <!-- Sonido y pausa: dos fichas chicas en la esquina libre (el sol ocupa la otra), no una
+                 barra al pie que competía con el llamado. Su texto aparece al apuntarlas. -->
+        <div class="ini__ajustes">
+          <button
+            class="tusi__ov-sound"
+            data-role="ov-sound"
+            type="button"
+            aria-pressed="true"
+            aria-label="Silenciar el sonido de la intro"
+          >
+            <svg class="ini__ico" viewBox="0 0 24 24" aria-hidden="true">
+              <path class="ini__ico-lleno" d="M4 9h3.5L12 5v14l-4.5-4H4z" />
+              <path class="ini__ico-on" d="M15.5 9a4 4 0 0 1 0 6M18 6.5a7.5 7.5 0 0 1 0 11" />
+              <path class="ini__ico-off" d="m16 9.5 5 5m0-5-5 5" />
+            </svg>
+            <span class="ini__globo tusi__ov-sound-txt">Sonido activado · tocá para silenciar</span>
+          </button>
+          <!-- La pausa de la vida de fondo (WCAG 2.2.2): la etiqueta dice lo que hace el botón, así
+                   que cambia con el estado y no lleva aria-pressed. -->
+          <button
+            class="tusi__ov-sound tusi__ov-pausa"
+            type="button"
+            [class.tusi__ov-pausa--activa]="pausaFondo()"
+            (click)="alternarPausa()"
+          >
+            <svg class="ini__ico" viewBox="0 0 24 24" aria-hidden="true">
+              <path class="ini__ico-on" d="M9 6.5v11M15 6.5v11" />
+              <path class="ini__ico-lleno ini__ico-off" d="M8.5 5.5v13l10-6.5z" />
+            </svg>
+            <span class="ini__globo tusi__ov-pausa-txt">{{
+              pausaFondo()
+                ? 'Animaciones en pausa · tocá para reanudar'
+                : 'Animaciones activas · tocá para pausar'
+            }}</span>
+          </button>
+          <!-- Con una partida guardada, entrar sigue donde quedó: acá se puede volver al principio. -->
+          @if (partida().punto) {
+            <button
+              class="tusi__ov-sound ini__reinicio"
+              type="button"
+              [class.ini__reinicio--confirmar]="confirmandoBorrado()"
+              (click)="pedirEmpezarDeCero()"
+            >
+              <svg class="ini__ico" viewBox="0 0 24 24" aria-hidden="true">
+                <path class="ini__ico-on" d="M5.5 12a6.5 6.5 0 1 0 2-4.7" />
+                <path class="ini__ico-lleno" d="M4 4.5v5h5z" />
+              </svg>
+              <span class="ini__globo">{{
+                confirmandoBorrado() ? '¿Borrar todo? Tocá otra vez' : 'Empezar de cero'
+              }}</span>
+            </button>
+          }
+        </div>
+
+        <!-- Antes que nada, de noche: el aviso de auriculares. Su toque abre el audio de toda la
+                 intro, y al irse la cámara se aleja desde el ojo de Angie hasta la colina. -->
+        <!-- Diferido: el bundle inicial no tenía lugar. Mientras llega, el telón liso del mismo
+                 color tapa la colina, así no se ve la mañana un instante antes de la noche. -->
+        @defer (on immediate) {
+          <app-aviso-auriculares
+            [retoma]="retomaDespuesDelAviso()"
+            [confirmandoBorrado]="confirmandoBorrado()"
+            (viaje)="angieMiraFijo($event)"
+            (llego)="alLlegarALaColina()"
+            (retomar)="retomarDondeQuedo()"
+            (empezarDeCero)="pedirEmpezarDeCero()"
+          />
+        } @placeholder {
+          <div class="ini__telon" aria-hidden="true"></div>
+        }
+      </div>
+    </div>
+    <!-- Prólogo "la anomalía": la cinemática que enmarca el recorrido (ver prologo-anomalia.ts).
+           Se destapa al tocar Entrar, porque ese click es el gesto que el navegador exige para
+           dejar sonar, y al terminar le pasa la posta a la construcción de Tusi. -->
+    <div
+      class="prologo"
+      [class.prologo--operadores]="hueco() !== null"
+      [class.prologo--disparo]="disparando()"
+      [class.prologo--manual]="paginaEnElPrologo() !== null"
+      hidden
+    >
+      <svg
+        class="prologo__escena"
+        role="img"
+        aria-label="Prólogo animado: cuatro naves vuelven a casa, una anomalía se traga a tres, y del otro lado lo que parecía caos es un patrón con orden"
+      ></svg>
+      <!-- Angie es la misma de la colina, con sus muelles: nace del choque de las dos moléculas. -->
+      <div class="prologo__mascot" aria-hidden="true">
+        <app-mascota-viva [vidaPropia]="angiePrologo()" />
+      </div>
+      <p class="prologo__voz" aria-live="polite"></p>
+      <div class="prologo__dialogo" aria-live="polite">
+        <p class="prologo__globo" data-quien="">
+          <span class="prologo__quien"></span><span class="prologo__frase"></span>
+        </p>
+        <p class="prologo__globo" data-quien="">
+          <span class="prologo__quien"></span><span class="prologo__frase"></span>
+        </p>
+      </div>
+      <!-- "¡Activen todos los operadores!": cada nave tiene un hueco en su código. La historia
+               espera acá con la escena viva, y cada hueco se puede saltear. La hoja llega diferida:
+               casi nadie la necesita en el primer segundo. -->
+      @if (huecoActual(); as h) {
+        <!-- El velo: la escena sigue viva detrás, pero el hueco es lo único que hay que hacer. -->
+        <div class="prologo__velo" aria-hidden="true"></div>
+        @defer (on immediate) {
+          <app-hoja-del-hueco
+            [hueco]="h"
+            [paso]="hueco()! + 1"
+            [total]="huecos().length"
+            (sistema-establecido)="alArreglarHueco($event)"
+            (saltar)="siguienteHueco()"
+          />
+        }
+      }
+      <!-- "¡Rápido, el manual de a bordo!": la cámara entra en la pantalla de la nave, que se
+               prende como una tele vieja, y cada página es esa pantalla entera. No se cierra: se
+               sigue hasta la última, y la historia continúa. -->
+      @if (paginaEnElPrologo(); as p) {
+        <div class="prologo__tele" aria-hidden="true"></div>
+        <ng-container *ngTemplateOutlet="hojaDelManualTpl; context: { $implicit: p }" />
+      }
+      <p class="prologo__titulo" aria-hidden="true">Angular Signals</p>
+      <!-- Íconos y no palabras: la barra es del juego, no un menú. El nombre de cada uno va en
+               `aria-label` y `title`, que el prólogo reescribe con el estado; el ícono lo elige
+               `aria-pressed`. -->
+      <div class="prologo__hud prologo__hud--controles">
+        <button
+          class="prologo__pause prologo__icono"
+          type="button"
+          aria-pressed="false"
+          aria-label="Pausa"
+          title="Pausa"
+        >
+          <svg class="ico ico--suelto" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M8 5v14M16 5v14" />
+          </svg>
+          <svg class="ico ico--apretado" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M7 4.5v15l12-7.5z" />
+          </svg>
+        </button>
+        <button
+          class="prologo__sound prologo__icono"
+          type="button"
+          aria-pressed="true"
+          aria-label="Sonido: sí"
+          title="Sonido: sí"
+        >
+          <svg class="ico ico--apretado" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z" />
+            <path d="M15.5 9a4 4 0 0 1 0 6M18.5 6.5a7.5 7.5 0 0 1 0 11" />
+          </svg>
+          <svg class="ico ico--suelto" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z" />
+            <path d="M16 9.5l5 5M21 9.5l-5 5" />
+          </svg>
+        </button>
+        <button
+          class="prologo__full prologo__icono"
+          type="button"
+          aria-pressed="false"
+          aria-label="Pantalla completa"
+          title="Pantalla completa"
+        >
+          <svg class="ico ico--suelto" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5" />
+          </svg>
+          <svg class="ico ico--apretado" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M9 4v5H4M20 9h-5V4M15 20v-5h5M4 15h5v5" />
+          </svg>
+        </button>
+      </div>
+      <div class="prologo__hud prologo__hud--salida">
+        <!-- Borrar todo pide confirmación con palabras: un ícono solo no alcanza para avisar. -->
+        <button
+          class="prologo__reinicio"
+          type="button"
+          [class.prologo__icono]="!confirmandoBorrado()"
+          [class.prologo__reinicio--confirmar]="confirmandoBorrado()"
+          [attr.aria-label]="confirmandoBorrado() ? null : 'Empezar de cero'"
+          [attr.title]="confirmandoBorrado() ? null : 'Empezar de cero'"
+          (click)="pedirEmpezarDeCero()"
+        >
+          @if (confirmandoBorrado()) {
+            ¿Seguro? Se borra todo
+          } @else {
+            <svg class="ico" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M4.5 12a7.5 7.5 0 1 0 2.2-5.3M4.5 4.5v4h4" />
+            </svg>
+          }
+        </button>
+      </div>
     </div>
   </div>
 </div>
@@ -810,7 +695,7 @@
           ><b>{{ libro().nombre }}</b></span
         >
         <span class="etapa__derecha">
-          <!-- Era el link de la molécula: retirada, la práctica se abre desde la hoja. -->
+          <!-- La práctica se abre desde la hoja (ADR 0019). -->
           <a class="etapa__practica" routerLink="/practica/carrito">Practicá</a>
           <ng-container [ngTemplateOutlet]="marcasDelLibro" />
         </span>
@@ -818,7 +703,7 @@
     }
     <div #cuerpoDelManual class="prologo__manual-cuerpo">
       <!-- La página del manual trae su ley, su lámina y su desafío (ver `app-pagina-del-manual`). Una
-           pantalla del viaje no: en la molécula su nombre lo ponía la barra de arriba. -->
+           pantalla del viaje no: su nombre lo pone la hoja. -->
       @if (libro().concepto !== undefined) {
         <!-- El título y la tripulación comparten una franja: con las naves en una franja propia
              arriba del título, el desafío quedaba debajo del pliegue en casi todas las pantallas.
@@ -895,17 +780,16 @@
   }
 </ng-template>
 
-<!-- Ir y volver. No hay "cerrar": la última página sigue la historia, y desde la bitácora la primera
-     vuelve a ella. -->
+<!-- Ir y volver. No hay "cerrar": la última página sigue la historia. -->
 <ng-template #pieDelLibro>
   <nav class="prologo__manual-paginas" aria-label="Páginas del manual">
-    @if (pagina()! > 0 || desdeLaBitacora()) {
+    @if (pagina()! > 0) {
       <button
         type="button"
         class="prologo__manual-boton prologo__manual-atras"
         (click)="pasarPagina(-1)"
       >
-        &larr; {{ pagina()! > 0 ? 'Anterior' : 'Bitácora' }}
+        &larr; Anterior
       </button>
     }
     @if (puedeSeguir()) {
@@ -922,7 +806,7 @@
   </nav>
 </ng-template>
 
-<!-- El manual suelto, abierto desde la bitácora: afuera del escenario, como ella. -->
+<!-- La hoja de una etapa del viaje va suelta, afuera del escenario: el escenario queda `inert`. -->
 @if (paginaSuelta(); as p) {
   <div class="manual-suelto" [class.manual-suelto--viaje]="libro().concepto !== undefined">
     <div class="prologo__tele" aria-hidden="true"></div>
@@ -931,32 +815,14 @@
 }
 
 <!-- La cinemática del capítulo va AFUERA del escenario: mientras corre, el escenario queda `inert`
-     entero, y ella no puede quedar adentro de lo que se apaga. -->
-@if (bitacoraAbierta()) {
-  <!-- Diferidos: la bitácora y el reproductor solo pesan cuando se abren. -->
-  @defer (on immediate) {
-    <app-bitacora
-      [partida]="partida()"
-      [capitulos]="capitulosBitacora()"
-      [leyFinal]="leyFinal()"
-      (verCinematica)="verCinematicaDesdeBitacora($event)"
-      (verPrologo)="verPrologoDesdeBitacora()"
-      (verManual)="verManualDesdeBitacora()"
-      (verArbol)="verArbolDesdeBitacora()"
-      (seguirViaje)="seguirElViajeDesdeBitacora()"
-      (borrar)="empezarDeCero()"
-      (cerrar)="cerrarBitacora()"
-    />
-  }
-}
-
+     entero, y ella no puede quedar adentro de lo que se apaga. Diferido: el reproductor solo pesa
+     cuando se abre. -->
 @if (cinematica(); as cine) {
   @defer (on immediate) {
     <app-cinematica
       [cinematica]="cine"
       [completo]="cinematicaCompleta()"
       [establecidos]="capitulosHechos()"
-      [origen]="origenIris()"
       [fotograma]="enElFin() ? 'fin' : null"
       [accionFinal]="
         enElFin() ? (confirmandoBorrado() ? '¿Seguro? Se borra todo' : 'Empezar de cero') : null

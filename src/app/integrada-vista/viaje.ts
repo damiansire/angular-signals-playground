@@ -28,6 +28,19 @@ export const ETAPAS_DEL_VIAJE: readonly EtapaDelViaje[] = [
   { capitulo: 11, nombre: 'Quien lee, avisa', arco: 'III' },
 ];
 
+/**
+ * El capítulo de cada concepto, en orden. El concepto es una posición (la de `signalsRoutesTree`,
+ * los ids de la partida, el lugar del viaje) y el capítulo es un nombre: cuando la Introducción (el 0)
+ * pasó a la historia, Signals siguió siendo el 1, y con él su cinemática y los links `?nivel=`.
+ */
+export const CAPITULO_DE_CONCEPTO: readonly number[] = ETAPAS_DEL_VIAJE.map((e) => e.capitulo);
+
+/** El concepto de un capítulo, o `null` si ese capítulo no es una etapa del viaje. */
+export function conceptoDeCapitulo(capitulo: number): number | null {
+  const i = CAPITULO_DE_CONCEPTO.indexOf(capitulo);
+  return i < 0 ? null : i;
+}
+
 export function etapaDe(capitulo: number): EtapaDelViaje | null {
   return ETAPAS_DEL_VIAJE.find((e) => e.capitulo === capitulo) ?? null;
 }

@@ -1,20 +1,18 @@
-import { TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { provideRouter } from '@angular/router';
 
 import { IntegradaVistaComponent } from './integrada-vista.component';
-import { signalsRoutesTree } from '../app.routes';
 import { cuadrosFalsos, hasta } from './testing/cuadros';
 import { CLAVE_PARTIDA } from '../libs/partida';
 
 /**
- * La vista de la ruta `/` es el producto entero, y su boot son ~3.900 líneas imperativas que
- * ningún test tocaba: los gates verificaban que el proyecto COMPILA, no que la app ARRANQUE, y el
- * deploy publica en cuanto cierran en verde. Estos tests cubren el arranque real y, sobre todo, el
- * contrato de teardown, que es lo que el módulo promete por escrito y nadie ejercitaba.
+ * La vista de la ruta `/` es el producto entero, y su boot es imperativo: los gates verificaban que
+ * el proyecto COMPILA, no que la app ARRANQUE, y el deploy publica en cuanto cierran en verde. Estos
+ * tests cubren el arranque real y, sobre todo, el contrato de teardown.
  */
 describe('IntegradaVistaComponent', () => {
-  /** El motor arranca en `afterNextRender`, que corre después del primer ciclo de detección. */
+  /** La colina arranca en `afterNextRender`, que corre después del primer ciclo de detección. */
   async function montar() {
     const fixture = TestBed.createComponent(IntegradaVistaComponent);
     fixture.detectChanges();
@@ -22,12 +20,23 @@ describe('IntegradaVistaComponent', () => {
     return fixture;
   }
 
-  /**
-   * El motor termina de arrancar en un timer de 30 ms: alto del track, posición de apertura y
-   * pausa guardada. Se espera a que pase, no un tiempo fijo que con la CPU tomada no alcanza.
-   */
-  const hastaElArranque = (host: HTMLElement): Promise<void> =>
-    hasta(() => host.querySelector<HTMLElement>('#track')!.style.height !== '');
+  /** Lo privado del componente, para manejar el viaje sin jugar la historia entera. */
+  const viaje = (fixture: ComponentFixture<IntegradaVistaComponent>) =>
+    fixture.componentInstance as unknown as {
+      abrirCinematica(capitulo: number): Promise<void>;
+      alTerminarCinematica(): void;
+      leerEtapa(concepto: number, desde: number): Promise<void>;
+    };
+
+  /** Abre la hoja de una etapa y devuelve su `.subhost`, donde se monta la pantalla. */
+  async function abrirEtapa(
+    fixture: ComponentFixture<IntegradaVistaComponent>,
+    concepto: number,
+  ): Promise<HTMLElement> {
+    void viaje(fixture).leerEtapa(concepto, 0);
+    await fixture.whenStable();
+    return fixture.nativeElement.querySelector('.manual-suelto .subhost') as HTMLElement;
+  }
 
   beforeEach(() =>
     TestBed.configureTestingModule({
@@ -35,57 +44,55 @@ describe('IntegradaVistaComponent', () => {
       providers: [provideZonelessChangeDetection(), provideRouter([])],
     }),
   );
-  // La vista guarda dónde quedó la historia apenas el recorrido se mueve: sin esto, cada test le
-  // dejaba su lugar al siguiente, que arrancaba adentro de la molécula en vez de en la landing.
+  // La vista guarda dónde quedó la historia: sin esto, cada test le dejaba su lugar al siguiente.
   beforeEach(() => localStorage.removeItem(CLAVE_PARTIDA));
   afterEach(() => localStorage.removeItem(CLAVE_PARTIDA));
 
-  it('arranca sin tirar y deja el escenario en pie', async () => {
+  it('arranca sin tirar, en la colina, y sin nada de la molécula (ADR 0021)', async () => {
     const fixture = await montar();
     const host: HTMLElement = fixture.nativeElement;
 
     expect(host.querySelector('#stage')).withContext('#stage').toBeTruthy();
-    expect(host.querySelector('#railTicks')).withContext('#railTicks').toBeTruthy();
-    expect(host.querySelector('.topbar')).withContext('.topbar').toBeTruthy();
+    expect(host.querySelector('.intro .tusi')).withContext('la colina').toBeTruthy();
+    for (const molecula of ['svg.mol', '#atoms', '#bonds', '.card--sub', '.topbar', '.rail']) {
+      expect(host.querySelector(molecula)).withContext(molecula).toBeNull();
+    }
 
     fixture.destroy();
   });
 
-  it('debajo de la intro no pinta nada, y lo devuelve apenas la intro se va', async () => {
-    const fixture = await montar();
-    const host: HTMLElement = fixture.nativeElement;
-    await hastaElArranque(host);
-    const molecula = host.querySelector<SVGSVGElement>('svg.mol')!;
-    const cards = host.querySelector<HTMLElement>('#content')!;
+  describe('la colina tapada por el viaje', () => {
+    it('una cinemática la tapa: deja de animar y de recibir foco, y vuelve al terminar', async () => {
+      const fixture = await montar();
+      const intro = fixture.nativeElement.querySelector('.intro') as HTMLElement;
+      expect(intro.classList).not.toContain('intro--fuera');
 
-    // La landing arranca en la intro: lo de abajo se esconde cuando terminó de cubrir.
-    await hasta(() => molecula.style.visibility === 'hidden');
-    expect(molecula.style.visibility).withContext('molécula tapada').toBe('hidden');
-    expect(cards.style.visibility).withContext('cards tapadas').toBe('hidden');
+      await viaje(fixture).abrirCinematica(1);
+      await fixture.whenStable();
+      expect(intro.classList).withContext('tapada').toContain('intro--fuera');
+      expect(intro.inert).toBeTrue();
 
-    const stage = host.querySelector<HTMLElement>('#stage')!;
-    stage.scrollTop = stage.scrollHeight;
-    await hasta(() => molecula.style.visibility === '');
-    expect(molecula.style.visibility).withContext('molécula a la vista').toBe('');
-    expect(cards.style.visibility).withContext('cards a la vista').toBe('');
+      viaje(fixture).alTerminarCinematica();
+      await fixture.whenStable();
+      expect(intro.classList).withContext('a la vista').not.toContain('intro--fuera');
+      expect(intro.inert).toBeFalse();
+      fixture.destroy();
+    });
 
-    fixture.destroy();
-  });
+    it('la hoja de una etapa también la tapa', async () => {
+      const fixture = await montar();
+      const intro = fixture.nativeElement.querySelector('.intro') as HTMLElement;
 
-  it('el motor dibuja una card por concepto del árbol', async () => {
-    const fixture = await montar();
-
-    // Si el motor descartara conceptos en silencio, acá se vería como cards de menos.
-    expect(fixture.nativeElement.querySelectorAll('.card--sub').length).toBe(
-      signalsRoutesTree.length,
-    );
-
-    fixture.destroy();
+      expect(await abrirEtapa(fixture, 0))
+        .withContext('la hoja')
+        .toBeTruthy();
+      expect(intro.classList).toContain('intro--fuera');
+      fixture.destroy();
+    });
   });
 
   describe('pausa de la vida de fondo (WCAG 2.2.2)', () => {
     const CLAVE = 'signals-pausa';
-    const esperar = (ms: number) => new Promise((r) => setTimeout(r, ms));
     let estilo: HTMLStyleElement;
 
     beforeEach(() => {
@@ -101,7 +108,11 @@ describe('IntegradaVistaComponent', () => {
       estilo.remove();
     });
 
-    /** Un elemento con una animación CSS, colgado dentro del recorrido. */
+    /** El botón de la pausa, en la colina junto al sonido. */
+    const boton = (host: HTMLElement): HTMLButtonElement =>
+      host.querySelector<HTMLButtonElement>('.ini__ajustes .tusi__ov-pausa')!;
+
+    /** Un elemento con una animación CSS, colgado dentro de la vista. */
     function animado(padre: Element, animacion: string): Animation {
       const el = document.createElement('div');
       el.style.animation = animacion;
@@ -109,7 +120,7 @@ describe('IntegradaVistaComponent', () => {
       return el.getAnimations()[0];
     }
 
-    /** `animationstart` visto desde `document`: burbujea después del handler del motor en la raíz. */
+    /** `animationstart` visto desde `document`: burbujea después del handler de la pausa. */
     const arranco = (animacion: Animation): Promise<void> =>
       new Promise((listo) => {
         const el = (animacion.effect as KeyframeEffect).target;
@@ -124,26 +135,26 @@ describe('IntegradaVistaComponent', () => {
     it('detiene los loops, termina las entradas y no toca lo que el jugador abrió encima', async () => {
       const fixture = await montar();
       const host: HTMLElement = fixture.nativeElement;
-      const btn = host.querySelector<HTMLButtonElement>('.tb-links .tb-pausa')!;
       const loop = animado(host, 'prueba-loop 1s linear infinite');
       // Una entrada que arranca invisible: congelada en su primer cuadro no se vería nunca.
       const entrada = animado(host, 'prueba-entrada 10s both');
-      const bitacora = host.appendChild(document.createElement('app-bitacora'));
-      const encima = animado(bitacora, 'prueba-entrada 10s both');
+      const cinematica = host.appendChild(document.createElement('app-cinematica'));
+      const encima = animado(cinematica, 'prueba-entrada 10s both');
 
-      expect(btn.textContent).toBe('Pausar animaciones');
-      btn.click();
-      expect(btn.textContent)
+      expect(boton(host).textContent).toContain('tocá para pausar');
+      boton(host).click();
+      fixture.detectChanges();
+      expect(boton(host).textContent)
         .withContext('la etiqueta dice lo que hace')
-        .toBe('Reanudar animaciones');
+        .toContain('tocá para reanudar');
       expect(host.classList).toContain('fondo-en-pausa');
       const quieto = loop.currentTime;
-      await esperar(120);
+      await new Promise((r) => setTimeout(r, 120));
       expect(loop.currentTime).withContext('loop').toBe(quieto);
       expect(entrada.playState).withContext('entrada').toBe('finished');
-      expect(encima.playState).withContext('bitácora').toBe('running');
+      expect(encima.playState).withContext('cinemática').toBe('running');
 
-      btn.click();
+      boton(host).click();
       expect(host.classList).not.toContain('fondo-en-pausa');
       expect(loop.playbackRate).withContext('loop reanudado').toBe(1);
       fixture.destroy();
@@ -152,58 +163,40 @@ describe('IntegradaVistaComponent', () => {
     it('no termina lo que sigue al scroll: el aviso de "más abajo" no es vida de fondo', async () => {
       const fixture = await montar();
       const host: HTMLElement = fixture.nativeElement;
-      const btn = host.querySelector<HTMLButtonElement>('.tb-pausa')!;
-      const card = host.appendChild(document.createElement('div'));
-      card.style.cssText = 'overflow-y: auto; height: 40px';
-      const aviso = card.appendChild(document.createElement('div'));
+      const hoja = host.appendChild(document.createElement('div'));
+      hoja.style.cssText = 'overflow-y: auto; height: 40px';
+      const aviso = hoja.appendChild(document.createElement('div'));
       aviso.style.cssText =
         'height: 400px; animation: prueba-entrada linear both; animation-timeline: scroll(nearest block)';
       const animacion = aviso.getAnimations()[0];
 
-      btn.click();
+      boton(host).click();
       expect(animacion.playState).withContext('sigue al scroll').not.toBe('finished');
-      btn.click();
+      boton(host).click();
       fixture.destroy();
     });
 
-    it('en la landing, con el topbar invisible, sus controles no se pueden enfocar', async () => {
+    it('se guarda al elegirla y se borra al sacarla', async () => {
       const fixture = await montar();
       const host: HTMLElement = fixture.nativeElement;
-      const links = host.querySelector<HTMLElement>('.tb-links')!;
 
-      await hastaElArranque(host); // el primer render corre en el arranque
-      expect(links.inert).toBeTrue();
-      fixture.destroy();
-    });
-
-    it('la landing trae la misma pausa junto al sonido, con el estado compartido', async () => {
-      const fixture = await montar();
-      const host: HTMLElement = fixture.nativeElement;
-      const landing = host.querySelector<HTMLButtonElement>('.ini__ajustes .tusi__ov-pausa')!;
-      const topbar = host.querySelector<HTMLButtonElement>('.tb-pausa')!;
-
-      expect(landing.textContent).toContain('tocá para pausar');
-      landing.click();
-      expect(landing.textContent).toContain('tocá para reanudar');
-      expect(topbar.textContent).withContext('el topbar se entera').toBe('Reanudar animaciones');
+      boton(host).click();
       expect(localStorage.getItem(CLAVE)).toBe('1');
-
-      topbar.click();
-      expect(landing.textContent).withContext('y al revés').toContain('tocá para pausar');
+      boton(host).click();
+      expect(localStorage.getItem(CLAVE)).toBeNull();
       fixture.destroy();
     });
 
     it('reanudar no revive un loop que el CSS canceló mientras duraba la pausa', async () => {
       const fixture = await montar();
       const host: HTMLElement = fixture.nativeElement;
-      const btn = host.querySelector<HTMLButtonElement>('.tb-pausa')!;
       const loop = animado(host, 'prueba-loop 1s linear infinite');
 
-      btn.click();
-      // Como el halo de una parada que deja de ser la actual: el CSS le saca la animación.
+      boton(host).click();
+      // Como el halo de algo que deja de estar en pantalla: el CSS le saca la animación.
       (loop.effect as KeyframeEffect).target!.setAttribute('style', 'animation: none');
       expect(loop.playState).toBe('idle');
-      btn.click();
+      boton(host).click();
       expect(loop.playState).withContext('sigue cancelado').toBe('idle');
       fixture.destroy();
     });
@@ -211,12 +204,11 @@ describe('IntegradaVistaComponent', () => {
     it('después de una pausa, la pestaña oculta sigue congelando por CSS', async () => {
       const fixture = await montar();
       const host: HTMLElement = fixture.nativeElement;
-      const btn = host.querySelector<HTMLButtonElement>('.tb-pausa')!;
       const loop = animado(host, 'prueba-loop 1s linear infinite');
 
-      btn.click();
-      btn.click();
-      host.classList.add('anims-frozen'); // lo que pone el motor con `document.hidden`
+      boton(host).click();
+      boton(host).click();
+      host.classList.add('anims-frozen'); // lo que pone la pausa con `document.hidden`
       expect(loop.playState).toBe('paused');
       host.classList.remove('anims-frozen');
       fixture.destroy();
@@ -225,11 +217,7 @@ describe('IntegradaVistaComponent', () => {
     it('lo que arranca con la pausa puesta ya nace quieto', async () => {
       const fixture = await montar();
       const host: HTMLElement = fixture.nativeElement;
-      // Antes del primer render: después, en la landing, los links quedan inertes y el click no llega.
-      host.querySelector<HTMLButtonElement>('.tb-pausa')!.click();
-      // El barrido de la pausa corre al final del arranque: pasado eso, a la entrada nueva solo la
-      // puede atrapar `animationstart`.
-      await hastaElArranque(host);
+      boton(host).click();
 
       const entrada = animado(host, 'prueba-entrada 10s both');
       await arranco(entrada);
@@ -244,17 +232,17 @@ describe('IntegradaVistaComponent', () => {
       const loop = animado(host, 'prueba-loop 1s linear infinite');
       await hasta(() => loop.playbackRate === 0); // la pausa guardada frena el loop
 
-      expect(host.querySelector('.tb-pausa')!.textContent).toBe('Reanudar animaciones');
+      expect(host.classList).toContain('fondo-en-pausa');
+      expect(boton(host).textContent).toContain('tocá para reanudar');
       expect(loop.playbackRate).toBe(0);
       fixture.destroy();
     });
   });
 
   describe('la colina no baja (ADR 0019)', () => {
-    it('una flecha libre no mueve el escenario: la molécula ya no se recorre', async () => {
+    it('una flecha libre no mueve el escenario', async () => {
       const fixture = await montar();
       const stage = fixture.nativeElement.querySelector('#stage') as HTMLElement;
-      await hastaElArranque(fixture.nativeElement);
       const antes = stage.scrollTop;
 
       const e = new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true, cancelable: true });
@@ -267,37 +255,60 @@ describe('IntegradaVistaComponent', () => {
     });
   });
 
-  describe('mountSub', () => {
-    it('monta el componente REAL del sub-nivel dentro de la .subhost, y renderiza algo', async () => {
-      const fixture = await montar();
-      const subhost = fixture.nativeElement.querySelector('.subhost') as HTMLElement;
-      expect(subhost).toBeTruthy();
-      // El primer concepto llega diferido: se espera la carga, no se da por vacía antes.
-      await hasta(() => subhost.childElementCount > 0);
+  describe('la hoja de una etapa', () => {
+    /**
+     * Con la pantalla montada, las naves y el circuito miden con `ResizeObserver`, y el navegador
+     * avisa por `window.onerror` cuando una medición queda para el cuadro siguiente. No es una falla:
+     * la medición llega igual. Jasmine toma cualquier `onerror` como excepción del spec: acá se
+     * cuentan todas menos ese aviso. Llega un cuadro después de la medición, así que se esperan unos
+     * cuadros antes de contar.
+     */
+    const sinElAvisoDelResizeObserver = (cuerpo: () => Promise<void>) => () =>
+      jasmine.spyOnGlobalErrorsAsync(async (errores) => {
+        await cuerpo();
+        for (let i = 0; i < 3; i++) await new Promise((r) => requestAnimationFrame(r));
+        const excepciones = errores.calls
+          .allArgs()
+          .filter(([error]) => !String(error).includes('ResizeObserver loop completed'));
+        expect(excepciones).withContext('excepciones globales').toEqual([]);
+      });
 
-      expect(subhost.childElementCount)
-        .withContext('la card se montó vacía: mountSub degrada sin ruido')
-        .toBeGreaterThan(0);
-      expect(subhost.textContent?.trim().length)
-        .withContext('el componente montó pero no pintó nada')
-        .toBeGreaterThan(0);
+    it(
+      'monta el componente REAL de la pantalla dentro de la .subhost, y renderiza algo',
+      sinElAvisoDelResizeObserver(async () => {
+        const fixture = await montar();
+        const subhost = await abrirEtapa(fixture, 0);
+        expect(subhost).toBeTruthy();
+        // La pantalla llega diferida: se espera la carga, no se da por vacía antes.
+        await hasta(() => subhost.childElementCount > 0);
 
-      fixture.destroy();
-    });
+        expect(subhost.childElementCount)
+          .withContext('la hoja se montó vacía: el montaje degrada sin ruido')
+          .toBeGreaterThan(0);
+        expect(subhost.textContent?.trim().length)
+          .withContext('el componente montó pero no pintó nada')
+          .toBeGreaterThan(0);
 
-    it('al destruir se lleva el componente montado pero NO la .subhost que lo aloja', async () => {
-      const fixture = await montar();
-      const subhost = fixture.nativeElement.querySelector('.subhost') as HTMLElement;
-      await hasta(() => subhost.childElementCount > 0);
-      const montado = subhost.firstElementChild;
+        fixture.destroy();
+      }),
+    );
 
-      expect(montado).toBeTruthy();
+    it(
+      'al destruir se lleva el componente montado pero NO la .subhost que lo aloja',
+      sinElAvisoDelResizeObserver(async () => {
+        const fixture = await montar();
+        const subhost = await abrirEtapa(fixture, 0);
+        await hasta(() => subhost.childElementCount > 0);
+        const montado = subhost.firstElementChild;
 
-      fixture.destroy();
+        expect(montado).toBeTruthy();
 
-      // El disposer usa un nodo propio justamente para no borrar la .subhost persistente.
-      expect(subhost.contains(montado)).toBeFalse();
-    });
+        fixture.destroy();
+
+        // El disposer usa un nodo propio justamente para no borrar la .subhost.
+        expect(subhost.contains(montado)).toBeFalse();
+      }),
+    );
   });
 
   describe('red de contención del boot', () => {
@@ -329,29 +340,29 @@ describe('IntegradaVistaComponent', () => {
   describe('contrato de teardown', () => {
     it('después de destruir no queda ningún rAF pidiendo cuadros', async () => {
       // Los cuadros los da el test y se mira lo que queda pedido. Antes se contaban pedidos durante
-      // 250 ms de reloj real: se le anotaban al motor los de cualquier otro código de la página de
+      // 250 ms de reloj real: se le anotaban a la vista los de cualquier otro código de la página de
       // Karma, y un cuadro que el cierre olvidaba cancelar no se veía, porque no pide otro.
       const cuadros = cuadrosFalsos();
       const fixture = await montar();
       expect(cuadros.pendientes())
-        .withContext('el motor arranca con cuadros pedidos: sin eso no hay nada que cortar')
+        .withContext('la colina arranca con cuadros pedidos: sin eso no hay nada que cortar')
         .toBeGreaterThan(0);
 
       fixture.destroy();
       // Destruir le avisa al scheduler zoneless de Angular, que pide un cuadro y lo cancela en su
-      // propio setTimeout(0), agendado antes que este: al volver, lo pendiente es solo del motor.
+      // propio setTimeout(0), agendado antes que este: al volver, lo pendiente es solo de la vista.
       await new Promise((r) => setTimeout(r));
 
       expect(cuadros.pendientes())
-        .withContext('el motor sigue animando sobre una vista que ya no existe')
+        .withContext('la vista sigue animando aunque ya no existe')
         .toBe(0);
     });
 
     it('devuelve todos los listeners globales que tomó', async () => {
-      // Solo los que toma el motor. `popstate`/`hashchange` son del Router de Angular, que vive
+      // Solo los que toma la vista. `popstate`/`hashchange` son del Router de Angular, que vive
       // más allá de esta vista y los suelta con el entorno de test, no con `fixture.destroy()`:
       // incluirlos haría fallar el test por algo que no es responsabilidad de este módulo.
-      const DEL_MOTOR = ['keydown', 'resize', 'load', 'visibilitychange', 'wheel', 'touchmove'];
+      const DE_LA_VISTA = ['keydown', 'resize', 'load', 'visibilitychange', 'wheel', 'touchmove'];
       const objetivos = [window, document] as const;
       const tomados = new Map<string, number>();
       const originales = objetivos.map((o) => [o.addEventListener, o.removeEventListener] as const);
@@ -375,7 +386,7 @@ describe('IntegradaVistaComponent', () => {
         fixture.destroy();
 
         const sinDevolver = [...tomados]
-          .filter(([k, saldo]) => saldo > 0 && DEL_MOTOR.includes(k.split(':')[1]))
+          .filter(([k, saldo]) => saldo > 0 && DE_LA_VISTA.includes(k.split(':')[1]))
           .map(([k]) => k);
         expect(sinDevolver)
           .withContext('listeners que quedaron colgados sobre una vista destruida')
@@ -388,6 +399,7 @@ describe('IntegradaVistaComponent', () => {
       }
     });
   });
+
   describe('partida guardada', () => {
     const CLAVE = 'signals-cuaderno';
     let urlOriginal = '';
@@ -401,12 +413,10 @@ describe('IntegradaVistaComponent', () => {
       localStorage.removeItem(CLAVE);
     });
 
-    it('establecer un sistema escribe la partida con su concepto y su sub-nivel', async () => {
+    it('un desafío resuelto en una etapa escribe la partida con su concepto y su página', async () => {
       const fixture = await montar();
-      await hastaElArranque(fixture.nativeElement);
-      const cards = fixture.nativeElement.querySelectorAll('.card--sub');
-      const adentro = (cards[2] as HTMLElement).querySelector('.subhost') ?? cards[2];
-      adentro.dispatchEvent(new CustomEvent('sistema-establecido', { bubbles: true }));
+      const subhost = await abrirEtapa(fixture, 2);
+      subhost.dispatchEvent(new CustomEvent('sistema-establecido', { bubbles: true }));
 
       const guardado = JSON.parse(localStorage.getItem(CLAVE) ?? '{}');
       expect(guardado.establecidos).toEqual(['2/0']);
@@ -414,10 +424,29 @@ describe('IntegradaVistaComponent', () => {
       fixture.destroy();
     });
 
-    it('un desafío de la historia (el manual, el árbol) no marca nada en el recorrido', async () => {
+    it('lo establecido en otra visita se conserva al anotar lo nuevo', async () => {
+      localStorage.setItem(
+        CLAVE,
+        JSON.stringify({
+          v: 4,
+          establecidos: ['0/1'],
+          cinematicas: [],
+          prologo: true,
+          punto: null,
+        }),
+      );
       const fixture = await montar();
-      await hastaElArranque(fixture.nativeElement);
-      // Las hojas del prólogo viven adentro del escenario, pero no en una card de la molécula.
+      const subhost = await abrirEtapa(fixture, 2);
+      subhost.dispatchEvent(new CustomEvent('sistema-establecido', { bubbles: true }));
+
+      const guardado = JSON.parse(localStorage.getItem(CLAVE) ?? '{}');
+      expect(guardado.establecidos).toEqual(['0/1', '2/0']);
+      fixture.destroy();
+    });
+
+    it('un desafío de la historia (el manual, el árbol) no marca nada en el viaje', async () => {
+      const fixture = await montar();
+      // Las hojas del prólogo viven adentro del escenario, no en una etapa.
       const hoja = document.createElement('section');
       fixture.nativeElement.querySelector('#stage').append(hoja);
       hoja.dispatchEvent(new CustomEvent('sistema-establecido', { bubbles: true }));
@@ -427,7 +456,7 @@ describe('IntegradaVistaComponent', () => {
       fixture.destroy();
     });
 
-    it('al recargar sin link, la molécula no se abre aunque la partida quedó en ella', async () => {
+    it('al recargar sin link, una partida que quedó en la molécula sigue en la colina', async () => {
       localStorage.setItem(
         CLAVE,
         JSON.stringify({
@@ -441,13 +470,10 @@ describe('IntegradaVistaComponent', () => {
       history.replaceState(null, '', location.pathname);
       const fixture = await montar();
       const host: HTMLElement = fixture.nativeElement;
-      await hastaElArranque(host);
       await new Promise((listo) => setTimeout(listo, 300));
-      // Sigue en la colina: la historia es una sola, y la molécula solo se abre con un link.
-      const enfocado = [...host.querySelectorAll('#atoms .atom')].findIndex((a) =>
-        a.classList.contains('current'),
-      );
-      expect(enfocado).not.toBe(9);
+      // La historia es una sola: nada se abre hasta que se entra desde la colina.
+      expect(host.querySelector('.manual-suelto')).toBeNull();
+      expect(host.querySelector('app-cinematica')).toBeNull();
       expect(location.search).not.toContain('nivel');
       fixture.destroy();
     });
@@ -455,7 +481,6 @@ describe('IntegradaVistaComponent', () => {
     it('un link a un capítulo guarda el viaje en su cinemática', async () => {
       history.replaceState(null, '', `${location.pathname}?nivel=4`);
       const fixture = await montar();
-      await hastaElArranque(fixture.nativeElement);
       await hasta(() => localStorage.getItem(CLAVE) !== null);
 
       const guardado = JSON.parse(localStorage.getItem(CLAVE) ?? '{}');
@@ -465,15 +490,16 @@ describe('IntegradaVistaComponent', () => {
       fixture.destroy();
     });
 
-    it('con una partida rota arranca igual, sin enlaces soldados', async () => {
+    it('con una partida rota arranca igual, y el link la reemplaza por una sana', async () => {
       localStorage.setItem(CLAVE, '{esto no es json');
       history.replaceState(null, '', `${location.pathname}?nivel=11`);
       const fixture = await montar();
-      await hastaElArranque(fixture.nativeElement);
+      await hasta(() => localStorage.getItem(CLAVE)?.startsWith('{"v"') ?? false);
 
-      const soldados = fixture.nativeElement.querySelectorAll('#bonds .bond.on').length;
-      // Solo puede estar encendido el enlace que está naciendo hacia el concepto actual.
-      expect(soldados).toBeLessThanOrEqual(1);
+      expect(fixture.componentInstance.bootFallo()).toBeFalse();
+      const guardado = JSON.parse(localStorage.getItem(CLAVE) ?? '{}');
+      expect(guardado.establecidos).toEqual([]);
+      expect(guardado.viaje).toEqual({ concepto: 10, pagina: -1 });
 
       fixture.destroy();
     });

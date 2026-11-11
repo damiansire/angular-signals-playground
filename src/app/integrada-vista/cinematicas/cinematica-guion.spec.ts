@@ -11,7 +11,7 @@ import {
   type Cinematica,
 } from './cinematica-guion';
 import { CINEMATICAS } from './cinematicas-datos';
-import { CAPITULO_DE_CONCEPTO, TITULOS_DE_CAPITULO } from '../molecule-engine';
+import { CAPITULO_DE_CONCEPTO } from '../viaje';
 
 /** Un capítulo mínimo que cumple todo, para variar de a una regla por test. */
 function capitulo(cambios: Partial<Cinematica> = {}): Cinematica {
@@ -177,15 +177,6 @@ describe('cinematica-guion', () => {
     it('ninguno rompe las reglas del guion', () => {
       const todos = CINEMATICAS.flatMap((c) => problemasDe(c));
       expect(todos).toEqual([]);
-    });
-
-    it('el título de cada capítulo es el mismo tagline que tiene en el recorrido', () => {
-      const fueraDelRecorrido = [CAPITULO_FINAL, CAPITULO_REVELACION];
-      for (const c of CINEMATICAS.filter((x) => !fueraDelRecorrido.includes(x.capitulo))) {
-        expect(c.titulo)
-          .withContext(`capítulo ${c.capitulo}`)
-          .toBe(TITULOS_DE_CAPITULO[CAPITULO_DE_CONCEPTO.indexOf(c.capitulo)]);
-      }
     });
 
     it('el capítulo 11 lleva la respuesta a la pregunta del recorrido y alguien la pregunta', () => {

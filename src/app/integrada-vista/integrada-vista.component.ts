@@ -50,11 +50,9 @@ import {
   rayosDelSol,
   type InicioAngie,
 } from './inicio-angie';
-import { initMundoQueResponde } from './mundo-que-responde';
 import { LO_QUE_DICE_EL_SOL, LO_QUE_RESPONDE_ANGIE } from './intercambio-del-sol';
 import type { HuecoDelPrologo } from './operadores-del-prologo';
 import { PAGINAS_DEL_MANUAL, pasoEnElManual, type PaginaDelManual } from './manual-de-a-bordo';
-import { ARBOL_DE_SIGNAL_SPACE } from './arbol-de-signal-space';
 import { HojaDelHuecoComponent } from './hoja-del-hueco/hoja-del-hueco.component';
 import { PAGINA_DEL_MANUAL } from '../signals/level-0-introduction/manual/pagina-del-manual';
 import { vigilarEstampado } from './estampado-tardio';
@@ -66,17 +64,9 @@ import { AYUDA_DE_ANGIE } from '../components-atom/manipulable-system/manipulabl
 
 import { signalsRoutesTree } from '../app.routes';
 import { type RouteItem, type SubNivelDiferido } from '../interfaces/route-item.interface';
-import {
-  initMolecule,
-  CAPITULO_DE_CONCEPTO,
-  conceptoDeCapitulo,
-  NOMBRES_DE_CONCEPTO,
-  TITULOS_DE_CAPITULO,
-  type MountSub,
-  type SubHandle,
-} from './molecule-engine';
 import { initIntroTusi, type IntroTusiHandle } from './intro-tusi';
 import { buildWhereQuery, parseWhereQuery } from './url-sync';
+import { guardarPausaFondo, initPausaDelFondo, leerPausaFondo } from './pausa-del-fondo';
 import {
   almacenDelNavegador,
   cargarPartida,
@@ -93,15 +83,16 @@ import {
 } from '../libs/partida';
 import { CinematicaComponent } from './cinematicas/cinematica.component';
 import { PUNTOS_DEL_PROLOGO } from './puntos-del-prologo';
-import { despuesDelAviso, entradaDeLaHistoria, puntoDelRecorrido } from './retomar';
+import { despuesDelAviso, entradaDeLaHistoria } from './retomar';
 import { AvisoAuricularesComponent } from './aviso-auriculares/aviso-auriculares.component';
-import { BitacoraComponent, type CapituloDeBitacora } from './bitacora/bitacora.component';
 import {
   CAPITULO_FINAL,
   CAPITULO_REVELACION,
   type Cinematica,
 } from './cinematicas/cinematica-guion';
 import {
+  CAPITULO_DE_CONCEPTO,
+  conceptoDeCapitulo,
   esElFin,
   etapaDe,
   finDelViaje,
@@ -109,16 +100,6 @@ import {
   paginasDeEtapa,
   siguienteEtapa,
 } from './viaje';
-
-/**
- * Cuánto tiene que quedarse el recorrido en la parada de un capítulo para que arranque su
- * cinemática. Con scroll-snap, pasar de largo también reporta cada parada: sin esta espera, un
- * gesto largo de trackpad disparaba la cinemática de un capítulo que el jugador solo cruzó.
- */
-const ESPERA_CINEMATICA_MS = 650;
-
-/** El final entra después de que el enlace del capítulo 11 terminó de trazarse. */
-const ESPERA_FINAL_MS = 1600;
 
 /** Cuánto dura el "¿seguro?" de "Empezar de cero" antes de volver a su estado normal. */
 const CONFIRMACION_DE_BORRADO_MS = 4000;
@@ -145,20 +126,18 @@ const SIGNAL_SPACE: Libro = {
 
 /**
  * `?prologo=<id de línea>` (solo en dev) se lee al cargar el módulo: para cuando el prólogo
- * arranca, la sincronía con la URL ya reescribió la barra y el parámetro no está más.
+ * arranca, el viaje puede haber reescrito la barra y el parámetro ya no estar.
  */
 const PROLOGO_PEDIDO =
   typeof location === 'undefined' ? null : new URLSearchParams(location.search).get('prologo');
 
 /**
- * Vista integrada: el recorrido de los 12 conceptos como una MOLÉCULA reactiva.
- * Cada concepto es un átomo; al scrollear, la cámara bucea a su contenido y sus
- * sub-niveles orbitan la card. Cada sub-nivel EMBEBE el componente REAL de
- * `/signals/level/X/sub-level/Z` (sacado de `signalsRoutesTree`), así toda la app
- * de niveles vive dentro de esta única vista.
+ * Vista integrada: la historia entera en la ruta `/`. La colina, el prólogo y el viaje por los once
+ * capítulos, cada uno con su cinemática y su hoja. Cada página de la hoja EMBEBE el componente REAL de
+ * `/signals/level/X/sub-level/Z` (sacado de `signalsRoutesTree`).
  *
- * La animación es imperativa (SVG/cámara/scroll-snap) y vive en `molecule-engine`;
- * se arranca en `afterNextRender` (solo browser) y el cleanup corta rAF y listeners.
+ * La colina y el prólogo son imperativos (canvas, SVG, audio); se arrancan en `afterNextRender`
+ * (solo browser) y el cleanup corta rAF y listeners.
  */
 @Component({
   selector: 'app-integrada-vista',
@@ -166,7 +145,6 @@ const PROLOGO_PEDIDO =
     NgTemplateOutlet,
     RouterLink,
     CinematicaComponent,
-    BitacoraComponent,
     MascotaVivaComponent,
     AvisoAuricularesComponent,
     HojaDelHuecoComponent,
@@ -181,7 +159,6 @@ const PROLOGO_PEDIDO =
     './prologo-anomalia.css',
     './manual-de-a-bordo.css',
     './boot-fallo.css',
-    './aviso-mas-abajo.css',
     './angosto.css',
     './viaje-cine.css',
     './viaje-angosto.css',
@@ -267,22 +244,15 @@ export class IntegradaVistaComponent {
     estrellas: estrellas(59, 70),
   };
 
-  /** Componentes reales de cada sub-nivel, por concepto (del árbol de conceptos). Un sub-nivel
-   *  siempre trae componente; el tipo admite `undefined` porque `RouteItem.component` es opcional
-   *  (los niveles no lo llevan) y `mountSub` ya cubre el caso faltante. */
+  /** Las pantallas de cada concepto (del árbol de conceptos): son las páginas de su etapa. */
   private readonly subComponents: RouteItem[][] = signalsRoutesTree.map(
     (lvl) => lvl.subLevels ?? [],
   );
 
-  /** Nombre de cada sub-nivel, en el mismo orden que `subComponents`: es lo que muestra el topbar. */
-  private readonly subTitles: (string | undefined)[][] = signalsRoutesTree.map((lvl) =>
-    (lvl.subLevels ?? []).map((sl) => sl.title),
-  );
-
   /**
-   * El boot falló y no hay recorrido que mostrar. La vista es 100% imperativa: sin esto, cualquier
-   * excepción en el arranque deja al usuario mirando una pantalla muerta, sin mensaje y sin forma
-   * de saber que hay algo roto. Angular no puede renderizar un fallback que nadie declaró.
+   * El boot falló. La colina y el prólogo son imperativos: sin esto, cualquier excepción en el
+   * arranque deja al usuario mirando una pantalla muerta, sin mensaje y sin forma de saber que hay
+   * algo roto. Angular no puede renderizar un fallback que nadie declaró.
    */
   readonly bootFallo = signal(false);
 
@@ -291,31 +261,50 @@ export class IntegradaVistaComponent {
   protected readonly cinematicaCompleta = signal(false);
   /**
    * Lo establecido, por número de capítulo, para el final, que dibuja los doce átomos de antes. El 0
-   * (la Introducción) va siempre: ya no es un concepto del recorrido, lo cuenta la historia.
+   * (la Introducción) va siempre: ya no es un concepto del viaje, lo cuenta la historia.
    */
   protected readonly capitulosHechos = computed(() => [
     0,
     ...[...conceptosEstablecidos(this.partida())].map((c) => CAPITULO_DE_CONCEPTO[c]),
   ]);
-  protected readonly origenIris = signal<{ x: number; y: number } | null>(null);
 
   protected readonly partida = signal<Partida>(PARTIDA_VACIA);
   private readonly almacen = almacenDelNavegador();
-  private donde = { concepto: -1, sub: -1 };
-  private esperaCinematica: ReturnType<typeof setTimeout> | null = null;
   private cerrarPrologo: (() => void) | null = null;
-  /** Atributo de encapsulación que el motor estampa en lo que crea a mano (ver `arrancar`). */
+  /** Atributo de encapsulación que se estampa en lo que las páginas montan a mano (ver `arrancar`). */
   private enc: string | null = null;
 
-  protected readonly bitacoraAbierta = signal(false);
-  /** Los capítulos como los lista la bitácora: nombre, título, ley y cuántos sub-niveles tiene. */
-  protected readonly capitulosBitacora = signal<readonly CapituloDeBitacora[]>([]);
-  protected readonly leyFinal = signal<string | null>(null);
+  /**
+   * La pausa de la vida de fondo, elegida en la colina. Se recuerda entre visitas; el frenado de
+   * las animaciones lo hace `pausa-del-fondo`, que arranca con la vista.
+   */
+  protected readonly pausaFondo = signal(leerPausaFondo(almacenDelNavegador()));
+  private pausaDelFondo: { aplicar: (pausa: boolean) => void } | null = null;
+
+  protected alternarPausa(): void {
+    this.pausaFondo.update((p) => !p);
+    guardarPausaFondo(this.almacen, this.pausaFondo());
+    this.pausaDelFondo?.aplicar(this.pausaFondo());
+  }
+
+  /**
+   * La colina está tapada mientras el viaje ocupa la pantalla entera: una cinemática o la hoja de una
+   * etapa. Tapada, deja de dibujar, de sonar y de animar: debajo de una capa opaca seguía
+   * redibujándose, y con poca memoria de GPU a lo de arriba le faltaban tiles. El prólogo no la tapa:
+   * vive adentro de ella.
+   */
+  protected readonly colinaTapada = computed(
+    () => this.cinematica() !== null || this.paginaSuelta() !== null,
+  );
+  private readonly avisarALaColina = effect(() => {
+    const tapada = this.colinaTapada();
+    untracked(() => this.landing?.setVisible(!tapada));
+  });
 
   /**
    * Los guiones de las trece cinemáticas se piden recién cuando hacen falta (al llegar a un
-   * capítulo o al abrir la bitácora): en el bundle inicial eran 12 kB de texto que casi nadie lee
-   * en el primer segundo. Se piden una sola vez.
+   * capítulo): en el bundle inicial eran 12 kB de texto que casi nadie lee en el primer segundo. Se
+   * piden una sola vez.
    */
   private datosCinematicas: Promise<typeof import('./cinematicas/cinematicas-datos')> | null = null;
   private cargarDatosCinematicas(): Promise<typeof import('./cinematicas/cinematicas-datos')> {
@@ -390,9 +379,8 @@ export class IntegradaVistaComponent {
    * lee a modo de estudio: se puede ir y volver, y pasar de página no exige resolver nada (ADR
    * 0002). No se cierra: es la pantalla de la nave, y la historia sigue al terminarla.
    *
-   * También se abre suelto desde la bitácora, para quien salteó el prólogo. Suelto va afuera del
-   * escenario; en la historia va adentro del prólogo, porque la pantalla completa es la del prólogo
-   * y lo que queda afuera no se ve.
+   * La misma hoja es la de cada etapa del viaje, que va suelta, afuera del escenario. En el prólogo
+   * va adentro de él, porque la pantalla completa es la del prólogo y lo que queda afuera no se ve.
    */
   protected readonly paginas = signal<readonly PaginaDelManual[]>([]);
   protected readonly pagina = signal<number | null>(null);
@@ -406,10 +394,6 @@ export class IntegradaVistaComponent {
   );
   protected readonly paginaSuelta = computed(() =>
     this.manualSuelto() ? this.paginaActual() : null,
-  );
-  /** El libro abierto desde la bitácora: su primera página vuelve a ella. */
-  protected readonly desdeLaBitacora = computed(
-    () => this.manualSuelto() && this.libro().concepto === undefined,
   );
   /**
    * Las páginas del libro que ya se cumplieron. Recién cumplida, una página deja seguir; y queda
@@ -498,12 +482,11 @@ export class IntegradaVistaComponent {
       }
       this.terminarManual = (completo) => {
         this.callarMusicaDelManual(1.5);
-        // El botón con el foco desaparece con la hoja: el foco vuelve a quien lo abrió, no al `body`.
-        // Suelto, eso está en el escenario, que se prende antes para poder recibirlo.
+        // El botón con el foco desaparece con la hoja: en el prólogo, el foco vuelve a su pausa y no
+        // al `body`. Suelta no hay a quién volver: después de la hoja de una etapa sigue el viaje.
         if (this.manualSuelto()) this.escenarioInerte(false);
-        this.host
-          .querySelector<HTMLElement>(this.manualSuelto() ? '.tb-bitacora' : '.prologo__pause')
-          ?.focus({ preventScroll: true });
+        else
+          this.host.querySelector<HTMLElement>('.prologo__pause')?.focus({ preventScroll: true });
         this.pagina.set(null);
         this.terminarManual = null;
         this.alAbrirPagina = null;
@@ -523,7 +506,11 @@ export class IntegradaVistaComponent {
     this.alAbrirPagina?.(i);
   }
 
-  /** Un desafío resuelto en una etapa del viaje se anota como en la molécula: es el mismo. */
+  /**
+   * Un desafío resuelto en una etapa del viaje queda en la partida, como `"concepto/página"`. El
+   * desafío avisa con un evento del DOM (`sistema-establecido`) que la hoja escucha: no conoce a la
+   * vista. Lo resuelto en el prólogo (el manual, el árbol) no se anota: no es una etapa.
+   */
   protected alEstablecerEnLaHoja(): void {
     const concepto = this.libro().concepto;
     const i = this.pagina();
@@ -538,8 +525,7 @@ export class IntegradaVistaComponent {
   /**
    * Las flechas de costado pasan de página, salvo adentro de la pantalla, donde pueden ser de la
    * demo. Escape no hace nada: el libro no se cierra, se sigue. Las de leer scrollean la hoja a mano: el
-   * `preventDefault` aparta al recorrido de atrás, que escucha las flechas en `window`, y también
-   * frena el scroll nativo.
+   * `preventDefault` frena el scroll nativo y le avisa a quien más escuche la tecla que ya se usó.
    */
   protected teclaDelManual(e: KeyboardEvent): void {
     const hoja = this.hojaDelManual()?.nativeElement;
@@ -580,7 +566,6 @@ export class IntegradaVistaComponent {
     const j = i + paso;
     if (j >= this.paginas().length) void this.dejarLaHoja(true);
     else if (j >= 0) this.irAPagina(j);
-    else if (this.desdeLaBitacora()) void this.dejarLaHoja(false);
   }
 
   /** El libro se deja como se entró: la pantalla se apaga y la historia sigue detrás. */
@@ -595,8 +580,8 @@ export class IntegradaVistaComponent {
   }
 
   /**
-   * Cada página monta la pantalla REAL, igual que la card del recorrido: el mismo `.subhost`, el
-   * mismo estampado y la misma armonización, así se ve como se veía en la molécula.
+   * Cada página monta la pantalla REAL en el `.subhost` de la hoja, con el estampado y la
+   * armonización de los demos embebidos (`.card--dissolve` en styles.css).
    */
   private readonly montarPagina = effect((onCleanup) => {
     const pagina = this.paginaActual();
@@ -621,7 +606,6 @@ export class IntegradaVistaComponent {
     const montada = this.montarDiferido(
       host,
       pagina.cargar,
-      pagina.ley,
       [
         { provide: AYUDA_DE_ANGIE, useValue: this.libro().ayuda ?? false },
         {
@@ -636,7 +620,7 @@ export class IntegradaVistaComponent {
                   pie: this.pieDelLibro(),
                   alCumplir: () => this.cumplidas.update((c) => new Set(c).add(pagina.id)),
                   pasar: (paso: 1 | -1) => this.pasarPagina(paso),
-                  atras: () => (i > 0 ? 'Anterior' : this.desdeLaBitacora() ? 'Bitácora' : null),
+                  atras: () => (i > 0 ? 'Anterior' : null),
                   siguiente: () =>
                     !this.puedeSeguir()
                       ? null
@@ -751,13 +735,13 @@ export class IntegradaVistaComponent {
   }
 
   private arrancar(): void {
-    // Nombre del atributo de encapsulación que Angular pone a los elementos del template;
-    // el motor lo estampa en lo que crea a mano para que el CSS scopeado les aplique.
-    const enc = (this.enc =
+    // Nombre del atributo de encapsulación que Angular pone a los elementos del template: se estampa
+    // en lo que las páginas montan a mano, para que el CSS scopeado les aplique.
+    this.enc =
       this.host
         .querySelector('#stage')
         ?.getAttributeNames()
-        .find((a) => a.startsWith('_ngcontent')) ?? null);
+        .find((a) => a.startsWith('_ngcontent')) ?? null;
     const subCounts = this.subComponents.map((subs) => subs.length);
     this.partida.set(cargarPartida(this.almacen, subCounts));
     // La molécula ya no existe (ADR 0019): un link `?nivel=` lleva a la misma pantalla, en la hoja
@@ -766,31 +750,12 @@ export class IntegradaVistaComponent {
     const lugarPedido = link && lugarDelLink(link.concept, link.sub, subCounts);
     if (lugarPedido)
       this.guardar(conViaje(conPunto(this.partida(), { lugar: 'viaje' }), lugarPedido));
-    this.destroyRef.onDestroy(() => {
-      if (this.esperaCinematica) clearTimeout(this.esperaCinematica);
-    });
-    // El motor arranca antes que la landing, así que el aviso de visibilidad se enruta por acá:
-    // el motor es el único que sabe si la landing está a la vista (lo decide el scroll) y la
-    // landing es la única que sabe qué hacer con eso (cortar audio y dejar de dibujar).
-    let landing: IntroTusiHandle | null = null;
-    const dispose = initMolecule(
-      this.host,
-      this.mountSub,
-      subCounts,
-      enc,
-      this.onWhere,
-      // Nunca abre la molécula: ni un link (ADR 0019).
-      null,
-      (visible) => landing?.setVisible(visible),
-      {
-        establecidos: new Set(this.partida().establecidos),
-        alEstablecer: (concepto, sub) => this.alEstablecer(concepto, sub),
-      },
-    );
-    this.destroyRef.onDestroy(dispose);
-    this.destroyRef.onDestroy(initMundoQueResponde(this.host));
 
-    // Landing "par de Tusi" (canvas + audio + pantalla de inicio). El motor ya fadea el `.intro`.
+    const pausa = initPausaDelFondo(this.host);
+    this.pausaDelFondo = pausa;
+    this.destroyRef.onDestroy(pausa.dispose);
+
+    // Landing "par de Tusi" (canvas + audio + pantalla de inicio).
     //
     // Entre entrar y la construcción va el PRÓLOGO. El orden importa y no es arbitrario: tocar
     // Entrar es el gesto que el navegador exige para dejar sonar, así que el prólogo arranca con
@@ -806,7 +771,7 @@ export class IntegradaVistaComponent {
     });
     this.inicio = inicio;
     this.destroyRef.onDestroy(() => inicio.dispose());
-    landing = initIntroTusi(this.host, {
+    const landing = initIntroTusi(this.host, {
       despedida: () => {
         this.angieEsperando.set(false);
         return inicio.despedir();
@@ -816,7 +781,7 @@ export class IntegradaVistaComponent {
       alEntrar: () => {
         // Las luces de Angie suben a las estrellas y ahí están las naves: el comienzo es la
         // continuación de esa escena, y el viaje la continuación del comienzo. Es una sola
-        // historia: entrar la sigue donde quedó, nunca abre la molécula (ADR 0008).
+        // historia: entrar la sigue donde quedó (ADR 0008).
         const { punto, prologo } = this.partida();
         const entrada = entradaDeLaHistoria(punto, PUNTOS_DEL_PROLOGO, prologo);
         if (entrada.a === 'viaje') {
@@ -837,19 +802,21 @@ export class IntegradaVistaComponent {
       },
     });
     this.landing = landing;
+    landing.setVisible(!this.colinaTapada());
     this.destroyRef.onDestroy(landing.dispose);
     this.destroyRef.onDestroy(() => {
       // Un pedido en vuelo que llega después de desmontar no tiene dónde montarse.
       this.pedidoPrologo++;
       this.cerrarPrologo?.();
     });
+    // Al final: frena también lo que la colina y el prólogo acaban de arrancar.
+    pausa.aplicar(this.pausaFondo());
   }
 
   /**
-   * Deep-link: lee `?nivel=X(&sub-nivel=Z)` de la URL para abrir el recorrido donde quedó.
-   * `?nivel=X` solo (sin sub-nivel, la vista molécula) también es válido: encuadra el átomo.
-   * `X` es el número de capítulo, no la posición: un capítulo que ya no está en el recorrido (el 0,
-   * que pasó a la historia) se ignora, y manda lo guardado.
+   * Deep-link: lee `?nivel=X(&sub-nivel=Z)` de la URL para abrir el viaje en esa pantalla. `X` es el
+   * número de capítulo, no la posición: un capítulo que ya no está en el viaje (el 0, que pasó a la
+   * historia) se ignora, y manda lo guardado.
    */
   private initialFromUrl(): { concept: number; sub: number } | null {
     const link = parseWhereQuery(window.location.search);
@@ -857,81 +824,10 @@ export class IntegradaVistaComponent {
     return link && concepto !== null ? { concept: concepto, sub: link.sub } : null;
   }
 
-  /**
-   * Refleja el nivel/sub-nivel actual del recorrido en la URL sin navegar ni recargar.
-   * `replaceState` reescribe la barra (respetando el base href) sin pasar por el Router,
-   * así el componente no se desmonta ni se pierde el scroll. `subIdx` -1 = vista molécula.
-   */
-  private readonly onWhere = (conceptIdx: number, subIdx: number): void => {
-    const capitulo = conceptIdx >= 0 ? (CAPITULO_DE_CONCEPTO[conceptIdx] ?? -1) : -1;
-    this.location.replaceState('/', buildWhereQuery(capitulo, subIdx));
-    const llego = conceptIdx !== this.donde.concepto;
-    // Llegar a otro átomo es lo único que cambia lo que dice el globo: la mascota lo anuncia.
-    if (subIdx === -1 && conceptIdx >= 0 && llego) {
-      this.guia()?.saltar(0.8);
-      this.sacudirGlobo();
-    }
-    this.donde = { concepto: conceptIdx, sub: subIdx };
-    this.guardar(
-      conPunto(this.partida(), puntoDelRecorrido(this.partida().punto, conceptIdx, subIdx)),
-    );
-    this.programarCinematica(conceptIdx, subIdx, llego);
-  };
-
-  /** Teclado o lector de pantalla: el puntero ya lo resuelve la mascota con su física. */
-  protected alTocarGuia(e: MouseEvent): void {
-    if (e.detail === 0) this.guia()?.saludar();
-    this.sacudirGlobo();
-  }
-
-  /** El globo es de quien habla: si la mascota salta o la tocan, él también se entera. */
-  protected sacudirGlobo(): void {
-    if (sinMovimiento()) return;
-    this.host.querySelector('.rec-guide__bubble')?.animate(
-      [
-        { transform: 'scale(.86) rotate(-1.5deg)', transformOrigin: '100% 80%' },
-        { transform: 'scale(1.05) rotate(.8deg)', transformOrigin: '100% 80%', offset: 0.45 },
-        { transform: 'scale(.99) rotate(-.3deg)', transformOrigin: '100% 80%', offset: 0.75 },
-        { transform: 'scale(1) rotate(0)', transformOrigin: '100% 80%' },
-      ],
-      { duration: 380, easing: 'ease-out' },
-    );
-  }
-
-  /**
-   * La cinemática de un capítulo se juega cada vez que el jugador llega a su parada de la molécula,
-   * aunque ya la haya visto (ADR 0004). Salir de un sub-nivel al átomo del mismo capítulo no es
-   * llegar: repetirla ahí cortaría cada ejercicio. Adentro de un sub-nivel tampoco se juega, para
-   * que un deep-link a un ejercicio no se interrumpa.
-   */
-  private programarCinematica(concepto: number, sub: number, llego: boolean): void {
-    if (this.esperaCinematica) clearTimeout(this.esperaCinematica);
-    this.esperaCinematica = null;
-    const capitulo = CAPITULO_DE_CONCEPTO[concepto];
-    if (capitulo === undefined || sub !== -1 || this.cinematica()) return;
-    if (!llego && this.partida().cinematicas.includes(capitulo)) return;
-    // Se adelanta la carga del guion mientras corre la espera: al abrir ya está.
-    void this.cargarDatosCinematicas();
-    this.esperaCinematica = setTimeout(() => {
-      this.esperaCinematica = null;
-      if (this.donde.concepto === concepto && this.donde.sub === -1)
-        void this.abrirCinematica(capitulo);
-    }, ESPERA_CINEMATICA_MS);
-  }
-
-  protected async abrirCinematica(capitulo: number, desdeElAtomo = true): Promise<void> {
+  protected async abrirCinematica(capitulo: number): Promise<void> {
     const { cinematicaDe } = await this.cargarDatosCinematicas();
     const cine = cinematicaDe(capitulo);
     if (!cine || this.cinematica()) return;
-    // El iris se abre desde el átomo del capítulo: la cinemática sale de ESE lugar del mapa.
-    const atomo = desdeElAtomo
-      ? this.host.querySelector('#atoms .atom.current')?.getBoundingClientRect()
-      : undefined;
-    this.origenIris.set(
-      atomo && atomo.width > 0
-        ? { x: atomo.left + atomo.width / 2, y: atomo.top + atomo.height / 2 }
-        : null,
-    );
     this.cinematicaCompleta.set(
       conceptosEstablecidos(this.partida()).size >= this.subComponents.length,
     );
@@ -955,11 +851,11 @@ export class IntegradaVistaComponent {
   private alCerrarCinematica: (() => void) | null = null;
 
   /**
-   * Una cinemática que se espera hasta el final, vista o salteada con Escape: la del viaje, y la
-   * revelación antes del final. Sin iris desde un átomo: en el viaje la molécula todavía no está.
+   * Una cinemática que se espera hasta el final, vista o salteada con Escape: la de cada etapa, y la
+   * revelación antes del final.
    */
   private async verEntera(capitulo: number): Promise<void> {
-    await this.abrirCinematica(capitulo, false);
+    await this.abrirCinematica(capitulo);
     if (this.cinematica()?.capitulo !== capitulo) return;
     await new Promise<void>((listo) => (this.alCerrarCinematica = listo));
   }
@@ -967,8 +863,8 @@ export class IntegradaVistaComponent {
   /**
    * El viaje: después del comienzo, cada capítulo es una etapa con su cinemática y su hoja, después
    * la revelación y el final, y al terminar la historia queda en su último cuadro. Se guarda cada
-   * paso, así recargar lo sigue en el mismo lugar. No hay salida a la molécula: la hoja no se cierra,
-   * pero nunca exige resolver nada para seguir (ADR 0002, ADR 0008).
+   * paso, así recargar lo sigue en el mismo lugar. La hoja no se cierra, pero nunca exige resolver
+   * nada para seguir (ADR 0002, ADR 0008).
    */
   private viajando = false;
   private async viajar(): Promise<void> {
@@ -1018,14 +914,14 @@ export class IntegradaVistaComponent {
   protected readonly enElFin = signal(false);
   private async mostrarElFin(): Promise<void> {
     this.enElFin.set(true);
-    await this.abrirCinematica(CAPITULO_FINAL, false);
+    await this.abrirCinematica(CAPITULO_FINAL);
   }
 
   /** La hoja de una etapa, desde la página donde quedó; cada página que se abre queda guardada. */
   private async leerEtapa(concepto: number, desde: number): Promise<void> {
     const capitulo = CAPITULO_DE_CONCEPTO[concepto];
     const libro: Libro = {
-      nombre: etapaDe(capitulo)?.nombre ?? NOMBRES_DE_CONCEPTO[concepto],
+      nombre: etapaDe(capitulo)?.nombre ?? '',
       sigue: 'Seguir el viaje',
       primeraLey: 1,
       concepto,
@@ -1040,97 +936,13 @@ export class IntegradaVistaComponent {
     this.manualSuelto.set(false);
   }
 
-  /** Desde la bitácora de la molécula (a la que se llega con un link): el viaje sigue donde quedó. */
-  protected seguirElViajeDesdeBitacora(): void {
-    this.bitacoraAbierta.set(false);
-    this.escenarioInerte(false);
-    void this.viajar();
-  }
-
   private alEstablecer(concepto: number, sub: number): void {
-    const antes = conceptosEstablecidos(this.partida()).has(concepto);
     this.guardar(conEstablecido(this.partida(), concepto, sub));
-    const ultimo = this.subComponents.length - 1;
-    if (concepto !== ultimo || antes || this.partida().cinematicas.includes(CAPITULO_FINAL)) return;
-    // En el viaje, el final llega cuando se deja la última hoja, no a mitad de ella.
-    if (this.viajando) return;
-    // El final entra cuando el enlace del último capítulo termina de trazarse: primero la
-    // consecuencia de lo que entendiste, después la ceremonia. Antes va la revelación: el final
-    // cuenta lo que pasa después de que Angie dice quién es.
-    setTimeout(async () => {
-      await this.verEntera(CAPITULO_REVELACION);
-      void this.abrirCinematica(CAPITULO_FINAL);
-    }, ESPERA_FINAL_MS);
-  }
-
-  protected async abrirBitacora(): Promise<void> {
-    const { cinematicaDe } = await this.cargarDatosCinematicas();
-    this.capitulosBitacora.set(
-      NOMBRES_DE_CONCEPTO.map((nombre, concepto) => {
-        const numero = CAPITULO_DE_CONCEPTO[concepto];
-        return {
-          concepto,
-          numero,
-          nombre,
-          titulo: TITULOS_DE_CAPITULO[concepto],
-          ley: cinematicaDe(numero)?.ley ?? null,
-          subs: this.subComponents[concepto]?.length ?? 0,
-        };
-      }),
-    );
-    this.leyFinal.set(cinematicaDe(CAPITULO_FINAL)?.ley ?? null);
-    this.escenarioInerte(true);
-    this.bitacoraAbierta.set(true);
-  }
-
-  protected cerrarBitacora(): void {
-    this.bitacoraAbierta.set(false);
-    this.escenarioInerte(false);
-    this.host.querySelector<HTMLElement>('.tb-bitacora')?.focus({ preventScroll: true });
-  }
-
-  protected verCinematicaDesdeBitacora(capitulo: number): void {
-    this.bitacoraAbierta.set(false);
-    this.escenarioInerte(false);
-    void this.abrirCinematica(capitulo);
-  }
-
-  /**
-   * El prólogo vive en la landing, así que para verlo de nuevo se vuelve arriba. Al terminar no
-   * arranca nada: la construcción de Tusi ya está hecha y el recorrido sigue donde estaba guardado.
-   */
-  protected verPrologoDesdeBitacora(): void {
-    this.cerrarBitacora();
-    const stage = this.host.querySelector<HTMLElement>('#stage');
-    if (stage) stage.scrollTop = 0;
-    this.abrirPrologo(() => undefined);
-  }
-
-  /**
-   * El manual suelto, sin la escena: quien salteó el prólogo también lo puede leer. El escenario
-   * sigue apagado mientras está abierto, como con la bitácora.
-   */
-  protected async verManualDesdeBitacora(): Promise<void> {
-    await this.leerSuelto(PAGINAS_DEL_MANUAL, MANUAL);
-  }
-
-  /** El árbol de Signal Space suelto: quien no vio el prólogo no lo vio nunca. */
-  protected async verArbolDesdeBitacora(): Promise<void> {
-    await this.leerSuelto([ARBOL_DE_SIGNAL_SPACE], SIGNAL_SPACE);
-  }
-
-  /** Suelto, el libro empieza y termina en la bitácora: no hay otro lugar adonde seguir. */
-  private async leerSuelto(paginas: readonly PaginaDelManual[], libro: Libro): Promise<void> {
-    this.bitacoraAbierta.set(false);
-    this.manualSuelto.set(true);
-    await this.leerManual(paginas, { ...libro, sigue: 'Volver a la bitácora' });
-    this.manualSuelto.set(false);
-    await this.abrirBitacora();
   }
 
   /**
    * Borrar la partida y volver al principio. Se recarga sin la query: con `?nivel=` en la barra,
-   * el link reabría el recorrido en el mismo lugar que se acababa de borrar.
+   * el link reabría el viaje en el mismo lugar que se acababa de borrar.
    */
   protected empezarDeCero(): void {
     this.guardar(PARTIDA_VACIA);
@@ -1139,11 +951,6 @@ export class IntegradaVistaComponent {
 
   /** "Empezar de cero" a la vista pide una segunda confirmación, que caduca sola. */
   protected readonly confirmandoBorrado = signal(false);
-  /**
-   * Borrar no es un link más: en el "¿seguro?" toma el rojo de la acción que no se deshace. Va en
-   * línea porque la hoja de la vista ya está en su presupuesto.
-   */
-  protected readonly colorDeBorrar = '#a3361c';
   private confirmacionBorrado: ReturnType<typeof setTimeout> | null = null;
   protected pedirEmpezarDeCero(): void {
     if (this.confirmacionBorrado) clearTimeout(this.confirmacionBorrado);
@@ -1158,7 +965,7 @@ export class IntegradaVistaComponent {
     );
   }
 
-  /** Lo de atrás no recibe foco, clicks ni teclas mientras corre una cinemática. */
+  /** Lo de atrás no recibe foco, clicks ni teclas mientras el viaje ocupa la pantalla. */
   private escenarioInerte(inerte: boolean): void {
     const stage = this.host.querySelector<HTMLElement>('#stage');
     if (stage) stage.inert = inerte;
@@ -1169,28 +976,17 @@ export class IntegradaVistaComponent {
     guardarPartida(this.almacen, partida);
   }
 
-  /** Monta el componente REAL del sub-nivel (concepto ci, sub si) y lo integra a la CD. */
-  private readonly mountSub: MountSub = (host, ci, si) => {
-    const sub = this.subComponents[ci]?.[si];
-    if (!sub?.component && sub?.loadComponent) {
-      return this.montarDiferido(host, sub.loadComponent, this.subTitles[ci]?.[si]);
-    }
-    const type = sub?.component;
-    if (!type) return { dispose: () => undefined };
-    return { title: this.subTitles[ci]?.[si], dispose: this.montar(host, type, this.env) };
-  };
-
   /** Crea el componente en `host`, lo integra a la CD y devuelve cómo desmontarlo. */
   private montar(host: HTMLElement, type: Type<unknown>, env: EnvironmentInjector): () => void {
     // No pasamos `hostElement: host`: al destruir, `ref.destroy()` borraría ESE nodo, y `host`
-    // es la `.subhost` persistente de la card. Creamos el componente en su propio nodo y lo
-    // appendeamos adentro; así `destroy()` solo se lleva el nodo del componente, no la `.subhost`.
+    // es la `.subhost` de la hoja. Creamos el componente en su propio nodo y lo appendeamos
+    // adentro; así `destroy()` solo se lleva el nodo del componente, no la `.subhost`.
     const ref = createComponent(type, { environmentInjector: env });
     host.appendChild(ref.location.nativeElement);
     this.appRef.attachView(ref.hostView);
-    // La app es zoneless: montar desde el listener nativo de scroll no agenda ningún tick,
-    // así que la vista recién adjuntada nunca correría su primera CD y quedaría en blanco.
-    // Forzamos la detección inicial acá; las interacciones posteriores ya agendan su propio tick.
+    // La app es zoneless: montar desde la promesa de la carga no agenda ningún tick, así que la
+    // vista recién adjuntada nunca correría su primera CD y quedaría en blanco. Forzamos la
+    // detección inicial acá; las interacciones posteriores ya agendan su propio tick.
     ref.changeDetectorRef.detectChanges();
     return () => {
       this.appRef.detachView(ref.hostView);
@@ -1199,18 +995,16 @@ export class IntegradaVistaComponent {
   }
 
   /**
-   * Un sub-nivel diferido: su chunk (y sus proveedores, en un injector propio) llega recién cuando
-   * el recorrido lo va a mostrar. Si el jugador ya se fue antes de que termine de cargar, no se
-   * monta nada. El motor estampa el árbol al montar, y acá el árbol llega después: se estampa al
-   * llegar, para que la armonización del `.subhost` le aplique igual.
+   * Una pantalla diferida: su chunk (y sus proveedores, en un injector propio) llega recién cuando la
+   * hoja la va a mostrar. Si el jugador ya pasó de página antes de que termine de cargar, no se monta
+   * nada. El árbol se estampa al llegar, para que la armonización del `.subhost` le aplique.
    */
   private montarDiferido(
     host: HTMLElement,
     cargar: () => Promise<SubNivelDiferido>,
-    title: string | undefined,
     lugar: readonly Provider[] = [],
     alMontar: (() => void) | null = null,
-  ): SubHandle {
+  ): { dispose: () => void } {
     let vivo = true;
     let desmontar: (() => void) | null = null;
     let injector: EnvironmentInjector | null = null;
@@ -1226,7 +1020,6 @@ export class IntegradaVistaComponent {
       })
       .catch((error: unknown) => this.errorHandler.handleError(error));
     return {
-      title,
       dispose: () => {
         vivo = false;
         desmontar?.();

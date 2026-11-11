@@ -1,7 +1,7 @@
 import type { Punto } from '../libs/partida';
 import { leerPartida } from '../libs/partida';
 import { PUNTOS_DEL_PROLOGO } from './puntos-del-prologo';
-import { despuesDelAviso, entradaDeLaHistoria, puntoDelRecorrido } from './retomar';
+import { despuesDelAviso, entradaDeLaHistoria } from './retomar';
 
 const PUNTOS = ['anom-rxjs', 'anom-manual', 'voz-supongo'];
 const EN_EL_PROLOGO: Punto = { lugar: 'prologo', linea: 'anom-manual' };
@@ -97,28 +97,6 @@ describe('retomar', () => {
         a: 'prologo',
         desde: 'anom-manual',
       });
-    });
-  });
-
-  describe('puntoDelRecorrido (recorrido → partida)', () => {
-    it('guarda el átomo o el sub-nivel que el recorrido reporta', () => {
-      expect(puntoDelRecorrido(null, 2, -1)).toEqual({ lugar: 'recorrido', concepto: 2, sub: -1 });
-      expect(puntoDelRecorrido(EN_EL_PROLOGO, 5, 1)).toEqual({
-        lugar: 'recorrido',
-        concepto: 5,
-        sub: 1,
-      });
-    });
-
-    it('subir del recorrido a la landing es volver a la construcción', () => {
-      expect(puntoDelRecorrido(EN_UN_SUB, -1, -1)).toEqual({ lugar: 'construccion' });
-    });
-
-    it('la landing del arranque no pisa el punto del comienzo ni el del viaje', () => {
-      expect(puntoDelRecorrido(EN_EL_PROLOGO, -1, -1)).toBe(EN_EL_PROLOGO);
-      const viajando: Punto = { lugar: 'viaje' };
-      expect(puntoDelRecorrido(viajando, -1, -1)).toBe(viajando);
-      expect(puntoDelRecorrido(null, -1, -1)).toBeNull();
     });
   });
 });

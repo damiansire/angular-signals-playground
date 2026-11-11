@@ -1,7 +1,8 @@
 import { signalsRoutesTree } from '../app.routes';
 import type { RouteItem } from '../interfaces/route-item.interface';
-import { CAPITULO_DE_CONCEPTO, conceptoDeCapitulo } from './molecule-engine';
 import {
+  CAPITULO_DE_CONCEPTO,
+  conceptoDeCapitulo,
   ETAPAS_DEL_VIAJE,
   esElFin,
   etapaDe,
@@ -13,8 +14,13 @@ import {
 import { buildWhereQuery, parseWhereQuery } from './url-sync';
 
 describe('el viaje', () => {
-  it('cada capítulo del recorrido tiene su etapa, en el mismo orden', () => {
-    expect(ETAPAS_DEL_VIAJE.map((e) => e.capitulo)).toEqual([...CAPITULO_DE_CONCEPTO]);
+  it('cada concepto del árbol de rutas tiene su etapa, y el capítulo es su path', () => {
+    // Si alguien agrega o quita un nivel en app.routes sin su etapa, el viaje lo saltearía en silencio.
+    expect(CAPITULO_DE_CONCEPTO.map(String)).toEqual(signalsRoutesTree.map((c) => c.path));
+    expect(conceptoDeCapitulo(1)).toBe(0);
+    expect(conceptoDeCapitulo(11)).toBe(ETAPAS_DEL_VIAJE.length - 1);
+    expect(conceptoDeCapitulo(0)).toBeNull();
+    expect(conceptoDeCapitulo(12)).toBeNull();
     expect(etapaDe(1)?.nombre).toBe('La caja que avisa');
     expect(etapaDe(11)?.nombre).toBe('Quien lee, avisa');
     expect(etapaDe(0)).toBeNull();

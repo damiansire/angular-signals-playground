@@ -14,7 +14,7 @@ import {
  * contra el extremo dispara la siguiente (propagación, como un signal actualizando a su dependiente),
  * hasta que el caos aparente se revela como un círculo. Suena en La menor (una nota por línea, timbre
  * sacado del video original). El click de "Entrar" desbloquea el audio (política anti-autoplay del
- * navegador). Imperativo como `molecule-engine`; devuelve su cleanup.
+ * navegador). Imperativo; devuelve su cleanup.
  */
 
 interface Pal {
@@ -74,7 +74,7 @@ export interface IntroTusiOptions {
 /** Lo que la landing le ofrece a quien la monta: cerrarla, y avisarle si está a la vista. */
 export interface IntroTusiHandle {
   dispose: () => void;
-  /** Lo llama el motor del recorrido, que es el único que sabe si la landing se está viendo. */
+  /** Lo llama la vista, que sabe cuándo el viaje tapa la colina entera. */
   setVisible: (visible: boolean) => void;
   /**
    * Entra sin la salida de la colina: con una partida para retomar, el toque del aviso ya fue el
@@ -105,7 +105,7 @@ export function initIntroTusi(host: HTMLElement, options: IntroTusiOptions = {})
   let helpOn = false;
   /** Para que una salida que termina después de desmontar no arranque nada. */
   let cerrado = false;
-  // El motor fadea el `.intro` (opacity inline 1↔0) al scrollear; cuando no es visible cortamos el audio.
+  // Tapada por el viaje (una cinemática o la hoja de una etapa), la landing no dibuja ni suena.
   const introEl = host.querySelector('.intro') as HTMLElement | null;
   let visible = true;
 
@@ -499,9 +499,8 @@ export function initIntroTusi(host: HTMLElement, options: IntroTusiOptions = {})
   }
 
   /**
-   * Lo llama el motor cuando la landing entra o sale de vista: es el único que lo sabe, porque lo
-   * decide el scroll. Antes esto se averiguaba sondeando `introEl.style.opacity` cuadro a cuadro,
-   * o sea leyendo el detalle de implementación del fade de otro módulo.
+   * Lo llama la vista cuando el viaje tapa la colina entera o la vuelve a dejar a la vista. Antes lo
+   * decidía el scroll hacia la molécula, que ya no existe (ADR 0021).
    */
   function aplicarVisibilidad(ahoraVisible: boolean): void {
     if (ahoraVisible === visible) return;
