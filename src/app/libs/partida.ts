@@ -1,7 +1,7 @@
 /**
  * La partida guardada: lo que el jugador ya estableció, qué cinemáticas vio y si ya pasó por el
  * prólogo. Sin esto el recorrido era un juego que se borra al recargar: resolvías medio acto, la
- * pestaña se cerraba, y volvías a una molécula entera punteada.
+ * pestaña se cerraba, y volvías al principio sin nada resuelto.
  *
  * Vive en `localStorage` bajo `signals-cuaderno` (la clave que se decidió para "el cuaderno", al
  * lado de `signals-carrito`). Es un boundary externo: cualquiera lo puede editar a mano o dejarlo a
@@ -61,13 +61,13 @@ export interface Partida {
   readonly establecidos: readonly string[];
   /** Cinemáticas ya vistas, por número de capítulo (del 1 al 11; 12 es el final, 13 la revelación). */
   readonly cinematicas: readonly number[];
-  /** Ya vio el prólogo completo o lo salteó a propósito: la bitácora le ofrece volver a verlo. */
+  /** Ya vio el prólogo completo o lo salteó a propósito: al volver, la historia sigue en el viaje. */
   readonly prologo: boolean;
   /** Dónde quedó la historia: al recargar se sigue desde acá. `null` es el principio. */
   readonly punto: Punto | null;
   /**
-   * Dónde quedó el viaje, aunque se haya salido al mapa: la bitácora lo sigue desde acá. `null` es
-   * el principio del viaje, o que ya se terminó.
+   * Dónde quedó el viaje: al volver se sigue desde acá. `null` es el principio del viaje, o que ya
+   * se terminó.
    */
   readonly viaje: LugarDelViaje | null;
 }
@@ -85,8 +85,9 @@ export interface LugarDelViaje {
 
 /**
  * Un lugar de la historia continua desde donde se puede retomar. En el prólogo es la línea del
- * guion que abre el tramo; en el viaje, el lugar que dice `Partida.viaje`; después, la construcción
- * de Tusi; y en el recorrido, el átomo (`sub` -1) o el sub-nivel (desde 0) donde estaba.
+ * guion que abre el tramo; en el viaje, el lugar que dice `Partida.viaje`. La construcción de Tusi y
+ * el recorrido (el átomo con `sub` -1 o el sub-nivel desde 0) eran lugares de la molécula: ya no se
+ * escriben (ADR 0021), pero una partida vieja los puede traer y se leen para no perderla.
  */
 export type Punto =
   | { readonly lugar: 'prologo'; readonly linea: string }
@@ -250,8 +251,8 @@ export function conPrologo(partida: Partida): Partida {
 }
 
 /**
- * Conceptos con al menos un sub-nivel establecido. Es la regla que ya usaba el recorrido para
- * soldar el enlace entre átomos: alcanza con entender un tramo, no hace falta completarlo.
+ * Conceptos con al menos un sub-nivel establecido: alcanza con entender un tramo, no hace falta
+ * completarlo.
  */
 export function conceptosEstablecidos(partida: Partida): ReadonlySet<number> {
   const conceptos = new Set<number>();
