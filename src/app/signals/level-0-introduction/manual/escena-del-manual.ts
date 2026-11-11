@@ -79,6 +79,7 @@ export abstract class EscenaDelManual {
     const nave = this.nave;
     const escala = this.escalaDe(lugar);
     if (!nave || !escala || !this.ctx || this.quieta) return Promise.resolve();
+    this.reaccion(() => this.alPartir());
     const caja = lugar.getBoundingClientRect();
     const atras = 26 / escala;
     const lejos = (innerWidth - caja.left + 80) / escala + atras;
@@ -119,6 +120,11 @@ export abstract class EscenaDelManual {
 
   /** Para que cada lámina tenga su propio cielo, igual cada vez. */
   protected abstract readonly semilla: number;
+
+  /** La nave arranca a seguir viaje: lo que la lámina ata a ella (el haz de la ley 1) se apaga. */
+  protected alPartir(): void {
+    // La mayoría de las láminas no ata nada a la nave fuera de su propio dibujo.
+  }
 
   /** Lo propio de la lámina, ya con la nave armada. Corre una vez, con el SVG en pantalla. */
   protected abstract armar(svg: SVGSVGElement): void;

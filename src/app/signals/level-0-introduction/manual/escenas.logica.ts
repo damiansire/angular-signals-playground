@@ -47,3 +47,31 @@ export function cieloAngosto(
   const y = importa.centro - h / 2;
   return `${importa.x} ${y.toFixed(1)} ${importa.ancho} ${h.toFixed(1)}`;
 }
+
+/** Un borde de la pantalla, en las coordenadas del dibujo de la nave. */
+export interface BordeDeLaPantalla {
+  readonly izquierda: number;
+  readonly arriba: number;
+  readonly abajo: number;
+}
+
+/**
+ * El haz que une la nariz de la nave con su pantalla, cuando la pantalla está en otro elemento (la
+ * ley 1): un triángulo de la nariz al borde izquierdo, que entra por debajo de las esquinas como el
+ * de `pintarPantalla` (30 de 178 arriba y abajo). Sin él, la pantalla flotaba suelta y se leía como
+ * una ventana aparte. `null` si la pantalla no queda adelante de la nariz (en el celular va abajo).
+ */
+export function trazoDelHaz(
+  nariz: { x: number; y: number },
+  borde: BordeDeLaPantalla,
+): string | null {
+  const alto = borde.abajo - borde.arriba;
+  if (alto <= 0 || borde.izquierda - nariz.x < 12) return null;
+  const margen = (alto * 30) / 178;
+  const f = (n: number) => n.toFixed(1);
+  return (
+    `M${f(nariz.x)} ${f(nariz.y)}` +
+    `L${f(borde.izquierda)} ${f(borde.arriba + margen)}` +
+    `L${f(borde.izquierda)} ${f(borde.abajo - margen)}Z`
+  );
+}

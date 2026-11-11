@@ -15,7 +15,8 @@
 
 /* Código, árbol y lo que se dibuja, lado a lado mientras entren; si no, bajan. La letra crece con la
    ventana: en la pantalla de la nave, a 3440 de ancho, con un tope de 1rem las tres columnas
-   quedaban chicas en el medio de un vidrio vacío. Las tres tienen el alto del código. */
+   quedaban chicas en el medio de un vidrio vacío. Las tres tienen el alto del código, y van sobre el
+   vidrio de la pantalla sin caja propia: con borde y fondo cada una, eran cajas dentro de una caja. */
 .htt {
   display: flex;
   flex-wrap: wrap;
@@ -30,9 +31,6 @@
   display: flex;
   flex-direction: column;
   padding: 0.55rem 1.1rem;
-  border: 1.5px solid #5b4a96;
-  border-radius: 12px;
-  background: #1c1434;
   font:
     500 1em / 1.4 'JetBrains Mono',
     'Cascadia Mono',
@@ -121,7 +119,7 @@
 }
 
 /* ── El árbol de nodos ─────────────────────────────────────────────────────────────────────
-   En su vidrio, como el código. Cada nodo aparece con un rebote donde lo pone el navegador, y al
+   Sobre el vidrio de la pantalla, como el código. Cada nodo aparece con un rebote donde lo pone el navegador, y al
    mover el cierre se muda con su rama. Lo que falta tocar arriba de lo tocado va punteado, como
    los lugares vacíos de la pantalla. */
 /* Del alto del código (sus renglones, en la misma letra) y con el ancho que le da su proporción:
@@ -133,9 +131,6 @@
   height: 13.4em;
   width: auto;
   padding: 0.5rem 0.75rem;
-  border: 1.5px solid #5b4a96;
-  border-radius: 12px;
-  background: #1c1434;
   overflow: visible;
 }
 

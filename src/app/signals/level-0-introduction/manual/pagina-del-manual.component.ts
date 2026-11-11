@@ -156,7 +156,16 @@ export class PaginaDelManualComponent {
           ease: 'back.out(1.3)',
           clearProps: 'width,height',
         });
-        gsap.from(pantalla.querySelectorAll(':scope > .pm-barra, :scope > [consola] > *'), {
+        // La ley baja sobre el cielo mientras la pantalla crece.
+        gsap.from(this.marco().nativeElement.querySelector(':scope > .pm-cabeza'), {
+          opacity: 0,
+          y: -18,
+          duration: 0.4,
+          ease: 'power2.out',
+          delay: 0.1,
+          clearProps: 'opacity,transform',
+        });
+        gsap.from(pantalla.querySelectorAll(':scope > [consola] > *'), {
           opacity: 0,
           y: 26,
           scale: 0.88,

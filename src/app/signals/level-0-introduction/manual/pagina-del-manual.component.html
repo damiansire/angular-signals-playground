@@ -1,10 +1,15 @@
 <article #marco class="pm">
-  <!-- Con la pantalla de la nave (`enPantalla`), la ley va en su barra de título, no acá. -->
-  @if (!enPantalla()) {
+  <!-- La ley va suelta sobre el cielo, también con la consola en la pantalla de la nave: adentro de
+       la pantalla, como barra de título, la encerraba todo en un recuadro y se leía como un modal.
+       Con la portada no se repite: la portada es la ley. -->
+  @if (!enPortada()) {
     <header class="pm-cabeza">
       @if (datos; as d) {
         <p class="pm-ley">Ley {{ d.numero }}</p>
         <h2 class="pm-titulo" id="manual-ley">{{ d.ley }}</h2>
+        @if (enPantalla()) {
+          <p class="pm-cabeza-nave">{{ d.enLaNave }}</p>
+        }
         @if (d.marcas) {
           <ng-container [ngTemplateOutlet]="d.marcas" />
         }
@@ -90,7 +95,7 @@
             }
           </div>
         }
-        <div #pantalla class="pm-pantalla">
+        <div #pantalla class="pm-pantalla" data-pantalla>
           @if (enPortada()) {
             <div class="pm-portada">
               <ng-content select="[portada]" />
@@ -110,20 +115,6 @@
               </div>
             </div>
           } @else {
-            <!-- La barra de título de la pantalla es la cabeza de la página: la ley, lo que le dice
-                 a la nave y en qué página del libro va. -->
-            @if (datos; as d) {
-              <header class="pm-barra">
-                <div class="pm-barra-ley">
-                  <p class="pm-ley">Ley {{ d.numero }}</p>
-                  <h2 class="pm-barra-titulo" id="manual-ley">{{ d.ley }}</h2>
-                  <p class="pm-barra-nave">{{ d.enLaNave }}</p>
-                </div>
-                @if (d.marcas) {
-                  <ng-container [ngTemplateOutlet]="d.marcas" />
-                }
-              </header>
-            }
             <ng-container [ngTemplateOutlet]="consola" />
             <!-- Volver, como pestaña sobre el borde de abajo de la pantalla. -->
             <nav class="pm-paginas" aria-label="Páginas">
