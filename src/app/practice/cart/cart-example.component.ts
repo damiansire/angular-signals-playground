@@ -7,6 +7,8 @@ import {
   effect,
   inject,
   signal,
+  untracked,
+  viewChild,
 } from '@angular/core';
 import { DecimalPipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
@@ -21,6 +23,20 @@ import {
   subtotal,
   total,
 } from './cart.model';
+import {
+  LUZ_DE,
+  NAVE_DEL_VIAJE,
+  TripulacionComponent,
+  type QuienDelViaje,
+} from '../../components-draw/tripulacion/tripulacion.component';
+import { RetratoDeNaveComponent } from '../../components-draw/tripulacion/retrato-de-nave.component';
+import { palabrasDeLinea } from '../../integrada-vista/guion-del-viaje';
+import {
+  type FotoDelCarrito,
+  GUION_DEL_CARRITO,
+  type MomentoDelCarrito,
+  momentoDelCarrito,
+} from './guion-del-carrito';
 
 /**
  * Ejemplo aplicado: usás lo aprendido (signal → computed → effect) en algo real.
@@ -61,7 +77,7 @@ export function wireColorFor(key: LinkKey): string {
 
 @Component({
   selector: 'app-cart-example',
-  imports: [RouterLink, DecimalPipe],
+  imports: [RouterLink, DecimalPipe, TripulacionComponent, RetratoDeNaveComponent],
   templateUrl: './cart-example.component.html',
   styleUrl: './cart-example.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -103,6 +119,17 @@ export class CartExampleComponent {
   /** Flecha curva que conecta el fragmento activo con su parte del widget. */
   readonly wire = signal<Wire | null>(null);
 
+  // ── La tripulación que comenta ──────────────────────────────────────────────
+  private readonly tripulacion = viewChild(TripulacionComponent);
+  /** Lo último que dijo la tripulación: llega diciendo qué se toca, y después comenta lo derivado. */
+  readonly linea = signal(GUION_DEL_CARRITO.llegada);
+  protected readonly palabrasDeLinea = palabrasDeLinea;
+  protected readonly naveDe = (quien: QuienDelViaje): number => NAVE_DEL_VIAJE[quien];
+  protected readonly luzDe = (quien: QuienDelViaje): string => LUZ_DE[quien];
+  protected nombreDeNave(quien: QuienDelViaje): string {
+    return quien === 'cap' ? 'Capitán' : quien === 'naveA' ? 'Nave A' : 'Nave B';
+  }
+
   constructor() {
     const saved = readSaved();
     if (saved) {
@@ -111,6 +138,19 @@ export class CartExampleComponent {
     }
     // El carrito se guarda solo: el effect reacciona a qty y coupon.
     effect(() => writeSaved({ qty: this.qty(), coupon: this.coupon() }));
+
+    // La charla también se deriva: compara lo que se ve ahora con lo de antes y dice qué cambió.
+    let antes: FotoDelCarrito | null = null;
+    effect(() => {
+      const ahora: FotoDelCarrito = {
+        unidades: this.count(),
+        cupon: this.coupon(),
+        envioGratis: this.freeShipping(),
+      };
+      const momento = antes && momentoDelCarrito(antes, ahora);
+      antes = ahora;
+      if (momento) untracked(() => this.decir(momento));
+    });
 
     // Al scrollear o redimensionar, la flecha activa se recalcula.
     if (typeof window !== 'undefined') {
@@ -125,6 +165,23 @@ export class CartExampleComponent {
         window.removeEventListener('resize', redraw);
       });
     }
+  }
+
+  private decir(momento: MomentoDelCarrito): void {
+    const linea = GUION_DEL_CARRITO[momento];
+    this.linea.set(linea);
+    const tripulacion = this.tripulacion();
+    tripulacion?.hablar(linea.quien);
+    if (momento === 'envio') tripulacion?.festejar();
+    else tripulacion?.avisarAlObjeto();
+  }
+
+  /** Las naves miran adonde va el puntero, y se enteran de lo que se toca. */
+  mirar(e: PointerEvent): void {
+    this.tripulacion()?.mirar(e.clientX, e.clientY);
+  }
+  tocar(e: PointerEvent): void {
+    this.tripulacion()?.seTocoAlgo(e.clientX, e.clientY);
   }
 
   /** Enciende el enlace de un fragmento y dibuja su flecha. */

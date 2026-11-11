@@ -1,66 +1,122 @@
-/* Practicá · carrito reactivo. Mismo clima luminoso que la vista integrada/recorrido. */
+/* Práctica · carrito reactivo, en el mundo de las cinemáticas: el mismo papel crema, la tinta con
+   tono, la barra oscura arriba y la caja de diálogo abajo. Los aparatos van con trazo de tinta y la
+   sombra dura de las cosas del mundo, no en tarjetas con sombra difusa. */
 :host {
-  --paper-top: #f7f5ed;
-  --paper-bot: #e6f1ea;
+  --paper-top: #fdfbf4;
+  --paper-bot: #e9e1cc;
   --ink: #201d16;
-  --ink-soft: #6a6355;
-  --hair: #d7d1c2;
+  --ink-soft: #6b6252;
+  --hair: #d7cdb6;
   --source: #eb9b3c;
   --source-deep: #c97d1e;
   --derived: #2f9a80;
   --effect: #ff5a4a;
-  --card: #fffdf8;
+  --card: #fffdf7;
+  --barra: #1b1813;
+  --sombra-dura: 0 6px 0 rgb(32 29 22 / 16%);
 
   display: block;
   height: 100vh;
   overflow: auto;
-  background: radial-gradient(130% 70% at 50% 0%, var(--paper-top) 0%, var(--paper-bot) 90%);
+  background: radial-gradient(
+    120% 90% at 50% 38%,
+    var(--paper-top) 0%,
+    #f5f0e2 58%,
+    var(--paper-bot) 100%
+  );
   color: var(--ink);
   font-family: var(--font-display);
 }
 
 .practice {
-  width: min(960px, 100%);
-  margin-inline: auto;
-  padding: clamp(1.5rem, 4vw, 3rem) clamp(1rem, 4vw, 2rem) 4rem;
-  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
 }
 
-.practice__back {
-  font-family: var(--font-mono);
-  font-size: 0.78rem;
-  color: var(--ink-soft);
+/* ── La barra de arriba ──────────────────────────────────────────────────────── */
+.practice__barra {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  min-height: clamp(40px, 6vh, 52px);
+  padding: 0 clamp(12px, 3vw, 36px);
+  background: var(--barra);
+}
+.practice__back,
+.practice__kicker {
+  margin: 0;
+  font:
+    600 12px/1 ui-monospace,
+    'SFMono-Regular',
+    Menlo,
+    Consolas,
+    monospace;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #bfb29b;
   text-decoration: none;
 }
-.practice__back:hover {
-  color: var(--source);
+.practice__back:hover,
+.practice__back:focus-visible {
+  color: #f2c27a;
 }
-.practice__kicker {
-  font-family: var(--font-mono);
-  font-size: 0.72rem;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-  color: var(--source);
-  margin: 1rem 0 0.3rem;
-}
-.practice__title {
-  font-family: var(--font-editorial);
+.practice__kicker b {
   font-weight: 600;
-  font-size: clamp(1.8rem, 4.5vw, 2.6rem);
-  margin: 0 0 0.6rem;
+  color: #efe6d6;
 }
-.practice__lede {
-  font-size: 1rem;
-  line-height: 1.55;
-  color: var(--ink-soft);
-  max-width: 60ch;
-  margin: 0 0 2rem;
+
+/* ── El cielo y la página ────────────────────────────────────────────────────── */
+.practice__cielo,
+.practice__cuerpo {
+  width: min(960px, calc(100% - 2 * clamp(1rem, 4vw, 2rem)));
+  margin-inline: auto;
 }
-.practice__lede code,
-.how__title code {
-  font-family: var(--font-mono);
-  font-size: 0.86em;
-  color: var(--source-deep);
+.practice__cielo {
+  margin-top: clamp(0.25rem, 1.5vh, 1rem);
+}
+.practice__cuerpo {
+  flex: 1;
+  padding-bottom: 2rem;
+}
+/* El título como la tarjeta de un capítulo: serif en tinta, con su trazo a mano en el acento. */
+.practice__title {
+  position: relative;
+  width: fit-content;
+  margin: 0 0 1.4rem;
+  padding-bottom: 0.45rem;
+  font:
+    500 clamp(1.7rem, 3.6vw, 2.6rem) / 1.08 'Iowan Old Style',
+    'Palatino Linotype',
+    Palatino,
+    Georgia,
+    serif;
+}
+.practice__title::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  height: 10px;
+  background: var(--source);
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 10' preserveAspectRatio='none'%3E%3Cpath d='M2 6 Q 60 1 100 5 T 198 4' fill='none' stroke='black' stroke-width='2.6' stroke-linecap='round'/%3E%3C/svg%3E")
+    center / 100% 100% no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 10' preserveAspectRatio='none'%3E%3Cpath d='M2 6 Q 60 1 100 5 T 198 4' fill='none' stroke='black' stroke-width='2.6' stroke-linecap='round'/%3E%3C/svg%3E")
+    center / 100% 100% no-repeat;
+  animation: practice-trazo 0.9s cubic-bezier(0.22, 1, 0.36, 1) 0.2s both;
+}
+@keyframes practice-trazo {
+  from {
+    clip-path: inset(0 100% 0 0);
+  }
+  to {
+    clip-path: inset(0 0 0 0);
+  }
 }
 
 .practice__grid {
@@ -73,9 +129,10 @@
 /* ── Carrito ────────────────────────────────────────────────────────────────── */
 .cart {
   background: var(--card);
-  border-radius: 16px;
+  border: 2.5px solid var(--ink);
+  border-radius: 18px;
   padding: 1.25rem;
-  box-shadow: 0 18px 40px -28px rgba(40, 32, 18, 0.5);
+  box-shadow: var(--sombra-dura);
 }
 .cart__list {
   list-style: none;
@@ -88,7 +145,7 @@
   align-items: center;
   gap: 0.75rem;
   padding: 0.75rem 0;
-  border-bottom: 1px solid var(--hair);
+  border-bottom: 1.5px dashed var(--hair);
 }
 .line__name {
   display: block;
@@ -114,16 +171,21 @@
 .stepper__btn {
   width: 30px;
   height: 30px;
-  border: 1.5px solid var(--hair);
+  border: 2px solid var(--ink);
   border-radius: 50%;
   background: var(--paper-top);
+  box-shadow: 0 3px 0 rgb(32 29 22 / 18%);
   color: var(--ink);
   font-size: 1.1rem;
   line-height: 1;
   cursor: pointer;
 }
 .stepper__btn:hover:not(:disabled) {
-  border-color: var(--source);
+  background: #ffe2b0;
+}
+.stepper__btn:active:not(:disabled) {
+  translate: 0 2px;
+  box-shadow: 0 1px 0 rgb(32 29 22 / 18%);
 }
 .stepper__btn:disabled {
   opacity: 0.4;
@@ -146,7 +208,7 @@
   gap: 0.5rem;
   margin: 0.25rem 0 1rem;
   padding: 0.5rem 0.9rem;
-  border: 1.5px dashed var(--hair);
+  border: 2px dashed var(--ink-soft);
   border-radius: 999px;
   background: transparent;
   font-family: var(--font-mono);
@@ -172,7 +234,7 @@
 
 .summary {
   margin: 0;
-  border-top: 2px solid var(--ink);
+  border-top: 2.5px solid var(--ink);
   padding-top: 0.75rem;
 }
 .summary__row {
@@ -221,12 +283,12 @@
 }
 .goal {
   background: var(--card);
-  border-radius: 16px;
+  border: 2.5px solid var(--ink);
+  border-radius: 18px;
   padding: 1.1rem 1.25rem;
-  box-shadow: inset 0 0 0 2px var(--source);
+  box-shadow: var(--sombra-dura);
 }
 .goal--done {
-  box-shadow: inset 0 0 0 2px var(--derived);
   background: #eafaf3;
 }
 .goal__label {
@@ -246,7 +308,8 @@
   margin: 0 0 0.8rem;
 }
 .goal__bar {
-  height: 10px;
+  height: 12px;
+  border: 2px solid var(--ink);
   border-radius: 999px;
   background: var(--paper-bot);
   overflow: hidden;
@@ -277,17 +340,20 @@
   color: var(--ink-soft);
   margin: 0 0 0.5rem;
 }
+/* El código, en la tinta cálida de las barras y con el trazo de las cosas del mundo: el gris de un
+   editor se leía como una ventana de otra aplicación pegada en el papel. */
 .how__editor {
-  border-radius: 12px;
+  border: 2.5px solid var(--ink);
+  border-radius: 14px;
   overflow: hidden;
-  box-shadow: 0 18px 40px -28px rgba(40, 32, 18, 0.55);
+  box-shadow: var(--sombra-dura);
 }
 .how__chrome {
   display: flex;
   align-items: center;
   gap: 6px;
   padding: 8px 12px;
-  background: #1c1913;
+  background: var(--barra);
 }
 .how__dot {
   width: 11px;
@@ -313,7 +379,7 @@
 .how__code {
   margin: 0;
   padding: 1rem;
-  background: #26221b;
+  background: #221e18;
   color: #d9d2c2;
   font-family: var(--font-mono);
   font-size: 0.78rem;
@@ -427,14 +493,103 @@
   color: var(--ink-soft);
 }
 
+/* ── La caja de diálogo ─────────────────────────────────────────────────────── */
+.practice__pie {
+  position: sticky;
+  bottom: 0;
+  z-index: 5;
+  display: grid;
+  min-height: clamp(84px, 13vh, 116px);
+  padding: 0.6rem clamp(12px, 3vw, 36px);
+  box-sizing: border-box;
+  background: var(--barra);
+  color: #efe6d6;
+}
+.practice__dialogo {
+  align-self: center;
+  justify-self: center;
+  width: min(100%, 60rem);
+  min-width: 0;
+}
+.practice__linea {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  gap: clamp(10px, 1.6vw, 18px);
+}
+.practice__retrato {
+  display: grid;
+  place-items: center;
+  width: clamp(44px, 4.6vw, 56px);
+  aspect-ratio: 1;
+  padding: 6px;
+  box-sizing: border-box;
+  border: 2px solid var(--c);
+  border-radius: 50%;
+  background: radial-gradient(circle at 50% 40%, #3a342a 0%, #221e17 100%);
+  overflow: hidden;
+  animation: practice-retrato 0.45s cubic-bezier(0.34, 1.6, 0.64, 1) both;
+}
+.practice__retrato app-retrato-de-nave {
+  width: 100%;
+  height: 100%;
+}
+@keyframes practice-retrato {
+  from {
+    opacity: 0;
+    scale: 0.6;
+  }
+}
+.practice__texto {
+  display: grid;
+  gap: 4px;
+  margin: 0;
+}
+.practice__nombre {
+  font:
+    700 11px/1 ui-monospace,
+    Menlo,
+    Consolas,
+    monospace;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--c);
+}
+.practice__frase {
+  font-size: clamp(1rem, 1.7vw, 1.3rem);
+  font-weight: 600;
+  line-height: 1.3;
+  color: #fbf6ec;
+}
+.practice__palabra {
+  display: inline-block;
+  animation: practice-palabra 0.26s cubic-bezier(0.34, 1.8, 0.64, 1) both;
+  animation-delay: calc(var(--i) * 55ms + 120ms);
+}
+@keyframes practice-palabra {
+  from {
+    opacity: 0;
+    translate: 0 10px;
+    scale: 0.86;
+  }
+}
+
 /* ── Responsive ─────────────────────────────────────────────────────────────── */
 @media (max-width: 720px) {
   .practice__grid {
     grid-template-columns: 1fr;
   }
+  .practice__kicker {
+    display: none;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .practice__title::after,
+  .practice__retrato,
+  .practice__palabra {
+    animation: none;
+  }
   .goal__fill,
   .wires,
   .frag,

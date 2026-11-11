@@ -1,4 +1,4 @@
-<main class="practice">
+<main class="practice" (pointermove)="mirar($event)">
   <!-- Flecha que conecta el fragmento de código activo con su parte del widget. -->
   <svg class="wires" [class.is-on]="wire()" [style.color]="wire()?.color" aria-hidden="true">
     <defs>
@@ -19,133 +19,144 @@
     }
   </svg>
 
-  <header class="practice__head">
+  <!-- La práctica pasa en el mundo de las cinemáticas: la barra arriba, la tripulación cargando la
+       bodega y la caja de diálogo abajo, que comenta lo que se derivó solo. -->
+  <header class="practice__barra">
     <!-- El recorrido vive en la raíz. Antes apuntaba a /recorrido, que el router no define:
          llegaba a destino de rebote por el comodín ** que redirige a '', no por estar bien. -->
     <a class="practice__back" routerLink="/">← Volver al recorrido</a>
-    <p class="practice__kicker">Practicá · lo aprendido</p>
-    <h1 class="practice__title">Carrito reactivo</h1>
-    <p class="practice__lede">
-      Vos solo cambiás las cantidades. Los subtotales, el descuento y el total se derivan solos con
-      <code>computed</code>, y el carrito se guarda con un <code>effect</code>. Esto es
-      <code>signal → computed → effect</code> resolviendo algo real.
-    </p>
+    <p class="practice__kicker">Práctica · <b>la bodega</b></p>
   </header>
+  <app-tripulacion class="practice__cielo" capitulo="carrito" />
 
-  <div class="practice__grid">
-    <!-- ── El widget que se toca ─────────────────────────────────────────── -->
-    <section class="cart" aria-label="Carrito">
-      <ul class="cart__list" data-part="signal" [class.is-linked]="linked() === 'signal'">
-        @for (p of catalog; track p.id) {
-          <li class="line">
-            <div class="line__info">
-              <span class="line__name">{{ p.name }}</span>
-              <span class="line__price">{{ money(p.price) }} c/u</span>
-            </div>
-            <div class="stepper" role="group" [attr.aria-label]="'Cantidad de ' + p.name">
-              <button
-                type="button"
-                class="stepper__btn"
-                (click)="dec(p.id)"
-                [disabled]="qtyOf(p.id) === 0"
-                [attr.aria-label]="'Quitar uno de ' + p.name"
-              >
-                −
-              </button>
-              <span class="stepper__qty" aria-live="polite">{{ qtyOf(p.id) }}</span>
-              <button
-                type="button"
-                class="stepper__btn"
-                (click)="inc(p.id)"
-                [attr.aria-label]="'Agregar uno de ' + p.name"
-              >
-                +
-              </button>
-            </div>
-            <span class="line__total">{{ money(lineOf(p.id)) }}</span>
-          </li>
-        }
-      </ul>
+  <div class="practice__cuerpo">
+    <h1 class="practice__title">Carrito reactivo</h1>
 
-      <button
-        type="button"
-        class="coupon"
-        [class.coupon--on]="coupon()"
-        [attr.aria-pressed]="coupon()"
-        (click)="toggleCoupon()"
-      >
-        <span class="coupon__check" aria-hidden="true">{{ coupon() ? '✓' : '' }}</span>
-        Cupón CAFE10 (10% off)
-      </button>
-
-      <dl class="summary" aria-live="polite">
-        <div class="summary__row" data-part="subtotal" [class.is-linked]="linked() === 'subtotal'">
-          <dt>Subtotal ({{ count() }} u.)</dt>
-          <dd>{{ money(subtotal()) }}</dd>
-        </div>
-        @if (discount() > 0) {
-          <div class="summary__row summary__row--save">
-            <dt>Descuento</dt>
-            <dd>−{{ money(discount()) }}</dd>
-          </div>
-        }
-        <div class="summary__row summary__row--total">
-          <dt>Total</dt>
-          <dd>{{ money(total()) }}</dd>
-        </div>
-      </dl>
-
-      <p class="saved" data-part="effect" [class.is-linked]="linked() === 'effect'">
-        <span aria-hidden="true">💾</span> Se guarda solo
-      </p>
-      <button type="button" class="cart__reset" (click)="reset()">Vaciar carrito</button>
-    </section>
-
-    <!-- ── Reto + el código detrás ───────────────────────────────────────── -->
-    <aside class="aside">
-      <section
-        class="goal"
-        data-part="envio"
-        [class.goal--done]="freeShipping()"
-        [class.is-linked]="linked() === 'envio'"
-        aria-live="polite"
-      >
-        <p class="goal__label">Reto</p>
-        <p class="goal__text">
-          @if (freeShipping()) {
-            Envío gratis conseguido. Mirá: nunca escribiste "envío gratis", se
-            <em>derivó</em> del subtotal.
-          } @else {
-            Llegá a {{ money(freeShippingGoal) }} de subtotal para el envío gratis. Te faltan
-            <strong>{{ money(missingForFree()) }}</strong
-            >.
+    <div class="practice__grid">
+      <!-- ── El widget que se toca ─────────────────────────────────────────── -->
+      <section class="cart" aria-label="Carrito">
+        <ul class="cart__list" data-part="signal" [class.is-linked]="linked() === 'signal'">
+          @for (p of catalog; track p.id) {
+            <li class="line">
+              <div class="line__info">
+                <span class="line__name">{{ p.name }}</span>
+                <span class="line__price">{{ money(p.price) }} c/u</span>
+              </div>
+              <div class="stepper" role="group" [attr.aria-label]="'Cantidad de ' + p.name">
+                <button
+                  type="button"
+                  class="stepper__btn"
+                  (pointerdown)="tocar($event)"
+                  (click)="dec(p.id)"
+                  [disabled]="qtyOf(p.id) === 0"
+                  [attr.aria-label]="'Quitar uno de ' + p.name"
+                >
+                  −
+                </button>
+                <span class="stepper__qty" aria-live="polite">{{ qtyOf(p.id) }}</span>
+                <button
+                  type="button"
+                  class="stepper__btn"
+                  (pointerdown)="tocar($event)"
+                  (click)="inc(p.id)"
+                  [attr.aria-label]="'Agregar uno de ' + p.name"
+                >
+                  +
+                </button>
+              </div>
+              <span class="line__total">{{ money(lineOf(p.id)) }}</span>
+            </li>
           }
-        </p>
-        <div
-          class="goal__bar"
-          role="progressbar"
-          aria-label="Progreso al envío gratis"
-          [attr.aria-valuenow]="subtotal()"
-          [attr.aria-valuemax]="freeShippingGoal"
+        </ul>
+
+        <button
+          type="button"
+          class="coupon"
+          [class.coupon--on]="coupon()"
+          [attr.aria-pressed]="coupon()"
+          (pointerdown)="tocar($event)"
+          (click)="toggleCoupon()"
         >
-          <span class="goal__fill" [style.width.%]="progress() * 100"></span>
-        </div>
-        <p class="goal__status">
-          {{ freeShipping() ? '✓ Envío gratis' : (progress() * 100 | number: '1.0-0') + '%' }}
+          <span class="coupon__check" aria-hidden="true">{{ coupon() ? '✓' : '' }}</span>
+          Cupón CAFE10 (10% off)
+        </button>
+
+        <dl class="summary" aria-live="polite">
+          <div
+            class="summary__row"
+            data-part="subtotal"
+            [class.is-linked]="linked() === 'subtotal'"
+          >
+            <dt>Subtotal ({{ count() }} u.)</dt>
+            <dd>{{ money(subtotal()) }}</dd>
+          </div>
+          @if (discount() > 0) {
+            <div class="summary__row summary__row--save">
+              <dt>Descuento</dt>
+              <dd>−{{ money(discount()) }}</dd>
+            </div>
+          }
+          <div class="summary__row summary__row--total">
+            <dt>Total</dt>
+            <dd>{{ money(total()) }}</dd>
+          </div>
+        </dl>
+
+        <p class="saved" data-part="effect" [class.is-linked]="linked() === 'effect'">
+          <span aria-hidden="true">💾</span> Se guarda solo
         </p>
+        <button type="button" class="cart__reset" (pointerdown)="tocar($event)" (click)="reset()">
+          Vaciar carrito
+        </button>
       </section>
 
-      <section class="how">
-        <p class="how__title">El código que lo mueve</p>
-        <p class="how__hint">Pasá el mouse por cada línea y seguí la flecha hasta lo que maneja.</p>
-        <div class="how__editor">
-          <div class="how__chrome" aria-hidden="true">
-            <span class="how__dot how__dot--s"></span>
-            <span class="how__dot how__dot--d"></span>
-            <span class="how__dot how__dot--e"></span>
-            <em class="how__file">cart.ts</em>
+      <!-- ── Reto + el código detrás ───────────────────────────────────────── -->
+      <aside class="aside">
+        <section
+          class="goal"
+          data-part="envio"
+          [class.goal--done]="freeShipping()"
+          [class.is-linked]="linked() === 'envio'"
+          aria-live="polite"
+        >
+          <p class="goal__label">Reto</p>
+          <p class="goal__text">
+            @if (freeShipping()) {
+              Envío gratis conseguido. Mirá: nunca escribiste "envío gratis", se
+              <em>derivó</em> del subtotal.
+            } @else {
+              Llegá a {{ money(freeShippingGoal) }} de subtotal para el envío gratis. Te faltan
+              <strong>{{ money(missingForFree()) }}</strong
+              >.
+            }
+          </p>
+          <div
+            class="goal__bar"
+            role="progressbar"
+            aria-label="Progreso al envío gratis"
+            [attr.aria-valuenow]="subtotal()"
+            [attr.aria-valuemax]="freeShippingGoal"
+          >
+            <span class="goal__fill" [style.width.%]="progress() * 100"></span>
           </div>
-          <pre class="how__code"><code><span class="c">// una sola fuente:</span>
+          <p class="goal__status">
+            {{ freeShipping() ? '✓ Envío gratis' : (progress() * 100 | number: '1.0-0') + '%' }}
+          </p>
+        </section>
+
+        <section class="how">
+          <p class="how__title">El código que lo mueve</p>
+          <p class="how__hint">
+            Pasá el mouse por cada línea y seguí la flecha hasta lo que maneja.
+          </p>
+          <div class="how__editor">
+            <div class="how__chrome" aria-hidden="true">
+              <span class="how__dot how__dot--s"></span>
+              <span class="how__dot how__dot--d"></span>
+              <span class="how__dot how__dot--e"></span>
+              <em class="how__file">cart.ts</em>
+            </div>
+            <pre class="how__code"><code><span class="c">// una sola fuente:</span>
 <span class="frag" data-code="signal" tabindex="0" role="button" [class.is-active]="linked() === 'signal'" (mouseenter)="linkTo('signal')" (mouseleave)="unlink()" (focus)="linkTo('signal')" (keydown.enter)="linkTo('signal')" (keydown.space)="$event.preventDefault(); linkTo('signal')" (blur)="unlink()" aria-label="qty es un signal: es la única fuente, controla las cantidades del carrito">qty = <span class="t-sig">signal</span>({{ '{' }} <span class="t-prop">cafe</span>: <span class="t-num">1</span> {{ '}' }});</span>
 
 <span class="c">// todo lo demás se deriva:</span>
@@ -160,8 +171,33 @@
 <span class="frag" data-code="effect" tabindex="0" role="button" [class.is-active]="linked() === 'effect'" (mouseenter)="linkTo('effect')" (mouseleave)="unlink()" (focus)="linkTo('effect')" (keydown.enter)="linkTo('effect')" (keydown.space)="$event.preventDefault(); linkTo('effect')" (blur)="unlink()" aria-label="effect: persiste el carrito solo, sin lifecycle hooks"><span class="t-eff">effect</span>(() =>
   localStorage.<span class="t-fn">setItem</span>(
     <span class="t-str">'carrito'</span>, JSON.<span class="t-fn">stringify</span>(qty())));</span></code></pre>
-        </div>
-      </section>
-    </aside>
+          </div>
+        </section>
+      </aside>
+    </div>
   </div>
+
+  <footer class="practice__pie">
+    <div class="practice__dialogo" aria-live="polite">
+      @for (l of [linea()]; track l) {
+        <div class="practice__linea" [style.--c]="luzDe(l.quien)">
+          <span class="practice__retrato" aria-hidden="true">
+            <app-retrato-de-nave [indice]="naveDe(l.quien)" />
+          </span>
+          <p class="practice__texto">
+            <span class="practice__nombre">{{ nombreDeNave(l.quien) }}</span>
+            <span class="practice__frase">
+              @for (p of palabrasDeLinea(l.txt); track $index) {
+                @if (p.corte) {
+                  <br />
+                }
+                <span class="practice__palabra" [style.--i]="$index">{{ p.txt }}</span>
+                {{ ' ' }}
+              }
+            </span>
+          </p>
+        </div>
+      }
+    </div>
+  </footer>
 </main>
