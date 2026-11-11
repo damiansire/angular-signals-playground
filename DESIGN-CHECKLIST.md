@@ -228,9 +228,12 @@ puede alcanzar" son dos cosas distintas y hay que chequear las dos.
       Contar con `.intro.getAnimations({subtree: true})` las infinitas en `running` (cero), no
       mirar un loop suelto: la pausa de `.intro.intro--fuera *` no llega a los pseudo-elementos
       (el halo del sol, el aura de la idea) ni a otro componente. Defecto resuelto (2026-11-12):
-      al retomar una partida, el aviso de auriculares se queda en `retomando` adentro de la colina
-      y sus 130 loops (estrellas, llamado) latían toda la sesión debajo de la hoja; lo frena su
-      propio `:host-context(.intro.intro--fuera)`.
+      al retomar una partida, el aviso de auriculares se quedaba en `retomando` adentro de la colina
+      y sus 120 loops (estrellas, llamado) latían toda la sesión debajo de la hoja; lo frenaba su
+      propio `:host-context(.intro.intro--fuera)`, que no alcanza cuando se retoma en el prólogo
+      (vive adentro de la colina y no la tapa). Ahora el aviso se oculta (`listo`) cuando termina la
+      transición de `.tusi__overlay.gone`. Verificar retomando en un punto del prólogo con un click
+      real: el aviso `hidden` y cero infinitas `running` en su `getAnimations({subtree: true})`.
       Antes (2026-11-10) era la molécula debajo de la intro: debajo de la colina, los electrones y las Angie de las
       cards obligaban a rasterizar de nuevo, en cada cuadro, una capa del tamaño de la pantalla
       (~2000 tiles en 2,5 s; ahora ~300). Verificar contando `RasterTask` por capa en un trace de
