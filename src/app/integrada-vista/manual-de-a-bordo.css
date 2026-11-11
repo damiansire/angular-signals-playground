@@ -99,14 +99,12 @@
   position: relative;
   flex: 1 0 auto;
 }
-/* La pista de Angie flota en la esquina, como en la molécula, pero arriba del pie de la hoja: a la
-   altura de siempre tapaba "Seguir el viaje" y el click caía en ella. */
+/* La pista de Angie flota en la esquina, pero arriba del pie de la hoja: a la altura de siempre
+   tapaba "Seguir el viaje" y el click caía en ella. */
 .prologo__manual app-concept-card {
   bottom: 5.5rem;
-  /* Arranca invisible y en la molécula la revela la entrada del sub-nivel (`.warp`), que en la hoja
-     no corre: en el viaje la pista no aparecía nunca. Aparece cuando la página ya asentó, porque
-     mientras entra deslizándose es el bloque contenedor de este `fixed` y la pista flotaba en el
-     medio. */
+  /* Arranca invisible (`concept-card`): aparece cuando la página ya asentó, porque mientras entra
+     deslizándose es el bloque contenedor de este `fixed` y la pista flotaba en el medio. */
   animation: prologo-pista 0.9s both;
 }
 @keyframes prologo-pista {
