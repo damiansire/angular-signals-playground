@@ -1086,6 +1086,25 @@ Del minijuego de operadores (2026-11-08):
       style; y la propiedad achica la letra si no entra (`textContent` pisaba "DOM"; medido: 17 px de
       aire). Probado con input real a 1600×900 y 1280×760: arrastre a los tres lugares, los dos pasos
       tachados, globo pegado a la nave, la 3 con las cuatro propiedades.
+- [ ] (2026-11-12) En la ley 1, mover `</article>` se compara en dos árboles: el de antes arriba y
+      el de después abajo, con los nodos que cambian de padre (y sus ramas, la que pierden y la que
+      ganan) en el acento ámbar, en los dos. Pedido de Damian: "el mover articulo esta medio raro…
+      que haya un antes y despues". Hasta la primera mudanza hay un solo árbol, centrado en la
+      columna; al mover el cierre se parte desde el medio. Arrastrando, el de abajo muestra adónde
+      caería antes de soltarlo (`arbolesAComparar`, `moverCierre`, `cambianDePadre`: funciones
+      puras). Lado a lado no entraban con el código y el render a 1440: van apilados, bajos (piso
+      de 42) y la columna mide siempre lo mismo, así la pantalla no cambia de tamaño al partirse
+      (medido: el mismo rectángulo antes y después a 1440×900 y 1280×640). El halo de lo que cambia
+      va POR FUERA del nodo: adentro tapaba el color de `h3` y el borde rojo de lo que quedó fuera
+      de su panel. Defectos resueltos en la pasada: (1) con el teclado, la segunda flecha no movía
+      nada: el botón del cierre se vuelve a crear en otro renglón y perdía el foco; ahora se lo
+      devuelve (`afterNextRender`); (2) arrastrando, la mano seguía señalando el lugar vacío de
+      donde salió el cierre: se aparta sin sacar "Mostrame" (sacarlo hacía saltar el globo);
+      (3) los rótulos en `em` quedaban en 8 px a 390: piso de 11 px. Arrastrar no selecciona texto
+      (`user-select: none` mientras dura). Medido con input real (mouse, dedo y flechas por CDP, y
+      "Mostrame") a 3440×1300, 1440×900, 1366×768, 1280×640 y 390×844: sin desborde horizontal,
+      sin nodos encimados, selección vacía durante el arrastre, letra de los nodos de 11,2 px o
+      más, y sin scroll salvo en el celular, donde los árboles quedan debajo del código.
 - [ ] Un absoluto dentro de una grilla NO lleva `grid-row`/`grid-column`: su caja pasa a ser esa
       celda. El globo de la nave tenía `grid-row: 2` (su lugar en el celular) y con la nave al
       costado caía debajo de ella, con la cola apuntando al vacío.
