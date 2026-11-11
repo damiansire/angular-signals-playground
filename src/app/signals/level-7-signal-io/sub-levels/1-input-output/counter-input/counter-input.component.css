@@ -1,0 +1,30 @@
+/* El hijo es un aparato de la nave, con la misma tinta cálida que la pantalla del código: en el gris
+   azulado de Tailwind se leía como un resto de otra aplicación pegado en la hoja. */
+.contador {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.85rem 1.1rem 1rem;
+  border: 2.5px solid #201d16;
+  border-radius: 16px;
+  background:
+    radial-gradient(130% 90% at 0% 0%, rgb(255 214 150 / 9%), transparent 60%),
+    linear-gradient(180deg, #2a251e, #1d1a15);
+  box-shadow: 0 6px 0 rgb(32 29 22 / 18%);
+  color: #f6efe2;
+}
+.contador__rotulo {
+  font-family: ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #f2c27a;
+}
+.contador__valor {
+  font-size: 1.9rem;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
