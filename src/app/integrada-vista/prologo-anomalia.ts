@@ -1574,13 +1574,29 @@ export function initPrologoAnomalia(host: HTMLElement, opts: PrologoOpciones): (
     }
   }
 
+  /**
+   * Cuánto deja sonar el zumbido, de 0 a 1. Con el manual abierto baja a cero: ahí suena la música
+   * para estudiar, y la tensión de la anomalía, sostenida mientras se lee, cansaba (`docs/sonido.md`).
+   */
+  let zumbidoLibre = 1;
+  let zumbidoEn: number | null = null;
+  /** Lo que tarda el zumbido en irse o volver, en segundos: un corte seco chasquea. */
+  const FUNDIDO_DEL_ZUMBIDO = 1.2;
+
   /** Lo que el reloj dice que suena, cuándo: dialogo, zumbido, salto, choque y el acorde final. */
   function pintarAudio(t: number, claro: number): void {
     const audio = abrirAudio();
     if (audio) {
+      const ahora = audio.master.context.currentTime;
+      const paso = zumbidoEn === null ? 1 : (ahora - zumbidoEn) / FUNDIDO_DEL_ZUMBIDO;
+      zumbidoEn = ahora;
+      const meta = manual === 'leyendo' ? 0 : 1;
+      zumbidoLibre +=
+        Math.sign(meta - zumbidoLibre) * Math.min(Math.abs(meta - zumbidoLibre), paso);
       const cerca = clamp01((t - T.temblor) / (T.zoom - T.temblor));
       const dentro0 = t > T.zoom && t < T.orden ? 0.5 : 0;
-      audio.zumbidoGain.gain.value = t < T.zoom ? cerca * 0.16 : dentro0 * 0.1 * (1 - claro);
+      audio.zumbidoGain.gain.value =
+        zumbidoLibre * (t < T.zoom ? cerca * 0.16 : dentro0 * 0.1 * (1 - claro));
       audio.filtro.frequency.value = 110 + cerca * 700;
     }
     if (t >= M.vuelta.t0 + 300) unaVez('vuelta', () => ruido(0.7, 400, 2600, 0.12));

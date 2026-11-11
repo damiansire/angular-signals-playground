@@ -49,6 +49,9 @@ import { HojaDelHuecoComponent } from './hoja-del-hueco/hoja-del-hueco.component
 import { PAGINA_DEL_MANUAL } from '../signals/level-0-introduction/manual/pagina-del-manual';
 import { vigilarEstampado } from './estampado-tardio';
 import { apagarLaTele, encenderLaTele } from './tele-del-manual';
+import { tocarManual } from './musica-del-manual';
+import type { Musica } from './musica-del-presentimiento';
+import { sonido } from '../libs/sonido';
 import { AYUDA_DE_ANGIE } from '../components-atom/manipulable-system/manipulable-system.component';
 
 import { signalsRoutesTree } from '../app.routes';
@@ -410,6 +413,8 @@ export class IntegradaVistaComponent {
   private terminarManual: ((completo: boolean) => void) | null = null;
   /** Cada página que se abre, para que el viaje guarde dónde quedó. */
   private alAbrirPagina: ((i: number) => void) | null = null;
+  /** La música para estudiar suena con el manual abierto, en la historia y suelto. */
+  private musicaDelManual: Musica | null = null;
   /**
    * La misma hoja sirve para el árbol que Angie muestra en Signal Space: es una página más del libro
    * de leyes, la sexta, pero ya no es el manual de la nave.
@@ -426,7 +431,11 @@ export class IntegradaVistaComponent {
       this.libro.set(libro);
       this.paginas.set(paginas);
       this.alAbrirPagina = alAbrir;
+      if (paginas === PAGINAS_DEL_MANUAL) {
+        this.musicaDelManual = tocarManual(() => sonido().salida());
+      }
       this.terminarManual = (completo) => {
+        this.callarMusicaDelManual(1.5);
         // El botón con el foco desaparece con la hoja: el foco vuelve a quien lo abrió, no al `body`.
         // Suelto, eso está en el escenario, que se prende antes para poder recibirlo.
         if (this.manualSuelto()) this.escenarioInerte(false);
@@ -440,6 +449,11 @@ export class IntegradaVistaComponent {
       };
       this.irAPagina(Math.min(Math.max(desde, 0), paginas.length - 1));
     });
+  }
+
+  private callarMusicaDelManual(sale?: number): void {
+    this.musicaDelManual?.apagar(sale);
+    this.musicaDelManual = null;
   }
 
   private irAPagina(i: number): void {
@@ -630,6 +644,7 @@ export class IntegradaVistaComponent {
 
   constructor() {
     this.destroyRef.onDestroy(() => this.cortarRespiro());
+    this.destroyRef.onDestroy(() => this.callarMusicaDelManual());
     afterNextRender(() => {
       try {
         this.arrancar();
