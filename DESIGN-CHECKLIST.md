@@ -1485,6 +1485,12 @@ Del minijuego de operadores (2026-11-08):
       naves en una franja propia arriba del título, 4 de cada 5 páginas pedían scroll. Lo que más
       empujaba: el desafío apilado, el historial de tarjetas altas y el código de doce renglones.
       "Seguir el viaje" en la última página lleva a la cinemática del capítulo siguiente.
+- [ ] (2026-11-11) También a 1366×768 (una notebook): de 820 de alto para abajo la tripulación
+      no pasa de 25rem, el código va a 0,82rem y se aprietan el aire del desafío y los títulos de
+      los historiales; sin eso, los capítulos 2, 3 y 8 se pasaban por 20 a 40 px. Las naves no bajan
+      de 400 px de ancho: debajo cambian a la disposición angosta, que es más alta. En un celular
+      vertical las naves van arriba del título, a lo ancho: lado a lado se dibujaban encima de él.
+      Acostado siguen al costado.
 - [ ] La pista de Angie (`app-concept-card`, fija en la esquina) va por encima del pie de la hoja:
       a `bottom: 1rem` tapaba "Seguir el viaje" y el click caía en la card. Medirlo con
       `elementFromPoint` en el centro del botón.
