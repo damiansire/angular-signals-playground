@@ -264,7 +264,7 @@ body {
    o los estilados desde el CSS del componente): sueltos sobre el campo se leen como texto plano,
    sin afford de acción. Les damos la misma pastilla base que a los grises, así todo lo clickeable
    se lee como control. Los bg-* ya tienen su tratamiento arriba y quedan excluidos. */
-.prologo__manual.card--dissolve .subhost button:not([class*='bg-']) {
+.prologo__manual.card--dissolve .subhost button:not([class*='bg-'], .boton-tinta) {
   font-family: var(--sans);
   font-weight: 600;
   border: none;
@@ -278,7 +278,7 @@ body {
   cursor: pointer;
   transition: filter 0.15s ease;
 }
-.prologo__manual.card--dissolve .subhost button:not([class*='bg-']):hover:not(:disabled) {
+.prologo__manual.card--dissolve .subhost button:not([class*='bg-'], .boton-tinta):hover:not(:disabled) {
   filter: brightness(1.08);
 }
 /* Foco de los inputs de texto en el acento del concepto en vez del cian/teal/rosa/naranja
@@ -288,6 +288,54 @@ body {
   outline: none;
   box-shadow: 0 0 0 2px var(--glow, #eb9b3c);
   border-color: transparent;
+}
+
+/* El botón de tinta de las pantallas: el gris de Tailwind (`bg-gray-800`) pasado al mundo, con el
+   trazo y la sombra dura de la caja del signal y de los campos de la hoja. Tocarlo lo hunde. Es una
+   clase propia y no un retoque de la hoja: así se ve igual en cualquier lugar que monte la pantalla. */
+.boton-tinta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  padding: 0.5rem 1.15rem;
+  border: 2.5px solid #201d16;
+  border-radius: 999px;
+  background: #2a251e;
+  color: #f6efe2;
+  font-family: var(--sans, system-ui, sans-serif);
+  font-size: 0.875rem;
+  font-weight: 700;
+  line-height: 1.25;
+  /* Una pastilla de dos renglones no se lee como botón: si no entra, el renglón de botones se
+     parte (`flex-wrap`), no la etiqueta. */
+  white-space: nowrap;
+  box-shadow: 0 4px 0 rgb(32 29 22 / 22%);
+  cursor: pointer;
+  transition:
+    transform 0.12s ease,
+    box-shadow 0.12s ease;
+}
+.boton-tinta:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 5px 0 rgb(32 29 22 / 22%);
+}
+.boton-tinta:active:not(:disabled) {
+  transform: translateY(3px);
+  box-shadow: 0 1px 0 rgb(32 29 22 / 22%);
+}
+.boton-tinta:focus-visible {
+  outline: 3px solid var(--glow, #f2c27a);
+  outline-offset: 3px;
+}
+.boton-tinta:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+@media (prefers-reduced-motion: reduce) {
+  .boton-tinta {
+    transition: none;
+  }
 }
 
 /* ───────────────────────────────────────────────────────────────────────────
