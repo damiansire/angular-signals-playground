@@ -1,5 +1,5 @@
 import type { SalidaDeAudio } from '../libs/sonido';
-import { tocarPresentimiento, type Musica, type NotaDeMusica } from './musica-del-presentimiento';
+import { tocarEnBucle, type Musica, type NotaDeMusica } from './musica-del-presentimiento';
 
 /**
  * La música de la colina, mientras Angie espera en la piedra que alguien entre: melancólica, en re
@@ -53,43 +53,11 @@ export function planDeLaColina(): readonly NotaDeMusica[] {
   return notas.sort((a, b) => a.t - b.t);
 }
 
-/** Con cuánta anticipación se agenda la vuelta siguiente, en segundos: un timer nunca llega justo. */
-const ANTICIPO = 1.5;
-/** Sin sonido, cada cuánto se fija si volvió, en ms. */
-const REVISA_MS = 1000;
-
 /**
- * Suena vuelta tras vuelta hasta que la apagan. Cada vuelta se agenda en el reloj del audio pegada
- * a la anterior, así un timer que se atrasa no abre un hueco. Sin sonido espera: si alguien lo
- * prende en la colina, la música empieza ahí.
+ * Suena vuelta tras vuelta hasta que la apagan. Sin sonido espera: si alguien lo prende en la
+ * colina, la música empieza ahí.
  */
 export function tocarColina(salida: () => SalidaDeAudio | null): Musica {
   const plan = planDeLaColina();
-  let vueltas: Musica[] = [];
-  let cero: number | null = null;
-  let apagada = false;
-  let timer: ReturnType<typeof setTimeout> | undefined;
-  const agendar = (): void => {
-    if (apagada) return;
-    const s = salida();
-    if (!s) {
-      cero = null;
-      timer = setTimeout(agendar, REVISA_MS);
-      return;
-    }
-    const ahora = s.ctx.currentTime;
-    if (cero === null || cero < ahora) cero = ahora + 0.05;
-    // Solo la que suena y la que viene: las anteriores ya se apagaron solas.
-    vueltas = [...vueltas.slice(-1), tocarPresentimiento(s, plan, cero)];
-    cero += VUELTA;
-    timer = setTimeout(agendar, Math.max(0, cero - ahora - ANTICIPO) * 1000);
-  };
-  agendar();
-  return {
-    apagar(sale = 0.6) {
-      apagada = true;
-      clearTimeout(timer);
-      for (const v of vueltas) v.apagar(sale);
-    },
-  };
+  return tocarEnBucle(salida, VUELTA, () => plan);
 }

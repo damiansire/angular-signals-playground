@@ -201,3 +201,48 @@ export function tocarPresentimiento(
     },
   };
 }
+
+/** Con cuánta anticipación se agenda la vuelta siguiente, en segundos: un timer nunca llega justo. */
+const ANTICIPO = 1.5;
+/** Sin sonido, cada cuánto se fija si volvió, en ms. */
+const REVISA_MS = 1000;
+
+/**
+ * Suena vuelta tras vuelta hasta que la apagan. Cada vuelta se agenda en el reloj del audio pegada
+ * a la anterior, así un timer que se atrasa no abre un hueco. Sin sonido espera, y suena cuando
+ * vuelve. `planDeVuelta` recibe el número de vuelta: una música puede cambiar de una a la otra.
+ */
+export function tocarEnBucle(
+  salida: () => SalidaDeAudio | null,
+  vuelta: number,
+  planDeVuelta: (n: number) => readonly NotaDeMusica[],
+): Musica {
+  let vueltas: Musica[] = [];
+  let cero: number | null = null;
+  let n = 0;
+  let apagada = false;
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  const agendar = (): void => {
+    if (apagada) return;
+    const s = salida();
+    if (!s) {
+      cero = null;
+      timer = setTimeout(agendar, REVISA_MS);
+      return;
+    }
+    const ahora = s.ctx.currentTime;
+    if (cero === null || cero < ahora) cero = ahora + 0.05;
+    // Solo la que suena y la que viene: las anteriores ya se apagaron solas.
+    vueltas = [...vueltas.slice(-1), tocarPresentimiento(s, planDeVuelta(n++), cero)];
+    cero += vuelta;
+    timer = setTimeout(agendar, Math.max(0, cero - ahora - ANTICIPO) * 1000);
+  };
+  agendar();
+  return {
+    apagar(sale = 0.6) {
+      apagada = true;
+      clearTimeout(timer);
+      for (const v of vueltas) v.apagar(sale);
+    },
+  };
+}
