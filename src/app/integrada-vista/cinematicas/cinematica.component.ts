@@ -35,6 +35,7 @@ import {
 } from './cinematica-guion';
 import { cargarEscena } from './escenas';
 import { queHaceElToque } from '../toque-de-dialogo';
+import { etapaDe } from '../viaje';
 
 export type FinDeCinematica = 'fin' | 'salteada';
 
@@ -136,7 +137,9 @@ export class CinematicaComponent {
   protected readonly etiqueta = computed(() => {
     const c = this.cinematica().capitulo;
     if (c === CAPITULO_REVELACION) return 'La revelación';
-    return c === CAPITULO_FINAL ? 'Final' : `Capítulo ${c}`;
+    if (c === CAPITULO_FINAL) return 'Final';
+    // El nombre de la etapa y no "Capítulo N": la historia no numera sus lugares (viaje.ts).
+    return etapaDe(c)?.nombre ?? `Capítulo ${c}`;
   });
 
   protected readonly linea = signal<LineaEnPantalla | null>(null);

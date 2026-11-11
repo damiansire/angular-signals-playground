@@ -304,7 +304,7 @@ import { ChangeDetectionStrategy, Component, ViewEncapsulation } from '@angular/
     }
     .cine-e9__boceto path {
       fill: none;
-      stroke: #6b6252;
+      stroke: #b9ad98;
       stroke-width: 2.4;
       stroke-linecap: round;
       stroke-linejoin: round;

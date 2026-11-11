@@ -450,7 +450,7 @@ import { ChangeDetectionStrategy, Component, ViewEncapsulation } from '@angular/
 
     /* ---- El puente: stream de canicas hacia la caja, y una de vuelta ---- */
     .cine-e8__stream {
-      stroke: #6b6252;
+      stroke: #b9ad98;
       stroke-width: 4;
       stroke-linecap: round;
       --trazo-ms: 800ms;
@@ -460,7 +460,7 @@ import { ChangeDetectionStrategy, Component, ViewEncapsulation } from '@angular/
     }
     .cine-e8__puente {
       fill: none;
-      stroke: #9a9081;
+      stroke: #8f86a6;
       stroke-width: 7;
       stroke-linecap: round;
       stroke-dasharray: 0.5 14;
@@ -527,12 +527,12 @@ import { ChangeDetectionStrategy, Component, ViewEncapsulation } from '@angular/
     }
     .cine-e8__patas {
       fill: none;
-      stroke: #6b6252;
+      stroke: #b9ad98;
       stroke-width: 7;
       stroke-linecap: round;
     }
     .cine-e8__mastil {
-      stroke: #6b6252;
+      stroke: #b9ad98;
       stroke-width: 5;
       stroke-linecap: round;
     }

@@ -305,7 +305,7 @@ import { ChangeDetectionStrategy, Component, ViewEncapsulation } from '@angular/
     /* ---- Los hilos de lectura y el anillo que viaja por el primero ---- */
     .cine-e3__hilo {
       fill: none;
-      stroke: #6b6252;
+      stroke: #b9ad98;
       stroke-width: 5;
       stroke-linecap: round;
       stroke-dasharray: 0.5 16;
@@ -457,7 +457,7 @@ import { ChangeDetectionStrategy, Component, ViewEncapsulation } from '@angular/
     .cine-e3__eco {
       aspect-ratio: 1 / 1;
       border-radius: 50%;
-      border: 2px solid #c98476;
+      border: 2px solid #f2a58e;
       opacity: 0;
       transform: translate(calc((26 - var(--x)) * 1cqw), calc((46.4 - var(--y)) * 1cqh)) scale(0.3);
       transition:

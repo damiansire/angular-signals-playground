@@ -44,15 +44,26 @@
   --c-todos: #f6d9c0;
   --barra-arriba: clamp(40px, 7vh, 60px);
   --barra-abajo: clamp(108px, 21vh, 176px);
+  /* El cielo del prólogo (`prologo-anomalia.ts`), quieto: las escenas pasan en la misma noche
+     donde la tripulación se perdió. Las estrellas son mosaicos de puntos de tamaños primos entre
+     sí, así no se ve la repetición; se pintan una vez, sin rAF ni filtros. */
+  --cielo:
+    radial-gradient(1.4px 1.4px at 31px 47px, #ffe2b8 60%, transparent) 0 0 / 173px 151px,
+    radial-gradient(1.1px 1.1px at 113px 19px, #d6dcf4 60%, transparent) 0 0 / 211px 197px,
+    radial-gradient(1px 1px at 67px 131px, rgb(214 220 244 / 70%) 60%, transparent) 0 0 / 127px
+      163px,
+    radial-gradient(1.8px 1.8px at 241px 89px, #fff4dc 60%, transparent) 0 0 / 367px 293px,
+    radial-gradient(42% 38% at 18% 24%, rgb(138 90 208 / 30%), transparent),
+    radial-gradient(36% 32% at 84% 74%, rgb(47 154 128 / 20%), transparent),
+    linear-gradient(180deg, #07080c 0%, #0c0f2a 42%, #1a1440 78%, #2a1846 100%);
 
   position: absolute;
   inset: 0;
   display: grid;
   grid-template-rows: var(--barra-arriba) 1fr var(--barra-abajo);
   overflow: hidden;
-  color: var(--tinta);
-  /* El mismo clima claro del recorrido: la cinemática pasa ADENTRO del mundo de las moléculas. */
-  background: radial-gradient(120% 90% at 50% 38%, #fdfbf4 0%, #f5f0e2 58%, #e9e1cc 100%);
+  color: #efe6d6;
+  background: var(--cielo);
   view-transition-name: cine;
 }
 
@@ -171,6 +182,12 @@
   container-type: size;
 }
 
+/* Las moléculas lejanas de cada escena, de noche, se leen como constelaciones: con la crema
+   entera brillaban más que las cajas del héroe. */
+.cine [class*='__lejos'] {
+  opacity: 0.5;
+}
+
 /* El lienzo guarda 16:9 y SIEMPRE cabe: por alto en pantallas anchas, por ancho en las angostas.
    Adentro las escenas ubican todo en porcentaje del lienzo, así la composición no se desarma. */
 .cine__lienzo {
@@ -232,7 +249,7 @@
     monospace;
   letter-spacing: 0.32em;
   text-transform: uppercase;
-  color: var(--tinta-suave);
+  color: #bfb29b;
 }
 
 .cine__titulo-h {
@@ -242,7 +259,12 @@
     Palatino,
     Georgia,
     serif;
-  color: var(--tinta);
+  color: #f6efe2;
+  /* Claro sobre la noche, y con sombra dura de noche: las cajas de las escenas son del mismo
+     crema, y donde una pasaba por detrás la letra se borraba. */
+  text-shadow:
+    0 3px 0 rgb(7 8 12 / 70%),
+    0 10px 30px rgb(7 8 12 / 60%);
   letter-spacing: 0.12em;
   transition: letter-spacing 900ms var(--resorte-suave, ease-out);
 }
@@ -441,7 +463,7 @@
 }
 
 .k-nave--cap {
-  color: var(--tinta);
+  color: var(--c-cap);
 }
 
 /* La exploradora lleva el color de Angie: es ella. */
@@ -632,7 +654,7 @@
   .cine__escena {
     grid-row: 3;
     container-type: inline-size;
-    background: radial-gradient(120% 90% at 50% 38%, #fdfbf4 0%, #f5f0e2 58%, #e9e1cc 100%);
+    background: var(--cielo);
   }
   .cine__lienzo {
     width: 100cqw;

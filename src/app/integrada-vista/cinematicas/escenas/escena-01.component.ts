@@ -174,7 +174,7 @@ import { ChangeDetectionStrategy, Component, ViewEncapsulation } from '@angular/
     /* ---- El hilo de lectura y el aviso ---- */
     .cine-e1__hilo {
       fill: none;
-      stroke: #6b6252;
+      stroke: #b9ad98;
       stroke-width: 5;
       stroke-linecap: round;
       stroke-dasharray: 0.5 16;

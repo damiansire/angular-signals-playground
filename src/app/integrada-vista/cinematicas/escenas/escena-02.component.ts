@@ -262,7 +262,7 @@ import { ChangeDetectionStrategy, Component, ViewEncapsulation } from '@angular/
     /* ---- Hilos: punteados, revelados por la máscara ---- */
     .cine-e2__hilos path {
       fill: none;
-      stroke: #6b6252;
+      stroke: #b9ad98;
       stroke-width: 5;
       stroke-linecap: round;
       stroke-dasharray: 0.5 16;
@@ -354,7 +354,7 @@ import { ChangeDetectionStrategy, Component, ViewEncapsulation } from '@angular/
       letter-spacing: 0.14em;
       text-transform: uppercase;
       white-space: nowrap;
-      color: #6b6252;
+      color: #bfb29b;
     }
     .cine.b-suma-a-mano .cine-e2__caja--viento .cine-e2__cara {
       animation: cine-e2-late-a 620ms cubic-bezier(0.3, 1.4, 0.5, 1) 3300ms;

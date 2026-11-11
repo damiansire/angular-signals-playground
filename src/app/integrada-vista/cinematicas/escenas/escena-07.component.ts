@@ -361,7 +361,7 @@ import { ChangeDetectionStrategy, Component, ViewEncapsulation } from '@angular/
     /* ---- El cable y el cometa ---- */
     .cine-e7__cable {
       fill: none;
-      stroke: #6b6252;
+      stroke: #b9ad98;
       stroke-width: 4.5;
       stroke-linecap: round;
       stroke-dasharray: 0.5 13;

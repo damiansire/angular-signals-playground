@@ -94,10 +94,9 @@ fecha y adónde fue. Los ids (H1, J1…) sirven para nombrarlos en una sesión (
   no se renumeraron. La partida pasó a la versión 3 con su migración. Lo que sigue atado a la
   posición: `RAW` y `signalsRoutesTree` (mismo largo y orden), `ACTS` y `CONCEPTO_PICO` en
   `molecule-engine.ts`, y el final, que dibuja doce átomos por número de capítulo.
-- **T12. El estilo de las cinemáticas.** Damian pidió que las cinemáticas de capítulo se vean como
-  la intro. Siguen con su estilo (papel claro, barras de cine) y su "Capítulo N" arriba, que
-  contradice el principio de no mostrar números. **Propuesta:** el reproductor toma el cielo del
-  prólogo y muestra el nombre de la etapa en lugar del número.
+- **T12. El estilo de las cinemáticas.** Resuelto el 2026-11-11: el reproductor pasa en el cielo
+  del prólogo (quieto, sin rAF) y arriba dice el nombre de la etapa, no "Capítulo N". Los trazos
+  sueltos de las escenas (hilos, cables, bocetos) se aclararon para leerse de noche.
 - **T13. Las pantallas en la hoja.** En el viaje, las pantallas de los capítulos se leen en la hoja
   del manual tal como venían de la molécula: su explicación (la pista de Angie) flota en la esquina y
   sus títulos son técnicos ("Read-only signals: asReadonly()"). **Propuesta:** pasarlas al formato

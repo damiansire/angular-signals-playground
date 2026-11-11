@@ -419,7 +419,7 @@ import { ChangeDetectionStrategy, Component, ViewEncapsulation } from '@angular/
     /* ---- La balanza y el enchufe: punteados revelados por máscara ---- */
     .cine-e4__punteado {
       fill: none;
-      stroke: #6b6252;
+      stroke: #b9ad98;
       stroke-width: 5;
       stroke-linecap: round;
       stroke-dasharray: 0.5 16;

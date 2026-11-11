@@ -308,7 +308,7 @@ import { ChangeDetectionStrategy, Component, ViewEncapsulation } from '@angular/
     }
     .cine-e11__anillo {
       fill: none;
-      stroke: #6b6252;
+      stroke: #b9ad98;
       stroke-opacity: 0.5;
       stroke-width: 3;
       stroke-dasharray: 10 16;
