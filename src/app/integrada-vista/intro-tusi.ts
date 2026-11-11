@@ -323,8 +323,8 @@ export function initIntroTusi(host: HTMLElement, options: IntroTusiOptions = {})
   const pipEls = Array.from(host.querySelectorAll<HTMLElement>('.tusi__pip'));
   let lastShown = -1;
   let lastCounterOff: boolean | null = null;
-  // El topbar del recorrido entra en la misma banda que el contador. Al primer gesto de scroll el
-  // usuario ya se está yendo del intro: apagamos el contador antes de que los dos textos se pisen.
+  // El primer gesto de rueda o de arrastre apaga el contador. Era para que no se pisara con el
+  // topbar de la molécula, que entraba en su misma banda y ya no existe (ADR 0021).
   let scrolled = false;
 
   helpBtn.addEventListener('click', () => {
@@ -505,9 +505,9 @@ export function initIntroTusi(host: HTMLElement, options: IntroTusiOptions = {})
   function aplicarVisibilidad(ahoraVisible: boolean): void {
     if (ahoraVisible === visible) return;
     visible = ahoraVisible;
-    // El overlay cubre el viewport; si el intro no es la vista activa (scroll o deep-link directo al
-    // recorrido SIN entrar), su subárbol interceptaría los clicks de los demos que quedaron
-    // debajo (pointer-events se hereda, así que apagarlo en el overlay apaga todo el subárbol). Solo
+    // El overlay cubre el viewport; si el intro no es la vista activa (el viaje la tapa, o un link
+    // abre directo una página SIN entrar), su subárbol interceptaría los clicks de lo que queda
+    // encima (pointer-events se hereda, así que apagarlo en el overlay apaga todo el subárbol). Solo
     // mientras no se entró: tras `start()`, `.gone` ya lo maneja y no hay que reactivarlo.
     // Va contra `picked` y no contra `started`: con prólogo en el medio hay minutos en los que el
     // usuario ya entró y la construcción todavía no arrancó, y ahí el overlay volvería a tapar.
@@ -597,10 +597,10 @@ export function initIntroTusi(host: HTMLElement, options: IntroTusiOptions = {})
   };
   mqlReduce.addEventListener('change', onReduceChange);
   // La primera medida del canvas va en el primer cuadro, no acá. `resize` lee
-  // getBoundingClientRect, y cuando esto corre el motor acaba de construir la molécula entera:
-  // leer geometría con el layout sucio fuerza el recálculo de toda la página. Medido sobre el
-  // build de PRODUCCIÓN: 336 ms de reflow forzado, el mayor contribuyente del boot. Va antes del
-  // primer `draw`, así que el canvas nunca se pinta sin medida.
+  // getBoundingClientRect, y cuando esto corre la vista acaba de montar la colina: leer geometría
+  // con el layout sucio fuerza el recálculo de toda la página. Con la molécula (ADR 0021), medido
+  // sobre el build de PRODUCCIÓN, eran 336 ms de reflow forzado, el mayor contribuyente del boot.
+  // Va antes del primer `draw`, así que el canvas nunca se pinta sin medida.
   rafId = window.requestAnimationFrame((ts) => {
     resize();
     loop(ts);

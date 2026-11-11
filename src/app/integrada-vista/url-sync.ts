@@ -5,16 +5,16 @@
  * que cerrar: una URL que la vista escribe, la vista la tiene que poder reabrir.
  */
 
-/** Punto del recorrido reflejado en la URL. `sub` es 1-based; 0 = vista molécula (átomo, sin sub-nivel). */
+/** Punto del viaje reflejado en la URL. `sub` es 1-based; 0 = la cinemática del capítulo, sin página. */
 export interface WhereState {
   concept: number;
   sub: number;
 }
 
 /**
- * Query string (sin `?`) para un punto del recorrido. `subIdx` es 0-based dentro del concepto,
- * o -1 en la vista molécula (átomo enfocado, sin sub-nivel) → solo `nivel=`. `conceptIdx < 0` = landing
- * (hero, todavía sin entrar al recorrido) → query VACÍA, así la URL queda limpia (`/`) en el arranque.
+ * Query string (sin `?`) para un punto del viaje. `subIdx` es 0-based dentro del concepto, o -1 en
+ * la cinemática del capítulo, que va antes de sus páginas → solo `nivel=`. `conceptIdx < 0` = landing
+ * (todavía sin entrar al viaje) → query VACÍA, así la URL queda limpia (`/`) en el arranque.
  */
 export function buildWhereQuery(conceptIdx: number, subIdx: number): string {
   if (conceptIdx < 0) return '';
@@ -23,8 +23,8 @@ export function buildWhereQuery(conceptIdx: number, subIdx: number): string {
 
 /**
  * Lee `?nivel=X(&sub-nivel=Z)` de un query string. Devuelve `null` si no hay un nivel válido.
- * `sub` es 1-based; vale 0 cuando la URL trae SOLO el nivel (vista molécula): así el deep-link
- * `?nivel=X` que la vista escribe en la molécula se puede reabrir (antes exigía `sub>=1` y caía a null).
+ * `sub` es 1-based; vale 0 cuando la URL trae SOLO el nivel (la cinemática): así el link `?nivel=X`
+ * que la vista escribe se puede reabrir (antes exigía `sub>=1` y caía a null).
  */
 export function parseWhereQuery(search: string): WhereState | null {
   const params = new URLSearchParams(search);

@@ -3,14 +3,15 @@ import type { Punto } from '../libs/partida';
 /**
  * Qué sigue al entrar: la historia desde una línea de su comienzo (`null` es el principio), o el
  * viaje donde quedó, que también puede ser su último cuadro. No hay un tercer lugar: la app es una
- * sola historia, y la molécula solo se abre con un link (ADR 0008).
+ * sola historia (ADR 0008).
  */
 export type Entrada =
   { readonly a: 'prologo'; readonly desde: string | null } | { readonly a: 'viaje' };
 
 /**
- * Qué pasa al entrar desde la colina: siempre sigue la historia, aunque la partida haya quedado en
- * la molécula. Con el comienzo ya visto, sigue el viaje; una partida de antes del viaje lo arranca
+ * Qué pasa al entrar desde la colina: siempre sigue la historia, aunque una partida vieja haya
+ * quedado en la molécula, que ya no existe (ADR 0021). Con el comienzo ya visto, sigue el viaje; una
+ * partida de antes del viaje lo arranca
  * del principio. Una línea guardada que el guion ya no tiene como punto se ignora: el comienzo
  * arranca del principio antes que en un lugar que no existe.
  */
