@@ -6,8 +6,9 @@ resuelve se agrega acá como ítem permanente, y cada revisión verifica TODOS l
 ("parece un modal") sobrevivió a 8 rondas de revisión porque cada ronda
 auditaba solo lo último reportado.
 
-**La molécula se borró (ADR 0021, 2026-11-12).** Los ítems de la card, la barra única, el riel, los
-átomos, la órbita y la guía describen una pantalla que ya no existe: no se verifican. Lo que vale de
+**La molécula se borró (ADR 0021, 2026-11-12).** Las secciones de la barra única, el riel, el topbar
+y el reposo de las paradas se fueron con ella. Los ítems que quedan de la card, los átomos, la
+órbita y la guía describen una pantalla que ya no existe: no se verifican. Lo que vale de
 ellos para las pantallas embebidas (sin costura, sin scroll anidado, legibilidad) se mide en la hoja
 del viaje, que lleva la misma `.card--dissolve`.
 
@@ -34,106 +35,13 @@ del viaje, que lleva la misma `.card--dissolve`.
 - [ ] Componentes embebidos (`createComponent`) sin costura: sin fondo propio
       distinto, sin scroll propio, no deben "parecer un iframe".
 
-## Barra única de navegación (borde izquierdo, morphea conceptos ↔ sub-niveles)
+## Composición
 
-Desde 2026-07-18 la navegación es UNA sola barra vertical pegada al borde
-IZQUIERDO (antes: riel de conceptos a la izquierda + ascensor/órbita de
-sub-niveles, que se pisaban entre sí y con las instrucciones). El electrón
-actual (dot + órbita + sonar) se mantiene CEÑIDO al ancho del riel para no pisar
-la espina vertical "Signals" que vive a su derecha.
-
-- [ ] Una SOLA barra visible por vez: en la vista molécula muestra los 11
-      capítulos (1-11); al bucear, su cuerpo (ticks + línea) se desvanece y la
-      barra de sub-niveles ocupa el mismo eje. Nunca dos barras a la vez.
-- [ ] Al bucear, los extremos de la barra de sub-niveles se ABREN hacia los
-      bordes (arriba/abajo) — el gesto de "morph" — en vez de aparecer de golpe.
-- [ ] Las flechas ▲/▼ (stepper) quedan siempre visibles y FLANQUEAN la barra
-      (arriba de la primera parada, abajo de la última), sin pisar el sub-nivel
-      1 ni el N.
-- [ ] El lado IZQUIERDO queda libre de navegación: solo el título vertical del
-      concepto (espina) y la columna de instrucciones. Cero colisiones de la
-      barra derecha con las instrucciones.
-- [ ] La espina vertical NO se superpone al índice de conceptos: overlap medido
-      contra TODAS las paradas del riel, no contra una. En la vista molécula la
-      espina va en 0 (su casa es el buceo).
-- [ ] El índice es NAVEGABLE, no decorativo (desde 2026-07-24): cada parada es un
-      `<button>` que salta a su concepto, con `aria-label`, `aria-current` en el
-      actual y foco visible. Queda `inert` cuando el índice no se ve (landing o
-      buceado) para no robar tabs ni recibir clicks fantasma.
-
-## Estado en REPOSO de cada parada (lo que se ve cuando el scroll asienta)
-
-Origen: 2026-07-24. En la parada de intro al concepto (`off[c]+1.3`) se veía
-FANTASMEADA la card del sub-nivel detrás de la molécula, y la espina vertical
-del concepto asomaba por encima del índice. Eran EL MISMO bug: las anclas de
-snap se posicionaban como fracción de `TOTAL + 0.2` mientras el alto del track
-usa `TOTAL + TRACK_TAIL`, así que el snap descansaba en un `scrollTop` que,
-releído como `s`, quedaba inflado (~×1.016) y metía el frame en la banda de
-fade de la card. El daño ESCALA con el índice del concepto (~3% de opacidad en
-el 0, ~87% en el 8), así que verificar solo el concepto 0 no alcanza.
-
-- [ ] El % de un ancla de snap divide por el MISMO total que el alto del track.
-      Si difieren, el estado en reposo NO es el que el motor cree.
-- [ ] En la parada de intro al concepto (antes de bucear): la card del sub-nivel
-      está en opacidad 0 EXACTA y la espina vertical en 0. Medido leyendo las
-      opacidades reales, no a ojo (al 3% el fantasma se ve pero casi no se mide).
-- [ ] Verificado en un concepto LEJANO (8-11), no solo en el 0: los defectos de
-      drift de scroll escalan con `off[c]`.
-
-## Z-order y geometría
-
-- [ ] Dots/círculos del riel por ENCIMA de los degradados del topbar; ningún
-      degradado tapa contenido interactivo.
-- [ ] El degradado inferior queda por DEBAJO del contenido, no encima.
-- [ ] La barra derecha NO invade la card ni la columna de instrucciones: vive
-      en la canaleta del borde derecho.
-- [ ] Cero colisiones entre la barra de sub-niveles y sus vecinos (card,
-      instrucciones, topbar/título, link "Practicá"): overlap medido con
-      `getBoundingClientRect()` contra TODOS los vecinos, no a ojo.
-- [ ] Con el sub-nivel asentado no queda nada de la molécula detrás de los controles salvo el átomo
-      actual: los átomos anteriores y los enlaces se retiran (`opacidadDeVecinos`) y, del todo
-      apagados, se ocultan y los enlaces dejan de fluir. La espiral los deja donde cae sin mirar el
-      contenido: el vecino pisaba inputs y botones en 13 sub-niveles y el enlace en 18. Medir cada
-      átomo no actual (caja de anillos y núcleo) y cada enlace (la curva muestreada en pantalla)
-      contra TODOS los controles, en los 40 sub-niveles a 1920, 1440, 820 y 500 px, y confirmar que
-      `#scene` tiene `vecinos-fuera` también en un concepto lejano: la parada no asienta con el
-      buceo en 1 exacto (en 7/1 queda cerca de 0.93).
-- [ ] Y el átomo actual, con el sub-nivel asentado, queda de fondo: su núcleo pasa a fantasma
-      (0.3) porque el disco sólido se veía a través de las cajas vacías del demo ("Todavía no
-      corrió nada" en 3/3). Mientras buceás sigue entero, y anillos y halo siguen respirando: la
-      card sigue parada sobre el átomo.
-
-## Composición y chrome
-
-- [ ] Chrome persistente presente tras cualquier reestructuración: botón de
-      inicio, riel/barra lateral, topbar (regresión ya ocurrida una vez).
 - [ ] Tamaños consistentes entre niveles y sub-niveles.
-- [ ] Título de la card en un renglón armónico, no partido en dos renglones
-      sueltos.
 - [ ] Espacio horizontal aprovechado; sin margen superior sin overlay.
-- [ ] El sub-nivel actual se marca con el electrón-ascensor (puck) que se
-      DESLIZA de una parada a la siguiente en la barra derecha, sin saltar.
-- [ ] Sin overflow: CADA sub-nivel entra en la card a 860px de alto (contenido
-      ≤ el `max-height` de la card) sin depender del scroll interno. Verificado
-      con `scrollHeight` de la card en los 40 sub-niveles, no a ojo. Ojo con
-      demos de lista que crecen por timer (cap explícito) y con demos de varios
-      bloques que se apilan en el grid dissolve (agruparlos en un contenedor).
-- [ ] Nada del topbar se parte por dentro (el contador nunca queda "1 /" arriba y "3" abajo) y el
-      título va entero: en un renglón desde 1200 px, y por debajo en dos pisos (arriba contador y
-      título, abajo la pregunta del recorrido y los controles, a la DERECHA: a la izquierda quedaba
-      encima de la primera parada del riel y se leía como su viñeta). Por debajo de 400 px cada piso
-      sigue en un renglón: el título escala con el ancho y Bitácora y Practicá pasan a íconos
-      (pasarlos a dos renglones subía el topbar a 100 px y tapaba la card y el riel). Medido con el
-      título más largo (8/2, "toSignal() · toObservable() · untracked()") a 360, 375, 500, 600, 768,
-      820, 1001, 1440 y 1920 px,
-      y la primera parada del riel contra el TEXTO del topbar que le queda encima. Un control nuevo, angosto,
-      pasa a ícono con un blanco de 24px y su etiqueta queda como nombre accesible.
 
 ## Color y afordancia (que el clima no tape, que el vacío no confunda)
 
-- [ ] El wash del concepto (`.dive-aura`) IDENTIFICA, no domina: a pleno buceo el
-      contenido (chips, código, texto) mantiene contraste contra el fondo teñido.
-      Ojo con acumular opacidad alta + `saturate()`: se suman y lavan el contenido.
 - [ ] Toda zona grande que ESPERA una interacción para llenarse dice qué esperar
       mientras está vacía. Un área que ocupa media escena sin contenido se lee
       como espacio muerto y el primerizo pasa de largo (caso: el árbol del DOM en
@@ -180,23 +88,9 @@ puede alcanzar" son dos cosas distintas y hay que chequear las dos.
 - [ ] Focusable ⇒ hace algo. Nada de blancos muertos con `role="button"` que
       al activarse no producen efecto, ni focusables anidados (contenedor y
       contenido ambos tabulables) que duplican las paradas de tabulación.
-- [ ] Las paradas que están ocultas (índice fuera de vista, sub-nivel no
-      activo) salen del tab-order mientras no se ven.
-- [ ] Abrir por deep-link (`?nivel=X&sub-nivel=Y`) deja el recorrido operable:
-      tomar el árbol de accesibilidad y confirmar que topbar, card y riel están
-      ahí. Sin tocar Entrar nadie liberaba el `inert` que pone la landing, y un
-      link compartido abría la app entera muerta (review de animaciones,
-      2026-09-24).
-- [ ] Ningún contenedor del chrome (riel, topbar) atrapa clicks con su caja: solo
-      sus controles. Hit-test con `elementFromPoint` sobre cada botón del demo en
-      pantalla, a 1440 y a 1920 de ancho: `aside.rail` (312×900, z 6) se comía el
-      botón entero de 1/6 a 1440 px.
 - [ ] Ninguna regla del recorrido apaga el foco de lo embebido. Los rings de
       Tailwind son `box-shadow`: un `box-shadow: none` genérico sobre la card
       también los borra. Tabular hasta un botón embebido y mirar el anillo.
-- [ ] En la landing el topbar está en opacidad 0 y, tocado Entrar, ya no es inerte: sus links
-      (bitácora, práctica, pausa) van `inert` mientras no se ven, con el mismo umbral que el
-      índice. Tabular después de entrar: el foco no cae en el topbar.
 - [ ] Todo anillo de foco llega a 3:1 contra lo que tiene alrededor. Los acentos claros (ámbar,
       verde) sobre el crema no llegan: el anillo va doble, `var(--focus-ink)` en el `outline` (el
       contraste) y el acento en un `box-shadow` por dentro (la identidad).
@@ -327,8 +221,6 @@ puede alcanzar" son dos cosas distintas y hay que chequear las dos.
 
 ## Vistas y estado
 
-- [ ] Verificar la vista CERCANA (sub-nivel) y la ALEJADA (molécula completa,
-      sin átomos amontonados); un cambio puede romper solo una de las dos.
 - [ ] URL sync bidireccional: navegar actualiza la URL Y pegar una URL
       restaura el estado (nivel y sub-nivel). Testear ambas direcciones.
 - [ ] Retomar al recargar (ADR 0005 y 0015), probado con input real: con un punto del prólogo, el
@@ -347,7 +239,7 @@ puede alcanzar" son dos cosas distintas y hay que chequear las dos.
       pantalla completa, empezar de cero), por encima de la pantalla del libro. El libro, sus marcas
       y "1 de 5" van debajo del título de la ley, adentro de la página: en la fila del HUD se
       chocaban con los íconos.
-- [ ] "Empezar de cero" está en la barra, en el HUD del prólogo, en la colina y, con partida
+- [ ] "Empezar de cero" está en el HUD del prólogo, en la colina, en el final y, con partida
       guardada, en el aviso de auriculares (la colina ya no se ve), y pide un segundo toque que
       caduca. En el aviso es una ficha arriba a la izquierda, en espejo con "Sonido" y de su mismo
       alto (40 px; con la vuelta más chica quedaba 2 px más baja), y su "¿seguro?" es corto,
@@ -356,8 +248,8 @@ puede alcanzar" son dos cosas distintas y hay que chequear las dos.
       750×342, 820×1180, 1024×768, 1440×900 y 1920×1080. Tocarla, con puntero o con Enter, no
       continúa el aviso. Su globo en la colina es corto: el largo tapaba el título a 1024×768, y el
       del "¿seguro?" se ve sin apuntar. Borrar recarga SIN la query.
-- [ ] El capítulo es un nombre, no una posición (ADR 0006): `?nivel=`, la cinemática, el número del
-      riel y la bitácora usan `CAPITULO_DE_CONCEPTO`; la partida y el motor, la posición. Signals es
+- [ ] El capítulo es un nombre, no una posición (ADR 0006): `?nivel=` y la cinemática usan
+      `CAPITULO_DE_CONCEPTO`; la partida y la vista, la posición. Signals es
       el capítulo 1 en la posición 0. `?nivel=0` se ignora y manda lo guardado. Un cambio que
       mezcla los dos abre la cinemática o el link de al lado.
 - [ ] Los specs que montan la vista limpian la partida antes y después: la vista guarda el punto
@@ -539,9 +431,6 @@ entrar desarma a Angie en luz y se hace noche, la costura con el prólogo.
       sin él el CSS no lo alcanza.
 - [ ] Con movimiento reducido Entrar pasa directo, sin desarme ni luces, y en la escena no queda
       ninguna animación infinita.
-- [ ] El chrome del recorrido (topbar, riel) no asoma sobre la landing: va por encima (z 6 contra 5) y su fundido arrancaba en s = 0.03, así que un toque de rueda dejaba "Bitácora" y "Tu
-      recorrido" flotando sobre la colina. Rueda real de una muesca: topbar y riel en 0 con la
-      intro en 1 (`chromeVisible`).
 - [ ] La despedida es el foco: las piezas se separan lejos (al menos 0.3 del ancho de Angie) y
       quedan suspendidas un momento; la noche tarda ~3 s y las luces viajan al sol, que late con
       cada una y se apaga con el destello. Con un segundo de noche y saltos cortos se veía todo
@@ -573,9 +462,8 @@ entrar desarma a Angie en luz y se hace noche, la costura con el prólogo.
       ancho de 375 solo no cambia el puntero.
 - [ ] Sonido y pausa son dos fichas de ícono arriba a la izquierda, con su texto en un globo al
       pasar o enfocar. Abajo, al lado del llamado, eran dos píldoras oscuras que competían con él.
-      Probarlas con click REAL: el topbar invisible (opacidad 0, z 6) tapaba las fichas y se comía
-      el click. Con el chrome en 0 el motor lo deja en `visibility: hidden`; comprobar con
-      `elementFromPoint` en el centro de cada ficha.
+      Probarlas con click REAL y comprobar con `elementFromPoint` en el centro de cada ficha que
+      nada invisible encima se come el click.
 - [ ] En vertical las fichas van en fila: en columna, con una partida guardada ("Empezar de cero"
       es la tercera), bajaban hasta 160 px y la última tapaba la "L" del título, que a 390×664
       empieza en 115. Medir con una partida sembrada y el aviso tocado: sin ella hay dos fichas y
@@ -891,10 +779,10 @@ entrar desarma a Angie en luz y se hace noche, la costura con el prólogo.
 Del design-review del prólogo (2026-07-26): tres de los defectos más graves no
 eran de dibujo sino de que el recorrido seguía vivo por debajo del velo.
 
-- [ ] Mientras un overlay cubre la pantalla, el recorrido de atrás va `inert`.
-      No alcanza con taparlo: el chrome invisible (`topbar`, `rail`, con opacidad
-      0 pero `pointer-events` activos) se come los clicks del overlay, y en
-      tablet llegó a tapar el botón para entrar.
+- [ ] Mientras un overlay cubre la pantalla, lo de atrás va `inert`. No alcanza
+      con taparlo: un chrome invisible (opacidad 0 pero `pointer-events` activos)
+      se come los clicks del overlay, y en tablet llegó a tapar el botón para
+      entrar.
 - [ ] Un handler de teclado colgado del overlay NO se dispara: el foco nunca
       está ahí. Va en `document`, y filtrando por overlay visible. Síntoma: la
       tecla "no hace nada" y encima scrollea lo de atrás.
