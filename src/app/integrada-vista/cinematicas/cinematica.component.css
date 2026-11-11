@@ -698,19 +698,19 @@
 
 @keyframes cine-iris-abre {
   from {
-    clip-path: circle(0 at var(--cine-iris-x, 50%) var(--cine-iris-y, 50%));
+    clip-path: circle(0 at 50% 50%);
   }
   to {
-    clip-path: circle(150vmax at var(--cine-iris-x, 50%) var(--cine-iris-y, 50%));
+    clip-path: circle(150vmax at 50% 50%);
   }
 }
 
 @keyframes cine-iris-cierra {
   from {
-    clip-path: circle(150vmax at var(--cine-iris-x, 50%) var(--cine-iris-y, 50%));
+    clip-path: circle(150vmax at 50% 50%);
   }
   to {
-    clip-path: circle(0 at var(--cine-iris-x, 50%) var(--cine-iris-y, 50%));
+    clip-path: circle(0 at 50% 50%);
   }
 }
 

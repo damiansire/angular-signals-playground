@@ -112,8 +112,6 @@ export class CinematicaComponent {
    * final enciende solo esos átomos y deja punteado el resto, que es la deuda visible de la partida.
    */
   readonly establecidos = input<readonly number[]>([]);
-  /** Punto de la pantalla del que se abre el iris (el átomo del capítulo), en px. */
-  readonly origen = input<{ x: number; y: number } | null>(null);
   /**
    * Congela la escena en un beat (el estado final de todo lo que pasó hasta la primera línea que lo
    * enciende), sin reloj, sin sonido y sin transiciones. Es para revisar escenas cuadro por cuadro:
@@ -327,10 +325,7 @@ export class CinematicaComponent {
     }
     this.eventos = this.armarEventos();
 
-    const o = this.origen();
     const raiz = document.documentElement;
-    raiz.style.setProperty('--cine-iris-x', o ? `${Math.round(o.x)}px` : '50%');
-    raiz.style.setProperty('--cine-iris-y', o ? `${Math.round(o.y)}px` : '50%');
 
     const mostrar = (): void => {
       this.host.classList.remove('cine-host--antes');
