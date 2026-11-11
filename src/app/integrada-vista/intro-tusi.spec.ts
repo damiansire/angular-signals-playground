@@ -148,20 +148,6 @@ describe('initIntroTusi', () => {
 
       expect(t.gatillos.length).toBe(1);
     });
-
-    it('el chrome del recorrido sigue inerte durante el prólogo y se libera al construir', () => {
-      const t = arrancar();
-      // El chrome del recorrido es hermano del `.intro` (topbar y riel van por encima en z-index).
-      const topbar = document.createElement('div');
-      t.host.appendChild(topbar);
-      topbar.inert = true;
-
-      t.entrar.click();
-      expect(topbar.inert).withContext('prólogo corriendo: el chrome no se toca').toBeTrue();
-
-      t.gatillos[0]();
-      expect(topbar.inert).withContext('construcción arrancada').toBeFalse();
-    });
   });
 
   describe('con despedida', () => {
@@ -352,19 +338,6 @@ describe('initIntroTusi', () => {
       t.handle.setVisible(true);
 
       expect(intro.inert).toBeFalse();
-    });
-
-    it('sin entrar (deep-link), salir de vista libera el chrome del recorrido', () => {
-      const t = arrancar();
-      const topbar = document.createElement('div');
-      t.host.appendChild(topbar);
-      topbar.inert = true;
-
-      t.handle.setVisible(false);
-      expect(topbar.inert).withContext('landing fuera de vista').toBeFalse();
-
-      t.handle.setVisible(true);
-      expect(topbar.inert).withContext('el overlay vuelve a tapar').toBeTrue();
     });
 
     it('avisar dos veces lo mismo no hace nada', () => {

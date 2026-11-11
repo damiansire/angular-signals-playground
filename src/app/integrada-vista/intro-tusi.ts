@@ -429,9 +429,6 @@ export function initIntroTusi(host: HTMLElement, options: IntroTusiOptions = {})
   function startBuild(): void {
     started = true;
     pedirCuadro();
-    // El chrome del recorrido se libera recién acá y no al entrar: con el prólogo en el medio
-    // quedaba clickeable y tabulable por encima de la cinemática (topbar y riel van en z-index 6).
-    tapados().forEach((el) => (el.inert = false));
     bajoElVelo().forEach((el) => (el.inert = false));
   }
   function start(): void {
@@ -461,18 +458,6 @@ export function initIntroTusi(host: HTMLElement, options: IntroTusiOptions = {})
     // orden de tabulación y en el árbol de a11y, invisibles pero alcanzables con Tab.
     overlay.inert = true;
   }
-  /**
-   * El overlay cubre el viewport, pero el chrome del recorrido que queda debajo sigue clickeable
-   * (opacidad 0 y `pointer-events` activos). A 834 px de ancho el riel tapaba el centro del botón
-   * para entrar y la app quedaba trabada acá, sin forma de arrancar.
-   */
-  const tapados = (): HTMLElement[] => {
-    const intro = overlay.closest('.intro');
-    return [...(intro?.parentElement?.children ?? [])].filter(
-      (el): el is HTMLElement => el instanceof HTMLElement && el !== intro,
-    );
-  };
-  tapados().forEach((el) => (el.inert = true));
   /**
    * Los controles de la construcción (sonido, pausa, velocidad, la ayuda) viven debajo de la pantalla
    * de inicio, en el mismo `.tusi`: tapados no se ven, pero seguían en el orden de Tab.
@@ -514,9 +499,6 @@ export function initIntroTusi(host: HTMLElement, options: IntroTusiOptions = {})
     if (!picked) {
       overlay.classList.toggle('gone', !visible);
       overlay.inert = !visible;
-      // El chrome del recorrido va tapado solo mientras el overlay tapa. Con un deep-link nadie entra
-      // por acá, y sin esto el recorrido entero quedaba inerte: sin clicks, sin Tab, sin lector.
-      tapados().forEach((el) => (el.inert = visible));
     }
     // El intro entero (controles de sonido/pausa/velocidad y el overlay) se desvanece con opacity,
     // que NO lo saca del tab-order ni del árbol de a11y. Con deep-link a un sub-nivel quedaban 7
