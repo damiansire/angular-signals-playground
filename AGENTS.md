@@ -81,6 +81,8 @@ Esto es lo que funciona:
   gramática de modal en `DESIGN-CHECKLIST.md`).
 - **Syncs bidireccionales** (URL↔estado, navegación↔UI): al menos un test por
   dirección.
+- **Sonido y música:** los requisitos están en [`docs/sonido.md`](./docs/sonido.md). Todo cambio de
+  lo que suena los respeta, y todo pedido nuevo sobre el sonido se anota ahí con fecha.
 - **Historia:** el canon (quién es quién y el bucle de Angie), el recorrido por
   etapas y lo que falta cerrar están en [`docs/historia/`](./docs/historia/README.md).
   Leelo antes de tocar guiones, cinemáticas o el orden de los conceptos.
