@@ -100,3 +100,33 @@
     rotate: 90deg;
   }
 }
+
+/* Un celular acostado: con el diálogo arriba y los botones abajo la consola se comía 140 de 342 px y
+   a la página le quedaba una franja. Acá sobra ancho, así que va todo en una fila: Angie en la punta
+   izquierda (centrada pisaba la frase), "Anterior", el diálogo y "Siguiente". */
+@media (max-height: 500px) and (min-width: 600px) {
+  .prologo__manual.prologo__manual--viaje {
+    /* El alto mínimo de la barra de diálogo (`--barra-abajo`, 84 px): con menos, la consola crecía
+       igual y le pisaba 8 px a la hoja. */
+    --consola: 5.25rem;
+  }
+  .prologo__manual--viaje .prologo__manual-pie {
+    grid-template-columns: 3.5rem auto minmax(0, 1fr) auto;
+    grid-template-rows: minmax(0, 1fr);
+    align-items: center;
+    column-gap: 0.75rem;
+  }
+  .prologo__manual--viaje .etapa__dialogo {
+    grid-area: 1 / 3;
+  }
+  .prologo__manual--viaje .prologo__manual-pie .prologo__manual-atras {
+    grid-area: 1 / 2;
+  }
+  .prologo__manual--viaje .prologo__manual-pie .prologo__manual-boton--sigue {
+    grid-area: 1 / 4;
+  }
+  .prologo__manual.prologo__manual--viaje app-concept-card {
+    inset: auto auto 0.5rem 0.75rem;
+    margin-inline: 0;
+  }
+}

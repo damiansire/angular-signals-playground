@@ -189,7 +189,9 @@
 /* ── La caja de diálogo y los botones ──────────────────────────────────────────────────────────── */
 .prologo__manual--viaje .prologo__manual-pie {
   z-index: 5;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 60rem) minmax(0, 1fr);
+  /* Los costados nunca más angostos que su botón: con `minmax(0, 1fr)`, a 1024 la caja de 60rem
+     se comía el ancho y "Siguiente página" se salía 135 px de la pantalla. */
+  grid-template-columns: minmax(max-content, 1fr) minmax(0, 60rem) minmax(max-content, 1fr);
   column-gap: clamp(0.75rem, 2vw, 1.5rem);
   min-height: var(--barra-abajo);
   margin: auto 0 0;
