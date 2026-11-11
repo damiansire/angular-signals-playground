@@ -5,6 +5,35 @@
   display: block;
 }
 
+/* La pista de cómo se mueve el cierre, debajo del paso, en el globo: más chica y en tinta suave
+   que el paso, para que se lea después de él. Entra y se va plegándose, sin que el globo salte. */
+.htt-pista {
+  display: grid;
+  grid-template-rows: 0fr;
+  opacity: 0;
+  font: italic 500 0.8em / 1.3 var(--font-display, system-ui, sans-serif);
+  color: #6f6280;
+  transition:
+    grid-template-rows 0.35s ease,
+    opacity 0.25s ease;
+}
+.htt-pista > span {
+  overflow: hidden;
+}
+.htt-pista-renglon {
+  display: block;
+  white-space: nowrap;
+}
+.htt-pista--a-la-vista {
+  grid-template-rows: 1fr;
+  opacity: 1;
+}
+@media (prefers-reduced-motion: reduce) {
+  .htt-pista {
+    transition: none;
+  }
+}
+
 .htt-arreglo code {
   font:
     700 0.92em / 1 'JetBrains Mono',

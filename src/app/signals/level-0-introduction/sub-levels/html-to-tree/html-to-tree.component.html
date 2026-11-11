@@ -35,7 +35,17 @@
   </svg>
 
   <p hacer>Tocá los tags.</p>
-  <p arreglo class="htt-arreglo">Mové el <code>&lt;/article&gt;</code>.</p>
+  <p arreglo class="htt-arreglo">
+    Mové el <code>&lt;/article&gt;</code>.
+    <!-- Cómo se mueve, chiquito y en tinta suave; se pliega cuando ya se lo movió a mano. -->
+    <span class="htt-pista" [class.htt-pista--a-la-vista]="pista()" [attr.aria-hidden]="!pista()">
+      <span>
+        @for (renglon of textoDeLaPista; track renglon) {
+          <span class="htt-pista-renglon">{{ renglon }}</span>
+        }
+      </span>
+    </span>
+  </p>
 
   <app-escena-arbol
     escena

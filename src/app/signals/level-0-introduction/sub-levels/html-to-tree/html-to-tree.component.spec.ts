@@ -108,6 +108,20 @@ describe('HtmlToTreeComponent', () => {
       expect(renglones()).toContain('<article></article>');
     });
 
+    it('la pista de cómo se mueve el cierre va con su paso, hasta que se lo mueve a mano', () => {
+      const pista = () => el.querySelector('.htt-pista--a-la-vista');
+      expect(pista()).toBeNull();
+      tocarTodos();
+      expect(pista()?.textContent).toContain('arrastrá');
+      expect(pista()?.getAttribute('aria-hidden')).toBe('false');
+      el.querySelector('[data-guia="cierre"]')!.dispatchEvent(
+        new KeyboardEvent('keydown', { key: 'ArrowDown', cancelable: true }),
+      );
+      fixture.detectChanges();
+      expect(pista()).toBeNull();
+      expect(el.querySelector('.htt-pista')?.getAttribute('aria-hidden')).toBe('true');
+    });
+
     it('con las flechas el foco sigue en el cierre, aunque cambie de renglón', async () => {
       tocarTodos();
       const cierre = () => el.querySelector('[data-guia="cierre"]') as HTMLButtonElement;

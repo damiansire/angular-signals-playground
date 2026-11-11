@@ -51,6 +51,16 @@ const ROTULOS = { antes: 'antes', despues: 'después' } as const;
  */
 const HOJAS = Math.max(...LUGARES_DEL_CIERRE.map((l) => disponerArbol(codigoDelArbol(l)).hojas));
 
+/**
+ * Cómo se mueve el cierre, para quien no lo descubre solo: tocarlo lo lleva a su lugar, y arrastrar
+ * no se adivina. En una pantalla táctil no hay click que mantener ni flechas.
+ */
+const PISTA_DEL_ARRASTRE = {
+  // En renglones: el globo tiene el ancho de la nave y la pista cortaba en "o / usá".
+  puntero: ['Mantené el click y arrastrá,', 'o usá ↑ ↓.'],
+  dedo: ['Mantené apretado y arrastrá.'],
+} as const;
+
 /** Cuánto hay que mover el puntero para que tocar el cierre sea arrastrarlo. */
 const UMBRAL_DE_ARRASTRE = 5;
 /**
@@ -133,6 +143,12 @@ export class HtmlToTreeComponent {
    */
   protected readonly arrastre = signal<{ dy: number; destino: HijosAdentro } | null>(null);
   private agarre: { id: number; y: number } | null = null;
+  /** Ya lo arrastró o lo movió con las flechas: la pista de cómo se mueve sobra. */
+  private readonly yaLoMovio = signal(false);
+  protected readonly textoDeLaPista =
+    typeof matchMedia === 'function' && matchMedia('(pointer: coarse)').matches
+      ? PISTA_DEL_ARRASTRE.dedo
+      : PISTA_DEL_ARRASTRE.puntero;
   /** Soltar después de arrastrar también dispara un click: ese no cuenta como tocarlo. */
   private recienSoltado = false;
   /** Los tags tocados, en el orden en que se tocaron. */
@@ -238,6 +254,8 @@ export class HtmlToTreeComponent {
   protected readonly sano = computed(() => this.arreglado() && this.todas());
   /** Con todo a la vista ya se ve qué quedó afuera: el paso de arreglar se prende. */
   protected readonly paso = computed<1 | 2>(() => (this.todas() || this.arreglado() ? 2 : 1));
+  /** La pista va con el paso de mover el cierre, hasta que se lo mueve a mano. */
+  protected readonly pista = computed(() => this.paso() === 2 && !this.sano() && !this.yaLoMovio());
 
   /**
    * La mano dice lo mismo que los pasos: el próximo tag sin tocar, en el orden en que el navegador
@@ -284,6 +302,7 @@ export class HtmlToTreeComponent {
     e.preventDefault();
     const l = this.cierre() + paso;
     if (l < 0 || l > ARREGLADO) return;
+    this.yaLoMovio.set(true);
     this.mover(l as HijosAdentro);
     // El cierre cambia de renglón y su botón se vuelve a crear: sin devolverle el foco, la segunda
     // flecha ya no lo encontraba.
@@ -318,6 +337,7 @@ export class HtmlToTreeComponent {
     this.agarre = null;
     this.arrastre.set(null);
     if (!arrastre) return;
+    this.yaLoMovio.set(true);
     this.recienSoltado = true;
     this.mover(arrastre.destino);
   }
