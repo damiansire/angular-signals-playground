@@ -202,7 +202,6 @@ function escribirFrase(destino: HTMLElement, txt: string): void {
 /** Qué nave es cada voz, para que la que habla se note en la escena y no solo en la caja. */
 const NAVE_DE: Partial<Record<Hablante, number>> = { cap: 0, naveA: 1, naveB: 2, nave4: 3 };
 
-
 /**
  * Los rótulos de operador dibujados en la escena, en unidades del viewBox, y lo mínimo que miden en
  * pantalla: el del disparo de la ráfaga y el del acierto del minijuego, que es el premio y va más
