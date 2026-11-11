@@ -56,6 +56,9 @@
           class="htt-linea"
           [class.htt-linea--vista]="r.estado === 'visto'"
           [class.htt-linea--afuera]="r.estado === 'afuera'"
+          [class.htt-linea--destino-adentro]="destinoEn(r.abre) === 'adentro'"
+          [class.htt-linea--destino-debajo]="destinoEn(r.abre) === 'debajo'"
+          [attr.data-abre]="r.abre"
           [style.--sangria.ch]="r.sangria * 2"
         >
           @for (p of r.piezas; track $index) {
@@ -73,14 +76,25 @@
                 </button>
               }
               @case ('hueco') {
+                <!-- Se arrastra a otro renglón; también se toca (lo lleva a su lugar o lo
+                     devuelve) o se mueve con las flechas. -->
                 <button
                   type="button"
                   class="htt-hueco"
                   [class.htt-hueco--ahora]="paso() === 2 && !arreglado()"
                   [class.htt-hueco--movido]="arreglado()"
+                  [class.htt-hueco--arrastrando]="arrastre() !== null"
+                  [style.--arrastre.px]="arrastre()?.dy"
                   [attr.aria-pressed]="arreglado()"
+                  aria-label="Mover el cierre de article: arrastralo, tocalo o usá las flechas"
                   data-guia="cierre"
                   (click)="moverCierre()"
+                  (keydown)="teclaDelCierre($event)"
+                  (pointerdown)="agarrarCierre($event)"
+                  (pointermove)="arrastrarCierre($event)"
+                  (pointerup)="soltarCierre($event)"
+                  (pointercancel)="cancelarArrastre()"
+                  (lostpointercapture)="cancelarArrastre()"
                 >
                   {{ p.texto }}
                 </button>

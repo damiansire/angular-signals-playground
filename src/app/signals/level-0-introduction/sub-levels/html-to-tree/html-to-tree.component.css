@@ -118,6 +118,42 @@
   background: rgb(106 209 154 / 10%);
   color: #8be0b3;
 }
+/* El cierre se agarra y se arrastra: la mano lo dice antes de tocarlo. Sin `touch-action`, en un
+   celular el dedo scrolleaba la hoja en vez de llevarlo. Mientras se arrastra va por encima de los
+   renglones, levantado como algo que se sostiene, y el renglón adonde caería se marca. */
+.htt .htt-codigo button.htt-hueco {
+  position: relative;
+  touch-action: none;
+  cursor: grab;
+}
+.htt .htt-codigo button.htt-hueco.htt-hueco--arrastrando {
+  z-index: 2;
+  background: #ffd27a;
+  color: #2b1b33;
+  text-decoration: none;
+  box-shadow: 0 6px 14px rgb(6 3 14 / 55%);
+  cursor: grabbing;
+  transition: none;
+  translate: 0 var(--arrastre, 0px);
+}
+.htt-linea--destino-adentro {
+  outline: 2px dashed #ffd27a;
+  outline-offset: 1px;
+}
+.htt-linea--destino-debajo {
+  position: relative;
+}
+.htt-linea--destino-debajo::after {
+  content: '';
+  position: absolute;
+  left: 0.4rem;
+  right: -2ch;
+  top: 100%;
+  height: 3px;
+  border-radius: 999px;
+  background: #ffd27a;
+  box-shadow: 0 0 8px rgb(255 210 122 / 70%);
+}
 .htt .htt-codigo button:focus-visible {
   outline: 2px solid #ffd27a;
   outline-offset: 2px;

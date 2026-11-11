@@ -69,6 +69,24 @@ const INDICE = new Map(PIEZAS.map((p, i) => [p.id, i]));
 /** Un panel sin hijos es una tira: vacío, no ocupa nada. */
 const ALTO_VACIO = 9;
 const AVISO = '#ff7676';
+/** Lo que un panel deja debajo de su último hijo. */
+const MARGEN_DEL_PANEL = 10;
+
+/**
+ * El alto de un panel: entero con todos sus hijos adentro, una tira sin ninguno y, si el cierre dejó
+ * adentro solo algunos, hasta el último de ellos.
+ */
+function altoDelPanel(id: string, fuera: ReadonlySet<string>): number {
+  const p = PIEZAS[INDICE.get(id) ?? 0];
+  const hijos = PIEZAS.filter((h) => h.panel === id);
+  const adentro = hijos.filter((h) => !fuera.has(h.id));
+  if (adentro.length === hijos.length) return p.alto;
+  if (!adentro.length) return ALTO_VACIO;
+  const fondo = Math.max(
+    ...adentro.map((h) => h.y + (h.renglones ? (h.renglones.length - 1) * 11 + 5 : h.alto)),
+  );
+  return fondo + MARGEN_DEL_PANEL - p.y;
+}
 
 /**
  * Lámina de la ley 1, que es el escenario de su página: lo que se dibuja (`render`, una columna de
@@ -230,14 +248,13 @@ export class EscenaArbolComponent extends EscenaDelManual {
     this.caidasVistas = caidas;
     const t = this.quieta || primeraVez ? 0 : 1;
 
-    // Un panel cuyos hijos quedaron afuera no tiene nada adentro: una tira vacía.
+    // Un panel abraza a los hijos que le quedaron: sin ninguno, es una tira vacía.
     for (const [id, caja] of this.cajas) {
-      const p = PIEZAS[INDICE.get(id) ?? 0];
-      const vacio = PIEZAS.some((h) => h.panel === id && fuera.has(h.id));
+      const alto = altoDelPanel(id, fuera);
       gsap.to(caja, {
-        attr: { height: vacio ? ALTO_VACIO : p.alto },
+        attr: { height: alto },
         duration: 0.35 * t,
-        ease: vacio ? 'power2.in' : 'back.out(1.6)',
+        ease: alto < PIEZAS[INDICE.get(id) ?? 0].alto ? 'power2.in' : 'back.out(1.6)',
         overwrite: 'auto',
       });
     }

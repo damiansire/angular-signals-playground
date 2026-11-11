@@ -85,6 +85,50 @@ describe('HtmlToTreeComponent', () => {
       expect(etapas()[1].classList).toContain('pm-etapa--hecho');
     });
 
+    it('con las flechas el cierre baja de a un renglón: a medias, solo el párrafo queda afuera', () => {
+      tocarTodos();
+      const tecla = (key: string) => {
+        el.querySelector('[data-guia="cierre"]')!.dispatchEvent(
+          new KeyboardEvent('keydown', { key, cancelable: true }),
+        );
+        fixture.detectChanges();
+      };
+      tecla('ArrowDown');
+      let r = renglones();
+      expect(r.indexOf('</article>')).toBe(r.indexOf('<h3>Título</h3>') + 1);
+      expect(pantalla()).toContain('1 fuera de su panel');
+      tecla('ArrowDown');
+      r = renglones();
+      expect(r.indexOf('</article>')).toBe(r.indexOf('<p>Texto</p>') + 1);
+      expect(pantalla()).toBe('Pantalla de la nave: 7 de 7 piezas');
+      tecla('ArrowDown');
+      expect(renglones().indexOf('</article>')).toBe(r.indexOf('</article>'));
+      tecla('ArrowUp');
+      tecla('ArrowUp');
+      expect(renglones()).toContain('<article></article>');
+    });
+
+    it('arrastrar el cierre hasta debajo del párrafo lo deja ahí, y soltarlo no lo devuelve', () => {
+      tocarTodos();
+      const cierre = el.querySelector('[data-guia="cierre"]') as HTMLButtonElement;
+      const parrafo = el.querySelector('.htt-linea[data-abre="p2"]')!.getBoundingClientRect();
+      const desde = cierre.getBoundingClientRect();
+      const puntero = (tipo: string, y: number) =>
+        cierre.dispatchEvent(
+          new PointerEvent(tipo, { pointerId: 1, button: 0, clientY: y, bubbles: true }),
+        );
+      puntero('pointerdown', desde.top + 2);
+      puntero('pointermove', parrafo.bottom - 4);
+      fixture.detectChanges();
+      expect(el.querySelector('.htt-linea--destino-debajo')?.getAttribute('data-abre')).toBe('p2');
+      puntero('pointerup', parrafo.bottom - 4);
+      cierre.click();
+      fixture.detectChanges();
+      const r = renglones();
+      expect(r.indexOf('</article>')).toBe(r.indexOf('<p>Texto</p>') + 1);
+      expect(el.querySelector('.htt-linea--destino-debajo')).toBeNull();
+    });
+
     it('la mano dice lo mismo que los pasos: cada tag en orden y después el hueco', () => {
       for (const id of NODOS) {
         expect(mano()).toBe(`[data-guia="abre-${id}"]`);

@@ -49,24 +49,47 @@ const HIJOS_DE_ARTICLE: readonly Renglon[] = [hoja(2, 'h3', 'Título'), hoja(2, 
 const FIN: Renglon = { sangria: 0, piezas: [cierra('main')] };
 
 /**
- * El código de la consola. Con el bug, `</article>` va pegado a su apertura; arreglado, después del
- * párrafo. Los renglones del título y el párrafo son los mismos en las dos: solo se mueve el cierre.
+ * Dónde está `</article>`: cuántos de sus hijos (el título y el párrafo) quedan adentro. Con 0 va
+ * pegado a su apertura, que es el bug; con 1 cierra después del título y el párrafo queda afuera;
+ * con 2, después del párrafo: arreglado.
  */
-export function codigoDelArbol(arreglado: boolean): readonly Renglon[] {
-  return arreglado
-    ? [
-        ...ANTES,
-        { sangria: 1, piezas: [abre('article')] },
-        ...HIJOS_DE_ARTICLE,
-        { sangria: 1, piezas: [cierra('article')] },
-        FIN,
-      ]
-    : [
-        ...ANTES,
-        { sangria: 1, piezas: [abre('article'), cierra('article')] },
-        ...HIJOS_DE_ARTICLE,
-        FIN,
-      ];
+export type HijosAdentro = 0 | 1 | 2;
+export const LUGARES_DEL_CIERRE: readonly HijosAdentro[] = [0, 1, 2];
+export const ARREGLADO: HijosAdentro = 2;
+
+/**
+ * El código de la consola, con `</article>` donde lo dejaron. Los renglones del título y el párrafo
+ * son siempre los mismos: solo se mueve el cierre.
+ */
+export function codigoDelArbol(adentro: HijosAdentro): readonly Renglon[] {
+  if (adentro === 0) {
+    return [
+      ...ANTES,
+      { sangria: 1, piezas: [abre('article'), cierra('article')] },
+      ...HIJOS_DE_ARTICLE,
+      FIN,
+    ];
+  }
+  return [
+    ...ANTES,
+    { sangria: 1, piezas: [abre('article')] },
+    ...HIJOS_DE_ARTICLE.slice(0, adentro),
+    { sangria: 1, piezas: [cierra('article')] },
+    ...HIJOS_DE_ARTICLE.slice(adentro),
+    FIN,
+  ];
+}
+
+/**
+ * Adónde va el cierre que se arrastra: al lugar más cercano a la altura del puntero. `alturas[i]`
+ * es la del lugar `i`, en el mismo eje que `y`.
+ */
+export function lugarMasCercano(y: number, alturas: readonly number[]): HijosAdentro {
+  let mejor = 0;
+  alturas.forEach((h, i) => {
+    if (Math.abs(h - y) < Math.abs(alturas[mejor] - y)) mejor = i;
+  });
+  return LUGARES_DEL_CIERRE[mejor] ?? 0;
 }
 
 export type Padres = Readonly<Partial<Record<NodoId, NodoId | null>>>;

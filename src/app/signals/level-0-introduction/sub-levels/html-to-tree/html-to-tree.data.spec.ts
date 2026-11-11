@@ -4,14 +4,16 @@ import {
   balanceados,
   codigoDelArbol,
   disponerArbol,
+  lugarMasCercano,
   estadoDelRenglon,
   fueraDelPanel,
   padres,
   padresPorSangria,
 } from './html-to-tree.data';
 
-const CON_BUG = codigoDelArbol(false);
-const ARREGLADO = codigoDelArbol(true);
+const CON_BUG = codigoDelArbol(0);
+const A_MEDIAS = codigoDelArbol(1);
+const ARREGLADO = codigoDelArbol(2);
 
 /** Los elementos que abre el código, en el orden en que aparecen. */
 const abiertos = (renglones: readonly Renglon[]) =>
@@ -36,6 +38,20 @@ describe('html-to-tree (dominio "el navegador lee los tags, no la sangría")', (
   it('con el bug, quedan fuera del panel justo el título y el párrafo; arreglado, nadie', () => {
     expect(fueraDelPanel(CON_BUG)).toEqual(['h3', 'p2']);
     expect(fueraDelPanel(ARREGLADO)).toEqual([]);
+  });
+
+  it('cerrado después del título, el título es de article y el párrafo queda afuera', () => {
+    expect(padres(A_MEDIAS)['h3']).toBe('article');
+    expect(padres(A_MEDIAS)['p2']).toBe('main');
+    expect(fueraDelPanel(A_MEDIAS)).toEqual(['p2']);
+    expect(balanceados(A_MEDIAS)).toBeTrue();
+    expect(abiertos(A_MEDIAS)).toEqual([...NODOS]);
+  });
+
+  it('el cierre que se suelta va al lugar más cercano', () => {
+    expect(lugarMasCercano(10, [12, 40, 70])).toBe(0);
+    expect(lugarMasCercano(50, [12, 40, 70])).toBe(1);
+    expect(lugarMasCercano(500, [12, 40, 70])).toBe(2);
   });
 
   it('lo demás tiene el mismo padre en las dos versiones', () => {

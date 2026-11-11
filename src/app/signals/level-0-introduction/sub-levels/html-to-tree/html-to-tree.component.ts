@@ -1,12 +1,23 @@
-import { Component, ChangeDetectionStrategy, signal, computed } from '@angular/core';
 import {
+  Component,
+  ChangeDetectionStrategy,
+  ElementRef,
+  signal,
+  computed,
+  inject,
+} from '@angular/core';
+import {
+  ARREGLADO,
+  LUGARES_DEL_CIERRE,
   NODOS,
   TAG,
+  type HijosAdentro,
   type NodoId,
   codigoDelArbol,
   disponerArbol,
   estadoDelRenglon,
   fueraDelPanel,
+  lugarMasCercano,
 } from './html-to-tree.data';
 import { PaginaDelManualComponent } from '../../manual/pagina-del-manual.component';
 import { EscenaArbolComponent } from '../../manual/escena-arbol.component';
@@ -27,10 +38,19 @@ const NODO = { ancho: 62, alto: 24 };
  * El ancho del árbol es el de su versión más ancha, la del bug: al mover el cierre los nodos se mudan
  * adentro del mismo lienzo, en vez de cambiar de escala todos juntos.
  */
-const HOJAS = Math.max(
-  disponerArbol(codigoDelArbol(false)).hojas,
-  disponerArbol(codigoDelArbol(true)).hojas,
-);
+const HOJAS = Math.max(...LUGARES_DEL_CIERRE.map((l) => disponerArbol(codigoDelArbol(l)).hojas));
+
+/** Cuánto hay que mover el puntero para que tocar el cierre sea arrastrarlo. */
+const UMBRAL_DE_ARRASTRE = 5;
+/**
+ * El renglón que marca cada lugar del cierre: pegado a `<article>`, o debajo del título o del
+ * párrafo.
+ */
+const RENGLON_DEL_LUGAR: Readonly<Record<HijosAdentro, NodoId>> = {
+  0: 'article',
+  1: 'h3',
+  2: 'p2',
+};
 
 /**
  * El color de cada nodo es el de su pieza en la pantalla de la nave (`escena-arbol`): así se ve que
@@ -90,15 +110,27 @@ export class HtmlToTreeComponent {
         : null,
     };
   });
-  protected readonly arreglado = signal(false);
+  private readonly host = inject<ElementRef<HTMLElement>>(ElementRef).nativeElement;
+  /** Dónde está `</article>`: cuántos de sus hijos quedan adentro. */
+  protected readonly cierre = signal<HijosAdentro>(0);
+  protected readonly arreglado = computed(() => this.cierre() === ARREGLADO);
+  /**
+   * El cierre mientras se arrastra: cuánto se corrió del lugar donde estaba y adónde caería si se
+   * suelta ahora. `null` cuando nadie lo arrastra.
+   */
+  protected readonly arrastre = signal<{ dy: number; destino: HijosAdentro } | null>(null);
+  private agarre: { id: number; y: number } | null = null;
+  /** Soltar después de arrastrar también dispara un click: ese no cuenta como tocarlo. */
+  private recienSoltado = false;
   /** Los tags tocados, en el orden en que se tocaron. */
   protected readonly reveladas = signal<readonly NodoId[]>([]);
 
-  private readonly codigo = computed(() => codigoDelArbol(this.arreglado()));
+  private readonly codigo = computed(() => codigoDelArbol(this.cierre()));
   protected readonly fuera = computed(() => fueraDelPanel(this.codigo()));
   protected readonly renglones = computed(() =>
     this.codigo().map((r) => ({
       sangria: r.sangria,
+      abre: r.piezas[0]?.tipo === 'abre' ? r.piezas[0].id : null,
       estado: estadoDelRenglon(r, this.reveladas(), this.fuera()),
       piezas: r.piezas.map((p): PiezaVista => {
         if (p.tipo === 'texto') return { tipo: 'texto', texto: p.texto };
@@ -192,8 +224,79 @@ export class HtmlToTreeComponent {
     this.reveladas.update((antes) => [...antes, id]);
   }
 
-  /** El hueco lleva `</article>` después del párrafo; tocarlo otra vez lo devuelve. */
+  /**
+   * Tocar el cierre lo lleva después del párrafo; tocarlo otra vez lo devuelve. Es lo que hace la
+   * mano de "Mostrame", y lo que hace el teclado con Enter.
+   */
   protected moverCierre(): void {
-    this.arreglado.update((a) => !a);
+    if (this.recienSoltado) {
+      this.recienSoltado = false;
+      return;
+    }
+    this.cierre.update((l) => (l === ARREGLADO ? 0 : ARREGLADO));
+  }
+
+  /** Con las flechas, el cierre baja o sube de a un renglón, como si se lo arrastrara. */
+  protected teclaDelCierre(e: KeyboardEvent): void {
+    const paso = e.key === 'ArrowDown' ? 1 : e.key === 'ArrowUp' ? -1 : 0;
+    if (!paso) return;
+    e.preventDefault();
+    const l = this.cierre() + paso;
+    if (l >= 0 && l <= ARREGLADO) this.cierre.set(l as HijosAdentro);
+  }
+
+  protected agarrarCierre(e: PointerEvent): void {
+    if (e.button !== 0) return;
+    this.recienSoltado = false;
+    this.agarre = { id: e.pointerId, y: e.clientY };
+    try {
+      // Con la captura, el cierre sigue al dedo aunque salga del botón.
+      (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
+    } catch {
+      // El puntero ya no está activo: se arrastra igual, mientras siga sobre el botón.
+    }
+  }
+
+  protected arrastrarCierre(e: PointerEvent): void {
+    if (this.agarre?.id !== e.pointerId) return;
+    const dy = e.clientY - this.agarre.y;
+    if (!this.arrastre() && Math.abs(dy) < UMBRAL_DE_ARRASTRE) return;
+    e.preventDefault();
+    this.arrastre.set({ dy, destino: lugarMasCercano(e.clientY, this.alturasDeLosLugares()) });
+  }
+
+  protected soltarCierre(e: PointerEvent): void {
+    if (this.agarre?.id !== e.pointerId) return;
+    const arrastre = this.arrastre();
+    this.agarre = null;
+    this.arrastre.set(null);
+    if (!arrastre) return;
+    this.recienSoltado = true;
+    this.cierre.set(arrastre.destino);
+  }
+
+  protected cancelarArrastre(): void {
+    this.agarre = null;
+    this.arrastre.set(null);
+  }
+
+  /**
+   * La altura de cada lugar del cierre en la pantalla: el medio del renglón de `<article>`, y el
+   * borde de abajo del título y del párrafo, que es donde quedaría el cierre en su propio renglón.
+   */
+  private alturasDeLosLugares(): number[] {
+    return LUGARES_DEL_CIERRE.map((l) => {
+      const renglon = this.host.querySelector(`.htt-linea[data-abre="${RENGLON_DEL_LUGAR[l]}"]`);
+      const caja = renglon?.getBoundingClientRect();
+      if (!caja) return Infinity;
+      return l === 0 ? caja.top + caja.height / 2 : caja.bottom;
+    });
+  }
+
+  /** El renglón que se marca como destino mientras se arrastra, y cómo. */
+  protected destinoEn(abre: NodoId | null): 'adentro' | 'debajo' | null {
+    const a = this.arrastre();
+    if (!a || abre !== RENGLON_DEL_LUGAR[a.destino]) return null;
+    return a.destino === 0 ? 'adentro' : 'debajo';
   }
 }
