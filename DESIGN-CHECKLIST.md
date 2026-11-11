@@ -1360,6 +1360,11 @@ Del minijuego de operadores (2026-11-08):
       todos crecía con cada click). Sin paneles `bg-gray-800` ni botones azules de Tailwind. El
       contador hijo del capítulo 7 (`app-counter-input`) seguía en gris azulado y salía así en la
       captura del README: es un aparato con la tinta de la pantalla del código.
+- [ ] (2026-11-12) Los botones de las pantallas son `.boton-tinta` (global en `styles.css`): tinta
+      cálida, trazo, sombra dura y se hunde al tocarlo. Ninguna pantalla trae `bg-gray-800` de
+      Tailwind; antes dependían de que la hoja los repintara, y fuera de ella eran grises. La
+      etiqueta no se parte en dos renglones: si no entra, se parte la fila (`flex-wrap`), como
+      "Lista internacional" del capítulo 5.
 - [ ] Cada página del viaje tiene su línea al llegar y otra al resolver (`guion-del-viaje.ts`, con
       spec: las 33 páginas, las reglas del guion y dos naves distintas por página, porque es una
       charla). Las naves miran lo que se toca, una se entera con un respingo, festejan lo resuelto
