@@ -1,0 +1,317 @@
+/* Una etapa del viaje con la estética de las cinemáticas: el mismo papel crema, la tinta con tono, la
+   barra del capítulo arriba y la caja de diálogo abajo. La etapa pasa ADENTRO del mundo de la
+   cinemática que la abrió, no en una tele apagada: sin negro de fondo y sin tarjeta, el ejercicio va
+   suelto sobre el papel, con la tripulación arriba mirándolo. Archivo aparte porque el presupuesto
+   de estilo se mide por archivo. */
+.manual-suelto--viaje {
+  --tinta: #201d16;
+  --tinta-suave: #6b6252;
+  --barra: #1b1813;
+  --barra-arriba: clamp(40px, 6vh, 52px);
+  --barra-abajo: clamp(84px, 13vh, 116px);
+  background: radial-gradient(120% 90% at 50% 38%, #fdfbf4 0%, #f5f0e2 58%, #e9e1cc 100%);
+}
+.manual-suelto--viaje .prologo__tele {
+  display: none;
+}
+.manual-suelto--viaje .prologo__manual.prologo__manual--viaje {
+  inset: 0;
+  width: 100%;
+  padding: 0;
+  color: var(--tinta);
+  scroll-padding-block: calc(var(--barra-arriba) + 1rem) calc(var(--barra-abajo) + 1rem);
+}
+
+/* ── La barra del capítulo ─────────────────────────────────────────────────────────────────── */
+.prologo__manual--viaje .prologo__manual-cabeza {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  min-height: var(--barra-arriba);
+  margin: 0;
+  padding: 0 clamp(12px, 3vw, 36px);
+  background: var(--barra);
+}
+.prologo__manual--viaje .prologo__manual-libro,
+.prologo__manual--viaje .prologo__manual-paso {
+  font:
+    600 12px/1 ui-monospace,
+    'SFMono-Regular',
+    Menlo,
+    Consolas,
+    monospace;
+  letter-spacing: 0.18em;
+  color: #bfb29b;
+  text-shadow: none;
+}
+.prologo__manual--viaje .prologo__manual-libro b {
+  font-weight: 600;
+  color: #efe6d6;
+}
+.prologo__manual--viaje .prologo__manual-donde {
+  margin: 0;
+}
+.prologo__manual--viaje .prologo__manual-marca {
+  background: rgb(239 230 214 / 22%);
+}
+.prologo__manual--viaje .prologo__manual-marca--leida {
+  background: #bfb29b;
+}
+.prologo__manual--viaje .prologo__manual-marca--aca {
+  background: #f2c27a;
+  box-shadow: none;
+}
+
+/* ── El cielo de la etapa y la página ─────────────────────────────────────────────────────────── */
+.prologo__manual--viaje .etapa__cielo,
+.prologo__manual--viaje .prologo__manual-cuerpo {
+  width: min(76rem, calc(100% - 2 * clamp(1rem, 3vw, 2.5rem)));
+  margin-inline: auto;
+}
+.prologo__manual--viaje .etapa__cielo {
+  margin-top: clamp(0.25rem, 1.5vh, 1rem);
+}
+.prologo__manual--viaje .prologo__manual-cuerpo {
+  justify-content: flex-start;
+  padding-bottom: 1.5rem;
+}
+/* El título como la tarjeta del capítulo: serif, en tinta, con su trazo a mano en el acento. */
+.prologo__manual--viaje .prologo__manual-titulo {
+  position: relative;
+  width: fit-content;
+  margin: 0 0 1.4rem;
+  padding-bottom: 0.45rem;
+  font:
+    500 clamp(1.7rem, 3vw, 2.6rem) / 1.08 'Iowan Old Style',
+    'Palatino Linotype',
+    Palatino,
+    Georgia,
+    serif;
+  letter-spacing: 0.005em;
+  color: var(--tinta);
+  text-shadow: none;
+}
+.prologo__manual--viaje .prologo__manual-titulo::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: min(100%, 18rem);
+  height: 10px;
+  background: var(--acento-etapa, #eb9b3c);
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 10' preserveAspectRatio='none'%3E%3Cpath d='M2 6 Q 60 1 100 5 T 198 4' fill='none' stroke='black' stroke-width='2.6' stroke-linecap='round'/%3E%3C/svg%3E")
+    center / 100% 100% no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 10' preserveAspectRatio='none'%3E%3Cpath d='M2 6 Q 60 1 100 5 T 198 4' fill='none' stroke='black' stroke-width='2.6' stroke-linecap='round'/%3E%3C/svg%3E")
+    center / 100% 100% no-repeat;
+  animation: etapa-trazo 0.9s cubic-bezier(0.22, 1, 0.36, 1) 0.2s both;
+}
+@keyframes etapa-trazo {
+  from {
+    clip-path: inset(0 100% 0 0);
+  }
+  to {
+    clip-path: inset(0 0 0 0);
+  }
+}
+/* Sin tarjeta: el ejercicio va sobre el papel, como un aparato más del mundo. */
+.prologo__manual--viaje .subhost {
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  color: var(--tinta);
+  box-shadow: none;
+}
+/* El desafío es el aparato que la tripulación tiene que hacer andar: trazo de tinta, papel claro y la
+   sombra dura de las cinemáticas, en vez del recuadro punteado de un formulario. */
+.prologo__manual.prologo__manual--viaje .subhost app-manipulable-system {
+  margin-top: 1.75rem;
+  padding: 1.1rem 1.3rem 1.2rem;
+  border: 2.5px solid var(--tinta);
+  border-radius: 18px;
+  background: #fffdf7;
+  box-shadow: 0 6px 0 rgb(32 29 22 / 16%);
+}
+
+/* El código, en la tinta cálida de las barras y con el trazo de las cosas del mundo: el gris azulado
+   de un editor se leía como una ventana de otra aplicación pegada en el papel. */
+.prologo__manual--viaje .subhost app-code > div {
+  border: 2.5px solid var(--tinta);
+  border-radius: 14px;
+  background-color: #221e18;
+  box-shadow: 0 6px 0 rgb(32 29 22 / 16%);
+}
+.prologo__manual--viaje .subhost app-code > div > div:first-child {
+  border-color: rgb(239 230 214 / 10%);
+  background-color: #1b1813;
+}
+
+/* Los aparatos de las demos hablan el idioma de la cinemática: el signal es la caja naranja que la
+   tripulación encontró, la variable común es una cajita de tinta que no avisa, lo derivado es un
+   átomo de la molécula y lo que lee es una pantallita. Todo con trazo de tinta y sombra dura. */
+.prologo__manual--viaje .ci .ci__celda .ci__nodo {
+  --ci-tinta: var(--tinta);
+  border: 2.5px solid var(--tinta);
+  box-shadow: 0 5px 0 rgb(32 29 22 / 18%);
+}
+.prologo__manual--viaje .ci .ci__celda .ci__nodo--fuente {
+  border-radius: 22px;
+  background: linear-gradient(180deg, #ffd58c, #e98f2c);
+}
+.prologo__manual--viaje .ci .ci__celda .ci__nodo--fuente .ci__orbita {
+  display: none;
+}
+.prologo__manual--viaje .ci .ci__celda .ci__nodo--caja {
+  border-radius: 10px;
+  background: #fffdf7;
+}
+.prologo__manual--viaje .ci .ci__celda .ci__nodo--derivado {
+  background: radial-gradient(circle at 34% 28%, #e4f8f1 0 16%, #8fdcc7 70%, #4fb39b);
+}
+.prologo__manual--viaje .ci .ci__celda .ci__nodo--consumidor {
+  background: linear-gradient(170deg, #fffefb, #e6def8);
+}
+.prologo__manual--viaje .ci .ci__celda .ci__nodo--elegido {
+  border-width: 4px;
+}
+.prologo__manual--viaje .ci .ci__cable {
+  stroke: var(--tinta);
+  stroke-width: 3;
+}
+.prologo__manual--viaje .ci .ci__cable--suelto {
+  stroke: #8a8069;
+}
+
+/* ── La caja de diálogo y los botones ──────────────────────────────────────────────────────────── */
+.prologo__manual--viaje .prologo__manual-pie {
+  z-index: 5;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 60rem) minmax(0, 1fr);
+  column-gap: clamp(0.75rem, 2vw, 1.5rem);
+  min-height: var(--barra-abajo);
+  margin: auto 0 0;
+  padding: 0.6rem clamp(12px, 3vw, 36px);
+  background: var(--barra);
+  color: #efe6d6;
+  pointer-events: auto;
+}
+.etapa__dialogo {
+  grid-area: 1 / 2;
+  min-width: 0;
+}
+.etapa__linea {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  gap: clamp(10px, 1.6vw, 18px);
+}
+.etapa__retrato {
+  display: grid;
+  place-items: center;
+  width: clamp(44px, 4.6vw, 56px);
+  aspect-ratio: 1;
+  padding: 6px;
+  border: 2px solid var(--c);
+  border-radius: 50%;
+  background: radial-gradient(circle at 50% 40%, #3a342a 0%, #221e17 100%);
+  overflow: hidden;
+  animation: etapa-retrato 0.45s cubic-bezier(0.34, 1.6, 0.64, 1) both;
+}
+.etapa__retrato app-retrato-de-nave {
+  width: 100%;
+  height: 100%;
+}
+@keyframes etapa-retrato {
+  from {
+    opacity: 0;
+    scale: 0.6;
+  }
+}
+.etapa__texto {
+  display: grid;
+  gap: 4px;
+  margin: 0;
+}
+.etapa__nombre {
+  font:
+    700 11px/1 ui-monospace,
+    Menlo,
+    Consolas,
+    monospace;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--c);
+}
+.etapa__frase {
+  font: 600 clamp(15px, 1.5vw, 19px) / 1.3 var(--font-display, system-ui, sans-serif);
+  color: #f6efe2;
+}
+.etapa__palabra {
+  display: inline-block;
+  animation: etapa-palabra 0.26s cubic-bezier(0.34, 1.8, 0.64, 1) both;
+  animation-delay: calc(var(--i) * 55ms + 120ms);
+}
+@keyframes etapa-palabra {
+  from {
+    opacity: 0;
+    translate: 0 10px;
+    scale: 0.86;
+  }
+}
+/* Los botones como los de la barra de la cinemática: pastillas de línea clara sobre la barra, y
+   "Siguiente" en el dorado del capitán, que es lo que se espera tocar. */
+.prologo__manual--viaje .prologo__manual-pie .prologo__manual-boton {
+  padding: 0.5rem 1.05rem;
+  border: 1px solid rgb(239 230 214 / 32%);
+  border-radius: 999px;
+  outline: none;
+  background: transparent;
+  box-shadow: none;
+  rotate: none;
+  font: 700 14px/1.2 var(--font-display, system-ui, sans-serif);
+  color: #efe6d6;
+  white-space: nowrap;
+}
+.prologo__manual--viaje .prologo__manual-pie .prologo__manual-boton:hover {
+  translate: none;
+  border-color: rgb(239 230 214 / 60%);
+  background: rgb(239 230 214 / 10%);
+}
+.prologo__manual--viaje .prologo__manual-pie .prologo__manual-boton:focus-visible {
+  outline: 2px solid #f2c27a;
+  outline-offset: 3px;
+}
+.prologo__manual--viaje .prologo__manual-pie .prologo__manual-boton--sigue {
+  border-color: #f2c27a;
+  background: #f2c27a;
+  color: var(--barra);
+}
+.prologo__manual--viaje .prologo__manual-pie .prologo__manual-boton--sigue:hover {
+  background: #f7d39b;
+}
+/* "Más abajo" flota sobre el borde de la barra, en el papel. */
+.prologo__manual--viaje .prologo__manual-pie .prologo__manual-abajo {
+  position: absolute;
+  bottom: calc(100% + 0.5rem);
+  left: 50%;
+  translate: -50% 0;
+  grid-area: auto;
+}
+/* La pista de Angie, arriba de la barra de diálogo: en su altura de siempre la tapaba. En un
+   celular va en la consola, entre los botones (`viaje-angosto.css`). */
+@media (min-width: 761px) and (min-height: 501px) {
+  .manual-suelto--viaje .prologo__manual app-concept-card {
+    bottom: calc(var(--barra-abajo) + 0.75rem);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .etapa__palabra,
+  .etapa__retrato,
+  .prologo__manual--viaje .prologo__manual-titulo::after {
+    animation: none;
+  }
+}

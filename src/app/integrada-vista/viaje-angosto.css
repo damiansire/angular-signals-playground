@@ -9,7 +9,7 @@
    presupuesto de estilo se mide por archivo. */
 @media (max-width: 760px), (max-height: 500px) {
   .prologo__manual.prologo__manual--viaje {
-    --consola: 4.5rem;
+    --consola: 8.75rem;
     /* El pie sale de la hoja: "más abajo" sigue su scroll por nombre, no por el ancestro más cercano,
        que para algo fijo es la ventana. */
     scroll-timeline: --hoja block;
@@ -27,11 +27,31 @@
     /* La columna del medio es el lugar de la pista: centrada en la pantalla, "Siguiente página", más
        largo que "Anterior", la pisaba. */
     grid-template-columns: 1fr 3rem 1fr;
-    column-gap: 0.4rem;
-    background: #050309;
+    /* Arriba la caja de diálogo, a lo ancho; abajo los dos botones con la pista en el medio. */
+    grid-template-rows: minmax(0, 1fr) auto;
+    gap: 0.6rem 0.4rem;
+    padding-block: 0.5rem 0.6rem;
+    background: var(--barra, #1b1813);
     /* La página se corta contra la consola: la sombra la funde en vez de un borde seco. */
-    box-shadow: 0 -0.9rem 1.2rem -0.4rem #050309;
+    box-shadow: 0 -0.6rem 1rem -0.4rem rgb(27 24 19 / 45%);
     pointer-events: auto;
+  }
+  .prologo__manual--viaje .etapa__dialogo {
+    grid-area: 1 / 1 / 2 / -1;
+    align-self: center;
+  }
+  .prologo__manual--viaje .prologo__manual-pie .prologo__manual-atras {
+    grid-area: 2 / 1;
+  }
+  .prologo__manual--viaje .prologo__manual-pie .prologo__manual-boton--sigue {
+    grid-area: 2 / 3;
+  }
+  .prologo__manual--viaje .etapa__retrato {
+    width: 40px;
+    padding: 4px;
+  }
+  .prologo__manual--viaje .etapa__frase {
+    font-size: 14px;
   }
   .prologo__manual--viaje .prologo__manual-pie .prologo__manual-boton {
     padding-inline: 0.6rem;

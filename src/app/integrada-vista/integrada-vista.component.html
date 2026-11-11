@@ -796,14 +796,27 @@
     role="region"
     aria-labelledby="manual-ley"
     (sistema-establecido)="alEstablecerEnLaHoja()"
+    (pointermove)="mirarLaEtapa($event)"
+    [style.--acento-etapa]="acentoDeEtapa()"
   >
     <!-- Una etapa del viaje pone su cabecera y su pie; una página del libro los lleva adentro (ver
          `marcasDelLibro` y `pieDelLibro`). -->
     @if (libro().concepto !== undefined) {
+      <!-- La barra de arriba de las cinemáticas: la etapa es un capítulo de la historia, y sigue
+           con la misma letra. -->
       <header class="prologo__manual-cabeza">
-        <span class="prologo__manual-libro">{{ libro().nombre }}</span>
+        <span class="prologo__manual-libro"
+          >Capítulo {{ capituloDeEtapa() }} <b>· {{ libro().nombre }}</b></span
+        >
         <ng-container [ngTemplateOutlet]="marcasDelLibro" />
       </header>
+      <!-- La tripulación del prólogo en el cielo de la etapa, con su objeto de mundo: miran lo que
+           se toca, festejan lo resuelto y se van volando a la página siguiente. -->
+      <app-tripulacion
+        class="etapa__cielo"
+        [capitulo]="capituloDeEtapa()"
+        [acento]="acentoDeEtapa()"
+      />
     }
     <div #cuerpoDelManual class="prologo__manual-cuerpo">
       <!-- La página del manual trae su ley, su lámina y su desafío (ver `app-pagina-del-manual`). Una
@@ -811,10 +824,33 @@
       @if (libro().concepto !== undefined) {
         <h2 class="prologo__manual-titulo" id="manual-ley">{{ p.ley }}</h2>
       }
-      <div #pantallaDelManual class="subhost"></div>
+      <div #pantallaDelManual class="subhost" (pointerdown)="tocarLaEtapa($event)"></div>
     </div>
     @if (libro().concepto !== undefined) {
       <div class="prologo__manual-pie">
+        <!-- La caja de diálogo de las cinemáticas: la tripulación dice qué encontró al llegar y qué
+             entendió al resolver. -->
+        <div class="etapa__dialogo" aria-live="polite">
+          @for (l of lineaDeEtapa() ? [lineaDeEtapa()!] : []; track l) {
+            <div class="etapa__linea" [style.--c]="luzDe(l.quien)">
+              <span class="etapa__retrato" aria-hidden="true">
+                <app-retrato-de-nave [indice]="naveDe(l.quien)" />
+              </span>
+              <p class="etapa__texto">
+                <span class="etapa__nombre">{{ nombreDeNave(l.quien) }}</span>
+                <span class="etapa__frase">
+                  @for (p of palabrasDeLinea(l.txt); track $index) {
+                    @if (p.corte) {
+                      <br />
+                    }
+                    <span class="etapa__palabra" [style.--i]="$index">{{ p.txt }}</span>
+                    {{ ' ' }}
+                  }
+                </span>
+              </p>
+            </div>
+          }
+        </div>
         <ng-container [ngTemplateOutlet]="pieDelLibro" />
         <!-- Sigue al scroll de la hoja: con todo a la vista no aparece. -->
         <span class="prologo__manual-abajo" aria-hidden="true">más abajo &darr;</span>
@@ -879,7 +915,7 @@
 
 <!-- El manual suelto, abierto desde la bitácora: afuera del escenario, como ella. -->
 @if (paginaSuelta(); as p) {
-  <div class="manual-suelto">
+  <div class="manual-suelto" [class.manual-suelto--viaje]="libro().concepto !== undefined">
     <div class="prologo__tele" aria-hidden="true"></div>
     <ng-container *ngTemplateOutlet="hojaDelManualTpl; context: { $implicit: p }" />
   </div>

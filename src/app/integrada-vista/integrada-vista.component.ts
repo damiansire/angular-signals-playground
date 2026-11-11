@@ -18,12 +18,22 @@ import {
   computed,
   effect,
   signal,
+  untracked,
   viewChild,
 } from '@angular/core';
 import { Location, NgTemplateOutlet } from '@angular/common';
 import { RouterLink } from '@angular/router';
 
 import { MascotaVivaComponent } from '../components-draw/mascota-viva/mascota-viva.component';
+import {
+  LUZ_DE,
+  NAVE_DEL_VIAJE,
+  TripulacionComponent,
+  type QuienDelViaje,
+} from '../components-draw/tripulacion/tripulacion.component';
+import { RetratoDeNaveComponent } from '../components-draw/tripulacion/retrato-de-nave.component';
+import { acentoDe } from './cinematicas/escenas/acentos';
+import { guionDe, palabrasDeLinea, type LineaDelViaje } from './guion-del-viaje';
 import { sinMovimiento } from '../libs/muelle';
 import {
   caminoDeColina,
@@ -153,6 +163,8 @@ const PROLOGO_PEDIDO =
     MascotaVivaComponent,
     AvisoAuricularesComponent,
     HojaDelHuecoComponent,
+    TripulacionComponent,
+    RetratoDeNaveComponent,
   ],
   templateUrl: './integrada-vista.component.html',
   styleUrls: [
@@ -164,6 +176,7 @@ const PROLOGO_PEDIDO =
     './boot-fallo.css',
     './aviso-mas-abajo.css',
     './angosto.css',
+    './viaje-cine.css',
     './viaje-angosto.css',
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -421,6 +434,48 @@ export class IntegradaVistaComponent {
    */
   protected readonly libro = signal<Libro>(MANUAL);
 
+  /**
+   * La etapa del viaje en la estética de las cinemáticas: la tripulación en el cielo, su objeto de
+   * mundo y la caja de diálogo abajo. Cada página es un momento de la historia: al llegar dicen qué
+   * encontraron, al resolver qué entendieron, y para pasar de página se van volando.
+   */
+  private readonly tripulacion = viewChild(TripulacionComponent);
+  protected readonly capituloDeEtapa = computed(() => {
+    const concepto = this.libro().concepto;
+    return concepto === undefined ? 0 : (CAPITULO_DE_CONCEPTO[concepto] ?? 0);
+  });
+  protected readonly acentoDeEtapa = computed(() => acentoDe(this.capituloDeEtapa()));
+  protected readonly lineaDeEtapa = signal<LineaDelViaje | null>(null);
+  protected readonly palabrasDeLinea = palabrasDeLinea;
+  protected readonly naveDe = (quien: QuienDelViaje): number => NAVE_DEL_VIAJE[quien];
+  protected readonly luzDe = (quien: QuienDelViaje): string => LUZ_DE[quien];
+  protected nombreDeNave(quien: QuienDelViaje): string {
+    return quien === 'cap' ? 'Capitán' : quien === 'naveA' ? 'Nave A' : 'Nave B';
+  }
+  /** La tripulación ya salió volando: "Siguiente" no se toca dos veces. */
+  private volando = false;
+  private mirada: number | null = null;
+
+  private decir(linea: LineaDelViaje | null): void {
+    this.lineaDeEtapa.set(linea);
+    if (linea) this.tripulacion()?.hablar(linea.quien);
+  }
+
+  /** Cada toque de la pantalla tiene una consecuencia en el cielo: lo miran y una se entera. */
+  protected tocarLaEtapa(e: PointerEvent): void {
+    this.tripulacion()?.seTocoAlgo(e.clientX, e.clientY);
+  }
+
+  /** Con el mouse, la tripulación sigue al puntero con la mirada: un cuadro, una mirada. */
+  protected mirarLaEtapa(e: PointerEvent): void {
+    if (e.pointerType !== 'mouse' || this.mirada !== null || !this.tripulacion()) return;
+    const { clientX, clientY } = e;
+    this.mirada = requestAnimationFrame(() => {
+      this.mirada = null;
+      this.tripulacion()?.mirar(clientX, clientY);
+    });
+  }
+
   private leerManual(
     paginas: readonly PaginaDelManual[],
     libro: Libro = MANUAL,
@@ -465,7 +520,12 @@ export class IntegradaVistaComponent {
   protected alEstablecerEnLaHoja(): void {
     const concepto = this.libro().concepto;
     const i = this.pagina();
-    if (concepto !== undefined && i !== null) this.alEstablecer(concepto, i);
+    if (concepto !== undefined && i !== null) {
+      this.alEstablecer(concepto, i);
+      this.tripulacion()?.festejar();
+      const id = this.paginaActual()?.id;
+      this.decir(id ? (guionDe(id)?.resuelta ?? null) : null);
+    }
   }
 
   /**
@@ -494,8 +554,22 @@ export class IntegradaVistaComponent {
 
   protected pasarPagina(paso: 1 | -1): void {
     const i = this.pagina();
-    if (i === null || this.apagandose) return;
+    if (i === null || this.apagandose || this.volando) return;
     if (paso === 1 && !this.puedeSeguir()) return;
+    // En el viaje, seguir es seguir viaje: la tripulación sale volando y recién ahí se pasa de hoja.
+    const tripulacion = this.libro().concepto !== undefined ? this.tripulacion() : undefined;
+    if (paso === 1 && tripulacion) {
+      this.volando = true;
+      void tripulacion.irse().then(() => {
+        this.volando = false;
+        this.irDesde(i, paso);
+      });
+      return;
+    }
+    this.irDesde(i, paso);
+  }
+
+  private irDesde(i: number, paso: 1 | -1): void {
     const j = i + paso;
     if (j >= this.paginas().length) void this.dejarLaHoja(true);
     else if (j >= 0) this.irAPagina(j);
@@ -575,6 +649,13 @@ export class IntegradaVistaComponent {
     hoja.focus({ preventScroll: true });
     const cuerpo = this.cuerpoDelManual()?.nativeElement;
     if (previa !== null && previa !== i && cuerpo) this.darVueltaLaHoja(i > previa, cuerpo);
+    if (this.libro().concepto !== undefined) {
+      untracked(() => {
+        this.decir(guionDe(pagina.id)?.llegada ?? null);
+        // Llegan volando a la página nueva: venían de irse por la derecha.
+        if (previa !== null && i > previa) this.tripulacion()?.llegar();
+      });
+    }
     onCleanup(() => {
       vigia?.();
       montada.dispose();
