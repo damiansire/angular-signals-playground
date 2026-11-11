@@ -129,6 +129,49 @@ describe('HtmlToTreeComponent', () => {
       expect(el.querySelector('.htt-linea--destino-debajo')).toBeNull();
     });
 
+    it('hasta mover el cierre hay un solo árbol; movido, el de antes y el de después', () => {
+      tocarTodos();
+      const comparando = () => el.querySelector('.htt-arboles--comparando') !== null;
+      const cambian = (cual: number) =>
+        [...el.querySelectorAll('.htt-arbol-caja')[cual].querySelectorAll('.htt-nodo--cambia')].map(
+          (n) => n.textContent?.trim(),
+        );
+      expect(comparando()).toBeFalse();
+      expect(el.querySelectorAll('.htt-nodo--cambia').length).toBe(0);
+      click('[data-guia="cierre"]');
+      expect(comparando()).toBeTrue();
+      expect(cambian(0)).toEqual(['h3', 'p']);
+      expect(cambian(1)).toEqual(['h3', 'p']);
+      const [antes, despues] = [...el.querySelectorAll('.htt-arbol')].map(
+        (a) => a.getAttribute('aria-label') ?? '',
+      );
+      expect(antes).toContain('h3 dentro de main');
+      expect(despues).toContain('h3 dentro de article');
+    });
+
+    it('arrastrando, el árbol de después muestra adónde caería antes de soltarlo', () => {
+      tocarTodos();
+      const cierre = el.querySelector('[data-guia="cierre"]') as HTMLButtonElement;
+      const titulo = el.querySelector('.htt-linea[data-abre="h3"]')!.getBoundingClientRect();
+      const desde = cierre.getBoundingClientRect();
+      const puntero = (tipo: string, y: number) =>
+        cierre.dispatchEvent(
+          new PointerEvent(tipo, { pointerId: 1, button: 0, clientY: y, bubbles: true }),
+        );
+      puntero('pointerdown', desde.top + 2);
+      puntero('pointermove', titulo.bottom - 2);
+      fixture.detectChanges();
+      expect(el.querySelector('.htt--arrastrando')).not.toBeNull();
+      expect(mano()).not.toBe('[data-guia="cierre"]');
+      const despues = el.querySelectorAll('.htt-arbol')[1].getAttribute('aria-label') ?? '';
+      expect(despues).toContain('h3 dentro de article');
+      expect(despues).toContain('p dentro de main');
+      expect(renglones()).toContain('<article></article>');
+      puntero('pointerup', titulo.bottom - 2);
+      fixture.detectChanges();
+      expect(el.querySelector('.htt--arrastrando')).toBeNull();
+    });
+
     it('la mano dice lo mismo que los pasos: cada tag en orden y después el hueco', () => {
       for (const id of NODOS) {
         expect(mano()).toBe(`[data-guia="abre-${id}"]`);

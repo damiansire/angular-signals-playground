@@ -1,8 +1,11 @@
 import {
   NODOS,
   type Renglon,
+  arbolesAComparar,
   balanceados,
+  cambianDePadre,
   codigoDelArbol,
+  moverCierre,
   disponerArbol,
   lugarMasCercano,
   estadoDelRenglon,
@@ -92,6 +95,38 @@ describe('html-to-tree (dominio "el navegador lee los tags, no la sangría")', (
     const texto = (rs: readonly Renglon[]) =>
       rs.flatMap((r) => r.piezas).filter((p) => p.tipo === 'texto');
     expect(texto(ARREGLADO)).toEqual(texto(CON_BUG));
+  });
+
+  describe('antes y después de mover el cierre', () => {
+    it('cambian de padre justo los hijos que el cierre deja adentro o afuera', () => {
+      expect(cambianDePadre(CON_BUG, ARREGLADO)).toEqual(['h3', 'p2']);
+      expect(cambianDePadre(CON_BUG, A_MEDIAS)).toEqual(['h3']);
+      expect(cambianDePadre(ARREGLADO, A_MEDIAS)).toEqual(['p2']);
+      expect(cambianDePadre(A_MEDIAS, A_MEDIAS)).toEqual([]);
+    });
+
+    it('mover el cierre deja como antes el lugar de donde salió', () => {
+      const quieto = { cierre: 0, antes: null } as const;
+      const movido = moverCierre(quieto, 2);
+      expect(movido).toEqual({ cierre: 2, antes: 0 });
+      expect(moverCierre(movido, 1)).toEqual({ cierre: 1, antes: 2 });
+    });
+
+    it('soltarlo donde ya estaba no pisa la última mudanza', () => {
+      const movido = { cierre: 2, antes: 0 } as const;
+      expect(moverCierre(movido, 2)).toBe(movido);
+      expect(moverCierre({ cierre: 0, antes: null }, 0)).toEqual({ cierre: 0, antes: null });
+    });
+
+    it('sin mudanzas no hay qué comparar; quieto, se compara la última', () => {
+      expect(arbolesAComparar({ cierre: 0, antes: null }, null)).toBeNull();
+      expect(arbolesAComparar({ cierre: 2, antes: 0 }, null)).toEqual({ antes: 0, despues: 2 });
+    });
+
+    it('mientras se arrastra, se compara el de ahora con adónde caería', () => {
+      expect(arbolesAComparar({ cierre: 0, antes: null }, 1)).toEqual({ antes: 0, despues: 1 });
+      expect(arbolesAComparar({ cierre: 2, antes: 0 }, 1)).toEqual({ antes: 2, despues: 1 });
+    });
   });
 
   describe('el árbol de nodos', () => {

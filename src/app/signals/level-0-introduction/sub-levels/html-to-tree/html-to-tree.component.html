@@ -48,8 +48,9 @@
 
   <!-- La pantalla de la nave, en tres columnas: el HTML, con cada tag que abre como botón y el
        cierre fuera de lugar como hueco (cada renglón se marca cuando su pieza ya está dibujada); el
-       mismo HTML como árbol de nodos, que es como se lee; y lo que se dibuja (`escena-arbol`). -->
-  <section consola class="htt">
+       mismo HTML como árbol de nodos, que es como se lee, antes y después de mover el cierre; y lo
+       que se dibuja (`escena-arbol`). -->
+  <section consola class="htt" [class.htt--arrastrando]="arrastre() !== null">
     <div class="htt-codigo" role="group" aria-label="El HTML de la pantalla">
       @for (r of renglones(); track $index) {
         <span
@@ -111,52 +112,74 @@
       }
     </div>
 
-    @let a = arbol();
-    <svg
-      class="htt-arbol"
-      [attr.viewBox]="'-4 -4 ' + (a.ancho + 8) + ' ' + (a.alto + 8)"
-      [style.aspect-ratio]="(a.ancho + 8) / (a.alto + 8)"
-      role="img"
-      [attr.aria-label]="descripcionDelArbol()"
-    >
-      @for (n of a.nodos; track n.id) {
-        @if (n.rama) {
-          <path
-            class="htt-rama"
-            [class.htt-rama--vista]="n.visto || n.fantasma"
-            [class.htt-rama--afuera]="n.afuera"
-            [style.d]="n.rama"
-            pathLength="1"
-          />
-        }
-      }
-      @for (n of a.nodos; track n.id) {
-        <g
-          class="htt-nodo"
-          [class.htt-nodo--visto]="n.visto"
-          [class.htt-nodo--fantasma]="n.fantasma"
-          [class.htt-nodo--afuera]="n.afuera"
-          [class.htt-nodo--oscuro]="n.visto && n.oscuro"
-          [style.transform]="'translate(' + n.x + 'px, ' + n.y + 'px)'"
-        >
-          <rect
-            [attr.x]="-a.nodo.ancho / 2"
-            [attr.y]="-a.nodo.alto / 2"
-            [attr.width]="a.nodo.ancho"
-            [attr.height]="a.nodo.alto"
-            rx="12"
-            [attr.fill]="n.visto ? n.color.fondo : 'none'"
-          />
-          <text
-            text-anchor="middle"
-            dominant-baseline="central"
-            [attr.fill]="n.visto ? n.color.letra : '#b9aee0'"
+    <!-- El árbol de antes de mover el cierre arriba y el de después abajo. Hasta la primera
+         mudanza hay uno solo, centrado: el de ahora. -->
+    <div class="htt-arboles" [class.htt-arboles--comparando]="comparacion() !== null">
+      @for (a of arboles(); track a.cual) {
+        <figure class="htt-arbol-caja" [class.htt-arbol-caja--despues]="a.cual === 'despues'">
+          <figcaption class="htt-rotulo" [attr.aria-hidden]="comparacion() === null">
+            {{ a.rotulo }}
+          </figcaption>
+          <svg
+            class="htt-arbol"
+            [attr.viewBox]="'-4 -4 ' + (a.ancho + 8) + ' ' + (a.alto + 8)"
+            [style.aspect-ratio]="(a.ancho + 8) / (a.alto + 8)"
+            role="img"
+            [attr.aria-label]="a.descripcion"
           >
-            {{ n.tag }}
-          </text>
-        </g>
+            @for (n of a.nodos; track n.id) {
+              @if (n.rama) {
+                <path
+                  class="htt-rama"
+                  [class.htt-rama--vista]="n.visto || n.fantasma"
+                  [class.htt-rama--afuera]="n.afuera"
+                  [class.htt-rama--cambia]="n.cambia"
+                  [style.d]="n.rama"
+                  pathLength="1"
+                />
+              }
+            }
+            @for (n of a.nodos; track n.id) {
+              <g
+                class="htt-nodo"
+                [class.htt-nodo--visto]="n.visto"
+                [class.htt-nodo--fantasma]="n.fantasma"
+                [class.htt-nodo--afuera]="n.afuera"
+                [class.htt-nodo--oscuro]="n.visto && n.oscuro"
+                [class.htt-nodo--cambia]="n.cambia"
+                [style.transform]="'translate(' + n.x + 'px, ' + n.y + 'px)'"
+              >
+                <!-- El halo de lo que cambia de padre: por fuera del nodo, así no tapa su color
+                     ni el borde rojo de lo que quedó fuera de su panel. -->
+                <rect
+                  class="htt-halo"
+                  [attr.x]="-a.nodo.ancho / 2 - 3.5"
+                  [attr.y]="-a.nodo.alto / 2 - 3.5"
+                  [attr.width]="a.nodo.ancho + 7"
+                  [attr.height]="a.nodo.alto + 7"
+                  rx="14.5"
+                />
+                <rect
+                  [attr.x]="-a.nodo.ancho / 2"
+                  [attr.y]="-a.nodo.alto / 2"
+                  [attr.width]="a.nodo.ancho"
+                  [attr.height]="a.nodo.alto"
+                  rx="11"
+                  [attr.fill]="n.visto ? n.color.fondo : 'none'"
+                />
+                <text
+                  text-anchor="middle"
+                  dominant-baseline="central"
+                  [attr.fill]="n.visto ? n.color.letra : '#b9aee0'"
+                >
+                  {{ n.tag }}
+                </text>
+              </g>
+            }
+          </svg>
+        </figure>
       }
-    </svg>
+    </div>
 
     <svg #render class="htt-render" viewBox="214 26 174 178" aria-hidden="true"></svg>
   </section>

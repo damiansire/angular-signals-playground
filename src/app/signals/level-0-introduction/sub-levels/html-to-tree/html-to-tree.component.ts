@@ -11,13 +11,17 @@ import {
   LUGARES_DEL_CIERRE,
   NODOS,
   TAG,
+  type CierreMovido,
   type HijosAdentro,
   type NodoId,
+  arbolesAComparar,
+  cambianDePadre,
   codigoDelArbol,
   disponerArbol,
   estadoDelRenglon,
   fueraDelPanel,
   lugarMasCercano,
+  moverCierre,
 } from './html-to-tree.data';
 import { PaginaDelManualComponent } from '../../manual/pagina-del-manual.component';
 import { EscenaArbolComponent } from '../../manual/escena-arbol.component';
@@ -30,10 +34,15 @@ interface PiezaVista {
   readonly id?: NodoId;
 }
 
-/** El árbol en unidades de su `viewBox`: un lugar por hoja y un piso por nivel. */
-const HOJA = 66;
-const PISO = 58;
-const NODO = { ancho: 62, alto: 24 };
+/**
+ * El árbol en unidades de su `viewBox`: un lugar por hoja y un piso por nivel. Bajo, porque van dos,
+ * uno arriba del otro: el de antes y el de después de mover el cierre.
+ */
+const HOJA = 74;
+const PISO = 42;
+const NODO = { ancho: 64, alto: 22 };
+/** Los dos árboles que se comparan, en el orden en que se leen. */
+const ROTULOS = { antes: 'antes', despues: 'después' } as const;
 /**
  * El ancho del árbol es el de su versión más ancha, la del bug: al mover el cierre los nodos se mudan
  * adentro del mismo lienzo, en vez de cambiar de escala todos juntos.
@@ -111,8 +120,9 @@ export class HtmlToTreeComponent {
     };
   });
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef).nativeElement;
-  /** Dónde está `</article>`: cuántos de sus hijos quedan adentro. */
-  protected readonly cierre = signal<HijosAdentro>(0);
+  /** Dónde está `</article>` (cuántos de sus hijos quedan adentro) y dónde estaba antes. */
+  private readonly movido = signal<CierreMovido>({ cierre: 0, antes: null });
+  protected readonly cierre = computed(() => this.movido().cierre);
   protected readonly arreglado = computed(() => this.cierre() === ARREGLADO);
   /**
    * El cierre mientras se arrastra: cuánto se corrió del lugar donde estaba y adónde caería si se
@@ -142,14 +152,35 @@ export class HtmlToTreeComponent {
   );
 
   /**
-   * El mismo HTML visto como árbol, al lado del código. Se ve lo tocado; de lo que falta tocar, solo
-   * los ancestros de lo tocado, punteados, para que cada rama tenga de dónde colgar. La forma completa no
-   * se adelanta: con el bug, que el título cuelgue de `<main>` se descubre al tocarlo.
+   * El mismo HTML visto como árbol, al lado del código: el de antes de mover el cierre arriba y el de
+   * después abajo, con los nodos que cambian de padre marcados. Mientras el cierre no se movió hay
+   * uno solo, el de ahora; arrastrándolo, el de abajo muestra adónde caería.
    */
-  protected readonly arbol = computed(() => {
-    const { nodos, hojas } = disponerArbol(this.codigo());
+  protected readonly comparacion = computed(() =>
+    arbolesAComparar(this.movido(), this.arrastre()?.destino ?? null),
+  );
+  protected readonly arboles = computed(() => {
+    const c = this.comparacion();
+    const antes = c?.antes ?? this.cierre();
+    const despues = c?.despues ?? this.cierre();
+    const cambian = new Set(cambianDePadre(codigoDelArbol(antes), codigoDelArbol(despues)));
+    return (['antes', 'despues'] as const).map((cual) => ({
+      cual,
+      rotulo: ROTULOS[cual],
+      ...this.dibujarArbol(cual === 'antes' ? antes : despues, cambian),
+    }));
+  });
+
+  /**
+   * Un árbol del cierre en `lugar`. Se ve lo tocado; de lo que falta tocar, solo los ancestros de lo
+   * tocado, punteados, para que cada rama tenga de dónde colgar. La forma completa no se adelanta:
+   * con el bug, que el título cuelgue de `<main>` se descubre al tocarlo.
+   */
+  private dibujarArbol(lugar: HijosAdentro, cambian: ReadonlySet<NodoId>) {
+    const codigo = codigoDelArbol(lugar);
+    const { nodos, hojas } = disponerArbol(codigo);
     const vistos = new Set(this.reveladas());
-    const fuera = new Set(this.fuera());
+    const fuera = new Set(fueraDelPanel(codigo));
     const padreDe = new Map(nodos.map((n) => [n.id, n.padre]));
     const ancestros = new Set<NodoId>();
     for (const id of vistos) {
@@ -164,14 +195,21 @@ export class HtmlToTreeComponent {
       x: corrimiento + n.x * HOJA + HOJA / 2,
       y: n.nivel * PISO + NODO.alto / 2 + 2,
     });
-    const lugar = new Map(nodos.map((n) => [n.id, centro(n)]));
+    const lugarDe = new Map(nodos.map((n) => [n.id, centro(n)]));
+    const ramas = nodos
+      .filter((n) => vistos.has(n.id) && n.padre)
+      .map((n) => `${TAG[n.id]} dentro de ${TAG[n.padre as NodoId]}`);
+    const visibles = [...cambian].filter((id) => vistos.has(id)).map((id) => TAG[id]);
     return {
       ancho: HOJAS * HOJA,
       alto: 2 * PISO + NODO.alto + 4,
       nodo: NODO,
+      descripcion:
+        (ramas.length ? `Árbol de nodos: ${ramas.join(', ')}` : 'Árbol de nodos vacío') +
+        (visibles.length ? `. Cambian de padre: ${visibles.join(', ')}` : ''),
       nodos: nodos.map((n) => {
         const { x, y } = centro(n);
-        const arriba = n.padre ? lugar.get(n.padre) : undefined;
+        const arriba = n.padre ? lugarDe.get(n.padre) : undefined;
         const medio = arriba ? (arriba.y + y) / 2 : y;
         return {
           id: n.id,
@@ -183,6 +221,7 @@ export class HtmlToTreeComponent {
           visto: vistos.has(n.id),
           fantasma: !vistos.has(n.id) && ancestros.has(n.id),
           afuera: vistos.has(n.id) && fuera.has(n.id),
+          cambia: vistos.has(n.id) && cambian.has(n.id),
           // Una rama curva del borde de abajo del padre al de arriba del hijo.
           rama: arriba
             ? `path("M ${arriba.x} ${arriba.y + NODO.alto / 2} C ${arriba.x} ${medio}, ${x} ${medio}, ${x} ${y - NODO.alto / 2}")`
@@ -190,15 +229,7 @@ export class HtmlToTreeComponent {
         };
       }),
     };
-  });
-  protected readonly descripcionDelArbol = computed(() => {
-    const vistos = new Set(this.reveladas());
-    const { nodos } = disponerArbol(this.codigo());
-    const ramas = nodos
-      .filter((n) => vistos.has(n.id) && n.padre)
-      .map((n) => `${TAG[n.id]} dentro de ${TAG[n.padre as NodoId]}`);
-    return ramas.length ? `Árbol de nodos: ${ramas.join(', ')}` : 'Árbol de nodos vacío';
-  });
+  }
 
   private readonly todas = computed(() => siguienteSinTocar(NODOS, this.reveladas()) === null);
   protected readonly sano = computed(() => this.arreglado() && this.todas());
@@ -211,6 +242,9 @@ export class HtmlToTreeComponent {
    */
   protected readonly guia = computed(() => {
     if (this.sano()) return null;
+    // Arrastrando, la mano se aparta: señalaba el lugar vacío de donde salió el cierre. Un selector
+    // sin caja la esconde sin sacar "Mostrame", que haría saltar el globo a mitad del arrastre.
+    if (this.arrastre()) return '[data-guia="cierre-en-la-mano"]';
     const siguiente = siguienteSinTocar(NODOS, this.reveladas());
     return siguiente === null ? '[data-guia="cierre"]' : `[data-guia="abre-${siguiente}"]`;
   });
@@ -233,7 +267,11 @@ export class HtmlToTreeComponent {
       this.recienSoltado = false;
       return;
     }
-    this.cierre.update((l) => (l === ARREGLADO ? 0 : ARREGLADO));
+    this.mover(this.cierre() === ARREGLADO ? 0 : ARREGLADO);
+  }
+
+  private mover(destino: HijosAdentro): void {
+    this.movido.update((m) => moverCierre(m, destino));
   }
 
   /** Con las flechas, el cierre baja o sube de a un renglón, como si se lo arrastrara. */
@@ -242,7 +280,8 @@ export class HtmlToTreeComponent {
     if (!paso) return;
     e.preventDefault();
     const l = this.cierre() + paso;
-    if (l >= 0 && l <= ARREGLADO) this.cierre.set(l as HijosAdentro);
+    if (l < 0 || l > ARREGLADO) return;
+    this.mover(l as HijosAdentro);
   }
 
   protected agarrarCierre(e: PointerEvent): void {
@@ -272,7 +311,7 @@ export class HtmlToTreeComponent {
     this.arrastre.set(null);
     if (!arrastre) return;
     this.recienSoltado = true;
-    this.cierre.set(arrastre.destino);
+    this.mover(arrastre.destino);
   }
 
   protected cancelarArrastre(): void {

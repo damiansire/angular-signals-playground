@@ -92,6 +92,44 @@ export function lugarMasCercano(y: number, alturas: readonly number[]): HijosAde
   return LUGARES_DEL_CIERRE[mejor] ?? 0;
 }
 
+/**
+ * El cierre y su comparación: dónde está, y dónde estaba antes de la última vez que se movió
+ * (`null` mientras nunca se movió).
+ */
+export interface CierreMovido {
+  readonly cierre: HijosAdentro;
+  readonly antes: HijosAdentro | null;
+}
+
+/**
+ * Mover el cierre: lo de antes pasa a ser donde estaba. Soltarlo donde ya estaba no es una mudanza:
+ * la comparación de la última queda como estaba.
+ */
+export function moverCierre(estado: CierreMovido, destino: HijosAdentro): CierreMovido {
+  if (destino === estado.cierre) return estado;
+  return { cierre: destino, antes: estado.cierre };
+}
+
+/**
+ * Los dos árboles que se comparan. Mientras se arrastra, el de ahora contra adónde caería; quieto,
+ * la última mudanza. Sin ninguna, no hay nada que comparar.
+ */
+export function arbolesAComparar(
+  estado: CierreMovido,
+  arrastrandoA: HijosAdentro | null,
+): { readonly antes: HijosAdentro; readonly despues: HijosAdentro } | null {
+  if (arrastrandoA !== null) return { antes: estado.cierre, despues: arrastrandoA };
+  if (estado.antes === null) return null;
+  return { antes: estado.antes, despues: estado.cierre };
+}
+
+/** Los elementos que tienen otro padre en un código que en el otro, en orden de documento. */
+export function cambianDePadre(antes: readonly Renglon[], despues: readonly Renglon[]): NodoId[] {
+  const a = padres(antes);
+  const d = padres(despues);
+  return NODOS.filter((id) => a[id] !== d[id]);
+}
+
 export type Padres = Readonly<Partial<Record<NodoId, NodoId | null>>>;
 
 /** El padre de cada elemento como lo lee el navegador: con una pila de tags abiertos. */
