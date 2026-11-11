@@ -26,7 +26,7 @@ import { IntegradaVistaComponent } from './integrada-vista/integrada-vista.compo
 /**
  * Árbol de los conceptos y sus sub-niveles. NO genera rutas: es la fuente de datos que la
  * vista integrada (`/`) consume para embeber el componente real de cada sub-nivel. Los niveles
- * no llevan componente propio: en la molécula el nivel es un átomo, no una página aparte.
+ * no llevan componente propio: el nivel es una etapa del viaje, y sus páginas son los sub-niveles.
  */
 export const signalsRoutesTree: RouteItem[] = [
   // La Introducción (el `path` 0) pasó entera a la historia: sus cinco primeras pantallas son las
@@ -254,7 +254,7 @@ export const signalsRoutesTree: RouteItem[] = [
 
 export const routes: Routes = [
   {
-    // Diferida: es otra página y se abre desde el topbar. Eager sumaba ~20 kB al bundle inicial, que
+    // Diferida: es otra página y se abre desde la hoja de una etapa. Eager sumaba ~20 kB al bundle inicial, que
     // se pasaba del presupuesto de 700 kB.
     path: 'practica/carrito',
     loadComponent: () =>
@@ -268,7 +268,7 @@ export const routes: Routes = [
       ),
     title: 'Sala de proyección · Angular Signals',
   },
-  // La vista integrada (recorrido molécula) ES la raíz `/`: es la entrada.
+  // La vista integrada ES la raíz `/`: es la entrada.
   { path: '', component: IntegradaVistaComponent },
   // Cualquier URL desconocida (incluidos bookmarks viejos como /signals/level/..., /lab o /poc)
   // rebota a la raíz.
