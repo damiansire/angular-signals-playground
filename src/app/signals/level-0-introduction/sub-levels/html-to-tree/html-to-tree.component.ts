@@ -2,6 +2,8 @@ import {
   Component,
   ChangeDetectionStrategy,
   ElementRef,
+  Injector,
+  afterNextRender,
   signal,
   computed,
   inject,
@@ -120,6 +122,7 @@ export class HtmlToTreeComponent {
     };
   });
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef).nativeElement;
+  private readonly injector = inject(Injector);
   /** Dónde está `</article>` (cuántos de sus hijos quedan adentro) y dónde estaba antes. */
   private readonly movido = signal<CierreMovido>({ cierre: 0, antes: null });
   protected readonly cierre = computed(() => this.movido().cierre);
@@ -282,6 +285,11 @@ export class HtmlToTreeComponent {
     const l = this.cierre() + paso;
     if (l < 0 || l > ARREGLADO) return;
     this.mover(l as HijosAdentro);
+    // El cierre cambia de renglón y su botón se vuelve a crear: sin devolverle el foco, la segunda
+    // flecha ya no lo encontraba.
+    afterNextRender(() => this.host.querySelector<HTMLElement>('[data-guia="cierre"]')?.focus(), {
+      injector: this.injector,
+    });
   }
 
   protected agarrarCierre(e: PointerEvent): void {

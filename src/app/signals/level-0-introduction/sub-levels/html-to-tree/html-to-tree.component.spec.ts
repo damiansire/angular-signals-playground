@@ -108,6 +108,16 @@ describe('HtmlToTreeComponent', () => {
       expect(renglones()).toContain('<article></article>');
     });
 
+    it('con las flechas el foco sigue en el cierre, aunque cambie de renglón', async () => {
+      tocarTodos();
+      const cierre = () => el.querySelector('[data-guia="cierre"]') as HTMLButtonElement;
+      cierre().focus();
+      cierre().dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', cancelable: true }));
+      fixture.detectChanges();
+      await fixture.whenStable();
+      expect(document.activeElement).toBe(cierre());
+    });
+
     it('arrastrar el cierre hasta debajo del párrafo lo deja ahí, y soltarlo no lo devuelve', () => {
       tocarTodos();
       const cierre = el.querySelector('[data-guia="cierre"]') as HTMLButtonElement;
