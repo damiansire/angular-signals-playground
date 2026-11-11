@@ -87,7 +87,7 @@ export function initIntroTusi(host: HTMLElement, options: IntroTusiOptions = {})
   const q = <T extends HTMLElement>(sel: string): T => host.querySelector(sel) as T;
   const root = q<HTMLElement>('.tusi');
   const canvas = q<HTMLCanvasElement>('.tusi__canvas');
-  // Falla ruidoso, igual que `initMolecule` con sus datos: devolver un no-op dejaba el overlay
+  // Falla ruidoso: devolver un no-op dejaba el overlay
   // puesto tapando el recorrido, sin sonido, sin construcción y sin una sola pista de por qué.
   // La landing quedaba trabada y el síntoma no apuntaba a ningún lado.
   if (!root) throw new Error('intro-tusi: falta .tusi en el host');
