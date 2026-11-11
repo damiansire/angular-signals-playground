@@ -37,6 +37,18 @@ const DISPOSICIONES = {
     objeto: { x: 1250, y: 100, s: 0.74 },
     lejos: { x0: 640, x1: 1100, abre: 1 },
   },
+  // Al lado del título, en lo que le queda de ancho: más alta que la ancha para que las naves no
+  // queden de 40 px, y más baja que la del celular para que la franja no empuje la página.
+  banda: {
+    caja: { w: 1000, h: 200 },
+    naves: [
+      { x: 330, y: 105, s: 0.86 },
+      { x: 170, y: 58, s: 0.68 },
+      { x: 162, y: 150, s: 0.68 },
+    ],
+    objeto: { x: 840, y: 105, s: 0.74 },
+    lejos: { x0: 540, x1: 620, abre: 0.8 },
+  },
   angosto: {
     caja: { w: 800, h: 260 },
     naves: [
@@ -128,8 +140,13 @@ export class TripulacionComponent {
     afterNextRender(() => {
       const svg = this.lienzo().nativeElement;
       this.observador = new ResizeObserver(() => {
-        const angosto = svg.getBoundingClientRect().width < 640;
-        const nueva = angosto ? DISPOSICIONES.angosto : DISPOSICIONES.ancho;
+        const ancho = svg.getBoundingClientRect().width;
+        const nueva =
+          ancho < 400
+            ? DISPOSICIONES.angosto
+            : ancho < 1000
+              ? DISPOSICIONES.banda
+              : DISPOSICIONES.ancho;
         if (nueva !== this.disposicion || !this.montado) {
           this.disposicion = nueva;
           this.dibujar();
