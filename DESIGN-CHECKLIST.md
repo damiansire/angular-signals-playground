@@ -1100,7 +1100,9 @@ Del minijuego de operadores (2026-11-08):
       en papel repetía los números del panel y el desafío usaba otro código (`badge`, `total`): tres
       tarjetas sueltas. El desafío es el paso 2 de la misma consola, sobre el mismo código: el hueco
       del handler se toca ahí, y completarlo no arregla el panel hasta la próxima corrida.
-- [ ] Los dos pasos del globo de la nave dicen dónde se está: el que toca, en dorado; el hecho, en verde.
+- [ ] Los dos pasos del globo de la nave dicen dónde se está: el que toca, en dorado; el hecho, en verde
+      y tachado (la raya entra como tinta; la consigna viene proyectada de cada página, por eso
+      `::ng-deep` acotado al host).
       La fila guarda el alto de "Mostrame" aunque ya no esté: al irse, el globo no se achica.
 - [ ] Las seis leyes van sin franja abajo (`enPantalla` + `portada`, ADR 0016 y 0018): la consola
       está ADENTRO de la pantalla de la nave (en la 1, tres columnas: código, árbol, lo que se dibuja;
@@ -1160,6 +1162,25 @@ Del minijuego de operadores (2026-11-08):
       4 al arreglar, se recentraba y el haz saltaba con ella. Medido con input real en la demo,
       después de correr y resuelta, a 3440×1300, 1440×900 y 1280×640: el mismo rectángulo en los
       tres estados en las cinco leyes. A 390 solo cambia el alto (la 4 suma dos renglones).
+- [ ] (2026-11-11) Revisión de Damian sobre la ley 1 y la 3, defectos resueltos: (1) el globo de la
+      nave quedaba a la izquierda y lejos de ella, medido contra la ventanilla: ahora el carril tiene
+      la caja de la nave y es su contenedor (`container-type: size`), y el globo va centrado sobre
+      ella con la cola a ~10 px de la antena (`min(22.5cqw, 41.4cqh)`: la nave se dibuja centrada y
+      limitada por el ancho), centrado con márgenes y no con `translate`, que es el de la salida;
+      (2) los renglones marcados del código se pegaban en un bloque, con la raya del costado como una
+      comilla al principio y un vacío al final: la marca abraza solo el código (`fit-content`) y un
+      borde transparente separa una de la otra sin cambiar el alto; (3) lo cumplido no se tachaba;
+      (4) "Mové el `</article>`" no se podía mover: ahora se arrastra (con captura del puntero y
+      `touch-action: none`), con la raya dorada donde caería, y también se toca o se mueve con las
+      flechas. Tiene tres lugares (`HijosAdentro`): pegado, después del título (solo el párrafo cae)
+      y arreglado; el panel de la pantalla abraza a los hijos que le quedan; (5) la barra fina arriba
+      de la pantalla (el brillo del vidrio) se leía como una barra de progreso: se sacó; (6) en la
+      3, la pantalla seguía mostrando la corrida anterior (`transform`, "barato") con otra propiedad en
+      el código: al cambiarla vuelve a quieta, con la propiedad nueva y "¿?" hasta correrla
+      (`enElCodigo`); el costo va en una etiqueta, porque suelto al lado de style se leía como de
+      style; y la propiedad achica la letra si no entra (`textContent` pisaba "DOM"; medido: 17 px de
+      aire). Probado con input real a 1600×900 y 1280×760: arrastre a los tres lugares, los dos pasos
+      tachados, globo pegado a la nave, la 3 con las cuatro propiedades.
 - [ ] Un absoluto dentro de una grilla NO lleva `grid-row`/`grid-column`: su caja pasa a ser esa
       celda. El globo de la nave tenía `grid-row: 2` (su lugar en el celular) y con la nave al
       costado caía debajo de ella, con la cola apuntando al vacío.
@@ -1222,8 +1243,8 @@ Del minijuego de operadores (2026-11-08):
       dos veces (el SVG ancho y el vertical en HTML) y la lámina repetía el costo en barras de 16
       ms. Cada corrida dibuja su flujo pieza por pieza, con el pulso en la punta
       (`recorridoDelFlujo`, función pura): caro baja derecho por todas, color salta layout y
-      transform salta las dos caras por el carril de la izquierda; las salteadas quedan tachadas
-      desde el arranque. La palabra del costo aparece cuando el flujo llega, y recién ahí cambia el
+      transform salta las dos caras por el carril de la izquierda; las salteadas quedan huecas y
+      grises desde el arranque, sin tachar (tachado es "cumplido" en el globo). La palabra del costo aparece cuando el flujo llega, y recién ahí cambia el
       vuelo (a los tirones y la nave trabada, o de corrido). El hueco es la propiedad y rota de la
       más cara a la más barata (`left`, `textContent`, `color`, `transform`): la mano alterna el
       hueco y "correr" para que se vean las cuatro, y se resuelve recién al correr `transform`.
@@ -1234,8 +1255,8 @@ Del minijuego de operadores (2026-11-08):
       "style"; la fila de DOM baja hasta despegarse del brillo del vidrio.
 - [ ] La ley 1 en el escenario: la consola dibuja el HTML a mano, sin `app-code` ni `app-tree`.
       Cada tag que abre es un botón dorado que revela su pieza; tocado, blanco, y su renglón se
-      marca (franja lila con raya; en rojo si lo que abre quedó fuera de su panel; destella dorado
-      al marcarse). Un cierre suelto se marca con su elemento (`estadoDelRenglon`). (2026-11-11)
+      marca (una pastilla lila que abraza solo su código; en rojo si lo que abre quedó fuera de su
+      panel; destella dorado al marcarse). Un cierre suelto se marca con su elemento (`estadoDelRenglon`). (2026-11-11)
       Al lado del código va el ÁRBOL DE NODOS, de arriba hacia abajo, con el color de cada pieza de
       la pantalla: la pantalla es como se dibuja, el árbol es como se lee. Defecto resuelto
       (Damian): sin él, "el HTML es un árbol" no se veía como árbol. Se ve lo tocado y, punteados,
