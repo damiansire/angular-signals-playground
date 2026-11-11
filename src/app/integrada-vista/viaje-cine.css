@@ -8,7 +8,7 @@
   --tinta-suave: #6b6252;
   --barra: #1b1813;
   --barra-arriba: clamp(40px, 6vh, 52px);
-  --barra-abajo: clamp(84px, 13vh, 116px);
+  --barra-abajo: clamp(80px, 10.5vh, 100px);
   background: radial-gradient(120% 90% at 50% 38%, #fdfbf4 0%, #f5f0e2 58%, #e9e1cc 100%);
 }
 .manual-suelto--viaje .prologo__tele {
@@ -67,17 +67,23 @@
 }
 
 /* ── El cielo de la etapa y la página ─────────────────────────────────────────────────────────── */
-.prologo__manual--viaje .etapa__cielo,
 .prologo__manual--viaje .prologo__manual-cuerpo {
   width: min(76rem, calc(100% - 2 * clamp(1rem, 3vw, 2.5rem)));
   margin-inline: auto;
-}
-.prologo__manual--viaje .etapa__cielo {
-  margin-top: clamp(0.25rem, 1.5vh, 1rem);
-}
-.prologo__manual--viaje .prologo__manual-cuerpo {
   justify-content: flex-start;
-  padding-bottom: 1.5rem;
+  padding-bottom: 0.25rem;
+}
+/* El título y la tripulación en una franja: con las naves arriba del título, en una franja propia,
+   el desafío quedaba debajo del pliegue en casi todas las pantallas a 1440×900. */
+.prologo__manual--viaje .etapa__cabeza {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(18rem, 32rem);
+  align-items: center;
+  column-gap: clamp(1rem, 3vw, 3rem);
+  margin: clamp(0.25rem, 1.2vh, 0.75rem) 0 clamp(0.5rem, 1.5vh, 1rem);
+}
+.prologo__manual--viaje .etapa__cabeza .prologo__manual-titulo {
+  margin: 0;
 }
 /* El título como la tarjeta del capítulo: serif, en tinta, con su trazo a mano en el acento. */
 .prologo__manual--viaje .prologo__manual-titulo {
@@ -117,6 +123,19 @@
     clip-path: inset(0 0 0 0);
   }
 }
+/* El aire entre la demo y el desafío lo pone la grilla: con el de la molécula (1.7rem) y los márgenes
+   de apilado de Tailwind, el desafío del capítulo 3 quedaba debajo de la barra a 1440×900. */
+.prologo__manual--viaje .subhost > * {
+  gap: 1rem;
+}
+.prologo__manual--viaje .subhost .mt-6 {
+  margin-top: 0.9rem;
+}
+/* El código de las pantallas largas (doce renglones en el capítulo 3) mandaba en el alto de la hoja. */
+.prologo__manual--viaje .subhost app-code div {
+  font-size: 0.88rem;
+  line-height: 1.32;
+}
 /* Sin tarjeta: el ejercicio va sobre el papel, como un aparato más del mundo. */
 .prologo__manual--viaje .subhost {
   padding: 0;
@@ -129,25 +148,12 @@
 /* El desafío es el aparato que la tripulación tiene que hacer andar: trazo de tinta, papel claro y la
    sombra dura de las cinemáticas, en vez del recuadro punteado de un formulario. */
 .prologo__manual.prologo__manual--viaje .subhost app-manipulable-system {
-  margin-top: 1.75rem;
-  padding: 1.1rem 1.3rem 1.2rem;
+  margin-top: 0.25rem;
+  padding: 0.85rem 1.2rem 0.95rem;
   border: 2.5px solid var(--tinta);
   border-radius: 18px;
   background: #fffdf7;
   box-shadow: 0 6px 0 rgb(32 29 22 / 16%);
-}
-
-/* El código, en la tinta cálida de las barras y con el trazo de las cosas del mundo: el gris azulado
-   de un editor se leía como una ventana de otra aplicación pegada en el papel. */
-.prologo__manual--viaje .subhost app-code > div {
-  border: 2.5px solid var(--tinta);
-  border-radius: 14px;
-  background-color: #221e18;
-  box-shadow: 0 6px 0 rgb(32 29 22 / 16%);
-}
-.prologo__manual--viaje .subhost app-code > div > div:first-child {
-  border-color: rgb(239 230 214 / 10%);
-  background-color: #1b1813;
 }
 
 /* Los aparatos de las demos hablan el idioma de la cinemática: el signal es la caja naranja que la

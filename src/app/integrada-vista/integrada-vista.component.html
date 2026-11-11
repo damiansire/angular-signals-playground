@@ -805,24 +805,29 @@
       <!-- La barra de arriba de las cinemáticas: la etapa es un capítulo de la historia, y sigue
            con la misma letra. -->
       <header class="prologo__manual-cabeza">
+        <!-- El nombre de la etapa y no "Capítulo N": la historia no numera sus etapas. -->
         <span class="prologo__manual-libro"
-          >Capítulo {{ capituloDeEtapa() }} <b>· {{ libro().nombre }}</b></span
+          ><b>{{ libro().nombre }}</b></span
         >
         <ng-container [ngTemplateOutlet]="marcasDelLibro" />
       </header>
-      <!-- La tripulación del prólogo en el cielo de la etapa, con su objeto de mundo: miran lo que
-           se toca, festejan lo resuelto y se van volando a la página siguiente. -->
-      <app-tripulacion
-        class="etapa__cielo"
-        [capitulo]="capituloDeEtapa()"
-        [acento]="acentoDeEtapa()"
-      />
     }
     <div #cuerpoDelManual class="prologo__manual-cuerpo">
       <!-- La página del manual trae su ley, su lámina y su desafío (ver `app-pagina-del-manual`). Una
            pantalla del viaje no: en la molécula su nombre lo ponía la barra de arriba. -->
       @if (libro().concepto !== undefined) {
-        <h2 class="prologo__manual-titulo" id="manual-ley">{{ p.ley }}</h2>
+        <!-- El título y la tripulación comparten una franja: con las naves en una franja propia
+             arriba del título, el desafío quedaba debajo del pliegue en casi todas las pantallas.
+             Las naves miran lo que se toca, festejan lo resuelto y se van volando a la página
+             siguiente. -->
+        <div class="etapa__cabeza">
+          <h2 class="prologo__manual-titulo" id="manual-ley">{{ p.ley }}</h2>
+          <app-tripulacion
+            class="etapa__cielo"
+            [capitulo]="capituloDeEtapa()"
+            [acento]="acentoDeEtapa()"
+          />
+        </div>
       }
       <div #pantallaDelManual class="subhost" (pointerdown)="tocarLaEtapa($event)"></div>
     </div>

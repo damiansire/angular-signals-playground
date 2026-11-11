@@ -30,15 +30,6 @@
   .card--dissolve .subhost .flex:has(app-code) > :is(app-code, :has(app-code)):has(.p-4 > .flex) {
     min-width: max-content;
   }
-  /* Angosto el código envuelve seguido: la continuación se sangra desde la sangría PROPIA del
-     renglón (`--sangria`, los espacios con que abre, la pone app-code). Con el 1.8em fijo, la
-     segunda mitad de un renglón sangrado arrancaba a la izquierda de su principio y se leía como un
-     cierre. En escritorio queda el fijo: ahí casi no envuelve, y sangrar más alargaba sub-niveles
-     que hoy entran en la pantalla. */
-  .card--dissolve .subhost app-code .p-4 > div:not(.flex) {
-    padding-left: calc(var(--sangria, 0) * 1ch + 1.8em);
-    text-indent: calc(var(--sangria, 0) * -1ch - 1.8em);
-  }
 }
 
 /* Nada del topbar se parte por dentro: con poco lugar el contador quedaba "1 /" arriba y "3" abajo,

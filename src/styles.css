@@ -142,16 +142,10 @@ body {
 /* Familia material: carbón cálido (editor) o vidrio entonado (card clara), redondeados
    y flotando sobre una sombra teñida con el concepto (--frame), que los hace leer
    "proyectados desde el átomo", no paneles de otra app. */
-.card--dissolve .subhost app-code > div,
 .card--dissolve .subhost img,
 .card--dissolve .subhost app-count-increment section {
   --frame: 0 26px 64px -34px color-mix(in srgb, var(--glow, #9a9081) 68%, #000);
   border-radius: 16px;
-}
-/* Editor: de gris frío (bg-gray-800 de Tailwind) a carbón cálido para hermanar con el crema. */
-.card--dissolve .subhost app-code > div {
-  background: linear-gradient(180deg, #26231d, #1b1915);
-  box-shadow: var(--frame);
 }
 /* GIF/imágenes: montadas como pantalla con bisel entonado (en vez de un rectángulo blanco). */
 .card--dissolve .subhost img {
@@ -300,6 +294,104 @@ body {
   outline: none;
   box-shadow: 0 0 0 2px var(--glow, #eb9b3c);
   border-color: transparent;
+}
+
+/* ───────────────────────────────────────────────────────────────────────────
+   LA HOJA DEL VIAJE — lo que la hoja le hace a cualquier pantalla que monta. Va acá y no en el CSS
+   de la vista porque alcanza internals de componentes descendientes: con el estampado de la vista,
+   un título que la pantalla dibujaba tarde quedaba afuera y se veía repetido debajo del de la hoja.
+   ─────────────────────────────────────────────────────────────────────────── */
+/* El título de la pantalla ya lo dice la hoja (o el manual), en grande y con su trazo. */
+.card--dissolve .subhost h1,
+.prologo__manual--viaje .subhost app-title {
+  display: none;
+}
+/* Los campos son parte del aparato: trazo de tinta, papel claro y la sombra dura de las cosas del
+   mundo. El borde gris fino de un formulario se leía como otra página pegada encima. */
+.prologo__manual--viaje.card--dissolve
+  .subhost
+  input:is([type='text'], [type='number'], [type='email']) {
+  padding: 0.5rem 0.85rem;
+  border: 2.5px solid #201d16;
+  border-radius: 12px;
+  background: #fffdf7;
+  box-shadow:
+    inset 0 2px 0 rgb(32 29 22 / 6%),
+    0 4px 0 rgb(32 29 22 / 14%);
+  font-family: var(--sans);
+  font-size: 1rem;
+  font-weight: 700;
+  color: #201d16;
+  transition:
+    box-shadow 0.18s ease,
+    transform 0.18s ease;
+}
+.prologo__manual--viaje.card--dissolve
+  .subhost
+  input:is([type='text'], [type='number'], [type='email']):focus {
+  outline: none;
+  border-color: #201d16;
+  box-shadow:
+    0 0 0 3px color-mix(in srgb, var(--acento-etapa, #eb9b3c) 55%, transparent),
+    0 5px 0 rgb(32 29 22 / 16%);
+  transform: translateY(-1px);
+}
+.prologo__manual--viaje.card--dissolve .subhost input::placeholder {
+  color: #8a8069;
+  font-weight: 500;
+}
+/* El formulario de a bordo en dos columnas: apilado en 20rem dejaba la mitad derecha de la hoja
+   vacía y el desafío debajo de la barra a 1440×900. */
+.prologo__manual--viaje .subhost .sgf {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem 1rem;
+  align-items: start;
+  width: auto;
+  max-width: 34rem;
+}
+@media (max-width: 600px) {
+  .prologo__manual--viaje .subhost .sgf {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+/* El desafío en dos columnas: el código a la izquierda y lo que contesta (lectura y botón) a la
+   derecha. Apilado ocupaba todo el ancho con la mitad derecha vacía, y era lo que más empujaba la
+   hoja hacia abajo. */
+.prologo__manual--viaje .subhost .ms {
+  display: grid;
+  grid-template-columns: minmax(0, 34rem) minmax(0, 1fr);
+  align-items: center;
+  gap: 0.6rem clamp(1rem, 3vw, 2.5rem);
+}
+.prologo__manual--viaje .subhost .ms > :not(.ms__code, .ms__bar) {
+  grid-column: 1 / -1;
+}
+.prologo__manual--viaje .subhost .ms__bar {
+  align-self: center;
+}
+@media (max-width: 900px) {
+  .prologo__manual--viaje .subhost .ms {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+/* El modelo en crudo, en la misma tinta cálida que la pantalla de la nave. */
+.prologo__manual--viaje .subhost .sgf-modelo {
+  border: 2.5px solid #201d16;
+  border-radius: 12px;
+  background: linear-gradient(180deg, #2a251e, #1d1a15);
+  box-shadow: 0 4px 0 rgb(32 29 22 / 16%);
+}
+.prologo__manual--viaje .subhost .sgf-modelo-val {
+  color: #f2c27a;
+}
+@media (prefers-reduced-motion: reduce) {
+  .prologo__manual--viaje.card--dissolve .subhost input {
+    transition: none;
+  }
+  .prologo__manual--viaje.card--dissolve .subhost input:focus {
+    transform: none;
+  }
 }
 
 /* ───────────────────────────────────────────────────────────────────────────
