@@ -102,11 +102,6 @@
   .topbar.contextual .tb-title {
     font-size: min(0.98rem, 3.85vw);
   }
-  /* Los renglones interactivos del árbol de 0/1 no envuelven a propósito (cada token es un blanco):
-     a 360 px se pasaban de la card. La densidad escala con el ancho y los deja entrar. */
-  .card--dissolve .subhost app-two-column-layout app-code div {
-    font-size: min(0.66rem, 2.7vw);
-  }
   .tb-links > :is(a, button) + :is(a, button) {
     margin-left: 0.3rem;
   }

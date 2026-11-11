@@ -531,14 +531,6 @@
   padding-top: 0.16rem;
   padding-bottom: 0.16rem;
 }
-/* Los demos con `app-two-column-layout` (html-to-tree, variable-refresh-and-tree) traen bloques de
-   código largos (el sample de Angular son 14 líneas) que en la card se pasaban del fold en laptop.
-   Acá el código de ESOS demos baja un escalón más de densidad (más específico que la regla general
-   de arriba, así gana): entra completo sin scroll interno. Los otros demos no matchean y quedan. */
-.card--dissolve .subhost app-two-column-layout app-code div {
-  font-size: 0.72rem;
-  line-height: 1.3;
-}
 /* El historial de eventos (app-event-history) es una LISTA DE DATOS, no un panel-ventana: al
    des-encajonar los fondos claros, sus filas quedaban transparentes flotando sobre el aura del
    concepto y el texto ("Count Number" sobre el flower rojo) perdía contraste. Un respaldo translúcido
