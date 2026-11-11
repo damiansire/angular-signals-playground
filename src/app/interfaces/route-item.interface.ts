@@ -16,13 +16,13 @@ export interface SubNivelDiferido {
  */
 export interface RouteItem {
   path: string;
-  // Los niveles no llevan componente propio (en la molécula son átomos, no páginas);
+  // Los niveles no llevan componente propio (son etapas del viaje, no páginas);
   // sí lo llevan los sub-niveles, que la vista integrada embebe.
   component?: Type<unknown>;
   // Alternativa diferida a `component`, para sub-niveles con dependencias pesadas (formularios de
   // signals, HttpClient): el componente y sus proveedores llegan en un chunk aparte.
   loadComponent?: () => Promise<SubNivelDiferido>;
-  // Nombre del sub-nivel para el topbar de la vista integrada. Es un contrato explícito a
+  // Nombre del sub-nivel: la ley que la hoja de la etapa establece. Es un contrato explícito a
   // propósito: antes el motor sacaba el título del primer <h1> del componente montado, y como
   // ningún sub-nivel tiene <h1> propio, terminaba mostrando el de un widget interno.
   // El dato lo declara quien arma el árbol, no lo adivina el DOM.
