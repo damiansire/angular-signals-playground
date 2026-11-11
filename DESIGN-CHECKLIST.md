@@ -1323,9 +1323,9 @@ Del minijuego de operadores (2026-11-08):
 - [ ] En cada escena, nada importante detrás de la nave: el planeta va arriba a la izquierda, el
       lápiz descansa adentro del cuadro y el rótulo "zone" cuelga de la cerca. Con movimiento
       reducido cada escena queda en el momento que explica, sin bucles.
-- [ ] Afuera del prólogo (el manual suelto y el viaje), detrás de la hoja va el negro opaco de la
-      tele apagada: con un velo, el mapa se leía a través y "11 sin establecer" se pisaba con la
-      cabecera.
+- [ ] Afuera del prólogo, detrás del manual suelto va el negro opaco de la tele apagada: con un
+      velo, el mapa se leía a través y "11 sin establecer" se pisaba con la cabecera. En el viaje
+      (desde 2026-11-11) va el papel crema de las cinemáticas, también opaco.
 - [ ] Pasar de página se ve: la página nueva entra deslizándose, con su título, desde el lado al
       que se va. La hoja de papel que giraba desde el lomo, sobre una hoja sin papel, era un
       destello blanco a pantalla entera. Sin animación con movimiento reducido.
@@ -1432,16 +1432,42 @@ Del minijuego de operadores (2026-11-08):
       la molécula. Escape la saltea y abre la hoja.
 - [ ] La hoja dice el nombre de la etapa ("La caja que avisa"), no "Nivel 1"; cada página lleva
       el título de su pantalla y el pie dice "Seguir el viaje" en la última.
-- [ ] La hoja del viaje no es un rectángulo crema a pantalla entera: el título va suelto sobre el
-      cielo con la letra de la ley, la pantalla entera en una tarjeta de papel con borde de tinta, y
-      en el medio del alto cuando es corta. Antes media hoja quedaba vacía debajo de la pantalla.
-- [ ] El desafío (`app-manipulable-system`) va en su recuadro punteado adentro del papel, a lo
-      ancho: la raya de arriba y el tope de 64rem eran para cerrar una card de la molécula.
+- [ ] (2026-11-11) La hoja del viaje es una escena de la cinemática que la abrió, no una pantalla
+      suelta (`viaje-cine.css`): el papel crema, la barra oscura arriba con "Capítulo N · nombre",
+      la tripulación del prólogo en su cielo con el objeto de la etapa, el título en serif con su
+      trazo a mano en el acento, y la caja de diálogo abajo. Sin tarjeta: el ejercicio va sobre el
+      papel. Antes era una tarjeta blanca sobre negro, y el viaje parecía otra aplicación.
+- [ ] El desafío (`app-manipulable-system`) es un aparato del mundo: trazo de tinta, papel claro y
+      la sombra dura de las cinemáticas, a lo ancho. El código, en la tinta cálida de las barras: el
+      gris azulado de un editor se leía como una ventana pegada en el papel.
+- [ ] Cada página del viaje tiene su línea al llegar y otra al resolver (`guion-del-viaje.ts`, con
+      spec: las 33 páginas, las reglas del guion y dos naves distintas por página, porque es una
+      charla). Las naves miran lo que se toca, una se entera con un respingo, festejan lo resuelto
+      y se van volando antes de pasar de página; tocarlas las sacude, como en el prólogo.
+- [ ] Nombre y retrato dicen la misma nave: el color de cada voz es el tono de su casco
+      (`VOZ_DE_NAVE`), igual en el viaje, las cinemáticas y la práctica. Nave A, violeta, hablaba
+      en rosa en el viaje (la luz de su antena) y en celeste en las cinemáticas.
+- [ ] La tripulación es vida de fondo: con `.fondo-en-pausa` o movimiento reducido no flota, no
+      chisporrotea, no parpadea y el objeto de la etapa no flota, y lo sigue EN VIVO (un
+      `MutationObserver` en las clases de los ancestros y el `change` del media query). Medido
+      comparando el SVG entre dos instantes: quieto con la pausa, vivo al sacarla, quieto al volver.
+- [ ] A 1024 el pie no se sale: los costados del pie son `minmax(max-content, 1fr)`. Con
+      `minmax(0, 1fr)` la caja de diálogo de 60rem los dejaba en cero y "Siguiente página" se salía
+      135 px (`scrollWidth` de la hoja contra su `clientWidth`).
+- [ ] Con el celular acostado (alto ≤ 500 y ancho ≥ 600) la consola va en UNA fila de 84 px:
+      Angie en la punta izquierda, "Anterior", el diálogo y "Siguiente". En dos filas se comía 140
+      de 342 px. Su alto es el mínimo de la barra de diálogo: con menos, crecía igual y le pisaba
+      8 px a la hoja. Medido a 750×342: la hoja termina en el píxel donde empieza la consola.
+- [ ] En un celular la molécula lejana del cielo va más cerrada (`abre: 0.6`): entera tocaba la
+      nariz del capitán y el objeto. Medido a 375: 9 px al capitán y 12 px al objeto.
+- [ ] La pista de Angie de escritorio (arriba de la barra de diálogo) va en un media query de
+      escritorio: con el encapsulado emulado cada selector compuesto suma un atributo, y la regla de
+      escritorio le ganaba a la del celular aunque viniera antes.
 - [ ] La pista de Angie se ve: arranca invisible y la revela la entrada del sub-nivel (`.warp`), que
       en la hoja no corre, y en el viaje no aparecía nunca. Aparece cuando la página ya asentó:
       mientras entra deslizándose es el bloque contenedor de su `fixed`, y flotaba en el medio.
-- [ ] Medido con input real a 1440×900, 1366×768 (scroll de 57 px con "más abajo"), 1024×768 y
-      480×900 (una columna): sin desborde horizontal; "Seguir el viaje" en la última página lleva a
+- [ ] Medido con input real a 1440×900, 1366×768 (scroll de 80 px con "más abajo"; 57 antes de la
+      franja de la tripulación), 1024×768 y 480×900 (una columna): sin desborde horizontal; "Seguir el viaje" en la última página lleva a
       la cinemática del capítulo siguiente.
 - [ ] La pista de Angie (`app-concept-card`, fija en la esquina) va por encima del pie de la hoja:
       a `bottom: 1rem` tapaba "Seguir el viaje" y el click caía en la card. Medirlo con
@@ -1474,6 +1500,12 @@ verificable con `/cine/<n>?cuadro=<beat>` (fotograma congelado) o `/cine/<n>` (r
 
 - [ ] Se sabe QUIÉN habla sin leer: retrato, nombre y timbre de voz por personaje. El prólogo no
       lo mostraba y era la fricción número uno de un jugador nuevo.
+- [ ] (2026-11-11) Las naves son las del prólogo y el viaje (`nave-del-prologo.ts`), dibujadas una
+      vez en los símbolos `#cine-nave*` con la paleta de cada una: la flecha vieja hacía que la
+      historia tuviera dos tripulaciones. El retrato encuadra el CUERPO de la nave (`viewBox` del
+      retrato apretado, el símbolo a escala 1:1): con el `viewBox` entero, llama incluida, la nave
+      quedaba chiquita en el círculo. Lo que pinta una escena con el color de una nave sigue a su
+      casco (la mano de Nave B del 5 es salmón, no lavanda).
 - [ ] Una línea en pantalla por vez y nunca más de ocho palabras (lo verifica
       `cinematica-guion.spec.ts`). El texto va en la caja de diálogo, NUNCA dentro de la escena.
       La caja del prólogo de las naves escala con el ancho Y con el alto (`min(2.1vw, 4.2vh)`): a
@@ -1528,6 +1560,18 @@ verificable con `/cine/<n>?cuadro=<beat>` (fotograma congelado) o `/cine/<n>` (r
       recolor busca también los comentarios que nombran el color ("un punto verde"). Mirar
       `?prologo=casa-apuren`, `/cine/6?cuadro=dos-paquetes` y `/cine/10?cuadro=rafaga`, y medir
       el nombre en las dos cajas (8:1).
+
+## La práctica (`/practica/carrito`)
+
+- [ ] (2026-11-11) La práctica pasa en el mundo de las cinemáticas: papel crema, barra arriba,
+      caja de diálogo fija abajo, la tripulación cargando su bodega (el objeto `carrito`) y los
+      aparatos con trazo de tinta y sombra dura. La charla también se deriva: `momentoDelCarrito`
+      (función pura con spec) compara lo que se ve antes y después, y las naves dicen qué se derivó
+      solo: una cantidad, el cupón, el envío gratis (con festejo), perderlo y vaciar.
+- [ ] Medido a 1440×900, 1024×768 y 375×812, arriba, a mitad y al fondo del scroll: sin desborde,
+      todo control entre la barra y la caja de diálogo recibe su click (`elementFromPoint`), y al
+      fondo no queda ninguno debajo de la caja. La molécula lejana no toca ni las naves ni la
+      bodega, y cada toque de un botón hace reaccionar a las naves y a la bodega (click real).
 
 ## Sonido (tiene que andar en cualquier PC)
 
