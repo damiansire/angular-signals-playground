@@ -1,9 +1,11 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
+import { Location } from '@angular/common';
 import { provideRouter } from '@angular/router';
 
 import { IntegradaVistaComponent } from './integrada-vista.component';
 import { cuadrosFalsos, hasta } from './testing/cuadros';
+import { parseWhereQuery } from './url-sync';
 import { CLAVE_PARTIDA } from '../libs/partida';
 import { sonido } from '../libs/sonido';
 import { signalsRoutesTree } from '../signals/signals-routes-tree';
@@ -523,6 +525,20 @@ describe('IntegradaVistaComponent', () => {
       expect(host.querySelector('.manual-suelto')).toBeNull();
       expect(host.querySelector('app-cinematica')).toBeNull();
       expect(location.search).not.toContain('nivel');
+      fixture.destroy();
+    });
+
+    it('abrir otra página de la etapa la escribe en la barra y en la partida', async () => {
+      const fixture = await montar();
+      void viaje(fixture).leerEtapa(3, 1);
+      await fixture.whenStable();
+
+      // El concepto 3 es el capítulo 4, y la página 1 es su segundo sub-nivel. La barra es la de
+      // Angular: en TestBed no es la del navegador.
+      const barra = TestBed.inject(Location).path();
+      expect(parseWhereQuery(barra.slice(barra.indexOf('?')))).toEqual({ concept: 4, sub: 2 });
+      const guardado = JSON.parse(localStorage.getItem(CLAVE) ?? '{}');
+      expect(guardado.viaje).toEqual({ concepto: 3, pagina: 1 });
       fixture.destroy();
     });
 

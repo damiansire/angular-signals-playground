@@ -958,9 +958,13 @@ export class IntegradaVistaComponent {
     const paginas = paginasDeEtapa(capitulo, this.subComponents[concepto] ?? []);
     this.manualSuelto.set(true);
     this.escenarioInerte(true);
-    await this.leerManual(paginas, libro, desde, (pagina) =>
-      this.guardar(conViaje(this.partida(), { concepto, pagina })),
-    );
+    await this.leerManual(paginas, libro, desde, (pagina) => {
+      const lugar = { concepto, pagina };
+      this.guardar(conViaje(this.partida(), lugar));
+      // La barra sigue a la página: el link le gana a la partida, así que con la barra todavía en
+      // la página 1, recargar en la 2 volvía a la 1.
+      this.mostrarEnLaBarra(lugar);
+    });
     this.manualSuelto.set(false);
   }
 
