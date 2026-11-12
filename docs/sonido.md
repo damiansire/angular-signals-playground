@@ -9,7 +9,9 @@ La plomería (un solo contexto, todo sintetizado, nada tira) la decidió el
 
 ## Reglas para toda la app
 
-1. **Todo se sintetiza.** Sin archivos ni red (`libs/sonido.ts`).
+1. **Todo se sintetiza, salvo las voces grabadas.** Sin archivos ni red (`libs/sonido.ts`). La
+   excepción son las voces de Gemini del prólogo, que se bajan como mp3 ([`voces.md`](./voces.md),
+   [ADR 0022](./adr/0022-el-prologo-habla-con-voces-grabadas.md)); sin ellas, la línea habla con blips.
 2. **Nada depende de que suene.** Sin Web Audio, con el sonido apagado o si el audio se rompe, todo
    sigue igual y en silencio.
 3. **Un solo interruptor.** Apagar el sonido en cualquier botón lo apaga en todos, y la preferencia
@@ -28,17 +30,18 @@ La plomería (un solo contexto, todo sintetizado, nada tira) la decidió el
 
 ## Por momento
 
-| Momento                     | Qué suena                                                                                | Requisitos                                                                                                         | Dónde                                        |
-| --------------------------- | ---------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ | -------------------------------------------- |
-| Pantalla de inicio (Tusi)   | Notas con el timbre del video original al trazar los círculos                            | No se rediseña (ADR 0002): solo cambió la plomería                                                                 | `intro-tusi.ts`                              |
-| La colina, esperando        | Bucle de 16 s en re menor, cuatro acordes y una cajita que baja                          | Melancólica; más baja que la despedida; Angie la escucha en sus auriculares al compás                              | `musica-de-la-colina.ts`                     |
-| La lamparita                | Radio: estática, chasquidos y el silbido del dial                                        | Va antes de hablar, para que el comienzo respire; cuando se apaga, la voz llega limpia                             | `ruido-de-radio.ts`                          |
-| Las ondas del sol           | Un tono que cae por anillo                                                               | Con interferencia tiembla; sintonizada, sale limpia y más suave, debajo de la voz                                  | `ruido-de-radio.ts`                          |
-| La despedida de Angie       | Fondo en re, un acorde por pensamiento y la cajita                                       | Una fase por pensamiento, sin horario (los pasa quien mira); al volverse luz queda sin resolver                    | `musica-del-presentimiento.ts`               |
-| El prólogo                  | Zumbido de la anomalía que tira de la nave, tirones, salto, choque, voces y acorde final | El zumbido crece al acercarse la anomalía; cada golpe suena una sola vez                                           | `prologo-anomalia.ts`                        |
-| El manual de a bordo        | Música para estudiar (2026-11-11)                                                        | Ver abajo                                                                                                          | `musica-del-manual.ts`                       |
-| Las voces de los personajes | Blips con un timbre por personaje                                                        | Se distingue quién habla sin leer; la misma frase suena siempre igual; nunca sigue hablando cuando el texto se fue | `libs/sonido.ts` (`PERFILES`, `planDeBlips`) |
-| Las cinemáticas             | Toque, título, beats, transmisión y cierre                                               | El título en la menor, como la intro                                                                               | `cinematica.component.ts`, `libs/sonido.ts`  |
+| Momento                     | Qué suena                                                                                | Requisitos                                                                                                          | Dónde                                        |
+| --------------------------- | ---------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- | -------------------------------------------- |
+| Pantalla de inicio (Tusi)   | Notas con el timbre del video original al trazar los círculos                            | No se rediseña (ADR 0002): solo cambió la plomería                                                                  | `intro-tusi.ts`                              |
+| La colina, esperando        | Bucle de 16 s en re menor, cuatro acordes y una cajita que baja                          | Melancólica; más baja que la despedida; Angie la escucha en sus auriculares al compás                               | `musica-de-la-colina.ts`                     |
+| La lamparita                | Radio: estática, chasquidos y el silbido del dial                                        | Va antes de hablar, para que el comienzo respire; cuando se apaga, la voz llega limpia                              | `ruido-de-radio.ts`                          |
+| Las ondas del sol           | Un tono que cae por anillo                                                               | Con interferencia tiembla; sintonizada, sale limpia y más suave, debajo de la voz                                   | `ruido-de-radio.ts`                          |
+| La despedida de Angie       | Fondo en re, un acorde por pensamiento y la cajita                                       | Una fase por pensamiento, sin horario (los pasa quien mira); al volverse luz queda sin resolver                     | `musica-del-presentimiento.ts`               |
+| El prólogo                  | Zumbido de la anomalía que tira de la nave, tirones, salto, choque, voces y acorde final | El zumbido crece al acercarse la anomalía; cada golpe suena una sola vez                                            | `prologo-anomalia.ts`                        |
+| El manual de a bordo        | Música para estudiar (2026-11-11)                                                        | Ver abajo                                                                                                           | `musica-del-manual.ts`                       |
+| Las voces del prólogo       | La voz de Gemini de cada personaje (2026-11-12, español neutro)                          | Reemplaza a los blips donde hay grabación; si no llegó o no entra en la ventana, blips; la línea dura lo que su voz | `libs/sonido.ts`, `voces-del-prologo.ts`     |
+| Las voces de los personajes | Blips con un timbre por personaje                                                        | Se distingue quién habla sin leer; la misma frase suena siempre igual; nunca sigue hablando cuando el texto se fue  | `libs/sonido.ts` (`PERFILES`, `planDeBlips`) |
+| Las cinemáticas             | Toque, título, beats, transmisión y cierre                                               | El título en la menor, como la intro                                                                                | `cinematica.component.ts`, `libs/sonido.ts`  |
 
 ## El manual de a bordo
 
