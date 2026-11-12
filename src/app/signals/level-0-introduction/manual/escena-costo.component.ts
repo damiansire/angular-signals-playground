@@ -16,7 +16,9 @@ import {
   stagesTriggered,
 } from '../../../libs/render-pipeline';
 import { CIELO_DEL_ESCENARIO, EscenaDelManual } from './escena-del-manual';
-import { PALETA, azar, el } from './nave-del-manual';
+import { azar } from '../../../libs/azar';
+import { el } from '../../../libs/svg';
+import { PALETA } from './nave-del-manual';
 import { type Costo, saltosDelPaisaje } from './escenas.logica';
 
 /** Una corrida del cuadro; `n` sube con cada una, aunque se repita la misma propiedad. */

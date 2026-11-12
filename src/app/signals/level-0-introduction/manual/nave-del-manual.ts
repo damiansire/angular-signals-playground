@@ -1,6 +1,8 @@
 import { gsap } from 'gsap';
 
-const NS = 'http://www.w3.org/2000/svg';
+import { azar } from '../../../libs/azar';
+import { sinMovimiento } from '../../../libs/muelle';
+import { el } from '../../../libs/svg';
 
 /** La nave del capitán, con la paleta que tiene en el prólogo. Sin negro: la tinta tiene tono. */
 export const PALETA = {
@@ -23,26 +25,6 @@ const CARAS: Record<Animo, { cejas: number; ojos: number; alto: number }> = {
 };
 
 const QUEJAS = ['¡ey!', '¡piloto a bordo!', '¡la pintura!'];
-
-export const sinMovimiento = (): boolean =>
-  typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-export function el<K extends keyof SVGElementTagNameMap>(
-  padre: Element,
-  tag: K,
-  attrs: Record<string, string | number> = {},
-): SVGElementTagNameMap[K] {
-  const n = document.createElementNS(NS, tag);
-  for (const [k, v] of Object.entries(attrs)) n.setAttribute(k, String(v));
-  padre.appendChild(n);
-  return n;
-}
-
-/** Pseudoazar con semilla: el cielo de cada escena sale igual cada vez. */
-export function azar(k: number): number {
-  const x = Math.sin(k * 127.1 + 311.7) * 43758.5453;
-  return x - Math.floor(x);
-}
 
 /** Un muelle: un toque no fija una pose, le suma velocidad. Por eso los toques se acumulan. */
 interface Muelle {

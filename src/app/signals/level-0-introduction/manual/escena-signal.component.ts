@@ -2,7 +2,8 @@ import { ChangeDetectionStrategy, Component, computed, effect, input } from '@an
 import { gsap } from 'gsap';
 import { CD_EDGES, CD_NODES, SIGNAL_DEPENDENTS } from '../../../libs/cd-tree';
 import { CIELO_DEL_ESCENARIO, EscenaDelManual } from './escena-del-manual';
-import { PALETA, el } from './nave-del-manual';
+import { el } from '../../../libs/svg';
+import { PALETA } from './nave-del-manual';
 
 /** Un cambio de valor; `n` sube con cada uno, aunque el modo se repita. */
 export interface Aviso {

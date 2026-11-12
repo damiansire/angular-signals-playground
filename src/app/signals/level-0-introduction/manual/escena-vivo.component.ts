@@ -1,7 +1,8 @@
 import { ChangeDetectionStrategy, Component, computed, effect, input } from '@angular/core';
 import { gsap } from 'gsap';
 import { CIELO_DEL_ESCENARIO, EscenaDelManual } from './escena-del-manual';
-import { PALETA, el } from './nave-del-manual';
+import { el } from '../../../libs/svg';
+import { PALETA } from './nave-del-manual';
 
 /** Lo que la lámina necesita de cada nodo de la demo. */
 export interface NodoVivo {

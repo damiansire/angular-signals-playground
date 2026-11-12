@@ -1,7 +1,10 @@
 import { DestroyRef, Directive, ElementRef, afterNextRender, inject, input } from '@angular/core';
 import { gsap } from 'gsap';
 import { trazoDelHaz } from './escenas.logica';
-import { NaveDelManual, PALETA, azar, el, sinMovimiento } from './nave-del-manual';
+import { azar } from '../../../libs/azar';
+import { sinMovimiento } from '../../../libs/muelle';
+import { el } from '../../../libs/svg';
+import { NaveDelManual, PALETA } from './nave-del-manual';
 import { VueloDeLaNave } from './vuelo-de-la-nave';
 
 /** El lienzo de todas las láminas: el mismo `viewBox`, así la nave mide lo mismo en las cinco. */

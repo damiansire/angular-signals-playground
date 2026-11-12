@@ -16,7 +16,7 @@ import {
 } from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
 import { gsap } from 'gsap';
-import { sinMovimiento } from './nave-del-manual';
+import { sinMovimiento } from '../../../libs/muelle';
 import { VueloDeLaNave } from './vuelo-de-la-nave';
 import { PAGINA_DEL_MANUAL } from './pagina-del-manual';
 import { ManoGuiaComponent, type Punta } from './mano-guia.component';

@@ -9,7 +9,7 @@ import {
   viewChild,
 } from '@angular/core';
 import { gsap } from 'gsap';
-import { sinMovimiento } from './nave-del-manual';
+import { sinMovimiento } from '../../../libs/muelle';
 
 export interface Punta {
   readonly x: number;

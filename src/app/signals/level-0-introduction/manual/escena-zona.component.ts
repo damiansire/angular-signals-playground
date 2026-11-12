@@ -2,7 +2,8 @@ import { ChangeDetectionStrategy, Component, computed, effect, input } from '@an
 import { gsap } from 'gsap';
 import { CD_EDGES, CD_NODES } from '../../../libs/cd-tree';
 import { CIELO_DEL_ESCENARIO, EscenaDelManual } from './escena-del-manual';
-import { PALETA, el } from './nave-del-manual';
+import { el } from '../../../libs/svg';
+import { PALETA } from './nave-del-manual';
 
 /** Una llamada de la demo o del desafío; `n` sube con cada una, aunque se repita la misma API. */
 export interface Llamada {
