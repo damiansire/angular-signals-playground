@@ -24,6 +24,8 @@ import {
   textoVisible,
 } from './prologo-guion';
 import { tramosDeFrase } from '../libs/tramos-de-frase';
+import { azar } from '../libs/azar';
+import { el, type Atributos } from '../libs/svg';
 import {
   ALTO,
   ANCHO,
@@ -36,7 +38,6 @@ import {
   PIPES,
   RADIO,
   adentro,
-  azar,
   bala,
   bolas,
   circulos,
@@ -128,20 +129,6 @@ export interface PrologoOpciones {
    * ya leída y espera a que se cierre. Sin esto, el prólogo corre de corrido.
    */
   readonly arbol?: (pagina: PaginaDelManual) => Promise<void>;
-}
-
-const NS = 'http://www.w3.org/2000/svg';
-type Atributos = Readonly<Record<string, string | number>>;
-
-function el<K extends keyof SVGElementTagNameMap>(
-  padre: Element,
-  tag: K,
-  attrs: Atributos = {},
-): SVGElementTagNameMap[K] {
-  const n = document.createElementNS(NS, tag);
-  for (const [k, v] of Object.entries(attrs)) n.setAttribute(k, String(v));
-  padre.appendChild(n);
-  return n;
 }
 
 const fijar = (n: Element, attrs: Atributos): void => {

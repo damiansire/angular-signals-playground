@@ -73,12 +73,6 @@ export const conRebote = (v: number, s = 1.9): number => {
   return 1 + (s + 1) * p * p * p + s * p * p;
 };
 
-/** Pseudoazar con semilla: estrellas, rocas y parpadeos salen iguales cada vez. */
-export const azar = (k: number): number => {
-  const x = Math.sin(k * 127.1 + 311.7) * 43758.5453;
-  return x - Math.floor(x);
-};
-
 export interface Tramo {
   readonly t0: number;
   readonly t1: number;

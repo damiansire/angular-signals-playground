@@ -19,11 +19,8 @@ import { NgComponentOutlet } from '@angular/common';
 import { palabrasDeLinea, type PalabraDeLinea } from '../../libs/guion';
 import { sonido } from '../../libs/sonido';
 import { VOCES_GRABADAS } from '../voces-grabadas';
-import {
-  dibujarNave,
-  el,
-  gradientesDeNaves,
-} from '../../components-draw/tripulacion/nave-del-prologo';
+import { el } from '../../libs/svg';
+import { dibujarNave, gradientesDeNaves } from '../../components-draw/tripulacion/nave-del-prologo';
 import { variablesDeResorteSiSoporta } from '../../libs/resorte';
 import {
   CAPITULO_FINAL,
