@@ -324,9 +324,12 @@ body {
   transform: translateY(3px);
   box-shadow: 0 1px 0 rgb(32 29 22 / 22%);
 }
+/* Anillo doble: la tinta por fuera da el contraste sobre el papel y el acento de la etapa, por
+   dentro, la identidad. El ámbar solo quedaba en 1,6:1 contra la hoja. */
 .boton-tinta:focus-visible {
-  outline: 3px solid var(--glow, #f2c27a);
+  outline: 3px solid var(--focus-ink);
   outline-offset: 3px;
+  box-shadow: 0 0 0 3px var(--acento-etapa, #eb9b3c);
 }
 .boton-tinta:disabled {
   opacity: 0.5;
