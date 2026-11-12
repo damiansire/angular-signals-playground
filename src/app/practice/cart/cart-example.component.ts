@@ -195,17 +195,20 @@ export class CartExampleComponent {
   }
 
   private drawWire(key: LinkKey): void {
-    // La flecha solo tiene sentido con las dos columnas lado a lado.
-    const wideEnough =
-      typeof matchMedia !== 'undefined' && matchMedia('(min-width: 760px)').matches;
     const codeEl = this.host.querySelector<HTMLElement>(`[data-code="${key}"]`);
     const partEl = this.host.querySelector<HTMLElement>(`[data-part="${key}"]`);
-    if (!wideEnough || !codeEl || !partEl) {
+    if (!codeEl || !partEl) {
       this.wire.set(null);
       return;
     }
     const c = codeEl.getBoundingClientRect();
     const p = partEl.getBoundingClientRect();
+    // La flecha solo tiene sentido con las dos columnas lado a lado. Se mira dónde quedaron y no un
+    // ancho de pantalla: el corte lo decide el CSS, y copiado acá ya se había desfasado 40 px.
+    if (c.left < p.right) {
+      this.wire.set(null);
+      return;
+    }
     // Sale del borde izquierdo del código y apunta al borde derecho del widget.
     const cx = c.left;
     const cy = c.top + c.height / 2;
