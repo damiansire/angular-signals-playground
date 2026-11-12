@@ -6,7 +6,7 @@
 
 <div class="flex">
   <div>
-    <button (click)="destroy()">Destruir hijo</button>
+    <button type="button" (click)="destroy()">Destruir hijo</button>
     @if (showComponent()) {
       <div>
         <app-component-destroy [relojes]="relojes" (autoRefreshEvent)="setAutoRefresh($event)" />

@@ -104,7 +104,7 @@ export class WhatIsSignalsComponent {
     this.clickCount.update((n) => n + 1);
   }
 
-  signalWrapperLines: Signal<CodeLine[]> = computed<CodeLine[]>(() => [
+  readonly signalWrapperLines: Signal<CodeLine[]> = computed<CodeLine[]>(() => [
     {
       line: 'export class SignalWrapper<T> {',
       active: false,

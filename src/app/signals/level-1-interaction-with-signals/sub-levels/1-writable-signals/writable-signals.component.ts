@@ -22,7 +22,7 @@ import { SET_SIGNAL_SYSTEM } from '../../signals-systems';
 })
 export class WritableSignalsComponent {
   readonly closingSystem = SET_SIGNAL_SYSTEM;
-  count = signal(0);
+  readonly count = signal(0);
   // viewChild() como signal: se resuelve tras inicializar la vista y es el estándar del repo
   // (en vez del decorador @ViewChild + ElementRef).
   readonly signalSetInput = viewChild.required<ElementRef<HTMLInputElement>>('signalSetInput');
@@ -44,7 +44,7 @@ export class WritableSignalsComponent {
     },
   ]);
 
-  lines = computed<CodeLine[]>(() => [
+  readonly lines = computed<CodeLine[]>(() => [
     { line: 'count = signal(0);', active: true },
     { line: 'setValue() {', active: false },
     { line: '    this.count.set(inputValue);', active: true },

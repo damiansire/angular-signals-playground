@@ -58,8 +58,8 @@ export class CreateNewSignalsComponent {
     this.lectura.set({ expresion: 'count()', resultado: String(this.count()) });
   }
 
-  lines = computed<CodeLine[]>(() => [{ line: 'count = signal(0);', active: true }]);
-  htmlLines = computed<CodeLine[]>(() => [
+  readonly lines = computed<CodeLine[]>(() => [{ line: 'count = signal(0);', active: true }]);
+  readonly htmlLines = computed<CodeLine[]>(() => [
     { line: '<div>', active: false },
     { line: '     <span>', active: false },
     { line: '            count()', active: true },

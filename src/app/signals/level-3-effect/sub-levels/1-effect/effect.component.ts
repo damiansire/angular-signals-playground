@@ -38,15 +38,15 @@ const MAX_HISTORY = 4;
 })
 export class EffectComponent {
   readonly closingSystem = EFFECT_READS_SYSTEM;
-  count = signal(0);
-  count2 = signal(0);
-  dependencies = computed<string[]>(() => {
+  readonly count = signal(0);
+  readonly count2 = signal(0);
+  readonly dependencies = computed<string[]>(() => {
     return ['count'];
   });
-  dependencies2 = computed<string[]>(() => {
+  readonly dependencies2 = computed<string[]>(() => {
     return ['count2'];
   });
-  appEventHistory = signal<HistoryElement[]>([]);
+  readonly appEventHistory = signal<HistoryElement[]>([]);
   constructor() {
     effect(() => {
       const trigger = this.count() === 0 ? 'effect(1) inicial' : 'effect(1) corrió';
@@ -83,7 +83,7 @@ export class EffectComponent {
       inject(DestroyRef).onDestroy(() => clearInterval(beatId));
     }
   }
-  lines = computed<CodeLine[]>(() => [
+  readonly lines = computed<CodeLine[]>(() => [
     { line: 'count = signal(0);', active: false },
     { line: 'count2 = signal(0);', active: false },
     { line: 'effect(() => {', active: false },

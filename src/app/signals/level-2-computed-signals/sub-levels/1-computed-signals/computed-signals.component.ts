@@ -29,9 +29,9 @@ function inputValue(eventTarget: EventTarget | null): string {
 })
 export class ComputedSignalsComponent {
   readonly closingSystem = COMPUTED_BASIC_SYSTEM;
-  firstName: WritableSignal<string> = signal('Damian');
-  surname: WritableSignal<string> = signal('Sire');
-  fullName: Signal<string> = computed(() => {
+  readonly firstName: WritableSignal<string> = signal('Damian');
+  readonly surname: WritableSignal<string> = signal('Sire');
+  readonly fullName: Signal<string> = computed(() => {
     return `${this.firstName()} ${this.surname()}`;
   });
 
@@ -77,7 +77,7 @@ export class ComputedSignalsComponent {
     this.surname.set(inputValue(eventTarget));
   }
 
-  lines = computed<CodeLine[]>(() => [
+  readonly lines = computed<CodeLine[]>(() => [
     {
       line: 'firstName: WritableSignal<string> = signal("Damian");',
       active: false,

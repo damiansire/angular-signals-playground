@@ -13,8 +13,8 @@ export class ComponentDestroyComponent {
   /** Del padre, igual que en 3/2: así la única diferencia entre los dos hijos es el onCleanup. */
   readonly relojes = input.required<RelojesDelHijo>();
   readonly autoRefreshEvent = output<boolean>();
-  currentTime = signal(new Date());
-  autoRefresh = signal(false);
+  readonly currentTime = signal(new Date());
+  readonly autoRefresh = signal(false);
   intervalSave: ReturnType<typeof setInterval> | undefined;
   constructor() {
     effect((onCleanup) => {

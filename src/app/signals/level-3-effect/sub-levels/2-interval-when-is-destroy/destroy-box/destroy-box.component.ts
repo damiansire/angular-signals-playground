@@ -13,8 +13,8 @@ export class DestroyBoxComponent {
   /** Del padre: el intervalo late ahí y no por un output, que muere con este componente. */
   readonly relojes = input.required<RelojesDelHijo>();
   readonly autoRefreshEvent = output<boolean>();
-  currentTime = signal(new Date());
-  autoRefresh = signal(false);
+  readonly currentTime = signal(new Date());
+  readonly autoRefresh = signal(false);
   intervalSave: ReturnType<typeof setInterval> | undefined;
   constructor() {
     effect(() => {

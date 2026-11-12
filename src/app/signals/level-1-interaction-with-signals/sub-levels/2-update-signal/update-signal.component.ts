@@ -18,7 +18,7 @@ const ESLABONES = 5;
 })
 export class UpdateSignalComponent {
   readonly closingSystem = UPDATE_SIGNAL_SYSTEM;
-  count = signal(0);
+  readonly count = signal(0);
 
   readonly enlaces: EnlaceCircuito[] = [{ de: 'count', a: 'vista' }];
   readonly nodos = computed<NodoCircuito[]>(() => [
@@ -44,7 +44,7 @@ export class UpdateSignalComponent {
     console.log(this.count());
   }
 
-  lines = computed<CodeLine[]>(() => [
+  readonly lines = computed<CodeLine[]>(() => [
     { line: 'count = signal(0);', active: false },
     { line: 'update() {', active: false },
     { line: '  this.count.update((value) => value + 1);', active: true },

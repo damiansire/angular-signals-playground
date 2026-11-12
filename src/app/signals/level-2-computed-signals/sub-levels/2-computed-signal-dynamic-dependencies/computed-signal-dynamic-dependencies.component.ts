@@ -31,21 +31,21 @@ const MAX_HISTORY = 2;
 })
 export class ComputedSignalDynamicDependenciesComponent {
   readonly closingSystem = COMPUTED_DYNAMIC_DEPS_SYSTEM;
-  showCount = signal(false);
-  count = signal(0);
-  conditionalCount = computed(() => {
+  readonly showCount = signal(false);
+  readonly count = signal(0);
+  readonly conditionalCount = computed(() => {
     if (this.showCount()) {
       return `The count is ${this.count()}.`;
     } else {
       return 'Nothing to see here!';
     }
   });
-  conditionalCountHistory = signal<HistoryElement[]>([]);
-  appEventHistory = signal<HistoryElement[]>([]);
-  dependencies = computed<string[]>(() => {
+  readonly conditionalCountHistory = signal<HistoryElement[]>([]);
+  readonly appEventHistory = signal<HistoryElement[]>([]);
+  readonly dependencies = computed<string[]>(() => {
     return this.showCount() ? ['showCount', 'count'] : ['showCount'];
   });
-  signalsInside = signal(['showCount', 'count']);
+  readonly signalsInside = signal(['showCount', 'count']);
 
   /** El cable de `count` existe solo mientras esta corrida lo lee: si no, cuelga y no lleva nada. */
   readonly enlaces = computed<EnlaceCircuito[]>(() => [
@@ -88,7 +88,7 @@ export class ComputedSignalDynamicDependenciesComponent {
     else this.upCount();
   }
 
-  lines = computed<CodeLine[]>(() => [
+  readonly lines = computed<CodeLine[]>(() => [
     { line: 'const showCount = signal(false);', active: false },
     { line: 'const count = signal(0);', active: false },
     { line: 'const conditionalCount = computed(() => {', active: false },

@@ -51,9 +51,9 @@ export class VariablesComponent implements OnInit {
       examples: ['[]', '[1,2,3,4,5]', '[true, false]', '[ 1 , 2 , true  ]'],
     },
   };
-  selectedType = signal(this.typesExamples['Number']);
-  selectedExampleValue = signal(this.selectedType().examples[0]);
-  lines = computed<CodeLine[]>(() => [
+  readonly selectedType = signal(this.typesExamples['Number']);
+  readonly selectedExampleValue = signal(this.selectedType().examples[0]);
+  readonly lines = computed<CodeLine[]>(() => [
     { line: `var value = ${this.selectedExampleValue()}`, active: false },
     {
       line: `const value = ${this.selectedExampleValue()}`,

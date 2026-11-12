@@ -42,9 +42,9 @@ export class DestroyEffectComponent {
    */
   readonly relojes = new RelojesDelHijo(inject(DestroyRef));
   /** Espejo del estado del hijo: solo resalta qué rama del código está corriendo. */
-  autoRefresh = signal(false);
+  readonly autoRefresh = signal(false);
   readonly showComponent = signal(true);
-  lines = computed<CodeLine[]>(() => [
+  readonly lines = computed<CodeLine[]>(() => [
     { line: '// en el hijo', active: false },
     { line: 'effect(() => {', active: false },
     { line: '  if (this.autoRefresh()) {', active: this.autoRefresh() },

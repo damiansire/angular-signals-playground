@@ -37,9 +37,9 @@ export class EffectDestroyComponent {
   /** Igual que en 3/2: los latidos del hijo se cuentan en el padre, que vive lo que dura la lección. */
   readonly relojes = new RelojesDelHijo(inject(DestroyRef));
   /** Espejo del estado del hijo: solo resalta qué parte del código está corriendo. */
-  autoRefresh = signal(false);
+  readonly autoRefresh = signal(false);
   readonly showComponent = signal(true);
-  lines = computed<CodeLine[]>(() => [
+  readonly lines = computed<CodeLine[]>(() => [
     { line: '// en el hijo', active: false },
     { line: 'effect((onCleanup) => {', active: false },
     { line: '  if (this.autoRefresh()) {', active: this.autoRefresh() },
