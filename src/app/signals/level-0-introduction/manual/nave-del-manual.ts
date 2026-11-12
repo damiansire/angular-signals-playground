@@ -213,7 +213,9 @@ export class NaveDelManual {
 
     gsap.set(this.parpados, { transformOrigin: '50% 50%' });
     gsap.set(this.cejas, { transformOrigin: '50% 100%' });
-    gsap.set(this.llama, { transformOrigin: '0% 50%' });
+    // La llama se dibuja desde la boca del motor (x = 0) hacia atrás: la boca es el borde DERECHO de
+    // su caja. Con el origen en el izquierdo chisporroteaba desde la punta y se despegaba del motor.
+    gsap.set(this.llama, { transformOrigin: '100% 50%' });
     gsap.set(this.gesto, { svgOrigin: '0 26' });
 
     // Tocarla es lo primero que hace la gente: se sacude, se queja y, si insisten, se harta.
