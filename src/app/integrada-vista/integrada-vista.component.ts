@@ -924,6 +924,7 @@ export class IntegradaVistaComponent {
       if (!esElFin(lugar, subs)) {
         // El cierre: recargar acá vuelve a la revelación, no al principio del viaje.
         this.guardar(conViaje(conPunto(this.partida(), { lugar: 'viaje' }), lugar));
+        this.sacarDeLaBarra();
         await this.verEntera(CAPITULO_REVELACION);
         await this.verEntera(CAPITULO_FINAL);
       }
@@ -944,12 +945,22 @@ export class IntegradaVistaComponent {
   }
 
   /**
+   * El cierre (la revelación, el final y el último cuadro) no tiene link: la barra queda limpia y
+   * manda la partida. Con la última página todavía escrita, el link le ganaba a la partida y recargar
+   * en el último cuadro volvía a esa página y perdía el fin.
+   */
+  private sacarDeLaBarra(): void {
+    this.location.replaceState('/', '');
+  }
+
+  /**
    * El último cuadro de la historia: el final congelado, con su última línea, y arriba la única
    * acción que queda, empezar de cero. Recargar vuelve acá.
    */
   protected readonly enElFin = signal(false);
   private async mostrarElFin(): Promise<void> {
     this.enElFin.set(true);
+    this.sacarDeLaBarra();
     await this.abrirCinematica(CAPITULO_FINAL);
   }
 

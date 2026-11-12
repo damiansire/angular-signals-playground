@@ -30,6 +30,7 @@ describe('IntegradaVistaComponent', () => {
       abrirCinematica(capitulo: number): Promise<void>;
       alTerminarCinematica(): void;
       leerEtapa(concepto: number, desde: number): Promise<void>;
+      mostrarElFin(): Promise<void>;
     };
 
   /** Abre la hoja de una etapa y devuelve su `.subhost`, donde se monta la pantalla. */
@@ -539,6 +540,19 @@ describe('IntegradaVistaComponent', () => {
       expect(parseWhereQuery(barra.slice(barra.indexOf('?')))).toEqual({ concept: 4, sub: 2 });
       const guardado = JSON.parse(localStorage.getItem(CLAVE) ?? '{}');
       expect(guardado.viaje).toEqual({ concepto: 3, pagina: 1 });
+      fixture.destroy();
+    });
+
+    it('en el último cuadro la barra ya no dice ninguna página: recargar vuelve a él', async () => {
+      const fixture = await montar();
+      void viaje(fixture).leerEtapa(10, 0);
+      await fixture.whenStable();
+      expect(TestBed.inject(Location).path()).toContain('nivel=11');
+
+      void viaje(fixture).mostrarElFin();
+      await fixture.whenStable();
+
+      expect(TestBed.inject(Location).path()).not.toContain('nivel');
       fixture.destroy();
     });
 
