@@ -1,13 +1,16 @@
-// Las voces de Gemini del prólogo: genera public/voces/prologo/*.mp3 y el índice que lee la app
-// (src/app/integrada-vista/voces-del-prologo.ts). Cómo se usa y por qué así: docs/voces.md.
+// Las voces de Gemini de la app: genera public/voces/<grupo>/*.mp3 (prólogo, cinemáticas y hojas
+// del viaje) y el índice que lee la app (src/app/integrada-vista/voces-grabadas.ts). Cómo se usa y
+// por qué así: docs/voces.md.
 //
 //   node scripts/voces.mjs              dice qué falta y cuántos pedidos gastaría (no gasta nada)
 //   node scripts/voces.mjs --go         genera lo que falta y reescribe el índice
 //   node scripts/voces.mjs --muestras   las líneas de "muestras" con cada acento, en pruebas/voces/
 //   node scripts/voces.mjs --indice     solo reescribe el índice con los mp3 que ya están
 //
-// Necesita GEMINI_API_KEY_2 (si no está en el entorno, la lee de las variables de usuario de
-// Windows) y FFMPEG con la ruta de un ffmpeg. La clave nunca se imprime ni se escribe.
+// Necesita las claves de "claves" en voces.json (si no están en el entorno, las lee de las variables
+// de usuario de Windows) y FFMPEG con la ruta de un ffmpeg. Las claves nunca se imprimen ni se
+// escriben. Cada clave es de un proyecto con su propio cupo: cuando una se queda sin cupo, siguen las
+// demás.
 
 import { createHash } from 'node:crypto';
 import { execFileSync } from 'node:child_process';
@@ -20,74 +23,98 @@ const raiz = join(dirname(fileURLToPath(import.meta.url)), '..');
 const config = JSON.parse(readFileSync(join(raiz, 'scripts/voces.json'), 'utf8'));
 const args = process.argv.slice(2);
 const FFMPEG = process.env.FFMPEG ?? 'ffmpeg';
-const CARPETA = join(raiz, 'public/voces/prologo');
-const INDICE = join(raiz, 'src/app/integrada-vista/voces-del-prologo.ts');
+const VOCES = join(raiz, 'public/voces');
+const INDICE = join(raiz, 'src/app/integrada-vista/voces-grabadas.ts');
 const TMP = join(tmpdir(), 'voces-signals');
 /** El cupo por minuto del modelo es de 10 pedidos: 7 s entre uno y otro deja margen. */
 const ENTRE_PEDIDOS_MS = 7000;
 
 mkdirSync(TMP, { recursive: true });
 
-/** El guion vive en TypeScript: se compila con el esbuild de Angular para no copiarlo a mano. */
-async function guionDelPrologo() {
+/** Los guiones viven en TypeScript: se compilan con el esbuild de Angular para no copiarlos a mano. */
+async function modulo(ruta, nombre) {
   const { build } = await import('esbuild');
-  const salida = join(TMP, 'prologo-guion.mjs');
+  const salida = join(TMP, `${nombre}.mjs`);
   await build({
-    entryPoints: [join(raiz, 'src/app/integrada-vista/prologo-guion.ts')],
+    entryPoints: [join(raiz, ruta)],
     bundle: true,
     format: 'esm',
     platform: 'neutral',
     outfile: salida,
     logLevel: 'error',
-    // El guion lee el índice que este script escribe: para sacar los textos alcanza con uno vacío,
-    // y así anda también la primera vez, cuando el índice todavía no existe.
+    // Los guiones leen el índice que este script escribe: para sacar los textos alcanza con uno
+    // vacío, y así anda también la primera vez, cuando el índice todavía no existe.
     plugins: [
       {
         name: 'indice-vacio',
         setup(b) {
-          b.onResolve({ filter: /voces-del-prologo$/ }, (a) => ({
-            path: a.path,
-            namespace: 'vacio',
-          }));
+          b.onResolve({ filter: /voces-grabadas$/ }, (a) => ({ path: a.path, namespace: 'vacio' }));
           b.onLoad({ filter: /.*/, namespace: 'vacio' }, () => ({
-            contents: 'export const VOCES_DEL_PROLOGO = {};',
+            contents: 'export const VOCES_GRABADAS = {};',
             loader: 'js',
           }));
         },
       },
     ],
   });
-  const m = await import(`${pathToFileURL(salida).href}?t=${Date.now()}`);
-  return { guion: m.GUION, visible: m.textoVisible };
+  return import(`${pathToFileURL(salida).href}?t=${Date.now()}`);
 }
 
-function clave() {
-  if (process.env.GEMINI_API_KEY_2) return process.env.GEMINI_API_KEY_2;
-  const k = execFileSync('powershell', [
+const visible = (txt) => txt.replace(/`/g, '').replace(/\n/g, ' ');
+
+/** Las líneas de cada grupo, todas con `id`, `quien` y `txt`. El id es único en toda la app. */
+async function lineasPorGrupo() {
+  const prologo = await modulo('src/app/integrada-vista/prologo-guion.ts', 'prologo');
+  const cine = await modulo('src/app/integrada-vista/cinematicas/cinematicas-datos.ts', 'cine');
+  const viaje = await modulo('src/app/integrada-vista/guion-del-viaje.ts', 'viaje');
+  return {
+    prologo: prologo.GUION,
+    cine: cine.CINEMATICAS.flatMap((c) => c.lineas),
+    viaje: Object.entries(viaje.GUION_DEL_VIAJE).flatMap(([pagina, momentos]) =>
+      Object.entries(momentos).map(([momento, l]) => ({
+        ...l,
+        id: viaje.idDeLineaDelViaje(pagina, momento),
+      })),
+    ),
+  };
+}
+
+function leerClave(nombre) {
+  if (process.env[nombre]) return process.env[nombre];
+  return execFileSync('powershell', [
     '-NoProfile',
     '-Command',
-    "[Environment]::GetEnvironmentVariable('GEMINI_API_KEY_2','User')",
+    `[Environment]::GetEnvironmentVariable('${nombre}','User')`,
   ])
     .toString()
     .trim();
-  if (!k) throw new Error('falta GEMINI_API_KEY_2');
-  return k;
+}
+
+function claves() {
+  const lista = config.claves
+    .map((nombre) => ({ nombre, k: leerClave(nombre) }))
+    .filter((c) => c.k);
+  if (!lista.length) throw new Error(`falta alguna de estas claves: ${config.claves.join(', ')}`);
+  return lista;
 }
 
 /** Qué se le pide a Gemini para una línea con un acento. `null` si ese hablante no tiene voz. */
-function pedidoDe(linea, visible, acento) {
+function pedidoDe(linea, grupo, acento) {
   const personaje = config.hablantes[linea.quien];
   if (!personaje) return null;
   const a = config.acentos[acento];
-  const texto = config.pronunciar[linea.id] ?? visible(linea).replace(/\n/g, ' ');
-  const estilo = `${config.personajes[personaje]}; ${a.estilo}`;
+  const texto = config.pronunciar[linea.id] ?? visible(linea.txt);
+  const extra = config.grupos[grupo].estilo;
+  const estilo = `${config.personajes[personaje]}; ${a.estilo}${extra ? `; ${extra}` : ''}`;
   const voz = a.voces[personaje];
   const hash = createHash('sha1')
     .update([config.modelo, voz, estilo, texto].join('|'))
     .digest('hex')
     .slice(0, 8);
-  return { id: linea.id, texto, estilo, voz, archivo: `${linea.id}.${hash}.mp3` };
+  return { id: linea.id, grupo, texto, estilo, voz, archivo: `${linea.id}.${hash}.mp3` };
 }
+
+const rutaDe = (p) => join(VOCES, p.grupo, p.archivo);
 
 async function tts(pedido, wav, k) {
   const body = JSON.stringify({
@@ -176,16 +203,17 @@ function duracionMs(mp3) {
 
 function escribirIndice(pedidos) {
   const filas = pedidos
-    .filter((p) => existsSync(join(CARPETA, p.archivo)))
+    .filter((p) => existsSync(rutaDe(p)))
     .map(
       (p) =>
-        `  '${p.id}': { archivo: 'voces/prologo/${p.archivo}', ms: ${duracionMs(join(CARPETA, p.archivo))} },`,
+        `  '${p.id}': { archivo: 'voces/${p.grupo}/${p.archivo}', ms: ${duracionMs(rutaDe(p))} },`,
     );
   const ts = `/**
  * Generado por \`scripts/voces.mjs\` (docs/voces.md): no se edita a mano.
  *
- * La voz de Gemini de cada línea del prólogo, por id, con lo que dura. La duración es del archivo,
- * no del navegador: así el reloj del prólogo es el mismo con sonido o sin él.
+ * La voz de Gemini de cada línea (del prólogo, de las cinemáticas y de las hojas del viaje), por id,
+ * con lo que dura. La duración es del archivo, no del navegador: así cada reloj es el mismo con
+ * sonido o sin él.
  */
 export interface VozGrabada {
   /** Relativo al \`<base href>\`, para que ande igual en local y en GitHub Pages. */
@@ -193,7 +221,7 @@ export interface VozGrabada {
   readonly ms: number;
 }
 
-export const VOCES_DEL_PROLOGO: Readonly<Record<string, VozGrabada>> = {
+export const VOCES_GRABADAS: Readonly<Record<string, VozGrabada>> = {
 ${filas.join('\n')}
 };
 `;
@@ -201,25 +229,54 @@ ${filas.join('\n')}
   execFileSync(
     process.execPath,
     [join(raiz, 'node_modules/prettier/bin/prettier.cjs'), '--write', INDICE],
-    {
-      stdio: 'ignore',
-    },
+    { stdio: 'ignore' },
   );
   console.log(`índice: ${filas.length} voces en ${INDICE.slice(raiz.length + 1)}`);
 }
 
-const { guion, visible } = await guionDelPrologo();
+/** Un trabajador por clave, todos sobre la misma cola: cada proyecto gasta su cupo a su ritmo. */
+async function generar(faltan) {
+  const cola = [...faltan];
+  let hechas = 0;
+  const trabajar = async ({ nombre, k }) => {
+    let primero = true;
+    while (cola.length) {
+      const p = cola.shift();
+      if (!primero) await esperar(ENTRE_PEDIDOS_MS);
+      primero = false;
+      const wav = join(TMP, `${p.id}.wav`);
+      try {
+        await tts(p, wav, k);
+        mkdirSync(join(VOCES, p.grupo), { recursive: true });
+        aMp3(wav, rutaDe(p));
+        hechas++;
+        console.log(`${hechas}/${faltan.length}`, nombre, p.id, '·', p.texto);
+      } catch (e) {
+        console.log('error en', p.id, `(${nombre})`, '·', e.message);
+        if (e.parar) {
+          cola.unshift(p);
+          console.log(`${nombre} sin cupo: siguen las demás claves`);
+          return;
+        }
+      }
+    }
+  };
+  await Promise.all(claves().map(trabajar));
+  console.log(`generadas: ${hechas}${cola.length ? ` · quedan ${cola.length} para otro día` : ''}`);
+}
+
+const grupos = await lineasPorGrupo();
 
 if (args.includes('--muestras')) {
-  const k = clave();
+  const { k } = claves()[0];
   const dir = join(raiz, 'pruebas/voces');
   mkdirSync(dir, { recursive: true });
-  const lineas = config.muestras.map((id) => guion.find((l) => l.id === id));
+  const lineas = config.muestras.map((id) => grupos.prologo.find((l) => l.id === id));
   let primero = true;
   for (const acento of Object.keys(config.acentos)) {
     const partes = [];
     for (const linea of lineas) {
-      const p = pedidoDe(linea, visible, acento);
+      const p = pedidoDe(linea, 'prologo', acento);
       const mp3 = join(dir, `${acento}-${linea.id}.mp3`);
       if (!existsSync(mp3)) {
         if (!primero) await esperar(ENTRE_PEDIDOS_MS);
@@ -280,42 +337,37 @@ if (args.includes('--muestras')) {
   process.exit(0);
 }
 
-const pedidos = guion.map((l) => pedidoDe(l, visible, config.acento)).filter(Boolean);
-const sinVoz = guion.filter((l) => !config.hablantes[l.quien]).map((l) => l.id);
-const faltan = pedidos.filter((p) => !existsSync(join(CARPETA, p.archivo)));
-mkdirSync(CARPETA, { recursive: true });
+const todas = Object.keys(config.grupos).flatMap((g) => grupos[g].map((l) => ({ l, g })));
+const pedidos = todas.map(({ l, g }) => pedidoDe(l, g, config.acento)).filter(Boolean);
+const sinVoz = todas.filter(({ l }) => !config.hablantes[l.quien]).map(({ l }) => l.id);
+const faltan = pedidos.filter((p) => !existsSync(rutaDe(p)));
 
-console.log(`acento: ${config.acento} · ${pedidos.length} líneas con voz, faltan ${faltan.length}`);
+for (const g of Object.keys(config.grupos)) {
+  const del = pedidos.filter((p) => p.grupo === g);
+  const sin = faltan.filter((p) => p.grupo === g).length;
+  console.log(`${g}: ${del.length} líneas con voz, faltan ${sin}`);
+}
+console.log(`acento: ${config.acento}`);
 if (sinVoz.length) console.log(`sin voz (siguen con blips): ${sinVoz.join(', ')}`);
 
-if (args.includes('--go')) {
-  const k = clave();
-  let hechas = 0;
-  for (const p of faltan) {
-    if (hechas) await esperar(ENTRE_PEDIDOS_MS);
-    const wav = join(TMP, `${p.id}.wav`);
-    try {
-      await tts(p, wav, k);
-      aMp3(wav, join(CARPETA, p.archivo));
-      hechas++;
-      console.log(`${hechas}/${faltan.length}`, p.id, '·', p.texto);
-    } catch (e) {
-      console.log('error en', p.id, '·', e.message);
-      if (e.parar) break;
-    }
-  }
-  console.log(`generadas: ${hechas}`);
-}
+if (args.includes('--go')) await generar(faltan);
 
 if (args.includes('--go') || args.includes('--indice')) {
   escribirIndice(pedidos);
-  const vigentes = new Set(pedidos.map((p) => p.archivo));
-  for (const f of readdirSync(CARPETA)) {
-    if (vigentes.has(f)) continue;
-    // Un archivo de una versión vieja del texto o la voz: se borra para que no se publique de más.
-    rmSync(join(CARPETA, f));
-    console.log('borrado (ya no se usa):', f);
+  const vigentes = new Set(pedidos.map((p) => rutaDe(p)));
+  for (const g of Object.keys(config.grupos)) {
+    const dir = join(VOCES, g);
+    if (!existsSync(dir)) continue;
+    for (const f of readdirSync(dir)) {
+      if (vigentes.has(join(dir, f))) continue;
+      // Un archivo de una versión vieja del texto o la voz: se borra para que no se publique de más.
+      rmSync(join(dir, f));
+      console.log('borrado (ya no se usa):', `${g}/${f}`);
+    }
   }
 } else if (faltan.length) {
-  console.log(`--go gastaría ${faltan.length} pedidos (el cupo es de 100 cada 24 h corridas).`);
+  console.log(
+    `--go gastaría ${faltan.length} pedidos, repartidos entre ${config.claves.length} claves ` +
+      '(cada proyecto tiene 100 cada 24 h corridas).',
+  );
 }

@@ -172,6 +172,14 @@ export function guionDe(
 }
 
 /**
+ * El id de una línea del viaje en el índice de voces (`voces-grabadas.ts`). La página "1/2" no puede
+ * ir así en el nombre de un archivo, y `scripts/voces.mjs` usa esta misma función.
+ */
+export function idDeLineaDelViaje(pagina: string, momento: string): string {
+  return `viaje-${pagina.replace('/', '-')}-${momento}`;
+}
+
+/**
  * Las palabras de una línea, para que entren de a una como en las cinemáticas. `corte` marca la
  * primera de un renglón nuevo: el salto lo decide el guion, no el ancho de la caja.
  */

@@ -1,6 +1,16 @@
 {
   "nota": "Guion de las voces de Gemini (scripts/voces.mjs, docs/voces.md). Cambiar una voz, un estilo o un texto regenera solo esas líneas.",
   "modelo": "gemini-3.8-flash-tts",
+  "claves": ["GEMINI_API_KEY_2", "GEMINI_API_KEY_3", "GEMINI_API_KEY_4"],
+  "grupos": {
+    "prologo": {},
+    "cine": {
+      "estilo": "English programming words such as signal, computed, effect, set, update or linkedSignal are said in English"
+    },
+    "viaje": {
+      "estilo": "English programming words such as signal, computed, effect, set, update or linkedSignal are said in English"
+    }
+  },
   "acento": "neutro",
   "acentos": {
     "rioplatense": {
