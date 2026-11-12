@@ -12,9 +12,11 @@
  *   igual y en silencio. Ningún método tira.
  * - **Un solo contexto, creado recién con un gesto** (click o tecla). Antes de eso, lo que se pida
  *   se descarta: no se encola para sonar todo junto después.
- * - **Todo se sintetiza.** Sin archivos ni red. Las voces de los personajes son "blips" con un
+ * - **Se sintetiza, salvo las voces grabadas.** Las voces de los personajes son "blips" con un
  *   timbre por personaje, al estilo de los RPG de texto: se distingue quién habla sin leer, y
  *   suena igual en cualquier máquina, cosa que una voz sintética del sistema no puede prometer.
+ *   Una línea que tiene su voz grabada (mp3 de Gemini, ADR 0022) suena con ella si ya llegó y
+ *   entra en su ventana; si no, con sus blips. La grabación nunca es condición para seguir.
  * - **Se congela con la pestaña oculta** y se respeta la preferencia guardada.
  */
 
@@ -161,8 +163,16 @@ export interface Sonido {
   /** Abre el contexto. Hay que llamarlo desde un gesto; también se engancha solo al primero. */
   desbloquear(): void;
   efecto(efecto: Efecto): void;
-  /** Hace hablar a un personaje durante la ventana de una línea. */
-  hablar(quien: Voz, texto: string, ventanaMs: number): void;
+  /**
+   * Hace hablar a un personaje durante la ventana de una línea. Con `grabada` (la ruta de su mp3)
+   * suena la grabación si ya está cargada y entra en la ventana; si no, los blips.
+   */
+  hablar(quien: Voz, texto: string, ventanaMs: number, grabada?: string): void;
+  /**
+   * Pide las grabaciones que van a sonar, para que estén listas cuando les toque. Con el sonido
+   * apagado no baja nada: lo hace recién cuando lo prenden.
+   */
+  precargar(grabadas: readonly string[]): void;
   /** Corta todo lo que está sonando o agendado. */
   callar(): void;
   /** Para quien sintetiza lo suyo (la intro, el prólogo). `null` si no hay audio todavía. */
@@ -180,6 +190,20 @@ export interface EntornoSonido {
     Document,
     'addEventListener' | 'removeEventListener' | 'visibilityState'
   > | null;
+  /** Cómo se baja una grabación. Por defecto `fetch`, relativo al `<base href>`. */
+  readonly traer?: (ruta: string) => Promise<ArrayBuffer>;
+}
+
+/** Una grabación cortada al borde de su ventana suena peor que los blips: tiene que entrar. */
+const HOLGURA_GRABADA_MS = 40;
+
+/** Las voces grabadas llegan normalizadas por Gemini: un poco por encima de la salida común. */
+const VOLUMEN_GRABADA = 1.1;
+
+async function traerDeLaRed(ruta: string): Promise<ArrayBuffer> {
+  const r = await fetch(ruta, { signal: AbortSignal.timeout(15_000) });
+  if (!r.ok) throw new Error(`${ruta}: ${r.status}`);
+  return r.arrayBuffer();
 }
 
 /** Más voces a la vez que esto se vuelve barro y cuesta CPU en máquinas chicas. */
@@ -217,6 +241,7 @@ export function crearSonido(entorno: EntornoSonido = {}): Sonido {
   const crearContexto = entorno.crearContexto ?? contextoDelNavegador;
   const almacen = entorno.almacen ?? null;
   const documento = entorno.documento ?? null;
+  const traer = entorno.traer ?? traerDeLaRed;
 
   let ctx: AudioContext | null = null;
   let salidaComun: GainNode | null = null;
@@ -225,6 +250,51 @@ export function crearSonido(entorno: EntornoSonido = {}): Sonido {
   let vivas = 0;
   const agendadas = new Set<OscillatorNode>();
   const oyentes = new Set<(activo: boolean) => void>();
+
+  /** Las grabaciones pedidas, en tres tiempos: pedida, bajada (bytes) y lista para sonar. */
+  const pedidas = new Set<string>();
+  const bajadas = new Map<string, Promise<ArrayBuffer | null>>();
+  const listas = new Map<string, AudioBuffer>();
+  const decodificando = new Set<string>();
+  const grabacionesSonando = new Set<AudioBufferSourceNode>();
+
+  /**
+   * Baja lo pedido y, si ya hay contexto, lo decodifica. Cada ruta se baja y se decodifica una
+   * sola vez: `decodeAudioData` se queda con los bytes. Una que falla queda en blips, sin reintento.
+   */
+  function cargar(): void {
+    if (roto || !encendido) return;
+    for (const ruta of pedidas) {
+      if (!bajadas.has(ruta)) {
+        bajadas.set(
+          ruta,
+          traer(ruta).catch(() => null),
+        );
+      }
+      if (!ctx || listas.has(ruta) || decodificando.has(ruta)) continue;
+      decodificando.add(ruta);
+      const contexto = ctx;
+      void bajadas
+        .get(ruta)!
+        .then((bytes) => (bytes ? contexto.decodeAudioData(bytes) : null))
+        .then((buffer) => {
+          if (buffer && ctx === contexto) listas.set(ruta, buffer);
+        })
+        .catch(() => undefined);
+    }
+  }
+
+  function reproducir(buffer: AudioBuffer): void {
+    if (!ctx || !salidaComun) return;
+    const fuente = ctx.createBufferSource();
+    const volumen = ctx.createGain();
+    fuente.buffer = buffer;
+    volumen.gain.value = VOLUMEN_GRABADA;
+    fuente.connect(volumen).connect(salidaComun);
+    grabacionesSonando.add(fuente);
+    fuente.onended = () => grabacionesSonando.delete(fuente);
+    fuente.start(ctx.currentTime + 0.02);
+  }
 
   /** Cualquier falla del audio lo apaga para siempre en esta sesión, sin ruido en pantalla. */
   function aSalvo(fn: () => void): void {
@@ -287,6 +357,7 @@ export function crearSonido(entorno: EntornoSonido = {}): Sonido {
         void ctx.resume().catch(() => undefined);
       }
     });
+    cargar();
   }
 
   const alGesto = (): void => desbloquear();
@@ -312,6 +383,14 @@ export function crearSonido(entorno: EntornoSonido = {}): Sonido {
     }
     agendadas.clear();
     vivas = 0;
+    for (const fuente of grabacionesSonando) {
+      try {
+        fuente.stop();
+      } catch {
+        // Ya había terminado.
+      }
+    }
+    grabacionesSonando.clear();
   }
 
   return {
@@ -328,6 +407,7 @@ export function crearSonido(entorno: EntornoSonido = {}): Sonido {
         if (salidaComun) salidaComun.gain.value = encendido ? VOLUMEN_COMUN : 0;
       });
       if (!encendido) callar();
+      else cargar();
       for (const fn of oyentes) fn(encendido);
       return encendido;
     },
@@ -359,15 +439,25 @@ export function crearSonido(entorno: EntornoSonido = {}): Sonido {
         }
       });
     },
-    hablar(quien, texto, ventanaMs) {
+    hablar(quien, texto, ventanaMs, grabada) {
       if (!listo()) return;
       aSalvo(() => {
+        const buffer = grabada ? listas.get(grabada) : undefined;
+        // A otra velocidad la ventana se achica y la grabación ya no entra: ahí hablan los blips.
+        if (buffer && buffer.duration * 1000 <= ventanaMs + HOLGURA_GRABADA_MS) {
+          reproducir(buffer);
+          return;
+        }
         const perfil = PERFILES[quien];
         const ahora = ctx!.currentTime + 0.02;
         for (const b of planDeBlips(texto, ventanaMs, perfil)) {
           tono(b.hz, ahora + b.t / 1000, b.ms, perfil.onda, perfil.volumen);
         }
       });
+    },
+    precargar(grabadas) {
+      for (const ruta of grabadas) pedidas.add(ruta);
+      cargar();
     },
     callar,
     salida: () => (listo() && ctx && salidaComun ? { ctx, salida: salidaComun } : null),
@@ -383,6 +473,9 @@ export function crearSonido(entorno: EntornoSonido = {}): Sonido {
       aSalvo(() => void ctx?.close().catch(() => undefined));
       ctx = null;
       salidaComun = null;
+      listas.clear();
+      bajadas.clear();
+      decodificando.clear();
     },
   };
 }

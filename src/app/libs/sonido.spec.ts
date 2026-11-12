@@ -48,6 +48,29 @@ class ContextoFalso {
       onended: null,
     } as unknown as OscillatorNode;
   }
+  grabaciones: { segundos: number; paradas: number }[] = [];
+  createBufferSource() {
+    const fuente = {
+      buffer: null as { duration: number } | null,
+      connect: (destino: unknown) => destino,
+      start: () => this.grabaciones.push(registro),
+      stop: () => {
+        registro.paradas++;
+      },
+      onended: null,
+    };
+    const registro = {
+      get segundos() {
+        return fuente.buffer?.duration ?? 0;
+      },
+      paradas: 0,
+    };
+    return fuente as unknown as AudioBufferSourceNode;
+  }
+  /** Los bytes falsos dicen cuánto dura la grabación: un byte por segundo. */
+  decodeAudioData(bytes: ArrayBuffer) {
+    return Promise.resolve({ duration: bytes.byteLength } as AudioBuffer);
+  }
   resume() {
     this.resumidas++;
     this.state = 'running';
@@ -252,6 +275,78 @@ describe('sonido', () => {
       s.destruir();
       expect(escuchas.size).toBe(0);
       expect(ctx.state).toBe('closed');
+    });
+
+    describe('voces grabadas', () => {
+      /** Espera a que se resuelvan las promesas de bajar y decodificar. */
+      const asentar = () => new Promise((r) => setTimeout(r));
+
+      function conGrabaciones(almacen = almacenEnMemoria()) {
+        const ctx = new ContextoFalso();
+        const pedidas: string[] = [];
+        const s = crearSonido({
+          crearContexto: () => ctx as unknown as AudioContext,
+          almacen,
+          documento: null,
+          traer: (ruta) => {
+            pedidas.push(ruta);
+            if (ruta.includes('rota')) return Promise.reject(new Error('404'));
+            return Promise.resolve(new ArrayBuffer(2));
+          },
+        });
+        return { ctx, s, pedidas };
+      }
+
+      it('con su grabación lista, la línea suena con ella y sin blips', async () => {
+        const { ctx, s } = conGrabaciones();
+        s.precargar(['voces/a.mp3']);
+        s.desbloquear();
+        await asentar();
+        s.hablar('cap', 'Al fin es hora de volver a casa.', 3000, 'voces/a.mp3');
+        expect(ctx.grabaciones.length).toBe(1);
+        expect(ctx.osciladores.length).toBe(0);
+      });
+
+      it('si todavía no llegó, o no llega nunca, habla con blips', async () => {
+        const { ctx, s } = conGrabaciones();
+        s.desbloquear();
+        s.precargar(['voces/a.mp3', 'voces/rota.mp3']);
+        s.hablar('cap', 'ahora', 3000, 'voces/a.mp3');
+        await asentar();
+        s.hablar('cap', 'ahora', 3000, 'voces/rota.mp3');
+        expect(ctx.grabaciones.length).toBe(0);
+        expect(ctx.osciladores.length).toBe(6);
+      });
+
+      it('una grabación que no entra en la ventana (a otra velocidad) cede a los blips', async () => {
+        const { ctx, s } = conGrabaciones();
+        s.precargar(['voces/a.mp3']);
+        s.desbloquear();
+        await asentar();
+        s.hablar('cap', 'ahora', 1000, 'voces/a.mp3');
+        expect(ctx.grabaciones.length).toBe(0);
+        expect(ctx.osciladores.length).toBe(3);
+      });
+
+      it('con el sonido apagado no baja nada; al prenderlo, sí', () => {
+        const { s, pedidas } = conGrabaciones(almacenEnMemoria({ [CLAVE_SONIDO]: '0' }));
+        s.precargar(['voces/a.mp3']);
+        expect(pedidas).toEqual([]);
+        s.alternar(true);
+        expect(pedidas).toEqual(['voces/a.mp3']);
+        s.precargar(['voces/a.mp3']);
+        expect(pedidas).toEqual(['voces/a.mp3']);
+      });
+
+      it('callar corta la grabación que está sonando', async () => {
+        const { ctx, s } = conGrabaciones();
+        s.precargar(['voces/a.mp3']);
+        s.desbloquear();
+        await asentar();
+        s.hablar('mascota', 'El caos es orden.', 3000, 'voces/a.mp3');
+        s.callar();
+        expect(ctx.grabaciones[0].paradas).toBe(1);
+      });
     });
 
     it('un contexto cerrado por el navegador deja de agendar sin tirar', () => {
