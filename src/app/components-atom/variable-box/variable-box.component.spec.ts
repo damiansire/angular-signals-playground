@@ -51,4 +51,17 @@ describe('VariableBoxComponent', () => {
 
     expect(emitted).toBe(1);
   });
+
+  it('con el espacio también: es un botón, y apretarlo no desplaza la página', () => {
+    let emitted = 0;
+    component.clickEvent.subscribe(() => emitted++);
+    const box = fixture.nativeElement.querySelector('[role="button"]') as HTMLElement;
+
+    const baja = new KeyboardEvent('keydown', { key: ' ', code: 'Space', cancelable: true });
+    box.dispatchEvent(baja);
+    box.dispatchEvent(new KeyboardEvent('keyup', { key: ' ', code: 'Space' }));
+
+    expect(baja.defaultPrevented).toBeTrue();
+    expect(emitted).toBe(1);
+  });
 });
