@@ -94,6 +94,22 @@ puede alcanzar" son dos cosas distintas y hay que chequear las dos.
 - [ ] Todo anillo de foco llega a 3:1 contra lo que tiene alrededor. Los acentos claros (ámbar,
       verde) sobre el crema no llegan: el anillo va doble, `var(--focus-ink)` en el `outline` (el
       contraste) y el acento en un `box-shadow` por dentro (la identidad).
+- [ ] (2026-11-12) `.boton-tinta` lleva ese anillo doble: `--focus-ink` por fuera y el acento de
+      la etapa (`--acento-etapa`) por dentro. Defecto resuelto: su foco era
+      `var(--glow, #f2c27a)`, y `--glow` se fue con la card de la molécula, así que quedaba el ámbar
+      solo, 1,6:1 contra la hoja, en los 15 botones de las pantallas. Al retirar una variable,
+      buscar quién la sigue leyendo con su valor de respaldo. Tabular hasta un botón de una pantalla
+      (7/3, "Resaltar") y mirar la captura ampliada, antes y después.
+- [ ] (2026-11-12) El skip-link deja el foco en el contenido de la página en la que está. Defecto
+      resuelto: con `<base href>`, `href="#main-content"` apunta a la raíz del sitio, así que el
+      primer Tab + Enter en `/practica/carrito` (o en `/?nivel=…`) llevaba a `/#main-content` y
+      recargaba la app. Ahora el click se cancela y el foco va al contenedor, sin anillo (es una
+      posición, no un control); el Tab siguiente cae en el primer control de adentro. Probado con
+      Tab y Enter reales por CDP: misma URL, sin recarga, foco en `#main-content`.
+- [ ] (2026-11-12) Un átomo con `role="button"` se escucha por su evento, no por el `(click)` del
+      host. Defecto resuelto: en 3/1 las cajas Count1 y Count2 se enlazaban con `(click)` sobre
+      `<app-variable-box>`; el Enter de la caja emite `clickEvent`, que nadie escuchaba, y la única
+      acción de la pantalla no se podía hacer con teclado. Con spec (mouse y Enter).
 - [ ] El aviso de auriculares es un diálogo modal también para el teclado: mientras está arriba, lo
       que tapa en `.tusi__overlay` (la colina: lamparita, sonido, pausa, "Entrar") va `inert`, y se
       suelta recién cuando la cámara llega a la colina. Defecto resuelto (2026-11-11): Tab salía de
@@ -145,6 +161,13 @@ puede alcanzar" son dos cosas distintas y hay que chequear las dos.
       shorthand `animation` más específico resetea el play-state y le gana.
 - [ ] `prefers-reduced-motion` se prueba cambiándolo EN VIVO, no solo al cargar:
       el CSS reacciona solo, el SMIL y los canvas no.
+- [ ] (2026-11-12) El bloque de `prefers-reduced-motion` nombra también las reglas más
+      específicas que vuelven a declarar `transition`: una regla de estado le gana por especificidad
+      a la lista del bloque, aunque el bloque esté después. Defecto resuelto: en 0/1,
+      `.htt-arboles--comparando .htt-arbol-caja` (0,2,0) le ganaba a `.htt-arbol-caja` (0,1,0), y al
+      comparar los dos árboles se deslizaban con resorte con el movimiento reducido. Arreglado en
+      el CSS; falta medirlo en pantalla (`getComputedStyle(caja).transitionDuration` con la
+      comparación abierta y el movimiento reducido).
 - [ ] La vida de fondo se pausa desde el botón de la colina, junto al sonido (WCAG 2.2.2; el del
       topbar se fue con la molécula, ADR 0021), y la pausa se recuerda (`signals-pausa`). Pausar NO es congelar: `animation-play-state: paused` deja una entrada que
       todavía no arrancó en su primer cuadro, invisible (con la pausa puesta la bitácora quedaba
@@ -218,6 +241,14 @@ puede alcanzar" son dos cosas distintas y hay que chequear las dos.
       contradice. Si el texto dice "el log quedó clavado" y el usuario ya
       reparó el sistema, pasa a leerse como reporte histórico (atenuado, con el
       eyebrow en "resuelto"), no como afirmación vigente.
+- [ ] (2026-11-12) El placeholder de un campo llega a 4,5:1 contra el campo. Defecto resuelto: en
+      la hoja del viaje era `#8a8069` sobre `#fffdf7` (3,85:1), y por especificidad le ganaba al
+      arreglo que ya tenía `.lab input::placeholder`. Ahora es el mismo `#6f6753` (5,5:1), con
+      `opacity: 1`. Medido en 10/1 con `getComputedStyle(input, '::placeholder')` y mirado ampliado.
+- [ ] (2026-11-12) Los cortes de ancho y de alto no dejan hueco entre dos enteros: con el zoom del
+      navegador el viewport mide fracciones de px, y entre `max-width: 760px` y `min-width: 761px`
+      (o entre 500 y 501 de alto) no aplicaba ni el viaje angosto ni el ancho. El lado ancho va en
+      `760.02px` y `500.02px`; el umbral escrito en este checklist (hasta 760, angosto) no se movió.
 
 ## Vistas y estado
 
@@ -310,6 +341,10 @@ puede alcanzar" son dos cosas distintas y hay que chequear las dos.
 
 - [ ] Lo que responde al puntero son muelles de `libs/muelle.ts` en UN reloj compartido. Con todo
       quieto, cero `requestAnimationFrame`: se cuenta en reposo y otra vez después de asentarse.
+- [ ] (2026-11-12) Un botón que se hunde en su sombra lleva la sombra en la misma transición que
+      el desplazamiento. Defecto resuelto: en las fichas del manual (`.prologo__manual-boton`,
+      `.pm-mostrar`, `.pm-atras`) la lista de `transition` no nombraba `box-shadow`: el botón bajaba
+      en 0,2 s y la sombra cambiaba en un cuadro. Arreglado en el CSS; falta mirarlo cuadro a cuadro.
 - [ ] Un toque suma velocidad, no fija una pose: doce clics seguidos terminan en
       `translate(0, 0) rotate(0) scale(1, 1)`, nada queda a medio camino.
 - [ ] Apretar y arrastrar estira y no selecciona texto (`user-select: none` y `getSelection()` vacío);
@@ -1543,6 +1578,11 @@ verificable con `/cine/<n>?cuadro=<beat>` (fotograma congelado) o `/cine/<n>` (r
       todo control entre la barra y la caja de diálogo recibe su click (`elementFromPoint`), y al
       fondo no queda ninguno debajo de la caja. La molécula lejana no toca ni las naves ni la
       bodega, y cada toque de un botón hace reaccionar a las naves y a la bodega (click real).
+- [ ] (2026-11-12) La flecha del código a su parte del carrito se dibuja siempre que las dos
+      columnas quedan lado a lado. Defecto resuelto: el CSS apila en 720 px y el TS preguntaba por
+      760, así que entre 721 y 759 las columnas iban lado a lado y la flecha no salía. Ahora el TS
+      mira dónde quedó cada columna (`getBoundingClientRect`), no un ancho copiado. Medido con el
+      mouse real a 740×900 (dos columnas, hay flecha) y a 700×900 (una columna, no hay).
 
 ## Sonido (tiene que andar en cualquier PC)
 
