@@ -151,6 +151,18 @@ puede alcanzar" son dos cosas distintas y hay que chequear las dos.
       de Tusi: mientras la colina la tapa (`.tusi__overlay` sin `.gone`), su canvas, título y HUD
       van en `visibility: hidden`. Seguían en capas propias, ~30 MB de memoria de video a 3440 px
       que le faltaban al zoom desde el ojo.
+- [ ] (2026-11-13) Con el manual de a bordo o el árbol de Signal Space abiertos, el prólogo de
+      atrás no se dibuja. Defecto resuelto: la pantalla de la nave lo tapa entero (`.prologo__tele`,
+      negro opaco), y el motor seguía corriendo `dibujar` en cada cuadro con el reloj clavado, unas
+      228 escrituras de atributos del SVG por cuadro durante todo lo que se tarda en leer. La tele
+      avisa cuándo el negro terminó de subir y cuándo está por irse (`alTapar`), y entre los dos
+      avisos el motor no pide cuadros y Angie no se mueve sola. Mientras el negro sube o se va, la
+      escena sigue viva, porque ahí todavía se ve. No descansa hasta que el zumbido terminó su fundido
+      (lo mueve el mismo loop), y con el árbol el zumbido sigue sonando igual, sin cuadros. Medir con
+      un `MutationObserver` de atributos sobre `.prologo__escena` y input real: cero con la página
+      abierta (a los ~1,3 s en el manual), y más de cero en la misma muestra en que la opacidad de
+      `.prologo__tele` baja de 1. Medido a 1440×900 en el manual y en el árbol, y en el árbol con
+      movimiento reducido, donde al seguir llega la cinemática del capítulo 1.
 - [ ] Consola limpia mientras se recorre: un `console.log` didáctico solo
       aparece cuando el usuario está en el sub-nivel que lo enseña.
 - [ ] Ningún loop de dibujo (rAF de canvas) corre sin algo que mover: parado en
@@ -254,8 +266,8 @@ puede alcanzar" son dos cosas distintas y hay que chequear las dos.
 
 - [ ] (2026-11-12) La barra de direcciones dice la página que se está viendo, no la primera de la
       etapa. Defecto resuelto: al pasar de página dentro de una etapa se guardaba la partida pero no
-      se escribía la barra, y como el link le gana a la partida, recargar en la página 2 volvía a la
-      1. Con spec (la barra y la partida dicen lo mismo) y probado con recarga real por CDP en 4/2.
+      se escribía la barra, y como el link le gana a la partida, recargar en la página 2 volvía a
+      la 1. Con spec (la barra y la partida dicen lo mismo) y probado con recarga real por CDP en 4/2.
 - [ ] URL sync bidireccional: navegar actualiza la URL Y pegar una URL
       restaura el estado (nivel y sub-nivel). Testear ambas direcciones.
 - [ ] Retomar al recargar (ADR 0005 y 0015), probado con input real: con un punto del prólogo, el
