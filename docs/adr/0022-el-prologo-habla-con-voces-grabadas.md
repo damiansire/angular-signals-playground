@@ -1,5 +1,8 @@
 # 0022. El prólogo habla con voces grabadas de Gemini; los blips quedan de respaldo
 
+> Ampliado por el [ADR 0023](./0023-toda-la-app-habla-con-voces-grabadas.md): las cinemáticas, las
+> hojas del viaje y la colina también hablan, y el índice pasó a llamarse `voces-grabadas.ts`.
+
 ## Contexto
 
 Desde [0002](./0002-capa-de-juego-cinematicas-partida-y-sonido.md) todo lo que suena se sintetiza,

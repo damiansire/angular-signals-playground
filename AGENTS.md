@@ -83,9 +83,10 @@ Esto es lo que funciona:
   dirección.
 - **Sonido y música:** los requisitos están en [`docs/sonido.md`](./docs/sonido.md). Todo cambio de
   lo que suena los respeta, y todo pedido nuevo sobre el sonido se anota ahí con fecha.
-- **Voces de Gemini:** el prólogo habla con mp3 generados por `scripts/voces.mjs`
-  ([`docs/voces.md`](./docs/voces.md)). Si cambiás el texto de una línea del prólogo, su voz queda
-  vieja y esa línea vuelve a los blips hasta regenerarla; generar gasta crédito real (avisá antes).
+- **Voces de Gemini:** el prólogo, las cinemáticas, las hojas del viaje y la colina hablan con mp3
+  generados por `scripts/voces.mjs` ([`docs/voces.md`](./docs/voces.md)). Si cambiás el texto de
+  una línea de esos guiones, su voz queda vieja y esa línea vuelve a los blips (o queda muda, en el
+  viaje) hasta regenerarla; generar gasta crédito real (avisá antes).
 - **Historia:** el canon (quién es quién y el bucle de Angie), el recorrido por
   etapas y lo que falta cerrar están en [`docs/historia/`](./docs/historia/README.md).
   Leelo antes de tocar guiones, cinemáticas o el orden de los conceptos.

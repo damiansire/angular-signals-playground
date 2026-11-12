@@ -10,7 +10,7 @@ La plomería (un solo contexto, todo sintetizado, nada tira) la decidió el
 ## Reglas para toda la app
 
 1. **Todo se sintetiza, salvo las voces grabadas.** Sin archivos ni red (`libs/sonido.ts`). La
-   excepción son las voces de Gemini del prólogo, que se bajan como mp3 ([`voces.md`](./voces.md),
+   excepción son las voces de Gemini (prólogo, cinemáticas, hojas del viaje y colina), que se bajan como mp3 ([`voces.md`](./voces.md),
    [ADR 0022](./adr/0022-el-prologo-habla-con-voces-grabadas.md)); sin ellas, la línea habla con blips.
 2. **Nada depende de que suene.** Sin Web Audio, con el sonido apagado o si el audio se rompe, todo
    sigue igual y en silencio.
@@ -39,7 +39,7 @@ La plomería (un solo contexto, todo sintetizado, nada tira) la decidió el
 | La despedida de Angie       | Fondo en re, un acorde por pensamiento y la cajita                                       | Una fase por pensamiento, sin horario (los pasa quien mira); al volverse luz queda sin resolver                     | `musica-del-presentimiento.ts`               |
 | El prólogo                  | Zumbido de la anomalía que tira de la nave, tirones, salto, choque, voces y acorde final | El zumbido crece al acercarse la anomalía; cada golpe suena una sola vez                                            | `prologo-anomalia.ts`                        |
 | El manual de a bordo        | Música para estudiar (2026-11-11)                                                        | Ver abajo                                                                                                           | `musica-del-manual.ts`                       |
-| Las voces del prólogo       | La voz de Gemini de cada personaje (2026-11-12, español neutro)                          | Reemplaza a los blips donde hay grabación; si no llegó o no entra en la ventana, blips; la línea dura lo que su voz | `libs/sonido.ts`, `voces-del-prologo.ts`     |
+| Las voces grabadas          | La voz de Gemini de cada personaje (2026-11-12, español neutro)                          | Reemplaza a los blips donde hay grabación; si no llegó o no entra en la ventana, blips; la línea dura lo que su voz | `libs/sonido.ts`, `voces-grabadas.ts`        |
 | Las voces de los personajes | Blips con un timbre por personaje                                                        | Se distingue quién habla sin leer; la misma frase suena siempre igual; nunca sigue hablando cuando el texto se fue  | `libs/sonido.ts` (`PERFILES`, `planDeBlips`) |
 | Las cinemáticas             | Toque, título, beats, transmisión y cierre                                               | El título en la menor, como la intro                                                                                | `cinematica.component.ts`, `libs/sonido.ts`  |
 

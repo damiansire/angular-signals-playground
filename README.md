@@ -32,8 +32,9 @@ them the rules. Each concept is a chapter of that trip:
   `signals-cuaderno`): reload and the trip picks up where you left it. "Empezar de cero", on the
   first screen, wipes it.
 - **Sound that works on any machine.** Everything is synthesized with one Web Audio context
-  (characters "talk" with RPG-style blips), except the prologue, where they speak with voices
-  pre-generated with Gemini TTS ([docs/voces.md](./docs/voces.md)) and fall back to the blips. Without
+  (characters "talk" with RPG-style blips), except their lines in the prologue, the cinematics and
+  the journey pages, where they speak with voices pre-generated with Gemini TTS
+  ([docs/voces.md](./docs/voces.md)) and fall back to the blips. Without
   audio support it simply stays silent. One switch mutes everything.
 - **Screening room.** `/cine/6` plays a chapter's cinematic directly, and `/cine/6?cuadro=<beat>`
   freezes one frame, useful to review scenes.
