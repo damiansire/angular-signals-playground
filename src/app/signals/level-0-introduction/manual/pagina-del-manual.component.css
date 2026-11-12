@@ -754,6 +754,15 @@
     --pm-nave-arriba: 50%;
   }
 }
+/* Más baja todavía, bajar la nave no alcanza: el globo crece hacia arriba desde ella, y con tres
+   renglones o con la pista llegaba igual a "Manual de a bordo" y a la bajada (a 1280×640 en las
+   leyes 1 a 4, y a 1024×600, 1366×640 y 2000×700). La ley se corre a la columna de la pantalla: el
+   globo y la ley dejan de compartir columna, midan lo que midan. */
+@media (min-width: 760.02px) and (max-height: 720px) {
+  :host(.pm-pantalla) .pm-cabeza {
+    padding-left: calc(var(--pm-nave-ancho) + clamp(1rem, 2.4vw, 2.2rem));
+  }
+}
 
 /* ── La portada (`portada`) ─────────────────────────────────────────────────────────────────
    La ley grande en la pantalla de la nave, con su dibujo arriba y "Leer" abajo, que abre la demo.
@@ -842,5 +851,21 @@
   .pm .pm-pantalla .pm-portada .pm-leer {
     rotate: none;
     transition: none;
+  }
+}
+
+/* Baja, la portada de la ley 1 (la más alta, con su árbol) no entraba y la hoja scrolleaba: 21 px a
+   1280×640, 19 a 2000×780, 35 a 1024×600. Con la rueda subía el vidrio y aparecía una franja negra.
+   Se le saca aire, no dibujo: abajo no cuelga la pestaña "Anterior" (en la portada va con "Leer"),
+   así que alcanza con el lugar del marco. */
+@media (min-width: 760.02px) and (max-height: 820px) {
+  :host(.pm-pantalla.pm-en-portada) .pm-ventana {
+    padding-bottom: 1.25rem;
+  }
+  :host(.pm-pantalla.pm-en-portada) .pm-pantalla {
+    margin-top: calc(var(--pm-arriba, 0px) + 0.75rem);
+  }
+  .pm-portada {
+    gap: 0.45rem;
   }
 }
