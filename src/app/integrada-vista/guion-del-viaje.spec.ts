@@ -1,4 +1,4 @@
-import { signalsRoutesTree } from '../app.routes';
+import { signalsRoutesTree } from '../signals/signals-routes-tree';
 import { problemasDeLinea } from '../libs/guion';
 import { GUION_DEL_VIAJE } from './guion-del-viaje';
 import { paginasDeEtapa } from './viaje';

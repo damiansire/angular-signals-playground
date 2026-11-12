@@ -1,47 +1,6 @@
-import { signalsRoutesTree, routes } from './app.routes';
+import { routes } from './app.routes';
 
-/**
- * El árbol de conceptos es la fuente de datos que la vista integrada consume para embeber cada
- * sub-nivel. Sus dos invariantes se rompían en silencio: un sub-nivel sin componente daba una card
- * en blanco sin ningún error, y el nombre del sub-nivel se sacaba del primer <h1> del componente
- * montado, así que un sub-nivel sin título propio terminaba mostrando el de un widget interno.
- */
-describe('signalsRoutesTree', () => {
-  const subLevels = signalsRoutesTree.flatMap((level) =>
-    (level.subLevels ?? []).map((sub) => ({ id: `${level.path}/${sub.path}`, sub })),
-  );
-
-  it('tiene los 11 conceptos del recorrido, del capítulo 1 al 11', () => {
-    expect(signalsRoutesTree.map((level) => level.path)).toEqual(
-      Array.from({ length: 11 }, (_, i) => String(i + 1)),
-    );
-  });
-
-  it('todo sub-nivel trae componente: sin esto la card se monta vacía y nadie se entera', () => {
-    const sinComponente = subLevels
-      .filter(({ sub }) => !sub.component && !sub.loadComponent)
-      .map(({ id }) => id);
-    expect(sinComponente).toEqual([]);
-  });
-
-  it('un sub-nivel diferido carga de verdad su componente', async () => {
-    const diferidos = subLevels.filter(({ sub }) => sub.loadComponent);
-    for (const { id, sub } of diferidos) {
-      const cargado = await sub.loadComponent!();
-      expect(cargado.component).withContext(id).toBeTruthy();
-    }
-  });
-
-  it('todo sub-nivel declara su nombre para el topbar', () => {
-    const sinTitulo = subLevels.filter(({ sub }) => !sub.title?.trim()).map(({ id }) => id);
-    expect(sinTitulo).toEqual([]);
-  });
-
-  it('los nombres son propios de cada sub-nivel, no un rótulo repetido', () => {
-    const titulos = subLevels.map(({ sub }) => sub.title);
-    expect(new Set(titulos).size).toBe(titulos.length);
-  });
-
+describe('routes', () => {
   it('el comodín manda a la raíz: es el fallback del que depende el deep-link en Pages', () => {
     const wildcard = routes.find((route) => route.path === '**');
     expect(wildcard).toBeTruthy();

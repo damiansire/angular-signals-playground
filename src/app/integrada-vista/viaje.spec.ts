@@ -1,4 +1,4 @@
-import { signalsRoutesTree } from '../app.routes';
+import { signalsRoutesTree } from '../signals/signals-routes-tree';
 import type { RouteItem } from '../interfaces/route-item.interface';
 import {
   CAPITULO_DE_CONCEPTO,
@@ -15,7 +15,7 @@ import { buildWhereQuery, parseWhereQuery } from './url-sync';
 
 describe('el viaje', () => {
   it('cada concepto del árbol de rutas tiene su etapa, y el capítulo es su path', () => {
-    // Si alguien agrega o quita un nivel en app.routes sin su etapa, el viaje lo saltearía en silencio.
+    // Si alguien agrega o quita un nivel del árbol sin su etapa, el viaje lo saltearía en silencio.
     expect(CAPITULO_DE_CONCEPTO.map(String)).toEqual(signalsRoutesTree.map((c) => c.path));
     expect(conceptoDeCapitulo(1)).toBe(0);
     expect(conceptoDeCapitulo(11)).toBe(ETAPAS_DEL_VIAJE.length - 1);

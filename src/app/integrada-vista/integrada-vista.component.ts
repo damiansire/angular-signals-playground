@@ -64,7 +64,7 @@ import type { Musica } from './musica-del-presentimiento';
 import { sonido } from '../libs/sonido';
 import { AYUDA_DE_ANGIE } from '../components-atom/manipulable-system/manipulable-system.component';
 
-import { signalsRoutesTree } from '../app.routes';
+import { signalsRoutesTree } from '../signals/signals-routes-tree';
 import { type RouteItem, type SubNivelDiferido } from '../interfaces/route-item.interface';
 import { initIntroTusi, type IntroTusiHandle } from './intro-tusi';
 import { buildWhereQuery, parseWhereQuery } from './url-sync';
