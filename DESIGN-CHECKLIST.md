@@ -117,6 +117,14 @@ puede alcanzar" son dos cosas distintas y hay que chequear las dos.
       con teclas reales: con el aviso el ciclo es invitación, skip-link, "Empezar de cero" (si hay
       partida) y sonido; en la colina vuelve a la lamparita.
 
+- [ ] (2026-11-13) El skip-link se ve cuando toma el foco, también sobre la hoja del viaje y sobre
+      una cinemática. Defecto resuelto: iba en `z-index: 50`, debajo de la hoja (70) y de la
+      cinemática (80), y Shift+Tab desde la hoja dejaba el foco en algo tapado. Ahora va en 90.
+      Probado con Shift+Tab real en 1/1: `elementFromPoint` en su centro devuelve el link.
+- [ ] (2026-11-13) Un átomo con `role="button"` responde a Enter y al espacio. Defecto resuelto:
+      `app-variable-box` solo escuchaba `keyup.enter`, y en 3/1 el espacio no hacía nada. El
+      `keydown` del espacio se cancela para que no desplace la página. Con spec.
+
 ## Trabajo de fondo (lo que corre cuando no lo estás mirando)
 
 - [ ] Ningún timer, effect ni fetch de un sub-nivel corre mientras su capítulo
@@ -195,6 +203,14 @@ puede alcanzar" son dos cosas distintas y hay que chequear las dos.
       con la pausa puesta (el cronómetro de 8/2 es el stream convertido a signal): solo se frena
       fuera de vista.
 
+- [ ] (2026-11-13) Lo que se apaga con `prefers-reduced-motion` desde un timer mira la preferencia
+      en cada vuelta, no una vez al nacer. Defecto resuelto: el latido de 3/1 la leía en el
+      constructor, y prenderla con la pantalla abierta no lo frenaba. Con spec.
+- [ ] (2026-11-13) Mismo defecto de especificidad que en 0/1, en el aviso de auriculares: las notas
+      se prenden con `:host(:not(…)) .aa__nota`, que le ganaba al `.aa__nota` del bloque de
+      movimiento reducido, y seguían en loop. El bloque nombra ahora el mismo selector. Medido con
+      la preferencia emulada: cero animaciones infinitas corriendo en el aviso.
+
 ## Legibilidad del contenido embebido
 
 - [ ] Texto que hay que LEER (valores de demo, resultados, aclaraciones) cumple
@@ -261,6 +277,9 @@ puede alcanzar" son dos cosas distintas y hay que chequear las dos.
       navegador el viewport mide fracciones de px, y entre `max-width: 760px` y `min-width: 761px`
       (o entre 500 y 501 de alto) no aplicaba ni el viaje angosto ni el ancho. El lado ancho va en
       `760.02px` y `500.02px`; el umbral escrito en este checklist (hasta 760, angosto) no se movió.
+
+- [ ] (2026-11-13) Los cuatro grupos de opciones que quedaban sin `aria-pressed` lo llevan: el envío
+      de 5/1 y 5/2 y el usuario de 6/1 y 6/2. El elegido se mostraba solo por color.
 
 ## Vistas y estado
 
@@ -352,6 +371,12 @@ puede alcanzar" son dos cosas distintas y hay que chequear las dos.
       centrado adentro de su propio widget (hasta ~50 px, el texto centrado de 7/1). Un contenedor
       desvanecido (borde transparente) no cuenta como visible al medir, y su padding tampoco corre
       el contenido: `.profile-container` de 2/1 lo metía 20-40 px adentro.
+
+- [ ] (2026-11-13) El cierre del viaje (la revelación, el final y el último cuadro) no deja un link
+      en la barra. Defecto resuelto: la barra seguía diciendo la última página (`?nivel=11&sub-nivel=1`)
+      y, como el link le gana a la partida, recargar en el último cuadro volvía a esa página y
+      reescribía la partida: se perdía el fin. Con spec y probado con recarga real: sigue en el
+      último cuadro, con "Empezar de cero".
 
 ## Lo que se toca: resortes, circuito y golpes
 
@@ -902,6 +927,11 @@ Del prólogo reconstruido en SVG (2026-11-08):
       presupuesto por 21 kB. Si el pedazo no llega, se sigue como si se hubiera saltado: nunca
       queda la noche sin construcción.
 
+- [ ] (2026-11-13) Lo que tapa la escena entera sin verse lleva `pointer-events: none`. Defecto
+      resuelto: el destello (`r` 1300, opacidad 0) se quedaba con todos los toques, así que tocar
+      una nave caía siempre en el cielo y las naves no se quejaban nunca. Probado con un click real
+      sobre el casco: `elementFromPoint` devuelve la nave y sale su queja. Con spec.
+
 Del minijuego de operadores (2026-11-08):
 
 - [ ] "¡Activen todos los operadores!" detiene el reloj del guion (`ESPERA_OPERADORES`) y abre
@@ -1006,6 +1036,12 @@ Del minijuego de operadores (2026-11-08):
       parada (`saltoQuieto`) y los muelles no avanzan. Medido con input real a 1440×900 y 390×664
       desde la colina: el minijuego, las cinco páginas y el árbol, y después la cinemática quieta
       del capítulo 1.
+
+- [ ] (2026-11-13) Todo lo que scrollea por dentro del prólogo está en la lista de `alDesplazar`:
+      el manual y la hoja del minijuego. Defecto resuelto: la hoja no estaba, y el prólogo le
+      cancelaba la rueda y el dedo. A 390×664 no entra (692 de alto en 453), el botón de probar
+      quedaba fuera de la vista y solo se podía saltar. Probado con rueda real: baja de 0 a 239.
+      Con spec. Además cada hueco nuevo abre arriba: bajada en uno, el siguiente abría sin título.
 
 **El manual de a bordo** (0/1 a 0/5, pantallas enteras en el prólogo):
 
@@ -1583,6 +1619,10 @@ verificable con `/cine/<n>?cuadro=<beat>` (fotograma congelado) o `/cine/<n>` (r
       `?prologo=casa-apuren`, `/cine/6?cuadro=dos-paquetes` y `/cine/10?cuadro=rafaga`, y medir
       el nombre en las dos cajas (8:1).
 
+- [ ] (2026-11-13) La regla que atenúa lo lejano alcanza también a `--lejos`. Defecto resuelto: la
+      capa lejana del capítulo 6 se llama `cine-e6__capa--lejos` y `[class*='__lejos']` no la
+      tocaba: sus moléculas iban con la crema entera. Medido en `/cine/6?cuadro=fin`: opacidad 0,5.
+
 ## La práctica (`/practica/carrito`)
 
 - [ ] (2026-11-11) La práctica pasa en el mundo de las cinemáticas: papel crema, barra arriba,
@@ -1599,6 +1639,13 @@ verificable con `/cine/<n>?cuadro=<beat>` (fotograma congelado) o `/cine/<n>` (r
       760, así que entre 721 y 759 las columnas iban lado a lado y la flecha no salía. Ahora el TS
       mira dónde quedó cada columna (`getBoundingClientRect`), no un ancho copiado. Medido con el
       mouse real a 740×900 (dos columnas, hay flecha) y a 700×900 (una columna, no hay).
+
+- [ ] (2026-11-13) Cada fragmento del código dibuja su flecha con las dos columnas lado a lado,
+      también `envioGratis`, cuya parte (el Reto) está arriba del código, en su misma columna: la
+      flecha sube por el pasillo y le entra por la izquierda. Defecto resuelto (regresión del
+      2026-11-12): decidir por geometría con una sola condición descartaba esa flecha en cualquier
+      ancho. El trazo es una función pura con spec (`trazoDelEnlace`). Medido con el mouse real: las
+      cuatro flechas a 1440, 740 y 721 de ancho, ninguna a 720 ni a 700.
 
 ## Sonido (tiene que andar en cualquier PC)
 
@@ -1618,3 +1665,7 @@ verificable con `/cine/<n>?cuadro=<beat>` (fotograma congelado) o `/cine/<n>` (r
       cajita baja con el primero y sube con el segundo, y si un pensamiento dura poco toca menos
       notas en vez de pisar el siguiente. Verificarla contando por CDP los osciladores agendados
       tras un click real: contexto `running` y cada entrada en el tiempo del plan.
+- [ ] (2026-11-13) El aviso de auriculares arranca con la preferencia guardada. Defecto resuelto:
+      arrancaba siempre con el sonido prendido y, al seguir, escribía ese estado: quien lo había
+      apagado lo encontraba prendido en la visita siguiente. Probado con recarga real: apagado sigue
+      apagado (`signals-sonido` en `0`) antes y después de seguir. Con spec.
