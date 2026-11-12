@@ -30,7 +30,7 @@ import {
   type QuienDelViaje,
 } from '../../components-draw/tripulacion/tripulacion.component';
 import { RetratoDeNaveComponent } from '../../components-draw/tripulacion/retrato-de-nave.component';
-import { palabrasDeLinea } from '../../integrada-vista/guion-del-viaje';
+import { palabrasDeLinea } from '../../libs/guion';
 import {
   type FotoDelCarrito,
   GUION_DEL_CARRITO,

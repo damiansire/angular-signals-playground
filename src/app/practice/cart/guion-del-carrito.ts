@@ -1,4 +1,4 @@
-import type { LineaDelViaje } from '../../integrada-vista/guion-del-viaje';
+import type { LineaDelViaje } from '../../components-draw/tripulacion/tripulacion.component';
 
 /** Lo que importa del carrito para la charla: lo que se ve cambiar, no cómo se calculó. */
 export interface FotoDelCarrito {

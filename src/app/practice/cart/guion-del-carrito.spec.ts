@@ -1,4 +1,4 @@
-import { REGLAS_GUION, palabrasDe } from '../../integrada-vista/cinematicas/cinematica-guion';
+import { problemasDeLinea } from '../../libs/guion';
 import { type FotoDelCarrito, GUION_DEL_CARRITO, momentoDelCarrito } from './guion-del-carrito';
 
 describe('momentoDelCarrito', () => {
@@ -35,15 +35,9 @@ describe('momentoDelCarrito', () => {
 
 describe('GUION_DEL_CARRITO', () => {
   it('cada línea sigue las reglas del guion', () => {
-    const problemas = Object.entries(GUION_DEL_CARRITO).flatMap(([momento, l]) => {
-      const renglones = l.txt.split('\n');
-      return [
-        palabrasDe(l.txt) > REGLAS_GUION.palabras && `${momento}: muchas palabras`,
-        renglones.length > REGLAS_GUION.renglones && `${momento}: muchos renglones`,
-        renglones.some((r) => r.length > REGLAS_GUION.columnas) && `${momento}: renglón largo`,
-        /[—–]/.test(l.txt) && `${momento}: usa raya`,
-      ].filter(Boolean);
-    });
+    const problemas = Object.entries(GUION_DEL_CARRITO).flatMap(([momento, l]) =>
+      problemasDeLinea(l.txt).map((p) => `${momento}: ${p}`),
+    );
     expect(problemas).toEqual([]);
   });
 
