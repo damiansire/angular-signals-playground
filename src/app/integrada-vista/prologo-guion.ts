@@ -9,6 +9,7 @@
  */
 
 import { LO_QUE_DICE_EL_SOL, LO_QUE_RESPONDE_ANGIE } from './intercambio-del-sol';
+import { VOCES_DEL_PROLOGO } from './voces-del-prologo';
 
 export type Hablante = 'cap' | 'naveA' | 'naveB' | 'nave4' | 'todos' | 'voz' | 'mascota';
 
@@ -336,14 +337,16 @@ export function largoDe(linea: LineaGuion): number {
 }
 
 /**
- * Cuánto tiene que estar en pantalla una línea para poder seguirse sin apuro. Siempre a ritmo de
- * lectura: los blips del director de sonido se reparten en la ventana que les toque, así que la voz
- * no cambia el ritmo y el prólogo dura lo mismo en cualquier máquina.
+ * Cuánto tiene que estar en pantalla una línea para poder seguirse sin apuro: a ritmo de lectura,
+ * o lo que dura su voz grabada si dura más (docs/voces.md). La duración de la grabación sale del
+ * índice y no del navegador, así que el prólogo dura lo mismo con sonido o sin él, en cualquier
+ * máquina; los blips se reparten en la ventana que les toque.
  */
 export function ventanaDe(linea: LineaGuion): number {
   const seguir = Math.max(
     PRESUPUESTO.minimo,
     Math.round((largoDe(linea) / PRESUPUESTO.cps) * 1000),
+    VOCES_DEL_PROLOGO[linea.id]?.ms ?? 0,
   );
   return Math.max(linea.dur ?? 0, seguir + PRESUPUESTO.entra + PRESUPUESTO.sale);
 }

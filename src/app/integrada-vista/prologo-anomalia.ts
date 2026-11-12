@@ -12,6 +12,7 @@ import { HUECOS_DEL_PROLOGO, type HuecoDelPrologo } from './operadores-del-prolo
 import { PAGINAS_DEL_MANUAL, type PaginaDelManual } from './manual-de-a-bordo';
 import { ARBOL_DE_SIGNAL_SPACE } from './arbol-de-signal-space';
 import { PUNTOS_DEL_PROLOGO } from './puntos-del-prologo';
+import { VOCES_DEL_PROLOGO } from './voces-del-prologo';
 import {
   GUION,
   PRESUPUESTO,
@@ -312,6 +313,8 @@ export function initPrologoAnomalia(host: HTMLElement, opts: PrologoOpciones): (
   const tituloEl = raiz.querySelector<HTMLElement>('.prologo__titulo');
 
   const reloj: readonly LineaEnReloj[] = armarReloj(GUION);
+  // Las voces se piden ya: la primera línea entra en menos de un segundo y llegaría en blips.
+  sonido().precargar(Object.values(VOCES_DEL_PROLOGO).map((v) => v.archivo));
   const T: Anclajes = anclajesDe(reloj);
   const M: Momentos = momentosDe(reloj);
   const linea = (id: string): LineaEnReloj => {
@@ -1380,7 +1383,12 @@ export function initPrologoAnomalia(host: HTMLElement, opts: PrologoOpciones): (
     for (const d of activas) {
       if (dichas.has(d.id)) continue;
       dichas.add(d.id);
-      sonido().hablar(d.quien, textoVisible(d), (d.t1 - d.t0) / velocidad);
+      sonido().hablar(
+        d.quien,
+        textoVisible(d),
+        (d.t1 - d.t0) / velocidad,
+        VOCES_DEL_PROLOGO[d.id]?.archivo,
+      );
       const nave = NAVE_DE[d.quien];
       if (nave !== undefined) tomaLaPalabra(nave);
       if (d.quien === 'mascota') angieHabla.v -= 3.2;

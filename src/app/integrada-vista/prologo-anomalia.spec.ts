@@ -548,7 +548,9 @@ describe('initPrologoAnomalia', () => {
 
     it('Angie lo muestra con la pregunta del viaje ya hecha, y la historia espera', async () => {
       const m = conArbol('leccion-pregunta');
-      m.cuadros.avanzar(400);
+      // Las líneas duran lo que su voz grabada (docs/voces.md): de sobra, porque la historia se
+      // queda quieta esperando el árbol.
+      m.cuadros.avanzar(700);
       expect(m.pedido).toHaveBeenCalledTimes(1);
       expect((m.pedido.calls.mostRecent().args[0] as { id: string }).id).toBe(
         'signals-change-detection',
