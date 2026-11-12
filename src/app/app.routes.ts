@@ -3,8 +3,8 @@ import { IntegradaVistaComponent } from './integrada-vista/integrada-vista.compo
 
 export const routes: Routes = [
   {
-    // Diferida: es otra página y se abre desde la hoja de una etapa. Eager sumaba ~20 kB al bundle inicial, que
-    // se pasaba del presupuesto de 700 kB.
+    // Diferida: es otra página y se abre desde la hoja de una etapa. Eager sumaba ~20 kB al bundle
+    // inicial, que se pasaba de su presupuesto (`budgets` en angular.json).
     path: 'practica/carrito',
     loadComponent: () =>
       import('./practice/cart/cart-example.component').then((m) => m.CartExampleComponent),
