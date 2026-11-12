@@ -75,7 +75,7 @@ Esto es lo que funciona:
 ## Antes de construir features visuales grandes
 
 - **Alcance primero:** ante "integrar/migrar X", inventariá el universo real
-  (p.ej. `app.routes.ts`) y confirmalo en una frase antes del primer caso.
+  (p.ej. `signals/signals-routes-tree.ts`) y confirmalo en una frase antes del primer caso.
 - **Referencia visual externa:** confirmá elemento por elemento qué se traslada.
 - **"Que se sienta X"** se traduce a una lista escrita de anti-patrones (ver la
   gramática de modal en `DESIGN-CHECKLIST.md`).
@@ -129,6 +129,11 @@ corto: nada de reescrituras masivas ni cambios de stack.
 
 ## Convenciones de código
 
+- **Las áreas dependen en una sola dirección** ([ADR 0024](./docs/adr/0024-las-areas-dependen-en-una-sola-direccion.md)):
+  `libs`/`interfaces` → `components-draw` → `components-atom` → `components`/`layouts` →
+  `signals`/`practice` → `integrada-vista` → arranque. El mapa es `PUEDE_IMPORTAR` en
+  `eslint.config.js` y `npm run lint` lo hace cumplir. Lo que comparten dos áreas que no se
+  conocen baja a `libs/`; ningún área importa `app.routes.ts`.
 - **Change detection:** `OnPush` en todos los componentes (lo exige ESLint). El
   estado de la vista vive en **signals**; los pocos casos que no (p.ej. el menú
   dirigido por eventos del router) llaman `markForCheck()`.

@@ -117,7 +117,7 @@ whose CI run went green.
 src/app/
 ├── integrada-vista/  # The default entry (/): the hill, the prologue and the trip through the 11 chapters
 │   └── cinematicas/  # Chapter cinematics: player, scripts and one lazy scene per chapter
-├── signals/          # The learning levels (0–11) and their sub-levels
+├── signals/          # The learning levels (0–11), their sub-levels and the concept tree
 ├── practice/         # Applied examples that use what you learned (/practica/*)
 ├── components/       # Feature components (histories, trees, forms…)
 ├── components-atom/  # Atomic UI building blocks (code block, concept card, title…)
@@ -125,8 +125,13 @@ src/app/
 ├── layouts/          # Reusable page layouts (two-column, column + code)
 ├── libs/             # Framework-agnostic helpers (HTML parser, saved game, sound, springs)
 ├── interfaces/       # Shared TypeScript types
-└── app.routes.ts     # Route tree that powers the leveled navigation
+└── app.routes.ts     # Router routes: the integrated view, the practice and the screening room
 ```
+
+Areas depend in one direction only, from the base up to the story: `libs`/`interfaces` →
+`components-draw` → `components-atom` → `components`/`layouts` → `signals`/`practice` →
+`integrada-vista`. The map is `PUEDE_IMPORTAR` in `eslint.config.js`, so `npm run lint` fails on
+an import that crosses it ([ADR 0024](./docs/adr/0024-las-areas-dependen-en-una-sola-direccion.md)).
 
 ### Conventions
 

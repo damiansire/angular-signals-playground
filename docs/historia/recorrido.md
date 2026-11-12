@@ -7,7 +7,7 @@ La historia de punta a punta, etapa por etapa, con cada uno de los 40 desafíos 
 Los ids entre comillas invertidas son las líneas del guion de hoy: `casa-*`, `anom-*`, `dentro-*`,
 `voz-*`, `reclamo-*`, `orden-*` y `leccion-*` en `src/app/integrada-vista/prologo-guion.ts`, y
 `c0-*` a `c12-*` en `src/app/integrada-vista/cinematicas/cinematicas-datos.ts`. Los desafíos se
-nombran como en las rutas de hoy (`signalsRoutesTree` en `src/app/app.routes.ts`): concepto y
+nombran como en las rutas de hoy (`signalsRoutesTree` en `src/app/signals/signals-routes-tree.ts`): concepto y
 sub-nivel, contando el sub-nivel desde 1.
 
 ## Principios
