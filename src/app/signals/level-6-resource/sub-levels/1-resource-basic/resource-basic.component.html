@@ -19,6 +19,7 @@
               ? 'bg-[#1c6b56] border-[#1c6b56] text-white'
               : 'bg-white border-gray-300 text-gray-700 hover:border-[#62c4ad]'
           "
+          [attr.aria-pressed]="id === userId()"
           (click)="setUser(id)"
         >
           {{ id }}

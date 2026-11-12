@@ -24,6 +24,7 @@
               ? 'bg-emerald-700 border-emerald-700 text-white'
               : 'bg-white border-gray-300 text-gray-700 hover:border-emerald-400'
           "
+          [attr.aria-pressed]="option === selectedOption()"
           (click)="select(option)"
         >
           {{ option }}

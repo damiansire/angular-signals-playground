@@ -24,6 +24,7 @@
               ? 'bg-purple-600 border-purple-600 text-white'
               : 'bg-white border-gray-300 text-gray-700 hover:border-purple-400'
           "
+          [attr.aria-pressed]="option === selectedOption()"
           (click)="select(option)"
         >
           {{ option }}
