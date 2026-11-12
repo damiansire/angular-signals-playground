@@ -1,25 +1,4 @@
 import { RouteItem } from '../interfaces/route-item.interface';
-import { EffectComponent } from './level-3-effect/sub-levels/1-effect/effect.component';
-import { DestroyEffectComponent } from './level-3-effect/sub-levels/2-interval-when-is-destroy/destroy-effect.component';
-import { EffectDestroyComponent } from './level-3-effect/sub-levels/5-effect-destroy/effect-destroy.component';
-import { ReferenceEqualityComponent } from './level-4-signal-equality-functions/sub-levels/1-reference-equality/reference-equality.component';
-import { CustomEqualComponent } from './level-4-signal-equality-functions/sub-levels/2-custom-equal/custom-equal.component';
-import { BasicLinkedSignalComponent } from './level-5-linked-signal/sub-levels/1-basic-linked-signal/basic-linked-signal.component';
-import { LinkedSignalWithSourceComponent } from './level-5-linked-signal/sub-levels/2-linked-signal-with-source/linked-signal-with-source.component';
-import { ResourceBasicComponent } from './level-6-resource/sub-levels/1-resource-basic/resource-basic.component';
-import { RxResourceComponent } from './level-6-resource/sub-levels/2-rx-resource/rx-resource.component';
-import { InputOutputComponent } from './level-7-signal-io/sub-levels/1-input-output/input-output.component';
-import { ModelTwoWayComponent } from './level-7-signal-io/sub-levels/2-model/model-two-way.component';
-import { InputRequiredComponent } from './level-7-signal-io/sub-levels/3-input-required/input-required.component';
-import { ViewChildComponent } from './level-8-queries-interop/sub-levels/1-view-child/view-child.component';
-import { RxjsInteropComponent } from './level-8-queries-interop/sub-levels/2-rxjs-interop/rxjs-interop.component';
-import { ViewChildrenComponent } from './level-8-queries-interop/sub-levels/3-view-children/view-children.component';
-import { ContentQueriesComponent } from './level-8-queries-interop/sub-levels/4-content-queries/content-queries.component';
-import { AfterRenderEffectComponent } from './level-9-after-render-effect/sub-levels/1-after-render-effect/after-render-effect.component';
-import { OnCleanupComponent } from './level-9-after-render-effect/sub-levels/2-on-cleanup/on-cleanup.component';
-import { DebouncedRxjsComponent } from './level-10-debounced/sub-levels/1-debounced-rxjs/debounced-rxjs.component';
-import { DebouncedManualComponent } from './level-10-debounced/sub-levels/2-debounced-manual/debounced-manual.component';
-import { ZonelessComponent } from './level-11-zoneless/sub-levels/1-zoneless/zoneless.component';
 
 /**
  * Árbol de los conceptos y sus sub-niveles. NO genera rutas: es la fuente de datos que la
@@ -31,7 +10,8 @@ export const signalsRoutesTree: RouteItem[] = [
   // páginas del manual de a bordo, y la sexta es el árbol de Signal Space, las dos en el prólogo
   // (`integrada-vista/manual-de-a-bordo.ts` y `arbol-de-signal-space.ts`). El `path` de cada
   // concepto es su número de capítulo: no se renumera.
-  // Capítulos 1 y 2 diferidos: el circuito que comparten solo lo paga quien llega a verlos.
+  // Todos los sub-niveles son diferidos: el viaje muestra una página por vez, y con los capítulos 3
+  // a 11 importados acá el bundle inicial pagaba 30 pantallas para dibujar la colina.
   {
     path: '1',
     subLevels: [
@@ -125,9 +105,30 @@ export const signalsRoutesTree: RouteItem[] = [
   {
     path: '3',
     subLevels: [
-      { path: '1', title: 'Dependencias del effect', component: EffectComponent },
-      { path: '2', title: 'Intervalo filtrado', component: DestroyEffectComponent },
-      { path: '3', title: 'Limpieza con onCleanup', component: EffectDestroyComponent },
+      {
+        path: '1',
+        title: 'Dependencias del effect',
+        loadComponent: () =>
+          import('./level-3-effect/sub-levels/1-effect/effect.component').then((m) => ({
+            component: m.EffectComponent,
+          })),
+      },
+      {
+        path: '2',
+        title: 'Intervalo filtrado',
+        loadComponent: () =>
+          import('./level-3-effect/sub-levels/2-interval-when-is-destroy/destroy-effect.component').then(
+            (m) => ({ component: m.DestroyEffectComponent }),
+          ),
+      },
+      {
+        path: '3',
+        title: 'Limpieza con onCleanup',
+        loadComponent: () =>
+          import('./level-3-effect/sub-levels/5-effect-destroy/effect-destroy.component').then(
+            (m) => ({ component: m.EffectDestroyComponent }),
+          ),
+      },
     ],
   },
   {
@@ -136,9 +137,19 @@ export const signalsRoutesTree: RouteItem[] = [
       {
         path: '1',
         title: 'Igualdad por defecto (Object.is)',
-        component: ReferenceEqualityComponent,
+        loadComponent: () =>
+          import('./level-4-signal-equality-functions/sub-levels/1-reference-equality/reference-equality.component').then(
+            (m) => ({ component: m.ReferenceEqualityComponent }),
+          ),
       },
-      { path: '2', title: 'Función equal custom', component: CustomEqualComponent },
+      {
+        path: '2',
+        title: 'Función equal custom',
+        loadComponent: () =>
+          import('./level-4-signal-equality-functions/sub-levels/2-custom-equal/custom-equal.component').then(
+            (m) => ({ component: m.CustomEqualComponent }),
+          ),
+      },
     ],
   },
   {
@@ -147,20 +158,40 @@ export const signalsRoutesTree: RouteItem[] = [
       {
         path: '1',
         title: 'linkedSignal: reinicio con la fuente',
-        component: BasicLinkedSignalComponent,
+        loadComponent: () =>
+          import('./level-5-linked-signal/sub-levels/1-basic-linked-signal/basic-linked-signal.component').then(
+            (m) => ({ component: m.BasicLinkedSignalComponent }),
+          ),
       },
       {
         path: '2',
         title: 'linkedSignal: preservar si sigue válida',
-        component: LinkedSignalWithSourceComponent,
+        loadComponent: () =>
+          import('./level-5-linked-signal/sub-levels/2-linked-signal-with-source/linked-signal-with-source.component').then(
+            (m) => ({ component: m.LinkedSignalWithSourceComponent }),
+          ),
       },
     ],
   },
   {
     path: '6',
     subLevels: [
-      { path: '1', title: 'resource(): loader con Promise', component: ResourceBasicComponent },
-      { path: '2', title: 'rxResource(): stream de RxJS', component: RxResourceComponent },
+      {
+        path: '1',
+        title: 'resource(): loader con Promise',
+        loadComponent: () =>
+          import('./level-6-resource/sub-levels/1-resource-basic/resource-basic.component').then(
+            (m) => ({ component: m.ResourceBasicComponent }),
+          ),
+      },
+      {
+        path: '2',
+        title: 'rxResource(): stream de RxJS',
+        loadComponent: () =>
+          import('./level-6-resource/sub-levels/2-rx-resource/rx-resource.component').then((m) => ({
+            component: m.RxResourceComponent,
+          })),
+      },
       {
         path: '3',
         title: 'httpResource(): pedir por URL',
@@ -178,14 +209,27 @@ export const signalsRoutesTree: RouteItem[] = [
       {
         path: '1',
         title: 'input() y output() basados en signals',
-        component: InputOutputComponent,
+        loadComponent: () =>
+          import('./level-7-signal-io/sub-levels/1-input-output/input-output.component').then(
+            (m) => ({ component: m.InputOutputComponent }),
+          ),
       },
       {
         path: '2',
         title: 'model(): binding two-way con [(value)]',
-        component: ModelTwoWayComponent,
+        loadComponent: () =>
+          import('./level-7-signal-io/sub-levels/2-model/model-two-way.component').then((m) => ({
+            component: m.ModelTwoWayComponent,
+          })),
       },
-      { path: '3', title: 'input.required() y transform', component: InputRequiredComponent },
+      {
+        path: '3',
+        title: 'input.required() y transform',
+        loadComponent: () =>
+          import('./level-7-signal-io/sub-levels/3-input-required/input-required.component').then(
+            (m) => ({ component: m.InputRequiredComponent }),
+          ),
+      },
       {
         path: '4',
         title: 'Formularios con signals',
@@ -200,17 +244,37 @@ export const signalsRoutesTree: RouteItem[] = [
   {
     path: '8',
     subLevels: [
-      { path: '1', title: 'viewChild() como signal', component: ViewChildComponent },
+      {
+        path: '1',
+        title: 'viewChild() como signal',
+        loadComponent: () =>
+          import('./level-8-queries-interop/sub-levels/1-view-child/view-child.component').then(
+            (m) => ({ component: m.ViewChildComponent }),
+          ),
+      },
       {
         path: '2',
         title: 'toSignal() · toObservable() · untracked()',
-        component: RxjsInteropComponent,
+        loadComponent: () =>
+          import('./level-8-queries-interop/sub-levels/2-rxjs-interop/rxjs-interop.component').then(
+            (m) => ({ component: m.RxjsInteropComponent }),
+          ),
       },
-      { path: '3', title: 'viewChildren() como signal', component: ViewChildrenComponent },
+      {
+        path: '3',
+        title: 'viewChildren() como signal',
+        loadComponent: () =>
+          import('./level-8-queries-interop/sub-levels/3-view-children/view-children.component').then(
+            (m) => ({ component: m.ViewChildrenComponent }),
+          ),
+      },
       {
         path: '4',
         title: 'contentChild() y contentChildren()',
-        component: ContentQueriesComponent,
+        loadComponent: () =>
+          import('./level-8-queries-interop/sub-levels/4-content-queries/content-queries.component').then(
+            (m) => ({ component: m.ContentQueriesComponent }),
+          ),
       },
     ],
   },
@@ -220,19 +284,39 @@ export const signalsRoutesTree: RouteItem[] = [
       {
         path: '1',
         title: 'afterRenderEffect(): medir el DOM',
-        component: AfterRenderEffectComponent,
+        loadComponent: () =>
+          import('./level-9-after-render-effect/sub-levels/1-after-render-effect/after-render-effect.component').then(
+            (m) => ({ component: m.AfterRenderEffectComponent }),
+          ),
       },
-      { path: '2', title: 'effect((onCleanup) => …)', component: OnCleanupComponent },
+      {
+        path: '2',
+        title: 'effect((onCleanup) => …)',
+        loadComponent: () =>
+          import('./level-9-after-render-effect/sub-levels/2-on-cleanup/on-cleanup.component').then(
+            (m) => ({ component: m.OnCleanupComponent }),
+          ),
+      },
     ],
   },
   {
     path: '10',
     subLevels: [
-      { path: '1', title: 'Debounce con RxJS', component: DebouncedRxjsComponent },
+      {
+        path: '1',
+        title: 'Debounce con RxJS',
+        loadComponent: () =>
+          import('./level-10-debounced/sub-levels/1-debounced-rxjs/debounced-rxjs.component').then(
+            (m) => ({ component: m.DebouncedRxjsComponent }),
+          ),
+      },
       {
         path: '2',
         title: 'Debounce a mano (effect + onCleanup)',
-        component: DebouncedManualComponent,
+        loadComponent: () =>
+          import('./level-10-debounced/sub-levels/2-debounced-manual/debounced-manual.component').then(
+            (m) => ({ component: m.DebouncedManualComponent }),
+          ),
       },
       {
         path: '3',
@@ -246,6 +330,15 @@ export const signalsRoutesTree: RouteItem[] = [
   },
   {
     path: '11',
-    subLevels: [{ path: '1', title: 'Change detection sin Zone.js', component: ZonelessComponent }],
+    subLevels: [
+      {
+        path: '1',
+        title: 'Change detection sin Zone.js',
+        loadComponent: () =>
+          import('./level-11-zoneless/sub-levels/1-zoneless/zoneless.component').then((m) => ({
+            component: m.ZonelessComponent,
+          })),
+      },
+    ],
   },
 ];
