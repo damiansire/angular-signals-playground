@@ -106,6 +106,11 @@ export class HojaDelHuecoComponent {
     const host: HTMLElement = inject(ElementRef).nativeElement;
     // El foco va a la hoja: con teclado, la orden se atiende sin buscarla.
     afterNextRender(() => host.focus());
+    // La hoja es la misma para los tres huecos: bajada en uno, el siguiente abría sin su título.
+    afterRenderEffect(() => {
+      this.hueco();
+      host.scrollTop = 0;
+    });
 
     // El operador cambia de ancho con cada nombre y el bloque se reacomoda con la ventana: la flecha
     // se mide después de cada render y en cada cambio de tamaño, contra el token real del código.

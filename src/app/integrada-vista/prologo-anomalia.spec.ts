@@ -272,6 +272,29 @@ describe('initPrologoAnomalia', () => {
       expect(rueda.defaultPrevented).toBeTrue();
     });
 
+    it('la hoja del minijuego scrollea por dentro: ahí la rueda y el dedo no se frenan', () => {
+      const p = arrancar();
+      const hoja = document.createElement('section');
+      hoja.className = 'prologo__operadores';
+      p.raiz.append(hoja);
+
+      for (const tipo of ['wheel', 'touchmove']) {
+        const adentro = new Event(tipo, { bubbles: true, cancelable: true });
+        hoja.dispatchEvent(adentro);
+        expect(adentro.defaultPrevented).withContext(`${tipo} en la hoja`).toBeFalse();
+      }
+      const afuera = new Event('touchmove', { bubbles: true, cancelable: true });
+      p.raiz.dispatchEvent(afuera);
+      expect(afuera.defaultPrevented).withContext('el dedo en la escena').toBeTrue();
+    });
+
+    it('el destello, que tapa la escena entera sin verse, no se queda con los toques', () => {
+      const p = arrancar();
+      const destello = p.host.querySelector('.prologo__escena circle[fill="url(#pa-destello)"]')!;
+
+      expect(destello.getAttribute('pointer-events')).toBe('none');
+    });
+
     it('al saltar devuelve las teclas y la rueda', () => {
       const p = arrancar();
       p.skip.click();

@@ -815,6 +815,9 @@ export function initPrologoAnomalia(host: HTMLElement, opts: PrologoOpciones): (
     r: 1300,
     fill: 'url(#pa-destello)',
     opacity: 0,
+    // Tapa la escena entera y casi siempre es invisible: sin esto se quedaba con todos los toques, y
+    // tocar una nave caía en el cielo.
+    'pointer-events': 'none',
   });
   const ondaChoque = el(svg, 'circle', {
     cx: CX,
@@ -2152,11 +2155,18 @@ export function initPrologoAnomalia(host: HTMLElement, opts: PrologoOpciones): (
     alternarPausa();
   };
 
+  /**
+   * Lo que scrollea por dentro del prólogo: el manual y la hoja del minijuego, que en un celular no
+   * entra. Con la hoja afuera de la lista, ni el dedo ni la rueda la bajaban y el botón de probar
+   * quedaba fuera de la vista: solo se podía saltar.
+   */
+  const scrollerDe = (t: EventTarget | null): HTMLElement | null =>
+    t instanceof Element ? t.closest<HTMLElement>('.prologo__manual, .prologo__operadores') : null;
+
   const alDesplazar = (e: Event): void => {
     if (terminado || raiz.hidden) return;
-    // Adentro del manual la rueda y el dedo lo scrollean a él, y no siguen hasta el recorrido de
-    // atrás: su rueda está en un ancestro del prólogo y, en el borde del manual, movía la molécula.
-    if (manualDe(e.target)) e.stopPropagation();
+    // Adentro la rueda y el dedo scrollean esa hoja, y no siguen hasta lo que hay detrás.
+    if (scrollerDe(e.target)) e.stopPropagation();
     else e.preventDefault();
   };
 
