@@ -62,6 +62,17 @@ cansador"; tiene que haber otra música, "compatible con el estudio".
 - [x] Es solo del manual de a bordo (decidido con Damian el 2026-11-11): las hojas de las etapas
       del viaje y el árbol de Signal Space no la llevan.
 
+## Los pensamientos de la colina
+
+Pedido de Damian (2026-11-12): en el sitio publicado, partes sin voz, por ejemplo "Así que… Ellos
+ya están aquí".
+
+- [x] Los dos pensamientos de Angie en la colina suenan con su voz grabada (grupo `colina` de
+      [`voces.md`](./voces.md)), dichos para adentro.
+- [x] Sin la grabación quedan callados, como antes: nada de blips en un pensamiento.
+- [ ] **Quedan sin voz a propósito:** el "¡Ahhhh!" de toda la tripulación en el prólogo
+      (`anom-grito`, blips) y la práctica del carrito, que no tiene sonido.
+
 ## Para la revisión
 
 Al revisar el sonido, por cada momento de la tabla: escucharlo entero con sonido, apagarlo y

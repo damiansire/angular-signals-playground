@@ -21,10 +21,12 @@ Los grupos y de dónde sale su texto (no se copia a mano):
 | `prologo` | `src/app/integrada-vista/prologo-guion.ts`                 | el `id` de la línea                  |
 | `cine`    | `src/app/integrada-vista/cinematicas/cinematicas-datos.ts` | el `id` de la línea                  |
 | `viaje`   | `src/app/integrada-vista/guion-del-viaje.ts`               | `idDeLineaDelViaje(pagina, momento)` |
+| `colina`  | `src/app/integrada-vista/pensamientos-de-la-colina.ts`     | el `id` de la línea                  |
 
 Un grupo puede sumarle un estilo a todas sus líneas (`grupos` en `voces.json`): las cinemáticas y el
-viaje dicen en inglés las palabras de programación. Si una palabra se lee mal, `pronunciar` le da a
-Gemini otra forma de escribirla para esa línea, sin tocar lo que se ve en pantalla.
+viaje dicen en inglés las palabras de programación, y los pensamientos de la colina se dicen para
+adentro, casi en un susurro. Si una palabra se lee mal, `pronunciar` le da a Gemini otra forma de
+escribirla para esa línea, sin tocar lo que se ve en pantalla.
 
 ## Cómo se usa
 
@@ -66,6 +68,9 @@ colina mientras suena la radio.
   grabación si ya está lista y entra en la ventana; si no, los blips de ese personaje. El reloj
   (`armarReloj`) usa la duración del índice, así la línea queda en pantalla mientras se dice. La
   colina dice la charla con el sol con las voces de `dentro-caotico` y `voz-supongo` del prólogo.
+- **Pensamientos de la colina** ("Así que… Ellos ya están aquí…" y "Así que… La hora ha
+  llegado…"): `sonido().decirGrabada(archivo)`, sin blips de respaldo (un pensamiento con blips se
+  oiría dicho en voz alta). El globo no se pasa solo antes de que termine su voz.
 - **Hojas del viaje:** `sonido().decirGrabada(archivo)` arranca la voz cuando aparece la línea
   (llegada o resuelta) y la corta cuando llega otra o la hoja se va. No hay blips de respaldo: sin
   voz, la línea es muda como antes.
