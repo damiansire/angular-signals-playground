@@ -56,9 +56,11 @@ const HOJAS = Math.max(...LUGARES_DEL_CIERRE.map((l) => disponerArbol(codigoDelA
  * no se adivina. En una pantalla táctil no hay click que mantener ni flechas.
  */
 const PISTA_DEL_ARRASTRE = {
-  // En renglones: el globo tiene el ancho de la nave y la pista cortaba en "o / usá".
-  puntero: ['Mantené el click y arrastrá,', 'o usá ↑ ↓.'],
-  dedo: ['Mantené apretado y arrastrá.'],
+  // En renglones: el globo tiene el ancho de la nave y la pista cortaba en "o / usá". Y cada renglón
+  // en trozos que no se parten: con el globo angosto (a 1280 y a 1024 de ancho) el renglón entero no
+  // entra, y recortado decía "arrastı". Si no entra, baja el trozo entero.
+  puntero: [['Mantené el click', 'y arrastrá,'], ['o usá ↑ ↓.']],
+  dedo: [['Mantené apretado', 'y arrastrá.']],
 } as const;
 
 /** Cuánto hay que mover el puntero para que tocar el cierre sea arrastrarlo. */

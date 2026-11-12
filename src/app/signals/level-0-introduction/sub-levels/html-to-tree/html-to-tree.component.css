@@ -22,6 +22,10 @@
 }
 .htt-pista-renglon {
   display: block;
+}
+/* El renglón se parte solo entre trozos, y solo si no entra: recortado no se entendía. */
+.htt-pista-trozo {
+  display: inline-block;
   white-space: nowrap;
 }
 .htt-pista--a-la-vista {
@@ -368,7 +372,9 @@
    Las ramas se dibujan desde la raíz y cada nodo llega con un rebote cuando su rama lo alcanza;
    después flotan, cada uno a su ritmo, como algo vivo en la pantalla. */
 .htt-portada {
-  width: min(100%, clamp(18rem, 24vw, 40rem));
+  /* También por el alto, como las otras portadas (`portada.css`): creciendo solo con el ancho, en una
+     pantalla ancha y baja (2000×700) el árbol empujaba la portada fuera de la hoja. */
+  width: min(100%, clamp(18rem, min(24vw, 55vh), 40rem));
   height: auto;
   margin-bottom: 0.4rem;
   overflow: visible;
