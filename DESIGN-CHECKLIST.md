@@ -1095,7 +1095,10 @@ Del minijuego de operadores (2026-11-08):
 - [ ] Los dos pasos del globo de la nave dicen dónde se está: el que toca, en dorado; el hecho, en verde
       y tachado (la raya entra como tinta; la consigna viene proyectada de cada página, por eso
       `::ng-deep` acotado al host).
-      La fila guarda el alto de "Mostrame" aunque ya no esté: al irse, el globo no se achica.
+      Cuando "Mostrame" se va, el globo se achica (48 px a 1440×900) y está bien así: va anclado
+      abajo, así que la cola y la nave no se mueven, y reservarle el alto dejaba un hueco vacío bajo
+      los dos pasos tachados (decidido el 2026-11-13). Lo de guardar el alto valía cuando los pasos
+      iban en una fila; en el globo va `min-height: 0`.
 - [ ] Las seis leyes van sin franja abajo (`enPantalla` + `portada`, ADR 0016 y 0018): la consola
       está ADENTRO de la pantalla de la nave (en la 1, tres columnas: código, árbol, lo que se dibuja;
       en las otras, el código con "correr" y lo que la lámina dibuja en `render`), y la nave va en su

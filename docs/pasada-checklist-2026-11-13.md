@@ -159,10 +159,10 @@ Describen algo que cambió; conviene reescribirlos o retirarlos.
 - La pausa ya no deja los brazos en `rotate(0)`: frena con velocidad 0 (L538). L553 y L558 se
   contradicen sobre la boca de Angie sentada.
 - L1121 da por bueno el rótulo de la ley 3 en 10,9 unidades y L1224 pide que no baje de 13,5.
-- L1059 dice que el globo no se achica cuando se va "Mostrame" y se achica 48 px. No es un
-  descuido: la frase es del 2026-11-09, cuando los pasos iban en una fila, y el globo nació el
-  2026-11-11 con `.pm-globo .pm-etapas { min-height: 0 }` escrito a propósito. Hay que decidir cuál
-  de los dos vale.
+- L1059 decía que el globo no se achica cuando se va "Mostrame", y se achica 48 px. La frase era
+  del 2026-11-09, cuando los pasos iban en una fila; el globo nació el 2026-11-11 con
+  `.pm-globo .pm-etapas { min-height: 0 }` escrito a propósito. Decidido el 2026-11-13: vale el
+  CSS, y el ítem ya lo dice.
 
 ## Lo que no se pudo verificar
 
