@@ -19,6 +19,12 @@ import { Tripulante } from './tripulante';
 
 /** Quién habla en el viaje: las tres naves que entraron en la anomalía. */
 export type QuienDelViaje = 'cap' | 'naveA' | 'naveB';
+
+/** Una línea que dice una nave de la tripulación. Sigue las reglas del guion (`libs/guion.ts`). */
+export interface LineaDelViaje {
+  readonly quien: QuienDelViaje;
+  readonly txt: string;
+}
 export const NAVE_DEL_VIAJE: Record<QuienDelViaje, number> = { cap: 0, naveA: 1, naveB: 2 };
 
 /**
