@@ -23,9 +23,9 @@ import { ClickInButton } from '../component.interface';
   styleUrl: './basic-form.component.css',
 })
 export class BasicFormComponent {
-  firstName: WritableSignal<string> = signal('Damian');
-  surname: WritableSignal<string> = signal('Sire');
-  fullName: Signal<string> = computed(() => {
+  readonly firstName: WritableSignal<string> = signal('Damian');
+  readonly surname: WritableSignal<string> = signal('Sire');
+  readonly fullName: Signal<string> = computed(() => {
     return `${this.firstName()} ${this.surname()}`;
   });
   readonly firstNameInput = viewChild.required<ElementRef<HTMLInputElement>>('firstNameInput');
