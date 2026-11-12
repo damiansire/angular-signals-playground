@@ -29,7 +29,7 @@ import { CodeClick } from './code.interface';
 export class CodeComponent {
   readonly textSize = input<TailwindTextSize>('text-2xl');
   readonly selectBy = input<'Line' | 'Element'>('Element');
-  htmlCode = input<string>('');
+  readonly htmlCode = input<string>('');
   // Modo estático: snippet pre-armado (líneas de código a mostrar tal cual, no interactivas,
   // resaltadas con `active`). Si se pasan `lines`, el átomo las muestra en vez de parsear
   // `htmlCode`; así reemplaza al viejo `code-legacy` sumándole la ventana estilo editor.
@@ -44,7 +44,7 @@ export class CodeComponent {
   private readonly parsedLines = computed<CodeLine[]>(() => this.parseCode(this.htmlCode()));
   // Las lineas visibles parten del parseo pero deben poder mutar con los clicks,
   // por eso es un linkedSignal (no un effect que propaga estado).
-  codeLines = linkedSignal<CodeLine[]>(() => this.parsedLines());
+  readonly codeLines = linkedSignal<CodeLine[]>(() => this.parsedLines());
   /** Los nodos marcados en modo `Element`. Se marca el ELEMENTO, no el token: `<h2> Introduction
    *  </h2>` es un nodo con su texto adentro, y marcar solo la apertura lo leía como tres cosas. */
   readonly marcados = linkedSignal<ReadonlySet<string>>(() => {

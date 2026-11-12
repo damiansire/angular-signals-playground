@@ -8,5 +8,5 @@ import { ChangeDetectionStrategy, Component, input } from '@angular/core';
   styleUrl: './text-description.component.css',
 })
 export class TextDescriptionComponent {
-  text = input<string>('');
+  readonly text = input<string>('');
 }
