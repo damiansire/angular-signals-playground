@@ -129,6 +129,7 @@ export class CinematicaComponent {
   readonly termino = output<FinDeCinematica>();
 
   private readonly host = inject(ElementRef<HTMLElement>).nativeElement as HTMLElement;
+  private readonly destroyRef = inject(DestroyRef);
   protected readonly variables = variablesDeResorteSiSoporta();
 
   /** La escena del capítulo, cuando terminó de cargar su chunk. */
@@ -168,7 +169,6 @@ export class CinematicaComponent {
   private focoPrevio: HTMLElement | null = null;
 
   constructor() {
-    const destroyRef = inject(DestroyRef);
     const reducido = matchMedia('(prefers-reduced-motion: reduce)');
     this.quieta.set(reducido.matches);
     const alCambiarMovimiento = (e: MediaQueryListEvent): void =>
@@ -182,7 +182,9 @@ export class CinematicaComponent {
     document.addEventListener('visibilitychange', alCambiarVisibilidad);
     document.addEventListener('keydown', this.alTeclear, { capture: true });
 
-    destroyRef.onDestroy(() => {
+    this.destroyRef.onDestroy(() => {
+      // El chunk de la escena y el fundido de cierre pueden terminar después: ya no abren nada.
+      this.cerrada = true;
       this.limpiarTimers();
       sonido().callar();
       reducido.removeEventListener('change', alCambiarMovimiento);
@@ -197,13 +199,17 @@ export class CinematicaComponent {
       this.dibujarNaves();
       // El iris se abre sobre la escena ya dibujada: primero se carga su chunk y se espera un
       // render, recién ahí arranca el reloj.
-      void cargarEscena(this.cinematica().capitulo)
-        .then((tipo) => {
+      void cargarEscena(this.cinematica().capitulo).then(
+        (tipo) => {
           if (this.cerrada) return;
           this.escena.set(tipo);
           afterNextRender(() => this.abrir(), { injector });
-        })
-        .catch(() => this.abrir());
+        },
+        // Sin el chunk de su escena la historia se cuenta igual, sobre el kit común.
+        () => {
+          if (!this.cerrada) this.abrir();
+        },
+      );
     });
   }
 
@@ -441,7 +447,10 @@ export class CinematicaComponent {
     sonido().callar();
     sonido().efecto('cierre');
 
-    const avisar = (): void => this.termino.emit(motivo);
+    // La sala de proyección puede irse en pleno fundido, y emitir destruida deja un NG0953.
+    const avisar = (): void => {
+      if (!this.destroyRef.destroyed) this.termino.emit(motivo);
+    };
     const ocultar = (): void => this.host.classList.add('cine-host--fuera');
     const vt = this.quieta()
       ? null
@@ -452,7 +461,7 @@ export class CinematicaComponent {
     }
     // Sin View Transitions (o con movimiento reducido) el cierre es un fundido corto por CSS.
     ocultar();
-    setTimeout(avisar, this.quieta() ? 0 : 280);
+    this.timers.push(setTimeout(avisar, this.quieta() ? 0 : 280));
   }
 }
 

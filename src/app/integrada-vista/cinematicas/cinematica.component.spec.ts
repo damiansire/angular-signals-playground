@@ -4,6 +4,7 @@ import { provideZonelessChangeDetection } from '@angular/core';
 import { hasta } from '../testing/cuadros';
 import { CinematicaComponent, type FinDeCinematica } from './cinematica.component';
 import { cinematicaDe } from './cinematicas-datos';
+import { cargarEscena } from './escenas';
 
 describe('CinematicaComponent', () => {
   let vtOriginal: unknown;
@@ -87,6 +88,27 @@ describe('CinematicaComponent', () => {
     await hasta(() => fines.length > 0); // el aviso llega al terminar el fundido de cierre
     expect(fines).toEqual(['salteada']);
     fixture.destroy();
+  });
+
+  it('destruida en pleno fundido de cierre, no avisa', async () => {
+    const { fixture, fines } = await montar(1);
+    const advertencia = spyOn(console, 'warn');
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+    fixture.destroy();
+    await new Promise((listo) => setTimeout(listo, 400)); // el fundido dura 280 ms
+    expect(fines).toEqual([]);
+    expect(advertencia).not.toHaveBeenCalled();
+  });
+
+  it('destruida antes de que cargue su escena, no se abre', async () => {
+    const fixture = TestBed.createComponent(CinematicaComponent);
+    fixture.componentRef.setInput('cinematica', cinematicaDe(1)!);
+    fixture.detectChanges();
+    const host: HTMLElement = fixture.nativeElement;
+    fixture.destroy();
+    await cargarEscena(1);
+    await new Promise((listo) => setTimeout(listo, 50));
+    expect(host.classList).toContain('cine-host--antes');
   });
 
   it('con la pausa de la vida de fondo del recorrido se cuenta en su modo quieto', async () => {
