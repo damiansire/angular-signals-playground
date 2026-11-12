@@ -11,6 +11,9 @@ import {
 import { gsap } from 'gsap';
 import { sinMovimiento } from '../../../libs/muelle';
 
+/** Lo que la mano espera para entrar: primero se lee la ley. */
+const DEMORA_DE_ENTRADA_MS = 1200;
+
 export interface Punta {
   readonly x: number;
   readonly y: number;
@@ -120,6 +123,8 @@ export class ManoGuiaComponent {
   private readonly guante = viewChild.required<ElementRef<SVGSVGElement>>('guante');
   private readonly onda = viewChild.required<ElementRef<HTMLElement>>('onda');
   private visible = false;
+  /** Hasta cuándo espera para entrar, en el reloj de `performance.now()`; `null` si no espera. */
+  private entraEn: number | null = null;
   private ocupada = false;
   private amague: gsap.core.Timeline | null = null;
   private viaje: gsap.core.Tween | null = null;
@@ -162,10 +167,12 @@ export class ManoGuiaComponent {
           listo();
         },
       });
-      if (!this.visible) {
+      // Esperando su entrada cuenta como no estar: "Mostrame" la trae ya.
+      if (!this.visible || (this.entraEn !== null && this.entraEn > performance.now())) {
         tl.set(mano, { x: punta.x + 40, y: punta.y + 40 });
         tl.to(mano, { autoAlpha: 1, scale: 1, duration: 0.2, ease: 'back.out(2)' });
       }
+      this.entraEn = null;
       this.visible = true;
       tl.to(mano, { x: punta.x, y: punta.y, duration: 0.38, ease: 'power2.inOut' })
         .to(guante, { scale: 0.86, y: 5, duration: 0.1, ease: 'power2.in' })
@@ -194,8 +201,12 @@ export class ManoGuiaComponent {
       this.visible = true;
       return;
     }
-    if (!this.visible) {
-      // Entra después de que se leyó la ley: aparecer junto con el título le robaba la mirada.
+    const ahora = performance.now();
+    if (!this.visible) this.entraEn = ahora + DEMORA_DE_ENTRADA_MS;
+    if (this.entraEn !== null && this.entraEn > ahora) {
+      // Entra después de que se leyó la ley: aparecer junto con el título le robaba la mirada. Si la
+      // página vuelve a medir mientras espera (lo hace al terminar de entrar la demo), sigue
+      // esperando lo que le falta: antes ese viaje la traía enseguida, a medio segundo de la ley.
       gsap.set(mano, { x: punta.x + 36, y: punta.y + 44, scale: 0.4, autoAlpha: 0 });
       this.viaje = gsap.to(mano, {
         x: punta.x,
@@ -203,7 +214,7 @@ export class ManoGuiaComponent {
         scale: 1,
         autoAlpha: 1,
         duration: 0.35,
-        delay: 1.2,
+        delay: (this.entraEn - ahora) / 1000,
         ease: 'back.out(2)',
         onComplete: () => this.amagar(),
       });
@@ -228,6 +239,7 @@ export class ManoGuiaComponent {
     this.viaje?.kill();
     if (!this.visible) return;
     this.visible = false;
+    this.entraEn = null;
     if (sinMovimiento()) {
       gsap.set(this.mano().nativeElement, { autoAlpha: 0 });
       return;
