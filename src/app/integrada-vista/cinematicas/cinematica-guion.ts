@@ -6,6 +6,7 @@
  * reloj calcula cuándo entra. Con dos relojes, el prólogo y los capítulos respirarían distinto, y
  * es la misma tripulación hablando.
  */
+import { REGLAS_DE_LINEA, palabrasDe, problemasDeLinea } from '../../libs/guion';
 import { armarReloj, type LineaGuion } from '../prologo-guion';
 
 export type Hablante = 'cap' | 'naveA' | 'naveB' | 'nave4' | 'mascota' | 'todos';
@@ -47,10 +48,7 @@ export const BEATS_COMUNES = ['titulo', 'naves', 'mascota', 'transmision'] as co
 
 /** Las reglas duras del guion. Son la barra de diseño del juego convertida en chequeo. */
 export const REGLAS_GUION = {
-  /** Máximo de palabras en pantalla a la vez: una línea es todo lo que hay en pantalla. */
-  palabras: 8,
-  renglones: 2,
-  columnas: 44,
+  ...REGLAS_DE_LINEA,
   /** Líneas por capítulo; el pico (6) y el final tienen más aire. */
   lineas: { min: 4, max: 8, maxLargo: 10 },
   /** Un capítulo que dura más que esto deja de ser ceremonia y pasa a ser espera. */
@@ -65,10 +63,6 @@ export const PASO_APERTURA_MS = 520;
 
 /** Capítulos con permiso para ser más largos: el pico del medio, la revelación y la salida. */
 const LARGOS = new Set([6, CAPITULO_REVELACION, CAPITULO_FINAL]);
-
-export function palabrasDe(txt: string): number {
-  return txt.replace(/\n/g, ' ').split(/\s+/).filter(Boolean).length;
-}
 
 /** Las líneas que se juegan en esta partida (el final cambia según lo que quedó establecido). */
 export function lineasPara(cine: Cinematica, completo: boolean): readonly LineaCine[] {
@@ -110,16 +104,7 @@ export function problemasDe(cine: Cinematica): readonly string[] {
     if (vistos.has(l.id)) p.push(`${quien}: id repetido`);
     vistos.add(l.id);
     if (!l.txt.trim()) p.push(`${quien}: sin texto`);
-    if (palabrasDe(l.txt) > REGLAS_GUION.palabras) {
-      p.push(`${quien}: ${palabrasDe(l.txt)} palabras, el techo es ${REGLAS_GUION.palabras}`);
-    }
-    const renglones = l.txt.split('\n');
-    if (renglones.length > REGLAS_GUION.renglones) p.push(`${quien}: más de dos renglones`);
-    for (const r of renglones) {
-      if (r.length > REGLAS_GUION.columnas) p.push(`${quien}: renglón de ${r.length} columnas`);
-    }
-    // La raya delata redacción automática y no es la voz de nadie de esta tripulación.
-    if (/[—–]/.test(l.txt)) p.push(`${quien}: usa raya`);
+    for (const problema of problemasDeLinea(l.txt)) p.push(`${quien}: ${problema}`);
     if (l.beat && !conocidos.has(l.beat)) p.push(`${quien}: beat "${l.beat}" no declarado`);
     if (l.si && cine.capitulo !== CAPITULO_FINAL) p.push(`${quien}: "si" solo va en el final`);
   }

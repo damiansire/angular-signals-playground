@@ -1,6 +1,6 @@
 import { signalsRoutesTree } from '../app.routes';
-import { REGLAS_GUION, palabrasDe } from './cinematicas/cinematica-guion';
-import { GUION_DEL_VIAJE, palabrasDeLinea } from './guion-del-viaje';
+import { problemasDeLinea } from '../libs/guion';
+import { GUION_DEL_VIAJE } from './guion-del-viaje';
 import { paginasDeEtapa } from './viaje';
 
 describe('GUION_DEL_VIAJE', () => {
@@ -18,18 +18,9 @@ describe('GUION_DEL_VIAJE', () => {
   });
 
   it('cada línea sigue las reglas del guion', () => {
-    const problemas: string[] = [];
-    for (const [id, { llegada, resuelta }] of Object.entries(GUION_DEL_VIAJE)) {
-      for (const l of [llegada, resuelta]) {
-        const renglones = l.txt.split('\n');
-        if (palabrasDe(l.txt) > REGLAS_GUION.palabras) problemas.push(`${id}: muchas palabras`);
-        if (renglones.length > REGLAS_GUION.renglones) problemas.push(`${id}: muchos renglones`);
-        if (renglones.some((r) => r.length > REGLAS_GUION.columnas)) {
-          problemas.push(`${id}: renglón largo`);
-        }
-        if (/[—–]/.test(l.txt)) problemas.push(`${id}: usa raya`);
-      }
-    }
+    const problemas = Object.entries(GUION_DEL_VIAJE).flatMap(([id, { llegada, resuelta }]) =>
+      [llegada, resuelta].flatMap((l) => problemasDeLinea(l.txt).map((p) => `${id}: ${p}`)),
+    );
     expect(problemas).toEqual([]);
   });
 
@@ -43,22 +34,5 @@ describe('GUION_DEL_VIAJE', () => {
       ([, g]) => g.llegada.quien === g.resuelta.quien,
     );
     expect(solas.map(([id]) => id)).toEqual([]);
-  });
-});
-
-describe('palabrasDeLinea', () => {
-  it('parte en palabras y marca la primera de cada renglón del guion', () => {
-    expect(palabrasDeLinea('Nunca la leí.\n¿Cómo se lee?')).toEqual([
-      { txt: 'Nunca', corte: false },
-      { txt: 'la', corte: false },
-      { txt: 'leí.', corte: false },
-      { txt: '¿Cómo', corte: true },
-      { txt: 'se', corte: false },
-      { txt: 'lee?', corte: false },
-    ]);
-  });
-
-  it('no cuenta espacios de más como palabras', () => {
-    expect(palabrasDeLinea('  hola   mundo ').map((p) => p.txt)).toEqual(['hola', 'mundo']);
   });
 });

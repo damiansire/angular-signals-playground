@@ -29,11 +29,13 @@ import {
   LUZ_DE,
   NAVE_DEL_VIAJE,
   TripulacionComponent,
+  type LineaDelViaje,
   type QuienDelViaje,
 } from '../components-draw/tripulacion/tripulacion.component';
 import { RetratoDeNaveComponent } from '../components-draw/tripulacion/retrato-de-nave.component';
 import { acentoDe } from './cinematicas/escenas/acentos';
-import { guionDe, idDeLineaDelViaje, palabrasDeLinea, type LineaDelViaje } from './guion-del-viaje';
+import { guionDe, idDeLineaDelViaje } from './guion-del-viaje';
+import { palabrasDeLinea } from '../libs/guion';
 import { VOCES_GRABADAS } from './voces-grabadas';
 import { sinMovimiento } from '../libs/muelle';
 import {

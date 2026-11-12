@@ -1,4 +1,4 @@
-import { REGLAS_GUION, palabrasDe } from './cinematicas/cinematica-guion';
+import { REGLAS_DE_LINEA, palabrasDe } from '../libs/guion';
 import { PAGINAS_DEL_MANUAL, pasoEnElManual } from './manual-de-a-bordo';
 
 describe('el manual de a bordo', () => {
@@ -14,7 +14,9 @@ describe('el manual de a bordo', () => {
 
   it('lo que le dice a la tripulación sigue las reglas del guion', () => {
     for (const p of PAGINAS_DEL_MANUAL) {
-      expect(palabrasDe(p.enLaNave)).withContext(p.id).toBeLessThanOrEqual(REGLAS_GUION.palabras);
+      expect(palabrasDe(p.enLaNave))
+        .withContext(p.id)
+        .toBeLessThanOrEqual(REGLAS_DE_LINEA.palabras);
       expect(p.enLaNave).withContext(p.id).not.toMatch(/[—–]/);
     }
   });

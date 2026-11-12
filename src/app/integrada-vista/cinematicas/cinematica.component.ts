@@ -16,6 +16,7 @@ import {
 } from '@angular/core';
 import { NgComponentOutlet } from '@angular/common';
 
+import { palabrasDeLinea, type PalabraDeLinea } from '../../libs/guion';
 import { sonido } from '../../libs/sonido';
 import { VOCES_GRABADAS } from '../voces-grabadas';
 import {
@@ -241,15 +242,8 @@ export class CinematicaComponent {
     return NOMBRES[quien];
   }
 
-  protected palabrasDe(linea: LineaEnPantalla): readonly { txt: string; corte: boolean }[] {
-    const salida: { txt: string; corte: boolean }[] = [];
-    linea.txt.split('\n').forEach((renglon, r) => {
-      renglon
-        .split(/\s+/)
-        .filter(Boolean)
-        .forEach((txt, i) => salida.push({ txt, corte: r > 0 && i === 0 }));
-    });
-    return salida;
+  protected palabrasDe(linea: LineaEnPantalla): readonly PalabraDeLinea[] {
+    return palabrasDeLinea(linea.txt);
   }
 
   /**

@@ -1,10 +1,4 @@
-import type { QuienDelViaje } from '../components-draw/tripulacion/tripulacion.component';
-
-/** Una línea de la tripulación en una página del viaje. Sigue las reglas del guion (`REGLAS_GUION`). */
-export interface LineaDelViaje {
-  readonly quien: QuienDelViaje;
-  readonly txt: string;
-}
+import type { LineaDelViaje } from '../components-draw/tripulacion/tripulacion.component';
 
 /**
  * Lo que dice la tripulación en cada página del viaje: al llegar, qué encontraron (el problema de la
@@ -177,17 +171,4 @@ export function guionDe(
  */
 export function idDeLineaDelViaje(pagina: string, momento: string): string {
   return `viaje-${pagina.replace('/', '-')}-${momento}`;
-}
-
-/**
- * Las palabras de una línea, para que entren de a una como en las cinemáticas. `corte` marca la
- * primera de un renglón nuevo: el salto lo decide el guion, no el ancho de la caja.
- */
-export function palabrasDeLinea(txt: string): { readonly txt: string; readonly corte: boolean }[] {
-  return txt.split('\n').flatMap((renglon, r) =>
-    renglon
-      .split(/\s+/)
-      .filter(Boolean)
-      .map((palabra, k) => ({ txt: palabra, corte: r > 0 && k === 0 })),
-  );
 }

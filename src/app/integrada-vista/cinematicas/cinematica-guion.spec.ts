@@ -5,7 +5,6 @@ import {
   COLA_MS,
   duracionDe,
   lineasPara,
-  palabrasDe,
   problemasDe,
   relojDe,
   type Cinematica,
@@ -35,11 +34,6 @@ describe('cinematica-guion', () => {
   describe('reglas', () => {
     it('un capítulo bien escrito no tiene problemas', () => {
       expect(problemasDe(capitulo())).toEqual([]);
-    });
-
-    it('cuenta palabras como tokens separados por espacio, también a través del corte', () => {
-      expect(palabrasDe('Uno dos\ntres')).toBe(3);
-      expect(palabrasDe('  ¿Qué   pasa?  ')).toBe(2);
     });
 
     it('una línea de nueve palabras rompe el techo de ocho', () => {
