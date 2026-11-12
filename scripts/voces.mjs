@@ -1,6 +1,6 @@
-// Las voces de Gemini de la app: genera public/voces/<grupo>/*.mp3 (prólogo, cinemáticas y hojas
-// del viaje) y el índice que lee la app (src/app/integrada-vista/voces-grabadas.ts). Cómo se usa y
-// por qué así: docs/voces.md.
+// Las voces de Gemini de la app: genera public/voces/<grupo>/*.mp3 (prólogo, cinemáticas, hojas
+// del viaje y pensamientos de la colina) y el índice que lee la app
+// (src/app/integrada-vista/voces-grabadas.ts). Cómo se usa y por qué así: docs/voces.md.
 //
 //   node scripts/voces.mjs              dice qué falta y cuántos pedidos gastaría (no gasta nada)
 //   node scripts/voces.mjs --go         genera lo que falta y reescribe el índice
@@ -67,6 +67,7 @@ async function lineasPorGrupo() {
   const prologo = await modulo('src/app/integrada-vista/prologo-guion.ts', 'prologo');
   const cine = await modulo('src/app/integrada-vista/cinematicas/cinematicas-datos.ts', 'cine');
   const viaje = await modulo('src/app/integrada-vista/guion-del-viaje.ts', 'viaje');
+  const colina = await modulo('src/app/integrada-vista/pensamientos-de-la-colina.ts', 'colina');
   return {
     prologo: prologo.GUION,
     cine: cine.CINEMATICAS.flatMap((c) => c.lineas),
@@ -76,6 +77,7 @@ async function lineasPorGrupo() {
         id: viaje.idDeLineaDelViaje(pagina, momento),
       })),
     ),
+    colina: colina.PENSAMIENTOS_DE_LA_COLINA,
   };
 }
 
