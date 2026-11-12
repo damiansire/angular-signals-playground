@@ -381,8 +381,10 @@ body {
     0 5px 0 rgb(32 29 22 / 16%);
   transform: translateY(-1px);
 }
+/* El mismo gris de `.lab input::placeholder`: #8a8069 daba 3,85:1 sobre el campo. */
 .prologo__manual--viaje.card--dissolve .subhost input::placeholder {
-  color: #8a8069;
+  color: #6f6753;
+  opacity: 1;
   font-weight: 500;
 }
 /* El formulario de a bordo en dos columnas: apilado en 20rem dejaba la mitad derecha de la hoja
