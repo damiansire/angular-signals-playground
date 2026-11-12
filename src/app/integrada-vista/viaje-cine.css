@@ -338,7 +338,7 @@
 }
 /* La pista de Angie, arriba de la barra de diálogo: en su altura de siempre la tapaba. En un
    celular va en la consola, entre los botones (`viaje-angosto.css`). */
-@media (min-width: 761px) and (min-height: 501px) {
+@media (min-width: 760.02px) and (min-height: 500.02px) {
   .manual-suelto--viaje .prologo__manual app-concept-card {
     bottom: calc(var(--barra-abajo) + 0.75rem);
   }
@@ -347,7 +347,7 @@
 /* Una notebook de 768 de alto: los capítulos 3 y 8 se pasaban por 20 a 40 px y el desafío quedaba
    debajo de la barra. La tripulación no baja de 25rem: debajo de 400 px cambia a la disposición
    angosta, que es más alta. */
-@media (min-width: 761px) and (max-height: 820px) {
+@media (min-width: 760.02px) and (max-height: 820px) {
   .prologo__manual--viaje .etapa__cabeza {
     grid-template-columns: minmax(0, 1fr) minmax(18rem, 25rem);
     margin-bottom: 0.35rem;
