@@ -9,12 +9,12 @@
     <app-variable-box
       variableName="Count1"
       [variableValue]="count().toString()"
-      (click)="upCount()"
+      (clickEvent)="upCount()"
     />
     <app-variable-box
       variableName="Count2"
       [variableValue]="count2().toString()"
-      (click)="upCount2()"
+      (clickEvent)="upCount2()"
     />
     <div class="mt-6">
       <app-dependencies-status

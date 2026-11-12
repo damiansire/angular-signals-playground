@@ -84,6 +84,21 @@ describe('EffectComponent', () => {
     expect(triggers()).not.toContain('effect(1) corrió');
   });
 
+  it('las cajas se tocan con el mouse y con Enter: es lo único que hay para hacer acá', () => {
+    create();
+    fixture.detectChanges();
+    const cajas = (fixture.nativeElement as HTMLElement).querySelectorAll<HTMLElement>(
+      'app-variable-box [role="button"]',
+    );
+
+    cajas[1].click();
+    expect(component.count2()).toBe(1);
+    cajas[1].dispatchEvent(new KeyboardEvent('keyup', { key: 'Enter', bubbles: true }));
+    expect(component.count2()).toBe(2);
+    cajas[0].dispatchEvent(new KeyboardEvent('keyup', { key: 'Enter', bubbles: true }));
+    expect(component.count()).toBe(1);
+  });
+
   it('cada effect declara su propia dependencia', () => {
     create();
     expect(component.dependencies()).toEqual(['count']);
