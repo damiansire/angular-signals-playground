@@ -36,18 +36,17 @@ Cada uno quedó comprobado en pantalla después del arreglo, y anotado en el che
 - **La capa lejana del capítulo 6 iba con la crema entera** (L1523 a).
 - **Recargar en el último cuadro volvía a la página 11/1 y perdía el fin** (L1506).
 
+Después de la pasada, en una segunda tanda, el manual de a bordo en pantallas bajas:
+
+- **El globo de la nave tapaba "Manual de a bordo" y la bajada** (L1073, L1280, L1317, L1342; lo
+  reportaron tres revisores): con 720 de alto o menos, la ley va sobre la columna de la pantalla.
+- **La portada de la ley 1 scrolleaba** (L1342, L1239): hasta 52 px a 2000×700.
+- **La pista de cómo se arrastra `</article>` salía cortada** (L1159) a 1280 y a 1024 de ancho.
+
 ## Fallas que quedan abiertas
 
 ### El manual de a bordo y el árbol (prólogo)
 
-- **El globo de la nave tapa "Manual de a bordo" a 1280×640** (L1073, L1280, L1317, L1342; tres
-  revisores). Leyes 1 a 4, con la demo abierta: el globo arranca en y 196 y la fila de marcas va de
-  y 197 a 208. En el paso 2 de la ley 1 tapa también la bajada. Pasa con 640 de alto o menos, y a
-  1024×700 por 2,5 px. Desde 680 de alto no pasa.
-- **La portada de la ley 1 scrollea** (L1342, L1239): 21 px a 1280×640, 19 px a 2000×780, 6 px a
-  2000×800. Con la rueda sube el vidrio y aparece una franja negra abajo.
-- **La pista de cómo se arrastra `</article>` sale cortada** (L1159): "Mantené el click y arrastı" a
-  1280 de ancho; a 1024 se pierde "y arrastrá" entero.
 - **El marco de la portada tapa la punta del anillo del planeta a 1280×640** (L1091): de 8 a 20 px.
 - **El globo se achica 48 px cuando se va "Mostrame"** (L1059), en todos los tamaños.
 - **La pantalla de la ley 4 crece 4,9 px al completar el handler a 1280×640** (L1113).

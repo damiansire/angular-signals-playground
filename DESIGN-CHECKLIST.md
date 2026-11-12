@@ -1432,6 +1432,29 @@ Del minijuego de operadores (2026-11-08):
       con "más abajo"), suelto a 1440×900 y con movimiento reducido: la mano a la vista y
       "Mostrame" hasta el final en las cinco páginas.
 
+- [ ] (2026-11-13) Baja (720 de alto o menos), la ley va sobre la columna de la pantalla y no
+      comparte columna con el globo de la nave. Defecto resuelto, el mismo que el ítem del 2026-11-11
+      daba por cerrado bajando la nave: el globo crece hacia arriba desde ella, y con tres renglones
+      o con la pista llegaba igual a "Manual de a bordo" y a la bajada (a 1280×640 en las leyes 1 a
+      4; también a 1024×600, 1366×640 y 2000×700). Correr la nave no alcanza porque el alto del globo
+      cambia con cada página; en columnas distintas no se pueden tocar. Medido con input real en las
+      cinco leyes a 1280×640 y 1024×600, y en la 1 a 1100×640, 1366×640 y 2000×700: el globo no pisa
+      la ley, la pantalla ni la barra del juego, y el título va en un renglón. A 1440×900, 2000×780
+      y 3440×1300 la ley sigue donde estaba.
+- [ ] (2026-11-13) La portada entra entera en una pantalla baja. Defecto resuelto: la de la ley 1
+      (la más alta, con su árbol) scrolleaba 21 px a 1280×640, 19 a 2000×780, 35 a 1024×600 y 52 a
+      2000×700, y con la rueda subía el vidrio y aparecía una franja negra abajo. Con 820 de alto o
+      menos la portada lleva menos aire abajo (ahí no cuelga la pestaña "Anterior") y arriba, y el
+      árbol del dibujo se limita también por el alto, como las otras portadas. Medido en las cinco
+      portadas a 1280×640 y 1024×600, y en la 1 a 1100×640, 1366×640, 2000×700, 2000×780 y 2000×800:
+      `scrollHeight` igual a `clientHeight`. A 1440×900 mide lo mismo que antes.
+- [ ] (2026-11-13) La pista de cómo se arrastra `</article>` se lee entera con el globo angosto.
+      Defecto resuelto: sus renglones no se partían y el globo los recortaba: "Mantené el click y
+      arrastı" a 1280 de ancho, y a 1024 se perdía "y arrastrá" entero, que es lo que la pista viene
+      a decir. Cada renglón va en trozos que no se parten por dentro: si no entra, baja el trozo
+      entero ("Mantené el click / y arrastrá, / o usá ↑ ↓."). Medido a 1280×640 y 1024×600: ningún
+      trozo se sale de su caja. A 1440×900 sigue en dos renglones.
+
 **El árbol de Signal Space** (el viejo 0/6, la misma hoja con una sola página):
 
 - [ ] La historia se frena en "Miren el árbol." y sigue con "Guarden esa pregunta." al tocar
