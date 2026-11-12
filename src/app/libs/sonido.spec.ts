@@ -338,6 +338,30 @@ describe('sonido', () => {
         expect(pedidas).toEqual(['voces/a.mp3']);
       });
 
+      it('decirGrabada toca solo la grabación, también si llega después de pedirla', async () => {
+        const { ctx, s } = conGrabaciones();
+        s.desbloquear();
+        s.decirGrabada('voces/a.mp3');
+        expect(ctx.grabaciones.length).toBe(0);
+        await asentar();
+        expect(ctx.grabaciones.length).toBe(1);
+        s.decirGrabada('voces/a.mp3');
+        expect(ctx.grabaciones.length).toBe(2);
+        expect(ctx.grabaciones[0].paradas).toBe(1);
+        expect(ctx.osciladores.length).toBe(0);
+      });
+
+      it('decirGrabada no suena tarde si antes se pidió callar, ni sin grabación', async () => {
+        const { ctx, s } = conGrabaciones();
+        s.desbloquear();
+        s.decirGrabada('voces/a.mp3');
+        s.decirGrabada(null);
+        s.decirGrabada('voces/rota.mp3');
+        await asentar();
+        expect(ctx.grabaciones.length).toBe(0);
+        expect(ctx.osciladores.length).toBe(0);
+      });
+
       it('callar corta la grabación que está sonando', async () => {
         const { ctx, s } = conGrabaciones();
         s.precargar(['voces/a.mp3']);

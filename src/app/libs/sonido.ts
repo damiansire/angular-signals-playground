@@ -173,6 +173,12 @@ export interface Sonido {
    * apagado no baja nada: lo hace recién cuando lo prenden.
    */
   precargar(grabadas: readonly string[]): void;
+  /**
+   * Toca solo una grabación, sin ventana ni blips: para una línea que queda en pantalla hasta que
+   * quien mira sigue (las hojas del viaje). Corta la grabación que estaba sonando, y con `null` solo
+   * corta. Si todavía está bajando, suena cuando llegue, salvo que antes se pida otra o callar.
+   */
+  decirGrabada(grabada: string | null): void;
   /** Corta todo lo que está sonando o agendado. */
   callar(): void;
   /** Para quien sintetiza lo suyo (la intro, el prólogo). `null` si no hay audio todavía. */
@@ -257,6 +263,8 @@ export function crearSonido(entorno: EntornoSonido = {}): Sonido {
   const listas = new Map<string, AudioBuffer>();
   const decodificando = new Set<string>();
   const grabacionesSonando = new Set<AudioBufferSourceNode>();
+  /** La de `decirGrabada` que se pidió antes de estar lista: suena al llegar. */
+  let enEspera: string | null = null;
 
   /**
    * Baja lo pedido y, si ya hay contexto, lo decodifica. Cada ruta se baja y se decodifica una
@@ -278,10 +286,27 @@ export function crearSonido(entorno: EntornoSonido = {}): Sonido {
         .get(ruta)!
         .then((bytes) => (bytes ? contexto.decodeAudioData(bytes) : null))
         .then((buffer) => {
-          if (buffer && ctx === contexto) listas.set(ruta, buffer);
+          if (!buffer || ctx !== contexto) return;
+          listas.set(ruta, buffer);
+          if (enEspera === ruta && listo()) {
+            enEspera = null;
+            aSalvo(() => reproducir(buffer));
+          }
         })
         .catch(() => undefined);
     }
+  }
+
+  function cortarGrabaciones(): void {
+    for (const fuente of grabacionesSonando) {
+      try {
+        fuente.stop();
+      } catch {
+        // Ya había terminado.
+      }
+    }
+    grabacionesSonando.clear();
+    enEspera = null;
   }
 
   function reproducir(buffer: AudioBuffer): void {
@@ -383,14 +408,7 @@ export function crearSonido(entorno: EntornoSonido = {}): Sonido {
     }
     agendadas.clear();
     vivas = 0;
-    for (const fuente of grabacionesSonando) {
-      try {
-        fuente.stop();
-      } catch {
-        // Ya había terminado.
-      }
-    }
-    grabacionesSonando.clear();
+    cortarGrabaciones();
   }
 
   return {
@@ -458,6 +476,15 @@ export function crearSonido(entorno: EntornoSonido = {}): Sonido {
     precargar(grabadas) {
       for (const ruta of grabadas) pedidas.add(ruta);
       cargar();
+    },
+    decirGrabada(grabada) {
+      cortarGrabaciones();
+      if (!grabada || !listo()) return;
+      pedidas.add(grabada);
+      cargar();
+      const buffer = listas.get(grabada);
+      if (buffer) aSalvo(() => reproducir(buffer));
+      else enEspera = grabada;
     },
     callar,
     salida: () => (listo() && ctx && salidaComun ? { ctx, salida: salidaComun } : null),
