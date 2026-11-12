@@ -95,6 +95,7 @@
   transition:
     rotate 0.2s,
     translate 0.2s,
+    box-shadow 0.2s,
     background-color 0.2s;
 }
 .pm :is(.pm-etapas, .pm-globo) .pm-mostrar:hover:not(:disabled) {
@@ -279,7 +280,7 @@
 /* Con lugar, la escena llega hasta arriba de todo y la ley flota sobre su cielo, debajo de la barra
    del juego (`--pm-arriba`, que pone quien la monta). Con la ley en una franja propia, encima de la
    escena, el título cortaba la pantalla de la nave y lo que saltaba al tocar quedaba debajo. */
-@media (min-width: 761px) and (min-height: 501px) {
+@media (min-width: 760.02px) and (min-height: 500.02px) {
   :host(.pm-entera) .pm-cabeza {
     position: absolute;
     inset: 0 0 auto;
@@ -474,7 +475,8 @@
   cursor: pointer;
   transition:
     rotate 0.2s,
-    translate 0.2s;
+    translate 0.2s,
+    box-shadow 0.2s;
 }
 .pm .pm-pantalla .pm-atras:hover {
   rotate: 0deg;
@@ -650,7 +652,7 @@
   }
 }
 
-@media (min-width: 761px) {
+@media (min-width: 760.02px) {
   :host(.pm-pantalla) {
     --pm-nave-ancho: clamp(11rem, 20%, 34rem);
     --pm-nave-alto: 40%;
@@ -746,7 +748,7 @@
 
 /* Baja, la nave baja con la pantalla: al 44%, a 1280×640 su globo subía hasta la ley y tapaba "Manual
    de a bordo". */
-@media (min-width: 761px) and (max-height: 800px) {
+@media (min-width: 760.02px) and (max-height: 800px) {
   :host(.pm-pantalla) {
     --pm-nave-alto: 36%;
     --pm-nave-arriba: 50%;
