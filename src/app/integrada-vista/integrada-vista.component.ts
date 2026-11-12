@@ -734,6 +734,12 @@ export class IntegradaVistaComponent {
   constructor() {
     this.destroyRef.onDestroy(() => this.cortarRespiro());
     this.destroyRef.onDestroy(() => this.callarMusicaDelManual());
+    this.destroyRef.onDestroy(() => {
+      // La línea que estaba sonando es de esta pantalla: no sigue hablando en la práctica.
+      sonido().callar();
+      if (this.confirmacionBorrado) clearTimeout(this.confirmacionBorrado);
+      if (this.mirada !== null) cancelAnimationFrame(this.mirada);
+    });
     afterNextRender(() => {
       try {
         this.arrancar();

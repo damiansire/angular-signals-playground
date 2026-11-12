@@ -5,6 +5,7 @@ import { provideRouter } from '@angular/router';
 import { IntegradaVistaComponent } from './integrada-vista.component';
 import { cuadrosFalsos, hasta } from './testing/cuadros';
 import { CLAVE_PARTIDA } from '../libs/partida';
+import { sonido } from '../libs/sonido';
 
 /**
  * La vista de la ruta `/` es el producto entero, y su boot es imperativo: los gates verificaban que
@@ -356,6 +357,31 @@ describe('IntegradaVistaComponent', () => {
       expect(cuadros.pendientes())
         .withContext('la vista sigue animando aunque ya no existe')
         .toBe(0);
+    });
+
+    it('la mirada que pidió el mouse no queda pidiendo su cuadro', async () => {
+      const fixture = await montar();
+      await abrirEtapa(fixture, 1);
+      const cuadros = cuadrosFalsos();
+      const hoja = fixture.nativeElement.querySelector('.prologo__manual') as HTMLElement;
+      hoja.dispatchEvent(
+        new PointerEvent('pointermove', { pointerType: 'mouse', clientX: 40, clientY: 40 }),
+      );
+      expect(cuadros.pendientes())
+        .withContext('mover el mouse sobre la etapa pide un cuadro para la mirada')
+        .toBeGreaterThan(0);
+
+      fixture.destroy();
+      await new Promise((r) => setTimeout(r));
+
+      expect(cuadros.pendientes()).toBe(0);
+    });
+
+    it('al irse corta la voz que estaba sonando', async () => {
+      const fixture = await montar();
+      const callar = spyOn(sonido(), 'callar').and.callThrough();
+      fixture.destroy();
+      expect(callar).toHaveBeenCalled();
     });
 
     it('devuelve todos los listeners globales que tomó', async () => {
