@@ -1,0 +1,52 @@
+{
+  "nota": "Guion de las voces de Gemini (scripts/voces.mjs, docs/voces.md). Cambiar una voz, un estilo o un texto regenera solo esas líneas.",
+  "modelo": "gemini-3.8-flash-tts",
+  "acento": "neutro",
+  "acentos": {
+    "rioplatense": {
+      "estilo": "Rioplatense Spanish accent from Buenos Aires or Montevideo, natural voseo, ll and y pronounced as sh",
+      "voces": {
+        "cap": "es-419-techagent-12",
+        "naveA": "es-419-concierge-9",
+        "naveB": "es-419-tutor-6",
+        "nave4": "es-419-techagent-11",
+        "angie": "es-419-advisor-1"
+      }
+    },
+    "neutro": {
+      "estilo": "neutral Latin American Spanish, like a dubbed animated film, no strong regional accent",
+      "voces": {
+        "cap": "es-419-podcaster-3",
+        "naveA": "es-419-assistant-1",
+        "naveB": "es-419-assistant-9",
+        "nave4": "es-419-csagent-7",
+        "angie": "es-419-commercial-6"
+      }
+    }
+  },
+  "personajes": {
+    "cap": "starship captain in his forties, in command of his crew but shaken by what is happening, firm and clear, short sentences",
+    "naveA": "young female starship pilot, emotional and expressive, a little sarcastic with her friends",
+    "naveB": "young male starship pilot, curious and nervous, always asking questions",
+    "nave4": "young female scout pilot, impatient and full of energy, teasing her slow friends",
+    "angie": "calm and wise female guide, gentle, warm and slightly mysterious, never in a hurry, short pauses between ideas"
+  },
+  "hablantes": {
+    "cap": "cap",
+    "naveA": "naveA",
+    "naveB": "naveB",
+    "nave4": "nave4",
+    "voz": "angie",
+    "mascota": "angie"
+  },
+  "pronunciar": {
+    "dentro-switchmap": "suich map no funciona, tampoco puedo usar los pipes."
+  },
+  "muestras": [
+    "casa-volver",
+    "dentro-esquiva-ya",
+    "leccion-pregunta",
+    "casa-apuren",
+    "orden-malinterpretado"
+  ]
+}
