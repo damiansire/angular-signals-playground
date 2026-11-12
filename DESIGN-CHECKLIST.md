@@ -252,6 +252,10 @@ puede alcanzar" son dos cosas distintas y hay que chequear las dos.
 
 ## Vistas y estado
 
+- [ ] (2026-11-12) La barra de direcciones dice la página que se está viendo, no la primera de la
+      etapa. Defecto resuelto: al pasar de página dentro de una etapa se guardaba la partida pero no
+      se escribía la barra, y como el link le gana a la partida, recargar en la página 2 volvía a la
+      1. Con spec (la barra y la partida dicen lo mismo) y probado con recarga real por CDP en 4/2.
 - [ ] URL sync bidireccional: navegar actualiza la URL Y pegar una URL
       restaura el estado (nivel y sub-nivel). Testear ambas direcciones.
 - [ ] Retomar al recargar (ADR 0005 y 0015), probado con input real: con un punto del prólogo, el
