@@ -183,8 +183,9 @@
 }
 
 /* Las moléculas lejanas de cada escena, de noche, se leen como constelaciones: con la crema
-   entera brillaban más que las cajas del héroe. */
-.cine [class*='__lejos'] {
+   entera brillaban más que las cajas del héroe. La capa lejana del capítulo 6 se llama `--lejos`
+   y quedaba afuera: sus moléculas iban con la crema entera. */
+.cine :is([class*='__lejos'], [class*='--lejos']) {
   opacity: 0.5;
 }
 
