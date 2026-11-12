@@ -87,6 +87,13 @@ module.exports = defineConfig([
       "no-console": ["error", { allow: ["warn", "error"] }],
       // Gate: el repo predica OnPush al 100% — fallar si se reintroduce Default CD
       "@angular-eslint/prefer-on-push-component-change-detection": "error",
+      // Gate: signal-first. `input()`/`output()`/`model()`/queries de signals en vez de decoradores,
+      // y los campos signal `readonly`: se escribe el valor, nunca se reasigna el signal.
+      "@angular-eslint/prefer-signals": "error",
+      "@angular-eslint/prefer-signal-model": "error",
+      "@angular-eslint/prefer-output-emitter-ref": "error",
+      "@angular-eslint/prefer-output-readonly": "error",
+      "@angular-eslint/no-lifecycle-call": "error",
     },
   },
   ...fronterasEntreAreas,
@@ -108,6 +115,12 @@ module.exports = defineConfig([
       "@angular-eslint/template/click-events-have-key-events": "error",
       "@angular-eslint/template/interactive-supports-focus": "error",
       "@angular-eslint/template/mouse-events-have-key-events": "error",
+      // Gate: un <button> sin `type` es de envío adentro de un <form>, y nadie lo eligió.
+      "@angular-eslint/template/button-has-type": "error",
+      "@angular-eslint/template/no-positive-tabindex": "error",
+      // Gate: control flow moderno también en sus ramas (`@empty`, `@else`).
+      "@angular-eslint/template/prefer-at-empty": "error",
+      "@angular-eslint/template/prefer-at-else": "error",
     },
   }
 ]);
