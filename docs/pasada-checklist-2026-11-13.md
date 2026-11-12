@@ -42,20 +42,16 @@ Después de la pasada, en una segunda tanda, el manual de a bordo en pantallas b
   reportaron tres revisores): con 720 de alto o menos, la ley va sobre la columna de la pantalla.
 - **La portada de la ley 1 scrolleaba** (L1342, L1239): hasta 52 px a 2000×700.
 - **La pista de cómo se arrastra `</article>` salía cortada** (L1159) a 1280 y a 1024 de ancho.
+- **La llama se despegaba de la boca del motor** (L1183): hasta 61 px a fondo.
+- **La mano guía entraba a medio segundo de la ley** (L1368), no a 1,2 s.
+- **La hoja del árbol no decía "Signal Space"** (L1403).
 
 ## Fallas que quedan abiertas
 
 ### El manual de a bordo y el árbol (prólogo)
 
 - **El marco de la portada tapa la punta del anillo del planeta a 1280×640** (L1091): de 8 a 20 px.
-- **El globo se achica 48 px cuando se va "Mostrame"** (L1059), en todos los tamaños.
 - **La pantalla de la ley 4 crece 4,9 px al completar el handler a 1280×640** (L1113).
-- **La llama se despega de la boca del motor** (L1183): hasta 61 px a fondo. El chisporroteo escala
-  desde la punta de la llama, no desde la boca (`nave-del-manual.ts`).
-- **La mano guía entra 0,5 a 0,7 s después de la ley, no 1,2 s** (L1368): un `medir()` posterior
-  reemplaza la entrada demorada.
-- **La hoja del árbol no dice "Signal Space"** (L1403): el nombre del libro vive en la plantilla de
-  las marcas, que no se pinta con una sola página.
 - **En el celular** (390×844): los rótulos SVG de las portadas quedan en 9,4 a 10,7 px (L227); las
   portadas tienen 3 px de scroll y muestran un "más abajo" fantasma (L21); "más abajo ↓" tapa el
   texto de "Leer →" en la portada de la ley 1 (L990); la ley 1 baja 385 px y la 6 no entra (L1239,
@@ -163,6 +159,10 @@ Describen algo que cambió; conviene reescribirlos o retirarlos.
 - La pausa ya no deja los brazos en `rotate(0)`: frena con velocidad 0 (L538). L553 y L558 se
   contradicen sobre la boca de Angie sentada.
 - L1121 da por bueno el rótulo de la ley 3 en 10,9 unidades y L1224 pide que no baje de 13,5.
+- L1059 dice que el globo no se achica cuando se va "Mostrame" y se achica 48 px. No es un
+  descuido: la frase es del 2026-11-09, cuando los pasos iban en una fila, y el globo nació el
+  2026-11-11 con `.pm-globo .pm-etapas { min-height: 0 }` escrito a propósito. Hay que decidir cuál
+  de los dos vale.
 
 ## Lo que no se pudo verificar
 

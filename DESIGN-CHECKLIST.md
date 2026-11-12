@@ -1455,6 +1455,18 @@ Del minijuego de operadores (2026-11-08):
       entero ("Mantené el click / y arrastrá, / o usá ↑ ↓."). Medido a 1280×640 y 1024×600: ningún
       trozo se sale de su caja. A 1440×900 sigue en dos renglones.
 
+- [ ] (2026-11-13) La llama de la nave queda pegada a la boca del motor, chisporroteando y a fondo.
+      Defecto resuelto: se dibuja desde la boca (x = 0) hacia atrás, así que la boca es el borde
+      derecho de su caja, y el chisporroteo escalaba desde el izquierdo, la punta: el hueco iba de
+      -3 a 16 px en ralentí y hasta 61 a fondo. Medido cuadro a cuadro a 1440×900, contra el origen
+      de la tobera: entre -0,4 y 0 px en ralentí (120 cuadros) y entre -1 y 0 saliendo volando, con
+      la llama de 229 px.
+- [ ] (2026-11-13) La mano guía espera su 1,2 s aunque la página vuelva a medir. Defecto resuelto:
+      al terminar de entrar la demo la página re-mide, y ese segundo viaje reemplazaba la entrada
+      demorada: la mano aparecía a medio segundo de la ley. Ahora recuerda hasta cuándo espera y
+      sigue esperando lo que le falta. Medido tras un click real en "Leer": la ley empieza a verse a
+      los 0,50 s y la mano a los 1,67 s. "Mostrame" la trae en el acto, también si estaba esperando.
+
 **El árbol de Signal Space** (el viejo 0/6, la misma hoja con una sola página):
 
 - [ ] La historia se frena en "Miren el árbol." y sigue con "Guarden esa pregunta." al tocar
@@ -1467,6 +1479,10 @@ Del minijuego de operadores (2026-11-08):
 - [ ] Un desafío resuelto en una hoja del prólogo no se anota en la molécula: el motor solo cuenta
       el `sistema-establecido` que sale de una card. Antes caía en el concepto que hubiera en
       pantalla, y Signal Space marcaba Signals 1/1.
+
+- [ ] (2026-11-13) La hoja del árbol dice "Signal Space" debajo de la ley, en la portada y en la
+      demo. Defecto resuelto: el nombre del libro iba adentro de las marcas, que con una sola página
+      no se pintan. Sigue sin marcas y sin "1 de 1".
 
 **El viaje** (cada capítulo después del prólogo: su cinemática y sus pantallas en la hoja, ADR 0007):
 
