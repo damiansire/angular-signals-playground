@@ -4,7 +4,8 @@
   position: absolute;
   left: 8px;
   top: -48px;
-  z-index: 50;
+  /* Por encima de la hoja del viaje (70) y de las cinemáticas (80): con 50 tomaba el foco tapado. */
+  z-index: 90;
   padding: 0.5rem 0.9rem;
   border-radius: 6px;
   background: var(--accent-source, #eb9b3c);
