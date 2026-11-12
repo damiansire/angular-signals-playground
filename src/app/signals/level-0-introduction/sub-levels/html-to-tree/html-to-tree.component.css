@@ -354,6 +354,7 @@
   .htt-nodo,
   .htt-nodo > *,
   .htt-arbol-caja,
+  .htt-arboles--comparando .htt-arbol-caja,
   .htt-rotulo {
     transition: none;
   }
