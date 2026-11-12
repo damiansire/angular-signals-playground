@@ -43,7 +43,8 @@ Scripted motion is CSS (springs solved by hand and fed to `linear()`, View Trans
 lazy-loaded scenes). What answers the pointer (the mascot you can grab and stretch, the signal graphs
 you can poke) runs on hand-rolled springs sharing one clock that sleeps when nothing moves: no
 perpetual `requestAnimationFrame`, no expensive filters on moving things, and everything freezes when
-the tab is hidden or honors `prefers-reduced-motion`.
+the tab is hidden or honors `prefers-reduced-motion`. The scenes of the on-board manual and the
+crew of the trip are the exception: they are scripted with GSAP timelines.
 
 Built with **Angular 22** (standalone components, `OnPush` everywhere, signal-first
 APIs) and styled with **Tailwind CSS**.
@@ -63,7 +64,7 @@ The content is organized as progressive **levels**, each with focused sub-levels
 | **0**  | Introduction                               | How Angular renders the DOM tree, classic change detection vs. signal-based change detection, HTML-to-tree visualization                                         |
 | **1**  | Interacting with signals                   | Writable signals, `set` vs. `update`, read-only signals, the different kinds of signals                                                                          |
 | **2**  | Computed signals                           | Derived state, dynamic dependencies, lazy evaluation & memoization                                                                                               |
-| **3**  | Effects                                    | `effect()`, cleanup, manual destruction, what happens when a component is destroyed                                                                              |
+| **3**  | Effects                                    | `effect()`, cleanup with `onCleanup`, what happens when a component is destroyed                                                                                 |
 | **4**  | Equality functions                         | Custom equality and when a signal _doesn't_ notify its consumers                                                                                                 |
 | **5**  | `linkedSignal`                             | Writable state derived from a source: reset on change, or preserve if still valid                                                                                |
 | **6**  | `resource` / `rxResource` / `httpResource` | Async signals: `value`/`status`/`error`/`isLoading` with a Promise, an RxJS stream, or a real HTTP request                                                       |
@@ -121,8 +122,8 @@ src/app/
 ├── practice/         # Applied examples that use what you learned (/practica/*)
 ├── components/       # Feature components (histories, trees, forms…)
 ├── components-atom/  # Atomic UI building blocks (code block, concept card, title…)
-├── components-draw/  # Drawing/visualization components (variable boxes, node tree)
-├── layouts/          # Reusable page layouts (two-column, column + code)
+├── components-draw/  # Drawing components (the living mascot, the signal circuit, the crew)
+├── layouts/          # Reusable page layouts (column + code)
 ├── libs/             # Framework-agnostic helpers (HTML parser, saved game, sound, springs)
 ├── interfaces/       # Shared TypeScript types
 └── app.routes.ts     # Router routes: the integrated view, the practice and the screening room
@@ -135,9 +136,9 @@ an import that crosses it ([ADR 0024](./docs/adr/0024-las-areas-dependen-en-una-
 
 ### Conventions
 
-- **Change detection:** every component uses `ChangeDetectionStrategy.OnPush`.
-  State that drives the view is held in **signals**; the few cases that aren't
-  (e.g. router-event-driven menu state) explicitly call `markForCheck()`.
+- **Change detection:** every component uses `ChangeDetectionStrategy.OnPush`, and
+  the state that drives the view is held in **signals**: nothing calls
+  `markForCheck()`.
 - **Standalone components** with explicit `imports` — no `NgModule`s.
 
 ## Non-goals

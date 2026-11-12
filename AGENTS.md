@@ -27,7 +27,8 @@ todos lados, estilada con Tailwind. No es una librería ni un monorepo.
   `--rebaseline` es únicamente para cuando cambia la definición de la métrica.
 - Usá siempre sintaxis Angular moderna: `inject()`, control flow (`@if`/`@for`),
   APIs de signals (`signal`/`computed`/`effect`/`input`/`output`/`model`),
-  componentes standalone. Nada de `NgModule`.
+  componentes standalone. Nada de `NgModule`. ESLint lo exige: los campos signal
+  van `readonly` y todo `<button>` declara su `type`.
 
 ## Verificación visual
 
@@ -101,8 +102,8 @@ realmente tocás; no inventes scopes nuevos.
 | `src/app/integrada-vista/` | Vista integrada: prólogo y viaje por los 11 capítulos (ruta `/`) | `integrada`  |
 | `src/app/practice/`        | Ejemplos aplicados para usar lo aprendido (`/practica/*`)        | `practice`   |
 | `src/app/signals/`         | Los niveles de aprendizaje (0–11) y sus sub-niveles              | `signals`    |
-| `src/app/components/`      | Componentes de feature (histories, trees, forms…)                | `components` |
-| `src/app/components-atom/` | Bloques atómicos de UI (button, code, input, title…)             | `atom`       |
+| `src/app/components/`      | Componentes de feature (historiales, formulario, balizas…)       | `components` |
+| `src/app/components-atom/` | Bloques atómicos de UI (code, concept card, title, caja…)        | `atom`       |
 | `src/app/components-draw/` | Componentes de dibujo/visualización                              | `draw`       |
 | `src/app/layouts/`         | Layouts de página reutilizables                                  | `layouts`    |
 | `src/app/libs/`            | Helpers agnósticos del framework (p.ej. parser de HTML)          | `libs`       |
@@ -135,8 +136,8 @@ corto: nada de reescrituras masivas ni cambios de stack.
   `eslint.config.js` y `npm run lint` lo hace cumplir. Lo que comparten dos áreas que no se
   conocen baja a `libs/`; ningún área importa `app.routes.ts`.
 - **Change detection:** `OnPush` en todos los componentes (lo exige ESLint). El
-  estado de la vista vive en **signals**; los pocos casos que no (p.ej. el menú
-  dirigido por eventos del router) llaman `markForCheck()`.
+  estado de la vista vive en **signals**: hoy nada llama `markForCheck()`, y si
+  hiciera falta, es la excepción que se explica en un comentario.
 - **Nombres por dominio, no por mecanismo:** un componente o un signal se
   nombra por lo que significa en el playground (`signalLevel`, `benchFrame`),
   no por su tipo interno.
