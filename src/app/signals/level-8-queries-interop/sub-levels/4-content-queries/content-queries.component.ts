@@ -32,7 +32,7 @@ export class ContentQueriesComponent {
     { line: '', active: false },
     { line: '// En el padre, contenido proyectado:', active: false },
     { line: '<app-tag-list>', active: false },
-    { line: '  @for (n of names(); track n) {', active: false },
+    { line: '  @for (n of names(); track $index) {', active: false },
     { line: '    <span #tag>{{ n }}</span>', active: false },
     { line: '  }', active: false },
     { line: '</app-tag-list>', active: false },

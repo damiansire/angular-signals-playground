@@ -38,7 +38,7 @@ export class ViewChildrenComponent {
   }
 
   readonly lines = computed<CodeLine[]>(() => [
-    { line: '@for (n of names(); track n) {', active: false },
+    { line: '@for (n of names(); track $index) {', active: false },
     { line: '  <span #chip>{{ n }}</span>', active: false },
     { line: '}', active: false },
     { line: '', active: false },

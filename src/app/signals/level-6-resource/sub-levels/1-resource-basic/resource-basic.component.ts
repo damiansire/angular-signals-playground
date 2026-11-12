@@ -53,7 +53,8 @@ export class ResourceBasicComponent {
     { line: '', active: false },
     { line: 'userResource = resource({', active: true },
     { line: '  params: () => this.userId(),', active: true },
-    { line: '  loader: ({ params }) => fetchUser(params),', active: true },
+    { line: '  loader: ({ params, abortSignal }) =>', active: true },
+    { line: '    fetchUser(params, abortSignal),', active: true },
     { line: '});', active: true },
     { line: '', active: false },
     {
