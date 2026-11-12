@@ -61,6 +61,30 @@ interface Wire {
   color: string;
 }
 
+type Caja = Pick<DOMRect, 'left' | 'right' | 'top' | 'height'>;
+
+/**
+ * La flecha de un fragmento de código a lo que maneja, o `null` si no hay por dónde dibujarla. Solo
+ * tiene sentido con el carrito y el código lado a lado, y eso se mira donde quedaron, no en un ancho
+ * de pantalla: el corte lo decide el CSS, y copiado acá ya se había desfasado 40 px. El Reto vive
+ * arriba del código, en su misma columna: su flecha sube por el pasillo y le entra por la izquierda.
+ */
+export function trazoDelEnlace(codigo: Caja, parte: Caja, carrito: Caja): string | null {
+  if (codigo.left < carrito.right) return null;
+  const cx = codigo.left;
+  const cy = codigo.top + codigo.height / 2;
+  const py = parte.top + parte.height / 2;
+  if (parte.right <= codigo.left) {
+    const px = parte.right + 6;
+    const dx = Math.max(36, (cx - px) * 0.5);
+    return `M ${cx} ${cy} C ${cx - dx} ${cy} ${px + dx} ${py} ${px} ${py}`;
+  }
+  const px = parte.left - 6;
+  // La panza de la curva no pasa del pasillo: más ancha, se montaba sobre el carrito.
+  const dx = Math.min(36, Math.max(12, parte.left - carrito.right));
+  return `M ${cx} ${cy} C ${cx - dx} ${cy} ${px - dx} ${py} ${px} ${py}`;
+}
+
 /** Color de la flecha según el rol del fragmento (mismo lenguaje semántico). */
 export function wireColorFor(key: LinkKey): string {
   switch (key) {
@@ -197,28 +221,16 @@ export class CartExampleComponent {
   private drawWire(key: LinkKey): void {
     const codeEl = this.host.querySelector<HTMLElement>(`[data-code="${key}"]`);
     const partEl = this.host.querySelector<HTMLElement>(`[data-part="${key}"]`);
-    if (!codeEl || !partEl) {
-      this.wire.set(null);
-      return;
-    }
-    const c = codeEl.getBoundingClientRect();
-    const p = partEl.getBoundingClientRect();
-    // La flecha solo tiene sentido con las dos columnas lado a lado. Se mira dónde quedaron y no un
-    // ancho de pantalla: el corte lo decide el CSS, y copiado acá ya se había desfasado 40 px.
-    if (c.left < p.right) {
-      this.wire.set(null);
-      return;
-    }
-    // Sale del borde izquierdo del código y apunta al borde derecho del widget.
-    const cx = c.left;
-    const cy = c.top + c.height / 2;
-    const px = p.right + 6;
-    const py = p.top + p.height / 2;
-    const dx = Math.max(36, (cx - px) * 0.5);
-    this.wire.set({
-      path: `M ${cx} ${cy} C ${cx - dx} ${cy} ${px + dx} ${py} ${px} ${py}`,
-      color: wireColorFor(key),
-    });
+    const carrito = this.host.querySelector<HTMLElement>('.cart');
+    const path =
+      codeEl && partEl && carrito
+        ? trazoDelEnlace(
+            codeEl.getBoundingClientRect(),
+            partEl.getBoundingClientRect(),
+            carrito.getBoundingClientRect(),
+          )
+        : null;
+    this.wire.set(path ? { path, color: wireColorFor(key) } : null);
   }
 
   lineOf(id: string): number {
