@@ -44,14 +44,13 @@ import {
   juncos,
   letrasDelDicho,
   letrasDelTitulo,
-  LO_QUE_DECIDE,
-  LO_QUE_PRESIENTE,
   matasDePasto,
   TECLA_MS,
   rayosDelSol,
   type InicioAngie,
 } from './inicio-angie';
 import { LO_QUE_DICE_EL_SOL, LO_QUE_RESPONDE_ANGIE } from './intercambio-del-sol';
+import { LO_QUE_DECIDE, LO_QUE_PRESIENTE } from './pensamientos-de-la-colina';
 import type { HuecoDelPrologo } from './operadores-del-prologo';
 import { PAGINAS_DEL_MANUAL, pasoEnElManual, type PaginaDelManual } from './manual-de-a-bordo';
 import { HojaDelHuecoComponent } from './hoja-del-hueco/hoja-del-hueco.component';

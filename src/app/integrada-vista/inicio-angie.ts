@@ -2,6 +2,7 @@ import { emitirImpacto, sinMovimiento } from '../libs/muelle';
 import { chispas, onda } from '../libs/rastros';
 import { sonido, type Voz } from '../libs/sonido';
 import { LO_QUE_DICE_EL_SOL, LO_QUE_RESPONDE_ANGIE } from './intercambio-del-sol';
+import { LO_QUE_DECIDE, LO_QUE_PRESIENTE } from './pensamientos-de-la-colina';
 import {
   HASTA_LA_NOCHE,
   SOSTENIDO,
@@ -223,10 +224,6 @@ export function letrasDelDicho(texto: string): Dicho {
   return { renglones, letras };
 }
 
-/** Lo que piensa: primero lo presiente, con la radio; después de hablar con el sol, decide. */
-export const LO_QUE_PRESIENTE = 'Así que… Ellos ya están aquí';
-export const LO_QUE_DECIDE = 'Así que… La hora ha llegado';
-
 /**
  * Lo mínimo que un globo se queda antes de aceptar el toque: lo que tarda en escribirse y un respiro
  * para leer el final. Nunca menos que `piso`, el mínimo de antes, pensado para un globo corto.
@@ -237,15 +234,18 @@ export function loQueTardaEnEscribirse(texto: string, piso: number): number {
 
 /**
  * La charla del sol es la del prólogo, palabra por palabra (`intercambio-del-sol.ts`): suena con
- * las mismas voces grabadas de las dos líneas del prólogo que la dicen.
+ * las mismas voces grabadas de las dos líneas del prólogo que la dicen. Los pensamientos tienen las
+ * suyas, del grupo `colina`.
  */
-const VOZ_DEL_SOL: Readonly<Record<string, string>> = {
+const VOZ_DE_LA_COLINA: Readonly<Record<string, string>> = {
   [LO_QUE_DICE_EL_SOL]: 'dentro-caotico',
   [LO_QUE_RESPONDE_ANGIE]: 'voz-supongo',
+  [LO_QUE_PRESIENTE]: 'colina-presiente',
+  [LO_QUE_DECIDE]: 'colina-decide',
 };
 
 export function vozDeLaColina(texto: string): VozGrabada | undefined {
-  const id = VOZ_DEL_SOL[texto];
+  const id = VOZ_DE_LA_COLINA[texto];
   return id ? VOCES_GRABADAS[id] : undefined;
 }
 
@@ -585,6 +585,15 @@ export function initInicioAngie(host: HTMLElement, cuerpo?: AngieDeLaColina): In
   };
 
   /**
+   * Un pensamiento suena solo con su voz grabada: sin ella queda callado, como antes. Unos blips
+   * dirían que habla en voz alta.
+   */
+  const pensar = (texto: string): void => {
+    contar(`${texto}…`);
+    sonido().decirGrabada(vozDeLaColina(texto)?.archivo ?? null);
+  };
+
+  /**
    * La respuesta no se apaga donde la dijo: se vuelve luz y sube al sol, que es de donde vino la
    * voz. Así se lee como un mensaje que se manda. El globo entero volando se veía raro: un cartel
    * que cruza el cielo. Hecho luz es el mismo idioma de la despedida, que todavía no llegó.
@@ -661,9 +670,11 @@ export function initInicioAngie(host: HTMLElement, cuerpo?: AngieDeLaColina): In
     // Primero se cruza una radio: estática y ondas que salen del sol, una señal que todavía no se
     // entiende. Ella la oye antes que nadie y lo presiente.
     escena.classList.add('ini--radio');
-    // Las voces de la charla con el sol se bajan mientras suena la radio: llegan a tiempo.
+    // Las voces de la colina se bajan mientras suena la radio: llegan a tiempo.
     sonido().precargar(
-      [LO_QUE_DICE_EL_SOL, LO_QUE_RESPONDE_ANGIE].flatMap((t) => vozDeLaColina(t)?.archivo ?? []),
+      [LO_QUE_PRESIENTE, LO_QUE_DICE_EL_SOL, LO_QUE_RESPONDE_ANGIE, LO_QUE_DECIDE].flatMap(
+        (t) => vozDeLaColina(t)?.archivo ?? [],
+      ),
     );
     const salidaDeRadio = sonido().salida();
     radio = salidaDeRadio ? tocarRadio(salidaDeRadio, planDeLaRadio()) : null;
@@ -671,8 +682,8 @@ export function initInicioAngie(host: HTMLElement, cuerpo?: AngieDeLaColina): In
     if (cerrado) return;
     escena.classList.add('ini--piensa');
     sonar('presiente');
-    contar(`${LO_QUE_PRESIENTE}…`);
-    await pensamiento(loQueTardaEnEscribirse(LO_QUE_PRESIENTE, T.presentir));
+    pensar(LO_QUE_PRESIENTE);
+    await pensamiento(loQueDuraDicho(LO_QUE_PRESIENTE, T.presentir));
     if (cerrado) return;
     // La señal entra: la estática se va y la voz del sol llega limpia. Es la charla que la
     // tripulación tiene en la cabina, oída del otro lado: suena con la voz del capitán.
@@ -696,8 +707,8 @@ export function initInicioAngie(host: HTMLElement, cuerpo?: AngieDeLaColina): In
     escena.classList.add('ini--atardecer', 'ini--piensa', 'ini--piensa-2');
     cuerpo?.sonreir?.();
     sonar('decide');
-    contar(`${LO_QUE_DECIDE}…`);
-    await pensamiento(loQueTardaEnEscribirse(LO_QUE_DECIDE, T.pensar));
+    pensar(LO_QUE_DECIDE);
+    await pensamiento(loQueDuraDicho(LO_QUE_DECIDE, T.pensar));
     if (cerrado) return;
     escena.classList.remove('ini--piensa', 'ini--piensa-2');
     sonar('luz');

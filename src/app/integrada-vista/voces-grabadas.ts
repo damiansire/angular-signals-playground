@@ -258,4 +258,6 @@ export const VOCES_GRABADAS: Readonly<Record<string, VozGrabada>> = {
   'viaje-10-3-resuelta': { archivo: 'voces/viaje/viaje-10-3-resuelta.2abcd767.mp3', ms: 3216 },
   'viaje-11-1-llegada': { archivo: 'voces/viaje/viaje-11-1-llegada.45296f04.mp3', ms: 2656 },
   'viaje-11-1-resuelta': { archivo: 'voces/viaje/viaje-11-1-resuelta.b3583a82.mp3', ms: 3623 },
+  'colina-presiente': { archivo: 'voces/colina/colina-presiente.8803e8f0.mp3', ms: 3168 },
+  'colina-decide': { archivo: 'voces/colina/colina-decide.e7bf8165.mp3', ms: 4197 },
 };

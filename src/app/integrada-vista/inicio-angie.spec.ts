@@ -12,13 +12,16 @@ import {
   initInicioAngie,
   letrasDelDicho,
   letrasDelTitulo,
+  loQueDuraDicho,
   loQueTardaEnEscribirse,
   rayosDelSol,
   juncos,
   matasDePasto,
   TECLA_MS,
+  vozDeLaColina,
 } from './inicio-angie';
 import { LO_QUE_DICE_EL_SOL, LO_QUE_RESPONDE_ANGIE } from './intercambio-del-sol';
+import { LO_QUE_DECIDE, LO_QUE_PRESIENTE } from './pensamientos-de-la-colina';
 import { RESPIRO_MS } from './toque-de-dialogo';
 
 /**
@@ -57,6 +60,25 @@ describe('inicio-angie', () => {
       const largo = loQueTardaEnEscribirse(LO_QUE_RESPONDE_ANGIE, 100);
       expect(largo).toBeGreaterThan(letrasDelDicho(LO_QUE_RESPONDE_ANGIE).letras * TECLA_MS);
       expect(loQueTardaEnEscribirse('Hola', 1100)).toBe(1100);
+    });
+
+    it('cada globo de la colina, también los pensamientos, tiene su voz grabada', () => {
+      for (const texto of [
+        LO_QUE_PRESIENTE,
+        LO_QUE_DICE_EL_SOL,
+        LO_QUE_RESPONDE_ANGIE,
+        LO_QUE_DECIDE,
+      ]) {
+        expect(vozDeLaColina(texto)?.archivo)
+          .withContext(texto)
+          .toMatch(/^voces\/.+\.mp3$/);
+      }
+      expect(vozDeLaColina(LO_QUE_PRESIENTE)?.archivo).toContain('voces/colina/');
+    });
+
+    it('un pensamiento no se pasa solo antes de que termine su voz', () => {
+      const voz = vozDeLaColina(LO_QUE_PRESIENTE)!;
+      expect(loQueDuraDicho(LO_QUE_PRESIENTE, 0)).toBeGreaterThan(voz.ms);
     });
   });
 
