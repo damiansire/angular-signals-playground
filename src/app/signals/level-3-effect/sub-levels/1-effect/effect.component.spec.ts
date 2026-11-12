@@ -132,6 +132,25 @@ describe('EffectComponent', () => {
     expect(component.count()).toBe(0);
   });
 
+  it('si el movimiento reducido se prende con la pantalla abierta, el latido se frena ahí', () => {
+    const preferencia = {
+      matches: false,
+      addEventListener: () => undefined,
+      removeEventListener: () => undefined,
+    };
+    spyOn(window, 'matchMedia').and.returnValue(preferencia as unknown as MediaQueryList);
+    fixture = TestBed.createComponent(EffectComponent);
+    component = fixture.componentInstance;
+    fixture.detectChanges();
+
+    jasmine.clock().tick(1400);
+    expect(component.count()).toBe(1);
+
+    preferencia.matches = true;
+    jasmine.clock().tick(5000);
+    expect(component.count()).toBe(1);
+  });
+
   it('con la pausa del recorrido el latido se detiene, y vuelve al sacarla', () => {
     create();
     const recorrido = document.body.appendChild(document.createElement('div'));

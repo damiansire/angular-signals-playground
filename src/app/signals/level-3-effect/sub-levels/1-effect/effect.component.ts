@@ -71,17 +71,17 @@ export class EffectComponent {
     // la vida de fondo del recorrido (`.fondo-en-pausa`) no late. Es vida, igual que lo que apaga
     // reduced-motion, y cada latido deja "The current count is: N" en la consola.
     const host = inject(ElementRef).nativeElement as HTMLElement;
-    const prefersReducedMotion =
-      typeof window !== 'undefined' &&
-      typeof window.matchMedia === 'function' &&
-      window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    if (!prefersReducedMotion) {
-      const beatId = setInterval(() => {
-        if (host.closest('[inert], .fondo-en-pausa')) return;
-        this.count.update((c) => c + 1);
-      }, 1300);
-      inject(DestroyRef).onDestroy(() => clearInterval(beatId));
-    }
+    // La preferencia se mira en cada latido: leída una sola vez al nacer, cambiarla con la pantalla
+    // abierta no lo frenaba.
+    const quieto =
+      typeof window !== 'undefined' && typeof window.matchMedia === 'function'
+        ? window.matchMedia('(prefers-reduced-motion: reduce)')
+        : null;
+    const beatId = setInterval(() => {
+      if (quieto?.matches || host.closest('[inert], .fondo-en-pausa')) return;
+      this.count.update((c) => c + 1);
+    }, 1300);
+    inject(DestroyRef).onDestroy(() => clearInterval(beatId));
   }
   readonly lines = computed<CodeLine[]>(() => [
     { line: 'count = signal(0);', active: false },
