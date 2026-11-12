@@ -608,6 +608,7 @@ export class IntegradaVistaComponent {
       return;
     }
     const i = this.pagina()!;
+    const siguiente = this.paginas()[i + 1];
     const previa = this.paginaPrevia;
     this.paginaPrevia = i;
     // La primera página del libro entra prendiendo la pantalla, cuando ya está montada.
@@ -648,7 +649,11 @@ export class IntegradaVistaComponent {
           },
         },
       ],
-      prender,
+      () => {
+        prender?.();
+        // Con la página a la vista se pide la que sigue: pasar de página no espera a la red.
+        void siguiente?.cargar().catch(() => undefined);
+      },
     );
     const vigia = this.enc ? vigilarEstampado(host, this.enc) : null;
     // Cada página arranca arriba, y el foco va a la hoja: con teclado, se lee sin buscarla.

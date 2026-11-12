@@ -6,6 +6,7 @@ import { IntegradaVistaComponent } from './integrada-vista.component';
 import { cuadrosFalsos, hasta } from './testing/cuadros';
 import { CLAVE_PARTIDA } from '../libs/partida';
 import { sonido } from '../libs/sonido';
+import { signalsRoutesTree } from '../signals/signals-routes-tree';
 
 /**
  * La vista de la ruta `/` es el producto entero, y su boot es imperativo: los gates verificaban que
@@ -308,6 +309,27 @@ describe('IntegradaVistaComponent', () => {
 
         // El disposer usa un nodo propio justamente para no borrar la .subhost.
         expect(subhost.contains(montado)).toBeFalse();
+      }),
+    );
+
+    it(
+      'con una página montada ya pide la siguiente, y no la que no se ve',
+      sinElAvisoDelResizeObserver(async () => {
+        const [primera, segunda, tercera] = signalsRoutesTree[1].subLevels!;
+        const pedidos = [primera, segunda, tercera].map((sub) =>
+          spyOn(sub, 'loadComponent' as never).and.callThrough(),
+        );
+        const fixture = await montar();
+
+        const subhost = await abrirEtapa(fixture, 1);
+        await hasta(() => subhost.childElementCount > 0);
+
+        expect(pedidos[0]).toHaveBeenCalled();
+        expect(pedidos[1])
+          .withContext('la página 2 se pide con la 1 a la vista')
+          .toHaveBeenCalled();
+        expect(pedidos[2]).not.toHaveBeenCalled();
+        fixture.destroy();
       }),
     );
   });
