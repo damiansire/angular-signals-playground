@@ -16,9 +16,19 @@ describe('AppComponent', () => {
     expect(fixture.componentInstance).toBeTruthy();
   });
 
-  it('expone el titulo de la aplicacion', () => {
+  it('el skip-link lleva el foco al contenido sin navegar', () => {
     const fixture = TestBed.createComponent(AppComponent);
-    expect(fixture.componentInstance.title).toBe('angular-examples');
+    fixture.detectChanges();
+    const el = fixture.nativeElement as HTMLElement;
+    document.body.appendChild(el);
+    const click = new MouseEvent('click', { bubbles: true, cancelable: true });
+
+    (el.querySelector('a.skip-link') as HTMLAnchorElement).dispatchEvent(click);
+
+    // Sin cancelar, el navegador sigue el enlace: con `<base href>` eso es irse a la raíz.
+    expect(click.defaultPrevented).toBeTrue();
+    expect(document.activeElement).toBe(el.querySelector('#main-content'));
+    el.remove();
   });
 
   it('es una sola superficie: solo el router-outlet y el skip-link, sin sidebar', () => {

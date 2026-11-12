@@ -20,3 +20,9 @@
   outline: 2px solid #1d1a14;
   outline-offset: 2px;
 }
+
+/* El salto deja el foco en el contenedor para que el Tab siguiente arranque adentro: es una
+   posición, no un control, y un anillo alrededor de la página entera se leería como error. */
+#main-content:focus {
+  outline: none;
+}

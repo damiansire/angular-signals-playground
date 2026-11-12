@@ -9,5 +9,12 @@ import { RouterOutlet } from '@angular/router';
   imports: [RouterOutlet],
 })
 export class AppComponent {
-  title = 'angular-examples';
+  /**
+   * Con `<base href>`, `#main-content` apunta a la raíz del sitio y no a esta página: seguir el
+   * enlace sacaba del carrito y recargaba la app entera. El salto se hace a mano.
+   */
+  protected saltarAlContenido(e: Event, contenido: HTMLElement): void {
+    e.preventDefault();
+    contenido.focus();
+  }
 }
