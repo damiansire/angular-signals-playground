@@ -47,6 +47,13 @@ class ContextoFalso {
   createBiquadFilter() {
     return nodoFalso(this);
   }
+  /** Las ráfagas de ruido (los disparos, el salto) arman un buffer y lo tocan. */
+  createBuffer(_canales: number, largo: number) {
+    return { getChannelData: () => new Float32Array(largo) };
+  }
+  createBufferSource() {
+    return { ...nodoFalso(this), buffer: null as unknown };
+  }
 }
 
 /**
@@ -524,6 +531,125 @@ describe('initPrologoAnomalia', () => {
       expect(ruedaAfuera.defaultPrevented).toBeTrue();
     });
 
+    describe('con la escena tapada por la pantalla', () => {
+      const avisoDe = (m: ReturnType<typeof conManual>) =>
+        m.pedido.calls.mostRecent().args[1] as (tapada: boolean) => void;
+
+      it('deja de dibujarse, y vuelve cuando la pantalla está por dejarla ver', async () => {
+        const m = conManual('anom-velocidad');
+        m.cuadros.avanzar(400);
+        expect(m.cuadros.pendientes()).withContext('mientras la cámara se acerca').toBe(1);
+
+        avisoDe(m)(true);
+        m.cuadros.avanzar(2);
+        expect(m.cuadros.pendientes()).withContext('tapada').toBe(0);
+
+        avisoDe(m)(false);
+        expect(m.cuadros.pendientes()).withContext('el negro se va').toBe(1);
+        // Vuelve a dibujarse, pero la historia sigue esperando a que el manual se cierre.
+        m.cuadros.avanzar(200);
+        expect(m.frase()).not.toContain('leyes del espacio');
+
+        m.resolver();
+        await new Promise((ok) => setTimeout(ok));
+        m.cuadros.avanzar(120);
+        expect(m.frase()).toContain('leyes del espacio');
+        expect(m.cuadros.pendientes()).toBe(1);
+      });
+
+      it('si el manual se cierra sin avisar que la destapa, la historia sigue igual', async () => {
+        const m = conManual('anom-velocidad');
+        m.cuadros.avanzar(400);
+        avisoDe(m)(true);
+        m.cuadros.avanzar(2);
+
+        m.resolver();
+        await new Promise((ok) => setTimeout(ok));
+        m.cuadros.avanzar(120);
+        expect(m.frase()).toContain('leyes del espacio');
+      });
+
+      it('un aviso que llega con el manual ya cerrado no frena la historia', async () => {
+        const m = conManual('anom-velocidad');
+        m.cuadros.avanzar(400);
+        m.resolver();
+        await new Promise((ok) => setTimeout(ok));
+
+        avisoDe(m)(true);
+        m.cuadros.avanzar(120);
+        expect(m.cuadros.pendientes()).toBe(1);
+        expect(m.frase()).toContain('leyes del espacio');
+      });
+
+      it('sacar la pausa dibuja un cuadro y vuelve a dormir; destaparla en pausa no la arranca', () => {
+        const m = conManual('anom-velocidad');
+        m.cuadros.avanzar(400);
+        avisoDe(m)(true);
+        m.cuadros.avanzar(2);
+        const pausa = m.host.querySelector<HTMLButtonElement>('.prologo__pause')!;
+
+        pausa.click();
+        pausa.click();
+        expect(m.cuadros.pendientes()).withContext('al sacar la pausa').toBe(1);
+        m.cuadros.avanzar(2);
+        expect(m.cuadros.pendientes()).withContext('sigue tapada').toBe(0);
+
+        pausa.click();
+        avisoDe(m)(false);
+        expect(m.cuadros.pendientes()).withContext('destapada en pausa').toBe(0);
+        pausa.click();
+        expect(m.cuadros.pendientes()).withContext('y sin pausa').toBe(1);
+      });
+
+      it('no descansa hasta que el zumbido terminó de irse, y al volver no entra de golpe', async () => {
+        const ctx = new ContextoFalso();
+        salida.and.returnValue({
+          ctx: ctx as unknown as AudioContext,
+          salida: nodoFalso(ctx) as unknown as AudioNode,
+        });
+        const m = conManual('anom-velocidad');
+        const avanzar = (cuadros: number): void => {
+          for (let i = 0; i < cuadros; i++) {
+            ctx.currentTime += 0.016;
+            m.cuadros.avanzar(1);
+          }
+        };
+        for (let i = 0; i < 2000 && !m.pedido.calls.count(); i++) avanzar(1);
+        // La red se arma en este orden: la ganancia general y, después, la del zumbido.
+        const zumbido = ctx.ganancias[1].gain;
+        const sonando = zumbido.value;
+        expect(sonando).withContext('la anomalía ya zumba').toBeGreaterThan(0);
+
+        avisoDe(m)(true);
+        avanzar(10);
+        expect(m.cuadros.pendientes()).withContext('el zumbido todavía se está yendo').toBe(1);
+        avanzar(80);
+        expect(zumbido.value).toBe(0);
+        expect(m.cuadros.pendientes()).withContext('callado y tapada').toBe(0);
+
+        // Un minuto leyendo: ese tiempo no cuenta como fundido.
+        ctx.currentTime += 60;
+        m.resolver();
+        await new Promise((ok) => setTimeout(ok));
+        avanzar(2);
+        expect(zumbido.value).toBeGreaterThan(0);
+        expect(zumbido.value).toBeLessThan(sonando * 0.2);
+      });
+
+      it('saltar la intro con la escena tapada no la despierta', async () => {
+        const m = conManual('anom-velocidad');
+        m.cuadros.avanzar(400);
+        avisoDe(m)(true);
+        m.cuadros.avanzar(2);
+
+        m.host.querySelector<HTMLButtonElement>('.prologo__skip')!.click();
+        // Al saltar, quien muestra el manual lo cierra.
+        m.resolver();
+        await new Promise((ok) => setTimeout(ok));
+        expect(m.cuadros.pendientes()).toBe(0);
+      });
+    });
+
     it('quien arranca después de la orden no pasa por el manual', () => {
       const m = conManual('anom-leyes');
       m.cuadros.avanzar(400);
@@ -565,6 +691,39 @@ describe('initPrologoAnomalia', () => {
       m.cuadros.avanzar(120);
       expect(m.frase()).toContain('Guarden esa pregunta');
       expect(m.pedido).toHaveBeenCalledTimes(1);
+    });
+
+    it('tapada por el árbol, la escena no se dibuja y Angie deja de moverse sola', async () => {
+      const cuadros = cuadrosFalsos();
+      const host = hostCompleto();
+      hosts.push(host);
+      let resolver: () => void = () => undefined;
+      const vida: boolean[] = [];
+      let tapar: (tapada: boolean) => void = () => undefined;
+      cerrar.push(
+        initPrologoAnomalia(host, {
+          alTerminar: () => undefined,
+          desde: 'leccion-pregunta',
+          alCambiarMascota: (viva) => vida.push(viva),
+          arbol: (_pagina, alTapar) => {
+            tapar = alTapar;
+            return new Promise<void>((ok) => (resolver = ok));
+          },
+        }),
+      );
+      cuadros.avanzar(700);
+      expect(vida.at(-1)).withContext('Angie ya nació').toBeTrue();
+
+      tapar(true);
+      cuadros.avanzar(2);
+      expect(cuadros.pendientes()).toBe(0);
+      expect(vida.at(-1)).toBeFalse();
+
+      resolver();
+      await new Promise((ok) => setTimeout(ok));
+      cuadros.avanzar(2);
+      expect(cuadros.pendientes()).toBe(1);
+      expect(vida.at(-1)).toBeTrue();
     });
 
     it('quien arranca después de mostrarlo no lo vuelve a ver', () => {

@@ -120,15 +120,21 @@ export interface PrologoOpciones {
   ) => Promise<void>;
   /**
    * El manual de a bordo de "¡Rápido, el manual de a bordo!". La historia se frena con la orden ya
-   * leída y espera a que el manual se cierre; la escena sigue viva mientras tanto. Sin esto, el
+   * leída y espera a que el manual se cierre. El manual es la pantalla de la nave y tapa la escena
+   * entera: con `alTapar` avisa cuándo ya no se ve nada de ella y cuándo está por volver a verse, y
+   * entre un aviso y el otro la escena no se dibuja. Sin avisos sigue viva, como antes. Sin esto, el
    * prólogo corre de corrido.
    */
-  readonly manual?: (paginas: readonly PaginaDelManual[]) => Promise<void>;
+  readonly manual?: (
+    paginas: readonly PaginaDelManual[],
+    alTapar: (tapada: boolean) => void,
+  ) => Promise<void>;
   /**
    * El árbol de Signal Space de "Miren el árbol.". Como el manual: la historia se frena con la línea
-   * ya leída y espera a que se cierre. Sin esto, el prólogo corre de corrido.
+   * ya leída y espera a que se cierre, y `alTapar` avisa lo mismo. Sin esto, el prólogo corre de
+   * corrido.
    */
-  readonly arbol?: (pagina: PaginaDelManual) => Promise<void>;
+  readonly arbol?: (pagina: PaginaDelManual, alTapar: (tapada: boolean) => void) => Promise<void>;
 }
 
 const fijar = (n: Element, attrs: Atributos): void => {
@@ -1319,6 +1325,7 @@ export function initPrologoAnomalia(host: HTMLElement, opts: PrologoOpciones): (
   let zumbidoEn: number | null = null;
   /** Lo que tarda el zumbido en irse o volver, en segundos: un corte seco chasquea. */
   const FUNDIDO_DEL_ZUMBIDO = 1.2;
+  const metaDelZumbido = (): number => (manual === 'leyendo' ? 0 : 1);
 
   /** Lo que el reloj dice que suena, cuándo: dialogo, zumbido, salto, choque y el acorde final. */
   function pintarAudio(t: number, claro: number): void {
@@ -1327,7 +1334,7 @@ export function initPrologoAnomalia(host: HTMLElement, opts: PrologoOpciones): (
       const ahora = audio.master.context.currentTime;
       const paso = zumbidoEn === null ? 1 : (ahora - zumbidoEn) / FUNDIDO_DEL_ZUMBIDO;
       zumbidoEn = ahora;
-      const meta = manual === 'leyendo' ? 0 : 1;
+      const meta = metaDelZumbido();
       zumbidoLibre +=
         Math.sign(meta - zumbidoLibre) * Math.min(Math.abs(meta - zumbidoLibre), paso);
       const cerca = clamp01((t - T.temblor) / (T.zoom - T.temblor));
@@ -1870,17 +1877,37 @@ export function initPrologoAnomalia(host: HTMLElement, opts: PrologoOpciones): (
     ...(arbol === 'despues' ? [] : [ESPERA_ARBOL]),
   ];
 
+  /**
+   * El manual y el árbol son la pantalla de la nave y tapan la escena entera. Dibujarla igual, cuadro
+   * a cuadro, era trabajo que nadie veía durante todo lo que se tarda en leer. Un aviso que llega
+   * tarde, con la pantalla ya cerrada, no tapa nada.
+   */
+  let tapada = false;
+  function tapar(tapa: boolean): void {
+    const ahora = tapa && (manual === 'leyendo' || arbol === 'mirando');
+    if (ahora === tapada) return;
+    tapada = ahora;
+    if (!tapada && !terminado && !pausado) retomar();
+  }
+  /**
+   * El zumbido se va de a poco con el manual abierto (`pintarAudio`): frenar antes lo dejaba sonando.
+   * Con el árbol no se va, pero con la historia quieta tampoco cambia, y sigue sonando sin cuadros.
+   */
+  const enReposo = (): boolean => tapada && (!red || zumbidoLibre === metaDelZumbido());
+
   function pedirArbol(): void {
     arbol = 'mirando';
-    void opts.arbol?.(ARBOL_DE_SIGNAL_SPACE).then(() => {
+    void opts.arbol?.(ARBOL_DE_SIGNAL_SPACE, tapar).then(() => {
       arbol = 'despues';
+      tapar(false);
     });
   }
 
   function pedirManual(): void {
     manual = 'leyendo';
-    void opts.manual?.(PAGINAS_DEL_MANUAL).then(() => {
+    void opts.manual?.(PAGINAS_DEL_MANUAL, tapar).then(() => {
       manual = 'despues';
+      tapar(false);
     });
   }
 
@@ -1985,8 +2012,25 @@ export function initPrologoAnomalia(host: HTMLElement, opts: PrologoOpciones): (
     }
     // Quieto, los muelles no avanzan: una nave que toma la palabra no se sacude.
     dibujar(tAhora, quieto ? 0 : (dt * velocidad) / 1000);
-    if (tAhora < T.fin) raf = requestAnimationFrame((t) => frame(t, gen));
-    else terminar();
+    if (tAhora >= T.fin) terminar();
+    // Tapada no se pide otro cuadro, y Angie tampoco se mueve sola: el cuadro que retoma la despierta.
+    else if (enReposo()) dormirAngie();
+    else raf = requestAnimationFrame((t) => frame(t, gen));
+  }
+
+  function dormirAngie(): void {
+    if (!angieViva) return;
+    angieViva = false;
+    opts.alCambiarMascota?.(false);
+  }
+
+  function retomar(): void {
+    cancelAnimationFrame(raf);
+    anterior = null;
+    // El fundido del zumbido mide el tiempo entre cuadros: la espera contaba entera, y volvía de golpe.
+    zumbidoEn = red?.master.context.currentTime ?? null;
+    const gen = ++generacion;
+    raf = requestAnimationFrame((ts) => frame(ts, gen));
   }
 
   const reducido = (): boolean => matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -2040,10 +2084,7 @@ export function initPrologoAnomalia(host: HTMLElement, opts: PrologoOpciones): (
     if (terminado) return;
     terminado = true;
     cancelAnimationFrame(raf);
-    if (angieViva) {
-      angieViva = false;
-      opts.alCambiarMascota?.(false);
-    }
+    dormirAngie();
     sonido().callar();
     if (red) red.zumbidoGain.gain.value = 0;
     luego(soltarAudio, CIERRE_AUDIO_MS);
@@ -2063,9 +2104,7 @@ export function initPrologoAnomalia(host: HTMLElement, opts: PrologoOpciones): (
     if (terminado) return;
     if (pausado) {
       despausar();
-      anterior = null;
-      const gen = ++generacion;
-      raf = requestAnimationFrame((ts) => frame(ts, gen));
+      retomar();
       return;
     }
     pausado = true;
@@ -2073,10 +2112,7 @@ export function initPrologoAnomalia(host: HTMLElement, opts: PrologoOpciones): (
     btnPausa.setAttribute('aria-pressed', 'true');
     cancelAnimationFrame(raf);
     // En pausa Angie tampoco se mueve sola: la escena entera se congela.
-    if (angieViva) {
-      angieViva = false;
-      opts.alCambiarMascota?.(false);
-    }
+    dormirAngie();
     sonido().callar();
     if (red) red.zumbidoGain.gain.value = 0;
   }
@@ -2173,7 +2209,11 @@ export function initPrologoAnomalia(host: HTMLElement, opts: PrologoOpciones): (
     if (sonido().alternar()) sonido().desbloquear();
     else sonido().callar();
   };
-  const dejarDeOirSonido = sonido().alCambiar(pintarSonido);
+  const dejarDeOirSonido = sonido().alCambiar(() => {
+    pintarSonido();
+    // Tapada no hay cuadros, y el zumbido se arma en un cuadro: prender el sonido pide uno.
+    if (tapada && !pausado && !terminado) retomar();
+  });
 
   skipEl?.addEventListener('click', alSaltar);
   btnPausa.addEventListener('click', alPausar);

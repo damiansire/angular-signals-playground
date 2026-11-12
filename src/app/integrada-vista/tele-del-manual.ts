@@ -58,16 +58,28 @@ const PRENDER_SIN_ESPERAR_MS = 4000;
  * la página ya está montada. Prendida antes, el fogonazo pasaba mientras la página cargaba y se
  * trababa un segundo. `escena`, si hay, es el prólogo detrás: la cámara se le acerca rápido y
  * después se frena, mientras el negro sube. Sin ella (el manual suelto), solo se oscurece.
+ * `alQuedarNegro` avisa cuando el negro ya tapa todo: desde ahí lo de atrás no se ve.
  */
-export function encenderLaTele(hoja: HTMLElement, escena: HTMLElement | null): () => void {
-  if (sinMovimiento()) return () => undefined;
+export function encenderLaTele(
+  hoja: HTMLElement,
+  escena: HTMLElement | null,
+  alQuedarNegro?: () => void,
+): () => void {
+  if (sinMovimiento()) {
+    // Sin movimiento el negro no sube: está desde el primer cuadro.
+    if (tele(hoja)) alQuedarNegro?.();
+    return () => undefined;
+  }
   const desde = performance.now();
   hoja.style.clipPath = NADA;
-  tele(hoja)?.animate([{ opacity: 0 }, { opacity: 1 }], {
-    duration: ACERCARSE_MS,
-    easing: 'ease-in',
-    fill: 'backwards',
-  });
+  tele(hoja)
+    ?.animate([{ opacity: 0 }, { opacity: 1 }], {
+      duration: ACERCARSE_MS,
+      easing: 'ease-in',
+      fill: 'backwards',
+    })
+    // Cancelada (la hoja se fue antes), el negro no llegó a tapar nada.
+    .finished.then(alQuedarNegro, () => undefined);
   escena?.animate([{ scale: '1' }, { scale: '1.7' }], {
     duration: ACERCARSE_MS,
     easing: 'ease-out',
@@ -94,10 +106,14 @@ export function encenderLaTele(hoja: HTMLElement, escena: HTMLElement | null): (
   return prender;
 }
 
-/** Apaga la pantalla y deja ver lo de atrás; resuelve cuando ya no queda nada del manual. */
-export async function apagarLaTele(hoja: HTMLElement): Promise<void> {
+/**
+ * Apaga la pantalla y deja ver lo de atrás; resuelve cuando ya no queda nada del manual.
+ * `alVolver` avisa justo antes de que el negro empiece a irse: lo de atrás vuelve a verse.
+ */
+export async function apagarLaTele(hoja: HTMLElement, alVolver?: () => void): Promise<void> {
   if (sinMovimiento()) return;
   await hoja.animate([...SE_APAGA], { duration: APAGARSE_MS, fill: 'forwards' }).finished;
+  alVolver?.();
   await tele(hoja)?.animate([{ opacity: 1 }, { opacity: 0 }], {
     duration: VOLVER_MS,
     easing: 'ease-out',

@@ -419,6 +419,8 @@ export class IntegradaVistaComponent {
   private terminarManual: ((completo: boolean) => void) | null = null;
   /** Cada página que se abre, para que el viaje guarde dónde quedó. */
   private alAbrirPagina: ((i: number) => void) | null = null;
+  /** En el prólogo, la escena de atrás deja de dibujarse mientras la pantalla la tapa. */
+  private alTaparLaEscena: ((tapada: boolean) => void) | null = null;
   /** La música para estudiar suena con el manual abierto, en la historia y suelto. */
   private musicaDelManual: Musica | null = null;
   /**
@@ -485,11 +487,13 @@ export class IntegradaVistaComponent {
     libro: Libro = MANUAL,
     desde = 0,
     alAbrir: ((i: number) => void) | null = null,
+    alTapar: ((tapada: boolean) => void) | null = null,
   ): Promise<boolean> {
     return new Promise((listo) => {
       this.libro.set(libro);
       this.paginas.set(paginas);
       this.alAbrirPagina = alAbrir;
+      this.alTaparLaEscena = alTapar;
       if (paginas === PAGINAS_DEL_MANUAL) {
         this.musicaDelManual = tocarManual(() => sonido().salida());
       }
@@ -503,6 +507,7 @@ export class IntegradaVistaComponent {
         this.pagina.set(null);
         this.terminarManual = null;
         this.alAbrirPagina = null;
+        this.alTaparLaEscena = null;
         listo(completo);
       };
       this.irAPagina(Math.min(Math.max(desde, 0), paginas.length - 1));
@@ -589,7 +594,7 @@ export class IntegradaVistaComponent {
     const hoja = this.hojaDelManual()?.nativeElement;
     if (hoja && this.libro().concepto === undefined) {
       this.apagandose = true;
-      await apagarLaTele(hoja).catch(() => undefined);
+      await apagarLaTele(hoja, () => this.alTaparLaEscena?.(false)).catch(() => undefined);
       this.apagandose = false;
     }
     this.terminarManual?.(completo);
@@ -617,6 +622,7 @@ export class IntegradaVistaComponent {
         ? encenderLaTele(
             hoja,
             this.manualSuelto() ? null : this.host.querySelector('.prologo__escena'),
+            () => this.alTaparLaEscena?.(true),
           )
         : null;
     // En el prólogo Angie todavía no interviene: los desafíos de las páginas van sin su pista.
@@ -721,8 +727,10 @@ export class IntegradaVistaComponent {
             alTerminar();
           },
           operadores: (huecos, alArreglar) => this.jugarOperadores(huecos, alArreglar),
-          manual: async (paginas) => void (await this.leerManual(paginas)),
-          arbol: async (pagina) => void (await this.leerManual([pagina], SIGNAL_SPACE)),
+          manual: async (paginas, alTapar) =>
+            void (await this.leerManual(paginas, MANUAL, 0, null, alTapar)),
+          arbol: async (pagina, alTapar) =>
+            void (await this.leerManual([pagina], SIGNAL_SPACE, 0, null, alTapar)),
           alCambiarMascota: (viva) => this.angiePrologo.set(viva),
           desde: (isDevMode() ? PROLOGO_PEDIDO : null) ?? historia?.desde ?? null,
           alPasarPunto: historia?.alPasarPunto,
