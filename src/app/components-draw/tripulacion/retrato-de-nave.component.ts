@@ -6,7 +6,8 @@ import {
   input,
   viewChild,
 } from '@angular/core';
-import { dibujarNave, el, gradientesDeNaves } from './nave-del-prologo';
+import { el } from '../../libs/svg';
+import { dibujarNave, gradientesDeNaves } from './nave-del-prologo';
 
 let instancias = 0;
 

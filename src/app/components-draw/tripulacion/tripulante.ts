@@ -7,7 +7,9 @@ import {
   motorDeMuelles,
   sinMovimiento,
 } from '../../libs/muelle';
-import { PALETAS, TINTA, dibujarNave, el, type NaveDibujada } from './nave-del-prologo';
+import { azar } from '../../libs/azar';
+import { el } from '../../libs/svg';
+import { PALETAS, TINTA, dibujarNave, type NaveDibujada } from './nave-del-prologo';
 
 export type Animo = 'tranquila' | 'atenta' | 'preocupada' | 'contenta' | 'harta';
 
@@ -22,12 +24,6 @@ const CARAS: Record<Animo, { cejas: number; ojos: number; alto: number }> = {
 
 const QUEJAS = ['¡ey!', '¡piloto a bordo!', '¡la pintura!', '¡estoy manejando!'];
 const HARTA = ['¡basta!', '¡ya va!', '¡uf!'];
-
-/** Pseudoazar con semilla: el mismo toque da la misma queja. */
-const azar = (k: number): number => {
-  const x = Math.sin(k * 127.1 + 311.7) * 43758.5453;
-  return x - Math.floor(x);
-};
 
 /** Dónde mira la cabina, en el dibujo de la nave: el centro entre los dos ojos. */
 const OJOS = { x: 28, y: -18 };

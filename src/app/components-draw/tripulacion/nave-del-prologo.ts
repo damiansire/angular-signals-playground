@@ -4,19 +4,7 @@
  * historia. Solo dibuja: quién las mueve (el guion del prólogo, los muelles del viaje) es de cada uno.
  */
 
-const NS = 'http://www.w3.org/2000/svg';
-type Atributos = Readonly<Record<string, string | number>>;
-
-export function el<K extends keyof SVGElementTagNameMap>(
-  padre: Element,
-  tag: K,
-  attrs: Atributos = {},
-): SVGElementTagNameMap[K] {
-  const n = document.createElementNS(NS, tag);
-  for (const [k, v] of Object.entries(attrs)) n.setAttribute(k, String(v));
-  padre.appendChild(n);
-  return n;
-}
+import { el, type Atributos } from '../../libs/svg';
 
 export interface Paleta {
   readonly claro: string;

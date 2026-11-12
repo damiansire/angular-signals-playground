@@ -1,6 +1,7 @@
 import { gsap } from 'gsap';
 import { sinMovimiento } from '../../libs/muelle';
-import { TINTA, el } from './nave-del-prologo';
+import { el } from '../../libs/svg';
+import { TINTA } from './nave-del-prologo';
 
 /**
  * El objeto de mundo de cada etapa del viaje, el mismo que nombra la etapa: la caja que avisa, la

@@ -13,7 +13,9 @@ import {
 import { gsap } from 'gsap';
 import { sinMovimiento } from '../../libs/muelle';
 import { chispas } from '../../libs/rastros';
-import { VOZ_DE_NAVE, el, gradientesDeNaves } from './nave-del-prologo';
+import { azar } from '../../libs/azar';
+import { el } from '../../libs/svg';
+import { VOZ_DE_NAVE, gradientesDeNaves } from './nave-del-prologo';
 import { dibujarObjeto, type EtapaDelMundo, type ObjetoDelMundo } from './objetos-del-mundo';
 import { Tripulante } from './tripulante';
 
@@ -68,11 +70,6 @@ const DISPOSICIONES = {
   },
 } as const;
 type Disposicion = (typeof DISPOSICIONES)[keyof typeof DISPOSICIONES];
-
-const azar = (k: number): number => {
-  const x = Math.sin(k * 127.1 + 311.7) * 43758.5453;
-  return x - Math.floor(x);
-};
 
 let instancias = 0;
 
