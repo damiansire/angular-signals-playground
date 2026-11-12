@@ -17,6 +17,7 @@ import {
 import { NgComponentOutlet } from '@angular/common';
 
 import { sonido } from '../../libs/sonido';
+import { VOCES_GRABADAS } from '../voces-grabadas';
 import {
   dibujarNave,
   el,
@@ -339,6 +340,13 @@ export class CinematicaComponent {
     if (!vt) mostrar();
 
     sonido().efecto('titulo');
+    // Las voces del capítulo se piden con el título: la primera línea entra después de la apertura.
+    sonido().precargar(
+      this.reloj().flatMap((l) => {
+        const voz = VOCES_GRABADAS[l.id];
+        return voz ? [voz.archivo] : [];
+      }),
+    );
     this.corriendo = true;
     this.base = 0;
     this.arranco = performance.now();
@@ -387,7 +395,7 @@ export class CinematicaComponent {
           this.lineaDesde = performance.now();
           this.completadaEn = null;
           if (l.beat) encender(l.beat);
-          sonido().hablar(l.quien, l.txt, l.t1 - l.t0);
+          sonido().hablar(l.quien, l.txt, l.t1 - l.t0, VOCES_GRABADAS[l.id]?.archivo);
         },
       };
       this.lineaEventos.add(evento);

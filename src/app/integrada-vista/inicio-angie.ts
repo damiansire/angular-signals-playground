@@ -12,6 +12,7 @@ import {
   type Musica,
 } from './musica-del-presentimiento';
 import { tocarColina } from './musica-de-la-colina';
+import { VOCES_GRABADAS, type VozGrabada } from './voces-grabadas';
 import { planDeLaRadio, sonidoDeOnda, tocarOnda, tocarRadio } from './ruido-de-radio';
 import { queHaceElToque } from './toque-de-dialogo';
 
@@ -232,6 +233,25 @@ export const LO_QUE_DECIDE = 'Así que… La hora ha llegado';
  */
 export function loQueTardaEnEscribirse(texto: string, piso: number): number {
   return Math.max(piso, letrasDelDicho(texto).letras * TECLA_MS + 500);
+}
+
+/**
+ * La charla del sol es la del prólogo, palabra por palabra (`intercambio-del-sol.ts`): suena con
+ * las mismas voces grabadas de las dos líneas del prólogo que la dicen.
+ */
+const VOZ_DEL_SOL: Readonly<Record<string, string>> = {
+  [LO_QUE_DICE_EL_SOL]: 'dentro-caotico',
+  [LO_QUE_RESPONDE_ANGIE]: 'voz-supongo',
+};
+
+export function vozDeLaColina(texto: string): VozGrabada | undefined {
+  const id = VOZ_DEL_SOL[texto];
+  return id ? VOCES_GRABADAS[id] : undefined;
+}
+
+/** Un globo hablado espera también a que termine su voz, si es más larga que lo que se escribe. */
+export function loQueDuraDicho(texto: string, piso: number): number {
+  return Math.max(loQueTardaEnEscribirse(texto, piso), (vozDeLaColina(texto)?.ms ?? 0) + 400);
 }
 
 export interface RayoDelSol {
@@ -554,7 +574,14 @@ export function initInicioAngie(host: HTMLElement, cuerpo?: AngieDeLaColina): In
    */
   const decir = (quien: Voz, texto: string): void => {
     contar(texto);
-    sonido().hablar(quien, texto.replace(/\n/g, ' '), letrasDelDicho(texto).letras * TECLA_MS);
+    const voz = vozDeLaColina(texto);
+    const escribir = letrasDelDicho(texto).letras * TECLA_MS;
+    sonido().hablar(
+      quien,
+      texto.replace(/\n/g, ' '),
+      Math.max(escribir, voz?.ms ?? 0),
+      voz?.archivo,
+    );
   };
 
   /**
@@ -634,6 +661,10 @@ export function initInicioAngie(host: HTMLElement, cuerpo?: AngieDeLaColina): In
     // Primero se cruza una radio: estática y ondas que salen del sol, una señal que todavía no se
     // entiende. Ella la oye antes que nadie y lo presiente.
     escena.classList.add('ini--radio');
+    // Las voces de la charla con el sol se bajan mientras suena la radio: llegan a tiempo.
+    sonido().precargar(
+      [LO_QUE_DICE_EL_SOL, LO_QUE_RESPONDE_ANGIE].flatMap((t) => vozDeLaColina(t)?.archivo ?? []),
+    );
     const salidaDeRadio = sonido().salida();
     radio = salidaDeRadio ? tocarRadio(salidaDeRadio, planDeLaRadio()) : null;
     await esperar(T.sintonizar);
@@ -650,11 +681,11 @@ export function initInicioAngie(host: HTMLElement, cuerpo?: AngieDeLaColina): In
     radio?.apagar(0.5);
     radio = null;
     decir('cap', LO_QUE_DICE_EL_SOL);
-    await pensamiento(loQueTardaEnEscribirse(LO_QUE_DICE_EL_SOL, T.oir));
+    await pensamiento(loQueDuraDicho(LO_QUE_DICE_EL_SOL, T.oir));
     if (cerrado) return;
     escena.classList.replace('ini--oye', 'ini--responde');
     decir('mascota', LO_QUE_RESPONDE_ANGIE);
-    await pensamiento(loQueTardaEnEscribirse(LO_QUE_RESPONDE_ANGIE, T.responder));
+    await pensamiento(loQueDuraDicho(LO_QUE_RESPONDE_ANGIE, T.responder));
     if (cerrado) return;
     await enviarAlSol();
     if (cerrado) return;

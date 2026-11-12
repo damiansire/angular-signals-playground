@@ -33,7 +33,8 @@ import {
 } from '../components-draw/tripulacion/tripulacion.component';
 import { RetratoDeNaveComponent } from '../components-draw/tripulacion/retrato-de-nave.component';
 import { acentoDe } from './cinematicas/escenas/acentos';
-import { guionDe, palabrasDeLinea, type LineaDelViaje } from './guion-del-viaje';
+import { guionDe, idDeLineaDelViaje, palabrasDeLinea, type LineaDelViaje } from './guion-del-viaje';
+import { VOCES_GRABADAS } from './voces-grabadas';
 import { sinMovimiento } from '../libs/muelle';
 import {
   caminoDeColina,
@@ -447,9 +448,20 @@ export class IntegradaVistaComponent {
   private volando = false;
   private mirada: number | null = null;
 
-  private decir(linea: LineaDelViaje | null): void {
+  /** Con `id`, la línea suena con su voz grabada si la tiene; sin voz, se lee callada como antes. */
+  private decir(linea: LineaDelViaje | null, id?: string): void {
     this.lineaDeEtapa.set(linea);
     if (linea) this.tripulacion()?.hablar(linea.quien);
+    sonido().decirGrabada((linea && id && VOCES_GRABADAS[id]?.archivo) || null);
+  }
+
+  /** Las voces del viaje se piden todas juntas al abrir la primera hoja: pesan poco y así no esperan. */
+  private precargarVocesDelViaje(): void {
+    sonido().precargar(
+      Object.values(VOCES_GRABADAS)
+        .map((v) => v.archivo)
+        .filter((a) => a.startsWith('voces/viaje/')),
+    );
   }
 
   /** Cada toque de la pantalla tiene una consecuencia en el cielo: lo miran y una se entera. */
@@ -518,7 +530,10 @@ export class IntegradaVistaComponent {
       this.alEstablecer(concepto, i);
       this.tripulacion()?.festejar();
       const id = this.paginaActual()?.id;
-      this.decir(id ? (guionDe(id)?.resuelta ?? null) : null);
+      this.decir(
+        id ? (guionDe(id)?.resuelta ?? null) : null,
+        id ? idDeLineaDelViaje(id, 'resuelta') : undefined,
+      );
     }
   }
 
@@ -642,7 +657,8 @@ export class IntegradaVistaComponent {
     if (previa !== null && previa !== i && cuerpo) this.darVueltaLaHoja(i > previa, cuerpo);
     if (this.libro().concepto !== undefined) {
       untracked(() => {
-        this.decir(guionDe(pagina.id)?.llegada ?? null);
+        this.precargarVocesDelViaje();
+        this.decir(guionDe(pagina.id)?.llegada ?? null, idDeLineaDelViaje(pagina.id, 'llegada'));
         // Llegan volando a la página nueva: venían de irse por la derecha.
         if (previa !== null && i > previa) this.tripulacion()?.llegar();
       });

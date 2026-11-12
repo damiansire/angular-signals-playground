@@ -12,7 +12,7 @@ import { HUECOS_DEL_PROLOGO, type HuecoDelPrologo } from './operadores-del-prolo
 import { PAGINAS_DEL_MANUAL, type PaginaDelManual } from './manual-de-a-bordo';
 import { ARBOL_DE_SIGNAL_SPACE } from './arbol-de-signal-space';
 import { PUNTOS_DEL_PROLOGO } from './puntos-del-prologo';
-import { VOCES_DEL_PROLOGO } from './voces-del-prologo';
+import { VOCES_GRABADAS } from './voces-grabadas';
 import {
   GUION,
   PRESUPUESTO,
@@ -314,7 +314,11 @@ export function initPrologoAnomalia(host: HTMLElement, opts: PrologoOpciones): (
 
   const reloj: readonly LineaEnReloj[] = armarReloj(GUION);
   // Las voces se piden ya: la primera línea entra en menos de un segundo y llegaría en blips.
-  sonido().precargar(Object.values(VOCES_DEL_PROLOGO).map((v) => v.archivo));
+  sonido().precargar(
+    Object.values(VOCES_GRABADAS)
+      .map((v) => v.archivo)
+      .filter((a) => a.startsWith('voces/prologo/')),
+  );
   const T: Anclajes = anclajesDe(reloj);
   const M: Momentos = momentosDe(reloj);
   const linea = (id: string): LineaEnReloj => {
@@ -1387,7 +1391,7 @@ export function initPrologoAnomalia(host: HTMLElement, opts: PrologoOpciones): (
         d.quien,
         textoVisible(d),
         (d.t1 - d.t0) / velocidad,
-        VOCES_DEL_PROLOGO[d.id]?.archivo,
+        VOCES_GRABADAS[d.id]?.archivo,
       );
       const nave = NAVE_DE[d.quien];
       if (nave !== undefined) tomaLaPalabra(nave);

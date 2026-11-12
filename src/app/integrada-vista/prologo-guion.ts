@@ -9,7 +9,7 @@
  */
 
 import { LO_QUE_DICE_EL_SOL, LO_QUE_RESPONDE_ANGIE } from './intercambio-del-sol';
-import { VOCES_DEL_PROLOGO } from './voces-del-prologo';
+import { VOCES_GRABADAS } from './voces-grabadas';
 
 export type Hablante = 'cap' | 'naveA' | 'naveB' | 'nave4' | 'todos' | 'voz' | 'mascota';
 
@@ -346,7 +346,7 @@ export function ventanaDe(linea: LineaGuion): number {
   const seguir = Math.max(
     PRESUPUESTO.minimo,
     Math.round((largoDe(linea) / PRESUPUESTO.cps) * 1000),
-    VOCES_DEL_PROLOGO[linea.id]?.ms ?? 0,
+    VOCES_GRABADAS[linea.id]?.ms ?? 0,
   );
   return Math.max(linea.dur ?? 0, seguir + PRESUPUESTO.entra + PRESUPUESTO.sale);
 }
