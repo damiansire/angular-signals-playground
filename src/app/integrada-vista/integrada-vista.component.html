@@ -760,23 +760,26 @@
 </ng-template>
 
 <!-- Las páginas como marcas del libro: cuánto falta se ve sin leer el número. Con una sola página no
-     hay nada que contar. -->
+     hay nada que contar, pero el libro se nombra igual: el árbol de Signal Space quedaba sin decir
+     de qué libro es. -->
 <ng-template #marcasDelLibro>
-  @if (paginas().length > 1) {
+  @if (paginas().length > 1 || libro().concepto === undefined) {
     <span class="prologo__manual-donde">
       @if (libro().concepto === undefined) {
         <span class="prologo__manual-libro">{{ libro().nombre }}</span>
       }
-      <span class="prologo__manual-marcas" aria-hidden="true">
-        @for (cada of paginas(); track cada.id; let i = $index) {
-          <span
-            class="prologo__manual-marca"
-            [class.prologo__manual-marca--leida]="i < pagina()!"
-            [class.prologo__manual-marca--aca]="i === pagina()"
-          ></span>
-        }
-      </span>
-      <span class="prologo__manual-paso">{{ pagina()! + 1 }} de {{ paginas().length }}</span>
+      @if (paginas().length > 1) {
+        <span class="prologo__manual-marcas" aria-hidden="true">
+          @for (cada of paginas(); track cada.id; let i = $index) {
+            <span
+              class="prologo__manual-marca"
+              [class.prologo__manual-marca--leida]="i < pagina()!"
+              [class.prologo__manual-marca--aca]="i === pagina()"
+            ></span>
+          }
+        </span>
+        <span class="prologo__manual-paso">{{ pagina()! + 1 }} de {{ paginas().length }}</span>
+      }
     </span>
   }
 </ng-template>
