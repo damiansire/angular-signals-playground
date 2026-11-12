@@ -108,8 +108,12 @@ export class AvisoAuricularesComponent {
   readonly empezarDeCero = output<void>();
 
   protected readonly momento = signal<Momento>('esperando');
-  /** El aviso recomienda el sonido: arranca prendido, y apagarlo es una elección explícita. */
-  protected readonly conSonido = signal(true);
+  /**
+   * El aviso recomienda el sonido: la primera vez arranca prendido, y apagarlo es una elección
+   * explícita. Esa elección se guarda y vale en toda la app: quien lo apagó lo encuentra apagado.
+   * Arrancando siempre prendido, seguir desde el aviso le volvía a prender el sonido.
+   */
+  protected readonly conSonido = signal(sonido().activo());
   /** El lado que está sonando en la prueba: enciende esa copa. */
   protected readonly suena = signal<Lado | null>(null);
   protected readonly estrellas = estrellasDelAlba(11, 70);

@@ -803,6 +803,9 @@
   .aa__raton::before,
   .aa__raton i,
   .aa__nota,
+  /* Las notas se prenden con una regla de estado, más específica que `.aa__nota`: nombrada igual
+     acá, o le ganaba a este bloque y seguían saliendo. */
+  :host(:not(.aa--probando, .aa--alejandose, .aa--mudo)) .aa__nota,
   .aa__parlante-ondas path {
     animation: none;
   }

@@ -1,6 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 
+import { sonido } from '../../libs/sonido';
 import { hasta } from '../testing/cuadros';
 import { AvisoAuricularesComponent } from './aviso-auriculares.component';
 
@@ -34,6 +35,18 @@ describe('AvisoAuricularesComponent al retomar', () => {
     await fixture.whenStable();
     return host;
   }
+
+  it('quien había apagado el sonido lo encuentra apagado, y seguir no se lo prende', async () => {
+    spyOn(sonido(), 'activo').and.returnValue(false);
+    const alternar = spyOn(sonido(), 'alternar');
+    const desbloquear = spyOn(sonido(), 'desbloquear');
+
+    const host = await retomar();
+
+    expect(host.querySelector('.aa__mudo')?.getAttribute('aria-pressed')).toBe('true');
+    expect(alternar.calls.allArgs()).toEqual([[false]]);
+    expect(desbloquear).not.toHaveBeenCalled();
+  });
 
   it('sigue a la vista mientras la pantalla se desvanece y se oculta cuando terminó', async () => {
     const host = await retomar();
