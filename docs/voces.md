@@ -32,13 +32,19 @@ escribirla para esa línea, sin tocar lo que se ve en pantalla.
 
 Hacen falta las claves de `claves` en `voces.json` (variables de entorno; en Windows el script
 también las busca en las variables de usuario) y un ffmpeg en `FFMPEG`. Cada clave es de un
-proyecto de Google Cloud distinto, con su propio cupo:
+proyecto de Google Cloud distinto, con su propio cupo. Son los cinco proyectos de la cuenta de
+facturación Expert Account, que no admite más de cinco:
 
-| Variable           | Proyecto                     | Nombre de la clave            |
-| ------------------ | ---------------------------- | ----------------------------- |
-| `GEMINI_API_KEY_2` | `angular-signals-playground` | la del proyecto original      |
-| `GEMINI_API_KEY_3` | `angular-signals-voces-2`    | `angular-signals-voces-2-tts` |
-| `GEMINI_API_KEY_4` | `angular-signals-voces-3`    | `angular-signals-voces-3-tts` |
+| Variable           | Proyecto                                 | Nombre de la clave               |
+| ------------------ | ---------------------------------------- | -------------------------------- |
+| `GEMINI_API_KEY_2` | `angular-signals-playground`             | `angular-signals-playground-tts` |
+| `GEMINI_API_KEY_3` | `angular-signals-voces-2`                | `angular-signals-voces-2-tts`    |
+| `GEMINI_API_KEY_4` | `angular-signals-voces-3`                | `angular-signals-voces-3-tts`    |
+| `GEMINI_API_KEY`   | `TTS-Voz` (`gen-lang-client-0098437358`) | `Gemini-Claude-Skill-Voz-2`      |
+| `GEMINI_API_KEY_5` | `cuebook-2f1c8`                          | `japanise-game-voces`            |
+
+`japanise-game` usa las cinco y los videos en japonés usan `GEMINI_API_KEY`, así que las 500 voces
+por día se reparten entre los tres.
 
 Las claves nunca se imprimen ni se escriben en un archivo.
 
