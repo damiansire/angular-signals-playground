@@ -712,7 +712,8 @@ entrar desarma a Angie en luz y se hace noche, la costura con el prólogo.
       negra de golpe); un cuadro sin aviso al arrancar (el primero se pinta antes de prender la
       máscara); texto del aviso legible mientras se va; un PUNTO que queda en el medio y viaja
       hasta la colina (se leía como algo nuevo: el aviso termina en cero antes de que la cámara se
-      aleje); la pantalla NEGRA más de medio segundo (uno detrás del otro y con margen ×2, quedaba
+      aleje; desde el 2026-11-14 deja de dibujarse cuando la cámara arranca, con menos de 12 px a
+      3440 de ancho y 3 px en un celular); la pantalla NEGRA más de medio segundo (uno detrás del otro y con margen ×2, quedaba
       un segundo y medio: se leía como que se había colgado); cortes entre tramos; más de unos 6 s; arrancar con la cara a la vista (medida por su
       caja de pantalla, una figura girada y estirada por los muelles dejaba un borde a la vista; y
       a cientos de aumentos se pinta más angosta que su geometría: de ahí el margen); el aviso de
@@ -849,6 +850,54 @@ entrar desarma a Angie en luz y se hace noche, la costura con el prólogo.
       de cuadros sueltos: con 256 MB, 0 en 8 corridas (antes 2–6); con la memoria normal, 0 a
       3440×1300, 1440×900 y 390×844. Con 128 MB sigue destellando en cada redibujado: la escena sola
       ya no entra.
+- [ ] (2026-11-14) El zoom desde el ojo no destella tampoco con 128 MB de memoria de video, y el
+      aviso arranca a moverse apenas se toca. A 3440×1300 con `--force-gpu-mem-available-mb=128`:
+      ningún cuadro en blanco ni con el fondo de `.ini`, ninguna franja sin dibujar. Reemplaza el
+      mecanismo de los tres ítems de arriba (ya no hay `frenar`/`medir`/`soltar` ni se saca y se
+      pone `will-change` en la colina). Defecto resuelto (Damian: "arreglalo y asegurate que quede
+      perfecto"): 10–14 destellos y hasta 37 cuadros vacíos por corrida. Cinco causas, medidas con
+      trazas del compositor:
+      (1) La capa era la colina misma, agrandada cientos de veces: el navegador le dibujaba por
+      adelantado lo que rodea a la pantalla hasta llenar el tope (109 MB de 128, 190 de 256), y cada
+      redibujado la creaba de nuevo cuando la vieja todavía no había devuelto su memoria. Ahora la
+      colina se dibuja por ESCALONES (`escalaDeDibujo`, `tocaRedibujar`) y lo que falta lo pone, de
+      ∛2 a 1, su contenedor de más afuera que recorta (`capaDeLaCamara`, hoy
+      `app-integrada-vista`), que es la capa: mide lo que la pantalla, se dibuja una vez a ∛2 (1,6×
+      los píxeles) y el navegador solo la achica. Tiene que ser el de más afuera: con otro recorte
+      por encima la capa entera se redibujaba en casi todos los cuadros (620 mosaicos en 1,5 s
+      contra 232). Y la capa nunca agranda lo dibujado más allá de la escala a la que nació: ahí el
+      navegador sí la redibuja, en cada cuadro.
+      (2) El paisaje de la colina seguía dibujándose debajo del aviso: es un SVG y solo se
+      ocultaban los hijos HTML. Mientras el aviso espera y se cierra, todo lo que tapa va con
+      `visibility: hidden` (en reposo, de 116 MB a 44).
+      (3) El aviso al cerrarse eran tres capas a pantalla entera, partidas por las setenta
+      estrellas animadas: sus loops quedan quietos y lleva `will-change` (`alivianarElAviso`), y su
+      Angie, que sigue con sus muelles, va en capa propia (redibujaba franjas del ancho de la
+      pantalla en cada cuadro).
+      (4) El aviso y la colina no se dibujan a la vez al arrancar: mientras el aviso se cierra,
+      detrás hay solo el negro del ojo, liso. La colina aparece 200 ms antes de que arranque la
+      cámara (`LA_COLINA_APARECE_MS`), y cuando la cámara arranca el aviso, ya de menos de 12 px,
+      deja de dibujarse. Con los dos y la cámara en marcha, la colina entera se redibujaba cada tres
+      cuadros.
+      (5) Al llegar, los loops despiertan tres cuadros después de sacar la cámara
+      (`CUADROS_DE_ESPERA`).
+      Además el reloj del viaje no salta con un tirón (`TIRON_MS`): antes, armar la capa tardaba un
+      cuarto de segundo con el aviso quieto y después aparecía ya achicado; ahora el tirón del
+      arranque es de 17–50 ms y el de armar la colina (150 ms) cae con el aviso hecho un punto.
+      Mientras la cámara está adentro del ojo, el fondo de la página es su negro: si falta memoria
+      un cuadro, lo que falta sale negro y no blanco (probado con 64 MB). Probado y descartado: un
+      primer escalón más largo agrandando la capa (se redibuja en cada cuadro); escalones de √2 (2×
+      los píxeles: cada escalón pedía 126 MB); sacarle la capa al aviso al arrancar la cámara
+      (ráfaga de redibujados); ocultar el aviso recién al asomar la cara o al llegar a cero (choca
+      con la cámara y con el primer escalón); la colina debajo del aviso desde el primer cuadro
+      (con 128 MB el aviso destella mientras se cierra). Medido con `grabar-zoom.mjs` y
+      `destellos.py` de la skill `zoom-extremo-web`, en tandas alternadas con la versión anterior
+      (la carga de la PC cambia los números): 128 MB, 0 destellos en 6 corridas (antes 10–14); 256 MB
+      y memoria normal, 0; 1440×900, 1280×640 y 390×844, 0. Con memoria normal, 329–340 cuadros en
+      5,7 s y 4–10 salteados. Al llegar: los 77 loops a velocidad 1, sin estilos en línea en la
+      colina, en `app-integrada-vista` ni en `html`, nada oculto ni inerte. La colina quieta sigue
+      pidiendo unos 150 MB a 3440 px: con 128 MB le pueden faltar pedazos EN REPOSO, que es otro
+      defecto.
 
 ## Overlays que tapan el recorrido (prólogo, modales a pantalla completa)
 
