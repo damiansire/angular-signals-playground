@@ -114,7 +114,8 @@ realmente tocás; no inventes scopes nuevos.
 
 ## Commits
 
-- **Conventional commits, en español.** Formato: `type(scope): resumen`.
+- **Conventional commits, en inglés** (desde el 2026-11-14; los anteriores
+  quedan en español). Formato: `type(scope): summary`.
 - Tipos válidos: `feat`, `fix`, `refactor`, `perf`, `test`, `docs`, `chore`.
 - `scope` debe ser uno de la columna **Scope** de la tabla de arriba (lista
   cerrada); la documentación va sin scope (`docs: …`). Si un cambio cruza varias
@@ -143,6 +144,9 @@ corto: nada de reescrituras masivas ni cambios de stack.
   no por su tipo interno.
 - **Los comentarios explican el PORQUÉ, nunca el QUÉ:** si un comentario
   parafrasea la línea de abajo, se borra o se renombra la variable.
+- **Los comentarios del código van en inglés** (desde el 2026-11-14): todo
+  comentario nuevo o que se reescribe. Los que ya están en español se traducen
+  cuando se toca ese código, no en una pasada masiva.
 - **Fail-fast en los pocos bordes async:** si se agrega un fetch de datos o un
   timer (p.ej. en `signals/level-6-resource/` o `level-10-debounced/`), va con
   timeout o cleanup explícito (`effect` con `onCleanup`, no un `setTimeout`

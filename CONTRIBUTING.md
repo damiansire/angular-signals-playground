@@ -44,8 +44,9 @@ A couple of these are less obvious than the rest:
 - **`test:scripts`** covers the gate scripts themselves, so the ratchet cannot
   quietly stop measuring.
 
-Commits are conventional and in Spanish (`feat(scope): …`), with the scope taken
-from the directory table in [AGENTS.md](./AGENTS.md).
+Commits are conventional and in English (`feat(scope): …`), with the scope taken
+from the directory table in [AGENTS.md](./AGENTS.md). Code comments are in
+English too; older Spanish ones get translated when that code is touched.
 
 ## Reporting a bug
 
