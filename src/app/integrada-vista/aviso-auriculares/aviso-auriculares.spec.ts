@@ -21,10 +21,15 @@ import {
   loopsQueSeRedibujan,
   tocaRedibujar,
   planDeLaPrueba,
-  siguientePaso,
   propiedadesAnimadas,
   marcaDelPseudo,
-  type PasoDelRedibujado,
+  HOLGURA_DE_DIBUJO,
+  LA_COLINA_APARECE_MS,
+  camaraSobreLoDibujado,
+  escalaDeDibujo,
+  esLoopQueCorre,
+  laCapaTapaSuLugar,
+  type Dibujada,
 } from './aviso-auriculares';
 
 describe('aviso de auriculares', () => {
@@ -254,6 +259,13 @@ describe('los loops que se redibujan al llegar la cámara', () => {
     enPausa.playbackRate = 0;
     expect(loopsQueSeRedibujan([enPausa], aviso)).toEqual([]);
   });
+
+  it('los del aviso también son loops que corren: se aquietan aparte, mientras se cierra', () => {
+    expect(esLoopQueCorre(animar(aviso, Infinity))).toBeTrue();
+    expect(esLoopQueCorre(animar(aviso, 1)))
+      .withContext('termina solo')
+      .toBeFalse();
+  });
 });
 
 describe('cuándo la gema de Angie tapa la pantalla', () => {
@@ -317,55 +329,172 @@ describe('la cámara lleva el ojo al medio de la pantalla', () => {
   });
 });
 
-describe('cuándo se redibujan los loops en el viaje de la cámara', () => {
-  it('en el primer cuadro: arrancan a la escala del ojo y no a la de la colina de antes', () => {
-    expect(tocaRedibujar(900, Infinity)).toBeTrue();
+describe('cuándo aparece la colina debajo del aviso', () => {
+  const cubre = aireQueCubre(1720, 650, 3440, 1300);
+  const cabe = aireQueCabe(1720, 650, 3440, 1300);
+
+  it('antes de que arranque la cámara: cuando arranca, ya está dibujada', () => {
+    expect(LA_COLINA_APARECE_MS).toBeLessThan(SE_ALEJA_DESDE_MS);
+    expect(SE_ALEJA_DESDE_MS - LA_COLINA_APARECE_MS).toBeGreaterThanOrEqual(150);
   });
 
-  it('cada vez que la escala baja √2, y no en cada cuadro, que pestañeaba', () => {
-    expect(tocaRedibujar(640, 900)).withContext('apenas se alejó').toBeFalse();
-    expect(tocaRedibujar(636, 900)).withContext('a √2').toBeTrue();
-  });
-
-  it('nunca dibujada a más del doble de los píxeles que se ven: a 4× no entraba en memoria', () => {
-    const escala = 900 / 1.4;
-    expect(tocaRedibujar(escala, 900)).toBeFalse();
-    expect((900 / escala) ** 2).toBeLessThanOrEqual(2);
-  });
-
-  it('del ojo a la colina son unas veinte veces, no cientos', () => {
-    let dibujadaA = Infinity;
-    let veces = 0;
-    for (let escala = 960; escala >= 1; escala *= 0.97) {
-      if (tocaRedibujar(escala, dibujadaA)) {
-        dibujadaA = escala;
-        veces++;
-      }
-    }
-    expect(veces).toBeGreaterThan(15);
-    expect(veces).toBeLessThan(25);
+  it('con el aviso ya chico: el tirón de armarla no frena un aviso a pantalla entera', () => {
+    const c = cuadroDelViaje(LA_COLINA_APARECE_MS, 520, cubre, cabe);
+    const diametro = 2 * c.aire * c.aviso * c.colina;
+    expect(diametro).withContext('px en una pantalla de 3440').toBeLessThan(60);
   });
 });
 
-describe('los pasos del redibujado de la colina', () => {
-  it('frena, mide y suelta en tres cuadros seguidos', () => {
-    const pasos: (PasoDelRedibujado | null)[] = [];
-    let paso: PasoDelRedibujado | null = null;
-    for (const toca of [false, true, false, false, false]) {
-      paso = siguientePaso(paso, toca);
-      pasos.push(paso);
+describe('cuándo el aviso deja de dibujarse', () => {
+  const profundidad = 520;
+  const cubre = aireQueCubre(1720, 650, 3440, 1300);
+  const cabe = aireQueCabe(1720, 650, 3440, 1300);
+
+  it('cuando arranca la cámara ya es una mota de pocos píxeles: que desaparezca no se ve', () => {
+    const c = cuadroDelViaje(SE_ALEJA_DESDE_MS, profundidad, cubre, cabe);
+    const diametro = 2 * c.aire * c.aviso * c.colina;
+    expect(diametro).withContext('px en una pantalla de 3440').toBeLessThan(12);
+  });
+
+  it('y falta para el primer escalón de la colina: su memoria de video ya volvió', () => {
+    const primerEscalon = escalaDeDibujo(profundidad);
+    let t = SE_ALEJA_DESDE_MS;
+    while (cuadroDelViaje(t, profundidad, cubre, cabe).colina > primerEscalon) t += 4;
+    expect(t - SE_ALEJA_DESDE_MS)
+      .withContext('ms entre que se va el aviso y el escalón')
+      .toBeGreaterThan(200);
+  });
+});
+
+describe('la colina dibujada por escalones', () => {
+  /** Un viaje del ojo a la colina, cuadro a cuadro: cuántos escalones y la mayor escala de la capa. */
+  const viaje = (desde: number): { escalones: number; mayor: number; menor: number } => {
+    let dibujadaA = escalaDeDibujo(desde);
+    let escalones = 1;
+    let mayor = 0;
+    let menor = Infinity;
+    for (let escala = desde; escala >= 1; escala *= 0.985) {
+      if (tocaRedibujar(escala, dibujadaA)) {
+        dibujadaA = escalaDeDibujo(escala);
+        escalones++;
+      }
+      mayor = Math.max(mayor, escala / dibujadaA);
+      menor = Math.min(menor, escala / dibujadaA);
     }
-    expect(pasos).toEqual([null, 'frenar', 'medir', 'soltar', null]);
+    return { escalones, mayor, menor };
+  };
+
+  it('se dibuja a la escala del final del escalón: la capa pone la holgura que falta', () => {
+    expect(escalaDeDibujo(900)).toBeCloseTo(900 / HOLGURA_DE_DIBUJO, 6);
   });
 
-  it('no arranca otro mientras uno está a medias: quedaría un loop fijado o quieto', () => {
-    expect(siguientePaso('frenar', true)).toBe('medir');
-    expect(siguientePaso('medir', true)).toBe('soltar');
+  it('el último escalón ya es la colina en su lugar: no se dibuja a menos de 1', () => {
+    expect(escalaDeDibujo(1.1)).toBe(1);
+    expect(escalaDeDibujo(1)).toBe(1);
   });
 
-  it('después de soltar puede volver a frenar si ya toca', () => {
-    expect(siguientePaso('soltar', true)).toBe('frenar');
-    expect(siguientePaso('soltar', false)).toBeNull();
+  it('toca otro cuando la cámara llega a la escala dibujada, y no en cada cuadro', () => {
+    expect(tocaRedibujar(800, 714)).withContext('a mitad del escalón').toBeFalse();
+    expect(tocaRedibujar(714, 714)).withContext('llegó').toBeTrue();
+  });
+
+  it('dibujada a escala 1 no toca más: la capa la lleva hasta la colina', () => {
+    expect(tocaRedibujar(1.2, 1)).toBeFalse();
+    expect(tocaRedibujar(1, 1)).toBeFalse();
+  });
+
+  it('la capa nunca achica lo dibujado ni lo agranda más que la holgura', () => {
+    const { mayor, menor } = viaje(960);
+    expect(menor).withContext('achicada, asomaría lo de atrás por los bordes').toBeGreaterThan(1);
+    expect(mayor)
+      .withContext('agrandada de más, el navegador la vuelve a dibujar en cada cuadro')
+      .toBeLessThanOrEqual(HOLGURA_DE_DIBUJO + 1e-9);
+  });
+
+  it('nunca más de 1,6 veces los píxeles de la pantalla: con 2× no entraba con poca memoria', () => {
+    expect(HOLGURA_DE_DIBUJO ** 2).toBeLessThan(1.6);
+  });
+
+  it('del ojo a la colina son unas treinta veces, no cientos', () => {
+    const { escalones } = viaje(960);
+    expect(escalones).toBeGreaterThan(24);
+    expect(escalones).toBeLessThan(34);
+  });
+});
+
+describe('lo que la capa agrega sobre la colina dibujada', () => {
+  const dibujada: Dibujada = { escala: 400, ojo: { x: 1700, y: 620 }, corrida: { x: 12, y: 18 } };
+  /** Dónde cae en pantalla un punto de la colina, con la colina dibujada y la capa encima. */
+  const enPantalla = (
+    p: { x: number; y: number },
+    capa: { escala: number; corrida: { x: number; y: number } },
+  ): { x: number; y: number } => {
+    const eje = (v: number, o: number, t: number, c: number): number => {
+      const dibujado = o + dibujada.escala * (v - o) + t;
+      return o + capa.escala * (dibujado - o) + c;
+    };
+    return {
+      x: eje(p.x, dibujada.ojo.x, dibujada.corrida.x, capa.corrida.x),
+      y: eje(p.y, dibujada.ojo.y, dibujada.corrida.y, capa.corrida.y),
+    };
+  };
+
+  it('recién dibujada no agrega nada: escala 1 y sin corrida', () => {
+    const capa = camaraSobreLoDibujado(dibujada, 400, dibujada.ojo, dibujada.corrida);
+    expect(capa.escala).toBe(1);
+    expect(capa.corrida.x).toBeCloseTo(0, 9);
+    expect(capa.corrida.y).toBeCloseTo(0, 9);
+  });
+
+  it('entre las dos dejan cada punto donde lo pone la cámara: escala y corrida del momento', () => {
+    const corrida = { x: 15, y: 22 };
+    const capa = camaraSobreLoDibujado(dibujada, 500, dibujada.ojo, corrida);
+    expect(capa.escala).toBeCloseTo(1.25, 9);
+    const punto = { x: 1701.5, y: 619 };
+    const visto = enPantalla(punto, capa);
+    expect(visto.x).toBeCloseTo(1700 + 500 * 1.5 + 15, 6);
+    expect(visto.y).toBeCloseTo(620 + 500 * -1 + 22, 6);
+  });
+
+  it('si el ojo se movió desde el escalón, sigue en su lugar: la corrida lo compensa', () => {
+    const ojo = { x: 1700.2, y: 620.1 };
+    const corrida = { x: 15, y: 22 };
+    const capa = camaraSobreLoDibujado(dibujada, 500, ojo, corrida);
+    const visto = enPantalla(ojo, capa);
+    expect(visto.x)
+      .withContext('el ojo es el punto fijo de la cámara')
+      .toBeCloseTo(ojo.x + 15, 6);
+    expect(visto.y).toBeCloseTo(ojo.y + 22, 6);
+  });
+});
+
+describe('la capa de la cámara tapa su lugar', () => {
+  const caja = { x: 0, y: 0, ancho: 3440, alto: 1300 };
+  const ojo = { x: 1700, y: 620 };
+
+  it('agrandada alrededor de un punto de adentro, lo tapa', () => {
+    expect(laCapaTapaSuLugar(1.26, { x: 0, y: 0 }, ojo, caja)).toBeTrue();
+    expect(laCapaTapaSuLugar(1, { x: 0, y: 0 }, ojo, caja)).toBeTrue();
+  });
+
+  it('achicada no: asoma lo de atrás por los cuatro bordes', () => {
+    expect(laCapaTapaSuLugar(0.98, { x: 0, y: 0 }, ojo, caja)).toBeFalse();
+  });
+
+  it('corrida de más deja un borde al aire, aunque esté agrandada', () => {
+    expect(laCapaTapaSuLugar(1.05, { x: 30, y: 0 }, ojo, caja))
+      .withContext('a 30 px')
+      .toBeTrue();
+    expect(laCapaTapaSuLugar(1.05, { x: 90, y: 0 }, ojo, caja))
+      .withContext('a 90 px')
+      .toBeFalse();
+    expect(laCapaTapaSuLugar(1.05, { x: 0, y: -40 }, ojo, caja))
+      .withContext('hacia arriba')
+      .toBeFalse();
+  });
+
+  it('medio píxel de menos no cuenta: es redondeo, no un borde', () => {
+    expect(laCapaTapaSuLugar(1, { x: 0.4, y: 0 }, ojo, caja)).toBeTrue();
   });
 });
 

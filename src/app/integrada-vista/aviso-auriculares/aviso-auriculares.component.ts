@@ -18,10 +18,18 @@ import {
   LLAMADO,
   LLAMADO_TACTIL,
   VIAJE_MS,
+  CUADROS_DE_ESPERA,
+  HOLGURA_DE_DIBUJO,
+  LA_COLINA_APARECE_MS,
+  TIRON_MS,
   aireQueCabe,
   aireQueCubre,
+  camaraSobreLoDibujado,
   corridaDeLaCamara,
   cuadroDelViaje,
+  escalaDeDibujo,
+  esLoopQueCorre,
+  laCapaTapaSuLugar,
   laGemaTapaLaPantalla,
   cuandoSeAbre,
   cuandoSuena,
@@ -32,9 +40,8 @@ import {
   loopsQueSeRedibujan,
   propiedadesAnimadas,
   marcaDelPseudo,
-  siguientePaso,
   tocaRedibujar,
-  type PasoDelRedibujado,
+  type Dibujada,
   planDeLaPrueba,
   tocarPrueba,
   type Lado,
@@ -131,7 +138,8 @@ export class AvisoAuricularesComponent {
   private readonly host: HTMLElement = inject(ElementRef<HTMLElement>).nativeElement;
   private readonly temporizadores = new Set<ReturnType<typeof setTimeout>>();
   private cuadro = 0;
-  private frenados: Animation[] = [];
+  /** La colina y la capa que la contiene, mientras llevan puesta la cámara. */
+  private conCamara: HTMLElement[] = [];
   /** Los loops que van quietos hasta llegar, con su efecto aparte para devolvérselo. */
   private quietos: { animacion: Animation; efecto: KeyframeEffect; fijas: string[] }[] = [];
   /** Los pseudo-elementos con su pulso apagado hasta llegar. */
@@ -142,12 +150,16 @@ export class AvisoAuricularesComponent {
    * la lamparita, a las fichas y a "Entrar" de la colina, que no se veían.
    */
   private inertes: HTMLElement[] = [];
+  /** La página lleva el negro del ojo de fondo, mientras la cámara está adentro. */
+  private conFondoNegro = false;
+  /** Lo que el aviso tapa entero mientras espera y mientras se cierra: no se dibuja. */
+  private bajoElAviso: (HTMLElement | SVGElement)[] = [];
 
   constructor() {
     inject(DestroyRef).onDestroy(() => {
       this.temporizadores.forEach(clearTimeout);
       cancelAnimationFrame(this.cuadro);
-      this.soltarLoops();
+      this.sacarLaCamara();
       this.despertarLoops();
       this.destapar();
       this.soltarLaColina();
@@ -158,6 +170,14 @@ export class AvisoAuricularesComponent {
         (el): el is HTMLElement => el instanceof HTMLElement && el !== this.host && !el.inert,
       );
       for (const el of this.inertes) el.inert = true;
+      // Tampoco se dibuja: el aviso la tapa entera, y sus capas (el cielo, las lomas, los juncos, el
+      // globo) eran más de 100 MB de memoria de video a 3440 px. El paisaje es un SVG: no entra entre
+      // los inertes, pero también se oculta.
+      this.bajoElAviso = [...(this.host.parentElement?.children ?? [])].filter(
+        (el): el is HTMLElement | SVGElement =>
+          (el instanceof HTMLElement || el instanceof SVGElement) && el !== this.host,
+      );
+      for (const el of this.bajoElAviso) el.style.visibility = 'hidden';
       if (!this.host.closest('.gone')) this.seguir().nativeElement.focus({ preventScroll: true });
       // El primer tiempo llega con el timer y no al montar: si la vista se va enseguida, no queda
       // un cuadro pedido al motor.
@@ -277,16 +297,26 @@ export class AvisoAuricularesComponent {
    * negro de su ojo, que ocupa toda la pantalla; después la cámara se aleja a la cara, a Angie en la
    * piedra y a la colina entera. Va cuadro a cuadro desde acá y no con una animación del navegador:
    * animada por el compositor, la colina agrandada se pintaba una sola vez y, al alejarse, aparecía
-   * cortada en rectángulos. Cada cuadro cambia la escala y el navegador la vuelve a dibujar.
+   * cortada en rectángulos. La colina se dibuja por escalones y la capa que la contiene pone el resto
+   * (ver «La colina dibujada por escalones» en `aviso-auriculares.ts`).
    */
   private alejarse(conSonido: boolean): void {
     this.elegido.emit(conSonido);
     const escena = this.host.parentElement;
-    if (sinMovimiento() || !escena) {
+    const capa = escena && capaDeLaCamara(escena);
+    if (sinMovimiento() || !escena || !capa) {
       this.llegar();
       return;
     }
     const r = this.host.getBoundingClientRect();
+    const deLaCapa = capa.getBoundingClientRect();
+    /** La capa, en las coordenadas de la colina: es lo que la colina dibujada tiene que tapar. */
+    const caja = {
+      x: deLaCapa.left - r.left,
+      y: deLaCapa.top - r.top,
+      ancho: deLaCapa.width,
+      alto: deLaCapa.height,
+    };
     this.viaje.emit(true);
     // Los ojos de frente: los del perfil también existen, apagados, y miden cero.
     const elOjo = [...escena.querySelectorAll<SVGGraphicsElement>('.ini__angie .mv__parpado')].find(
@@ -337,14 +367,42 @@ export class AvisoAuricularesComponent {
           y: ojo.y + (medido.y - corrida.y - ojo.y) / escala,
         };
       }
-      escena.style.transformOrigin = `${ojo.x}px ${ojo.y}px`;
-      // La cámara lleva el ojo al medio y lo devuelve a su lugar a medida que se aleja, parejo en
-      // escala como el viaje: a la mitad del camino en escala, a la mitad del camino en pantalla.
+      corrida = laCorrida(colina, ojo);
+    };
+    /**
+     * La cámara lleva el ojo al medio y lo devuelve a su lugar a medida que se aleja, parejo en
+     * escala como el viaje: a la mitad del camino en escala, a la mitad del camino en pantalla.
+     */
+    const laCorrida = (
+      colina: number,
+      desde: { x: number; y: number },
+    ): { x: number; y: number } => {
       const k = corridaDeLaCamara(colina, profundidad);
-      corrida = { x: (medio.x - ojo.x) * k, y: (medio.y - ojo.y) * k };
-      escena.style.translate = `${corrida.x}px ${corrida.y}px`;
-      // El aviso, adentro de la escena, se achica alrededor de su medio puesto sobre el ojo.
-      this.host.style.translate = `${ojo.x - medio.x}px ${ojo.y - medio.y}px`;
+      return { x: (medio.x - desde.x) * k, y: (medio.y - desde.y) * k };
+    };
+
+    /**
+     * Un escalón: la colina queda dibujada a la escala del final del tramo que empieza, y hasta
+     * entonces solo la mueve la capa. Con el ojo muy cerca de un borde la capa agrandada no llegaría
+     * a tapar el otro: se prueba con menos holgura hasta que tape.
+     */
+    const dibujar = (colina: number, llego: boolean): Dibujada => {
+      // Los loops que hayan arrancado desde el escalón anterior también van quietos.
+      this.aquietarLoops(escena);
+      // Ya asoma la cara: la página deja de tener el negro del ojo de fondo.
+      if (colina < profundidad) this.sacarElFondoNegro();
+      let dibujada: Dibujada = { escala: 1, ojo, corrida: { x: 0, y: 0 } };
+      for (let holgura = HOLGURA_DE_DIBUJO; !llego; holgura = Math.sqrt(holgura)) {
+        const escalon = holgura < 1.01 ? colina : escalaDeDibujo(colina, holgura);
+        dibujada = { escala: escalon, ojo, corrida: laCorrida(escalon, ojo) };
+        const vista = camaraSobreLoDibujado(dibujada, colina, ojo, corrida);
+        if (escalon === colina || laCapaTapaSuLugar(vista.escala, vista.corrida, ojo, caja)) break;
+      }
+      escena.style.transformOrigin = `${ojo.x}px ${ojo.y}px`;
+      escena.style.scale = `${dibujada.escala}`;
+      escena.style.translate = `${dibujada.corrida.x}px ${dibujada.corrida.y}px`;
+      capa.style.transformOrigin = `${ojo.x - caja.x}px ${ojo.y - caja.y}px`;
+      return dibujada;
     };
 
     /**
@@ -367,59 +425,168 @@ export class AvisoAuricularesComponent {
       if (h instanceof HTMLElement || h instanceof SVGElement) detras.push(h);
     }
 
+    /**
+     * El color del ojo de Angie, que llena la pantalla mientras la cámara está adentro. Mientras el
+     * aviso se cierra, la colina no se dibuja: detrás hay solo ese negro, liso, que no pide memoria
+     * de video. Los dos juntos desde el arranque eran más de 100 MB a 3440 px, y con poca memoria
+     * al aviso le faltaban pedazos. La colina aparece un momento antes de que arranque la cámara, con
+     * el aviso ya chico. Sin ojo que medir no hay negro que valga: la colina sale enseguida.
+     */
+    const negro = elOjo ? getComputedStyle(elOjo.firstElementChild ?? elOjo).fill : null;
+    let aLaVista = false;
+
     let escala = 1;
-    let dibujadaA = Infinity;
-    let paso: PasoDelRedibujado | null = null;
-    let cero = 0;
+    let dibujada: Dibujada | null = null;
+    let reloj = 0;
+    let anterior = 0;
     const pintar = (ahora: number): void => {
-      const t = ahora - cero;
-      // Al llegar, la cámara queda quieta en la colina mientras termina el último redibujado.
-      const llego = t >= VIAJE_MS;
-      const c = cuadroDelViaje(Math.min(t, VIAJE_MS), profundidad, cubre, cabe);
+      // Un tirón no se salta: el viaje sigue donde iba. Con el reloj de pared, después de armar la
+      // capa de la colina (un cuarto de segundo a 3440 px) lo que seguía aparecía ya empezado.
+      reloj += Math.max(0, Math.min(ahora - anterior, TIRON_MS));
+      anterior = ahora;
+      const llego = reloj >= VIAJE_MS;
+      const c = cuadroDelViaje(Math.min(reloj, VIAJE_MS), profundidad, cubre, cabe);
+      if (!aLaVista) {
+        if (negro && reloj < LA_COLINA_APARECE_MS) {
+          // Sin la colina debajo, el aviso lleva la escala que tiene en pantalla.
+          this.host.style.scale = `${c.aviso * c.colina}`;
+          this.host.style.setProperty('--aa-aire', `${c.aire}px`);
+          this.cuadro = requestAnimationFrame(pintar);
+          return;
+        }
+        aLaVista = true;
+        this.mostrarLaColina();
+        escena.style.removeProperty('background-color');
+        // La capa nace ya agrandada: el navegador la dibuja a esa escala y después solo la achica.
+        capa.style.willChange = 'transform';
+      }
       seguirElOjo(escala, c.colina);
       if (laGemaTapaLaPantalla(piezas, r)) this.tapar(detras);
       else this.destapar();
       escala = c.colina;
-      // La escena va en una capa propia (`will-change`) que el navegador dibuja una vez y solo achica:
-      // redibujada en cada cuadro a la escala nueva, la cara gigante salía a rayas. Esa capa no baja
-      // sola su escala y la memoria crecía, así que cada √2 vuelve a la escala del momento. Los
-      // loops van quietos todo el viaje (`aquietarLoops`). Al llegar se redibuja una última vez, ya a
-      // escala 1, y los loops vuelven a moverse.
-      paso = siguientePaso(paso, llego || tocaRedibujar(escala, dibujadaA));
-      if (paso === 'frenar') {
-        dibujadaA = escala;
-        this.frenarLoops(escena);
-      } else if (paso === 'medir') {
-        this.medirLoops();
-        escena.style.willChange = 'auto';
-      } else if (paso === 'soltar') {
-        this.soltarLoops();
-        if (!llego) escena.style.willChange = 'transform';
-        else this.despertarLoops();
+      // La capa es la que se mueve en cada cuadro; la colina solo cambia en los escalones. Los loops
+      // van quietos todo el viaje (`aquietarLoops`, desde el primer escalón, con la colina recién
+      // aparecida). Al llegar, el último escalón deja la colina a escala 1 y la capa sin nada que
+      // agregar.
+      let vista = dibujada && camaraSobreLoDibujado(dibujada, escala, ojo, corrida);
+      if (
+        !dibujada ||
+        !vista ||
+        llego ||
+        tocaRedibujar(escala, dibujada.escala) ||
+        !laCapaTapaSuLugar(vista.escala, vista.corrida, dibujada.ojo, caja)
+      ) {
+        dibujada = dibujar(escala, llego);
+        vista = camaraSobreLoDibujado(dibujada, escala, ojo, corrida);
       }
-      escena.style.scale = `${c.colina}`;
-      this.host.style.scale = `${c.aviso}`;
-      this.host.style.setProperty('--aa-aire', `${c.aire}px`);
-      if (!llego || paso !== 'soltar') {
-        this.cuadro = requestAnimationFrame(pintar);
-        return;
+      capa.style.scale = `${vista.escala}`;
+      capa.style.translate = `${vista.corrida.x}px ${vista.corrida.y}px`;
+      if (escala < profundidad) {
+        // Cuando la cámara arranca, el aviso ya es una mota de pocos píxeles y deja de dibujarse, un
+        // instante antes de llegar a cero. Con los dos a la vez, el navegador redibujaba la colina
+        // entera cada tres cuadros, y la memoria de video del aviso todavía no había vuelto cuando
+        // llegaba el primer escalón: con poca, la pantalla salía en blanco un cuadro. Sin dibujarse
+        // tampoco recalcula el estilo de todo lo suyo en cada cuadro del viaje.
+        this.host.style.visibility = 'hidden';
+      } else {
+        // El aviso, adentro de la colina agrandada, se achica alrededor de su medio puesto sobre el
+        // ojo.
+        this.host.style.translate = `${ojo.x - medio.x}px ${ojo.y - medio.y}px`;
+        this.host.style.scale = `${c.aviso}`;
+        this.host.style.setProperty('--aa-aire', `${c.aire}px`);
       }
-      // A escala 1 y sin corrida, sacarlas no mueve nada.
-      escena.style.removeProperty('scale');
-      escena.style.removeProperty('transform-origin');
-      escena.style.removeProperty('translate');
-      escena.style.removeProperty('will-change');
-      this.destapar();
-      // El aviso queda en cero hasta que lo oculta `listo`: devuelto a su tamaño, volvía entero un cuadro.
-      this.viaje.emit(false);
-      this.llegar();
+      this.cuadro = requestAnimationFrame(llego ? terminar : pintar);
     };
-    // Quietos desde el primer cuadro, todavía bajo el aviso, así el cambio de pose no se ve.
-    this.aquietarLoops(escena);
-    // El primer cuadro va ya, junto con la máscara: sin aire, el aviso desaparecía un cuadro.
-    cero = performance.now();
-    pintar(cero);
+    /**
+     * Un cuadro después del último escalón, ya a escala 1 y sin corrida, sacar la cámara no mueve
+     * nada. Los loops despiertan unos cuadros más tarde: cada uno vuelve a su capa, y juntas con la
+     * de la cámara, que todavía no devolvió su memoria de video, pedían de más y a la colina le
+     * faltaba una franja un cuadro.
+     */
+    const terminar = (): void => {
+      this.sacarLaCamara();
+      this.destapar();
+      this.enCuadros(CUADROS_DE_ESPERA, () => {
+        this.despertarLoops();
+        // El aviso sigue sin dibujarse hasta que lo oculta `listo`: devuelto, volvía entero un cuadro.
+        this.viaje.emit(false);
+        this.llegar();
+      });
+    };
+    this.conCamara = [escena, capa];
+    this.alivianarElAviso();
+    // La máscara entra con el aviso entero: sin aire, el aviso desaparecía un cuadro.
+    this.host.style.setProperty('--aa-aire', `${cubre}px`);
     this.momento.set('alejandose');
+    if (negro) {
+      // Mientras la colina no se dibuja, detrás del aviso hay solo el negro del ojo.
+      escena.style.backgroundColor = negro;
+      // Y también es el fondo de la página hasta el primer escalón: si al navegador le falta memoria
+      // de video para un cuadro, muestra lo que falta con el color de la página, y adentro del ojo
+      // tiene que ser negro. En blanco, al aparecer la colina quedaba una franja clara un cuadro.
+      document.documentElement.style.backgroundColor = negro;
+      this.conFondoNegro = true;
+    }
+    anterior = performance.now();
+    pintar(anterior);
+  }
+
+  /** Corre `fn` dentro de `cuadros` cuadros de pantalla; se cancela con la vista. */
+  private enCuadros(cuadros: number, fn: () => void): void {
+    this.cuadro = requestAnimationFrame(() => {
+      if (cuadros <= 1) fn();
+      else this.enCuadros(cuadros - 1, fn);
+    });
+  }
+
+  /**
+   * Mientras se cierra, el aviso es una sola capa que el navegador dibuja una vez y solo achica. Con
+   * sus loops andando eran tres a pantalla entera (el cielo, el velo y lo de adelante, partidos por
+   * las setenta estrellas que titilan en el medio): 57 MB de memoria de video a 3440 px que, con poca,
+   * no dejaban lugar para el primer escalón de la colina, y le faltaban pedazos un cuadro. Quietos en
+   * su pose no se nota: el aviso se va en un segundo y medio. No vuelven a moverse, que el aviso no
+   * vuelve.
+   */
+  private alivianarElAviso(): void {
+    for (const animacion of this.host.getAnimations({ subtree: true }).filter(esLoopQueCorre)) {
+      animacion.playbackRate = 0;
+      try {
+        animacion.commitStyles();
+        animacion.effect = null;
+      } catch {
+        // Un pseudo-elemento, o algo que no se dibuja: queda quieto con su animación puesta.
+      }
+    }
+    this.host.style.willChange = 'transform';
+    // Angie sigue moviéndose con sus muelles (el salto del acorde, las cejas caídas): con capa propia
+    // se redibuja ella sola. En la del aviso, cada cuadro suyo redibujaba franjas del ancho de la
+    // pantalla, 14 MB por cuadro a 3440 px que el navegador tardaba en devolver.
+    this.host
+      .querySelector<HTMLElement>('.aa__angie')
+      ?.style.setProperty('will-change', 'transform');
+  }
+
+  private sacarElFondoNegro(): void {
+    if (!this.conFondoNegro) return;
+    document.documentElement.style.removeProperty('background-color');
+    this.conFondoNegro = false;
+  }
+
+  private sacarLaCamara(): void {
+    this.sacarElFondoNegro();
+    for (const el of this.conCamara) {
+      for (const p of [
+        'scale',
+        'transform-origin',
+        'translate',
+        'will-change',
+        'background-color',
+      ]) {
+        el.style.removeProperty(p);
+      }
+    }
+    this.host.style.removeProperty('will-change');
+    this.conCamara = [];
   }
 
   /** La colina queda a la vista: vuelve a ser tocable y a estar en el orden de foco. */
@@ -430,8 +597,15 @@ export class AvisoAuricularesComponent {
   }
 
   private soltarLaColina(): void {
+    this.mostrarLaColina();
     for (const el of this.inertes) el.inert = false;
     this.inertes = [];
+  }
+
+  /** La colina vuelve a dibujarse, todavía sin poder tocarse: el aviso está por dejar de taparla. */
+  private mostrarLaColina(): void {
+    for (const el of this.bajoElAviso) el.style.removeProperty('visibility');
+    this.bajoElAviso = [];
   }
 
   private tapar(detras: (HTMLElement | SVGElement)[]): void {
@@ -445,17 +619,9 @@ export class AvisoAuricularesComponent {
     this.tapados = [];
   }
 
-  private frenarLoops(escena: HTMLElement): void {
-    this.frenados = loopsQueSeRedibujan(escena.getAnimations({ subtree: true }), this.host);
-    for (const a of this.frenados) {
-      a.playbackRate = 0;
-      this.fijarEscala(a, true);
-    }
-  }
-
   /**
    * Los loops quedan quietos en la pose de este cuadro y sin animación enganchada: así no tienen capa
-   * propia y la colina entera es una sola, que solo se redibuja cada √2 de escala. Animando, cada
+   * propia y la colina entera es una sola, que solo se redibuja en cada escalón. Animando, cada
    * pieza de Angie era una capa que a ×100–×500 cubría la pantalla: con poca memoria de video no
    * entraban al redibujar y la colina salía un cuadro en blanco. Con velocidad 0 y no con pause(),
    * que le saca al CSS el control de `animation-play-state` (ver `pausa-del-fondo.ts`).
@@ -503,26 +669,6 @@ export class AvisoAuricularesComponent {
     this.apagados = [];
   }
 
-  private medirLoops(): void {
-    for (const a of this.frenados) this.fijarEscala(a, false);
-  }
-
-  private soltarLoops(): void {
-    for (const a of this.frenados) {
-      a.playbackRate = 1;
-      this.fijarEscala(a, false);
-    }
-    this.frenados = [];
-  }
-
-  /** `will-change: transform` mantiene la escala con que el navegador dibujó un loop. */
-  private fijarEscala(a: Animation, fija: boolean): void {
-    const blanco = (a.effect as KeyframeEffect | null)?.target as HTMLElement | SVGElement | null;
-    if (!blanco) return;
-    if (fija) blanco.style.willChange = 'transform';
-    else blanco.style.removeProperty('will-change');
-  }
-
   private luego(ms: number, fn: () => void): void {
     const id = setTimeout(() => {
       this.temporizadores.delete(id);
@@ -530,6 +676,22 @@ export class AvisoAuricularesComponent {
     }, ms);
     this.temporizadores.add(id);
   }
+}
+
+/**
+ * La capa que lleva la cámara: el contenedor de más afuera que recorta su contenido. Recortada, la
+ * capa mide lo que la pantalla y no lo que la colina agrandada. Y tiene que ser el de más afuera:
+ * con otro recorte por encima, el navegador pasa ese recorte al dibujo de la capa, que cambia con
+ * cada cuadro de la cámara, y la capa entera se volvía a dibujar en casi todos (620 mosaicos en un
+ * segundo y medio a 3440 px, contra 232 con la capa afuera, que son los de los escalones).
+ */
+function capaDeLaCamara(escena: HTMLElement): HTMLElement | null {
+  let capa: HTMLElement | null = null;
+  for (let el = escena.parentElement; el && el !== document.body; el = el.parentElement) {
+    if (el === document.documentElement) break;
+    if (getComputedStyle(el).overflowX !== 'visible') capa = el;
+  }
+  return capa ?? escena.parentElement;
 }
 
 /** Prende o apaga una marca de `data-quieto` sin tocar las otras del mismo elemento. */

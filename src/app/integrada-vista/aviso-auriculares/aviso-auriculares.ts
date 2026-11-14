@@ -168,6 +168,19 @@ export const SE_CIERRA_MS = 1700;
 export const ALEJARSE_MS = 4200;
 export const SE_ALEJA_DESDE_MS = SE_CIERRA_MS - 300;
 export const VIAJE_MS = SE_ALEJA_DESDE_MS + ALEJARSE_MS;
+/**
+ * Cuándo aparece la colina debajo del aviso, con su capa: un momento antes de que arranque la
+ * cámara, así cuando arranca ya está dibujada. Armarla es un tirón de un quinto de segundo a 3440 px:
+ * cae con el aviso hecho un punto de pocas decenas de píxeles, y no con el aviso entero ni con la
+ * cámara en marcha.
+ */
+export const LA_COLINA_APARECE_MS = SE_ALEJA_DESDE_MS - 200;
+
+/**
+ * Lo más que avanza el viaje de un cuadro al otro. Un tirón más largo no se salta: el viaje sigue
+ * donde iba. A 20 cuadros por segundo todavía va a su paso.
+ */
+export const TIRON_MS = 50;
 
 /** Hasta acá del cierre el borde se redondea: de la pantalla entera al círculo que cabe adentro. */
 const REDONDEA = 0.4;
@@ -276,22 +289,25 @@ export function profundidadDesdeElOjo(
 }
 
 /**
- * Los loops de la colina que se frenan un instante para que el navegador los vuelva a dibujar. Lo
- * que anima queda dibujado a la escala más grande que alcanzó, contando la de la escena, y no la
- * baja mientras siga animando: después de alejarse desde el ojo, los juncos, las nubes y Angie
- * quedaban a decenas de aumentos, cientos de megas de memoria de video, y con poca (Opera Neon con
- * otras pestañas) a la colina le faltaban pedazos. Frenados un cuadro dejan de animar, se miden a la
- * escala del momento y arrancan desde ahí. Quietos todo el viaje, en cambio, se redibujaban en cada
- * cuadro y el zoom pestañeaba en blanco. Los del aviso no, que se va, ni los que ya frenó la pausa
- * de fondo: soltarlos sería despausarlos.
+ * Los loops de la colina que van quietos mientras viaja la cámara. Lo que anima queda dibujado a la
+ * escala más grande que alcanzó, contando la de la escena, y no la baja mientras siga animando:
+ * después de alejarse desde el ojo, los juncos, las nubes y Angie quedaban a decenas de aumentos,
+ * cientos de megas de memoria de video, y con poca (Opera Neon con otras pestañas) a la colina le
+ * faltaban pedazos. Los del aviso no, que se va, ni los que ya frenó la pausa de fondo: soltarlos
+ * sería despausarlos.
  */
 export function loopsQueSeRedibujan(animaciones: readonly Animation[], aviso: Node): Animation[] {
   return animaciones.filter((a) => {
-    const efecto = a.effect;
-    if (!(efecto instanceof KeyframeEffect) || a.playbackRate === 0) return false;
-    if (efecto.target && aviso.contains(efecto.target)) return false;
-    return efecto.getComputedTiming().iterations === Infinity;
+    const blanco = (a.effect as KeyframeEffect | null)?.target;
+    return esLoopQueCorre(a) && !(blanco && aviso.contains(blanco));
   });
+}
+
+/** Un loop que corre: sin fin, y no frenado ya por la pausa de fondo. */
+export function esLoopQueCorre(a: Animation): boolean {
+  const efecto = a.effect;
+  if (!(efecto instanceof KeyframeEffect) || a.playbackRate === 0) return false;
+  return efecto.getComputedTiming().iterations === Infinity;
 }
 
 /**
@@ -333,40 +349,103 @@ export function laGemaTapaLaPantalla(
   });
 }
 
+// ─── La colina dibujada por escalones, dentro de una capa que no crece ─────────────────────────
+//
+// La cámara reparte su escala en dos: la colina lleva una escala que solo cambia por escalones (la
+// «dibujada»), y un contenedor suyo, que es la capa (`will-change: transform`), lleva lo que falta,
+// de la holgura a 1, cuadro a cuadro. La capa mide lo que la pantalla y el navegador la dibuja una
+// sola vez, a la holgura: nunca ocupa más de holgura² veces los píxeles que se ven, y entre un
+// escalón y otro solo la achica.
+//
+// Antes la capa era la colina misma, agrandada cientos de veces: el navegador le dibujaba por
+// adelantado lo que rodea a la pantalla hasta llenar la memoria de video (109 MB de un tope de 128,
+// 190 de 256), y cada redibujado, que la creaba de nuevo, pedía memoria cuando la capa vieja todavía
+// no había devuelto la suya. Con poca, el cuadro salía sin dibujar: el flash del color de fondo.
+
 /**
- * Si la colina se vuelve a dibujar en este cuadro del viaje: cada vez que la escala baja √2 de la
- * que tenía. Con la del ojo todo el viaje, cada vez entraba más colina en pantalla a ×955, se pasaba
- * el límite de memoria y quedaban tiles sin dibujar. Entre un redibujado y otro la capa está dibujada
- * más grande de lo que se ve: a la mitad llegaba a 4× los píxeles de la pantalla, y con poca memoria
- * de video el redibujado no entraba y salía un cuadro en blanco; a √2 son 2×, unas veinte veces en
- * todo el viaje.
+ * Cuánto más grande de lo que se ve queda dibujada la colina al empezar un escalón: ∛2 de lado, 1,6×
+ * los píxeles de la pantalla, y 27 escalones del ojo a la colina. Con √2 (2× los píxeles, 18
+ * escalones) cada escalón pedía dos veces esa capa, 126 MB a 3440 px, y con 128 MB de memoria de
+ * video no entraba junto con el aviso.
  */
-export function tocaRedibujar(escala: number, dibujadaA: number): boolean {
-  return escala <= dibujadaA / Math.SQRT2;
+export const HOLGURA_DE_DIBUJO = Math.cbrt(2);
+
+/**
+ * La escala a la que se dibuja la colina cuando la cámara está en `escala`: la del final del escalón,
+ * así lo que la capa agrega va de `holgura` a 1 y nunca la achica por debajo de la pantalla. Nunca
+ * menos que 1: el último escalón ya es la colina en su lugar.
+ */
+export function escalaDeDibujo(escala: number, holgura = HOLGURA_DE_DIBUJO): number {
+  return Math.max(1, escala / holgura);
 }
 
 /**
- * Cómo se vuelve a dibujar la colina a la escala del momento: un paso por cuadro, y nunca dos
- * redibujados encimados. Todo junto en un cuadro (los loops quietos y la escena sin su capa), el
- * navegador se enteraba de que los loops pararon recién al mostrar el cuadro, los volvía a dibujar
- * sin esperar y la pantalla salía vacía un cuadro: a 3440 px, un destello a cada mitad de escala.
- * Por pasos, el redibujado espera a estar listo:
- * - `frenar`: los loops quedan quietos, pero con la escala fijada (`will-change`), así no se
- *   redibujan todavía;
- * - `medir`: se les saca la fijación a ellos y a la escena, y se dibujan a la escala de este cuadro
- *   (con la de la escena puesta, los loops seguían a la escala vieja);
- * - `soltar`: vuelven a moverse y la escena vuelve a su capa.
+ * Cuántos cuadros se dejan pasar entre soltar unas capas y pedir otras: entre que la cámara se va y
+ * que despiertan los loops. El navegador tarda un par de cuadros en devolver la memoria de video de
+ * las capas que se van: todo en el mismo cuadro, lo nuevo no entraba y a la colina le faltaba una
+ * franja.
  */
-export type PasoDelRedibujado = 'frenar' | 'medir' | 'soltar';
+export const CUADROS_DE_ESPERA = 3;
 
-/** El paso de este cuadro, a partir del anterior y de si ya toca redibujar. */
-export function siguientePaso(
-  anterior: PasoDelRedibujado | null,
-  toca: boolean,
-): PasoDelRedibujado | null {
-  if (anterior === 'frenar') return 'medir';
-  if (anterior === 'medir') return 'soltar';
-  return toca ? 'frenar' : null;
+/** Si toca otro escalón: la cámara ya llegó a la escala dibujada y todavía no es la de la colina. */
+export function tocaRedibujar(escala: number, dibujadaA: number): boolean {
+  return dibujadaA > 1 && escala <= dibujadaA;
+}
+
+interface Punto {
+  readonly x: number;
+  readonly y: number;
+}
+
+/** Cómo quedó dibujada la colina en el último escalón: su escala, su punto fijo y su corrida. */
+export interface Dibujada {
+  readonly escala: number;
+  readonly ojo: Punto;
+  readonly corrida: Punto;
+}
+
+/**
+ * Lo que la capa agrega encima de la colina dibujada para que en pantalla quede a `escala`, con el
+ * ojo en `ojo` y corrida `corrida`: una escala alrededor del ojo dibujado y una corrida. El ojo se
+ * mueve apenas entre un escalón y otro, y a cientos de aumentos eso son cientos de píxeles: la
+ * corrida lo compensa.
+ */
+export function camaraSobreLoDibujado(
+  dibujada: Dibujada,
+  escala: number,
+  ojo: Punto,
+  corrida: Punto,
+): { readonly escala: number; readonly corrida: Punto } {
+  const k = escala / dibujada.escala;
+  return {
+    escala: k,
+    corrida: {
+      x: (ojo.x - dibujada.ojo.x) * (1 - escala) + corrida.x - k * dibujada.corrida.x,
+      y: (ojo.y - dibujada.ojo.y) * (1 - escala) + corrida.y - k * dibujada.corrida.y,
+    },
+  };
+}
+
+/**
+ * Si la capa, agrandada `escala` alrededor de `origen` y corrida, sigue tapando su propio lugar: la
+ * capa está recortada a su caja, y si no la tapa asoma lo de atrás por un borde. `caja` es la capa
+ * sin agrandar, en las mismas coordenadas que `origen`. Con medio píxel de tolerancia.
+ */
+export function laCapaTapaSuLugar(
+  escala: number,
+  corrida: Punto,
+  origen: Punto,
+  caja: { readonly x: number; readonly y: number; readonly ancho: number; readonly alto: number },
+): boolean {
+  if (escala < 1 - 1e-9) return false;
+  const izquierda = origen.x + escala * (caja.x - origen.x) + corrida.x;
+  const arriba = origen.y + escala * (caja.y - origen.y) + corrida.y;
+  return (
+    izquierda <= caja.x + 0.5 &&
+    arriba <= caja.y + 0.5 &&
+    izquierda + escala * caja.ancho >= caja.x + caja.ancho - 0.5 &&
+    arriba + escala * caja.alto >= caja.y + caja.alto - 0.5
+  );
 }
 
 /**
