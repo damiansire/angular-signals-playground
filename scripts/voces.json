@@ -1,7 +1,13 @@
 {
   "nota": "Guion de las voces de Gemini (scripts/voces.mjs, docs/voces.md). Cambiar una voz, un estilo o un texto regenera solo esas líneas.",
   "modelo": "gemini-3.8-flash-tts",
-  "claves": ["GEMINI_API_KEY_2", "GEMINI_API_KEY_3", "GEMINI_API_KEY_4"],
+  "claves": [
+    "GEMINI_API_KEY_2",
+    "GEMINI_API_KEY_3",
+    "GEMINI_API_KEY_4",
+    "GEMINI_API_KEY",
+    "GEMINI_API_KEY_5"
+  ],
   "grupos": {
     "prologo": {},
     "cine": {
