@@ -53,7 +53,7 @@
     "@angular/cli": "^22.2.0",
     "@angular/compiler-cli": "^22.2.1",
     "@eslint/js": "^10.0.1",
-    "@types/jasmine": "~6.0.0",
+    "@types/jasmine": "~7.0.0",
     "angular-eslint": "22.5.0",
     "autoprefixer": "^10.6.1",
     "axe-core": "^4.13.0",
