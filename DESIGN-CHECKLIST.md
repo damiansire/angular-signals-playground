@@ -223,7 +223,7 @@ puede alcanzar" son dos cosas distintas y hay que chequear las dos.
       ESCENA, no el papel: medir contra el píxel real (#c3bdb1 en el peor caso). Los rótulos del
       desafío ("Desafío · tocá el código", "desfasado") daban 4.7:1 contra el token y 2 a 3.9:1
       contra la escena; el borde del verbo del desafío, 1.1:1.
-- [ ] Gate de contraste sobre el píxel compuesto: en los 40 sub-niveles a 1440 y 375, cada texto
+- [ ] Gate de contraste sobre el píxel compuesto: en los 42 sub-niveles a 1440 y 375, cada texto
       de la card activa contra la escena real, capturando con el texto y sin él (texto
       transparente, animaciones pausadas): fondo = mediana sin texto, texto = el píxel que más se
       separa (p97). Pasa con 0 textos por debajo de 3:1; lo que queda entre 3 y 4.5 es deuda de
@@ -340,7 +340,7 @@ puede alcanzar" son dos cosas distintas y hay que chequear las dos.
       ("textCont|ent", "'#|count'").
       Un identificador de 24 letras o más (el `provideZoneChangeDetection()` de 11/1) no entra
       entero en la columna angosta y se partía igual: ese se corta en las jorobas del camelCase.
-      Medirlo con un `Range` carácter por carácter en los 40 sub-niveles: ningún salto de renglón
+      Medirlo con un `Range` carácter por carácter en los 42 sub-niveles: ningún salto de renglón
       cae entre dos caracteres de un mismo token, salvo en una joroba.
       Todo código embebido con `overflow-x: auto`
       (el `<pre>` de 0/4, el `<code>` de los botones de 0/2) envuelve en vez de scrollear: su scroll
@@ -349,7 +349,7 @@ puede alcanzar" son dos cosas distintas y hay que chequear las dos.
       0/1) no envuelve a propósito: su ancho mínimo es el renglón entero y la fila lo baja entero.
       Medir `scrollWidth > clientWidth` de todo lo que tenga overflow dentro de la card, no solo
       contra la card (los `sr-only` son falsos positivos).
-      Medir el ancho del renglón de código en los 40 sub-niveles a 1001, 820, 600, 500 y 375 px, y
+      Medir el ancho del renglón de código en los 42 sub-niveles a 1001, 820, 600, 500 y 375 px, y
       el `scrollHeight` de la card antes y después (un arreglo de ancho no puede empujar
       sub-niveles fuera de la pantalla: correr el contenido para despejar la espina sacaba el
       desafío de 8/2 de la vista a 820 px).
@@ -422,9 +422,9 @@ puede alcanzar" son dos cosas distintas y hay que chequear las dos.
 - [ ] Agrandar la mascota del mapa corre el globo a la izquierda, contra el nombre de los átomos de
       abajo. Se mide texto contra texto en las 12 paradas, a 1440×860 y 1280×720.
 
-## Cierre del sub-nivel (el desafío manipulable, los 40)
+## Cierre del sub-nivel (el desafío manipulable, los 42)
 
-Los 40 sub-niveles terminan con el mismo gesto: un bloque de código con una
+Los 42 sub-niveles terminan con el mismo gesto: un bloque de código con una
 parte que se mueve, las lecturas del sistema y el verbo que lo acciona. Con esa
 cantidad, la uniformidad no se sostiene con buena voluntad: la forma está fijada
 en `SHAPE` (`libs/manipulable-challenge.ts`) y la verifica `malformed()` en cada
@@ -461,6 +461,13 @@ posición de la perilla. Estos ítems son los defectos que YA aparecieron.
       card entera apretaba todos los demos, y correr los bloques lo que ocupaba la espina grande
       sacó de la vista el desafío de 8/2 a 820 px. Medido contra controles Y texto a 1001, 820 y
       768 px, con el `scrollHeight` de la card antes y después.
+
+- [ ] (2026-11-18) Un formulario de una pantalla no reserva un renglón de error por campo si eso
+      deja su botón contra el desafío: en 7/6 el botón quedaba a 4 px. El error comparte fila con lo
+      que ya está debajo del campo (los atajos del canal, el botón de enviar).
+- [ ] (2026-11-18) Lo que el sistema rechaza se ve en el aparato y dura lo que tarda en leerse: en
+      7/6 una sacudida de 320 ms no alcanzaba para notar que `submit()` retuvo el envío. Ahora la vía
+      dice "retenida", y el pulso que falla vuelve a la antena en lugar de desaparecer.
 
 ## Lo que la app HACE, no lo que dice
 
@@ -1571,7 +1578,7 @@ Del minijuego de operadores (2026-11-08):
       etiqueta no se parte en dos renglones: si no entra, se parte la fila (`flex-wrap`), como
       "Lista internacional" del capítulo 5.
 - [ ] Cada página del viaje tiene su línea al llegar y otra al resolver (`guion-del-viaje.ts`, con
-      spec: las 33 páginas, las reglas del guion y dos naves distintas por página, porque es una
+      spec: las 35 páginas, las reglas del guion y dos naves distintas por página, porque es una
       charla). Las naves miran lo que se toca, una se entera con un respingo, festejan lo resuelto
       y se van volando antes de pasar de página; tocarlas las sacude, como en el prólogo.
 - [ ] Nombre y retrato dicen la misma nave: el color de cada voz es el tono de su casco
@@ -1596,7 +1603,7 @@ Del minijuego de operadores (2026-11-08):
 - [ ] La pista de Angie se ve: arranca invisible y la revela la entrada del sub-nivel (`.warp`), que
       en la hoja no corre, y en el viaje no aparecía nunca. Aparece cuando la página ya asentó:
       mientras entra deslizándose es el bloque contenedor de su `fixed`, y flotaba en el medio.
-- [ ] La hoja entra sin scroll a 1440×900 en las 33 páginas, medido con input real página por
+- [ ] La hoja entra sin scroll a 1440×900 en las 35 páginas, medido con input real página por
       página (`scrollHeight - clientHeight` de la hoja y el borde de abajo de la pantalla contra el
       de arriba de la barra de diálogo). El título y la tripulación comparten una franja: con las
       naves en una franja propia arriba del título, 4 de cada 5 páginas pedían scroll. Lo que más

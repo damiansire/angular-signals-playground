@@ -1,6 +1,6 @@
 # Recorrido: de la colina al epílogo
 
-La historia de punta a punta, etapa por etapa, con cada uno de los 40 desafíos ubicados. El canon
+La historia de punta a punta, etapa por etapa, con cada uno de los 42 desafíos ubicados. El canon
 (quién es quién y el bucle) está en el [README](./README.md); lo que falta decidir, en
 [pendientes](./pendientes.md).
 
@@ -25,19 +25,19 @@ sub-nivel, contando el sub-nivel desde 1.
 
 ## Mapa
 
-| Etapa                    | Qué pasa                                                                                                                                              | Desafíos       |
-| ------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------- | -------------- |
+| Etapa                    | Qué pasa                                                                                                                                                   | Desafíos       |
+| ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------- |
 | La colina                | Una radio desde el sol: piensa "Así que… Ellos ya están aquí…", el sol dice "Esto es demasiado caótico.", contesta y decide "Así que… La hora ha llegado…" | —              |
-| Volver a casa            | Las cuatro naves y sus deseos. La exploradora, ya con los colores de Angie, los apura                                                                 | —              |
-| La anomalía              | Los atrae, y "¡Activen todos los operadores!" abre el minijuego. Funciona, pero el tirón es más rápido. La exploradora queda afuera                   | 3 nuevos       |
-| El manual de a bordo     | "¡Rápido, el manual de a bordo!": cinco páginas en la cabina                                                                                          | 0/1 a 0/5      |
-| Adentro                  | Caos y esquives, hasta "Esto es demasiado caótico."                                                                                                   | —              |
-| La voz y Angie           | El mismo intercambio de la colina, ahora desde la cabina. Llegan sus luces, "El caos es orden", el par de Tusi, el pacto, y Signal Space con su árbol | 0/6            |
-| Arco I · Aprender a leer | La caja que avisa · La molécula punteada · La baliza · Las coordenadas gemelas                                                                        | 1/1 a 4/2 (15) |
-| Arco II · La banda vieja | El mapa de rutas · La transmisión · El repetidor · Los pipes se traducen                                                                              | 5/1 a 8/4 (13) |
-| Arco III · La verdad     | La antena · La tormenta · Quien lee, avisa (penúltima etapa: la revelación)                                                                           | 9/1 a 11/1 (6) |
-| La salida                | Desafío final de signals y RxJS. La tripulación pone sus operadores, Angie pone signals                                                               | nuevo          |
-| Epílogo                  | La colina, todos juntos                                                                                                                               | —              |
+| Volver a casa            | Las cuatro naves y sus deseos. La exploradora, ya con los colores de Angie, los apura                                                                      | —              |
+| La anomalía              | Los atrae, y "¡Activen todos los operadores!" abre el minijuego. Funciona, pero el tirón es más rápido. La exploradora queda afuera                        | 3 nuevos       |
+| El manual de a bordo     | "¡Rápido, el manual de a bordo!": cinco páginas en la cabina                                                                                               | 0/1 a 0/5      |
+| Adentro                  | Caos y esquives, hasta "Esto es demasiado caótico."                                                                                                        | —              |
+| La voz y Angie           | El mismo intercambio de la colina, ahora desde la cabina. Llegan sus luces, "El caos es orden", el par de Tusi, el pacto, y Signal Space con su árbol      | 0/6            |
+| Arco I · Aprender a leer | La caja que avisa · La molécula punteada · La baliza · Las coordenadas gemelas                                                                             | 1/1 a 4/2 (15) |
+| Arco II · La banda vieja | El mapa de rutas · La transmisión · El repetidor · Los pipes se traducen                                                                                   | 5/1 a 8/4 (15) |
+| Arco III · La verdad     | La antena · La tormenta · Quien lee, avisa (penúltima etapa: la revelación)                                                                                | 9/1 a 11/1 (6) |
+| La salida                | Desafío final de signals y RxJS. La tripulación pone sus operadores, Angie pone signals                                                                    | nuevo          |
+| Epílogo                  | La colina, todos juntos                                                                                                                                    | —              |
 
 ## La apertura
 
@@ -79,7 +79,7 @@ Es el acto 1 hasta la orden del capitán: `anom-que-pasa`, `anom-sin-control`, `
 huecos cortos, uno por nave, para **completar el hueco** eligiendo el operador (J2).
 
 El minijuego reusa `ManipulableChallenge` (`src/app/libs/manipulable-challenge.ts`). El hueco es la
-perilla, las opciones son sus posiciones, y la primera es la rota, como en los 34 desafíos de perilla.
+perilla, las opciones son sus posiciones, y la primera es la rota, como en los 36 desafíos de perilla.
 Cada hueco entra en el `SHAPE` actual: una perilla, hasta dos lecturas y hasta seis renglones de
 código.
 
@@ -210,12 +210,12 @@ Angie enseña las reglas básicas, y la tripulación quiere entender el mundo pa
 
 La meta cambia: hay algo en la banda vieja, y la tripulación quiere comunicarse con la exploradora.
 
-| Etapa                 | Ley                                                     | Objeto                              | Giro                                                                                               | Pista                         | Desafíos                     |
-| --------------------- | ------------------------------------------------------- | ----------------------------------- | -------------------------------------------------------------------------------------------------- | ----------------------------- | ---------------------------- |
-| El mapa de rutas      | Podés pisar un derivado; su fuente lo reinicia.         | El mapa de rutas                    | Eligen a mano una ruta hacia el borde donde se oye la banda                                        | A Angie se le escapa "lentos" | Linked, 5/1 y 5/2            |
-| La transmisión        | Un dato que viaja tiene estado: cargando, error, valor. | El estado en viaje y los paquetes   | El pico del viaje: la primera transmisión de la exploradora, "…cap… ¿me… reciben?…" (`c6-reciben`) | Angie calla                   | Resource, 6/1 a 6/3          |
-| El repetidor          | Un aparato recibe por un borde, avisa por otro.         | El repetidor                        | Arman un aparato para hablar con la exploradora                                                    | Angie sabe la frecuencia      | Inputs y outputs, 7/1 a 7/4  |
-| Los pipes se traducen | Pantalla y streams también se leen como valores.        | Los pipes en la esclusa y el puente | "No los tiren. Se traducen." (`c8-traducen`): sus operadores vuelven a servir                      | —                             | Queries e interop, 8/1 a 8/4 |
+| Etapa                 | Ley                                                     | Objeto                              | Giro                                                                                               | Pista                         | Desafíos                                 |
+| --------------------- | ------------------------------------------------------- | ----------------------------------- | -------------------------------------------------------------------------------------------------- | ----------------------------- | ---------------------------------------- |
+| El mapa de rutas      | Podés pisar un derivado; su fuente lo reinicia.         | El mapa de rutas                    | Eligen a mano una ruta hacia el borde donde se oye la banda                                        | A Angie se le escapa "lentos" | Linked, 5/1 y 5/2                        |
+| La transmisión        | Un dato que viaja tiene estado: cargando, error, valor. | El estado en viaje y los paquetes   | El pico del viaje: la primera transmisión de la exploradora, "…cap… ¿me… reciben?…" (`c6-reciben`) | Angie calla                   | Resource, 6/1 a 6/3                      |
+| El repetidor          | Un aparato recibe por un borde, avisa por otro.         | El repetidor                        | Arman un aparato para hablar con la exploradora                                                    | Angie sabe la frecuencia      | Inputs, outputs y formularios, 7/1 a 7/6 |
+| Los pipes se traducen | Pantalla y streams también se leen como valores.        | Los pipes en la esclusa y el puente | "No los tiren. Se traducen." (`c8-traducen`): sus operadores vuelven a servir                      | —                             | Queries e interop, 8/1 a 8/4             |
 
 ### Arco III · La verdad
 
@@ -267,33 +267,33 @@ alcanzaban, ahora funcionan traducidos a signals. El sistema concreto está en
 La colina otra vez, ahora con todos. Helado de chocolate y las papas fritas que la exploradora
 pisó. Angie ya no mira el sol con melancolía. "Este mundo también es casa." (`c12-casa`).
 
-## Los 40 desafíos
+## Los 42 desafíos
 
-| Etapa                   | Desafíos de hoy                                                                                                                                                                                    |
-| ----------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| El manual de a bordo    | 0/1 El HTML es un árbol de nodos. · 0/2 El DOM está vivo. · 0/3 No todo cambio cuesta lo mismo. · 0/4 A mano, te olvidás un lugar. · 0/5 Zone.js revisa todo el árbol.                             |
-| La voz y Angie          | 0/6 El signal avisa quién lo lee.                                                                                                                                                                  |
-| La caja que avisa       | 1/1 Variables (repaso pre-signals) · 1/2 Qué es un signal · 1/3 Tipos de signal · 1/4 Leer un signal: el getter () · 1/5 Writable Signal · 1/6 Update Signal · 1/7 Read-only signals: asReadonly() |
-| La molécula punteada    | 2/1 Computed signals · 2/2 Dependencias dinámicas · 2/3 Perezoso y memoizado                                                                                                                       |
-| La baliza               | 3/1 Dependencias del effect · 3/2 Intervalo filtrado · 3/3 Limpieza con onCleanup                                                                                                                  |
-| Las coordenadas gemelas | 4/1 Igualdad por defecto (Object.is) · 4/2 Función equal custom                                                                                                                                    |
-| El mapa de rutas        | 5/1 linkedSignal: reinicio con la fuente · 5/2 linkedSignal: preservar si sigue válida                                                                                                             |
-| La transmisión          | 6/1 resource(): loader con Promise · 6/2 rxResource(): stream de RxJS · 6/3 httpResource(): pedir por URL                                                                                          |
-| El repetidor            | 7/1 input() y output() basados en signals · 7/2 model(): binding two-way con [(value)] · 7/3 input.required() y transform · 7/4 Formularios con signals                                            |
-| Los pipes se traducen   | 8/1 viewChild() como signal · 8/2 toSignal() · toObservable() · untracked() · 8/3 viewChildren() como signal · 8/4 contentChild() y contentChildren()                                              |
-| La antena               | 9/1 afterRenderEffect(): medir el DOM · 9/2 effect((onCleanup) => …)                                                                                                                               |
-| La tormenta             | 10/1 Debounce con RxJS · 10/2 Debounce a mano (effect + onCleanup) · 10/3 debounced() nativo                                                                                                       |
-| Quien lee, avisa        | 11/1 Change detection sin Zone.js                                                                                                                                                                  |
+| Etapa                   | Desafíos de hoy                                                                                                                                                                                                   |
+| ----------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| El manual de a bordo    | 0/1 El HTML es un árbol de nodos. · 0/2 El DOM está vivo. · 0/3 No todo cambio cuesta lo mismo. · 0/4 A mano, te olvidás un lugar. · 0/5 Zone.js revisa todo el árbol.                                            |
+| La voz y Angie          | 0/6 El signal avisa quién lo lee.                                                                                                                                                                                 |
+| La caja que avisa       | 1/1 Variables (repaso pre-signals) · 1/2 Qué es un signal · 1/3 Tipos de signal · 1/4 Leer un signal: el getter () · 1/5 Writable Signal · 1/6 Update Signal · 1/7 Read-only signals: asReadonly()                |
+| La molécula punteada    | 2/1 Computed signals · 2/2 Dependencias dinámicas · 2/3 Perezoso y memoizado                                                                                                                                      |
+| La baliza               | 3/1 Dependencias del effect · 3/2 Intervalo filtrado · 3/3 Limpieza con onCleanup                                                                                                                                 |
+| Las coordenadas gemelas | 4/1 Igualdad por defecto (Object.is) · 4/2 Función equal custom                                                                                                                                                   |
+| El mapa de rutas        | 5/1 linkedSignal: reinicio con la fuente · 5/2 linkedSignal: preservar si sigue válida                                                                                                                            |
+| La transmisión          | 6/1 resource(): loader con Promise · 6/2 rxResource(): stream de RxJS · 6/3 httpResource(): pedir por URL                                                                                                         |
+| El repetidor            | 7/1 input() y output() basados en signals · 7/2 model(): binding two-way con [(value)] · 7/3 input.required() y transform · 7/4 Formularios con signals · 7/5 Reglas que reaccionan · 7/6 Transmitir con submit() |
+| Los pipes se traducen   | 8/1 viewChild() como signal · 8/2 toSignal() · toObservable() · untracked() · 8/3 viewChildren() como signal · 8/4 contentChild() y contentChildren()                                                             |
+| La antena               | 9/1 afterRenderEffect(): medir el DOM · 9/2 effect((onCleanup) => …)                                                                                                                                              |
+| La tormenta             | 10/1 Debounce con RxJS · 10/2 Debounce a mano (effect + onCleanup) · 10/3 debounced() nativo                                                                                                                      |
+| Quien lee, avisa        | 11/1 Change detection sin Zone.js                                                                                                                                                                                 |
 
-Son 6 + 15 + 13 + 6 = 40. Las cinco leyes del manual y la de Signal Space llevan el desafío adentro
-de su página, sobre el mismo código que la demo; los otros 34 son de perilla (`*-systems.ts`). Los desafíos que quizá
+Son 6 + 15 + 15 + 6 = 42. Las cinco leyes del manual y la de Signal Space llevan el desafío adentro
+de su página, sobre el mismo código que la demo; los otros 36 son de perilla (`*-systems.ts`). Los desafíos que quizá
 conviene mover o juntar están en [pendientes](./pendientes.md).
 
 ## Lo que se reusa y lo que se rehace
 
 | Se reusa                                                                      | Por qué                                                                  |
 | ----------------------------------------------------------------------------- | ------------------------------------------------------------------------ |
-| `libs/manipulable-challenge.ts`, los 11 `*-systems.ts` y su barrido de los 34 | Son la lógica de cada desafío, ya probada como función pura              |
+| `libs/manipulable-challenge.ts`, los 11 `*-systems.ts` y su barrido de los 36 | Son la lógica de cada desafío, ya probada como función pura              |
 | `libs/cd-tree.ts`                                                             | El árbol de las páginas 5 y 6 y de Quien lee, avisa                      |
 | `libs/partida.ts`                                                             | El guardado, con una versión nueva                                       |
 | `libs/sonido.ts`, `libs/resorte.ts`, `libs/muelle.ts`, `libs/rastros.ts`      | El sonido, los resortes, el reloj de muelles y los rastros de los toques |
@@ -304,6 +304,6 @@ conviene mover o juntar están en [pendientes](./pendientes.md).
 | Se rehace                                    | Por qué                                         |
 | -------------------------------------------- | ----------------------------------------------- |
 | `molecule-engine.ts` (el recorrido molécula) | Es la UI de los niveles                         |
-| Las 40 pantallas de los desafíos             | Pasan a ser aparatos del mundo                  |
+| Las 42 pantallas de los desafíos             | Pasan a ser aparatos del mundo                  |
 | `cinematicas/escenas/`                       | Las cinemáticas por capítulo pasan a ser etapas |
 | La bitácora, `/cine/<n>` y la URL `?nivel=`  | Están atadas a los números de capítulo          |
