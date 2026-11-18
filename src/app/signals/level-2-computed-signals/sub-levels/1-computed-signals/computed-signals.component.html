@@ -9,23 +9,11 @@
     <div class="lab__acciones">
       <div class="lab__campo">
         <label class="lab__rotulo" for="firstName">Name:</label>
-        <input
-          id="firstName"
-          type="text"
-          [value]="firstName()"
-          (input)="setFirstName($event.target)"
-          placeholder="Name"
-        />
+        <input id="firstName" type="text" [formField]="firstNameField" placeholder="Name" />
       </div>
       <div class="lab__campo">
         <label class="lab__rotulo" for="surname">Surname:</label>
-        <input
-          id="surname"
-          type="text"
-          [value]="surname()"
-          (input)="setLastName($event.target)"
-          placeholder="Surname"
-        />
+        <input id="surname" type="text" [formField]="surnameField" placeholder="Surname" />
       </div>
     </div>
     <app-circuito #circuito [nodos]="nodos()" [enlaces]="enlaces" (tocado)="escribirDerivado()" />

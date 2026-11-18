@@ -23,7 +23,7 @@
       type="text"
       class="w-full border border-gray-300 rounded px-3 py-2 mb-4 focus:outline-none focus:ring-2 focus:ring-teal-400"
       placeholder="Escribí tu nombre…"
-      (input)="onInput($any($event.target).value)"
+      [formField]="typedField"
     />
 
     <p class="text-sm text-gray-600 mb-4">

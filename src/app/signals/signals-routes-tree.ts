@@ -233,7 +233,6 @@ export const signalsRoutesTree: RouteItem[] = [
       {
         path: '4',
         title: 'Formularios con signals',
-        // Diferido: @angular/forms/signals pesa, y solo lo paga quien llega a este sub-nivel.
         loadComponent: () =>
           import('./level-7-signal-io/sub-levels/4-signal-forms/signal-forms.component').then(
             (m) => ({ component: m.SignalFormsComponent }),

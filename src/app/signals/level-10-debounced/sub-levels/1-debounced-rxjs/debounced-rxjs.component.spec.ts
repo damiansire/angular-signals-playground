@@ -22,8 +22,15 @@ describe('DebouncedRxjsComponent', () => {
     expect(component).toBeTruthy();
   });
 
+  it('escribir en el input actualiza la consulta', () => {
+    const input = fixture.nativeElement.querySelector('input') as HTMLInputElement;
+    input.value = 'ho';
+    input.dispatchEvent(new Event('input'));
+    expect(component.query()).toBe('ho');
+  });
+
   it('el valor inmediato cambia al instante', () => {
-    component.setQuery('ho');
+    component.query.set('ho');
     expect(component.query()).toBe('ho');
   });
 
@@ -47,7 +54,7 @@ describe('DebouncedRxjsComponent', () => {
   }
 
   it('debounced refleja el valor recién ~400ms después de la última tecla', async () => {
-    component.setQuery('ho');
+    component.query.set('ho');
     flushDebounce();
     // Sincrónico, sin reloj de por medio: acaba de escribirse, no puede haber emitido.
     expect(component.debounced()).toBe('');
@@ -57,11 +64,11 @@ describe('DebouncedRxjsComponent', () => {
   });
 
   it('una tecla dentro de la ventana reinicia el debounce: solo emite el último', async () => {
-    component.setQuery('h');
+    component.query.set('h');
     flushDebounce();
 
     const dentroDeLaVentana = await dormir(200);
-    component.setQuery('ho');
+    component.query.set('ho');
     const reinicio = performance.now();
     flushDebounce(); // reinicia la ventana con 'ho'
 

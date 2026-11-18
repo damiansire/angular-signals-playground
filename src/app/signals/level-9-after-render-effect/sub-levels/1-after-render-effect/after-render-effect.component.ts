@@ -7,6 +7,7 @@ import {
   signal,
   viewChild,
 } from '@angular/core';
+import { form, FormField } from '@angular/forms/signals';
 import { CodeLine } from '../../../../components-atom/component-atom.interface';
 import { ColumnAndCodeLayoutComponent } from '../../../../layouts/column-and-code-layout/column-and-code-layout.component';
 import { ManipulableSystemComponent } from '../../../../components-atom/manipulable-system/manipulable-system.component';
@@ -17,11 +18,12 @@ import { AFTER_RENDER_SYSTEM } from '../../after-render-systems';
   templateUrl: './after-render-effect.component.html',
   styleUrl: './after-render-effect.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ManipulableSystemComponent, ColumnAndCodeLayoutComponent],
+  imports: [ManipulableSystemComponent, ColumnAndCodeLayoutComponent, FormField],
 })
 export class AfterRenderEffectComponent {
   readonly closingSystem = AFTER_RENDER_SYSTEM;
   readonly text = signal('Escribí algo y miro su ancho');
+  readonly textField = form(this.text);
   private readonly measured = viewChild<ElementRef<HTMLElement>>('measured');
 
   // Ancho REAL del texto ya renderizado: solo el DOM lo sabe, y un effect lo leería un render tarde.
@@ -35,10 +37,6 @@ export class AfterRenderEffectComponent {
         this.widthPx.set(Math.round(element.getBoundingClientRect().width));
       }
     });
-  }
-
-  setText(value: string) {
-    this.text.set(value);
   }
 
   readonly lines = computed<CodeLine[]>(() => [

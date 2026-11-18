@@ -1,11 +1,5 @@
-import {
-  Component,
-  ElementRef,
-  viewChild,
-  computed,
-  signal,
-  ChangeDetectionStrategy,
-} from '@angular/core';
+import { Component, viewChild, computed, signal, ChangeDetectionStrategy } from '@angular/core';
+import { form, FormField, required } from '@angular/forms/signals';
 import { CodeLine } from '../../../../components-atom/component-atom.interface';
 import { ColumnAndCodeLayoutComponent } from '../../../../layouts/column-and-code-layout/column-and-code-layout.component';
 import { ManipulableSystemComponent } from '../../../../components-atom/manipulable-system/manipulable-system.component';
@@ -18,14 +12,16 @@ import { SET_SIGNAL_SYSTEM } from '../../signals-systems';
   templateUrl: './writable-signals.component.html',
   styleUrl: './writable-signals.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ManipulableSystemComponent, ColumnAndCodeLayoutComponent, CircuitoComponent],
+  imports: [ManipulableSystemComponent, ColumnAndCodeLayoutComponent, CircuitoComponent, FormField],
 })
 export class WritableSignalsComponent {
   readonly closingSystem = SET_SIGNAL_SYSTEM;
   readonly count = signal(0);
-  // viewChild() como signal: se resuelve tras inicializar la vista y es el estándar del repo
-  // (en vez del decorador @ViewChild + ElementRef).
-  readonly signalSetInput = viewChild.required<ElementRef<HTMLInputElement>>('signalSetInput');
+  // A cleared number input writes null, so the draft cannot be a plain number.
+  readonly draft = signal<number | null>(null);
+  readonly draftField = form(this.draft, (value) => {
+    required(value);
+  });
   /** Se escribió algo que no es un número. Antes el valor inválido se descartaba en silencio. */
   readonly rejected = signal(false);
 
@@ -51,10 +47,9 @@ export class WritableSignalsComponent {
     { line: '}', active: false },
   ]);
   setValue() {
-    const raw = this.signalSetInput().nativeElement.value.trim();
-    const inputValue = Number(raw);
-    // `Number` en vez de `parseInt`: parseInt("12abc") daba 12 y el demo aceptaba basura a medias.
-    if (raw === '' || !Number.isFinite(inputValue)) {
+    const inputValue = this.draft();
+    // invalid() also covers text the browser cannot parse ("1e"), which never reaches the draft.
+    if (inputValue === null || this.draftField().invalid()) {
       this.rejected.set(true);
       return;
     }

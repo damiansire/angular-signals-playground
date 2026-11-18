@@ -28,7 +28,23 @@ describe('ViewChildComponent', () => {
   });
 
   it('refleja el texto leído del campo', () => {
-    component.onInput('Ada');
+    const input = component.nameField()!.nativeElement;
+    input.value = 'Ada';
+    input.dispatchEvent(new Event('input'));
     expect(component.typed()).toBe('Ada');
+  });
+
+  it('Limpiar vacía el campo y el texto leído', () => {
+    const input = component.nameField()!.nativeElement;
+    input.value = 'Ada';
+    input.dispatchEvent(new Event('input'));
+    // FormField writes to the DOM only when the bound value differs from the last render.
+    fixture.detectChanges();
+
+    component.clearField();
+    fixture.detectChanges();
+
+    expect(component.typed()).toBe('');
+    expect(input.value).toBe('');
   });
 });

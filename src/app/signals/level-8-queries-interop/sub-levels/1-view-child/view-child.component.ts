@@ -6,6 +6,7 @@ import {
   signal,
   viewChild,
 } from '@angular/core';
+import { form, FormField } from '@angular/forms/signals';
 import { CodeLine } from '../../../../components-atom/component-atom.interface';
 import { ColumnAndCodeLayoutComponent } from '../../../../layouts/column-and-code-layout/column-and-code-layout.component';
 import { ManipulableSystemComponent } from '../../../../components-atom/manipulable-system/manipulable-system.component';
@@ -16,7 +17,7 @@ import { VIEW_CHILD_SYSTEM } from '../../queries-systems';
   templateUrl: './view-child.component.html',
   styleUrl: './view-child.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ManipulableSystemComponent, ColumnAndCodeLayoutComponent],
+  imports: [ManipulableSystemComponent, ColumnAndCodeLayoutComponent, FormField],
 })
 export class ViewChildComponent {
   readonly closingSystem = VIEW_CHILD_SYSTEM;
@@ -24,27 +25,20 @@ export class ViewChildComponent {
   readonly nameField = viewChild<ElementRef<HTMLInputElement>>('nameField');
 
   readonly typed = signal('');
+  readonly typedField = form(this.typed);
   readonly resolved = computed(() => this.nameField() !== undefined);
-
-  onInput(value: string) {
-    this.typed.set(value);
-  }
 
   focusField() {
     this.nameField()?.nativeElement.focus();
   }
 
   clearField() {
-    const field = this.nameField()?.nativeElement;
-    if (field) {
-      field.value = '';
-      this.typed.set('');
-      field.focus();
-    }
+    this.typed.set('');
+    this.focusField();
   }
 
   readonly lines = computed<CodeLine[]>(() => [
-    { line: '<input #nameField (input)="onInput($event)" />', active: false },
+    { line: '<input #nameField [formField]="typedField" />', active: false },
     { line: '', active: false },
     { line: 'nameField = viewChild<ElementRef>("nameField");', active: true },
     { line: '', active: false },

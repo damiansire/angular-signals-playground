@@ -1,4 +1,5 @@
 import { Component, ChangeDetectionStrategy, computed, effect, signal } from '@angular/core';
+import { form, FormField } from '@angular/forms/signals';
 import { CodeLine } from '../../../../components-atom/component-atom.interface';
 import { ColumnAndCodeLayoutComponent } from '../../../../layouts/column-and-code-layout/column-and-code-layout.component';
 import { ManipulableSystemComponent } from '../../../../components-atom/manipulable-system/manipulable-system.component';
@@ -9,11 +10,12 @@ import { DEBOUNCE_MANUAL_SYSTEM } from '../../debounce-systems';
   templateUrl: './debounced-manual.component.html',
   styleUrl: './debounced-manual.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ManipulableSystemComponent, ColumnAndCodeLayoutComponent],
+  imports: [ManipulableSystemComponent, ColumnAndCodeLayoutComponent, FormField],
 })
 export class DebouncedManualComponent {
   readonly closingSystem = DEBOUNCE_MANUAL_SYSTEM;
   readonly query = signal('');
+  readonly queryField = form(this.query);
   readonly debounced = signal('');
 
   constructor() {
@@ -23,10 +25,6 @@ export class DebouncedManualComponent {
       // Cada tecla cancela el timer anterior antes de arrancar el nuevo.
       onCleanup(() => clearTimeout(id));
     });
-  }
-
-  setQuery(value: string) {
-    this.query.set(value);
   }
 
   readonly lines = computed<CodeLine[]>(() => [

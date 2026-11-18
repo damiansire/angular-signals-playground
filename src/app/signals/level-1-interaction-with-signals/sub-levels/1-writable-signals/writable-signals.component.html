@@ -11,8 +11,8 @@
       <label class="sr-only" for="signalSetInput">Número a escribir en el signal</label>
       <div class="lab__campo">
         <input
-          #signalSetInput
           id="signalSetInput"
+          [formField]="draftField"
           type="number"
           placeholder="Escribí un número"
           [attr.aria-invalid]="rejected() ? 'true' : null"

@@ -6,6 +6,7 @@ import {
   linkedSignal,
   signal,
 } from '@angular/core';
+import { form, FormField } from '@angular/forms/signals';
 import { CodeLine } from '../../../../components-atom/component-atom.interface';
 import { ColumnAndCodeLayoutComponent } from '../../../../layouts/column-and-code-layout/column-and-code-layout.component';
 import { ManipulableSystemComponent } from '../../../../components-atom/manipulable-system/manipulable-system.component';
@@ -29,12 +30,13 @@ function searchesWhenReading<T>(source: () => T) {
   templateUrl: './debounced-nativo.component.html',
   styleUrl: './debounced-nativo.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ManipulableSystemComponent, ColumnAndCodeLayoutComponent],
+  imports: [ManipulableSystemComponent, ColumnAndCodeLayoutComponent, FormField],
 })
 export class DebouncedNativoComponent {
   readonly closingSystem = DEBOUNCED_NATIVE_SYSTEM;
   readonly waitMs = 400;
   readonly query = signal('');
+  readonly queryField = form(this.query);
 
   // Es un Resource, no un signal: mientras espera queda en 'loading' y `.value()` sostiene el
   // último valor estable en vez de caer a undefined.
@@ -42,10 +44,6 @@ export class DebouncedNativoComponent {
 
   readonly rawSearches = searchesWhenReading(this.query);
   readonly debouncedSearches = searchesWhenReading(() => this.debouncedQuery.value());
-
-  setQuery(value: string) {
-    this.query.set(value);
-  }
 
   readonly lines = computed<CodeLine[]>(() => [
     { line: '// @experimental 22.0', active: false },

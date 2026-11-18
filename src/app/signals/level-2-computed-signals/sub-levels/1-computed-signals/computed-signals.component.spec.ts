@@ -28,20 +28,6 @@ describe('ComputedSignalsComponent', () => {
     expect(text).toContain('Hola, Damian Sire!');
   });
 
-  it('setFirstName/setLastName recalculan el computed fullName', () => {
-    const first = document.createElement('input');
-    first.value = 'Ada';
-    const last = document.createElement('input');
-    last.value = 'Lovelace';
-    component.setFirstName(first);
-    component.setLastName(last);
-    fixture.detectChanges();
-
-    expect(component.fullName()).toBe('Ada Lovelace');
-    const text = (fixture.nativeElement as HTMLElement).textContent ?? '';
-    expect(text).toContain('Hola, Ada Lovelace!');
-  });
-
   it('escribir en los inputs actualiza el saludo en pantalla', () => {
     const inputs = fixture.nativeElement.querySelectorAll('input');
     (inputs[0] as HTMLInputElement).value = 'Grace';
@@ -51,6 +37,8 @@ describe('ComputedSignalsComponent', () => {
     fixture.detectChanges();
 
     expect(component.fullName()).toBe('Grace Hopper');
+    const text = (fixture.nativeElement as HTMLElement).textContent ?? '';
+    expect(text).toContain('Hola, Grace Hopper!');
   });
 
   it('cada rótulo está asociado a su input', () => {
@@ -86,10 +74,5 @@ describe('ComputedSignalsComponent', () => {
     fixture.detectChanges();
     const inputs = fixture.nativeElement.querySelectorAll('input');
     expect((inputs[1] as HTMLInputElement).value).toBe('Lovelace');
-  });
-
-  it('setFirstName con target nulo deja el nombre vacio', () => {
-    component.setFirstName(null);
-    expect(component.fullName()).toBe(' Sire');
   });
 });

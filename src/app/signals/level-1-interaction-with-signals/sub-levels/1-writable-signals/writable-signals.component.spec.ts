@@ -18,6 +18,12 @@ describe('WritableSignalsComponent', () => {
     fixture.detectChanges();
   });
 
+  function escribir(valor: string) {
+    const input = fixture.nativeElement.querySelector('#signalSetInput') as HTMLInputElement;
+    input.value = valor;
+    input.dispatchEvent(new Event('input'));
+  }
+
   it('should create', () => {
     expect(component).toBeTruthy();
   });
@@ -29,7 +35,7 @@ describe('WritableSignalsComponent', () => {
   });
 
   it('setValue toma el numero del input y lo asigna al signal', () => {
-    component.signalSetInput().nativeElement.value = '42';
+    escribir('42');
     component.setValue();
     fixture.detectChanges();
     expect(component.count()).toBe(42);
@@ -39,7 +45,7 @@ describe('WritableSignalsComponent', () => {
 
   it('setValue rechaza lo que no es un numero y lo avisa en pantalla', () => {
     component.count.set(7);
-    component.signalSetInput().nativeElement.value = 'abc';
+    escribir('abc');
     component.setValue();
     fixture.detectChanges();
     expect(component.count()).toBe(7);
@@ -50,17 +56,17 @@ describe('WritableSignalsComponent', () => {
 
   it('setValue rechaza el input vacio en vez de escribir NaN', () => {
     component.count.set(7);
-    component.signalSetInput().nativeElement.value = '';
+    escribir('');
     component.setValue();
     expect(component.count()).toBe(7);
     expect(component.rejected()).toBeTrue();
   });
 
   it('escribir de nuevo borra el aviso de rechazo', () => {
-    component.signalSetInput().nativeElement.value = '';
+    escribir('');
     component.setValue();
     expect(component.rejected()).toBeTrue();
-    component.clearRejected();
+    escribir('3');
     expect(component.rejected()).toBeFalse();
   });
 });

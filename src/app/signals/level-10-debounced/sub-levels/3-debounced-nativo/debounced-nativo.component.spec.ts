@@ -24,7 +24,9 @@ describe('DebouncedNativoComponent', () => {
 
   /** Una tecla tal como pasa en pantalla: el input cambia y la vista se vuelve a pintar. */
   function tipear(value: string) {
-    component.setQuery(value);
+    const input = fixture.nativeElement.querySelector('input') as HTMLInputElement;
+    input.value = value;
+    input.dispatchEvent(new Event('input'));
     fixture.detectChanges(); // corre el effect de debounced(): arranca (o reinicia) la espera
   }
 

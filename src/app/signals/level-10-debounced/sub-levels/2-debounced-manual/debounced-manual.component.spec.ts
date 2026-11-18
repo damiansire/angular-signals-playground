@@ -22,15 +22,22 @@ describe('DebouncedManualComponent', () => {
     expect(component).toBeTruthy();
   });
 
+  it('escribir en el input actualiza la consulta', () => {
+    const input = fixture.nativeElement.querySelector('input') as HTMLInputElement;
+    input.value = 'abc';
+    input.dispatchEvent(new Event('input'));
+    expect(component.query()).toBe('abc');
+  });
+
   it('el valor inmediato cambia al instante', () => {
-    component.setQuery('abc');
+    component.query.set('abc');
     expect(component.query()).toBe('abc');
   });
 
   it('debounced() no cambia hasta que pasan los 400ms', () => {
     jasmine.clock().install();
     try {
-      component.setQuery('a');
+      component.query.set('a');
       fixture.detectChanges(); // corre el effect -> programa el setTimeout(400)
       jasmine.clock().tick(399);
       expect(component.debounced()).toBe('');
@@ -44,10 +51,10 @@ describe('DebouncedManualComponent', () => {
   it('cada tecla cancela el timer anterior: solo pega el último valor', () => {
     jasmine.clock().install();
     try {
-      component.setQuery('a');
+      component.query.set('a');
       fixture.detectChanges();
       jasmine.clock().tick(200);
-      component.setQuery('ab');
+      component.query.set('ab');
       fixture.detectChanges(); // onCleanup limpia el timer de 'a' y programa el de 'ab'
       jasmine.clock().tick(200);
       // 'a' fue cancelado y 'ab' todavía no cumplió sus 400ms: sigue vacío.

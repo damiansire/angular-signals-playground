@@ -23,7 +23,9 @@ describe('AfterRenderEffectComponent', () => {
   });
 
   it('actualiza el texto a medir', () => {
-    component.setText('hola');
+    const input = fixture.nativeElement.querySelector('input') as HTMLInputElement;
+    input.value = 'hola';
+    input.dispatchEvent(new Event('input'));
     expect(component.text()).toBe('hola');
   });
 });
