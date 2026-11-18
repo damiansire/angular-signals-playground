@@ -1,0 +1,180 @@
+/* Prefixed: the journey embeds this page next to others, and a generic name would collide. */
+
+.rgl {
+  display: grid;
+  grid-template-columns: 8.5rem 16rem;
+  gap: 1.25rem;
+  align-items: start;
+}
+
+.rgl-aparato {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.rgl-torre {
+  width: 8rem;
+  height: auto;
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.rgl-mastil {
+  stroke: #2b2520;
+  stroke-width: 3;
+}
+
+.rgl-foco {
+  fill: #b9b2a6;
+  stroke: #2b2520;
+  stroke-width: 3;
+  transition: fill 200ms ease;
+}
+
+.rgl-onda {
+  stroke: #b9b2a6;
+  stroke-width: 3.5;
+  stroke-dasharray: 3 8;
+  transition: stroke 200ms ease;
+}
+
+.rgl-torre--al-aire .rgl-foco {
+  fill: #f59e0b;
+}
+
+.rgl-torre--al-aire .rgl-onda {
+  stroke: #d97706;
+  stroke-dasharray: none;
+  animation: rgl-emite var(--rgl-ciclo, 1.5s) ease-out infinite;
+  animation-delay: calc(var(--i) * var(--rgl-ciclo, 1.5s) / 3);
+}
+
+@keyframes rgl-emite {
+  0%,
+  100% {
+    opacity: 0.2;
+  }
+  35% {
+    opacity: 1;
+  }
+}
+
+.rgl-lectura {
+  font-size: 0.75rem;
+  white-space: nowrap;
+}
+
+.rgl-mandos {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.rgl-interruptor {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  font-size: 0.85rem;
+}
+
+.rgl-interruptor input {
+  width: 1.05rem;
+  height: 1.05rem;
+  accent-color: #d97706;
+}
+
+.rgl-campo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  transition: opacity 150ms ease;
+}
+
+.rgl-campo--apagado {
+  opacity: 0.7;
+}
+
+/* Reserves the tallest state, so showing the key never pushes the challenge below it. */
+.rgl-campo--clave {
+  min-height: 5.1rem;
+}
+
+.rgl-rotulo {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.75rem;
+}
+
+.rgl-valor {
+  font-weight: 700;
+  color: #92400e;
+}
+
+.rgl-dial {
+  width: 100%;
+  accent-color: #d97706;
+}
+
+.rgl-dial:disabled {
+  cursor: not-allowed;
+}
+
+.rgl-texto {
+  width: 100%;
+  padding: 0.35rem 0.6rem;
+  border: 2px solid #2b2520;
+  border-radius: 0.5rem;
+  background: #fffdf8;
+}
+
+.rgl-texto--mal {
+  border-color: #b91c1c;
+}
+
+.rgl-nota {
+  min-height: 1.1rem;
+  font-size: 0.75rem;
+  color: #6b5f50;
+}
+
+.rgl-nota--error {
+  color: #b91c1c;
+}
+
+.rgl-oculto {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 4.6rem;
+  border: 2px dashed #b9b2a6;
+  border-radius: 0.5rem;
+  font-size: 0.75rem;
+  color: #6b5f50;
+}
+
+@media (max-width: 760px) {
+  .rgl {
+    grid-template-columns: minmax(0, 1fr);
+    justify-items: center;
+  }
+
+  .rgl-mandos {
+    width: min(100%, 18rem);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rgl-torre--al-aire .rgl-onda {
+    animation: none;
+  }
+
+  .rgl-foco,
+  .rgl-onda,
+  .rgl-campo {
+    transition: none;
+  }
+}

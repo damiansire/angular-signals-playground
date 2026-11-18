@@ -1,0 +1,112 @@
+<app-column-and-code-layout
+  title="Transmitir con submit()"
+  [codeLines]="lines()"
+  concept="submit() retiene lo no verificado."
+>
+  <!-- No intro on purpose: the three stations light up in order while the signal crosses. -->
+  <section class="trs">
+    <form class="trs-campos" novalidate (submit)="enviar($event)">
+      <div class="trs-campo">
+        <label class="trs-rotulo" for="trs-canal"><code>canal</code></label>
+        <input
+          id="trs-canal"
+          class="trs-texto"
+          type="text"
+          autocomplete="off"
+          [class.trs-texto--mal]="transmision.canal().touched() && transmision.canal().invalid()"
+          [formField]="transmision.canal"
+        />
+        <div class="trs-fila">
+          <div class="trs-opciones">
+            @for (canal of canales; track canal) {
+              <button
+                type="button"
+                class="boton-tinta trs-opcion"
+                [disabled]="transmision().submitting()"
+                (click)="elegirCanal(canal)"
+              >
+                <code>{{ canal }}</code>
+              </button>
+            }
+          </div>
+          <p class="trs-error">
+            @if (transmision.canal().touched()) {
+              @for (error of transmision.canal().errors(); track error.kind) {
+                <span>{{ error.message }}</span>
+              }
+            }
+          </p>
+        </div>
+      </div>
+
+      <div class="trs-campo">
+        <label class="trs-rotulo" for="trs-mensaje"><code>mensaje</code></label>
+        <input
+          id="trs-mensaje"
+          class="trs-texto"
+          type="text"
+          autocomplete="off"
+          [class.trs-texto--mal]="
+            transmision.mensaje().touched() && transmision.mensaje().invalid()
+          "
+          [formField]="transmision.mensaje"
+        />
+        <div class="trs-fila trs-fila--envio">
+          <button
+            type="submit"
+            class="boton-tinta trs-enviar"
+            [disabled]="transmision().submitting()"
+          >
+            <code>submit()</code>
+          </button>
+          <p class="trs-error">
+            @if (transmision.mensaje().touched()) {
+              @for (error of transmision.mensaje().errors(); track error.kind) {
+                <span>{{ error.message }}</span>
+              }
+            }
+          </p>
+        </div>
+      </div>
+    </form>
+
+    <div class="trs-camino" role="status">
+      <ol class="trs-etapas">
+        <li class="trs-etapa" [class.trs-etapa--viva]="etapa() === 'debounce'">
+          <code>debounce</code>
+        </li>
+        <li class="trs-etapa" [class.trs-etapa--viva]="etapa() === 'pending'">
+          <code>pending</code>
+        </li>
+        <li class="trs-etapa" [class.trs-etapa--viva]="etapa() === 'submitting'">
+          <code>submitting</code>
+        </li>
+      </ol>
+
+      <div class="trs-espacio" [class.trs-espacio--rebote]="rebote()">
+        <span class="trs-antena"></span>
+        <span class="trs-via"></span>
+        @if (etapa() === 'submitting') {
+          <span
+            class="trs-pulso"
+            [class.trs-pulso--rebota]="vaARebotar()"
+            [style.animation-duration.ms]="cruceMs"
+          ></span>
+        }
+        <span class="trs-destino"></span>
+        <!-- Keyed by the attempt: a new element is what lets the notice play again. -->
+        @for (intento of retenciones(); track intento) {
+          <code class="trs-retenida">retenida</code>
+        }
+      </div>
+
+      <ul class="trs-enviados" aria-label="Transmisiones enviadas">
+        @for (mensaje of enviados(); track $index) {
+          <li class="trs-enviado">{{ mensaje }}</li>
+        }
+      </ul>
+    </div>
+  </section>
+</app-column-and-code-layout>
+
+<app-manipulable-system [system]="closingSystem" />

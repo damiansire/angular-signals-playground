@@ -4,7 +4,8 @@ import { ManipulableChallenge, SystemState } from '../../libs/manipulable-challe
  * Sistemas del nivel 7: los bordes del componente. Los tres primeros atacan el mismo malentendido
  * desde lugares distintos, que un input ahora es un signal y no un campo que alguien te rellena
  * antes de arrancar. El cuarto lo lleva al borde por donde escribe el usuario: la validez de un
- * formulario tampoco es un dato que se calcula una vez, se deriva del modelo.
+ * formulario tampoco es un dato que se calcula una vez, se deriva del modelo. Los dos últimos
+ * siguen en ese borde: una regla que lee el modelo una sola vez, y un envío que no espera.
  */
 
 const K = 'perilla';
@@ -101,4 +102,52 @@ export const SIGNAL_FORMS_SYSTEM: ManipulableChallenge = {
   // Nadie vuelve a validar hasta el próximo envío: cada edición queda con la validez anterior.
   settle: (s: SystemState) => ({ sinValidar: s.knobs[K] === 1 ? 0 : s.actions }),
   healthy: (s: SystemState) => s.actions > 0 && s.values['sinValidar'] === 0,
+};
+
+/**
+ * 7/5 · A rule that closes over a value read while building the form never hears about it again.
+ * It compiles and works on the first render, which is what makes the trap believable.
+ */
+export const SIGNAL_RULES_SYSTEM: ManipulableChallenge = {
+  knobs: knob('leer el modelo una vez o dentro de la regla'),
+  gauges: [{ id: 'reglaVieja', label: 'regla vieja' }],
+  action: 'cambiar el modo',
+  start: { reglaVieja: 0 },
+  code: (k) =>
+    k[K] === 1
+      ? [
+          { text: 'readonly f = form(this.modelo, (r) => {' },
+          { text: '  disabled(r.frecuencia, (c) => c.valueOf(r.automatica));', knob: K },
+          { text: '});' },
+        ]
+      : [
+          { text: 'const automatica = this.modelo().automatica;' },
+          { text: 'readonly f = form(this.modelo, (r) => {' },
+          { text: '  disabled(r.frecuencia, () => automatica);', knob: K },
+          { text: '});' },
+        ],
+  // The captured constant keeps the first value: every later change leaves the rule behind.
+  settle: (s: SystemState) => ({ reglaVieja: s.knobs[K] === 1 ? 0 : s.actions }),
+  healthy: (s: SystemState) => s.actions > 0 && s.values['reglaVieja'] === 0,
+};
+
+/**
+ * 7/6 · By default submit() lets pending validators through: the data leaves while the check that
+ * should have stopped it is still running. 'none' holds the submission back instead of waiting.
+ */
+export const SIGNAL_SUBMIT_SYSTEM: ManipulableChallenge = {
+  knobs: knob('enviar con validadores pendientes o esperarlos'),
+  gauges: [{ id: 'sinVerificar', label: 'sin verificar' }],
+  action: 'transmitir ya',
+  start: { sinVerificar: 0 },
+  code: (k) => [
+    { text: 'submit(this.f, {' },
+    k[K] === 1
+      ? { text: "  ignoreValidators: 'none',", knob: K }
+      : { text: "  ignoreValidators: 'pending',", knob: K },
+    { text: '  action: () => transmitir(this.modelo()),' },
+    { text: '});' },
+  ],
+  settle: (s: SystemState) => ({ sinVerificar: s.knobs[K] === 1 ? 0 : s.actions }),
+  healthy: (s: SystemState) => s.actions > 0 && s.values['sinVerificar'] === 0,
 };

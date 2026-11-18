@@ -238,6 +238,22 @@ export const signalsRoutesTree: RouteItem[] = [
             (m) => ({ component: m.SignalFormsComponent }),
           ),
       },
+      {
+        path: '5',
+        title: 'Reglas que reaccionan',
+        loadComponent: () =>
+          import('./level-7-signal-io/sub-levels/5-signal-rules/signal-rules.component').then(
+            (m) => ({ component: m.SignalRulesComponent }),
+          ),
+      },
+      {
+        path: '6',
+        title: 'Transmitir con submit()',
+        loadComponent: () =>
+          import('./level-7-signal-io/sub-levels/6-signal-submit/signal-submit.component').then(
+            (m) => ({ component: m.SignalSubmitComponent }),
+          ),
+      },
     ],
   },
   {

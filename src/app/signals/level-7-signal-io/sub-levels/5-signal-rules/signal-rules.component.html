@@ -1,0 +1,73 @@
+<app-column-and-code-layout
+  title="Reglas que reaccionan"
+  [codeLines]="lines()"
+  concept="Las reglas leen el modelo."
+>
+  <!-- No intro on purpose: each switch lights the rule it wakes up in the code next to it. -->
+  <section class="rgl">
+    <div class="rgl-aparato" role="status">
+      <svg
+        class="rgl-torre"
+        [class.rgl-torre--al-aire]="alAire()"
+        [style.--rgl-ciclo]="cicloDeOnda()"
+        viewBox="0 0 120 112"
+        aria-hidden="true"
+      >
+        <path class="rgl-onda" style="--i: 0" d="M74 22a20 20 0 0 1 0 28M46 22a20 20 0 0 0 0 28" />
+        <path class="rgl-onda" style="--i: 1" d="M84 14a32 32 0 0 1 0 44M36 14a32 32 0 0 0 0 44" />
+        <path class="rgl-onda" style="--i: 2" d="M94 6a44 44 0 0 1 0 60M26 6a44 44 0 0 0 0 60" />
+        <path class="rgl-mastil" d="M60 42 42 108M60 42l18 66M50 80h20M46 94h28" />
+        <circle class="rgl-foco" cx="60" cy="36" r="6" />
+      </svg>
+      <code class="rgl-lectura">valid() = {{ alAire() }}</code>
+    </div>
+
+    <div class="rgl-mandos">
+      <label class="rgl-interruptor">
+        <input type="checkbox" [formField]="panel.automatica" />
+        <code>automatica</code>
+      </label>
+
+      <div class="rgl-campo" [class.rgl-campo--apagado]="panel.frecuencia().disabled()">
+        <label class="rgl-rotulo" for="rgl-frecuencia">
+          <code>frecuencia</code>
+          <code class="rgl-valor">{{ modelo().frecuencia }}</code>
+        </label>
+        <input id="rgl-frecuencia" class="rgl-dial" type="range" [formField]="panel.frecuencia" />
+        <p class="rgl-nota">
+          @for (razon of panel.frecuencia().disabledReasons(); track razon.message) {
+            <code>disabled: {{ razon.message }}</code>
+          }
+        </p>
+      </div>
+
+      <label class="rgl-interruptor">
+        <input type="checkbox" [formField]="panel.cifrar" />
+        <code>cifrar</code>
+      </label>
+
+      <div class="rgl-campo rgl-campo--clave">
+        @if (panel.clave().hidden()) {
+          <code class="rgl-oculto">clave: hidden</code>
+        } @else {
+          <label class="rgl-rotulo" for="rgl-clave"><code>clave</code></label>
+          <input
+            id="rgl-clave"
+            class="rgl-texto"
+            type="text"
+            autocomplete="off"
+            [class.rgl-texto--mal]="panel.clave().invalid()"
+            [formField]="panel.clave"
+          />
+          <p class="rgl-nota rgl-nota--error">
+            @for (error of panel.clave().errors(); track error.kind) {
+              <span>{{ error.message }}</span>
+            }
+          </p>
+        }
+      </div>
+    </div>
+  </section>
+</app-column-and-code-layout>
+
+<app-manipulable-system [system]="closingSystem" />

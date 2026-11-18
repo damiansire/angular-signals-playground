@@ -8,7 +8,66 @@ import {
   SystemState,
   turn,
 } from '../../libs/manipulable-challenge';
-import { SIGNAL_FORMS_SYSTEM } from './io-systems';
+import { SIGNAL_FORMS_SYSTEM, SIGNAL_RULES_SYSTEM, SIGNAL_SUBMIT_SYSTEM } from './io-systems';
+
+describe('io 7/5 · una regla lee el modelo cada vez, no una sola al armar el form', () => {
+  const sistema = SIGNAL_RULES_SYSTEM;
+  const codigo = (posicion: number) =>
+    sistema
+      .code({ perilla: posicion })
+      .map((line) => line.text)
+      .join('\n');
+
+  it('está bien armado y tiene solución', () => {
+    expect(malformed(sistema)).toEqual([]);
+    expect(solutionFor(sistema)).not.toBeNull();
+  });
+
+  it('la avería captura el valor afuera de la regla', () => {
+    expect(codigo(0)).toContain('const automatica = this.modelo().automatica;');
+    expect(codigo(0)).toContain('() => automatica');
+    expect(codigo(1)).toContain('c.valueOf(r.automatica)');
+  });
+
+  it('con el valor capturado cada cambio deja la regla vieja; leyéndolo, ninguno', () => {
+    const roto = act(sistema, act(sistema, startOf(sistema)));
+    expect(roto.values['reglaVieja']).toBe(2);
+    expect(healthOf(sistema, roto)).toBe('broken');
+
+    const sano = act(sistema, turn(sistema, startOf(sistema), 'perilla'));
+    expect(sano.values['reglaVieja']).toBe(0);
+    expect(healthOf(sistema, sano)).toBe('healthy');
+  });
+});
+
+describe('io 7/6 · submit deja salir lo pendiente si no se le pide retenerlo', () => {
+  const sistema = SIGNAL_SUBMIT_SYSTEM;
+  const codigo = (posicion: number) =>
+    sistema
+      .code({ perilla: posicion })
+      .map((line) => line.text)
+      .join('\n');
+
+  it('está bien armado y tiene solución', () => {
+    expect(malformed(sistema)).toEqual([]);
+    expect(solutionFor(sistema)).not.toBeNull();
+  });
+
+  it('la perilla es la opción real de submit()', () => {
+    expect(codigo(0)).toContain("ignoreValidators: 'pending'");
+    expect(codigo(1)).toContain("ignoreValidators: 'none'");
+  });
+
+  it('con pending cada envío sale sin verificar; con none, ninguno', () => {
+    const roto = act(sistema, startOf(sistema));
+    expect(roto.values['sinVerificar']).toBe(1);
+    expect(healthOf(sistema, roto)).toBe('broken');
+
+    const sano = act(sistema, turn(sistema, startOf(sistema), 'perilla'));
+    expect(sano.values['sinVerificar']).toBe(0);
+    expect(healthOf(sistema, sano)).toBe('healthy');
+  });
+});
 
 describe('io 7/4 · la validez de un form se deriva, no se calcula al enviar', () => {
   const sistema = SIGNAL_FORMS_SYSTEM;

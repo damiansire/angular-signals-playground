@@ -1,0 +1,246 @@
+/* Prefixed: the journey embeds this page next to others, and a generic name would collide. */
+
+.trs {
+  display: grid;
+  grid-template-columns: 18rem 15rem;
+  gap: 1.5rem;
+  align-items: start;
+}
+
+.trs-campos,
+.trs-campo,
+.trs-camino {
+  display: flex;
+  flex-direction: column;
+}
+
+.trs-campos {
+  gap: 0.6rem;
+}
+
+.trs-campo {
+  gap: 0.25rem;
+}
+
+.trs-camino {
+  gap: 0.9rem;
+}
+
+.trs-rotulo {
+  font-size: 0.75rem;
+}
+
+.trs-texto {
+  width: 100%;
+  padding: 0.35rem 0.6rem;
+  border: 2px solid #2b2520;
+  border-radius: 0.5rem;
+  background: #fffdf8;
+}
+
+.trs-texto--mal {
+  border-color: #b91c1c;
+}
+
+/* Sharing the row keeps the submit button clear of the challenge below it. */
+.trs-fila {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.trs-fila .trs-error {
+  text-align: right;
+}
+
+.trs-fila--envio {
+  margin-top: 0.45rem;
+}
+
+.trs-opciones {
+  display: flex;
+  flex: none;
+  gap: 0.35rem;
+}
+
+.trs-opcion.boton-tinta {
+  min-height: 0;
+  padding: 0.1rem 0.6rem;
+  font-size: 0.75rem;
+}
+
+.trs-error {
+  min-height: 1.1rem;
+  font-size: 0.75rem;
+  color: #b91c1c;
+}
+
+.trs-etapas {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.3rem;
+  padding: 0;
+  list-style: none;
+}
+
+.trs-etapa {
+  padding: 0.25rem 0.45rem;
+  border: 2px solid #b9b2a6;
+  border-radius: 9999px;
+  font-size: 0.7rem;
+  color: #6b5f50;
+  transition:
+    background-color 120ms ease,
+    border-color 120ms ease,
+    color 120ms ease;
+}
+
+.trs-etapa--viva {
+  border-color: #2b2520;
+  background: #f59e0b;
+  color: #1f1a15;
+}
+
+.trs-espacio {
+  position: relative;
+  height: 3.5rem;
+  border-radius: 0.5rem;
+  background: #1f1a15;
+  overflow: hidden;
+}
+
+.trs-via {
+  position: absolute;
+  top: 50%;
+  left: 1.5rem;
+  right: 1.5rem;
+  border-top: 2px dashed #7c7264;
+}
+
+.trs-espacio--rebote .trs-via {
+  border-color: #f87171;
+}
+
+.trs-antena,
+.trs-destino {
+  position: absolute;
+  top: 50%;
+  width: 0.9rem;
+  height: 0.9rem;
+  border-radius: 50%;
+  transform: translateY(-50%);
+}
+
+.trs-antena {
+  left: 0.75rem;
+  background: #f59e0b;
+}
+
+.trs-destino {
+  right: 0.75rem;
+  background: #f0349a;
+}
+
+.trs-pulso {
+  position: absolute;
+  top: 50%;
+  left: 1.25rem;
+  width: 0.7rem;
+  height: 0.7rem;
+  margin-top: -0.35rem;
+  border-radius: 50%;
+  background: #fde68a;
+  box-shadow: 0 0 0.7rem 0.2rem #fbbf24;
+  animation: trs-cruza linear forwards;
+}
+
+@keyframes trs-cruza {
+  to {
+    left: calc(100% - 2rem);
+  }
+}
+
+/* Goes out and comes back within the same crossing time: the failure is seen before it is read. */
+.trs-pulso--rebota {
+  background: #fecaca;
+  box-shadow: 0 0 0.7rem 0.2rem #f87171;
+  animation-name: trs-rebota;
+}
+
+@keyframes trs-rebota {
+  50% {
+    left: calc(100% - 2rem);
+  }
+  100% {
+    left: 1.25rem;
+  }
+}
+
+.trs-retenida {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  padding: 0.15rem 0.6rem;
+  border-radius: 9999px;
+  background: #b91c1c;
+  color: #fff;
+  font-size: 0.75rem;
+  opacity: 0;
+  transform: translate(-50%, -50%);
+  animation: trs-avisa 1800ms ease-out forwards;
+}
+
+/* Only opacity changes, so this one stays on under reduced motion. */
+@keyframes trs-avisa {
+  8%,
+  70% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+.trs-enviados {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+  min-height: 1.5rem;
+  padding: 0;
+  list-style: none;
+}
+
+.trs-enviado {
+  max-width: 100%;
+  padding: 0.15rem 0.55rem;
+  overflow: hidden;
+  border-radius: 9999px;
+  background: #1f1a15;
+  color: #fff;
+  font-size: 0.75rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@media (max-width: 760px) {
+  .trs {
+    grid-template-columns: minmax(0, 1fr);
+    justify-items: stretch;
+    width: min(100%, 18rem);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .trs-pulso {
+    animation: none;
+  }
+
+  .trs-pulso {
+    left: 50%;
+  }
+
+  .trs-etapa {
+    transition: none;
+  }
+}
