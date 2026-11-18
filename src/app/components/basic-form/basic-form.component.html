@@ -12,11 +12,10 @@
       </label>
       <input
         type="text"
-        name="fName"
         id="fName"
         placeholder="First Name"
         class="w-full rounded-md border border-[#e0e0e0] bg-white py-3 px-6 text-base font-medium text-[#6B7280] outline-none focus:border-[#6A64F1] focus:shadow-md"
-        #firstNameInput
+        [formField]="nameForm.firstName"
       />
     </div>
   </div>
@@ -26,11 +25,10 @@
       <label for="sName" class="mb-3 block text-base font-medium text-[#07074D]"> Surname </label>
       <input
         type="text"
-        name="sName"
         id="sName"
         placeholder="Surname"
         class="w-full rounded-md border border-[#e0e0e0] bg-white py-3 px-6 text-base font-medium text-[#6B7280] outline-none focus:border-[#6A64F1] focus:shadow-md"
-        #surnameInput
+        [formField]="nameForm.surname"
       />
     </div>
   </div>

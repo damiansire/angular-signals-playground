@@ -41,8 +41,13 @@ describe('BasicFormComponent', () => {
     let clicked: { firstName: string; surname: string } | undefined;
     component.buttonClicked.subscribe((e) => (clicked = e));
 
-    component.firstNameInput().nativeElement.value = 'Grace';
-    component.surnameInput().nativeElement.value = 'Hopper';
+    const [nombre, apellido] = fixture.nativeElement.querySelectorAll('input');
+    nombre.value = 'Grace';
+    nombre.dispatchEvent(new Event('input'));
+    apellido.value = 'Hopper';
+    apellido.dispatchEvent(new Event('input'));
+    expect(component.firstName()).toBe('Damian');
+
     component.setValue();
 
     expect(component.firstName()).toBe('Grace');
