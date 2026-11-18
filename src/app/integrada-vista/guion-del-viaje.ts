@@ -112,6 +112,14 @@ export const GUION_DEL_VIAJE: Readonly<
     llegada: { quien: 'cap', txt: 'Cada campo del formulario\nes una caja.' },
     resuelta: { quien: 'naveB', txt: 'Escribo, y la validez\nse entera sola.' },
   },
+  '7/5': {
+    llegada: { quien: 'naveA', txt: 'El panel cambia\nsegún lo que elijo.' },
+    resuelta: { quien: 'cap', txt: 'Cambia el modelo,\ny las reglas se acomodan.' },
+  },
+  '7/6': {
+    llegada: { quien: 'naveB', txt: '¿Y si transmito\nantes de verificar el canal?' },
+    resuelta: { quien: 'naveA', txt: 'Sin verificar, no sale.\nsubmit la retiene.' },
+  },
   // 8 · Los pipes se traducen
   '8/1': {
     llegada: { quien: 'naveA', txt: 'Quiero ver la pieza de adentro.' },
