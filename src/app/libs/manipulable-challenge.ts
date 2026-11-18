@@ -200,7 +200,7 @@ export function solutionFor(
 }
 
 /**
- * Presupuesto de forma. Con los 40 sub-niveles cerrando igual, la consistencia no se sostiene con
+ * Presupuesto de forma. Con todos los sub-niveles cerrando igual, la consistencia no se sostiene con
  * buena voluntad: si un desafío trae seis lecturas y otro dos, el cierre deja de leerse como el
  * mismo gesto. Estos números SON la forma del cierre, y por eso los verifica un test.
  */
@@ -217,7 +217,7 @@ const words = (text: string): number => text.trim().split(/\s+/).filter(Boolean)
 
 /**
  * Un desafío mal armado no se ve roto en pantalla: se ve como un sub-nivel que no se puede
- * resolver, o como un cierre que no se parece a los otros 36. Estas son las condiciones que el
+ * resolver, o como un cierre que no se parece a los demás. Estas son las condiciones que el
  * contenido tiene que cumplir para llegar a shippear.
  */
 export function malformed(challenge: ManipulableChallenge): readonly string[] {
@@ -235,7 +235,7 @@ export function malformed(challenge: ManipulableChallenge): readonly string[] {
     problems.push('arranca sano, así que no hay nada que notar');
   }
 
-  // Forma: que los 40 cierres se lean como el mismo gesto.
+  // Forma: que todos los cierres se lean como el mismo gesto.
   if (challenge.knobs.length > 1) {
     problems.push('tiene más de una perilla: es un puzzle, no un control');
   }
