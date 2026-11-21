@@ -844,8 +844,9 @@
 .ini__burbuja {
   display: grid;
 }
-/* Como en un diálogo de juego, el triangulito que late dice "tocá para seguir": los pensamientos
-   los pasa quien mira. Aparece después del último punto, cuando la frase ya se leyó. */
+/* As in a game dialogue, the pulsing triangle says "tap to go on": whoever watches passes the
+   thoughts. It shows when a tap does pass (`--sigue`, set by `pensamiento`): after the writing and
+   after its voice. */
 .ini__burbuja::after {
   content: '';
   position: absolute;
@@ -858,13 +859,9 @@
   opacity: 0;
 }
 .ini--piensa .ini__burbuja::after {
-  --sigue: calc(var(--entra) + var(--n1) * var(--tecla) + 900ms);
   opacity: 1;
   transition: opacity 0.2s ease-out var(--sigue);
   animation: ini-sigue 0.9s ease-in-out var(--sigue) infinite;
-}
-.ini--piensa-2 .ini__burbuja::after {
-  --sigue: calc(var(--entra) + var(--n2) * var(--tecla) + 900ms);
 }
 @keyframes ini-sigue {
   50% {
@@ -1008,8 +1005,7 @@
 }
 .ini--oye .ini__voz-sol::after,
 .ini--responde .ini__renglon-dicho:last-child::after {
-  /* Cuando termina de escribirse: antes, invitaba a pasar un globo a medio decir. */
-  --sigue: calc(var(--entra) + var(--n) * var(--tecla) + 300ms);
+  /* `--sigue`, as in the thoughts: before, it invited to pass a bubble still being said. */
   opacity: 1;
   transition: opacity 0.2s ease-out var(--sigue);
   animation: ini-sigue 0.9s ease-in-out var(--sigue) infinite;
@@ -1113,6 +1109,8 @@
 .ini--saliendo .ini__ajustes,
 .ini--saliendo .tusi__ov-capbar {
   opacity: 0;
+  /* Gone, they still took taps: one in that corner muted the sound and the bubble did not pass. */
+  pointer-events: none;
   transition: opacity 0.28s ease-in;
 }
 

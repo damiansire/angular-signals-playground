@@ -528,9 +528,13 @@ export function initInicioAngie(host: HTMLElement, cuerpo?: AngieDeLaColina): In
    * foco nunca está en la escena.
    */
   let soltarToque: (() => void) | null = null;
-  const pensamiento = (ms: number): Promise<void> =>
+  const pensamiento = (texto: string, piso: number): Promise<void> =>
     new Promise((ok) => {
       const empezo = performance.now();
+      const ms = loQueDuraDicho(texto, piso);
+      const grabada = vozDeLaColina(texto) !== undefined;
+      // The cue says a tap will pass: it waits for the voice too, not only for the writing.
+      escena.style.setProperty('--sigue', `${Math.round(ms)}ms`);
       let completadoEn: number | null = null;
       const listo = (): void => {
         escena.removeEventListener('click', alClicDeAvance);
@@ -543,12 +547,17 @@ export function initInicioAngie(host: HTMLElement, cuerpo?: AngieDeLaColina): In
       const tocar = (): void => {
         const ahora = performance.now() - empezo;
         const hace = queHaceElToque(ahora, ms, completadoEn);
-        if (hace === 'pasar') listo();
+        if (hace === 'pasar') {
+          // Passed before its voice ended: it does not go on under the next bubble.
+          if (ahora < ms) sonido().callar();
+          listo();
+        }
         if (hace !== 'completar') return;
         completadoEn = ahora;
         escena.classList.add('ini--escrito');
         // Los blips duraban lo que tardaba en escribirse: seguían hablando sobre el globo ya escrito.
-        sonido().callar();
+        // A recording is the line itself: completing the text does not cut it halfway.
+        if (!grabada) sonido().callar();
       };
       // Sonido y pausa hacen lo suyo: no pasan el pensamiento.
       const alClicDeAvance = (e: MouseEvent): void => {
@@ -646,6 +655,10 @@ export function initInicioAngie(host: HTMLElement, cuerpo?: AngieDeLaColina): In
     if (yendose) return;
     yendose = true;
     escena.classList.add('ini--saliendo');
+    // Faded out with the farewell; only hidden by opacity, they stayed in the tab order.
+    escena
+      .querySelectorAll<HTMLElement>('.ini__ajustes, .tusi__ov-capbar')
+      .forEach((x) => (x.inert = true));
     // La de la colina se va mientras entra la de la despedida: las dos en re, se funden.
     colina?.apagar(2.4);
     colina = null;
@@ -683,7 +696,7 @@ export function initInicioAngie(host: HTMLElement, cuerpo?: AngieDeLaColina): In
     escena.classList.add('ini--piensa');
     sonar('presiente');
     pensar(LO_QUE_PRESIENTE);
-    await pensamiento(loQueDuraDicho(LO_QUE_PRESIENTE, T.presentir));
+    await pensamiento(LO_QUE_PRESIENTE, T.presentir);
     if (cerrado) return;
     // La señal entra: la estática se va y la voz del sol llega limpia. Es la charla que la
     // tripulación tiene en la cabina, oída del otro lado: suena con la voz del capitán.
@@ -692,11 +705,11 @@ export function initInicioAngie(host: HTMLElement, cuerpo?: AngieDeLaColina): In
     radio?.apagar(0.5);
     radio = null;
     decir('cap', LO_QUE_DICE_EL_SOL);
-    await pensamiento(loQueDuraDicho(LO_QUE_DICE_EL_SOL, T.oir));
+    await pensamiento(LO_QUE_DICE_EL_SOL, T.oir);
     if (cerrado) return;
     escena.classList.replace('ini--oye', 'ini--responde');
     decir('mascota', LO_QUE_RESPONDE_ANGIE);
-    await pensamiento(loQueDuraDicho(LO_QUE_RESPONDE_ANGIE, T.responder));
+    await pensamiento(LO_QUE_RESPONDE_ANGIE, T.responder);
     if (cerrado) return;
     await enviarAlSol();
     if (cerrado) return;
@@ -708,7 +721,7 @@ export function initInicioAngie(host: HTMLElement, cuerpo?: AngieDeLaColina): In
     cuerpo?.sonreir?.();
     sonar('decide');
     pensar(LO_QUE_DECIDE);
-    await pensamiento(loQueDuraDicho(LO_QUE_DECIDE, T.pensar));
+    await pensamiento(LO_QUE_DECIDE, T.pensar);
     if (cerrado) return;
     escena.classList.remove('ini--piensa', 'ini--piensa-2');
     sonar('luz');
