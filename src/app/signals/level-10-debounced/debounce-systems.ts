@@ -18,7 +18,7 @@ export const DEBOUNCE_RXJS_SYSTEM: ManipulableChallenge = {
     { text: 'const resultados = toSignal(' },
     { text: '  toObservable(consulta).pipe(' },
     k[K] === 1
-      ? { text: '    debounceTime(300),', knob: K }
+      ? { text: '    debounceTime(400),', knob: K }
       : { text: '    // sin espera', knob: K },
     { text: '    switchMap(buscar),' },
     { text: '  ),' },
@@ -40,7 +40,7 @@ export const DEBOUNCE_MANUAL_SYSTEM: ManipulableChallenge = {
   code: (k) => [
     { text: 'effect((onCleanup) => {' },
     { text: '  const q = consulta();' },
-    { text: '  const id = setTimeout(() => buscar(q), 300);' },
+    { text: '  const id = setTimeout(() => buscar(q), 400);' },
     k[K] === 1
       ? { text: '  onCleanup(() => clearTimeout(id));', knob: K }
       : { text: '  // el timer anterior sigue', knob: K },
@@ -62,7 +62,7 @@ export const DEBOUNCED_NATIVE_SYSTEM: ManipulableChallenge = {
   action: 'tipear una letra',
   start: { busquedas: 0 },
   code: (k) => [
-    { text: 'const q = debounced(consulta, 300);' },
+    { text: 'const q = debounced(consulta, 400);' },
     { text: 'const resultados = resource({' },
     k[K] === 1
       ? { text: '  params: () => q.value(),', knob: K }

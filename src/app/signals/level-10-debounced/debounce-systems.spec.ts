@@ -30,7 +30,7 @@ describe('debounce 10/3 · debounced() nativo: crearlo no alcanza, hay que leerl
 
   it('arranca leyendo la consulta cruda aunque el debounced ya esté creado', () => {
     const codigo = sistema.code(startOf(sistema).knobs).map((line) => line.text);
-    expect(codigo).toContain('const q = debounced(consulta, 300);');
+    expect(codigo).toContain('const q = debounced(consulta, 400);');
     expect(codigo).toContain('  params: () => consulta(),');
   });
 
