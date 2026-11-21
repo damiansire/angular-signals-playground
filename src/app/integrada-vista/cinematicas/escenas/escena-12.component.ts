@@ -4,9 +4,13 @@ import { ChangeDetectionStrategy, Component, ViewEncapsulation } from '@angular/
  * Final · Quien lee, vuelve. La molécula entera del recorrido (la misma espiral de doce átomos que
  * el jugador cruzó) se enciende en orden; solo brillan los capítulos que estableció, el resto
  * queda punteado: es la deuda visible de la partida. En el borde derecho se abre la salida, un
- * iris dorado, entero si no quedó deuda y a medias si quedó. Con la salida entera la exploradora
- * entra, busca a la tripulación y se van los cuatro por el iris; a medias, ella se asoma, la
- * tripulación va hacia la salida y se da vuelta: este mundo también es casa.
+ * iris dorado, entero si no quedó deuda y a medias si quedó.
+ *
+ * The revelation (`cine--revelacion`) uses this same scene: there the explorer comes in on "Porque
+ * entré." and either joins the crew (complete) or only peeks in (incomplete). In the ending she is
+ * already inside: she comes in with the crew, beside it. With the exit whole the four leave through
+ * the iris; with it half open the crew heads to the exit and turns around, and she stays.
+ * Este mundo también es casa.
  *
  * Técnicas: la cadena punteada se REVELA con una máscara cuyo trazo se dibuja (como el hilo del
  * capítulo 1), y los enlaces dorados se dibujan encima uno por uno con stroke-dashoffset, solo
@@ -560,7 +564,8 @@ import { ChangeDetectionStrategy, Component, ViewEncapsulation } from '@angular/
         opacity 220ms linear,
         transform 700ms var(--resorte-suave, ease-out);
     }
-    .cine.b-nave4-entra .k-actor.k-nave.cine-e12__nave4 > .k-cuerpo {
+    .cine.b-nave4-entra .k-actor.k-nave.cine-e12__nave4 > .k-cuerpo,
+    .cine.b-naves:not(.cine--revelacion) .k-actor.k-nave.cine-e12__nave4 > .k-cuerpo {
       opacity: 1;
       transform: none;
     }
@@ -620,27 +625,32 @@ import { ChangeDetectionStrategy, Component, ViewEncapsulation } from '@angular/
         offset-distance: 46.88%;
         transition: offset-distance 1700ms cubic-bezier(0.22, 0.85, 0.3, 1.2);
       }
+      /* The ending starts where the complete revelation left her: beside the crew. */
+      .cine:not(.cine--revelacion) .k-actor.cine-e12__nave4 {
+        offset-distance: 46.88%;
+      }
       .cine.cine--completo.b-regreso .k-actor.cine-e12__vuela {
         offset-distance: 99.9%;
         transition: offset-distance 1900ms cubic-bezier(0.5, 0, 0.25, 1) calc(var(--orden) * 200ms);
       }
 
-      /* Incompleto: ella se asoma; la tripulación va hacia la salida y se da vuelta. */
+      /* Incomplete revelation: she only peeks in. */
       .cine.cine--incompleto.b-nave4-entra .k-actor.cine-e12__nave4 {
         offset-distance: 0.55%;
         transition: offset-distance 900ms var(--resorte-suave, ease-out);
       }
-      .cine.cine--incompleto.b-nave4-entra .k-actor.cine-e12__vuela:not(.cine-e12__nave4) {
+      /* Incomplete ending: when the exit half opens the crew heads to it, then turns around. */
+      .cine.cine--incompleto.b-salida-iris .k-actor.cine-e12__vuela:not(.cine-e12__nave4) {
         transition: offset-distance 1600ms var(--resorte-suave, ease-out)
           calc((var(--orden) - 1) * 150ms);
       }
-      .cine.cine--incompleto.b-nave4-entra .cine-e12__nave--a {
+      .cine.cine--incompleto.b-salida-iris .cine-e12__nave--a {
         offset-distance: 77%;
       }
-      .cine.cine--incompleto.b-nave4-entra .cine-e12__nave--cap {
+      .cine.cine--incompleto.b-salida-iris .cine-e12__nave--cap {
         offset-distance: 64.5%;
       }
-      .cine.cine--incompleto.b-nave4-entra .cine-e12__nave--b {
+      .cine.cine--incompleto.b-salida-iris .cine-e12__nave--b {
         offset-distance: 56%;
       }
       .cine.cine--incompleto.b-regreso .k-actor.cine-e12__vuela:not(.cine-e12__nave4) {

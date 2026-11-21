@@ -590,6 +590,11 @@
 }
 
 /* Transmisión de la exploradora: el kit la dispara solo con el beat común. */
+/* Its rings are inset: 0, so without a height they collapse into a line. */
+.k-transmision {
+  aspect-ratio: 1 / 1;
+}
+
 .k-transmision > span {
   position: absolute;
   inset: 0;

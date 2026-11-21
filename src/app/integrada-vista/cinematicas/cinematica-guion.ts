@@ -24,7 +24,7 @@ export interface Cinematica {
   readonly capitulo: number;
   /** El tagline del concepto: el mismo título que ya tiene en el recorrido. */
   readonly titulo: string;
-  /** La ley del mundo que el capítulo enseña. Se escribe en la bitácora al establecerlo. */
+  /** The law of the world the chapter teaches. Only the script checks it today: nothing shows it. */
   readonly ley: string;
   /** Beats que se encienden antes de la primera línea, en este orden. */
   readonly apertura: readonly string[];

@@ -38,13 +38,13 @@ import { etapaDe } from '../viaje';
 
 export type FinDeCinematica = 'fin' | 'salteada';
 
-/** Nombres en pantalla. Es el dato que el prólogo nunca mostraba: quién está hablando. */
+/** Names on screen: the same ones the prologue's dialogue box uses. */
 const NOMBRES: Readonly<Record<Hablante, string>> = {
   cap: 'Capitán',
   naveA: 'Nave A',
   naveB: 'Nave B',
   nave4: 'Exploradora',
-  mascota: 'Mascota',
+  mascota: 'Angie',
   todos: 'Todos',
 };
 
@@ -104,7 +104,7 @@ interface Evento {
 })
 export class CinematicaComponent {
   readonly cinematica = input.required<Cinematica>();
-  /** Si el jugador estableció los doce capítulos: el final cambia algunas líneas. */
+  /** Whether the player established a page of every stage: the ending changes some lines. */
   readonly completo = input(false);
   /**
    * Capítulos que el jugador estableció. Llegan a la escena como clases `e-<n>` en la raíz: el
@@ -151,6 +151,8 @@ export class CinematicaComponent {
       ...[...this.beats()].map((b) => `b-${b}`),
       ...this.establecidos().map((n) => `e-${n}`),
       this.completo() ? 'cine--completo' : 'cine--incompleto',
+      // The revelation and the ending share a scene; the explorer is already inside in the ending.
+      ...(this.cinematica().capitulo === CAPITULO_REVELACION ? ['cine--revelacion'] : []),
     ].join(' '),
   );
   protected readonly quieta = signal(false);
@@ -268,6 +270,8 @@ export class CinematicaComponent {
         return;
       }
     }
+    // `hablar` does not cut the previous recording: passing before a voice ended stacked the two.
+    sonido().callar();
     sonido().efecto('toque');
     const ahora = this.ahora();
     const proxima = this.eventos.find((e) => e.t > ahora + 30 && this.esLinea(e));

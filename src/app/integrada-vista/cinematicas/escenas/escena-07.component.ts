@@ -147,7 +147,7 @@ import { ChangeDetectionStrategy, Component, ViewEncapsulation } from '@angular/
           <span class="cine-e7__num cine-e7__num--viejo"
             ><span class="cine-e7__parpadeo">88</span></span
           >
-          <span class="cine-e7__num cine-e7__num--nuevo">104</span>
+          <span class="cine-e7__num cine-e7__num--nuevo">142</span>
           <svg class="cine-e7__ranura" viewBox="0 0 100 46">
             <rect x="4" y="4" width="92" height="38" rx="11" pathLength="20" />
           </svg>
@@ -162,7 +162,7 @@ import { ChangeDetectionStrategy, Component, ViewEncapsulation } from '@angular/
       <div class="k-actor cine-e7__caja" style="--x: 32; --y: 30; --w: 7">
         <div class="k-cuerpo">
           <span class="cine-e7__valor cine-e7__valor--antes">88</span>
-          <span class="cine-e7__valor cine-e7__valor--despues">104</span>
+          <span class="cine-e7__valor cine-e7__valor--despues">142</span>
         </div>
       </div>
 
