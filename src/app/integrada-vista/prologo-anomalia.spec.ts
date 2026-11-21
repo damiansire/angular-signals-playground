@@ -114,11 +114,14 @@ describe('initPrologoAnomalia', () => {
     if (sonido().activo() !== sonidoAlEntrar) sonido().alternar(sonidoAlEntrar);
   });
 
-  function arrancar() {
+  function arrancar(fondoDelViaje = false) {
     const host = hostCompleto();
     hosts.push(host);
     let terminado = 0;
-    const dispose = initPrologoAnomalia(host, { alTerminar: () => (terminado += 1) });
+    const dispose = initPrologoAnomalia(host, {
+      alTerminar: () => (terminado += 1),
+      fondoDelViaje,
+    });
     cerrar.push(dispose);
     return {
       host,
@@ -465,7 +468,18 @@ describe('initPrologoAnomalia', () => {
       );
       for (let i = 0; i < 4000 && pasados.length < 2; i++) cuadros.avanzar(1);
 
-      expect(pasados).toEqual(['anom-manual', 'dentro-vivos']);
+      expect(pasados).toEqual(['anom-manual', 'anom-leyes']);
+    });
+
+    it('al retomar no repite la línea anterior: la primera que habla es la del punto guardado', () => {
+      const cuadros = cuadrosFalsos();
+      const habla = spyOn(sonido(), 'hablar');
+      const host = hostCompleto();
+      hosts.push(host);
+      cerrar.push(initPrologoAnomalia(host, { alTerminar: () => undefined, desde: 'anom-lento' }));
+      for (let i = 0; i < 200 && habla.calls.count() === 0; i++) cuadros.avanzar(1);
+
+      expect(habla.calls.first().args[1]).toBe(GUION.find((l) => l.id === 'anom-lento')!.txt);
     });
 
     it('sin nadie que escuche, la historia avanza igual por los puntos', () => {
@@ -774,6 +788,19 @@ describe('initPrologoAnomalia', () => {
 
     expect(p.veces()).toBe(1);
     expect(p.raiz.hidden).toBeTrue();
+  });
+
+  it('como fondo del viaje, saltar deja la escena a la vista hasta que se cierra', () => {
+    const p = arrancar(true);
+
+    p.skip.click();
+
+    expect(p.veces()).toBe(1);
+    expect(p.raiz.hidden).toBeFalse();
+    expect(p.raiz.classList).toContain('prologo--terminado');
+    p.cerrar();
+    expect(p.raiz.hidden).toBeTrue();
+    expect(p.raiz.classList).not.toContain('prologo--terminado');
   });
 
   it('saltar dos veces sigue cediendo la posta una sola vez', () => {

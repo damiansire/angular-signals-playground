@@ -34,6 +34,12 @@
   display: none;
 }
 
+/* Over as the journey's backdrop: the last frame stays (Angie too, or she popped out right before the
+   iris), but nobody is talking and nothing can be pressed. */
+.prologo--terminado > :not(.prologo__escena, .prologo__titulo, .prologo__mascot) {
+  display: none;
+}
+
 /* Con `meet` la escena entera siempre CABE, y lo que el SVG pinta afuera de su viewBox (cielo,
    interior, papel) llena el sobrante: en una pantalla que no es 16:9 no quedan franjas. */
 .prologo__escena {

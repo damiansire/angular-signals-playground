@@ -2,6 +2,7 @@ import { avanzarMuelle, crearMuelle, limitar, type Muelle } from '../libs/muelle
 import {
   PALETAS,
   TINTA,
+  VOZ_DE_NAVE,
   dibujarNave,
   gradientesDeNaves,
   type NaveDibujada,
@@ -108,6 +109,12 @@ export interface PrologoOpciones {
    * se retoma al recargar. Los puntos anteriores al arranque no se avisan.
    */
   readonly alPasarPunto?: ((linea: string) => void) | undefined;
+  /**
+   * Keeps the last frame on screen after the prologue ends, without its dialogue or controls, until
+   * the returned closer runs. The journey opens its first cinematic over it: hidden at once, the
+   * frozen landing underneath showed up for a moment and was the old frame of the cinematic's iris.
+   */
+  readonly fondoDelViaje?: boolean;
   /**
    * El minijuego de "¡Activen todos los operadores!". La historia se frena en la orden y espera a
    * que se resuelva o se saltee; la escena sigue viva mientras tanto. Cada hueco que queda sano se
@@ -950,6 +957,12 @@ export function initPrologoAnomalia(host: HTMLElement, opts: PrologoOpciones): (
   let red: RedDeAudio | null = null;
   /** Lo que ya sonó o se dijo una sola vez, por id de línea o por hito. */
   let dichas = new Set<string>();
+  /**
+   * True only on the first frame after resuming from a saved point. Everything due by then already
+   * happened before the reload: it is marked as said without sounding, or the pops, shots and the
+   * previous line all went off together.
+   */
+  let retomando = false;
   let terminado = false;
 
   function abrirAudio(): RedDeAudio | null {
@@ -1031,7 +1044,7 @@ export function initPrologoAnomalia(host: HTMLElement, opts: PrologoOpciones): (
   const unaVez = (clave: string, fn: () => void): void => {
     if (dichas.has(clave)) return;
     dichas.add(clave);
-    fn();
+    if (!retomando) fn();
   };
 
   /* ── física ────────────────────────────────────────────────────────────────────────────────── */
@@ -1384,6 +1397,7 @@ export function initPrologoAnomalia(host: HTMLElement, opts: PrologoOpciones): (
     for (const d of activas) {
       if (dichas.has(d.id)) continue;
       dichas.add(d.id);
+      if (retomando && d.t0 < t) continue;
       sonido().hablar(
         d.quien,
         textoVisible(d),
@@ -1940,7 +1954,8 @@ export function initPrologoAnomalia(host: HTMLElement, opts: PrologoOpciones): (
       'font-family': '"JetBrains Mono","Cascadia Mono",Consolas,monospace',
       'font-size': r2(ROTULO_ACIERTO * escala),
       'font-weight': 700,
-      fill: PALETAS[i].luz,
+      // The ship's own color, as its name in the dialogue box: the antenna light made Nave A pink.
+      fill: VOZ_DE_NAVE[i],
       stroke: '#0b1630',
       'stroke-width': r2(5 * escala),
       'paint-order': 'stroke',
@@ -2015,6 +2030,7 @@ export function initPrologoAnomalia(host: HTMLElement, opts: PrologoOpciones): (
     }
     // Quieto, los muelles no avanzan: una nave que toma la palabra no se sacude.
     dibujar(tAhora, quieto ? 0 : (dt * velocidad) / 1000);
+    retomando = false;
     if (tAhora >= T.fin) terminar();
     // Tapada no se pide otro cuadro, y Angie tampoco se mueve sola: el cuadro que retoma la despierta.
     else if (enReposo()) dormirAngie();
@@ -2050,6 +2066,8 @@ export function initPrologoAnomalia(host: HTMLElement, opts: PrologoOpciones): (
     mostrar();
     medir();
     dichas = new Set();
+    // Reduced motion lands on a stop whose line has to be heard: it is not a resume of a moment.
+    retomando = desde > 0 && !quieto;
     anterior0 = flota.map(() => ({ x: 0, y: 0 }));
     tAhora = desde;
     // Quien arranca más adelante no tiene que pasar por el minijuego. Un punto guardado arranca
@@ -2091,7 +2109,11 @@ export function initPrologoAnomalia(host: HTMLElement, opts: PrologoOpciones): (
     sonido().callar();
     if (red) red.zumbidoGain.gain.value = 0;
     luego(soltarAudio, CIERRE_AUDIO_MS);
-    ocultar();
+    // What follows (the cinematic, the sheet) lives outside the prologue: in its fullscreen it is not
+    // painted, and the player was left on the frozen last frame with no controls.
+    if (document.fullscreenElement === raiz) void document.exitFullscreen().catch(() => undefined);
+    if (opts.fondoDelViaje) raiz.classList.add('prologo--terminado');
+    else ocultar();
     opts.alTerminar();
   }
 
@@ -2254,6 +2276,8 @@ export function initPrologoAnomalia(host: HTMLElement, opts: PrologoOpciones): (
     timers.clear();
     // Terminado ya se calló: callar de nuevo cortaría las voces de lo que venga después.
     if (!terminado) sonido().callar();
+    raiz.classList.remove('prologo--terminado');
+    if (terminado) ocultar();
     if (angieViva) opts.alCambiarMascota?.(false);
     soltarAudio();
     dejarDeOirSonido();

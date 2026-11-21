@@ -10,7 +10,10 @@
 export const PUNTOS_DEL_PROLOGO: readonly string[] = [
   'anom-que-pasa',
   'anom-rxjs',
+  // Right after the minigame and the manual: reloading there does not make them be played again.
+  'anom-pipes',
   'anom-manual',
+  'anom-leyes',
   'dentro-vivos',
   'voz-supongo',
   'orden-caos-es-orden',

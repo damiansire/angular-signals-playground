@@ -57,6 +57,7 @@ import type { HuecoDelPrologo } from './operadores-del-prologo';
 import { PAGINAS_DEL_MANUAL, pasoEnElManual, type PaginaDelManual } from './manual-de-a-bordo';
 import { HojaDelHuecoComponent } from './hoja-del-hueco/hoja-del-hueco.component';
 import { PAGINA_DEL_MANUAL } from '../signals/level-0-introduction/manual/pagina-del-manual';
+import { VueloDeLaNave } from '../signals/level-0-introduction/manual/vuelo-de-la-nave';
 import { vigilarEstampado } from './estampado-tardio';
 import { apagarLaTele, encenderLaTele } from './tele-del-manual';
 import { tocarManual } from './musica-del-manual';
@@ -378,8 +379,8 @@ export class IntegradaVistaComponent {
   /**
    * El manual de a bordo del prólogo. El motor frena la historia con la orden del capitán ya
    * leída y pide `leerManual`; esto muestra una página por vez y resuelve después de la última. Se
-   * lee a modo de estudio: se puede ir y volver, y pasar de página no exige resolver nada (ADR
-   * 0002). No se cierra: es la pantalla de la nave, y la historia sigue al terminarla.
+   * lee a modo de estudio: se puede volver atrás, y "Siguiente" aparece con la página cumplida (ADR
+   * 0014). No se cierra: es la pantalla de la nave, y la historia sigue al terminarla.
    *
    * La misma hoja es la de cada etapa del viaje, que va suelta, afuera del escenario. En el prólogo
    * va adentro de él, porque la pantalla completa es la del prólogo y lo que queda afuera no se ve.
@@ -553,7 +554,7 @@ export class IntegradaVistaComponent {
     if (this.pagina() === null || !hoja || e.defaultPrevented) return;
     const objetivo = e.target instanceof Element ? e.target : null;
     const enLaPantalla = objetivo?.closest('.subhost');
-    if (e.key === 'ArrowRight' && !enLaPantalla) this.pasarPagina(1);
+    if (e.key === 'ArrowRight' && !enLaPantalla) void this.seguirConTeclado();
     else if (e.key === 'ArrowLeft' && !enLaPantalla) this.pasarPagina(-1);
     else {
       // En la historia, una tecla afuera de la hoja es del prólogo (la pausa, por ejemplo). Un botón
@@ -564,6 +565,22 @@ export class IntegradaVistaComponent {
       hoja.scrollBy({ top: paso });
     }
     e.preventDefault();
+  }
+
+  /**
+   * The key goes on like the page's "Siguiente" button: in the prologue's manual the ship takes off
+   * first. Straight to `pasarPagina`, the ship neither left nor arrived flying on the next page.
+   */
+  private readonly vueloDeLaNave = inject(VueloDeLaNave);
+  private async seguirConTeclado(): Promise<void> {
+    const enElPrologo = this.libro().concepto === undefined;
+    if (this.vueloDeLaNave.volando()) return;
+    if (enElPrologo && this.puedeSeguir() && !this.apagandose && !this.volando) {
+      this.volando = true;
+      await this.vueloDeLaNave.despegar();
+      this.volando = false;
+    }
+    this.pasarPagina(1);
   }
 
   protected pasarPagina(paso: 1 | -1): void {
@@ -699,11 +716,10 @@ export class IntegradaVistaComponent {
   }
 
   /**
-   * El prólogo se pide recién al bajar de la colina: son 25 kB de escena que nadie ve en el
-   * primer segundo, y el aviso de auriculares más la colina dan tiempo de sobra para traerlos.
-   * Cada pedido invalida al anterior, así un pedido viejo que llega tarde no monta un segundo
-   * prólogo. Si el pedazo no llega (red caída a mitad de camino), se sigue como si se hubiera
-   * saltado: quedarse en la noche sin construcción sería peor que perderse la escena.
+   * The prologue is requested only when entering, after the hill: 25 kB of scene that nobody sees in
+   * the first second. Each request invalidates the previous one, so a late old request does not
+   * mount a second prologue. If the chunk never arrives (network down halfway), it goes on as if it
+   * had been skipped: staying in the night with nothing would be worse than missing the scene.
    */
   private pedidoPrologo = 0;
   private abrirPrologo(
@@ -732,6 +748,8 @@ export class IntegradaVistaComponent {
           arbol: async (pagina, alTapar) =>
             void (await this.leerManual([pagina], SIGNAL_SPACE, 0, null, alTapar)),
           alCambiarMascota: (viva) => this.angiePrologo.set(viva),
+          // The journey always follows, and the landing underneath stopped being part of the story.
+          fondoDelViaje: true,
           desde: (isDevMode() ? PROLOGO_PEDIDO : null) ?? historia?.desde ?? null,
           alPasarPunto: historia?.alPasarPunto,
         });
