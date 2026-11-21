@@ -23,6 +23,16 @@ describe('VueloDeLaNave', () => {
     expect(vuelo.llegaVolando()).toBeFalse();
   });
 
+  it('avisa que está volando mientras dura el despegue, venga de donde venga', async () => {
+    let salir: () => void = () => undefined;
+    vuelo.alDespegar(() => new Promise<void>((ok) => (salir = ok)));
+    const despegue = vuelo.despegar();
+    expect(vuelo.volando()).toBeTrue();
+    salir();
+    await despegue;
+    expect(vuelo.volando()).toBeFalse();
+  });
+
   it('una página que tarda demasiado en montarse ya no la espera', async () => {
     await vuelo.despegar();
     jasmine.clock().tick(VIGENCIA_DEL_VUELO_MS + 1);

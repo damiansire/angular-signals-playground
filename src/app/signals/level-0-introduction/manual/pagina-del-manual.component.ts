@@ -76,7 +76,8 @@ export class PaginaDelManualComponent {
   private readonly quieta = sinMovimiento();
   private readonly vuelo = inject(VueloDeLaNave);
   /** La nave ya está saliendo: "Siguiente" no se toca dos veces. */
-  protected readonly yendo = signal(false);
+  private readonly saliendo = signal(false);
+  protected readonly yendo = computed(() => this.saliendo() || this.vuelo.volando());
 
   protected readonly punta = signal<Punta | null>(null);
   protected readonly mostrando = signal(false);
@@ -196,7 +197,7 @@ export class PaginaDelManualComponent {
   /** "Siguiente": la nave sale volando por la derecha y recién ahí el libro pasa de hoja. */
   protected async seguir(): Promise<void> {
     if (this.yendo()) return;
-    this.yendo.set(true);
+    this.saliendo.set(true);
     await this.vuelo.despegar();
     this.datos?.pasar?.(1);
   }

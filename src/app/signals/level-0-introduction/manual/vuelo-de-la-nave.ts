@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, signal } from '@angular/core';
 
 /** Cuánto espera la página siguiente a la nave: si tarda más en montarse, la nave ya está ahí. */
 export const VIGENCIA_DEL_VUELO_MS = 4000;
@@ -13,6 +13,11 @@ export const VIGENCIA_DEL_VUELO_MS = 4000;
 export class VueloDeLaNave {
   private despegue: (() => Promise<void>) | null = null;
   private partio = Number.NEGATIVE_INFINITY;
+  /**
+   * The ship is on its way out, whoever made it leave (the page's button or the → key): the page
+   * takes its bubble along and its "Siguiente" cannot start a second flight.
+   */
+  readonly volando = signal(false);
 
   /** La escena se anota con su despegue; devuelve con qué soltarlo al desmontarse. */
   alDespegar(despegue: () => Promise<void>): () => void {
@@ -25,7 +30,12 @@ export class VueloDeLaNave {
   /** La nave se va volando; resuelve cuando ya salió. Sin nave a la vista, enseguida. */
   async despegar(): Promise<void> {
     this.partio = Date.now();
-    await this.despegue?.();
+    this.volando.set(true);
+    try {
+      await this.despegue?.();
+    } finally {
+      this.volando.set(false);
+    }
   }
 
   /** Para la escena que se monta: ¿la nave viene volando de la página anterior? Una vez por viaje. */
