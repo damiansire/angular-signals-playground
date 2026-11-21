@@ -92,6 +92,33 @@ Esto es lo que funciona:
   etapas y lo que falta cerrar están en [`docs/historia/`](./docs/historia/README.md).
   Leelo antes de tocar guiones, cinemáticas o el orden de los conceptos.
 
+## Cómo se saca el guion
+
+Para leer un tramo de la vista integrada toque por toque (la skill general `guion-paso-a-paso`, en
+`~/.claude/skills`):
+
+1. **Textos:** `node scripts/guion.mjs [--desde X] [--hasta Y] [--salida ruta.md]`. Tramos, en orden
+   de juego: `colina`, `prologo`, `1` … `11`, `revelacion`, `final`. Saca de los datos quién dice
+   qué (prólogo, cinemáticas, líneas del viaje), qué líneas no tienen voz grabada, dónde se frena el
+   prólogo para el minijuego, el manual y el árbol, la tarjeta de cada página y el código roto y
+   sano de cada desafío de perilla, con la tabla «Qué aprendes en cada paso».
+2. **Coreografía**, leyendo el código: la colina y el aviso en `inicio-angie.ts` y
+   `aviso-auriculares/`; el prólogo en `prologo-anomalia.ts` (el motor), `prologo-escena.ts` (las
+   paradas) y `operadores-del-prologo.ts`; el manual y el árbol en `manual-de-a-bordo.ts` y
+   `signals/level-0-introduction/`; el viaje en `viaje.ts`, `cinematicas/escenas/escena-NN` y cada
+   página en `signals/level-N-*/sub-levels/` (demo + `closingSystem`); quién habla con qué voz en
+   `voces-grabadas.ts`. El recorrido entero se partió en 7 partes: arranque y colina, prólogo hasta
+   el manual, manual y árbol, adentro hasta Angie, arco I (con la mecánica del viaje), arco II, y
+   arco III con la revelación y el final.
+3. **Entrega:** `docs/guiones/guion-paso-a-paso-<tramo>-<AAAA-MM-DD>.md`. Es una foto: no se
+   reescribe, se saca otra.
+
+Trampas propias: en el viaje, la tarjeta de la página (`concept`/`action`/`observe`) no está a la
+vista: es la pista de Angie, que se abre tocando a la mascota. El prólogo corre con reloj
+(`armarReloj`): tocar no pasa ni acelera sus líneas, sólo hace reaccionar a las naves. La colina y
+las cinemáticas sí se pasan por toques (`toque-de-dialogo.ts`). Con movimiento reducido el prólogo
+salta de parada en parada y la colina no se ve: miralo aparte.
+
 ## Mapa del repo → scope de commit
 
 Cada área de `src/app/` mapea a un scope de commit. Usá el scope del área que
