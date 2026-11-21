@@ -118,8 +118,8 @@ export class ManipulableSystemComponent {
   }
 
   /**
-   * Al quedar sano avisa por evento del DOM: el recorrido traza el enlace al concepto siguiente.
-   * Sale solo en la TRANSICIÓN, no en cada toque, así el enlace se dibuja una vez.
+   * When it turns healthy it says so with a DOM event, only on the transition and not on every tap.
+   * Nobody listens since the molecule that drew the link to the next concept was retired (ADR 0019).
    */
   private settle(next: () => SystemState): void {
     const wasHealthy = this.healthy();
