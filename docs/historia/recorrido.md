@@ -16,7 +16,8 @@ sub-nivel, contando el sub-nivel desde 1.
 - **Cada concepto entra cuando la historia lo necesita**, y cada desafío es un aparato del mundo (una
   caja, una baliza, un repetidor), no un ejercicio suelto.
 - **Propuesta:** la primera interacción llega antes de los 60 segundos. Hoy hay que pasar el aviso,
-  la colina, el prólogo (3 min 17 s, 60 líneas) y el par de Tusi antes del primer desafío.
+  la colina y 29 s del prólogo antes del primer desafío, el minijuego de operadores. El prólogo entero
+  son 67 líneas y 4 min 21 s de reloj, sin contar el minijuego, el manual ni el árbol (2026-11-22).
 - **Siguen las reglas del guion** (`REGLAS_GUION` en `cinematica-guion.ts`): ocho palabras por línea
   en pantalla, sin raya, y el reloj derivado del texto (`armarReloj` en `prologo-guion.ts`).
 - **Siguen las reglas de juego de
@@ -136,14 +137,14 @@ Zone.js." (`anom-leyes`).
 
 Está hecho (2026-11-09), en `src/app/integrada-vista/manual-de-a-bordo.ts`. La línea nueva es
 `anom-manual`, entre `anom-velocidad` y `anom-leyes`. La historia se frena al final de la orden, con
-la escena viva, y el manual se abre en una hoja de papel sobre el velo. Cada página monta la pantalla
-de hoy entera (la demo y su desafío), cargada diferida, con lo que le dice a la tripulación arriba.
-Se puede ir y volver, y "Cerrar el manual" en la página 5 sigue con `anom-leyes`. No pide resolver
-nada para avanzar (ADR 0002). Las cinco pantallas salieron de la molécula, y la sexta pasó a la
-historia con La voz y Angie.
+la escena viva, y el manual se prende en la pantalla de la nave, a pantalla entera. Cada página monta
+la pantalla de hoy entera (la demo y su desafío), cargada diferida, con lo que le dice a la
+tripulación arriba. Se puede volver atrás, pero "Siguiente página" aparece recién con la página
+cumplida (ADR 0014), y "Seguir la historia" en la página 5 sigue con `anom-leyes`. Las cinco
+pantallas salieron de la molécula, y la sexta pasó a la historia con La voz y Angie.
 
-El manual también se abre suelto desde la bitácora, sin la escena: así lo lee quien salteó el
-prólogo, y cualquiera que quiera volver a una página.
+La bitácora, que iba a abrir el manual suelto, se retiró con la molécula (ADR 0021): hoy quien
+saltea el prólogo no tiene dónde leerlo, y nadie puede volver a una página.
 
 ### Adentro
 
@@ -178,7 +179,7 @@ declaración como hueco: con `let total = 0;`, alguien barre el árbol entero co
 se preocupa; con `const total = signal(0);`, el aviso viaja solo por los dos hilos.
 "Seguir" cierra la hoja y Angie dice "Guarden esa pregunta. Los acompaña todo el viaje."
 (`leccion-guarden`). Esas líneas reemplazan a la cinemática del capítulo 0, que se retiró con la
-Introducción (ADR 0006). La bitácora abre el árbol suelto, como el manual.
+Introducción (ADR 0006). El árbol, como el manual, no se puede volver a abrir.
 
 ## El cuerpo: tres arcos
 
@@ -190,8 +191,8 @@ de mundo (sacado de las cinemáticas actuales), el giro y la pista que siembra.
 
 Desde el 2026-11-09 el cuerpo se juega como un viaje (ADR 0007): después del prólogo, cada etapa
 abre con la cinemática de su capítulo y sigue con sus desafíos como páginas de la hoja del manual,
-con el nombre de la etapa arriba (`integrada-vista/viaje.ts`). Cerrar la hoja lleva al mapa (la
-molécula), y la bitácora sigue el viaje donde quedó. Las pistas de Angie ya están en el guion: el
+con el nombre de la etapa arriba (`integrada-vista/viaje.ts`). La hoja no se cierra: recargar sigue
+el viaje donde quedó. Las pistas de Angie ya están en el guion: el
 helado (`c4-helado`), "lentos" (`c5-lentos`), el silencio del capítulo 6 y la frecuencia
 (`c7-frecuencia`).
 

@@ -50,8 +50,8 @@ cansador"; tiene que haber otra música, "compatible con el estudio".
 
 - [x] Con el manual abierto, el zumbido de la anomalía se va con un fundido (1,2 s) y vuelve igual
       al cerrarlo.
-- [x] Suena una música propia mientras el manual está abierto: en el prólogo y también suelto,
-      desde la bitácora. Se apaga con un fundido al dejar la hoja.
+- [x] Suena una música propia mientras el manual está abierto, en el prólogo. Se apaga con un
+      fundido al dejar la hoja. (Suelto, desde la bitácora, ya no se abre: se retiró con ADR 0021.)
 - [x] Es música para estudiar: lenta y pareja (acordes de 6 s), sin percusión ni golpes, sin una
       melodía que se pegue.
 - [x] Cambia de ánimo sin cambiar de mundo: fa mayor, vecina del re menor del resto.

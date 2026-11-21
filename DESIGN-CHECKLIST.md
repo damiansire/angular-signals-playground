@@ -621,7 +621,7 @@ entrar desarma a Angie en luz y se hace noche, la costura con el prólogo.
       empezando, "Así que… La hora ha llegado…" (lo decide, sonriendo). Cada pensamiento lo pasa QUIEN MIRA con un click (o Enter/Espacio en
       `document`), no un reloj; `T.presentir`/`T.pensar` son solo lo mínimo que tarda en entrar la
       nube. Un triangulito que late abajo a la derecha de la nube (como en un diálogo de juego)
-      aparece con el último punto y dice "tocá para seguir". Sonido y pausa no pasan el
+      aparece cuando el toque ya pasa y dice "tocá para seguir". Sonido y pausa no pasan el
       pensamiento. Por eso el overlay NO va `inert` durante la salida (inerte, el toque no
       llegaba); volver a entrar lo cierra `picked`. La música va por fases (`planDeFase`): el fondo
       sigue y cada pensamiento suena hasta el click siguiente. Las dos frases ocupan la misma celda y cruzan opacidad:
@@ -648,13 +648,15 @@ entrar desarma a Angie en luz y se hace noche, la costura con el prólogo.
 - [ ] (2026-11-09) Los cuatro globos se escriben de a una letra, como los diálogos de un RPG
       (`TECLA_MS`, que es también `--tecla` en el CSS y lo que espera cada globo antes del toque,
       `loQueTardaEnEscribirse`). El globo entra entero y las letras lo llenan: no cambia de tamaño
-      mientras se escribe. Las palabras no se parten al bajar de renglón. Los puntos y el
-      triangulito de "tocá para seguir" esperan a que termine la frase, y los blips de voz duran
+      mientras se escribe. Las palabras no se parten al bajar de renglón. Los puntos esperan a que
+      termine la frase; el triangulito de "tocá para seguir", a que el toque pase (la frase y su
+      voz grabada, `loQueDuraDicho`, en `--sigue`), y los blips de voz duran
       lo mismo que la escritura. Al irse, las letras esperan a que el globo se encoja.
 - [ ] (2026-11-10) El toque sobre un diálogo que se escribe (los globos de la colina y las líneas
       de las cinemáticas) hace lo de un RPG (`queHaceElToque`): a medio escribir lo COMPLETA en el
       acto (`ini--escrito`, `cine__linea--escrita`: letras, puntos y triangulito saltan a su lugar y
-      se cortan los blips), y recién escrito lo PASA. Después de completar, el toque siguiente
+      se cortan los blips; una voz grabada de la colina sigue hasta el final), y recién escrito lo
+      PASA. Pasar antes de que termine una voz la corta: no se encima con la siguiente. Después de completar, el toque siguiente
       espera `RESPIRO_MS` (350) para pasar. Anti-patrones (Damian, con muchos clics): todo toque
       pasaba, y una ráfaga se llevaba dos diálogos juntos sin leer ninguno; en la colina el toque a
       medio escribir quedaba guardado y el globo se iba solo al terminar de escribirse. Probado con
@@ -906,6 +908,14 @@ entrar desarma a Angie en luz y se hace noche, la costura con el prólogo.
       pidiendo unos 150 MB a 3440 px: con 128 MB le pueden faltar pedazos EN REPOSO, que es otro
       defecto.
 
+- [ ] (2026-11-22) El triangulito «tocá para seguir» de cada globo aparece cuando el toque pasa, no
+      cuando se terminó de escribir: con voz grabada el toque espera también a la voz, y el
+      triangulito invitaba a un toque que sólo completaba y cortaba la voz. Medido con el opacity de
+      `::after` cada 40 ms: el primer pensamiento lo muestra a los 3,57 s (antes, 2,19 s).
+- [ ] (2026-11-22) Las fichas de sonido y pausa de la colina no reciben toques cuando se apagan al
+      salir (`pointer-events: none`) ni el foco (`inert`): un toque en esa esquina silenciaba sin
+      que se viera nada, y Tab caía en ellas invisibles.
+
 ## Overlays que tapan el recorrido (prólogo, modales a pantalla completa)
 
 Del design-review del prólogo (2026-07-26): tres de los defectos más graves no
@@ -1002,7 +1012,8 @@ Del minijuego de operadores (2026-11-08):
       caja de diálogo y el HUD a 1440×900, 1280×640 y 1024×700, con la pista abierta: cero solapes
       y sin scroll interno.
 - [ ] Al arreglar un hueco, la nave DISPARA su operador: un proyectil SVG con el nombre en el
-      color de su antena y borde oscuro, como los de la ráfaga. Con `palabra()` el texto salía
+      color de su nave (`VOZ_DE_NAVE`, el de su nombre en la caja; con la luz de la antena, Nave A
+      salía rosa) y borde oscuro, como los de la ráfaga. Con `palabra()` el texto salía
       oscuro sobre el espacio y no se leía. El disparo no suena: acertar es en silencio. Mientras
       dispara, el velo y la hoja se apartan (`prologo--disparo`): tapado, el único aviso del acierto
       pasaba detrás de la hoja.
@@ -1641,6 +1652,17 @@ Del minijuego de operadores (2026-11-08):
       en su último cuadro, con "Empezar de cero" arriba en lugar de "Saltar" y sin el ▸. Recargar
       vuelve a ese cuadro, sin repetir la revelación.
 
+- [ ] (2026-11-22) Lo que termina debajo de una transición no se oculta antes de que lo tape lo que
+      sigue. Defecto resuelto: el prólogo se ocultaba de golpe y el iris de la cinemática 1 se abría
+      sobre la portada del par de Tusi congelada («Se está formando algo · 1 de 8 líneas»). Ahora su
+      último cuadro (la escena, el título y Angie, sin diálogo ni controles) queda de fondo del
+      viaje. Probado con `grabar-zoom.mjs` desde `?prologo=frase-angulo` con un punto guardado del
+      prólogo: el iris se abre sobre los círculos y, al saltar la cinemática, se cierra sobre ellos.
+      Si el prólogo estaba en pantalla completa, al terminar sale de ella: lo que sigue vive afuera
+      del prólogo y no se pintaba.
+- [ ] (2026-11-22) Retomar el prólogo no repite lo que ya pasó: en el primer cuadro después de
+      recargar, los efectos de una sola vez y la línea anterior se marcan como dichos sin sonar.
+
 ## Cinemáticas de capítulo (que se sienta un juego, no un video)
 
 Lista escrita de lo que "que se sienta como la cinemática de un RPG" significa acá. Cada ítem es
@@ -1720,6 +1742,20 @@ verificable con `/cine/<n>?cuadro=<beat>` (fotograma congelado) o `/cine/<n>` (r
 - [ ] (2026-11-13) La regla que atenúa lo lejano alcanza también a `--lejos`. Defecto resuelto: la
       capa lejana del capítulo 6 se llama `cine-e6__capa--lejos` y `[class*='__lejos']` no la
       tocaba: sus moléculas iban con la crema entera. Medido en `/cine/6?cuadro=fin`: opacidad 0,5.
+
+- [ ] (2026-11-22) Un beat no pasa de una cinemática a otra: cada una enciende sólo los de su
+      apertura y sus líneas. Defecto resuelto: el final (12) comparte escena con la revelación (13)
+      y su exploradora y el «ir hacia la salida» del final incompleto colgaban de `nave4-entra`, que
+      sólo se enciende en la revelación. En el final salían tres naves, y en el incompleto la
+      tripulación terminaba de espaldas a la salida. Mirar `/cine/12?cuadro=salida-iris` y
+      `?cuadro=regreso`, con `completo=0` y sin él, y `/cine/13?cuadro=nave4-entra` en las dos.
+- [ ] (2026-11-22) Las ondas de la transmisión (`.k-transmision`) son círculos: sus anillos van
+      `inset: 0` y sin alto se aplastaban en una raya. Se ven en vivo, no con `?cuadro=`.
+- [ ] (2026-11-22) La caja de diálogo nombra a Angie «Angie», como en el prólogo, no «Mascota».
+- [ ] (2026-11-22) En el final, la exploradora entra con la flota (`b-naves`), no antes: con la
+      tarjeta del título ya estaba sola en escena.
+- [ ] (2026-11-22) Pasar con ▸ antes de que termine una voz la corta: `hablar` no corta la grabación
+      anterior, y las dos sonaban encimadas.
 
 ## La práctica (`/practica/carrito`)
 
