@@ -206,7 +206,7 @@
 .tusi__mascot {
   flex: none;
   width: clamp(62px, 9vw, 116px);
-  height: auto;
+  pointer-events: none;
   filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.28));
 }
 .tusi__bubble {

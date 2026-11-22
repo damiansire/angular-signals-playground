@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, ViewEncapsulation } from '@angular/core';
+import { MascotaVivaComponent } from '../../../components-draw/mascota-viva/mascota-viva.component';
 
 /**
  * Capítulo 6 · El dato que todavía viaja. El pico del recorrido: la primera transmisión de la
@@ -18,6 +19,7 @@ import { ChangeDetectionStrategy, Component, ViewEncapsulation } from '@angular/
  */
 @Component({
   selector: 'app-escena-06',
+  imports: [MascotaVivaComponent],
   template: `
     <div class="k-mundo cine-e6" aria-hidden="true">
       <!-- Plano lejano: se mueve poco y al revés que el cercano; entre los dos queda la escena. -->
@@ -232,7 +234,7 @@ import { ChangeDetectionStrategy, Component, ViewEncapsulation } from '@angular/
 
       <div class="k-actor k-mascota" style="--x: 84; --y: 64; --w: 10">
         <div class="k-cuerpo">
-          <img src="angular-mascot-idea.svg" alt="" width="240" height="300" />
+          <app-mascota-viva />
         </div>
       </div>
 

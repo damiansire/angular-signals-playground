@@ -350,10 +350,15 @@
   overflow: visible;
 }
 
-.cine__retrato img {
+.cine__retrato app-mascota-viva {
   width: 82%;
-  height: auto;
   translate: 0 12%;
+}
+
+/* In the cinematics Angie is part of the scene, not a toy: a grab on her must not eat the tap that
+   moves the dialog on. */
+.cine app-mascota-viva {
+  pointer-events: none;
 }
 
 .cine__texto {
@@ -487,7 +492,7 @@
   transform: none;
 }
 
-.cine.b-mascota .k-mascota img {
+.cine.b-mascota .k-mascota app-mascota-viva {
   transform-origin: 50% 100%;
   animation: cine-respira 3.6s ease-in-out infinite alternate;
 }

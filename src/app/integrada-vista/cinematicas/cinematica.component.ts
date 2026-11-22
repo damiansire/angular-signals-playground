@@ -14,6 +14,7 @@ import {
   signal,
   viewChild,
 } from '@angular/core';
+import { MascotaVivaComponent } from '../../components-draw/mascota-viva/mascota-viva.component';
 import { NgComponentOutlet } from '@angular/common';
 
 import { palabrasDeLinea, type PalabraDeLinea } from '../../libs/guion';
@@ -92,7 +93,7 @@ interface Evento {
  */
 @Component({
   selector: 'app-cinematica',
-  imports: [NgComponentOutlet],
+  imports: [NgComponentOutlet, MascotaVivaComponent],
   templateUrl: './cinematica.component.html',
   styleUrl: './cinematica.component.css',
   encapsulation: ViewEncapsulation.None,

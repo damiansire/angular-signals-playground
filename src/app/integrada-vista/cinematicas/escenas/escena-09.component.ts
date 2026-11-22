@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, ViewEncapsulation } from '@angular/core';
+import { MascotaVivaComponent } from '../../../components-draw/mascota-viva/mascota-viva.component';
 
 /**
  * Capítulo 9 · Medir después de pintar. La antena del repetidor aparece en boceto (solo trazo de
@@ -15,6 +16,7 @@ import { ChangeDetectionStrategy, Component, ViewEncapsulation } from '@angular/
  */
 @Component({
   selector: 'app-escena-09',
+  imports: [MascotaVivaComponent],
   template: `
     <div class="k-mundo cine-e9">
       <svg viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
@@ -246,7 +248,7 @@ import { ChangeDetectionStrategy, Component, ViewEncapsulation } from '@angular/
 
       <div class="k-actor k-mascota" style="--x: 84; --y: 64; --w: 10">
         <div class="k-cuerpo">
-          <img src="angular-mascot-idea.svg" alt="" width="240" height="300" />
+          <app-mascota-viva />
         </div>
       </div>
     </div>
