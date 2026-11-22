@@ -16,8 +16,9 @@ sub-nivel, contando el sub-nivel desde 1.
 - **Cada concepto entra cuando la historia lo necesita**, y cada desafío es un aparato del mundo (una
   caja, una baliza, un repetidor), no un ejercicio suelto.
 - **La primera interacción llega antes de los 60 segundos** (J8, 2026-11-22), medidos con el reloj
-  del guion, como el prólogo. Hoy no se cumple: hay que pasar el aviso (6 s), la cámara (5,6 s), la
-  colina (20 s) y 29,4 s del prólogo antes del primer desafío, el minijuego de operadores: unos 61 s.
+  del guion, como el prólogo. Hoy no se cumple: hay que pasar el aviso (6 s), la caída de Angie hecha luz
+  hasta que amanece (6,9 s), la colina (20 s) y 29,4 s del prólogo antes del primer desafío, el
+  minijuego de operadores: unos 62 s.
   El prólogo entero son 67 líneas y 4 min 21 s de reloj, sin contar el minijuego, el manual ni el
   árbol.
 - **Siguen las reglas del guion** (`REGLAS_GUION` en `cinematica-guion.ts`): ocho palabras por línea

@@ -14,7 +14,8 @@ click del aviso lleve directo ahí.
 
 **Con algo para retomar, el toque del aviso entra a la historia sin pasar por la colina**
 (`despuesDelAviso` en `retomar.ts`). El toque desbloquea el sonido con la preferencia que tenga el
-aviso, se saltea la prueba de un oído al otro y el alejarse desde el ojo, y la pantalla de inicio se
+aviso, se saltea la prueba de un oído al otro y el alejarse desde el ojo (desde el 2026-11-23, la
+caída de Angie hecha luz hasta la colina), y la pantalla de inicio se
 desvanece entera, con el aviso todavía encima, mientras entra la historia: el comienzo desde su
 línea, o el viaje donde quedó. El destino es el mismo que elige `entradaDeLaHistoria` al entrar desde
 la colina.

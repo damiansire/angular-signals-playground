@@ -588,7 +588,8 @@ entrar desarma a Angie en luz y se hace noche, la costura con el prólogo.
       una ceja levantada se leía preocupada; con las cejas a ±16-18° y los párpados más
       inclinados, triste. Mirarla con una lupa (la mascota clonada a 2000 px) Y a tamaño real.
 - [ ] Angie YA ESTÁ sentada en la piedra del CENTRO cuando aparece la colina: no camina hasta
-      ella (la caminata se sacó; `sentarse(deUna)` asienta los muelles sin animar la bajada, así no
+      ella (desde el 2026-11-23 la colina aparece de noche sin ella y Angie vuelve de la luz que cae,
+      ya sentada en la piedra; la caminata se sacó; `sentarse(deUna)` asienta los muelles sin animar la bajada, así no
       se ve que recién llega). Sentada es de frente (`mv--pensativa`), mirando al sol
       (`MIRA_AL_SOL`), con los brazos al costado y las piernas colgando del borde, balanceándose a
       destiempo. La cara es MELANCÓLICA (2026-11-09): párpados apenas caídos y la boca casi recta,
@@ -690,45 +691,28 @@ entrar desarma a Angie en luz y se hace noche, la costura con el prólogo.
       continúa sin sonido y los botones de sonido de la colina lo reflejan. Con sonido, su toque es
       el gesto que el navegador exige: suena la prueba de un oído al otro (`planDeLaPrueba`), la
       copa que suena golpea y Angie se vuelca hacia ese lado (`inclinarse`), y en el acorde salta.
-      Después la CÁMARA SE ALEJA como en Powers of Ten (2026-11-09, `cuadroDelViaje`): la noche
-      era lo que Angie miraba, y se va adentro de su OJO. Dos tramos: (a) el CIERRE
-      (`SE_CIERRA_MS`): el aviso SE ACHICA DESDE EL PRIMER CUADRO, despacio al principio en
-      escala (`v = u²`), hasta CERO en el negro del ojo (#0f0f11), en el medio de la pantalla (ver
-      "El círculo del aviso se cierra en el MEDIO"), y mientras se achica su borde se
-      redondea en un círculo blando (máscara con `--aa-aire`) hasta el que cabe adentro
-      (`aireQueCabe`); el negro aparece ALREDEDOR porque el aviso se aleja; el texto se va
-      primero; (b) la cámara se ALEJA (`ALEJARSE_MS`) del ojo a la cara, a
-      Angie en la piedra y a la colina entera, en escala pareja (cada tramo de tiempo divide la
-      escala por lo mismo); arranca desde ADENTRO del ojo izquierdo (`MANCHA`, el negro lejos del
-      párpado, del borde y del brillo pensativo; `profundidadDesdeElOjo`: las cuatro esquinas, en
-      el dibujo del ojo, caen adentro con margen ×1,2, tope 900); los dos tramos se pisan: la
-      cámara arranca (`SE_ALEJA_DESDE_MS`) cuando el aviso ya es una mota, y la pantalla queda toda
-      negra apenas un tercio de segundo; después asoma el borde del ojo, su
-      brillo, la cara, Angie y la colina. La BOCA queda cerrada todo el viaje, como siempre, y
-      Angie no parpadea mientras dura (`sinParpadear`). El título de la colina entra recién al
-      llegar (`llego`): antes se vería gigante. Lo que NO puede pasar (anti-patrones): un IRIS
-      NEGRO que se cierra hacia el medio sobre el aviso quieto (2026-11-09, Damian: "no se hace
-      realmente un zoom out", se lee como que lo negro tapa, no como alejarse); el aviso que se
-      achica parejo en escala hasta 0,004 en un segundo (cada 140 ms la mitad: a los 200 ms ya iba
-      por un tercio y se leía como un salto; por eso arranca despacio, a los 300 ms sigue arriba
-      de 0,6); un zoom en
-      línea recta (el ojo pasaba en un parpadeo y la colina se arrastraba); la colina en
-      RECTÁNGULOS (animada por el compositor, el navegador la pintaba una sola vez a la escala del
-      arranque: por eso va cuadro a cuadro con `requestAnimationFrame`, y cada cuadro se vuelve a
-      dibujar); el negro corrido (la cara se mueve sola y a cientos de aumentos dos píxeles se
-      notan: la cámara SIGUE al punto del ojo cada cuadro, con su matriz de pantalla; los ojos del
-      perfil también existen, apagados, y miden cero); un PARPADEO en el viaje (abría la pantalla
-      negra de golpe); un cuadro sin aviso al arrancar (el primero se pinta antes de prender la
-      máscara); texto del aviso legible mientras se va; un PUNTO que queda en el medio y viaja
-      hasta la colina (se leía como algo nuevo: el aviso termina en cero antes de que la cámara se
-      aleje; desde el 2026-11-14 deja de dibujarse cuando la cámara arranca, con menos de 12 px a
-      3440 de ancho y 3 px en un celular); la pantalla NEGRA más de medio segundo (uno detrás del otro y con margen ×2, quedaba
-      un segundo y medio: se leía como que se había colgado); cortes entre tramos; más de unos 6 s; arrancar con la cara a la vista (medida por su
-      caja de pantalla, una figura girada y estirada por los muelles dejaba un borde a la vista; y
-      a cientos de aumentos se pinta más angosta que su geometría: de ahí el margen); el aviso de
-      vuelta entero un cuadro al llegar (queda en escala 0 hasta que `listo` lo oculta). Antes
-      arrancaba en la boca abierta, de #940054: lo que se iba era oscuro y se leía como algo ajeno
-      a la boca; en el negro del ojo, la noche y el ojo son del mismo color. Defectos viejos que
+      Después Angie SE VUELVE LUZ y CAE EN SU PLANETITA (2026-11-23, `cuadroDeLaCaida`; reemplaza
+      la cámara que se alejaba desde su ojo, que a Damian le parecía rara): se aplasta sobre los
+      pies, salta y estalla en una estrella rosa con cola; la cámara sube detrás de ella, la noche
+      del aviso baja con un borde suave y se abre el espacio con el planetita lejos y su sol; la
+      estrella hace un arco y cae mientras la cámara baja a la cima del planeta, pareja en escala;
+      entra en su aire, cruza unas nubes y debajo está la colina, de noche, a su tamaño real (no se
+      escala nunca: el que se escala es el planeta, un SVG chico). La estrella cae sobre la piedra
+      (la del planeta es la MISMA de la colina, `piedra-de-la-colina.ts`, y termina justo encima
+      de ella). En el cuadro del choque el aviso deja de dibujarse y la luz que se abre sobre la piedra
+      ya es de la colina: nace donde estaba la estrella y de su tamaño (el aviso se lo pasa en
+      `aterriza`), Angie vuelve de esa luz sentada en la piedra (crece de 0,25
+      a 1,12 y se asienta) y amanece: la noche se levanta, las estrellas se apagan y sale el sol
+      (`aterrizar`, `ALBA_MS`). El título de la colina entra cuando ya es de día (`llego`). Es la
+      llegada de Angie al SignalVerso, mucho antes que la tripulación: el principio de su espera
+      en la colina. Lo que NO puede pasar: la colina agrandada (era lo que pedía cientos de MB de
+      memoria de video); un cuadro de la colina de día antes de que llegue Angie; Angie entera un
+      cuadro antes de volver de la luz; la estrella fuera de la pantalla en algún momento del
+      vuelo; la piedra del planeta corrida de la de la colina al llegar; un borde duro donde la
+      noche se separa del espacio (se leía como una cortina); el planeta iluminado que pasa a una
+      colina mucho más oscura detrás de las nubes (el aire del planeta termina en el color de la
+      noche de la colina); la estrella que se achica o se corre al volverse la luz del choque; el
+      título antes de que salga el sol. Defectos viejos que
       siguen valiendo: un
       rectángulo que se achica se leía como una ventana; nubes oscuras sobre la cara, como humo
       de explosión. Los cuadros pausados NO muestran los rectángulos, porque pausar le da tiempo
@@ -771,7 +755,8 @@ entrar desarma a Angie en luz y se hace noche, la costura con el prólogo.
       con su botón.
 - [ ] Ninguna capa que lee lo de atrás (`mix-blend-mode`, `backdrop-filter`) queda prendida en el
       aviso ni en la colina mientras no hace falta. Las capas del atardecer multiplican recién con
-      `ini--atardecer` / `ini--noche`, y la ficha "Sonido" del aviso es casi opaca y sin
+      `ini--atardecer` / `ini--noche` (y la penumbra, mientras la colina espera de noche y amanece,
+      con `ini--de-noche`; al terminar el amanecer deja de multiplicar), y la ficha "Sonido" del aviso es casi opaca y sin
       desenfoque. Defecto resuelto (2026-11-10, Opera Neon en Windows): aunque estuvieran en
       opacidad 0, hacían que el navegador dibujara a pedazos lo animado de encima. Se borraban
       letras de la ola del llamado, el cuerpo de Angie, el sol y las fichas, y el aviso se cortaba
@@ -792,6 +777,10 @@ entrar desarma a Angie en luz y se hace noche, la costura con el prólogo.
       Opera aparte (Playwright, `executablePath` y perfil propio) con
       `--force-gpu-mem-available-mb=128`. Se mide con un trace `disabled-by-default-cc.debug`: el
       `LayerTreeHostImpl:snapshot` trae `gpu_memory_usage` y `contents_scale` de cada tile.
+      **El zoom desde el ojo ya no existe (2026-11-23).** Lo reemplazó la caída de la estrella (ver el
+      aviso de auriculares, arriba). Los cinco ítems que siguen sobre el zoom quedan como historia y no se
+      verifican; lo que vale de ellos para la caída está en «La caída de la estrella no destella», debajo.
+
 - [ ] (2026-11-10) El círculo del aviso se cierra en el MEDIO de la pantalla: la cámara lleva el ojo
       de Angie al medio mientras el aviso se cierra y lo devuelve a su lugar a medida que se aleja,
       parejo en escala (`corridaDeLaCamara`: a la mitad del viaje en escala, a la mitad del camino).
@@ -907,6 +896,52 @@ entrar desarma a Angie en luz y se hace noche, la costura con el prólogo.
       colina, en `app-integrada-vista` ni en `html`, nada oculto ni inerte. La colina quieta sigue
       pidiendo unos 150 MB a 3440 px: con 128 MB le pueden faltar pedazos EN REPOSO, que es otro
       defecto.
+- [ ] (2026-11-23) La caída de la estrella no destella: a 3440×1300 con la memoria normal, con
+      `--force-gpu-mem-available-mb=256` y con 128, a 1440×900, 1280×640 y 390×844, ningún cuadro
+      con franjas del fondo de la página ni con la colina de día. Defectos resueltos al hacerla:
+      (1) Con 128 MB, 17 destellos: franjas claras abajo mientras Angie salta y la noche se va, y
+      la colina un cuadro de día al cruzar las nubes. Causas: la noche que se desliza tenía capa
+      propia encima del espacio (dos capas a pantalla entera más la de lo que va arriba); la Angie
+      del aviso volvía a arrancar sus loops al cambiar de momento, después de aquietarlos, y con
+      ellos su capa partía el resto en tres (se aquietan otra vez los primeros cuadros,
+      `CUADROS_QUE_SE_AQUIETA`); la colina aparecía con sus loops andando y cada uno le daba capa a
+      todo lo de encima, la noche que multiplica entre ellos (quedan quietos de noche y en el
+      amanecer, `ini--de-noche`); y el amanecer eran transiciones y animaciones del
+      compositor (la noche, las estrellas, el sol, la vuelta de Angie), cada una con su capa, en el
+      mismo cuadro en que despertaban los loops: 127 MB de 128. Ahora todo va cuadro a cuadro en
+      una sola capa: el pico es 62 MB y 0 destellos en dos corridas con 128 MB.
+      (2) Al empezar a subir la cámara, una franja gris clara arriba: el borde suave de la noche
+      entraba de golpe con el 40 % del alto y dejaba ver el espacio todavía a medio aparecer sobre
+      el fondo claro de la página. El borde crece con lo que la noche bajó, y el espacio ya es
+      opaco antes de que la noche se mueva.
+      (3) Un salto de brillo detrás de las nubes: el planeta todavía iluminado y la colina de noche
+      mucho más oscura. El aire del planeta termina en el color de la penumbra de la colina.
+      Probado y descartado: el brillo (`filter`) en la vuelta de Angie (una capa más en el choque;
+      la luz del choque ya es ese brillo). Tirones, en tandas alternadas con la versión anterior a
+      1440×900 (Edge sin pantalla): el peor de 200–400 ms contra 500–617 de la cámara del ojo. Al
+      llegar, los 76 loops a velocidad 1, nada oculto ni inerte, sin estilos en línea. Sin
+      movimiento no hay caída: la colina de día con su título. Con partida guardada el aviso sigue
+      directo a la historia, como antes.
+      (4) Con la PC cargada (otra sesión con dos Edge de Playwright, 70 % de CPU), de 6 a 13
+      destellos con 128 MB en el primer medio segundo del amanecer, franjas del fondo abajo,
+      contra 0 de la cámara del ojo en tandas alternadas. Causa: la noche de la colina multiplica,
+      y eso le da capa propia a la colina y otra al aviso que está encima, las dos a pantalla
+      entera; el aviso seguía dibujando la luz del choque durante el primer medio segundo del
+      amanecer; y el amanecer redibuja la colina en cada cuadro. Tres capas a pantalla entera más el redibujado
+      no entraban. Además los loops de la Angie de la colina viven en otro componente y
+      `.ini--de-noche *` no los alcanza: 35 capas al aterrizar. Ahora el aviso se va
+      (`display: none`) en el cuadro del choque, la luz del choque la dibuja la colina en su capa,
+      el cielo empieza tres cuadros después, y los loops de la mascota se aquietan por script de
+      noche y despiertan tres cuadros después del amanecer. Medido con 128 MB: 0 destellos en dos
+      corridas, sin avisos de memoria; con carga artificial al 100 % de CPU, 0 y 5 contra 0 y 3 de
+      la cámara del ojo, y esos 5 son falsos positivos (nubes rápidas con cuadros salteados, sin
+      franjas). Una medición suelta no sirve: con la misma versión, 0 destellos con la PC tranquila
+      y 10 con la otra sesión corriendo.
+      (5) A 3396×1355 (la ventana de Damian) y a 3440×1300 con 128 MB, un destello suelto mientras
+      Angie salta: la noche de la colina multiplicaba desde el primer toque, con la colina todavía
+      oculta bajo el aviso, y eso solo ya daba tres capas a pantalla entera. La noche se prende
+      ahora en el cuadro en que la colina vuelve a dibujarse bajo las nubes (`anochece`): una sola
+      capa mientras Angie salta, y 0 destellos en cuatro corridas, dos con la PC cargada.
 
 - [ ] (2026-11-22) El triangulito «tocá para seguir» de cada globo aparece cuando el toque pasa, no
       cuando se terminó de escribir: con voz grabada el toque espera también a la voz, y el
