@@ -1,2 +1,5 @@
 # Local dev-server URLs referenced in the docs (not reachable in CI).
 http://localhost:4200
+# Placeholder email of the Signal Forms page (level 7), quoted in the step-by-step scripts.
+# Lychee reads «ana@nave.io» as a relative file path.
+ana@nave\.io
