@@ -15,14 +15,17 @@ sub-nivel, contando el sub-nivel desde 1.
 - **No existe "Nivel N".** Quien juega ve lugares y momentos de la historia, no un temario.
 - **Cada concepto entra cuando la historia lo necesita**, y cada desafío es un aparato del mundo (una
   caja, una baliza, un repetidor), no un ejercicio suelto.
-- **Propuesta:** la primera interacción llega antes de los 60 segundos. Hoy hay que pasar el aviso,
-  la colina y 29 s del prólogo antes del primer desafío, el minijuego de operadores. El prólogo entero
-  son 67 líneas y 4 min 21 s de reloj, sin contar el minijuego, el manual ni el árbol (2026-11-22).
+- **La primera interacción llega antes de los 60 segundos** (J8, 2026-11-22), medidos con el reloj
+  del guion, como el prólogo. Hoy no se cumple: hay que pasar el aviso (6 s), la cámara (5,6 s), la
+  colina (20 s) y 29,4 s del prólogo antes del primer desafío, el minijuego de operadores: unos 61 s.
+  El prólogo entero son 67 líneas y 4 min 21 s de reloj, sin contar el minijuego, el manual ni el
+  árbol.
 - **Siguen las reglas del guion** (`REGLAS_GUION` en `cinematica-guion.ts`): ocho palabras por línea
   en pantalla, sin raya, y el reloj derivado del texto (`armarReloj` en `prologo-guion.ts`).
 - **Siguen las reglas de juego de
-  [ADR 0002](../adr/0002-capa-de-juego-cinematicas-partida-y-sonido.md)**: silencio al acertar y,
-  salvo lo que se decida sobre el final, no se bloquea el avance.
+  [ADR 0002](../adr/0002-capa-de-juego-cinematicas-partida-y-sonido.md)**: silencio al acertar y no
+  se bloquea el avance, salvo en el desafío final
+  ([ADR 0028](../adr/0028-el-final-se-resuelve-para-escapar.md)).
 
 ## Mapa
 
@@ -144,7 +147,9 @@ cumplida (ADR 0014), y "Seguir la historia" en la página 5 sigue con `anom-leye
 pantallas salieron de la molécula, y la sexta pasó a la historia con La voz y Angie.
 
 La bitácora, que iba a abrir el manual suelto, se retiró con la molécula (ADR 0021): hoy quien
-saltea el prólogo no tiene dónde leerlo, y nadie puede volver a una página.
+saltea el prólogo no tiene dónde leerlo, y nadie puede volver a una página. Cuando vuelva, es el
+cuaderno de leyes, ahora por etapa, y la pregunta del viaje ("¿Quién le avisó a la pantalla?") sigue
+como hilo hasta la penúltima etapa (J7, 2026-11-22).
 
 ### Adentro
 
@@ -157,7 +162,9 @@ caótico." (`dentro-caotico`), la línea que ya se escuchó desde el sol.
    caótico."
 2. "¿Escucharon eso?" (`react-escucharon`) y "¿Quién ha hablado?" (`react-quien`).
 3. Llegan las luces de la colina y chocan, y Angie aparece. Hoy el choque cae en
-   `reclamo-quien-eres`.
+   `reclamo-quien-eres`. Lo que choca son sus luces, así que los átomos de la fusión llevan los
+   colores de `COLORES_DE_LUZ` (`inicio-angie.ts`) y no ámbar y menta (T8, 2026-11-22; falta en el
+   código).
 4. "El caos es orden." y su tesis (`orden-caos-es-orden`, `orden-no-comprenden`,
    `orden-malinterpretado`), con el par de Tusi como demostración: dos círculos de movimiento
    uniforme.
@@ -187,7 +194,9 @@ La meta de la tripulación cambia en el camino, y eso ordena los arcos: primero 
 moverse, después comunicarse con la exploradora, y al final, la verdad.
 
 Cada etapa lleva qué quiere la tripulación, la ley (la de hoy, de `cinematicas-datos.ts`), el objeto
-de mundo (sacado de las cinemáticas actuales), el giro y la pista que siembra.
+de mundo (sacado de las cinemáticas actuales), el giro y la pista que siembra. Toda etapa abre con
+su objeto de mundo (M1, 2026-11-22): hoy, a los 3 s de cada cinemática, los doce capítulos ya lo
+muestran.
 
 Desde el 2026-11-09 el cuerpo se juega como un viaje (ADR 0007): después del prólogo, cada etapa
 abre con la cinemática de su capítulo y sigue con sus desafíos como páginas de la hoja del manual,
@@ -260,13 +269,60 @@ puedo intervenir." (línea nueva).
 
 Toma de 6/2 (`rxResource`), de 8/2 (`toSignal`, `toObservable` y `untracked`) y de 10/1
 (`debounceTime` con `switchMap`), y vuelven los operadores del minijuego: los que al principio no
-alcanzaban, ahora funcionan traducidos a signals. El sistema concreto está en
-[pendientes](./pendientes.md).
+alcanzaban, ahora funcionan traducidos a signals (J4, 2026-11-22).
+
+### El desafío final: el motor de salida
+
+Hay que resolverlo para escapar, y Angie ayuda un poco más con cada intento, así nunca es un muro
+([ADR 0028](../adr/0028-el-final-se-resuelve-para-escapar.md)). Es un solo sistema, el motor que los
+saca, con seis huecos: tres de la tripulación y tres de Angie.
+
+```ts
+const rumbo = toSignal(toObservable(viento).pipe(debounceTime(400), switchMap(calcularRumbo)));
+const empuje = rxResource({
+  params: () => rumbo(),
+  stream: ({ params }) =>
+    carga$.pipe(
+      filter((c) => c === 'combustible'),
+      map(() => params.velocidad * 2),
+      tap((v) => panel.mostrar(v)),
+    ),
+});
+effect(() => motor.empujar(empuje.value(), untracked(escudo)));
+```
+
+| Hueco               | De quién | Opciones, la rota primero                        | Qué pasa con la rota                                       | Viene de  |
+| ------------------- | -------- | ------------------------------------------------ | ---------------------------------------------------------- | --------- |
+| `filter`            | Nave B   | `tap` · `map` · `filter`                         | El agua llega al motor                                     | Minijuego |
+| `map`               | Capitán  | `tap` · `filter` · `map`                         | Al motor le llega la carga, no el empuje                   | Minijuego |
+| `tap`               | Nave A   | `map` · `filter` · `tap`                         | El panel se ve, pero al motor no le llega nada             | Minijuego |
+| `toSignal(`         | Angie    | `.subscribe((r) => (rumbo = r))` · `toSignal(`   | El rumbo queda en una variable y el empuje nunca se entera | 8/2       |
+| `rxResource({`      | Angie    | `effect` con `subscribe` a mano · `rxResource({` | Cada rumbo nuevo deja otra suscripción viva                | 6/2       |
+| `untracked(escudo)` | Angie    | `escudo()` · `untracked(escudo)`                 | Cada cambio del escudo dispara un empuje de más            | 8/2       |
+
+- **Los huecos de la tripulación van primero** y son los del minijuego, en el mismo orden de
+  opciones: los reconocen, y esta vez el motor responde.
+- **`debounceTime` y `switchMap` ya están escritos**, de La tormenta: el viento sopla a ráfagas y el
+  rumbo se calcula cuando se calma.
+- **Dos lecturas:** la distancia al borde, que baja con cada hueco sano, y los avisos de más, que
+  suben con cada pieza rota. El último hueco sano abre la salida, sin cartel.
+- **La ayuda de Angie**, por intento fallido: qué hizo la pieza elegida, después el renglón, y al
+  final solo dos opciones en ese hueco.
+
+Es un `ManipulableChallenge` con seis perillas, así que la regla se prueba como función pura con el
+barrido de los demás desafíos.
 
 ## Epílogo
 
 La colina otra vez, ahora con todos. Helado de chocolate y las papas fritas que la exploradora
-pisó. Angie ya no mira el sol con melancolía. "Este mundo también es casa." (`c12-casa`).
+pisó. Angie ya no mira el sol con melancolía. "Este mundo también es casa." (`c12-casa`). Puede
+insinuar que la tripulación empieza a cambiar, porque Signal Space transforma con el tiempo (H4).
+
+## Después del final: la heladería de la colina
+
+`/practica/carrito` pasa a ser "la heladería de la colina" (J6, 2026-11-22): un juego para después
+del final, con la misma lógica de `cart.model.ts` y los productos del epílogo (el helado de
+chocolate, las papas fritas).
 
 ## Los 42 desafíos
 
@@ -287,8 +343,12 @@ pisó. Angie ya no mira el sol con melancolía. "Este mundo también es casa." (
 | Quien lee, avisa        | 11/1 Change detection sin Zone.js                                                                                                                                                                                 |
 
 Son 6 + 15 + 15 + 6 = 42. Las cinco leyes del manual y la de Signal Space llevan el desafío adentro
-de su página, sobre el mismo código que la demo; los otros 36 son de perilla (`*-systems.ts`). Los desafíos que quizá
-conviene mover o juntar están en [pendientes](./pendientes.md).
+de su página, sobre el mismo código que la demo; los otros 36 son de perilla (`*-systems.ts`).
+
+Algunos se pisan o encajarían mejor en otro lado: 1/1 (variables, antes de signals) podría ir al
+manual de a bordo; 3/2, 3/3 y 9/2 enseñan tres veces la limpieza de un efecto; 10/1 a 10/3 son tres
+formas del mismo debounce, y la de RxJS ya vive en el final. Se revisan al rehacer cada etapa, sin
+perder ninguna ley (J5, 2026-11-22).
 
 ## Lo que se reusa y lo que se rehace
 
@@ -308,3 +368,25 @@ conviene mover o juntar están en [pendientes](./pendientes.md).
 | Las 42 pantallas de los desafíos             | Pasan a ser aparatos del mundo                  |
 | `cinematicas/escenas/`                       | Las cinemáticas por capítulo pasan a ser etapas |
 | La bitácora, `/cine/<n>` y la URL `?nivel=`  | Están atadas a los números de capítulo          |
+
+## Cómo se construye
+
+Decidido el 2026-11-22:
+
+- **Una etapa por vez (T3).** La historia nueva crece al lado del recorrido actual, y cada etapa
+  nueva retira lo que reemplaza, para que cada cambio se lea como un diff (`CONTRIBUTING.md`). Así
+  se hicieron el manual de a bordo, que sacó 0/1 a 0/5 de la molécula, y el árbol de Signal Space,
+  que sacó 0/6 y con él la Introducción.
+- **Las pantallas pasan al formato del manual (T13)**: qué hacer, la demo, la escena de la nave y el
+  desafío, en una sola pieza, una etapa por vez, como la Introducción.
+- **La partida migra (T4).** Cada etapa que retire sub-niveles suma su migración en `MIGRACIONES`
+  (`libs/partida.ts`), como las versiones 2 y 3.
+- **El gate de prosa sigue a las pantallas (T6).** Si una pantalla se muda, la raíz del escaneo de
+  `scripts/prose-budget.mjs` se mueve con ella, para que no mida cero sin avisar.
+- **Carpeta nueva, scope nuevo (T2).** Si la historia vive en una carpeta nueva, su fila y su scope
+  se suman a la tabla de `AGENTS.md` en el mismo cambio.
+- **El motor de animación es el del repo (T1).** El prólogo y las cinemáticas usan el método de
+  `/animacion-vectorial` (causa y reacción, planos, luz, resortes, un solo impacto) con CSS, Web
+  Animations, `libs/resorte.ts`, `libs/muelle.ts`, `libs/rastros.ts` y `emitirImpacto`. GSAP queda
+  donde ya está (las láminas del manual y la del árbol); sumarlo al prólogo o a las cinemáticas
+  sería un cambio de stack y pediría su ADR.

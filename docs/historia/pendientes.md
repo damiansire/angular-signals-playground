@@ -8,126 +8,58 @@ fecha y adónde fue. Los ids (H1, J1…) sirven para nombrarlos en una sesión (
 
 ## Historia
 
-- **H2. La familia.** "Extraño a mi familia." (`casa-familia`) queda sin resolver si se quedan a
-  vivir en Signal Space. **Propuesta:** la familia es la tripulación, que estaba incompleta sin la
-  exploradora; en el epílogo están los cuatro.
-- **H3. El nombre.** ¿La exploradora se llamaba Angie? Si es así, ¿por qué no la reconocen?
-  **Propuesta:** la tripulación siempre le dijo "exploradora", y "Angie" es el nombre que tomó en
-  Signal Space. La caja de diálogo lo muestra porque habla para quien juega, no para la tripulación.
-- **H4. Por qué es una gema.** ¿Signal Space transforma a quien entra? Si es así, ¿por qué la
-  tripulación sigue siendo nave? **Propuesta:** el mundo transforma con el tiempo, no al entrar. La
-  tripulación lleva minutos y ella muchísimo tiempo. El epílogo puede insinuar que ellos empiezan a
-  cambiar.
-- **H5. El sol.** El canon propone que el sol de la colina es la anomalía vista desde Signal Space.
-  Falta confirmarlo. El dibujo queda como está: `DESIGN-CHECKLIST.md` ya decidió un sol dibujado, no
-  un átomo.
-- **H8. El guion de la revelación.** Pasado en limpio el 2026-11-09 como la cinemática 13 (ADR
-  0007). Falta que Damian lo lea en pantalla: el ritmo y los huecos entre líneas son una propuesta.
-- **H9. El género.** Angie es ella, pero el prólogo le dice "¿Estás loco?" (`reclamo-loco`) y "tú,
-  tan tranquilo" (`reclamo-armonioso`). Además, un comentario de `prologo-guion.ts` dice "él se
-  NIEGA primero". **Propuesta:** "¿Estás loca?" y "tan tranquila", porque para entonces ya oyeron
-  su voz, y el comentario en femenino.
-- **H10. El registro.** El prólogo tutea ("Sácanos de aquí", "si lo miras desde el ángulo
-  correcto") y las cinemáticas usan voseo ("¿A ella le avisó y a vos no?", "Preguntá"). La interfaz
-  mezclaba ("Haz click" al lado de "Ponete auriculares"); los dos llamados ya dicen "Hacé click".
-  Falta elegir uno para toda la historia. **Propuesta:** voseo, como los docs y casi toda la interfaz.
+- **H2. La familia.** Al volver a casa, la Nave A dice "Extraño a mi familia." (`casa-familia`).
+  Pero no vuelven nunca: al final se quedan a vivir en Signal Space, y esa familia queda colgada.
+  **Propuesta:** la familia que extraña es la tripulación completa, los cuatro con la exploradora.
+  Recién en el epílogo están los cuatro juntos, así que la línea se cumple. (La exploradora es la
+  nave violeta, con los colores de Angie; la Nave A es otra.)
+- **H8. El guion de la revelación.** Damian pidió propuestas (2026-11-22). Tres versiones, todas de
+  tú (H10):
+  - **A. La de hoy, de tú:** "No los encuentro. Voy a entrar." · "¡No! ¡Quédate afuera!" · "Va a
+    entrar igual." · "¿Cómo lo sabes?" · "Porque entré." · "¿Exploradora?" · "Llegué antes que
+    ustedes. Mucho antes." · "No podía decirlo. Ella tenía que entrar." · "Siempre tan aguafiestas."
+  - **B. Con la espera:** la A, y después de "Mucho antes." la Nave B pregunta "¿Cuánto tiempo?" y
+    Angie contesta "Lo suficiente para dejar de apurarlos.". Cuenta en una línea por qué cambió de
+    carácter.
+  - **C. La adivinan por las pistas:** después de "Va a entrar igual.", la Nave B junta las pistas,
+    "Sabías lo del helado. Y la frecuencia.", el capitán pregunta "¿Quién eres?" y Angie dice "La que
+    siempre los apuraba."; sigue con "¿Exploradora?". Premia a quien vio las pistas, pero pierde
+    "Porque entré.".
+
+  **Propuesta:** la B. Cambiar líneas pide regenerar sus voces, y eso gasta crédito.
 
 ## Juego
 
-- **J2. Teclear el hueco.** Elegir ya está hecho (ver abajo). Falta decidir si se suma teclear como
-  variante para quien quiera, validando contra las mismas opciones (mayúsculas, espacios, nombres
-  parecidos).
-- **J3. ¿El final exige resolverlo?** Damian quiere que tengan que resolverlo para escapar, pero
-  [ADR 0002](../adr/0002-capa-de-juego-cinematicas-partida-y-sonido.md) decidió que no se bloquea el
-  avance (25 y 26 de julio). **Propuesta:** el escape pasa al resolverlo, y Angie ayuda un poco más
-  con cada intento, así nunca es un muro. La decisión va en un ADR.
-- **J4. El desafío final concreto.** Qué sistema, cuántos huecos, cuáles le tocan a la tripulación
-  (RxJS) y cuáles a Angie (signals). Toma de 6/2 (`rxResource`), de 8/2 (`toSignal`, `toObservable`
-  y `untracked`) y de 10/1 (`debounceTime` con `switchMap`), y vuelven los operadores del minijuego.
-- **J5. Los desafíos que se repiten.** Algunos se pisan o encajarían mejor en otro lado:
-  - 1/1 (variables, antes de signals) podría ir al manual de a bordo;
-  - 3/2, 3/3 y 9/2 enseñan tres veces la limpieza de un efecto;
-  - 10/1 a 10/3 son tres formas del mismo debounce, y la de RxJS puede ir al final.
-
-  **Propuesta:** revisarlo al rehacer cada etapa, sin perder ninguna ley.
-
-- **J6. El carrito.** `/practica/carrito` es el único ejemplo de práctica, y no es parte de los
-  desafíos ni de la partida. **Propuesta:** "la heladería de la colina", un juego para después del
-  final, con la misma lógica de `cart.model.ts` y los productos del epílogo.
-- **J7. La bitácora y volver a ver.** Con una historia continua, ¿qué se repasa y cómo se vuelve a
-  ver una escena? La pregunta de la barra ("¿Quién le avisó a la pantalla?", que cambia a "Quien
-  lee, avisa." en el último concepto) ya hace de hilo de todo el viaje. **Propuesta:** la bitácora
-  sigue siendo el cuaderno de leyes, ahora por etapa, y la pregunta sigue como hilo hasta la
-  penúltima.
-- **J8. La duración de la apertura.** **Propuesta:** la primera interacción, antes de los 60 s.
-  Se mide con el reloj del guion, como hoy el prólogo.
+- **J2. Escribir el operador.** En el minijuego del prólogo, el hueco se completa tocando uno de
+  tres operadores (hecho, ver J2 en cerrados). La duda era si sumar otra forma: escribir el nombre
+  con el teclado. **Propuesta:** no sumarla. Tocar anda igual en el celular y en la compu, y escribir
+  agrega errores de tipeo que no enseñan nada.
 
 ## Técnica
 
-- **T1. El motor de animación.** `/animacion-vectorial` arma las escenas con SVG y GSAP, y el repo
-  no tiene GSAP. Además, las cinemáticas exigen cero JavaScript de animación (`DESIGN-CHECKLIST.md`),
-  y el bundle inicial anda cerca de su presupuesto: 740 kB, y el prólogo pasó a carga diferida
-  porque lo excedía por 21 kB. **Propuesta:** usar el método del skill (causa y reacción, planos, luz,
-  resortes, un solo impacto) con el motor del repo: CSS, Web Animations, `libs/resorte.ts`,
-  `libs/muelle.ts`, `libs/rastros.ts` y `emitirImpacto`. Sumar GSAP sería un cambio de stack
-  (`CONTRIBUTING.md`) y pediría su ADR. Actualización (2026-11-09): las láminas del manual ya usan
-  GSAP (`EscenaDelManual`), y la del árbol de Signal Space también; el prólogo y las cinemáticas
-  siguen con el motor del repo.
-- **T2. Dónde vive el código nuevo.** La tabla de scopes de `AGENTS.md` es una lista cerrada: si la
-  historia vive en una carpeta nueva, su fila y su scope se suman en el mismo cambio.
-- **T3. Reemplazo por etapas.** `CONTRIBUTING.md` no acepta reescrituras masivas: cada cambio tiene
-  que leerse como un diff. **Propuesta:** la historia nueva crece al lado del recorrido actual, una
-  etapa por vez, y cada etapa nueva retira lo que reemplaza. La primera fue el manual de a bordo
-  (2026-11-09): sacó 0/1 a 0/5 de la molécula. La segunda, el árbol de Signal Space (el mismo día):
-  sacó 0/6, y con él la Introducción entera.
-- **T4. La partida.** `libs/partida.ts` guarda `"concepto/sub"` (con el sub-nivel desde 0) y lo
-  valida contra la cantidad de sub-niveles de cada concepto. Con etapas, esos ids cambian de
-  sentido. Hay dos caminos: subir `VERSION` a 2, y las partidas viejas arrancan de cero como ya prevé
-  ADR 0002, o escribir una migración. Con el manual se eligió migrar: la versión 2 traduce las
-  partidas de la 1 (el viejo `0/5` es el `0/0`, y lo de `0/0` a `0/4` se descarta) y el resto de lo
-  guardado sigue. Con el árbol, la versión 3 corre todo un concepto, punto del recorrido incluido,
-  y descarta lo de la Introducción (ADR 0006). Cada etapa que retire sub-niveles suma su migración
-  en `MIGRACIONES`.
-- **T5. Lo que fija la forma de 0 a 11.** Resuelto el 2026-11-09 (ADR 0006), al sacar la
-  Introducción entera. El número de capítulo quedó como nombre (`CAPITULO_DE_CONCEPTO`, atado al
-  `path` de `signalsRoutesTree`), así que las cinemáticas 1 a 12, el riel, la bitácora y `?nivel=`
-  no se renumeraron. La partida pasó a la versión 3 con su migración. Lo que sigue atado a la
-  posición: `RAW` y `signalsRoutesTree` (mismo largo y orden), `ACTS` y `CONCEPTO_PICO` en
-  `molecule-engine.ts`, y el final, que dibuja doce átomos por número de capítulo.
-- **T12. El estilo de las cinemáticas.** Resuelto el 2026-11-11: el reproductor pasa en el cielo
-  del prólogo (quieto, sin rAF) y arriba dice el nombre de la etapa, no "Capítulo N". Los trazos
-  sueltos de las escenas (hilos, cables, bocetos) se aclararon para leerse de noche.
-- **T13. Las pantallas en la hoja.** En el viaje, las pantallas de los capítulos se leen en la hoja
-  del manual tal como venían de la molécula: su explicación (la pista de Angie) flota en la esquina y
-  sus títulos son técnicos ("Read-only signals: asReadonly()"). **Propuesta:** pasarlas al formato
-  de las páginas del manual (qué hacer, la demo, la escena de la nave y el desafío), una etapa por
-  vez, como se hizo con la Introducción.
-- **T15. Borrar el motor de la molécula.** Resuelto el 2026-11-12
-  ([0021](../adr/0021-el-motor-de-la-molecula-se-borra.md)): la vista tapa la colina mientras el
-  viaje ocupa la pantalla, la pausa vive en `pausa-del-fondo.ts` con su botón en la colina, y lo
-  establecido lo anota la hoja. Se borraron el motor, el riel, la barra, la guía, la bitácora y el
-  CSS de la card.
-- **T6. El gate de prosa.** `scripts/prose-budget.mjs` mide solo los `*.component.html` que están
-  bajo `src/app/signals/**/sub-levels/`. Si las pantallas se mudan, mide cero y pasa sin avisar.
-  Además, una pantalla movida o renombrada arranca sin crédito de línea base, con 8 palabras. La
-  raíz del escaneo se mueve junto con las pantallas. El manual dejó sus cinco pantallas en su
-  carpeta de `signals/`, así que el gate las sigue midiendo.
-- **T7. El sonido.** Si Angie y la exploradora comparten algo del timbre, es una pista más. Hoy, en
-  `libs/sonido.ts`, la exploradora suena en onda cuadrada a 392 Hz (la más aguda y rápida) y Angie
-  en senoidal a 330 Hz, lenta. Además, `sonido.spec.ts` exige que la exploradora tenga la voz más
-  aguda.
-- **T8. La fusión del prólogo.** Los átomos que chocan cuando nace Angie son ámbar y menta, y con el
-  lore nuevo lo que choca son sus luces de la colina. **Propuesta:** que tomen los colores de
-  `COLORES_DE_LUZ` (`inicio-angie.ts`).
-- **T9. Tres nombres para Angie.** El prólogo la llama "Angie", las cinemáticas "Mascota", y la
-  intro de Tusi usa una imagen estática (`public/angular-mascot-idea.svg`). **Propuesta:** "Angie" y
-  el componente vivo (`mascota-viva`) en todos lados.
-- **T10. La captura del README.** `public/preview.jpeg` y el README en
-  inglés se rehacen cuando cambie la vista integrada.
-- **T11. Quien no ve el prólogo.** Cerrado (2026-11-10). Sin movimiento o con menos de 700 px de
-  ancho el prólogo se salteaba entero, y con él el manual de a bordo. Ahora se juega a cualquier
-  ancho (ADR 0012) y, sin movimiento, quieto, de parada en parada (ADR 0013). Lo que se sigue
-  perdiendo sin movimiento son las líneas de la historia entre paradas.
+- **T7. Cómo suenan Angie y la exploradora.** Son la misma persona, pero hoy suenan como dos: la
+  exploradora tiene una voz grabada de Gemini (`csagent-7`) y Angie otra (`commercial-6`), y sus
+  blips también son distintos (`libs/sonido.ts`). La duda es si el sonido tiene que dejar una pista.
+  **Propuesta:** la exploradora habla con la voz de Angie, pero rápida e impaciente. Quien preste
+  atención puede sospechar, y a la primera no se nota. Son 8 líneas (5 del prólogo y 3 de las
+  cinemáticas) que hay que regenerar, y eso gasta crédito.
+- **T10. La foto del README.** `public/preview.jpeg` es la captura que abre el README, y hay que
+  sacarla de nuevo cada vez que cambia la vista integrada. Eso ya es regla en `AGENTS.md`, así que
+  no hay nada que decidir. **Propuesta:** cerrarlo, y sumar un script que la saque solo, como
+  `docs/tarjeta-social/capturar.mjs`, para que regenerarla sea un comando.
+
+## Decidido, falta en el código
+
+Lo decidido el 2026-11-22 que todavía no está hecho:
+
+- **H9 y H10.** Pasar el juego entero a tú y el prólogo a femenino ("¿Estás loca?", "tan
+  tranquila", y el comentario de `prologo-guion.ts`). Cada línea que cambia se queda sin voz hasta
+  regenerarla, y eso gasta crédito.
+- **T8.** Los átomos de la fusión con los colores de `COLORES_DE_LUZ`.
+- **T9.** `mascota-viva` en lugar de `angular-mascot-idea.svg`: está en el reproductor de
+  cinemáticas, en cada `escena-NN` y en `manipulable-system`.
+- **J3 y J4.** El desafío final, como lo describe el recorrido en "La salida".
+- **J6.** La heladería de la colina.
 
 ## Arreglos de docs
 
@@ -149,6 +81,37 @@ Textos que estaban desactualizados y no dependían de la historia nueva. Cerrado
 
 ## Cerrados
 
+- **H3. El nombre** (2026-11-22). La tripulación le dijo siempre "exploradora", y "Angie" es el
+  nombre que tomó en Signal Space. Está en el canon.
+- **H4. Por qué es una gema** (2026-11-22). Signal Space transforma con el tiempo, no al entrar. Está
+  en el canon y en el epílogo del recorrido.
+- **H5. El sol** (2026-11-22). El sol de la colina es la anomalía vista desde Signal Space. Está en
+  el canon.
+- **H9. El género** (2026-11-22). Desde que oyen su voz, le hablan en femenino. Está en el canon;
+  falta en el código.
+- **H10. El registro** (2026-11-22). Todo el juego habla de tú, sin voseo. Está en el canon, en "Cómo
+  hablan"; falta en el código.
+- **J3. ¿El final exige resolverlo?** (2026-11-22). Sí, y Angie ayuda más con cada intento.
+  [ADR 0028](../adr/0028-el-final-se-resuelve-para-escapar.md).
+- **J4. El desafío final concreto** (2026-11-22). El motor de salida, con seis huecos. Está en el
+  recorrido, en "La salida".
+- **J5. Los desafíos que se repiten** (2026-11-22). Se revisan al rehacer cada etapa. Está en el
+  recorrido, en "Los 42 desafíos".
+- **J6. El carrito** (2026-11-22). Pasa a ser la heladería de la colina, para después del final.
+  Está en el recorrido.
+- **J7. La bitácora y volver a ver** (2026-11-22). Cuando vuelva, es el cuaderno de leyes por etapa.
+  Está en el recorrido, en "El manual de a bordo".
+- **J8. La duración de la apertura** (2026-11-22). La primera interacción, antes de los 60 s. Está
+  en los principios del recorrido; hoy son unos 61 s.
+- **M1. Las aperturas desparejas** (2026-11-22). Toda etapa abre con su objeto de mundo, y hoy las
+  doce cinemáticas ya lo muestran a los 3 s. Está en el recorrido, en "El cuerpo".
+- **T1, T2, T3, T4, T6 y T13** (2026-11-22). Cómo se construye la historia nueva: el motor de
+  animación, el scope, una etapa por vez, la partida, el gate de prosa y el formato de las
+  pantallas. Están en el recorrido, en "Cómo se construye".
+- **T8. La fusión del prólogo** (2026-11-22). Los colores de las luces de la colina. Está en el
+  recorrido, en "La voz y Angie"; falta en el código.
+- **T9. Tres nombres para Angie** (2026-11-22). "Angie" y `mascota-viva` en todos lados. Está en el
+  canon, en "Nombres"; falta en el código.
 - **H1. El deseo cortado** (2026-11-09). Eran papas fritas: "Y yo quiero unas papas fritas…"
   (`casa-unas`) se dice entero, con su globo de papas como el del helado, y la exploradora igual
   la pisa. El epílogo las sirve junto al helado de chocolate. Está en el canon y en el recorrido.
@@ -174,10 +137,3 @@ Textos que estaban desactualizados y no dependían de la historia nueva. Cerrado
   forma de tres tarjetas ni el input `integrada` en `app-pagina-del-manual`, sin
   `introduction-systems.ts` (sus seis sistemas de perilla), sin `app-tree` ni
   `posicionesEnElDocumento`, y el barrido cuenta 34.
-
-## Memoria
-
-- **M1. Las aperturas desparejas de las cinemáticas.** Los capítulos 0, 2, 4, 7, 8 y 10 abren solo
-  con el título y las naves; los otros, con un objeto propio. Damian lo dejó en espera hasta definir
-  el enfoque de las cinemáticas, y con el rediseño queda absorbido. **Propuesta de regla para las
-  etapas nuevas:** toda etapa abre con su objeto de mundo.
