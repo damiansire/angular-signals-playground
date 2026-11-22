@@ -34,9 +34,9 @@
     }
   </svg>
 
-  <p hacer>Tocá los tags.</p>
+  <p hacer>Toca los tags.</p>
   <p arreglo class="htt-arreglo">
-    Mové el <code>&lt;/article&gt;</code>.
+    Mueve el <code>&lt;/article&gt;</code>.
     <!-- Cómo se mueve, chiquito y en tinta suave; se pliega cuando ya se lo movió a mano. -->
     <span class="htt-pista" [class.htt-pista--a-la-vista]="pista()" [attr.aria-hidden]="!pista()">
       <span>
@@ -102,7 +102,7 @@
                   [class.htt-hueco--arrastrando]="arrastre() !== null"
                   [style.--arrastre.px]="arrastre()?.dy"
                   [attr.aria-pressed]="arreglado()"
-                  aria-label="Mover el cierre de article: arrastralo, tocalo o usá las flechas"
+                  aria-label="Mover el cierre de article: arrástralo, tócalo o usa las flechas"
                   data-guia="cierre"
                   (click)="moverCierre()"
                   (keydown)="teclaDelCierre($event)"

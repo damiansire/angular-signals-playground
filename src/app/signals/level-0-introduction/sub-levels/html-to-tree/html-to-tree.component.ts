@@ -59,8 +59,8 @@ const PISTA_DEL_ARRASTRE = {
   // En renglones: el globo tiene el ancho de la nave y la pista cortaba en "o / usá". Y cada renglón
   // en trozos que no se parten: con el globo angosto (a 1280 y a 1024 de ancho) el renglón entero no
   // entra, y recortado decía "arrastı". Si no entra, baja el trozo entero.
-  puntero: [['Mantené el click', 'y arrastrá,'], ['o usá ↑ ↓.']],
-  dedo: [['Mantené apretado', 'y arrastrá.']],
+  puntero: [['Mantén el click', 'y arrastra,'], ['o usa ↑ ↓.']],
+  dedo: [['Mantén apretado', 'y arrastra.']],
 } as const;
 
 /** Cuánto hay que mover el puntero para que tocar el cierre sea arrastrarlo. */

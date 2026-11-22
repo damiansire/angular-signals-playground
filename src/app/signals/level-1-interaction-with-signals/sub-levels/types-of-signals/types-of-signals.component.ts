@@ -37,7 +37,7 @@ export class TypesOfSignalsComponent {
       id: 'writable',
       label: 'WritableSignal',
       writable: true,
-      description: 'Se crea con signal(). Podés leerlo y escribirlo con set() / update().',
+      description: 'Se crea con signal(). Puedes leerlo y escribirlo con set() / update().',
       code: [
         { line: 'count = signal(0);', active: true },
         { line: 'count.set(5);', active: false },

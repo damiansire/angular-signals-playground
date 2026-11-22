@@ -2,7 +2,7 @@
   title="Writable Signal"
   [codeLines]="lines()"
   concept="signal.set() reemplaza el valor de un writable signal por uno nuevo."
-  action="Escribí un número y tocá Set."
+  action="Escribe un número y toca Set."
   observe="El contador toma exactamente el valor que escribiste."
 >
   <div class="lab lab__demo">
@@ -14,7 +14,7 @@
           id="signalSetInput"
           [formField]="draftField"
           type="number"
-          placeholder="Escribí un número"
+          placeholder="Escribe un número"
           [attr.aria-invalid]="rejected() ? 'true' : null"
           (input)="clearRejected()"
           (keyup.enter)="setValue()"
@@ -24,7 +24,7 @@
       <span class="lab__lectura">Valor: {{ count() }}</span>
     </div>
     @if (rejected()) {
-      <p class="lab__error" role="alert">Escribí un número: el signal quedó como estaba.</p>
+      <p class="lab__error" role="alert">Escribe un número: el signal quedó como estaba.</p>
     }
   </div>
 </app-column-and-code-layout>

@@ -50,7 +50,7 @@ export class DestroyEffectComponent {
     { line: '  if (this.autoRefresh()) {', active: this.autoRefresh() },
     { line: '    this.intervalSave = setInterval(tick, 1000);', active: this.autoRefresh() },
     { line: '  } else {', active: !this.autoRefresh() },
-    { line: '    // al destruir el hijo nunca llega acá (leak)', active: true },
+    { line: '    // al destruir el hijo nunca llega aquí (leak)', active: true },
     { line: '    clearInterval(this.intervalSave);', active: !this.autoRefresh() },
     { line: '  }', active: false },
     { line: '});', active: false },

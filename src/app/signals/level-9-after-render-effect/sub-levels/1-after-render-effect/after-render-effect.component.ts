@@ -22,7 +22,7 @@ import { AFTER_RENDER_SYSTEM } from '../../after-render-systems';
 })
 export class AfterRenderEffectComponent {
   readonly closingSystem = AFTER_RENDER_SYSTEM;
-  readonly text = signal('Escribí algo y miro su ancho');
+  readonly text = signal('Escribe algo y miro su ancho');
   readonly textField = form(this.text);
   private readonly measured = viewChild<ElementRef<HTMLElement>>('measured');
 

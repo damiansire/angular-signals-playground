@@ -112,7 +112,7 @@ describe('HtmlToTreeComponent', () => {
       const pista = () => el.querySelector('.htt-pista--a-la-vista');
       expect(pista()).toBeNull();
       tocarTodos();
-      expect(pista()?.textContent).toContain('arrastrá');
+      expect(pista()?.textContent).toContain('arrastra');
       expect(pista()?.getAttribute('aria-hidden')).toBe('false');
       el.querySelector('[data-guia="cierre"]')!.dispatchEvent(
         new KeyboardEvent('keydown', { key: 'ArrowDown', cancelable: true }),

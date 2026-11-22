@@ -51,7 +51,7 @@ describe('WritableSignalsComponent', () => {
     expect(component.count()).toBe(7);
     expect(component.rejected()).toBeTrue();
     const text = (fixture.nativeElement as HTMLElement).textContent ?? '';
-    expect(text).toContain('Escribí un número');
+    expect(text).toContain('Escribe un número');
   });
 
   it('setValue rechaza el input vacio en vez de escribir NaN', () => {
