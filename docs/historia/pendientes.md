@@ -8,56 +8,16 @@ fecha y adónde fue. Los ids (H1, J1…) sirven para nombrarlos en una sesión (
 
 ## Historia
 
-- **H2. La familia.** Al volver a casa, la Nave A dice "Extraño a mi familia." (`casa-familia`).
-  Pero no vuelven nunca: al final se quedan a vivir en Signal Space, y esa familia queda colgada.
-  **Propuesta:** la familia que extraña es la tripulación completa, los cuatro con la exploradora.
-  Recién en el epílogo están los cuatro juntos, así que la línea se cumple. (La exploradora es la
-  nave violeta, con los colores de Angie; la Nave A es otra.)
-- **H8. El guion de la revelación.** Damian pidió propuestas (2026-11-22). Tres versiones, todas de
-  tú (H10):
-  - **A. La de hoy, de tú:** "No los encuentro. Voy a entrar." · "¡No! ¡Quédate afuera!" · "Va a
-    entrar igual." · "¿Cómo lo sabes?" · "Porque entré." · "¿Exploradora?" · "Llegué antes que
-    ustedes. Mucho antes." · "No podía decirlo. Ella tenía que entrar." · "Siempre tan aguafiestas."
-  - **B. Con la espera:** la A, y después de "Mucho antes." la Nave B pregunta "¿Cuánto tiempo?" y
-    Angie contesta "Lo suficiente para dejar de apurarlos.". Cuenta en una línea por qué cambió de
-    carácter.
-  - **C. La adivinan por las pistas:** después de "Va a entrar igual.", la Nave B junta las pistas,
-    "Sabías lo del helado. Y la frecuencia.", el capitán pregunta "¿Quién eres?" y Angie dice "La que
-    siempre los apuraba."; sigue con "¿Exploradora?". Premia a quien vio las pistas, pero pierde
-    "Porque entré.".
-
-  **Propuesta:** la B. Cambiar líneas pide regenerar sus voces, y eso gasta crédito.
-
-## Juego
-
-- **J2. Escribir el operador.** En el minijuego del prólogo, el hueco se completa tocando uno de
-  tres operadores (hecho, ver J2 en cerrados). La duda era si sumar otra forma: escribir el nombre
-  con el teclado. **Propuesta:** no sumarla. Tocar anda igual en el celular y en la compu, y escribir
-  agrega errores de tipeo que no enseñan nada.
-
-## Técnica
-
-- **T7. Cómo suenan Angie y la exploradora.** Son la misma persona, pero hoy suenan como dos: la
-  exploradora tiene una voz grabada de Gemini (`csagent-7`) y Angie otra (`commercial-6`), y sus
-  blips también son distintos (`libs/sonido.ts`). La duda es si el sonido tiene que dejar una pista.
-  **Propuesta:** la exploradora habla con la voz de Angie, pero rápida e impaciente. Quien preste
-  atención puede sospechar, y a la primera no se nota. Son 8 líneas (5 del prólogo y 3 de las
-  cinemáticas) que hay que regenerar, y eso gasta crédito.
-- **T10. La foto del README.** `public/preview.jpeg` es la captura que abre el README, y hay que
-  sacarla de nuevo cada vez que cambia la vista integrada. Eso ya es regla en `AGENTS.md`, así que
-  no hay nada que decidir. **Propuesta:** cerrarlo, y sumar un script que la saque solo, como
-  `docs/tarjeta-social/capturar.mjs`, para que regenerarla sea un comando.
+- **H12. Cómo se cuenta la vuelta a casa.** Desde H2 (2026-11-22) el final no se queda en Signal
+  Space: vuelven a casa los cuatro y migran todo de a poco. Falta decidir cómo se ve. **Propuesta:**
+  el epílogo arranca en la colina (la despedida, el helado y las papas fritas) y cierra en el
+  espacio Zone.js, con la primera migración en la pantalla de la nave. "Este mundo también es casa."
+  (`c12-casa`) queda: no se quedan en Signal Space, se lo llevan.
 
 ## Decidido, falta en el código
 
 Lo decidido el 2026-11-22 que todavía no está hecho:
 
-- **H9 y H10.** Pasar el juego entero a tú y el prólogo a femenino ("¿Estás loca?", "tan
-  tranquila", y el comentario de `prologo-guion.ts`). Cada línea que cambia se queda sin voz hasta
-  regenerarla, y eso gasta crédito.
-- **T8.** Los átomos de la fusión con los colores de `COLORES_DE_LUZ`.
-- **T9.** `mascota-viva` en lugar de `angular-mascot-idea.svg`: está en el reproductor de
-  cinemáticas, en cada `escena-NN` y en `manipulable-system`.
 - **J3 y J4.** El desafío final, como lo describe el recorrido en "La salida".
 - **J6.** La heladería de la colina.
 
@@ -81,6 +41,24 @@ Textos que estaban desactualizados y no dependían de la historia nueva. Cerrado
 
 ## Cerrados
 
+- **H2. La familia** (2026-11-22). La familia es la tripulación completa, con la exploradora, y al
+  final vuelven a casa y migran todo de a poco, como el equipo de Angular con signals. Está en el
+  canon y en el epílogo del recorrido; cómo se cuenta la vuelta quedó como H12.
+- **H8. El guion de la revelación** (2026-11-22). La versión B: de tú, y con "¿Cuánto tiempo?" y "Lo
+  suficiente para dejar de apurarlos.". Está en el recorrido, en "La revelación", y en el juego, con
+  voz.
+- **J2. Escribir el operador** (2026-11-22). No se suma: el hueco se completa tocando.
+- **T7. Cómo suenan Angie y la exploradora** (2026-11-22). La exploradora habla con la voz de Angie,
+  rápida e impaciente (`scripts/voces.json`). Está en el canon, en "Pistas sembradas".
+- **T10. La foto del README** (2026-11-22). Se regenera con `node docs/preview/capturar.mjs`, con
+  el servidor local corriendo.
+- **H9 y H10. Tú y femenino** (2026-11-22). El juego entero habla de tú, y en el prólogo el capitán
+  le dice "¿Estás loca?" y "tan tranquila". Las 18 líneas que cambiaron tienen voz nueva.
+- **T8. Los colores de la fusión** (2026-11-22). Las bolas y los átomos del choque usan
+  `COLORES_DE_LUZ`, los de la luz de la colina.
+- **T9. Angie viva en todos lados** (2026-11-22). `mascota-viva` reemplaza a
+  `angular-mascot-idea.svg` en las cinemáticas, el retrato del diálogo, la pista del desafío y la
+  intro de Tusi.
 - **H3. El nombre** (2026-11-22). La tripulación le dijo siempre "exploradora", y "Angie" es el
   nombre que tomó en Signal Space. Está en el canon.
 - **H4. Por qué es una gema** (2026-11-22). Signal Space transforma con el tiempo, no al entrar. Está

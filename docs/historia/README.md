@@ -19,7 +19,10 @@ la cuarta, la exploradora, queda afuera. Adentro no sirve ningún operador de Rx
 que lo que ven como caos es armonía. La voz toma cuerpo: es Angie, y les enseña las reglas del mundo.
 La tripulación aprende e intenta comunicarse con la exploradora. Al final descubre que Angie _es_ la
 exploradora: entró a buscarlos, el mundo la dejó mucho antes, y los esperó. Con lo que aprendieron, y
-con ella ya libre de ayudar, escapan del caos y se quedan a vivir en su mundo.
+con ella ya libre de ayudar, escapan del caos y vuelven a casa los cuatro, con lo que aprendieron.
+En el espacio Zone.js convencen a todos de usar signals, y arman migraciones para pasar las cosas de
+a poco (H2, 2026-11-22): es un guiño a cómo el equipo de Angular empezó a usar signals y fue migrando
+el framework por partes.
 
 ## El SignalVerso
 
@@ -40,13 +43,13 @@ puede insinuar que ellos empiezan a cambiar.
 
 ## Personajes
 
-| Quién          | En el guion              | Qué lo define                                                                                                                                               |
-| -------------- | ------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Capitán        | `cap`                    | Da las órdenes y hace las preguntas que abren cada concepto ("¿Y quién le avisó a la pantalla?")                                                            |
-| Nave A         | `naveA`                  | "Extraño a mi familia." y el antojo que la exploradora pisa: "Y yo quiero unas papas fritas…". Es la que le dice "Siempre tan aguafiestas" a la exploradora |
-| Nave B         | `naveB`                  | "Yo quiero comer helado de chocolate."                                                                                                                      |
-| La exploradora | `nave4`                  | La impaciente: "¡Oigan! Dejen de desear y apúrense, van muy lento." Queda afuera de la anomalía                                                             |
-| Angie          | `voz`, después `mascota` | La gema que espera en la colina, y es la exploradora. Habla tranquila, enseña sin apurar y no dice quién es hasta la penúltima etapa                        |
+| Quién          | En el guion              | Qué lo define                                                                                                                                                                                                           |
+| -------------- | ------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Capitán        | `cap`                    | Da las órdenes y hace las preguntas que abren cada concepto ("¿Y quién le avisó a la pantalla?")                                                                                                                        |
+| Nave A         | `naveA`                  | "Extraño a mi familia." (la familia es la tripulación completa, con la exploradora) y el antojo que la exploradora pisa: "Y yo quiero unas papas fritas…". Es la que le dice "Siempre tan aguafiestas" a la exploradora |
+| Nave B         | `naveB`                  | "Yo quiero comer helado de chocolate."                                                                                                                                                                                  |
+| La exploradora | `nave4`                  | La impaciente: "¡Oigan! Dejen de desear y apúrense, van muy lento." Queda afuera de la anomalía                                                                                                                         |
+| Angie          | `voz`, después `mascota` | La gema que espera en la colina, y es la exploradora. Habla tranquila, enseña sin apurar y no dice quién es hasta la penúltima etapa                                                                                    |
 
 Angie es **ella**. Desde que la tripulación oye su voz, le habla en femenino: "¿Estás loca?" y "tú,
 tan tranquila" (H9, 2026-11-22).
@@ -81,7 +84,7 @@ entre la anomalía y la voz; para la exploradora pasa muchísimo tiempo.
 | Reciben transmisiones de la exploradora desde afuera                                    | Su yo de afuera transmite. Angie sabe qué dice y cómo termina cada mensaje                                                                                                                                            |
 | **Penúltima etapa:** la exploradora avisa que va a entrar, y Angie dice "Porque entré." | Su yo de afuera entra. Signal Space la deja mucho antes en su tiempo, y ahí empieza la espera en la colina. El bucle se cierra                                                                                        |
 | El desafío final: escapar del caos                                                      | Ya puede intervenir, y los ayuda                                                                                                                                                                                      |
-| Epílogo: viven en su mundo                                                              | Ya no espera a nadie                                                                                                                                                                                                  |
+| Epílogo: vuelven a casa y migran de a poco                                              | Vuelve con ellos: es la cuarta de la familia                                                                                                                                                                          |
 
 ## Las reglas del bucle
 
@@ -108,6 +111,8 @@ Permiten adivinar la revelación antes de que llegue. Ninguna lo dice; juntas lo
   vez, lentos." (`c12-lentos`). A Angie se le escapa una vez.
 - **El helado.** Angie nombra el helado de chocolate, que nadie le contó.
 - **El silencio.** Cuando llega la primera transmisión de la exploradora, Angie calla.
+- **La voz.** La exploradora habla con la voz de Angie, rápida e impaciente (T7, 2026-11-22): quien
+  presta atención puede sospechar, y a la primera no se nota.
 - **La frecuencia.** Angie sabe la frecuencia del repetidor que arman para hablar con la exploradora.
 - **"Ella todavía no terminó de hablar."** (`c10-no-termino`): sabe cómo termina el mensaje.
 
@@ -121,7 +126,7 @@ Con el lore nuevo, varias líneas del guion actual se leen distinto la segunda v
 | "No puedo intervenir con ustedes."              | `leccion-no-intervengo`            | No es una regla del mundo: es el bucle               |
 | "…dejar atrás lo que conocen y creen correcto." | `leccion-dejar-atras`, `c11-atras` | Ella ya lo hizo: dejó de ser nave                    |
 | "Ella todavía no terminó de hablar."            | `c10-no-termino`                   | Lo sabe porque es ella                               |
-| "Este mundo también es casa."                   | `c12-casa`                         | El epílogo: se quedan                                |
+| "Este mundo también es casa."                   | `c12-casa`                         | Se lo llevan: vuelven a casa y lo migran de a poco   |
 
 ## Nombres
 

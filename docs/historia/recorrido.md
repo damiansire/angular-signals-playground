@@ -41,7 +41,7 @@ sub-nivel, contando el sub-nivel desde 1.
 | Arco II · La banda vieja | El mapa de rutas · La transmisión · El repetidor · Los pipes se traducen                                                                                   | 5/1 a 8/4 (15) |
 | Arco III · La verdad     | La antena · La tormenta · Quien lee, avisa (penúltima etapa: la revelación)                                                                                | 9/1 a 11/1 (6) |
 | La salida                | Desafío final de signals y RxJS. La tripulación pone sus operadores, Angie pone signals                                                                    | nuevo          |
-| Epílogo                  | La colina, todos juntos                                                                                                                                    | —              |
+| Epílogo                  | La colina, todos juntos, y la vuelta a casa                                                                                                                | —              |
 
 ## La apertura
 
@@ -163,8 +163,7 @@ caótico." (`dentro-caotico`), la línea que ya se escuchó desde el sol.
 2. "¿Escucharon eso?" (`react-escucharon`) y "¿Quién ha hablado?" (`react-quien`).
 3. Llegan las luces de la colina y chocan, y Angie aparece. Hoy el choque cae en
    `reclamo-quien-eres`. Lo que choca son sus luces, así que los átomos de la fusión llevan los
-   colores de `COLORES_DE_LUZ` (`inicio-angie.ts`) y no ámbar y menta (T8, 2026-11-22; falta en el
-   código).
+   colores de `COLORES_DE_LUZ` (`inicio-angie.ts`) y no ámbar y menta (T8, 2026-11-22).
 4. "El caos es orden." y su tesis (`orden-caos-es-orden`, `orden-no-comprenden`,
    `orden-malinterpretado`), con el par de Tusi como demostración: dos círculos de movimiento
    uniforme.
@@ -240,17 +239,20 @@ La meta cambia: hay algo en la banda vieja, y la tripulación quiere comunicarse
 La banda por fin está limpia. La exploradora, desde afuera, avisa que va a entrar. Está hecha
 (2026-11-09) como la cinemática 13, "Porque entré", que va después de la hoja del capítulo 11 y antes
 del final (ids `r-*`). Usa el dibujo del final, con la nave de la exploradora entrando en "Porque
-entré.":
+entré.". Desde el 2026-11-22 (H8) suma "¿Cuánto tiempo?" y "Lo suficiente para dejar de
+apurarlos.": cuenta en una línea por qué la exploradora impaciente es la Angie paciente.
 
 | Quién       | Línea                                    |
 | ----------- | ---------------------------------------- |
 | Exploradora | No los encuentro. Voy a entrar.          |
-| Nave A      | ¡No! ¡Quedate afuera!                    |
+| Nave A      | ¡No! ¡Quédate afuera!                    |
 | Angie       | Va a entrar igual.                       |
-| Capitán     | ¿Cómo lo sabés?                          |
+| Capitán     | ¿Cómo lo sabes?                          |
 | Angie       | Porque entré.                            |
 | Nave A      | ¿Exploradora?                            |
 | Angie       | Llegué antes que ustedes. Mucho antes.   |
+| Nave B      | ¿Cuánto tiempo?                          |
+| Angie       | Lo suficiente para dejar de apurarlos.   |
 | Angie       | No podía decirlo. Ella tenía que entrar. |
 | Nave A      | Siempre tan aguafiestas.                 |
 
@@ -317,6 +319,11 @@ barrido de los demás desafíos.
 La colina otra vez, ahora con todos. Helado de chocolate y las papas fritas que la exploradora
 pisó. Angie ya no mira el sol con melancolía. "Este mundo también es casa." (`c12-casa`). Puede
 insinuar que la tripulación empieza a cambiar, porque Signal Space transforma con el tiempo (H4).
+
+Después vuelven a casa los cuatro, la familia completa (H2, 2026-11-22). En el espacio Zone.js
+convencen a todos de usar signals y arman migraciones para pasar las cosas de a poco, como el
+equipo de Angular cuando empezó a usar signals y migró el framework por partes. Cómo se cuenta esa
+vuelta está en [pendientes](./pendientes.md) (H12).
 
 ## Después del final: la heladería de la colina
 

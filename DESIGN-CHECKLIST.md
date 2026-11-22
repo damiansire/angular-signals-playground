@@ -221,7 +221,7 @@ puede alcanzar" son dos cosas distintas y hay que chequear las dos.
       "tenue a propósito": la pregunta del topbar estaba en 2.7:1 (y contestada, en 3.3:1).
       Tenue es relativo al título, no por debajo de AA. Con la card disuelta el fondo es la
       ESCENA, no el papel: medir contra el píxel real (#c3bdb1 en el peor caso). Los rótulos del
-      desafío ("Desafío · tocá el código", "desfasado") daban 4.7:1 contra el token y 2 a 3.9:1
+      desafío ("Desafío · toca el código", "desfasado") daban 4.7:1 contra el token y 2 a 3.9:1
       contra la escena; el borde del verbo del desafío, 1.1:1.
 - [ ] Gate de contraste sobre el píxel compuesto: en los 42 sub-niveles a 1440 y 375, cada texto
       de la card activa contra la escena real, capturando con el texto y sin él (texto
@@ -451,9 +451,9 @@ posición de la perilla. Estos ítems son los defectos que YA aparecieron.
 - [ ] Una corrida sin evidencia suficiente se pinta NEUTRA, nunca roja: el umbral de acciones sale
       de la solución de cada desafío (`accionesParaSaber`). Con el código correcto y una sola
       vuelta, 3/3 mostraba "1 vivo, 1 esperado" en rojo.
-- [ ] Al fallar (código roto con evidencia) la mascota dice "Esa no era. Mirá la lectura." y nada
-      más; al acertar, silencio. La imagen de la pista pelea contra `.card--dissolve .subhost img`
-      (que agranda toda imagen embebida): selector de tres clases.
+- [ ] Al fallar (código roto con evidencia) la mascota dice "Esa no era. Mira la lectura." y nada
+      más; al acertar, silencio. La mascota de la pista es `app-mascota-viva` (sin `<img>`, ya no
+      pelea con `.card--dissolve .subhost img`), mide 1,35rem y no recibe el puntero.
 - [ ] Los sub-niveles de ancho completo no quedan debajo de la espina vertical: medido a 1280,
       1440 y 1920 px con `getBoundingClientRect` (espina contra eyebrow y bloque de código). Entre
       601 y 1199 px la espina se achica y esos bloques se corren solo lo que falte; por debajo de
@@ -533,13 +533,13 @@ entrar desarma a Angie en luz y se hace noche, la costura con el prólogo.
       renglón a 375 px y sin tocar los pies de Angie ni los interruptores.
 - [ ] Se entra tocando en cualquier lugar de la escena, no solo la lamparita: apuntarle a un foco
       chico era un examen de puntería. Arrastrar a Angie (más de 8 px entre bajar y soltar) no
-      entra, ni tocar un control. El llamado dice "Hacé click para iniciar las aventuras", sin
+      entra, ni tocar un control. El llamado dice "Haz click para iniciar las aventuras", sin
       nombrar la idea, y tiene vida: un cursor hace click al empezar cada vuelta de 2,6 s, la frase
       se mueve en ola detrás (causa y reacción) y la chispa del final salta cuando la ola llega.
       Defecto resuelto: "Tocá para entrar" solo parpadeaba en opacidad y se leía apagado. Llega
       después del título (no antes: competía con la entrada de las letras).
 - [ ] En una pantalla táctil (`(hover: none) and (pointer: coarse)`) no hay click ni cursor: el
-      aviso y la colina dicen "Tocá…" y el cursor deja lugar a un punto que late con los mismos
+      aviso y la colina dicen "Toca…" y el cursor deja lugar a un punto que late con los mismos
       anillos. Las dos frases están en el DOM y el CSS muestra una; cada una con su texto para el
       lector. Probarlo con touch emulado por CDP (`setTouchEmulationEnabled`) y un tap real: el
       ancho de 375 solo no cambia el puntero.
@@ -1019,7 +1019,7 @@ Del minijuego de operadores (2026-11-08):
       pasaba detrás de la hoja.
 - [ ] La hoja dice qué hacer: qué es cada nombre del código (`v`, `c === 'combustible'`), qué tiene que
       salir y la meta de la lectura. Sin esto el hueco era adivinar. Qué tocar lo dice la flecha
-      "tocá acá" sobre el operador: la frase "Tocá el operador marcado" repetía lo mismo.
+      "toca aquí" sobre el operador: la frase "Tocá el operador marcado" repetía lo mismo.
 - [ ] Los huecos se arreglan con `map`, `tap` y `filter`, uno por nave: los tres más simples, con
       un encargo que se dice en una frase (duplicar la velocidad, verla en el panel, sacar el agua).
       Con `scan` y `throttleTime` el primerizo no tenía de dónde sacar qué hacían.
@@ -1756,6 +1756,15 @@ verificable con `/cine/<n>?cuadro=<beat>` (fotograma congelado) o `/cine/<n>` (r
       tarjeta del título ya estaba sola en escena.
 - [ ] (2026-11-22) Pasar con ▸ antes de que termine una voz la corta: `hablar` no corta la grabación
       anterior, y las dos sonaban encimadas.
+- [ ] (2026-11-22) Angie es `app-mascota-viva` en todos lados: escenas de las cinemáticas, retrato
+      de la caja de diálogo, pista del desafío e intro de Tusi. Defecto resuelto: ahí seguía el
+      `angular-mascot-idea.svg` quieto, otro dibujo que la colina y el prólogo. Donde es decorativa
+      lleva `pointer-events: none`: el componente se arrastra, y un toque sobre el retrato podía moverla.
+      Buscar `angular-mascot-idea` en `src/` tiene que dar vacío.
+- [ ] (2026-11-22) La fusión del prólogo usa los colores de la luz de la colina (`COLORES_DE_LUZ`
+      de `inicio-angie.ts`): las bolas se tiñen de rosa y oro a medida que se juntan y los átomos ya
+      nacen así. Era naranja y verde agua, y Angie salía de un choque que no tenía sus colores.
+      Mirar `?prologo=voz-supongo` y `?prologo=reclamo-loco`.
 
 ## La práctica (`/practica/carrito`)
 
