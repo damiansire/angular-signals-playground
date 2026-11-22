@@ -15,7 +15,7 @@ export type MomentoDelCarrito = 'llegada' | 'cantidad' | 'cupon' | 'envio' | 'si
  * lo que la práctica viene a mostrar: vos tocás cantidades y el resto se entera.
  */
 export const GUION_DEL_CARRITO: Readonly<Record<MomentoDelCarrito, LineaDelViaje>> = {
-  llegada: { quien: 'cap', txt: 'Cargamos la bodega.\nVos tocás las cantidades.' },
+  llegada: { quien: 'cap', txt: 'Cargamos la bodega.\nTú tocas las cantidades.' },
   cantidad: { quien: 'naveA', txt: 'Cambió una cantidad.\nEl total se rehízo solo.' },
   cupon: { quien: 'naveB', txt: 'El cupón cambia el total,\nno el carrito.' },
   envio: { quien: 'cap', txt: '¡Envío gratis!\nY nadie lo escribió.' },
