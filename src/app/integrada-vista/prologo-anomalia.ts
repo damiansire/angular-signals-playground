@@ -13,6 +13,7 @@ import { HUECOS_DEL_PROLOGO, type HuecoDelPrologo } from './operadores-del-prolo
 import { PAGINAS_DEL_MANUAL, type PaginaDelManual } from './manual-de-a-bordo';
 import { ARBOL_DE_SIGNAL_SPACE } from './arbol-de-signal-space';
 import { PUNTOS_DEL_PROLOGO } from './puntos-del-prologo';
+import { COLORES_DE_LUZ } from './inicio-angie';
 import { VOCES_GRABADAS } from './voces-grabadas';
 import {
   GUION,
@@ -450,6 +451,25 @@ export function initPrologoAnomalia(host: HTMLElement, opts: PrologoOpciones): (
     ],
     { cx: 0.36, cy: 0.32, r: 0.75 },
   );
+  // Angie's hill lights (`COLORES_DE_LUZ`), shaded like the balls so the fusion reads as the same matter.
+  radial(
+    'pa-luz-a',
+    [
+      [0, '#ffd9ec'],
+      [0.45, COLORES_DE_LUZ[0]],
+      [1, '#9c2560'],
+    ],
+    { cx: 0.36, cy: 0.32, r: 0.75 },
+  );
+  radial(
+    'pa-luz-b',
+    [
+      [0, '#fff1cc'],
+      [0.45, COLORES_DE_LUZ[1]],
+      [1, '#a06a12'],
+    ],
+    { cx: 0.36, cy: 0.32, r: 0.75 },
+  );
   radial('pa-bokeh-a', [
     [0, '#eb9b3c', 0.5],
     [0.7, '#eb9b3c', 0.18],
@@ -639,15 +659,21 @@ export function initPrologoAnomalia(host: HTMLElement, opts: PrologoOpciones): (
       'stroke-dashoffset': 1,
     }),
   );
+  // Each ball carries its hill-light twin, faded in while the fusion gathers them: what collides
+  // when Angie is born are her lights, not the anomaly's amber and mint.
+  const bolasLuz: SVGElement[] = [];
   const bolasG = Array.from({ length: CUERDAS * 2 }, (_, k) => {
     const g = el(patron, 'g');
     el(g, 'circle', { r: 10, fill: k % 2 ? 'url(#pa-bola-b)' : 'url(#pa-bola-a)' });
+    bolasLuz.push(
+      el(g, 'circle', { r: 10, fill: k % 2 ? 'url(#pa-luz-b)' : 'url(#pa-luz-a)', opacity: 0 }),
+    );
     el(g, 'circle', { cx: -3.2, cy: -3.6, r: 2.6, fill: '#fff', opacity: 0.7 });
     return g;
   });
   const atomos = [1, -1].map((s) => {
     const g = el(svg, 'g', { opacity: 0 });
-    const color = s > 0 ? '#f6b562' : '#7fd6bd';
+    const color = s > 0 ? COLORES_DE_LUZ[0] : COLORES_DE_LUZ[1];
     for (const rot of [0, 60, -60]) {
       el(g, 'ellipse', {
         rx: 52,
@@ -658,7 +684,7 @@ export function initPrologoAnomalia(host: HTMLElement, opts: PrologoOpciones): (
         transform: `rotate(${rot})`,
       });
     }
-    el(g, 'circle', { r: 15, fill: s > 0 ? 'url(#pa-bola-a)' : 'url(#pa-bola-b)' });
+    el(g, 'circle', { r: 15, fill: s > 0 ? 'url(#pa-luz-a)' : 'url(#pa-luz-b)' });
     return g;
   });
 
@@ -1628,6 +1654,7 @@ export function initPrologoAnomalia(host: HTMLElement, opts: PrologoOpciones): (
         transform: `translate(${r2(b.x)} ${r2(b.y)}) scale(${r2(Math.max(0.001, s))})`,
         opacity: r2(vivo * (nace > 0 ? 1 : 0)),
       });
+      fijar(bolasLuz[k], { opacity: r2(fusion ? clamp01(fusion.p / 0.3) : 0) });
     });
     const ph = t * 0.0011;
     const circ = circulos(t, T);

@@ -366,7 +366,8 @@ const T = {
 /** Cuánto de la pendiente acompaña su cuerpo: sentada se acomoda a la ladera. */
 const INCLINA_SENTADA = 0.45;
 
-const COLORES_DE_LUZ = ['#ff5fa8', '#ffc65c', '#ffffff', '#ff8ac9'];
+/** Angie's lights on the hill. The prologue's fusion takes the first two: what collides is them. */
+export const COLORES_DE_LUZ = ['#ff5fa8', '#ffc65c', '#ffffff', '#ff8ac9'];
 
 export interface InicioAngie {
   /**
