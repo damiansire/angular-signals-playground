@@ -21,6 +21,7 @@ import {
   turn,
 } from '../../libs/manipulable-challenge';
 import { tokensDeCodigo } from '../../libs/resaltado-de-codigo';
+import { MascotaVivaComponent } from '../../components-draw/mascota-viva/mascota-viva.component';
 
 /**
  * Si Angie puede dar la pista al fallar. Quien monta pantallas enteras en un lugar de la historia
@@ -40,6 +41,7 @@ export const AYUDA_DE_ANGIE = new InjectionToken<boolean>('AYUDA_DE_ANGIE', {
  */
 @Component({
   selector: 'app-manipulable-system',
+  imports: [MascotaVivaComponent],
   templateUrl: './manipulable-system.component.html',
   styleUrl: './manipulable-system.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,

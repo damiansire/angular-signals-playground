@@ -193,12 +193,10 @@
 /* Tres clases a propósito: adentro del recorrido corre la regla global
    `.card--dissolve .subhost img`, que monta toda imagen como pantalla con bisel y la agranda. */
 .ms .ms__pista .ms__pista-mascota {
+  flex: none;
   width: 1.35rem;
-  height: auto;
-  max-height: none;
-  border: 0;
-  border-radius: 0;
-  box-shadow: none;
+  /* A hint glyph, not a toy: a grab here would steal the reader's tap. */
+  pointer-events: none;
 }
 
 @keyframes ms-pista {

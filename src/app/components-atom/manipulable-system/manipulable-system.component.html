@@ -1,5 +1,5 @@
 <section class="ms" [class.ms--banco]="banco()">
-  <p class="ms__eyebrow">{{ healthy() ? 'Desafío · sano' : 'Desafío · tocá el código' }}</p>
+  <p class="ms__eyebrow">{{ healthy() ? 'Desafío · sano' : 'Desafío · toca el código' }}</p>
 
   <div class="ms__code">
     @for (line of lines(); track $index) {
@@ -63,14 +63,8 @@
     <div class="ms__pista-zona" aria-live="polite">
       @if (health() === 'broken') {
         <p class="ms__pista">
-          <img
-            class="ms__pista-mascota"
-            src="angular-mascot-idea.svg"
-            alt=""
-            width="240"
-            height="300"
-          />
-          Esa no era. Mirá la lectura.
+          <app-mascota-viva class="ms__pista-mascota" />
+          Esa no era. Mira la lectura.
         </p>
       }
     </div>

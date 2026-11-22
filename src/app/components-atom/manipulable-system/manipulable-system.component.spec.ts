@@ -122,7 +122,7 @@ describe('ManipulableSystemComponent', () => {
     it('con el código roto accionado, orienta hacia la lectura sin decir qué tocar', () => {
       const fixture = crear();
       fixture.componentInstance.press();
-      expect(pista(fixture)?.textContent?.trim()).toBe('Esa no era. Mirá la lectura.');
+      expect(pista(fixture)?.textContent?.trim()).toBe('Esa no era. Mira la lectura.');
     });
 
     it('al acertar hace silencio: nada de "muy bien"', () => {
