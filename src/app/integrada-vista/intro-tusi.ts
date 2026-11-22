@@ -329,7 +329,7 @@ export function initIntroTusi(host: HTMLElement, options: IntroTusiOptions = {})
 
   helpBtn.addEventListener('click', () => {
     helpOn = !helpOn;
-    helpBtn.textContent = helpOn ? 'Ocultar el círculo' : 'No la veo, ayudame';
+    helpBtn.textContent = helpOn ? 'Ocultar el círculo' : 'No la veo, ayúdame';
     pedirCuadro();
   });
 
@@ -417,8 +417,8 @@ export function initIntroTusi(host: HTMLElement, options: IntroTusiOptions = {})
       soundOn ? 'Silenciar el sonido de la intro' : 'Activar el sonido de la intro',
     );
     ovSoundTxt.textContent = soundOn
-      ? 'Sonido activado · tocá para silenciar'
-      : 'Sonido silenciado · tocá para activar';
+      ? 'Sonido activado · toca para silenciar'
+      : 'Sonido silenciado · toca para activar';
   }
   ovSoundBtn.addEventListener('click', toggleSound);
   const dejarDeOirSonido = sonido().alCambiar(() => {
@@ -547,7 +547,7 @@ export function initIntroTusi(host: HTMLElement, options: IntroTusiOptions = {})
       helpBtn.classList.toggle('in', done);
       if (!done) {
         helpOn = false;
-        helpBtn.textContent = 'No la veo, ayudame';
+        helpBtn.textContent = 'No la veo, ayúdame';
       }
     }
     if (construyendo || flashes.length > 0) pedirCuadro();

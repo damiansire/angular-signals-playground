@@ -166,7 +166,7 @@ export const GUION: readonly LineaGuion[] = [
     id: 'dentro-esquiva-ya',
     junto: true,
     quien: 'naveA',
-    txt: '¡Esquivá, rápido!',
+    txt: '¡Esquiva, rápido!',
   },
   { id: 'dentro-que-es', quien: 'naveB', txt: '¿Qué es esto?' },
   {
@@ -245,7 +245,7 @@ export const GUION: readonly LineaGuion[] = [
     quien: 'naveB',
     txt: '¿Círculos?',
   },
-  { id: 'reclamo-loco', quien: 'cap', txt: '¿Estás loco?' },
+  { id: 'reclamo-loco', quien: 'cap', txt: '¿Estás loca?' },
   // La pregunta que el CHOQUE contesta: la mascota nace acá, ni un segundo antes. Apareciendo sin
   // que nadie la llame es un efecto; apareciendo acá, es una respuesta.
   { id: 'reclamo-quien-eres', quien: 'cap', txt: '¿Quién eres?' },
@@ -256,7 +256,7 @@ export const GUION: readonly LineaGuion[] = [
     quien: 'cap',
     txt: 'Es lo más caótico que vivimos en nuestras vidas…',
   },
-  { id: 'reclamo-tranquilo', quien: 'cap', txt: '…y tú, tan tranquilo, lo llamas armonioso.' },
+  { id: 'reclamo-tranquilo', quien: 'cap', txt: '…y tú, tan tranquila, lo llamas armonioso.' },
 
   // ACTO 5 · la tesis, en tres golpes cada vez más largos. Ya tiene cuerpo: deja de ser "la voz".
   { id: 'orden-caos-es-orden', quien: 'mascota', txt: 'El caos es orden.' },
@@ -268,7 +268,7 @@ export const GUION: readonly LineaGuion[] = [
   },
 
   // ACTO 6 · el pacto, que es el puente al recorrido. Lo que lo hace un pacto y no un favor es que
-  // él se NIEGA primero: no los saca, los enseña. Salir queda del lado de ellos, que es exactamente
+  // ella se NIEGA primero: no los saca, les enseña. Salir queda del lado de ellos, que es exactamente
   // el trato que la app le propone a quien la abre.
   { id: 'leccion-entiendes', quien: 'cap', txt: '¿Tú entiendes este mundo?' },
   { id: 'leccion-sacanos', quien: 'naveB', txt: 'Sácanos de aquí.' },

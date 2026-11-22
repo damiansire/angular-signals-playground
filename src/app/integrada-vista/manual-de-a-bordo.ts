@@ -46,7 +46,7 @@ export const PAGINAS_DEL_MANUAL: readonly PaginaDelManual[] = [
   },
   {
     id: 'manual-sync-pain',
-    ley: 'A mano, te olvidás un lugar.',
+    ley: 'A mano, te olvidas un lugar.',
     enLaNave: 'Por eso el panel marca la velocidad vieja.',
     cargar: () =>
       import('../signals/level-0-introduction/sub-levels/manual-sync-pain/manual-sync-pain.component').then(

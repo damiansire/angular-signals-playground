@@ -49,8 +49,11 @@ export const BEATS_COMUNES = ['titulo', 'naves', 'mascota', 'transmision'] as co
 /** Las reglas duras del guion. Son la barra de diseño del juego convertida en chequeo. */
 export const REGLAS_GUION = {
   ...REGLAS_DE_LINEA,
-  /** Líneas por capítulo; el pico (6) y el final tienen más aire. */
-  lineas: { min: 4, max: 8, maxLargo: 10 },
+  /**
+   * Lines per chapter; the peak (6), the revelation and the ending get more air. 11 since the
+   * revelation says how long Angie waited (H8): the 42 s cap below still bounds the wait.
+   */
+  lineas: { min: 4, max: 8, maxLargo: 11 },
   /** Un capítulo que dura más que esto deja de ser ceremonia y pasa a ser espera. */
   duracionMaxMs: 42000,
 } as const;

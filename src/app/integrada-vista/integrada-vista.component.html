@@ -49,9 +49,9 @@
       <div class="tusi__hero">
         <div class="tusi__narrate">
           <p class="tusi__epigraph" aria-live="polite">
-            Las cosas son sencillas si las analizás por partes
+            Las cosas son sencillas si las analizas por partes
           </p>
-          <button class="tusi__help" type="button">No la veo, ayudame</button>
+          <button class="tusi__help" type="button">No la veo, ayúdame</button>
         </div>
         <h1 class="tusi__title">Angular Signals</h1>
         <div class="tusi__scroll">
@@ -436,8 +436,8 @@
         <div class="tusi__ov-capbar">
           <!-- El cursor hace click y la frase se mueve detrás: el mismo gesto del aviso. -->
           <label class="ini__llamado" for="ini-foco">
-            <span class="sr-only ini__con-mouse">Hacé click para iniciar las aventuras</span>
-            <span class="sr-only ini__tactil">Tocá para iniciar las aventuras</span>
+            <span class="sr-only ini__con-mouse">Haz click para iniciar las aventuras</span>
+            <span class="sr-only ini__tactil">Toca para iniciar las aventuras</span>
             <span class="ini__raton" aria-hidden="true">
               <i></i><i></i>
               <svg viewBox="0 0 24 30">
@@ -481,7 +481,7 @@
               <path class="ini__ico-on" d="M15.5 9a4 4 0 0 1 0 6M18 6.5a7.5 7.5 0 0 1 0 11" />
               <path class="ini__ico-off" d="m16 9.5 5 5m0-5-5 5" />
             </svg>
-            <span class="ini__globo tusi__ov-sound-txt">Sonido activado · tocá para silenciar</span>
+            <span class="ini__globo tusi__ov-sound-txt">Sonido activado · toca para silenciar</span>
           </button>
           <!-- La pausa de la vida de fondo (WCAG 2.2.2): la etiqueta dice lo que hace el botón, así
                    que cambia con el estado y no lleva aria-pressed. -->
@@ -497,8 +497,8 @@
             </svg>
             <span class="ini__globo tusi__ov-pausa-txt">{{
               pausaFondo()
-                ? 'Animaciones en pausa · tocá para reanudar'
-                : 'Animaciones activas · tocá para pausar'
+                ? 'Animaciones en pausa · toca para reanudar'
+                : 'Animaciones activas · toca para pausar'
             }}</span>
           </button>
           <!-- Con una partida guardada, entrar sigue donde quedó: acá se puede volver al principio. -->
@@ -514,7 +514,7 @@
                 <path class="ini__ico-lleno" d="M4 4.5v5h5z" />
               </svg>
               <span class="ini__globo">{{
-                confirmandoBorrado() ? '¿Borrar todo? Tocá otra vez' : 'Empezar de cero'
+                confirmandoBorrado() ? '¿Borrar todo? Toca otra vez' : 'Empezar de cero'
               }}</span>
             </button>
           }
@@ -689,7 +689,7 @@
         >
         <span class="etapa__derecha">
           <!-- La práctica se abre desde la hoja (ADR 0019). -->
-          <a class="etapa__practica" routerLink="/practica/carrito">Practicá</a>
+          <a class="etapa__practica" routerLink="/practica/carrito">Practica</a>
           <ng-container [ngTemplateOutlet]="marcasDelLibro" />
         </span>
       </header>

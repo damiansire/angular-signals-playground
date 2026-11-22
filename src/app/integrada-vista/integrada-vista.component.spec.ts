@@ -146,12 +146,12 @@ describe('IntegradaVistaComponent', () => {
       const cinematica = host.appendChild(document.createElement('app-cinematica'));
       const encima = animado(cinematica, 'prueba-entrada 10s both');
 
-      expect(boton(host).textContent).toContain('tocá para pausar');
+      expect(boton(host).textContent).toContain('toca para pausar');
       boton(host).click();
       fixture.detectChanges();
       expect(boton(host).textContent)
         .withContext('la etiqueta dice lo que hace')
-        .toContain('tocá para reanudar');
+        .toContain('toca para reanudar');
       expect(host.classList).toContain('fondo-en-pausa');
       const quieto = loop.currentTime;
       await new Promise((r) => setTimeout(r, 120));
@@ -238,7 +238,7 @@ describe('IntegradaVistaComponent', () => {
       await hasta(() => loop.playbackRate === 0); // la pausa guardada frena el loop
 
       expect(host.classList).toContain('fondo-en-pausa');
-      expect(boton(host).textContent).toContain('tocá para reanudar');
+      expect(boton(host).textContent).toContain('toca para reanudar');
       expect(loop.playbackRate).toBe(0);
       fixture.destroy();
     });

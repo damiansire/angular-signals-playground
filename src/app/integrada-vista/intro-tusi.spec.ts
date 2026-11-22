@@ -255,7 +255,7 @@ describe('initIntroTusi', () => {
       const t = arrancar();
 
       t.hudSound.click();
-      expect(t.ovSoundTxt.textContent).toBe('Sonido silenciado · tocá para activar');
+      expect(t.ovSoundTxt.textContent).toBe('Sonido silenciado · toca para activar');
       expect(t.hudSound.getAttribute('aria-label')).toBe('Activar sonido');
 
       // Como si lo hubiera prendido el botón del prólogo.

@@ -28,7 +28,7 @@ export const CINEMATICAS: readonly Cinematica[] = [
         beat: 'hilo-lectura',
       },
       { id: 'c1-cero', quien: 'cap', txt: 'El mío no. Sigue en cero.' },
-      { id: 'c1-ella', quien: 'naveB', txt: '¿A ella le avisó y a vos no?' },
+      { id: 'c1-ella', quien: 'naveB', txt: '¿A ella le avisó y a ti no?' },
       {
         id: 'c1-grita',
         quien: 'mascota',
@@ -157,7 +157,7 @@ export const CINEMATICAS: readonly Cinematica[] = [
   {
     capitulo: 5,
     titulo: 'Cuando el observador interviene',
-    ley: 'Podés pisar un derivado; su fuente lo reinicia.',
+    ley: 'Puedes pisar un derivado; su fuente lo reinicia.',
     apertura: ['titulo', 'naves', 'mapa-rutas'],
     beats: ['mapa-rutas', 'mano-pisa', 'sector-nuevo', 'marcador-suspenso'],
     lineas: [
@@ -219,7 +219,7 @@ export const CINEMATICAS: readonly Cinematica[] = [
       {
         id: 'c6-de-nuevo',
         quien: 'cap',
-        txt: 'No contesta. Preguntá de nuevo,\nmás fuerte.',
+        txt: 'No contesta. Pregunta de nuevo,\nmás fuerte.',
         hueco: 900,
       },
       {
@@ -295,7 +295,7 @@ export const CINEMATICAS: readonly Cinematica[] = [
       {
         id: 'c8-pipes',
         quien: 'naveB',
-        txt: 'Tiro los pipes de RxJS.\nAcá no sirven.',
+        txt: 'Tiro los pipes de RxJS.\nAquí no sirven.',
         beat: 'pipes-esclusa',
       },
       {
@@ -336,7 +336,7 @@ export const CINEMATICAS: readonly Cinematica[] = [
   {
     capitulo: 9,
     titulo: 'Medir después de pintar',
-    ley: 'Para medir la pantalla, esperá a que esté pintada.',
+    ley: 'Para medir la pantalla, espera a que esté pintada.',
     apertura: ['titulo', 'naves', 'antena-boceto'],
     beats: ['antena-boceto', 'regla-cero', 'pintado', 'oidos-apilados'],
     lineas: [
@@ -375,7 +375,7 @@ export const CINEMATICAS: readonly Cinematica[] = [
   {
     capitulo: 10,
     titulo: 'Esperar a que se estabilice',
-    ley: 'Ante una ráfaga de avisos, actuá cuando se calme.',
+    ley: 'Ante una ráfaga de avisos, actúa cuando se calme.',
     apertura: ['titulo', 'naves'],
     beats: ['rafaga', 'eco-multiple', 'temperatura', 'calma'],
     lineas: [
@@ -474,12 +474,15 @@ export const CINEMATICAS: readonly Cinematica[] = [
         txt: 'No los encuentro. Voy a entrar.',
         beat: 'transmision',
       },
-      { id: 'r-afuera', quien: 'naveA', txt: '¡No! ¡Quedate afuera!' },
+      { id: 'r-afuera', quien: 'naveA', txt: '¡No! ¡Quédate afuera!' },
       { id: 'r-igual', quien: 'mascota', txt: 'Va a entrar igual.', beat: 'mascota', hueco: 500 },
-      { id: 'r-como', quien: 'cap', txt: '¿Cómo lo sabés?' },
+      { id: 'r-como', quien: 'cap', txt: '¿Cómo lo sabes?' },
       { id: 'r-entre', quien: 'mascota', txt: 'Porque entré.', beat: 'nave4-entra', hueco: 700 },
       { id: 'r-exploradora', quien: 'naveA', txt: '¿Exploradora?', hueco: 600 },
       { id: 'r-antes', quien: 'mascota', txt: 'Llegué antes que ustedes.\nMucho antes.' },
+      // The wait is what turned the impatient scout into the patient guide: one line says why.
+      { id: 'r-cuanto', quien: 'naveB', txt: '¿Cuánto tiempo?', hueco: 500 },
+      { id: 'r-apurarlos', quien: 'mascota', txt: 'Lo suficiente para\ndejar de apurarlos.' },
       { id: 'r-tenia', quien: 'mascota', txt: 'No podía decirlo.\nElla tenía que entrar.' },
       { id: 'r-aguafiestas', quien: 'naveA', txt: 'Siempre tan aguafiestas.', hueco: 500 },
     ],

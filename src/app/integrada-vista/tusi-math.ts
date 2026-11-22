@@ -73,7 +73,7 @@ export function lineFreq(k: number): number {
 }
 
 /** Línea en reposo (antes de arrancar): el epígrafe que resume la idea del intro. */
-export const NARRATION_IDLE = 'Las cosas son sencillas si las analizás por partes';
+export const NARRATION_IDLE = 'Las cosas son sencillas si las analizas por partes';
 /** Línea de cierre: el caos se reveló como un círculo. */
 export const NARRATION_DONE = '¿Lo ves? Un círculo, hecho de puras líneas rectas.';
 
@@ -82,7 +82,7 @@ const NARRATION_STEPS: readonly { readonly at: number; readonly text: string }[]
   { at: 0, text: 'Una línea. Un punto que rebota contra el borde.' },
   { at: 0.2, text: 'Aparece otra, y otra. Cada choque llama a la que sigue.' },
   { at: 0.45, text: 'El caos, de a poco, tiene una forma.' },
-  { at: 0.75, text: 'Seguí mirando, ya casi.' },
+  { at: 0.75, text: 'Sigue mirando, ya casi.' },
 ];
 
 /**
