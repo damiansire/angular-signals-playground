@@ -1,36 +1,27 @@
 import {
+  BASE_DE_LA_PIEDRA,
+  CAJA_DE_LA_PIEDRA,
+  CHOQUE_MS,
+  LA_COLINA_APARECE_MS,
   LLAMADO,
-  NUCLEO,
-  ALEJARSE_MS,
-  SE_CIERRA_MS,
-  SE_ALEJA_DESDE_MS,
-  VIAJE_MS,
-  aireQueCabe,
-  aireQueCubre,
-  corridaDeLaCamara,
-  cuadroDelViaje,
-  laGemaTapaLaPantalla,
-  profundidadDelViaje,
-  profundidadDesdeElOjo,
-  type CuadroDelViaje,
   PANEO,
+  RADIO_DE_LA_LUZ,
+  RADIO_DEL_PLANETA,
+  SE_VA_LO_LEJANO_DESDE_MS,
+  SE_VA_LO_LEJANO_HASTA_MS,
+  SE_VUELVE_LUZ_MS,
+  camaraDelPlaneta,
+  cuadroDeLaCaida,
   cuandoSeAbre,
   cuandoSuena,
+  dibujoDelPlaneta,
+  dondeVaLaEstrella,
   estrellasDelAlba,
   letrasDelLlamado,
-  loopsQueSeRedibujan,
-  tocaRedibujar,
   planDeLaPrueba,
-  propiedadesAnimadas,
-  marcaDelPseudo,
-  HOLGURA_DE_DIBUJO,
-  LA_COLINA_APARECE_MS,
-  camaraSobreLoDibujado,
-  escalaDeDibujo,
-  esLoopQueCorre,
-  laCapaTapaSuLugar,
-  type Dibujada,
+  type EscenarioDeLaCaida,
 } from './aviso-auriculares';
+import { LUZ_DEL_CHOQUE_MS, luzDelChoque } from '../inicio-angie';
 
 describe('aviso de auriculares', () => {
   describe('la prueba', () => {
@@ -100,425 +91,169 @@ describe('aviso de auriculares', () => {
       expect(letrasDelLlamado(' a  b ').length).toBe(2);
     });
   });
-
-  describe('el círculo que se cierra', () => {
-    // Una pantalla con el ojo de Angie abajo y a la izquierda del centro, como en la colina.
-    const [ancho, alto, x, y] = [1024, 768, 470, 500];
-
-    it('arranca tapando el aviso entero: el círculo llega a la esquina más lejana', () => {
-      const a = aireQueCubre(x, y, ancho, alto);
-      const esquinas = [
-        [0, 0],
-        [ancho, 0],
-        [0, alto],
-        [ancho, alto],
-      ];
-      for (const [ex, ey] of esquinas)
-        expect(NUCLEO * a).toBeGreaterThan(Math.hypot(ex - x, ey - y));
-    });
-
-    it('al encajar queda adentro del aviso: no asoma ningún borde recto', () => {
-      const a = aireQueCabe(x, y, ancho, alto);
-      expect(x - a).toBeGreaterThanOrEqual(0);
-      expect(x + a).toBeLessThanOrEqual(ancho);
-      expect(y - a).toBeGreaterThanOrEqual(0);
-      expect(y + a).toBeLessThanOrEqual(alto);
-    });
-
-    it('se cierra: encaja con menos aire del que tenía al arrancar', () => {
-      expect(aireQueCabe(x, y, ancho, alto)).toBeLessThan(aireQueCubre(x, y, ancho, alto));
-    });
-  });
 });
 
-describe('el viaje de la cámara, del ojo de Angie a la colina', () => {
-  const S0 = 40;
-  const cubre = 2000;
-  const cabe = 300;
-  const en = (t: number) => cuadroDelViaje(t, S0, cubre, cabe);
-  const enPantalla = (c: CuadroDelViaje) => c.colina * c.aviso;
-
-  it('arranca con el aviso entero y del tamaño de la pantalla, y la colina de muy cerca', () => {
-    const c = en(0);
-    expect(c.colina).toBe(S0);
-    expect(enPantalla(c)).toBeCloseTo(1, 6);
-    expect(c.aire).toBe(cubre);
-  });
-
-  it('se aleja desde el primer cuadro: no es un círculo negro que se cierra sobre el aviso quieto', () => {
-    expect(enPantalla(en(16))).toBeLessThan(1);
-    expect(enPantalla(en(200))).toBeLessThan(0.95);
-    // Cuando el borde termina de redondearse, el aviso ya va por menos de la mitad de su tamaño.
-    const redondo = [...Array(SE_CIERRA_MS / 10).keys()]
-      .map((i) => i * 10)
-      .find((t) => en(t).aire === cabe)!;
-    expect(enPantalla(en(redondo))).toBeLessThan(0.5);
-  });
-
-  it('se aleja despacio al principio: no es un salto a la mitad en un parpadeo', () => {
-    expect(enPantalla(en(300))).toBeGreaterThan(0.6);
-    expect(enPantalla(en(SE_CIERRA_MS / 2))).toBeGreaterThan(0.15);
-  });
-
-  it('el borde se redondea sin volver atrás: de la pantalla entera al círculo que cabe', () => {
-    let antes = Infinity;
-    for (let t = 0; t <= SE_CIERRA_MS; t += 10) {
-      expect(en(t).aire).toBeLessThanOrEqual(antes);
-      antes = en(t).aire;
-    }
-    expect(en(SE_CIERRA_MS).aire).toBe(cabe);
-  });
-
-  it('el aviso se achica sin crecer nunca y termina en cero: la pantalla queda toda ojo', () => {
-    let antes = Infinity;
-    for (let t = 0; t <= SE_CIERRA_MS; t += 10) {
-      expect(enPantalla(en(t))).toBeLessThanOrEqual(antes + 1e-12);
-      antes = enPantalla(en(t));
-    }
-    expect(enPantalla(en(SE_CIERRA_MS))).toBe(0);
-  });
-
-  it('la cámara arranca cuando el aviso ya es una mota, y no antes: no queda un rato toda negra', () => {
-    for (let t = 0; t < SE_ALEJA_DESDE_MS; t += 10) expect(en(t).colina).toBe(S0);
-    expect(SE_ALEJA_DESDE_MS).toBeLessThan(SE_CIERRA_MS);
-    expect(enPantalla(en(SE_ALEJA_DESDE_MS))).toBeLessThan(0.01);
-  });
-
-  it('mientras la cámara se aleja no queda ningún punto del aviso', () => {
-    for (let t = SE_CIERRA_MS; t <= VIAJE_MS; t += 25) expect(en(t).aviso).toBe(0);
-  });
-
-  it('la cámara solo se aleja, y llega a la colina sin saltos', () => {
-    let antes = Infinity;
-    for (let t = 0; t <= VIAJE_MS; t += 10) {
-      const c = en(t);
-      expect(c.colina).toBeLessThanOrEqual(antes + 1e-9);
-      antes = c.colina;
-    }
-    expect(en(VIAJE_MS - 1).colina).toBeCloseTo(1, 1);
-    expect(en(VIAJE_MS).colina).toBe(1);
-  });
-
-  it('como en Powers of Ten: a mitad de camino, tiempos iguales dividen la escala por lo mismo', () => {
-    const t = (f: number) => SE_ALEJA_DESDE_MS + ALEJARSE_MS * f;
-    const r1 = en(t(0.4)).colina / en(t(0.5)).colina;
-    const r2 = en(t(0.5)).colina / en(t(0.6)).colina;
-    expect(r1).toBeCloseTo(r2, 1);
-    expect(r1).toBeGreaterThan(1.2);
-  });
-
-  it('arranca desde adentro del ojo: las esquinas de la pantalla caen dentro de su negro', () => {
-    const mancha = { ancho: 10, alto: 16 };
-    const s = profundidadDelViaje(mancha, 800, 500);
-    // La mancha agrandada, como elipse: la esquina más lejana queda adentro.
-    expect(
-      (800 / ((s * mancha.ancho) / 2)) ** 2 + (500 / ((s * mancha.alto) / 2)) ** 2,
-    ).toBeLessThan(1);
-    expect(profundidadDelViaje({ ancho: 0.1, alto: 0.1 }, 800, 500)).toBe(900);
-    expect(profundidadDelViaje({ ancho: 900, alto: 900 }, 10, 10)).toBe(6);
-  });
-
-  it('mide la pantalla en el dibujo del ojo: girada, una mancha alta queda acostada', () => {
-    const mancha = { ancho: 10, alto: 30 };
-    const esquinas = [
-      [-400, -100],
-      [400, 100],
-    ] as const;
-    const derecha = profundidadDesdeElOjo(mancha, { a: 1, b: 0, c: 0, d: 1 }, esquinas);
-    const acostada = profundidadDesdeElOjo(mancha, { a: 0, b: 1, c: -1, d: 0 }, esquinas);
-    expect(derecha).toBeCloseTo(profundidadDelViaje(mancha, 400, 100), 6);
-    expect(acostada).toBeCloseTo(profundidadDelViaje(mancha, 100, 400), 6);
-    expect(acostada).toBeLessThan(derecha);
-  });
-});
-
-describe('los loops que se redibujan al llegar la cámara', () => {
-  const colina = document.createElement('div');
-  const aviso = colina.appendChild(document.createElement('div'));
-  const animar = (padre: Element, iterations: number): Animation =>
-    padre.appendChild(document.createElement('div')).animate([{ opacity: 0.5 }, { opacity: 1 }], {
-      duration: 1000,
-      iterations,
-    });
-  beforeAll(() => document.body.appendChild(colina));
-  afterAll(() => colina.remove());
-
-  it('toma los loops de la colina, que de otro modo quedan dibujados a la escala del ojo', () => {
-    const junco = animar(colina, Infinity);
-    expect(loopsQueSeRedibujan([junco], aviso)).toEqual([junco]);
-  });
-
-  it('no toca lo que termina solo ni los loops del aviso, que se va', () => {
-    const entrada = animar(colina, 1);
-    const estrella = animar(aviso, Infinity);
-    expect(loopsQueSeRedibujan([entrada, estrella], aviso)).toEqual([]);
-  });
-
-  it('no toca los que ya frenó la pausa de fondo: al soltarlos los despausaría', () => {
-    const enPausa = animar(colina, Infinity);
-    enPausa.playbackRate = 0;
-    expect(loopsQueSeRedibujan([enPausa], aviso)).toEqual([]);
-  });
-
-  it('los del aviso también son loops que corren: se aquietan aparte, mientras se cierra', () => {
-    expect(esLoopQueCorre(animar(aviso, Infinity))).toBeTrue();
-    expect(esLoopQueCorre(animar(aviso, 1)))
-      .withContext('termina solo')
-      .toBeFalse();
-  });
-});
-
-describe('cuándo la gema de Angie tapa la pantalla', () => {
-  let svg: SVGSVGElement;
-  const pieza = (d: string): SVGPathElement => {
-    const p = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-    p.setAttribute('d', d);
-    svg.appendChild(p);
-    return p;
+describe('la caída: Angie se vuelve luz y cae en la colina', () => {
+  // A wide screen with the hill's stone in the middle, a bit below.
+  const ancha: EscenarioDeLaCaida = {
+    ancho: 1920,
+    alto: 1080,
+    angie: { x: 960, y: 421 },
+    piedra: { x: 958, y: 837, ancho: 446 },
   };
-  beforeEach(() => {
-    svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-    svg.setAttribute('style', 'position: fixed; left: 0; top: 0; width: 400px; height: 300px');
-    document.body.appendChild(svg);
-  });
-  afterEach(() => svg.remove());
-  const pantalla = { left: 100, top: 100, width: 100, height: 50 };
+  // A phone held upright.
+  const celular: EscenarioDeLaCaida = {
+    ancho: 390,
+    alto: 844,
+    angie: { x: 195, y: 330 },
+    piedra: { x: 195, y: 640, ancho: 172 },
+  };
+  const tiempos = (hasta: number, paso = 20): number[] =>
+    Array.from({ length: Math.floor(hasta / paso) + 1 }, (_, i) => i * paso);
 
-  it('la tapa cuando las cuatro esquinas, con margen, caen adentro', () => {
-    expect(laGemaTapaLaPantalla([pieza('M0 0H400V300H0Z')], pantalla)).toBeTrue();
-  });
-
-  it('no la tapa si una esquina asoma, aunque el resto esté adentro', () => {
-    expect(laGemaTapaLaPantalla([pieza('M0 0H195V300H0Z')], pantalla)).toBeFalse();
-  });
-
-  it('entre varias piezas: cada esquina en alguna alcanza', () => {
-    const izquierda = pieza('M0 0H150V300H0Z');
-    const derecha = pieza('M150 0H400V300H150Z');
-    expect(laGemaTapaLaPantalla([izquierda, derecha], pantalla)).toBeTrue();
+  it('arranca como el aviso: Angie entera, el texto a la vista y todavía sin luz ni espacio', () => {
+    const c = cuadroDeLaCaida(0, ancha);
+    expect(c.texto.opacidad).toBe(1);
+    expect(c.angie).toEqual(jasmine.objectContaining({ dy: -0, sx: 1, sy: 1, opacidad: 1 }));
+    expect(c.estrella.opacidad).toBe(0);
+    expect(c.espacio).toBe(0);
+    expect(c.noche).toEqual({ dy: 0, opacidad: 1 });
   });
 
-  it('sin piezas a la vista no la tapa', () => {
-    expect(laGemaTapaLaPantalla([], pantalla)).toBeFalse();
-  });
-});
-
-describe('la cámara lleva el ojo al medio de la pantalla', () => {
-  it('entero mientras se cierra el aviso, nada al llegar a la colina', () => {
-    expect(corridaDeLaCamara(900, 900)).toBe(1);
-    expect(corridaDeLaCamara(1, 900)).toBe(0);
+  it('se aplasta antes de saltar: anticipación sobre los pies', () => {
+    const c = cuadroDeLaCaida(250, ancha);
+    expect(c.angie.sy).toBeLessThan(0.9);
+    expect(c.angie.sx).toBeGreaterThan(1);
+    expect(c.angie.dy).toBeCloseTo(0, 5);
   });
 
-  it('va en escala: a la mitad del viaje en escala, a la mitad del camino', () => {
-    expect(corridaDeLaCamara(30, 900)).toBeCloseTo(0.5, 5);
+  it('la estrella nace donde Angie estalla en luz, y ella ya no está', () => {
+    const c = cuadroDeLaCaida(SE_VUELVE_LUZ_MS + 150, ancha);
+    const nace = dondeVaLaEstrella(SE_VUELVE_LUZ_MS, ancha);
+    expect(nace.x).toBeCloseTo(c.destello.x, 5);
+    expect(nace.y).toBeCloseTo(c.destello.y, 5);
+    expect(c.destello.opacidad).toBeGreaterThan(0);
+    expect(c.estrella.opacidad).toBe(1);
+    expect(c.angie.opacidad).toBe(0);
   });
 
-  it('a lo largo del viaje solo vuelve, nunca se pasa ni va y viene', () => {
-    let antes = Infinity;
-    for (let t = 0; t <= VIAJE_MS; t += 50) {
-      const k = corridaDeLaCamara(cuadroDelViaje(t, 900, 2000, 400).colina, 900);
-      expect(k).toBeGreaterThanOrEqual(0);
-      expect(k).toBeLessThanOrEqual(antes);
+  it('cae sobre la piedra justo en el choque, y se apaga ahí', () => {
+    for (const e of [ancha, celular]) {
+      const llega = dondeVaLaEstrella(CHOQUE_MS, e);
+      expect(Math.abs(llega.x - e.piedra.x)).toBeLessThan(1);
+      // Over the stone's middle: above its base, within its box.
+      expect(llega.y).toBeLessThan(e.piedra.y);
+      expect(llega.y).toBeGreaterThan(e.piedra.y - e.piedra.ancho / 2);
+      expect(cuadroDeLaCaida(CHOQUE_MS + 200, e).estrella.opacidad).toBe(0);
+    }
+  });
+
+  it('la cámara termina con la piedra del planeta sobre la de la colina', () => {
+    for (const e of [ancha, celular]) {
+      const c = camaraDelPlaneta(CHOQUE_MS, e);
+      const izquierda = c.x + CAJA_DE_LA_PIEDRA.x * c.k;
+      const base = c.y + (CAJA_DE_LA_PIEDRA.y + BASE_DE_LA_PIEDRA * CAJA_DE_LA_PIEDRA.lado) * c.k;
+      expect(izquierda).toBeCloseTo(e.piedra.x - e.piedra.ancho / 2, 3);
+      expect(CAJA_DE_LA_PIEDRA.lado * c.k).toBeCloseTo(e.piedra.ancho, 3);
+      expect(base).toBeCloseTo(e.piedra.y, 3);
+    }
+  });
+
+  it('la cámara solo se acerca, y pareja en escala: el planeta lejos dura lo que la colina cerca', () => {
+    let antes = 0;
+    for (const t of tiempos(CHOQUE_MS)) {
+      const { k } = camaraDelPlaneta(t, ancha);
+      expect(k).toBeGreaterThanOrEqual(antes);
       antes = k;
     }
-    expect(antes).toBe(0);
+    const lejos = camaraDelPlaneta(0, ancha).k;
+    const cerca = camaraDelPlaneta(CHOQUE_MS, ancha).k;
+    const mitad = camaraDelPlaneta((1100 + CHOQUE_MS) / 2, ancha).k;
+    // In a straight line the middle would be at half the scale; even in scale it is far below.
+    expect(mitad).toBeLessThan((lejos + cerca) / 4);
   });
 
-  it('sin profundidad no corre nada', () => {
-    expect(corridaDeLaCamara(1, 1)).toBe(0);
-  });
-});
-
-describe('cuándo aparece la colina debajo del aviso', () => {
-  const cubre = aireQueCubre(1720, 650, 3440, 1300);
-  const cabe = aireQueCabe(1720, 650, 3440, 1300);
-
-  it('antes de que arranque la cámara: cuando arranca, ya está dibujada', () => {
-    expect(LA_COLINA_APARECE_MS).toBeLessThan(SE_ALEJA_DESDE_MS);
-    expect(SE_ALEJA_DESDE_MS - LA_COLINA_APARECE_MS).toBeGreaterThanOrEqual(150);
-  });
-
-  it('con el aviso ya chico: el tirón de armarla no frena un aviso a pantalla entera', () => {
-    const c = cuadroDelViaje(LA_COLINA_APARECE_MS, 520, cubre, cabe);
-    const diametro = 2 * c.aire * c.aviso * c.colina;
-    expect(diametro).withContext('px en una pantalla de 3440').toBeLessThan(60);
-  });
-});
-
-describe('cuándo el aviso deja de dibujarse', () => {
-  const profundidad = 520;
-  const cubre = aireQueCubre(1720, 650, 3440, 1300);
-  const cabe = aireQueCabe(1720, 650, 3440, 1300);
-
-  it('cuando arranca la cámara ya es una mota de pocos píxeles: que desaparezca no se ve', () => {
-    const c = cuadroDelViaje(SE_ALEJA_DESDE_MS, profundidad, cubre, cabe);
-    const diametro = 2 * c.aire * c.aviso * c.colina;
-    expect(diametro).withContext('px en una pantalla de 3440').toBeLessThan(12);
-  });
-
-  it('y falta para el primer escalón de la colina: su memoria de video ya volvió', () => {
-    const primerEscalon = escalaDeDibujo(profundidad);
-    let t = SE_ALEJA_DESDE_MS;
-    while (cuadroDelViaje(t, profundidad, cubre, cabe).colina > primerEscalon) t += 4;
-    expect(t - SE_ALEJA_DESDE_MS)
-      .withContext('ms entre que se va el aviso y el escalón')
-      .toBeGreaterThan(200);
-  });
-});
-
-describe('la colina dibujada por escalones', () => {
-  /** Un viaje del ojo a la colina, cuadro a cuadro: cuántos escalones y la mayor escala de la capa. */
-  const viaje = (desde: number): { escalones: number; mayor: number; menor: number } => {
-    let dibujadaA = escalaDeDibujo(desde);
-    let escalones = 1;
-    let mayor = 0;
-    let menor = Infinity;
-    for (let escala = desde; escala >= 1; escala *= 0.985) {
-      if (tocaRedibujar(escala, dibujadaA)) {
-        dibujadaA = escalaDeDibujo(escala);
-        escalones++;
-      }
-      mayor = Math.max(mayor, escala / dibujadaA);
-      menor = Math.min(menor, escala / dibujadaA);
+  it('de lejos el planeta entra en la pantalla, también en un celular', () => {
+    for (const e of [ancha, celular]) {
+      const c = camaraDelPlaneta(1100, e);
+      const radio = RADIO_DEL_PLANETA * c.k;
+      expect(c.x - radio).toBeGreaterThan(0);
+      expect(c.x + radio).toBeLessThan(e.ancho);
+      expect(c.y + radio).toBeLessThan(e.alto);
     }
-    return { escalones, mayor, menor };
-  };
-
-  it('se dibuja a la escala del final del escalón: la capa pone la holgura que falta', () => {
-    expect(escalaDeDibujo(900)).toBeCloseTo(900 / HOLGURA_DE_DIBUJO, 6);
   });
 
-  it('el último escalón ya es la colina en su lugar: no se dibuja a menos de 1', () => {
-    expect(escalaDeDibujo(1.1)).toBe(1);
-    expect(escalaDeDibujo(1)).toBe(1);
+  it('la estrella no sale de la pantalla en todo el vuelo', () => {
+    for (const e of [ancha, celular]) {
+      for (const t of tiempos(CHOQUE_MS)) {
+        const c = cuadroDeLaCaida(t, e);
+        if (!c.estrella.opacidad) continue;
+        expect(c.estrella.x).withContext(`x a los ${t} ms`).toBeGreaterThan(0);
+        expect(c.estrella.x).withContext(`x a los ${t} ms`).toBeLessThan(e.ancho);
+        expect(c.estrella.y).withContext(`y a los ${t} ms`).toBeGreaterThan(0);
+        expect(c.estrella.y).withContext(`y a los ${t} ms`).toBeLessThan(e.alto);
+      }
+    }
   });
 
-  it('toca otro cuando la cámara llega a la escala dibujada, y no en cada cuadro', () => {
-    expect(tocaRedibujar(800, 714)).withContext('a mitad del escalón').toBeFalse();
-    expect(tocaRedibujar(714, 714)).withContext('llegó').toBeTrue();
+  it('la cola va detrás de la estrella y se achica: no hay cola antes de que nazca', () => {
+    expect(cuadroDeLaCaida(SE_VUELVE_LUZ_MS, ancha).cola.every((p) => p.r === 0)).toBeTrue();
+    const { cola, estrella } = cuadroDeLaCaida(2500, ancha);
+    expect(cola[0].r).toBeGreaterThan(cola[cola.length - 1].r);
+    expect(Math.hypot(cola[0].x - estrella.x, cola[0].y - estrella.y)).toBeGreaterThan(0);
   });
 
-  it('dibujada a escala 1 no toca más: la capa la lleva hasta la colina', () => {
-    expect(tocaRedibujar(1.2, 1)).toBeFalse();
-    expect(tocaRedibujar(1, 1)).toBeFalse();
+  it('la colina se dibuja antes de que se vaya lo lejano, y las nubes tapan el cambio', () => {
+    expect(LA_COLINA_APARECE_MS).toBeLessThan(SE_VA_LO_LEJANO_DESDE_MS);
+    expect(cuadroDeLaCaida(SE_VA_LO_LEJANO_DESDE_MS, ancha).lejos).toBe(1);
+    expect(cuadroDeLaCaida(SE_VA_LO_LEJANO_HASTA_MS, ancha).lejos).toBe(0);
+    const mitad = (SE_VA_LO_LEJANO_DESDE_MS + SE_VA_LO_LEJANO_HASTA_MS) / 2;
+    const tapa = Math.max(...cuadroDeLaCaida(mitad, ancha).nubes.map((n) => n.opacidad));
+    expect(tapa).toBeGreaterThan(0.5);
   });
 
-  it('la capa nunca achica lo dibujado ni lo agranda más que la holgura', () => {
-    const { mayor, menor } = viaje(960);
-    expect(menor).withContext('achicada, asomaría lo de atrás por los bordes').toBeGreaterThan(1);
-    expect(mayor)
-      .withContext('agrandada de más, el navegador la vuelve a dibujar en cada cuadro')
-      .toBeLessThanOrEqual(HOLGURA_DE_DIBUJO + 1e-9);
+  it('la luz del choque arranca como la luz de la estrella, sin salto, y se apaga creciendo', () => {
+    const { ancho, alto } = ancha;
+    const estrella = cuadroDeLaCaida(CHOQUE_MS, ancha).estrella;
+    const desde = RADIO_DE_LA_LUZ * estrella.escala;
+    const toca = luzDelChoque(0, desde, ancho, alto);
+    expect(toca.opacidad).toBe(estrella.opacidad);
+    expect(toca.r).toBe(desde);
+    const fin = luzDelChoque(LUZ_DEL_CHOQUE_MS, desde, ancho, alto);
+    expect(fin.opacidad).toBe(0);
+    expect(fin.r).toBeGreaterThan(3 * toca.r);
+    // Same size on any screen, relative to it.
+    const chica = luzDelChoque(LUZ_DEL_CHOQUE_MS, 1, celular.ancho, celular.alto);
+    expect(chica.r / Math.sqrt(celular.ancho * celular.alto)).toBeCloseTo(
+      fin.r / Math.sqrt(ancho * alto),
+      5,
+    );
   });
 
-  it('nunca más de 1,6 veces los píxeles de la pantalla: con 2× no entraba con poca memoria', () => {
-    expect(HOLGURA_DE_DIBUJO ** 2).toBeLessThan(1.6);
-  });
-
-  it('del ojo a la colina son unas treinta veces, no cientos', () => {
-    const { escalones } = viaje(960);
-    expect(escalones).toBeGreaterThan(24);
-    expect(escalones).toBeLessThan(34);
-  });
-});
-
-describe('lo que la capa agrega sobre la colina dibujada', () => {
-  const dibujada: Dibujada = { escala: 400, ojo: { x: 1700, y: 620 }, corrida: { x: 12, y: 18 } };
-  /** Dónde cae en pantalla un punto de la colina, con la colina dibujada y la capa encima. */
-  const enPantalla = (
-    p: { x: number; y: number },
-    capa: { escala: number; corrida: { x: number; y: number } },
-  ): { x: number; y: number } => {
-    const eje = (v: number, o: number, t: number, c: number): number => {
-      const dibujado = o + dibujada.escala * (v - o) + t;
-      return o + capa.escala * (dibujado - o) + c;
-    };
-    return {
-      x: eje(p.x, dibujada.ojo.x, dibujada.corrida.x, capa.corrida.x),
-      y: eje(p.y, dibujada.ojo.y, dibujada.corrida.y, capa.corrida.y),
-    };
-  };
-
-  it('recién dibujada no agrega nada: escala 1 y sin corrida', () => {
-    const capa = camaraSobreLoDibujado(dibujada, 400, dibujada.ojo, dibujada.corrida);
-    expect(capa.escala).toBe(1);
-    expect(capa.corrida.x).toBeCloseTo(0, 9);
-    expect(capa.corrida.y).toBeCloseTo(0, 9);
-  });
-
-  it('entre las dos dejan cada punto donde lo pone la cámara: escala y corrida del momento', () => {
-    const corrida = { x: 15, y: 22 };
-    const capa = camaraSobreLoDibujado(dibujada, 500, dibujada.ojo, corrida);
-    expect(capa.escala).toBeCloseTo(1.25, 9);
-    const punto = { x: 1701.5, y: 619 };
-    const visto = enPantalla(punto, capa);
-    expect(visto.x).toBeCloseTo(1700 + 500 * 1.5 + 15, 6);
-    expect(visto.y).toBeCloseTo(620 + 500 * -1 + 22, 6);
-  });
-
-  it('si el ojo se movió desde el escalón, sigue en su lugar: la corrida lo compensa', () => {
-    const ojo = { x: 1700.2, y: 620.1 };
-    const corrida = { x: 15, y: 22 };
-    const capa = camaraSobreLoDibujado(dibujada, 500, ojo, corrida);
-    const visto = enPantalla(ojo, capa);
-    expect(visto.x)
-      .withContext('el ojo es el punto fijo de la cámara')
-      .toBeCloseTo(ojo.x + 15, 6);
-    expect(visto.y).toBeCloseTo(ojo.y + 22, 6);
+  it('la noche del aviso sube con la cámara y se va antes de que llegue el planeta de cerca', () => {
+    const c = cuadroDeLaCaida(2100, ancha);
+    expect(c.noche.opacidad).toBe(0);
+    expect(c.noche.dy).toBeGreaterThan(0.8 * ancha.alto);
+    expect(c.espacio).toBe(1);
   });
 });
 
-describe('la capa de la cámara tapa su lugar', () => {
-  const caja = { x: 0, y: 0, ancho: 3440, alto: 1300 };
-  const ojo = { x: 1700, y: 620 };
-
-  it('agrandada alrededor de un punto de adentro, lo tapa', () => {
-    expect(laCapaTapaSuLugar(1.26, { x: 0, y: 0 }, ojo, caja)).toBeTrue();
-    expect(laCapaTapaSuLugar(1, { x: 0, y: 0 }, ojo, caja)).toBeTrue();
+describe('el planetita de Angie', () => {
+  it('sale igual con la misma semilla: el mismo planeta en cada visita', () => {
+    expect(dibujoDelPlaneta(7)).toEqual(dibujoDelPlaneta(7));
+    expect(dibujoDelPlaneta(7)).not.toEqual(dibujoDelPlaneta(8));
   });
 
-  it('achicada no: asoma lo de atrás por los cuatro bordes', () => {
-    expect(laCapaTapaSuLugar(0.98, { x: 0, y: 0 }, ojo, caja)).toBeFalse();
+  it('las flores y las praderas quedan adentro del disco', () => {
+    const { flores, praderas } = dibujoDelPlaneta(7);
+    for (const f of flores) expect(Math.hypot(f.cx, f.cy) + f.r).toBeLessThan(RADIO_DEL_PLANETA);
+    for (const p of praderas) expect(Math.hypot(p.cx, p.cy)).toBeLessThan(RADIO_DEL_PLANETA);
   });
 
-  it('corrida de más deja un borde al aire, aunque esté agrandada', () => {
-    expect(laCapaTapaSuLugar(1.05, { x: 30, y: 0 }, ojo, caja))
-      .withContext('a 30 px')
-      .toBeTrue();
-    expect(laCapaTapaSuLugar(1.05, { x: 90, y: 0 }, ojo, caja))
-      .withContext('a 90 px')
-      .toBeFalse();
-    expect(laCapaTapaSuLugar(1.05, { x: 0, y: -40 }, ojo, caja))
-      .withContext('hacia arriba')
-      .toBeFalse();
-  });
-
-  it('medio píxel de menos no cuenta: es redondeo, no un borde', () => {
-    expect(laCapaTapaSuLugar(1, { x: 0.4, y: 0 }, ojo, caja)).toBeTrue();
-  });
-});
-
-describe('lo que queda fijo mientras un loop va quieto', () => {
-  it('las propiedades que mueve, como se escriben en CSS', () => {
-    const cuadros = [
-      { offset: 0, computedOffset: 0, easing: 'ease', composite: 'auto', transform: 'none' },
-      { offset: 1, computedOffset: 1, easing: 'ease', composite: 'auto', transformOrigin: '50% 0' },
-    ];
-    expect(propiedadesAnimadas(cuadros).sort()).toEqual(['transform', 'transform-origin']);
-  });
-
-  it('cada una una sola vez, aunque aparezca en todos los cuadros', () => {
-    expect(propiedadesAnimadas([{ opacity: '0' }, { opacity: '1' }])).toEqual(['opacity']);
-  });
-});
-
-describe('los pulsos de los pseudo-elementos mientras viaja la cámara', () => {
-  it('cada pseudo-elemento con su marca, para apagar solo ese', () => {
-    expect(marcaDelPseudo('::before')).toBe('antes');
-    expect(marcaDelPseudo('::after')).toBe('despues');
-  });
-
-  it('un loop de un elemento no lleva marca: se aquieta con commitStyles', () => {
-    expect(marcaDelPseudo(null)).toBeNull();
+  it('el pasto da la vuelta entera, y sobre la loma va más alto', () => {
+    const { matas } = dibujoDelPlaneta(7);
+    expect(matas.length).toBe(120);
+    expect(matas.find((m) => m.giro < 5)?.alto).toBeGreaterThan(RADIO_DEL_PLANETA + 30);
+    expect(matas.find((m) => m.giro > 170 && m.giro < 190)?.alto).toBeLessThan(RADIO_DEL_PLANETA);
   });
 });

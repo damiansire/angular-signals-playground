@@ -1,6 +1,14 @@
 /* La noche de antes de la mañana. Planos de atrás hacia adelante: cielo, estrellas, halo, el piso de
-   luz, Angie con sus auriculares, texto. Al irse, la cámara se aleja (lo anima el componente). */
+   luz, Angie con sus auriculares, texto. Al irse, Angie cae hecha luz (lo anima el componente). */
 :host {
+  --aa-noche: linear-gradient(
+    to bottom,
+    #121732 0%,
+    #1c2549 45%,
+    #2e3058 72%,
+    #4d4266 90%,
+    #6e5470 100%
+  );
   position: absolute;
   inset: 0;
   z-index: 20;
@@ -9,36 +17,82 @@
   cursor: pointer;
   user-select: none;
   -webkit-user-select: none;
-  background: linear-gradient(
-    to bottom,
-    #121732 0%,
-    #1c2549 45%,
-    #2e3058 72%,
-    #4d4266 90%,
-    #6e5470 100%
-  );
+  background: var(--aa-noche);
 }
 :host([hidden]) {
   display: none;
 }
-/* Mientras se aleja ya no se toca: un segundo toque no puede volver a elegir. */
-:host(.aa--alejandose) {
+/* While she falls nothing is touched: a second touch cannot choose again. The night goes away with
+   the camera, so it carries its own sky: under it there is space, and then the hill. Nothing gets
+   a layer of its own: the night sliding in its own layer over space made two layers the size of
+   the screen, and with little video memory strips of the page showed through for a frame. All in
+   one, redrawn each frame, it does not happen. */
+:host(.aa--cayendo) {
   pointer-events: none;
+  background: none;
+}
+:host(.aa--cayendo) .aa__cielo {
+  background: var(--aa-noche);
+}
+/* She squashes and jumps on her feet. */
+:host(.aa--cayendo) .aa__escena {
+  transform-origin: 50% 86%;
 }
 
-/* El cierre: un círculo blando que se cierra en el ojo de Angie, como el final de un dibujo
-   animado. Tapa del todo hasta `NUCLEO` (0,86) de `--aa-aire` y se desvanece hasta el borde. */
-@property --aa-aire {
-  syntax: '<length>';
-  inherits: false;
-  initial-value: 0px;
+/* Far away, behind the night: space and Angie's little planet. Only drawn while she falls. */
+.aa__lejos,
+.aa__nubes-del-paso,
+.aa__luz {
+  display: none;
 }
-:host(.aa--alejandose) {
-  mask-image: radial-gradient(
-    circle at var(--aa-x) var(--aa-y),
-    #000 calc(var(--aa-aire) * 0.86),
-    transparent var(--aa-aire)
-  );
+:host(.aa--cayendo) .aa__lejos,
+:host(.aa--cayendo) .aa__nubes-del-paso,
+:host(.aa--cayendo) .aa__luz {
+  display: block;
+}
+.aa__lejos,
+.aa__espacio,
+.aa__atmosfera,
+.aa__lienzo-del-planeta,
+.aa__nubes-del-paso,
+.aa__luz {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+.aa__espacio {
+  opacity: 0;
+  background:
+    radial-gradient(circle at 18% 72%, rgba(126, 74, 170, 0.35), transparent 38%),
+    radial-gradient(circle at 82% 18%, rgba(60, 170, 160, 0.22), transparent 36%),
+    linear-gradient(#0b0f26, #141a3d 60%, #221d45);
+}
+.aa__espacio circle {
+  fill: #fff8ec;
+  opacity: 0.7;
+}
+.aa__matas {
+  fill: none;
+  stroke: #2f7a5a;
+  stroke-width: 2.2;
+  stroke-linecap: round;
+}
+.aa__juncos {
+  fill: none;
+  stroke: #1f5a45;
+  stroke-width: 3;
+  stroke-linecap: round;
+}
+/* The planet's air: the camera goes into it, toward the hill's night. It ends close to the hill
+   under its night (`.ini__penumbra`): lighter, the hill showed up much darker behind the clouds. */
+.aa__atmosfera {
+  opacity: 0;
+  background: linear-gradient(#10163a, #1c2350 60%, #2c3058);
+}
+.aa__nubes-del-paso {
+  fill: #a8afd6;
 }
 
 .aa__cielo,
@@ -503,16 +557,16 @@
 }
 /* Mientras espera, la música de sus auriculares se escapa en notas: una por compás, alternando la
    copa, con el mismo pulso que su movida. Sin sonido no hay música. */
-:host(:not(.aa--probando, .aa--alejandose, .aa--mudo)) .aa__nota {
+:host(:not(.aa--probando, .aa--cayendo, .aa--mudo)) .aa__nota {
   animation: aa-nota-escucha 4.8s ease-out infinite;
 }
-:host(:not(.aa--probando, .aa--alejandose, .aa--mudo)) .aa__notas--derecha .aa__nota {
+:host(:not(.aa--probando, .aa--cayendo, .aa--mudo)) .aa__notas--derecha .aa__nota {
   animation-delay: 2.4s;
 }
-:host(:not(.aa--probando, .aa--alejandose, .aa--mudo)) .aa__nota:nth-child(2) {
+:host(:not(.aa--probando, .aa--cayendo, .aa--mudo)) .aa__nota:nth-child(2) {
   animation-delay: 1.2s;
 }
-:host(:not(.aa--probando, .aa--alejandose, .aa--mudo)) .aa__notas--derecha .aa__nota:nth-child(2) {
+:host(:not(.aa--probando, .aa--cayendo, .aa--mudo)) .aa__notas--derecha .aa__nota:nth-child(2) {
   animation-delay: 3.6s;
 }
 @keyframes aa-nota-escucha {
@@ -718,22 +772,12 @@
   }
 }
 
-/* Al irse, el texto se va primero: en el círculo que se cierra quedan la noche y Angie, no restos
-   de palabras sobre la cara de la Angie de la colina. */
-.aa__titulo,
-.aa__lado {
-  transition: opacity 0.45s ease-out;
-}
-:host(.aa--alejandose) .aa__titulo,
-:host(.aa--alejandose) .aa__lado {
-  opacity: 0;
-}
-
 /* En la prueba la invitación ya hizo lo suyo: se aparta para que se mire a Angie. */
 :host(.aa--probando) .aa__seguir,
 :host(.aa--probando) .aa__mudo,
-:host(.aa--alejandose) .aa__seguir,
-:host(.aa--alejandose) .aa__mudo {
+:host(.aa--cayendo) .aa__seguir,
+:host(.aa--cayendo) .aa__mudo,
+:host(.aa--cayendo) .aa__de-cero {
   opacity: 0;
   pointer-events: none;
 }
@@ -790,7 +834,7 @@
   }
 }
 
-/* Sin movimiento: el aviso y sus dos opciones siguen ahí, sin bucles ni cámara que se aleja. */
+/* Sin movimiento: el aviso y sus dos opciones siguen ahí, sin bucles ni caída. */
 @media (prefers-reduced-motion: reduce) {
   .aa__estrella,
   .aa__destello-estrella,
@@ -805,7 +849,7 @@
   .aa__nota,
   /* Las notas se prenden con una regla de estado, más específica que `.aa__nota`: nombrada igual
      acá, o le ganaba a este bloque y seguían saliendo. */
-  :host(:not(.aa--probando, .aa--alejandose, .aa--mudo)) .aa__nota,
+  :host(:not(.aa--probando, .aa--cayendo, .aa--mudo)) .aa__nota,
   .aa__parlante-ondas path {
     animation: none;
   }

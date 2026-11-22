@@ -137,333 +137,351 @@ export function letrasDelLlamado(frase: string): LetraDelLlamado[][] {
     .map((palabra) => [...palabra].map((c) => ({ c, i: i++ })));
 }
 
-/**
- * El cierre (ver el CSS del componente) es un círculo blando centrado en el ojo de Angie, que crece
- * con `--aa-aire`: con aire `a` tapa del todo hasta `NUCLEO * a` y se desvanece hasta `a`. Un círculo
- * que se cierra es el final de dibujo animado; las nubes oscuras que tenía antes se leían como el
- * humo de una explosión.
+// ─── The fall: Angie turns into light, crosses space and lands on the hill ────────────────────
+
+/*
+ * After the touch Angie squashes, jumps and bursts into a pink star. The camera tilts up after it,
+ * the notice's night slides away and space opens with Angie's little planet far off. The star arcs
+ * down onto it while the camera dives to the top of the planet, through its clouds; under them the
+ * hill appears, at night, and the star lands on the stone. There Angie comes back and the sun rises
+ * (the hill does that part: `aterrizar` in `inicio-angie.ts`). It is her arrival in Signal Space,
+ * long before the crew: the start of the wait on the hill.
+ *
+ * The hill is never scaled: it appears at its real size under the clouds. Only the planet is, and
+ * it is a small SVG redrawn every frame, so no layer ever grows past the screen.
  */
-export const NUCLEO = 0.86;
 
-/** El aire con el que el círculo tapa el aviso entero: arranca sin que se note el recorte. */
-export function aireQueCubre(x: number, y: number, ancho: number, alto: number): number {
-  return (1.02 * Math.hypot(Math.max(x, ancho - x), Math.max(y, alto - y))) / NUCLEO;
-}
-
-/** El aire más grande con el que el círculo queda adentro del aviso, sin tocar sus bordes. */
-export function aireQueCabe(x: number, y: number, ancho: number, alto: number): number {
-  return 0.95 * Math.min(x, ancho - x, y, alto - y);
-}
-
-// ─── El viaje de la cámara, del ojo de Angie a la colina ───────────────────────────────────────
-
+/** Moments of the fall, in ms from its start (the end of the sound test, or the touch without it). */
+export const SE_VUELVE_LUZ_MS = 600;
+/** The hill is drawn again under the notice a moment before the far layers start to fade. */
+export const LA_COLINA_APARECE_MS = 3700;
+export const SE_VA_LO_LEJANO_DESDE_MS = 3900;
+export const SE_VA_LO_LEJANO_HASTA_MS = 4200;
+/** The star touches the stone. */
+export const CHOQUE_MS = 4300;
 /**
- * Los dos tramos del viaje, en ms. Primero el aviso se aleja, adentro del ojo de Angie, y mientras
- * se achica se redondea en un círculo, hasta desaparecer: la noche era lo que ella miraba, y la pantalla queda toda del
- * negro de su ojo. Después la cámara se aleja, del ojo a la cara, a Angie en la piedra y a la colina
- * entera. Se pisan un poco: la cámara arranca cuando el aviso ya es una mota. Uno detrás del otro, la
- * pantalla quedaba un segundo y medio toda negra.
- */
-export const SE_CIERRA_MS = 1700;
-export const ALEJARSE_MS = 4200;
-export const SE_ALEJA_DESDE_MS = SE_CIERRA_MS - 300;
-export const VIAJE_MS = SE_ALEJA_DESDE_MS + ALEJARSE_MS;
-/**
- * Cuándo aparece la colina debajo del aviso, con su capa: un momento antes de que arranque la
- * cámara, así cuando arranca ya está dibujada. Armarla es un tirón de un quinto de segundo a 3440 px:
- * cae con el aviso hecho un punto de pocas decenas de píxeles, y no con el aviso entero ni con la
- * cámara en marcha.
- */
-export const LA_COLINA_APARECE_MS = SE_ALEJA_DESDE_MS - 200;
-
-/**
- * Lo más que avanza el viaje de un cuadro al otro. Un tirón más largo no se salta: el viaje sigue
- * donde iba. A 20 cuadros por segundo todavía va a su paso.
+ * The longest step of the clock from one frame to the next. A longer hitch is not skipped: the fall
+ * goes on where it was. At 20 frames per second it still goes at its pace.
  */
 export const TIRON_MS = 50;
 
-/** Hasta acá del cierre el borde se redondea: de la pantalla entera al círculo que cabe adentro. */
-const REDONDEA = 0.4;
-/** Hasta dónde se va en escala antes de cerrarse en cero: parejo, como algo que se aleja. */
-const LEJOS = 0.004;
+/** The radius of the star's light, before its scale: the hill's light on the stone starts at it. */
+export const RADIO_DE_LA_LUZ = 70;
 
-/** Lo que muestra la cámara en un instante del viaje. */
-export interface CuadroDelViaje {
-  /** La escala de la colina, con el ojo como punto fijo: de `profundidad` a 1. */
-  readonly colina: number;
-  /** La escala del aviso dentro de la colina (su escala en pantalla es `colina * aviso`). */
-  readonly aviso: number;
-  /** El radio del círculo, en px del aviso. */
-  readonly aire: number;
-}
+/** How many lights trail behind the star. */
+export const LARGO_DE_LA_COLA = 18;
 
-/** Entra y sale suave: la cámara no arranca ni frena de golpe. */
-const suave = (v: number): number => 0.5 - 0.5 * Math.cos(Math.PI * v);
-const entre01 = (v: number): number => Math.min(1, Math.max(0, v));
-
+/** The planet, in its own units: radius 300, and the hill on top up to 335. */
+export const RADIO_DEL_PLANETA = 300;
 /**
- * El cuadro del viaje en el ms `t`. Como en Powers of Ten, la cámara se aleja en escala: cada tramo
- * de tiempo divide la escala por lo mismo, así el ojo, la cara, Angie y la colina duran parecido. En
- * línea recta, el ojo pasaba en un parpadeo y la colina se arrastraba.
- *
- * `profundidad` es de qué tan cerca arranca la colina; `cubre` y `cabe`, el aire que tapa el aviso
- * entero y el que entra justo adentro (`aireQueCubre`, `aireQueCabe`).
+ * Where the stone's drawing (the hill's, 1080 × 1080) sits on the planet: its base on the hill. At
+ * the end of the dive this box lands exactly on the hill's stone.
  */
-export function cuadroDelViaje(
-  t: number,
-  profundidad: number,
-  cubre: number,
-  cabe: number,
-): CuadroDelViaje {
-  const S0 = profundidad;
-  const colina = colinaEn(t, S0);
-  if (t >= SE_CIERRA_MS) return { colina, aviso: 0, aire: cabe };
-  const u = entre01(t / SE_CIERRA_MS);
-  // Se aleja desde el primer cuadro y al final se cierra en cero: no queda ningún punto. El negro del
-  // ojo aparece alrededor porque el aviso se achica, no porque lo tape: quieto mientras el círculo se
-  // cerraba encima, el negro avanzaba hacia el medio y no se leía alejarse. Arranca despacio en
-  // escala: parejo, a los 200 ms ya iba por un tercio y se leía como un salto, no como alejarse.
-  const v = u * u;
-  // El borde se redondea mientras se aleja, parejo en escala: en línea recta casi todo el tramo
-  // seguía siendo el rectángulo de la pantalla.
-  const aire = cubre * (cabe / cubre) ** Math.min(1, u / REDONDEA);
-  return { colina, aviso: ((1 - v) * LEJOS ** v) / colina, aire };
-}
+export const CAJA_DE_LA_PIEDRA = { x: -39.3, y: -402.8, lado: 78.6 } as const;
+/** Base of the stone in its drawing: the shadow's ellipse, at 1000 of 1080. */
+export const BASE_DE_LA_PIEDRA = 1000 / 1080;
+const SUELO_DE_LA_PIEDRA = CAJA_DE_LA_PIEDRA.y + BASE_DE_LA_PIEDRA * CAJA_DE_LA_PIEDRA.lado;
 
-/** La escala de la colina: quieta en la profundidad hasta que arranca, y después se aleja. */
-function colinaEn(t: number, S0: number): number {
-  const v = entre01((t - SE_ALEJA_DESDE_MS) / ALEJARSE_MS);
-  // Casi todo parejo en escala, con un poco de arranque y llegada suaves.
-  const p = 0.55 * v + 0.45 * suave(v);
-  return S0 ** (1 - p);
-}
-
-/**
- * Cuánto de la distancia entre el ojo y el medio de la pantalla corre la cámara: entera mientras la
- * colina está a `profundidad` (el aviso se cierra en el medio) y nada al llegar a 1 (la colina en su
- * lugar). Va en escala, como el viaje: en pantalla, lineal, la colina ya llegaba de costado cuando
- * todavía se veía solo la cara.
- */
-export function corridaDeLaCamara(colina: number, profundidad: number): number {
-  if (profundidad <= 1) return 0;
-  return entre01(Math.log(colina) / Math.log(profundidad));
-}
-
-/**
- * De qué tan cerca arranca la colina: desde ADENTRO del ojo, con toda la pantalla de su negro.
- * `mancha` es el negro que se puede llenar, en el dibujo del ojo (lejos de su brillo y del párpado);
- * `dx` y `dy`, una esquina de la pantalla vista desde su centro, en ese mismo dibujo. La esquina
- * tiene que caer adentro: con la mancha en media pantalla, se veía la cara desde el primer cuadro.
- * Con margen y con tope, que de más no muestra nada distinto.
- */
-export function profundidadDelViaje(
-  mancha: { readonly ancho: number; readonly alto: number },
-  dx: number,
-  dy: number,
-): number {
-  const a = Math.max(mancha.ancho, 1) / 2;
-  const b = Math.max(mancha.alto, 1) / 2;
-  const s = MARGEN * Math.hypot(dx / a, dy / b);
-  return Math.min(TOPE, Math.max(6, s));
-}
-const MARGEN = 1.2;
-const TOPE = 900;
-
-/**
- * La profundidad que deja las cuatro esquinas adentro de la mancha. Va en el dibujo del ojo y no en
- * su caja de pantalla: Angie está girada y estirada por sus muelles, y medida por la caja la cámara
- * arrancaba con un borde a la vista. `alOjo` es la inversa de su matriz de pantalla (solo la parte
- * lineal) y `esquinas`, cada esquina menos el centro de la mancha, en píxeles.
- */
-export function profundidadDesdeElOjo(
-  mancha: { readonly ancho: number; readonly alto: number },
-  alOjo: { readonly a: number; readonly b: number; readonly c: number; readonly d: number },
-  esquinas: readonly (readonly [number, number])[],
-): number {
-  const { a, b, c, d } = alOjo;
-  return Math.max(
-    ...esquinas.map(([x, y]) =>
-      profundidadDelViaje(mancha, Math.abs(a * x + c * y), Math.abs(b * x + d * y)),
-    ),
-  );
-}
-
-/**
- * Los loops de la colina que van quietos mientras viaja la cámara. Lo que anima queda dibujado a la
- * escala más grande que alcanzó, contando la de la escena, y no la baja mientras siga animando:
- * después de alejarse desde el ojo, los juncos, las nubes y Angie quedaban a decenas de aumentos,
- * cientos de megas de memoria de video, y con poca (Opera Neon con otras pestañas) a la colina le
- * faltaban pedazos. Los del aviso no, que se va, ni los que ya frenó la pausa de fondo: soltarlos
- * sería despausarlos.
- */
-export function loopsQueSeRedibujan(animaciones: readonly Animation[], aviso: Node): Animation[] {
-  return animaciones.filter((a) => {
-    const blanco = (a.effect as KeyframeEffect | null)?.target;
-    return esLoopQueCorre(a) && !(blanco && aviso.contains(blanco));
-  });
-}
-
-/** Un loop que corre: sin fin, y no frenado ya por la pausa de fondo. */
-export function esLoopQueCorre(a: Animation): boolean {
-  const efecto = a.effect;
-  if (!(efecto instanceof KeyframeEffect) || a.playbackRate === 0) return false;
-  return efecto.getComputedTiming().iterations === Infinity;
-}
-
-/**
- * Cuánto más afuera de la pantalla se mira si la gema la tapa: lo medido es el cuadro anterior, y entre
- * uno y otro la cámara se aleja unos pocos por ciento. Sin margen, el primer cuadro destapado mostraba
- * el hueco donde debía estar la colina.
- */
-const MARGEN_DE_TAPA = 1.15;
-
-/**
- * Si la gema de Angie tapa la pantalla entera: cada esquina, algo más afuera, cae adentro de alguna
- * de sus piezas. La gema es convexa, así que con las esquinas adentro está adentro todo. `piezas` son
- * las de la pose que se ve; `pantalla`, el rectángulo en coordenadas de cliente.
- */
-export function laGemaTapaLaPantalla(
-  piezas: readonly SVGGeometryElement[],
-  pantalla: {
-    readonly left: number;
-    readonly top: number;
-    readonly width: number;
-    readonly height: number;
-  },
-): boolean {
-  if (!piezas.length) return false;
-  const cx = pantalla.left + pantalla.width / 2;
-  const cy = pantalla.top + pantalla.height / 2;
-  const alPieza = piezas.map((p) => ({ p, m: p.getScreenCTM()?.inverse() }));
-  return [
-    [-1, -1],
-    [1, -1],
-    [-1, 1],
-    [1, 1],
-  ].every(([sx, sy]) => {
-    const x = cx + (sx * MARGEN_DE_TAPA * pantalla.width) / 2;
-    const y = cy + (sy * MARGEN_DE_TAPA * pantalla.height) / 2;
-    return alPieza.some(
-      ({ p, m }) => !!m && p.isPointInFill(new DOMPoint(x, y).matrixTransform(m)),
-    );
-  });
-}
-
-// ─── La colina dibujada por escalones, dentro de una capa que no crece ─────────────────────────
-//
-// La cámara reparte su escala en dos: la colina lleva una escala que solo cambia por escalones (la
-// «dibujada»), y un contenedor suyo, que es la capa (`will-change: transform`), lleva lo que falta,
-// de la holgura a 1, cuadro a cuadro. La capa mide lo que la pantalla y el navegador la dibuja una
-// sola vez, a la holgura: nunca ocupa más de holgura² veces los píxeles que se ven, y entre un
-// escalón y otro solo la achica.
-//
-// Antes la capa era la colina misma, agrandada cientos de veces: el navegador le dibujaba por
-// adelantado lo que rodea a la pantalla hasta llenar la memoria de video (109 MB de un tope de 128,
-// 190 de 256), y cada redibujado, que la creaba de nuevo, pedía memoria cuando la capa vieja todavía
-// no había devuelto la suya. Con poca, el cuadro salía sin dibujar: el flash del color de fondo.
-
-/**
- * Cuánto más grande de lo que se ve queda dibujada la colina al empezar un escalón: ∛2 de lado, 1,6×
- * los píxeles de la pantalla, y 27 escalones del ojo a la colina. Con √2 (2× los píxeles, 18
- * escalones) cada escalón pedía dos veces esa capa, 126 MB a 3440 px, y con 128 MB de memoria de
- * video no entraba junto con el aviso.
- */
-export const HOLGURA_DE_DIBUJO = Math.cbrt(2);
-
-/**
- * La escala a la que se dibuja la colina cuando la cámara está en `escala`: la del final del escalón,
- * así lo que la capa agrega va de `holgura` a 1 y nunca la achica por debajo de la pantalla. Nunca
- * menos que 1: el último escalón ya es la colina en su lugar.
- */
-export function escalaDeDibujo(escala: number, holgura = HOLGURA_DE_DIBUJO): number {
-  return Math.max(1, escala / holgura);
-}
-
-/**
- * Cuántos cuadros se dejan pasar entre soltar unas capas y pedir otras: entre que la cámara se va y
- * que despiertan los loops. El navegador tarda un par de cuadros en devolver la memoria de video de
- * las capas que se van: todo en el mismo cuadro, lo nuevo no entraba y a la colina le faltaba una
- * franja.
- */
-export const CUADROS_DE_ESPERA = 3;
-
-/** Si toca otro escalón: la cámara ya llegó a la escala dibujada y todavía no es la de la colina. */
-export function tocaRedibujar(escala: number, dibujadaA: number): boolean {
-  return dibujadaA > 1 && escala <= dibujadaA;
-}
-
-interface Punto {
+export interface PuntoDelAviso {
   readonly x: number;
   readonly y: number;
 }
 
-/** Cómo quedó dibujada la colina en el último escalón: su escala, su punto fijo y su corrida. */
-export interface Dibujada {
-  readonly escala: number;
-  readonly ojo: Punto;
-  readonly corrida: Punto;
+/** What the fall measures before starting, in px of the notice. */
+export interface EscenarioDeLaCaida {
+  readonly ancho: number;
+  readonly alto: number;
+  /** Middle of the notice's Angie. */
+  readonly angie: PuntoDelAviso;
+  /** The hill's stone: the middle of its base and the width of its box. */
+  readonly piedra: PuntoDelAviso & { readonly ancho: number };
 }
 
-/**
- * Lo que la capa agrega encima de la colina dibujada para que en pantalla quede a `escala`, con el
- * ojo en `ojo` y corrida `corrida`: una escala alrededor del ojo dibujado y una corrida. El ojo se
- * mueve apenas entre un escalón y otro, y a cientos de aumentos eso son cientos de píxeles: la
- * corrida lo compensa.
- */
-export function camaraSobreLoDibujado(
-  dibujada: Dibujada,
-  escala: number,
-  ojo: Punto,
-  corrida: Punto,
-): { readonly escala: number; readonly corrida: Punto } {
-  const k = escala / dibujada.escala;
-  return {
-    escala: k,
-    corrida: {
-      x: (ojo.x - dibujada.ojo.x) * (1 - escala) + corrida.x - k * dibujada.corrida.x,
-      y: (ojo.y - dibujada.ojo.y) * (1 - escala) + corrida.y - k * dibujada.corrida.y,
-    },
+export interface Circulo extends PuntoDelAviso {
+  readonly r: number;
+  readonly opacidad: number;
+}
+
+export interface CuadroDeLaCaida {
+  /** The title and the call under it. */
+  readonly texto: { readonly opacidad: number; readonly dy: number };
+  /** The notice's Angie: squash, jump, burst. Scale around her feet. */
+  readonly angie: {
+    readonly dy: number;
+    readonly sx: number;
+    readonly sy: number;
+    readonly brillo: number;
+    readonly opacidad: number;
   };
+  /** The notice's night (sky, stars, hills), sliding down as the camera tilts up after the star. */
+  readonly noche: { readonly dy: number; readonly opacidad: number };
+  /** Space behind the planet. */
+  readonly espacio: number;
+  /** Space, planet and atmosphere together: they fade to leave the hill. */
+  readonly lejos: number;
+  /** The planet: its centre on screen, its scale and the angle of its night side. */
+  readonly planeta: {
+    readonly x: number;
+    readonly y: number;
+    readonly k: number;
+    readonly opacidad: number;
+    readonly sombra: number;
+  };
+  readonly solLejano: PuntoDelAviso & { readonly escala: number; readonly opacidad: number };
+  readonly estrella: PuntoDelAviso & {
+    readonly escala: number;
+    readonly opacidad: number;
+    readonly giro: number;
+  };
+  /** The tail, from the star backwards. */
+  readonly cola: readonly Circulo[];
+  /** The light she turns into. */
+  readonly destello: Circulo;
+  /** The light on the stone. */
+  readonly atmosfera: number;
+  /** The clouds the camera crosses before the hill. */
+  readonly nubes: readonly (PuntoDelAviso & {
+    readonly escala: number;
+    readonly opacidad: number;
+  })[];
 }
 
+const entre01 = (v: number): number => Math.min(1, Math.max(0, v));
+const tramo = (t: number, a: number, b: number): number => entre01((t - a) / (b - a));
+const suave = (v: number): number => 0.5 - 0.5 * Math.cos(Math.PI * v);
+const acelera = (v: number): number => v * v;
+const frena = (v: number): number => 1 - (1 - v) * (1 - v);
+const entre = (a: number, b: number, v: number): number => a + (b - a) * v;
+/** Even in scale: equal stretches of time multiply the scale by the same. */
+const enEscala = (a: number, b: number, v: number): number => a * (b / a) ** v;
+const curva = (
+  p0: PuntoDelAviso,
+  p1: PuntoDelAviso,
+  p2: PuntoDelAviso,
+  u: number,
+): PuntoDelAviso => ({
+  x: (1 - u) ** 2 * p0.x + 2 * (1 - u) * u * p1.x + u * u * p2.x,
+  y: (1 - u) ** 2 * p0.y + 2 * (1 - u) * u * p1.y + u * u * p2.y,
+});
+/** How big the screen is, against 1920 × 1080: the light, its tail and the clouds go with it. */
+const tamano = (e: EscenarioDeLaCaida): number => Math.sqrt((e.ancho * e.alto) / (1920 * 1080));
+
+/** The camera dives from `BUSCA_DESDE_MS` to the crash. */
+const BUSCA_DESDE_MS = 1100;
+
 /**
- * Si la capa, agrandada `escala` alrededor de `origen` y corrida, sigue tapando su propio lugar: la
- * capa está recortada a su caja, y si no la tapa asoma lo de atrás por un borde. `caja` es la capa
- * sin agrandar, en las mismas coordenadas que `origen`. Con medio píxel de tolerancia.
+ * Where the camera puts the planet. It aims at the top of the planet (where the stone is) and gets
+ * closer evenly in scale, so the far planet and the near hill last about the same; at the crash the
+ * stone's box is exactly where the hill's stone is.
  */
-export function laCapaTapaSuLugar(
-  escala: number,
-  corrida: Punto,
-  origen: Punto,
-  caja: { readonly x: number; readonly y: number; readonly ancho: number; readonly alto: number },
-): boolean {
-  if (escala < 1 - 1e-9) return false;
-  const izquierda = origen.x + escala * (caja.x - origen.x) + corrida.x;
-  const arriba = origen.y + escala * (caja.y - origen.y) + corrida.y;
-  return (
-    izquierda <= caja.x + 0.5 &&
-    arriba <= caja.y + 0.5 &&
-    izquierda + escala * caja.ancho >= caja.x + caja.ancho - 0.5 &&
-    arriba + escala * caja.alto >= caja.y + caja.alto - 0.5
+export function camaraDelPlaneta(
+  t: number,
+  e: EscenarioDeLaCaida,
+): { x: number; y: number; k: number } {
+  const p = tramo(t, BUSCA_DESDE_MS, CHOQUE_MS);
+  const lejos = Math.min(Math.max(0.06 * e.alto, 36), 0.16 * e.ancho);
+  const k = enEscala(
+    lejos / RADIO_DEL_PLANETA,
+    e.piedra.ancho / CAJA_DE_LA_PIEDRA.lado,
+    0.35 * p + 0.65 * suave(p),
+  );
+  const cima = {
+    x: entre(0.4 * e.ancho, e.piedra.x, suave(p)),
+    y: entre(0.61 * e.alto, e.piedra.y, suave(p)),
+  };
+  return { x: cima.x, y: cima.y - SUELO_DE_LA_PIEDRA * k, k };
+}
+
+/** Where the star is at `t`: it rises from Angie, hangs a moment and falls onto the stone. */
+export function dondeVaLaEstrella(t: number, e: EscenarioDeLaCaida): PuntoDelAviso {
+  const nace = { x: e.angie.x, y: e.angie.y - 0.11 * e.alto };
+  const arriba = { x: 0.68 * e.ancho, y: 0.16 * e.alto };
+  if (t < 1700) {
+    return curva(nace, { x: 0.58 * e.ancho, y: 0.13 * e.alto }, arriba, frena(tramo(t, 600, 1700)));
+  }
+  const c = camaraDelPlaneta(t, e);
+  // Toward the middle of the stone, which moves as the camera gets closer.
+  const piedra = { x: c.x, y: c.y + (SUELO_DE_LA_PIEDRA - 34) * c.k };
+  const u = tramo(t, 1700, CHOQUE_MS);
+  return curva(
+    arriba,
+    { x: 0.74 * e.ancho, y: 0.48 * e.alto },
+    piedra,
+    0.5 * acelera(u) + 0.5 * suave(u),
   );
 }
 
-/**
- * Las propiedades que mueve una animación, escritas como en CSS: las que `commitStyles` deja fijas
- * en el estilo del elemento mientras va quieta, y que hay que sacar cuando vuelve a moverse.
- */
-export function propiedadesAnimadas(cuadros: readonly object[]): string[] {
-  const internas = new Set(['offset', 'computedOffset', 'easing', 'composite']);
-  const nombres = new Set(cuadros.flatMap((c) => Object.keys(c)).filter((k) => !internas.has(k)));
-  return [...nombres].map((k) => k.replace(/[A-Z]/g, (m) => '-' + m.toLowerCase()));
+/** The clouds the camera goes through, against the middle of the screen, and their size. */
+export const NUBES_DEL_PASO = [
+  [-520, -160, 1.3],
+  [480, -60, 1.6],
+  [-300, 260, 1.8],
+  [340, 300, 1.4],
+  [40, -320, 1.2],
+] as const;
+const NUBES_DESDE_MS = 3450;
+const NUBES_HASTA_MS = 4350;
+
+export function cuadroDeLaCaida(t: number, e: EscenarioDeLaCaida): CuadroDeLaCaida {
+  const tam = tamano(e);
+  const fuera = tramo(t, 0, 350);
+
+  // Angie: squashes on her feet, jumps, and bursts into light at the top of the jump.
+  const aplasta = suave(tramo(t, 0, 250));
+  const salto = frena(tramo(t, 250, 600));
+  const estira = t > 250 ? 1 + 0.1 * Math.sin(Math.PI * tramo(t, 250, 600)) : 1;
+  const nace = acelera(tramo(t, 520, 700));
+  const angie = {
+    dy: -0.13 * e.alto * salto,
+    sx: ((1 + 0.08 * aplasta) * (1 - nace)) / estira,
+    sy: (1 - 0.13 * aplasta) * estira * (1 - nace),
+    brillo: 1 + 2.5 * tramo(t, 420, 680),
+    opacidad: 1 - tramo(t, 640, 720),
+  };
+  const centroDelDestello = { x: e.angie.x, y: e.angie.y - 0.11 * e.alto };
+  const d = tramo(t, 560, 950);
+  const destello = {
+    ...centroDelDestello,
+    r: (40 + 260 * frena(d)) * tam,
+    opacidad: d > 0 && d < 1 ? Math.min(1, d * 6) * (1 - d) : 0,
+  };
+
+  // The camera tilts up after the star: the notice's night slides down and space opens.
+  const inclina = suave(tramo(t, 700, 2100));
+  const noche = { dy: 0.88 * e.alto * inclina, opacidad: 1 - tramo(t, 1300, 2100) };
+
+  const c = camaraDelPlaneta(t, e);
+  const p = tramo(t, BUSCA_DESDE_MS, CHOQUE_MS);
+  const aparece = tramo(t, BUSCA_DESDE_MS, 1700);
+  const planeta = { ...c, opacidad: aparece, sombra: entre(200, 172, p) };
+  const solLejano = {
+    x: 0.77 * e.ancho,
+    y: 0.26 * e.alto,
+    escala: (0.55 + 0.2 * p) * tam,
+    opacidad: aparece * (1 - tramo(t, 3000, 3700)),
+  };
+
+  const viva = t >= SE_VUELVE_LUZ_MS && t < CHOQUE_MS + 80;
+  const donde = dondeVaLaEstrella(t, e);
+  const escala = (0.6 + 0.4 * tramo(t, 600, 800)) * (1 + 0.7 * tramo(t, 3300, CHOQUE_MS)) * tam;
+  const estrella = {
+    ...donde,
+    escala,
+    opacidad: viva ? 1 - tramo(t, CHOQUE_MS, CHOQUE_MS + 80) : 0,
+    giro: (t * 0.12) % 360,
+  };
+  const cola = Array.from({ length: LARGO_DE_LA_COLA }, (_, i) => {
+    const antes = t - (i + 1) * 28;
+    const q = dondeVaLaEstrella(Math.max(SE_VUELVE_LUZ_MS, antes), e);
+    const hay = viva && antes > SE_VUELVE_LUZ_MS;
+    return {
+      ...q,
+      r: hay ? (12 - i * 0.6) * escala : 0,
+      opacidad: (1 - i / LARGO_DE_LA_COLA) * 0.8,
+    };
+  });
+
+  const nubes = NUBES_DEL_PASO.map(([x, y, s], i) => {
+    const dura = (NUBES_HASTA_MS - NUBES_DESDE_MS) * 0.55;
+    const desde =
+      NUBES_DESDE_MS + ((NUBES_HASTA_MS - NUBES_DESDE_MS - dura) * i) / (NUBES_DEL_PASO.length - 1);
+    const v = tramo(t, desde, desde + dura);
+    const lejos = enEscala(0.3, 6, acelera(v));
+    return {
+      x: e.ancho / 2 + x * tam * lejos,
+      y: e.alto / 2 + y * tam * lejos,
+      escala: enEscala(0.4, 9, acelera(v)) * s * tam,
+      opacidad: v <= 0 || v >= 1 ? 0 : Math.min(1, v * 5) * (1 - acelera(v)) * 0.96,
+    };
+  });
+
+  return {
+    texto: { opacidad: 1 - fuera, dy: 30 * fuera * tam },
+    angie,
+    noche,
+    // Opaque before the night starts to slide: half there, the page showed through it.
+    espacio: tramo(t, 300, 700),
+    lejos: 1 - tramo(t, SE_VA_LO_LEJANO_DESDE_MS, SE_VA_LO_LEJANO_HASTA_MS),
+    planeta,
+    solLejano,
+    estrella,
+    cola,
+    destello,
+    atmosfera: 0.95 * tramo(t, 3000, 4100),
+    nubes,
+  };
 }
 
-/**
- * La marca de `data-quieto` que apaga el pulso de un pseudo-elemento mientras viaja la cámara, o
- * `null` si el loop es de un elemento (ese se aquieta con `commitStyles`).
- */
-export function marcaDelPseudo(pseudo: string | null): string | null {
-  if (pseudo === '::before') return 'antes';
-  if (pseudo === '::after') return 'despues';
-  return null;
+// ─── Angie's little planet ───────────────────────────────────────────────────────────────────
+
+export interface DibujoDelPlaneta {
+  /** Darker meadows inside the disc. */
+  readonly praderas: readonly { cx: number; cy: number; rx: number; ry: number; giro: number }[];
+  readonly flores: readonly { cx: number; cy: number; r: number; color: string }[];
+  /** Grass tufts around the rim: the angle and the path, drawn standing on the top. */
+  readonly matas: readonly { giro: number; alto: number; d: string }[];
+  readonly juncos: readonly { giro: number; d: string }[];
+  /** Little clouds floating around it: angle, distance and size. */
+  readonly nubes: readonly { giro: number; distancia: number; escala: number }[];
+}
+
+/** The hill on top of the planet, where the stone sits. Also cuts the planet's light. */
+export const LOMA_DEL_PLANETA =
+  'M-190 -288C-120 -294 -80 -335 0 -335C80 -335 120 -294 190 -288L150 -230L-150 -230Z';
+
+const COLORES_DE_FLOR = ['#ffffff', '#ffd46a', '#ff9fcf'] as const;
+
+/** The planet's details, with a seed: the same planet on every visit. */
+export function dibujoDelPlaneta(semilla: number): DibujoDelPlaneta {
+  const r = azar(semilla);
+  const praderas = Array.from({ length: 7 }, () => {
+    const a = r() * Math.PI * 2;
+    const d = 90 + r() * 150;
+    return {
+      cx: +(Math.cos(a) * d).toFixed(1),
+      cy: +(Math.sin(a) * d).toFixed(1),
+      rx: +(40 + r() * 50).toFixed(1),
+      ry: +(22 + r() * 26).toFixed(1),
+      giro: +((a * 180) / Math.PI + 90).toFixed(1),
+    };
+  });
+  const flores = Array.from({ length: 70 }, (_, i) => {
+    const a = r() * Math.PI * 2;
+    const d = 200 + r() * 92;
+    return {
+      cx: +(Math.cos(a) * d).toFixed(1),
+      cy: +(Math.sin(a) * d).toFixed(1),
+      r: +(2 + r() * 2.4).toFixed(1),
+      color: COLORES_DE_FLOR[i % COLORES_DE_FLOR.length],
+    };
+  });
+  const matas = Array.from({ length: 120 }, (_, i) => {
+    const giro = +((i / 120) * 360 + r() * 2).toFixed(1);
+    const h = 8 + r() * 9;
+    // On the hill they stand higher: the hill reaches 335 around the top.
+    const sobreLaLoma = Math.abs(((giro + 180) % 360) - 180) < 22;
+    const f = (v: number): string => v.toFixed(1);
+    return {
+      giro,
+      alto: sobreLaLoma ? 333 : RADIO_DEL_PLANETA - 1,
+      d: `M-4 0Q-5 ${f(-h * 0.6)} -7 ${f(-h)}M0 0Q0 ${f(-h * 0.7)} 1 ${f(-h * 1.25)}M4 0Q5 ${f(-h * 0.6)} 7 ${f(-h * 0.9)}`,
+    };
+  });
+  const juncos = [62, 118, 160, 205, 250, 300].map((giro) => ({
+    giro,
+    d: [0, 1, 2, 3]
+      .map((j) => `M${j * 5 - 8} 0Q${j * 6 - 8} -22 ${j * 9 - 14} ${-36 - j * 6}`)
+      .join(''),
+  }));
+  const nubes = (
+    [
+      [-40, 352, 1.1],
+      [35, 345, 0.9],
+      [100, 350, 1],
+      [170, 342, 1.2],
+      [235, 355, 0.85],
+      [290, 347, 1],
+    ] as const
+  ).map(([giro, distancia, escala]) => ({ giro, distancia, escala }));
+  return { praderas, flores, matas, juncos, nubes };
 }

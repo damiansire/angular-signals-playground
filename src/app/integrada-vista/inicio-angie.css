@@ -195,9 +195,29 @@
   background: linear-gradient(to bottom, #07091a 0, #10163a 45%, #1c2350 72%, #262d55 100%);
   transition: opacity 3s cubic-bezier(0.4, 0, 0.3, 1);
 }
-.ini--noche .ini__penumbra {
+/* Also before the morning, while Angie falls as light toward the stone: the hill waits at night,
+   with stars, without the sun and without her. When she lands, `aterrizar` lifts the night frame by
+   frame with inline styles over these, and once it is gone nothing multiplies any more. */
+:is(.ini--noche, .ini--de-noche) .ini__penumbra {
   mix-blend-mode: multiply;
   opacity: 1;
+}
+.ini--de-noche :is(.ini__sol, .ini__angie) {
+  opacity: 0;
+}
+/* The hill's loops (clouds, reeds, the sun's rays, the aura) stand still while it waits at night
+   and while the sun comes up: it appears under the notice, and each loop took a layer of its own
+   and gave one to everything above it, the night among them. With little video memory the hill
+   showed up a frame in daylight, and waking them with the landing asked for too much at once.
+   They start when the morning is there; the title comes in after them. No transitions either:
+   the dawn is drawn frame by frame, and each one would be a layer more. */
+.ini--de-noche *,
+.ini--de-noche ::before,
+.ini--de-noche ::after {
+  animation-name: none;
+}
+.ini--de-noche .ini__estrella {
+  scale: 1;
 }
 
 .ini__noche {

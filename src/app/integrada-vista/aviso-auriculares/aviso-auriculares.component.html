@@ -1,3 +1,155 @@
+<!-- Lo de lejos, detrás de la noche: el espacio y el planetita de Angie, adonde cae hecha luz
+     (`cuadroDeLaCaida`). Solo se ve en la caída; la escala y el lugar los pone el componente. -->
+<div class="aa__lejos" aria-hidden="true">
+  <div class="aa__espacio">
+    <svg class="aa__estrellas" viewBox="0 0 1920 1080" preserveAspectRatio="xMidYMin slice">
+      @for (e of estrellas; track $index) {
+        <circle [attr.cx]="e.x" [attr.cy]="e.y" [attr.r]="e.r" />
+      }
+    </svg>
+  </div>
+  <svg class="aa__lienzo-del-planeta">
+    <defs>
+      <radialGradient id="aa-pl-brillo" cx="0.32" cy="0.26" r="0.75">
+        <stop offset="0" stop-color="#e9fff0" stop-opacity="0.55" />
+        <stop offset="0.45" stop-color="#e9fff0" stop-opacity="0" />
+      </radialGradient>
+      <radialGradient id="aa-pl-aire" r="0.5">
+        <stop offset="0.82" stop-color="#9fe6d0" stop-opacity="0.55" />
+        <stop offset="1" stop-color="#9fe6d0" stop-opacity="0" />
+      </radialGradient>
+      <linearGradient id="aa-pl-sombra" x1="0" x2="1" y1="0" y2="0">
+        <stop offset="0.3" stop-color="#0a0e2a" stop-opacity="0" />
+        <stop offset="0.62" stop-color="#0a0e2a" stop-opacity="0.7" />
+        <stop offset="1" stop-color="#0a0e2a" stop-opacity="0.88" />
+      </linearGradient>
+      <radialGradient id="aa-pl-borde" r="0.5">
+        <stop offset="0.8" stop-color="#1d4d3f" stop-opacity="0" />
+        <stop offset="1" stop-color="#1d4d3f" stop-opacity="0.55" />
+      </radialGradient>
+      <radialGradient id="aa-sol-nucleo" cx="42%" cy="38%" r="70%">
+        <stop offset="0" stop-color="#fffbe6" />
+        <stop offset=".38" stop-color="#ffe07a" />
+        <stop offset=".78" stop-color="#ffb23c" />
+        <stop offset="1" stop-color="#f59a28" />
+      </radialGradient>
+      <radialGradient id="aa-sol-corona">
+        <stop offset=".45" stop-color="#ffd46a" stop-opacity=".55" />
+        <stop offset="1" stop-color="#ffd46a" stop-opacity="0" />
+      </radialGradient>
+      <!-- La luz del planeta no se sale del disco ni de la loma de la piedra. -->
+      <clipPath id="aa-pl-recorte">
+        <circle [attr.r]="radioDelPlaneta" />
+        <path [attr.d]="lomaDelPlaneta" />
+      </clipPath>
+    </defs>
+    <!-- El sol de Angie, lejos: es el mismo que sale en la colina cuando ella llega. -->
+    <g class="aa__sol-lejano" opacity="0">
+      <circle r="100" fill="url(#aa-sol-corona)" />
+      @for (giro of rayosDelSol; track $index) {
+        <path
+          [attr.transform]="'rotate(' + giro + ')'"
+          d="M-9 -50Q0 -55 9 -50L3 -92Q0 -97 -3 -92Z"
+          fill="#ffc24d"
+          opacity="0.8"
+        />
+      }
+      <circle r="44" fill="url(#aa-sol-nucleo)" />
+    </g>
+    <g class="aa__planeta">
+      <circle r="372" fill="url(#aa-pl-aire)" />
+      <circle [attr.r]="radioDelPlaneta" fill="#5ea883" />
+      @for (p of planeta.praderas; track $index) {
+        <ellipse
+          [attr.cx]="p.cx"
+          [attr.cy]="p.cy"
+          [attr.rx]="p.rx"
+          [attr.ry]="p.ry"
+          [attr.transform]="'rotate(' + p.giro + ' ' + p.cx + ' ' + p.cy + ')'"
+          fill="#4b9271"
+          opacity="0.55"
+        />
+      }
+      <ellipse cx="-110" cy="120" rx="58" ry="30" fill="#7cc9c2" transform="rotate(-25 -110 120)" />
+      <ellipse
+        cx="-100"
+        cy="112"
+        rx="26"
+        ry="8"
+        fill="#c6f1ea"
+        opacity="0.7"
+        transform="rotate(-25 -110 120)"
+      />
+      @for (f of planeta.flores; track $index) {
+        <circle
+          [attr.cx]="f.cx"
+          [attr.cy]="f.cy"
+          [attr.r]="f.r"
+          [attr.fill]="f.color"
+          opacity="0.9"
+        />
+      }
+      <path [attr.d]="lomaDelPlaneta" fill="#5ea883" />
+      <g class="aa__matas">
+        @for (m of planeta.matas; track $index) {
+          <path
+            [attr.transform]="'rotate(' + m.giro + ') translate(0 ' + -m.alto + ')'"
+            [attr.d]="m.d"
+          />
+        }
+      </g>
+      <g class="aa__juncos">
+        @for (j of planeta.juncos; track $index) {
+          <path [attr.transform]="'rotate(' + j.giro + ') translate(0 -298)'" [attr.d]="j.d" />
+        }
+      </g>
+      <!-- La misma piedra de la colina: al final de la caída cae justo sobre ella. -->
+      <svg
+        [attr.x]="cajaDeLaPiedra.x"
+        [attr.y]="cajaDeLaPiedra.y"
+        [attr.width]="cajaDeLaPiedra.lado"
+        [attr.height]="cajaDeLaPiedra.lado"
+        viewBox="0 0 1080 1080"
+      >
+        <ellipse
+          [attr.cx]="sombraDeLaPiedra.cx"
+          [attr.cy]="sombraDeLaPiedra.cy"
+          [attr.rx]="sombraDeLaPiedra.rx"
+          [attr.ry]="sombraDeLaPiedra.ry"
+          [attr.fill]="sombraDeLaPiedra.fill"
+        />
+        @for (p of piedra; track $index) {
+          <path [attr.fill]="p.fill" [attr.d]="p.d" />
+        }
+      </svg>
+      <!-- La luz viene de arriba a la izquierda, y el lado de la noche gira mientras la cámara baja. -->
+      <g clip-path="url(#aa-pl-recorte)">
+        <circle r="340" fill="url(#aa-pl-brillo)" />
+        <circle [attr.r]="radioDelPlaneta" fill="url(#aa-pl-borde)" />
+        <rect
+          class="aa__noche-del-planeta"
+          x="-340"
+          y="-340"
+          width="680"
+          height="680"
+          fill="url(#aa-pl-sombra)"
+        />
+      </g>
+      @for (n of planeta.nubes; track $index) {
+        <path
+          [attr.transform]="
+            'rotate(' + n.giro + ') translate(0 ' + -n.distancia + ') scale(' + n.escala + ')'
+          "
+          d="M-30 6C-42 6 -44 -8 -32 -11C-30 -24 -12 -26 -6 -16C0 -28 22 -26 22 -12C34 -12 36 6 24 6Z"
+          fill="#ffffff"
+          opacity="0.88"
+        />
+      }
+    </g>
+  </svg>
+  <!-- El aire del planeta: la cámara entra en él antes de las nubes. -->
+  <div class="aa__atmosfera"></div>
+</div>
 <div class="aa__cielo" aria-hidden="true">
   <svg class="aa__estrellas" viewBox="0 0 1920 1080" preserveAspectRatio="xMidYMin slice">
     @for (e of estrellas; track $index) {
@@ -51,6 +203,16 @@
     />
   </svg>
 </div>
+<!-- Las nubes que la cámara atraviesa: tapan el paso del planeta a la colina. -->
+<svg class="aa__nubes-del-paso" aria-hidden="true">
+  @for (n of nubesDelPaso; track $index) {
+    <g opacity="0">
+      @for (b of bollosDeNube; track $index) {
+        <circle [attr.cx]="b[0]" [attr.cy]="b[1]" [attr.r]="b[2]" />
+      }
+    </g>
+  }
+</svg>
 <!-- Con partida guardada el aviso sigue directo a la historia: borrarla va acá, en espejo con el
      sonido, porque la colina que tenía su ficha ya no se ve. La confirmación es corta: a 375 px,
      la de la colina se montaba sobre el sonido. -->
@@ -319,3 +481,26 @@
     </p>
   </div>
 </div>
+<!-- La luz en que se vuelve Angie y su cola. La luz del choque la dibuja la colina (`aterrizar`). -->
+<svg class="aa__luz" aria-hidden="true">
+  <defs>
+    <radialGradient id="aa-luz">
+      <stop offset="0" stop-color="#fff6fb" />
+      <stop offset="0.25" stop-color="#ff8ac9" stop-opacity="0.85" />
+      <stop offset="1" stop-color="#ff3fa6" stop-opacity="0" />
+    </radialGradient>
+  </defs>
+  @for (c of colaDeLaLuz; track $index) {
+    <circle r="0" [attr.fill]="$index % 2 ? '#ffd1ea' : '#ff8ac9'" />
+  }
+  <g class="aa__luz-que-cae" opacity="0">
+    <circle [attr.r]="radioDeLaLuz" fill="url(#aa-luz)" />
+    <path
+      class="aa__brillo-de-la-luz"
+      d="M0 -46L7 -7L46 0L7 7L0 46L-7 7L-46 0L-7 -7Z"
+      fill="#fff6fb"
+    />
+    <circle r="11" fill="#ffffff" />
+  </g>
+  <circle class="aa__estallido" r="0" fill="url(#aa-luz)" />
+</svg>

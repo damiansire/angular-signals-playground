@@ -14,40 +14,35 @@ import { TIEMPO_MS } from '../../components-draw/mascota-viva/escuchar';
 import { MascotaVivaComponent } from '../../components-draw/mascota-viva/mascota-viva.component';
 import { sinMovimiento } from '../../libs/muelle';
 import { sonido } from '../../libs/sonido';
+import { ALBA_MS, type LuzQueLlega } from '../inicio-angie';
+import { PIEDRA_DE_LA_COLINA, SOMBRA_DE_LA_PIEDRA } from '../piedra-de-la-colina';
 import {
+  BASE_DE_LA_PIEDRA,
+  CAJA_DE_LA_PIEDRA,
+  CHOQUE_MS,
+  LA_COLINA_APARECE_MS,
+  LARGO_DE_LA_COLA,
   LLAMADO,
   LLAMADO_TACTIL,
-  VIAJE_MS,
-  CUADROS_DE_ESPERA,
-  HOLGURA_DE_DIBUJO,
-  LA_COLINA_APARECE_MS,
+  LOMA_DEL_PLANETA,
+  NUBES_DEL_PASO,
+  RADIO_DE_LA_LUZ,
+  RADIO_DEL_PLANETA,
   TIRON_MS,
-  aireQueCabe,
-  aireQueCubre,
-  camaraSobreLoDibujado,
-  corridaDeLaCamara,
-  cuadroDelViaje,
-  escalaDeDibujo,
-  esLoopQueCorre,
-  laCapaTapaSuLugar,
-  laGemaTapaLaPantalla,
+  cuadroDeLaCaida,
   cuandoSeAbre,
   cuandoSuena,
+  dibujoDelPlaneta,
   estrellasDelAlba,
-  profundidadDelViaje,
-  profundidadDesdeElOjo,
   letrasDelLlamado,
-  loopsQueSeRedibujan,
-  propiedadesAnimadas,
-  marcaDelPseudo,
-  tocaRedibujar,
-  type Dibujada,
   planDeLaPrueba,
   tocarPrueba,
+  type CuadroDeLaCaida,
+  type EscenarioDeLaCaida,
   type Lado,
 } from './aviso-auriculares';
 
-type Momento = 'esperando' | 'probando' | 'alejandose' | 'retomando' | 'listo';
+type Momento = 'esperando' | 'probando' | 'cayendo' | 'retomando' | 'listo';
 
 /** Los lentes de sol, en el plano de la cara: centrados entre los ojos, uno en espejo del otro. */
 const LENTE_IZQUIERDO =
@@ -55,20 +50,33 @@ const LENTE_IZQUIERDO =
 const LENTE_DERECHO =
   'M132 -36H16C11 -36 8 -32 9 -26L16 12C20 34 42 44 72 44C102 44 122 34 127 12L136 -26C137 -32 136 -36 132 -36Z';
 
+/** The puffs of a passing cloud: x, y and radius, around its middle. */
+const BOLLOS_DE_NUBE = [
+  [-90, 4, 46],
+  [-34, -36, 62],
+  [40, -22, 54],
+  [92, 8, 40],
+  [0, 18, 52],
+  [-50, 22, 40],
+  [56, 24, 40],
+] as const;
+
+/** For how many frames the notice's loops are stilled again after the fall starts. */
+const CUADROS_QUE_SE_AQUIETA = 12;
+
+/**
+ * The hill's title comes in once the morning is there and the hill's loops are moving again, a few
+ * frames later: together they asked for more video memory than a loaded PC has.
+ */
+const EL_TITULO_ENTRA_MS = CHOQUE_MS + ALBA_MS + 400;
+
 /**
  * Antes de la mañana de Angie, todavía de noche: ella espera en el medio con los auriculares puestos
  * y lentes de sol. Tocar en cualquier lado es el gesto que el navegador exige para dejar sonar, así
  * que toda la intro llega con audio; arriba se puede apagar. Suena la prueba de un oído al otro,
- * Angie se vuelca hacia el lado que suena, y la cámara se aleja: el aviso queda a lo lejos y aparece
- * la colina, con ella sentada en la piedra.
+ * Angie se vuelca hacia el lado que suena, y después se vuelve luz y cae en su planetita: en la
+ * colina, de noche, donde vuelve a ser ella y amanece.
  */
-/**
- * Dónde arranca la cámara, en el dibujo del ojo izquierdo de Angie (`.mv__parpado`): el centro y el
- * radio del negro que se puede llenar sin tocar el párpado de arriba, el borde del ojo ni su brillo
- * pensativo, que queda abajo a la derecha.
- */
-const MANCHA = { x: 455, y: 613, radio: 8 } as const;
-
 @Component({
   selector: 'app-aviso-auriculares',
   imports: [MascotaVivaComponent],
@@ -80,7 +88,7 @@ const MANCHA = { x: 455, y: 613, radio: 8 } as const;
     'aria-modal': 'true',
     'aria-labelledby': 'aa-titulo',
     '[class.aa--probando]': "momento() === 'probando'",
-    '[class.aa--alejandose]': "momento() === 'alejandose'",
+    '[class.aa--cayendo]': "momento() === 'cayendo'",
     '[class.aa--mudo]': '!conSonido()',
     '[class.aa--izquierda]': "suena() === 'izquierda'",
     '[class.aa--derecha]': "suena() === 'derecha'",
@@ -91,14 +99,17 @@ const MANCHA = { x: 455, y: 613, radio: 8 } as const;
   },
 })
 export class AvisoAuricularesComponent {
-  /** Se eligió (con o sin sonido) y la cámara empieza a alejarse: la colina puede despertarse. */
+  /** Se eligió (con o sin sonido) y Angie se va: la colina puede despertarse. */
   readonly elegido = output<boolean>();
   /**
-   * La cámara viaja desde el ojo de Angie: mientras dura, ella no parpadea. Un parpadeo a cientos de
-   * aumentos abría la pantalla negra de golpe.
+   * The hill is about to be drawn again under the clouds, and it has to be night already, without
+   * Angie. Not before: its night multiplies, and that alone gave the hidden hill a full-screen layer
+   * of its own (and the notice another) while Angie jumped.
    */
-  readonly viaje = output<boolean>();
-  /** La cámara llegó a la colina: recién ahí entra su título, que de cerca se vería gigante. */
+  readonly anochece = output<void>();
+  /** The light touched the hill's stone: the notice is gone, and Angie comes back there. */
+  readonly aterriza = output<LuzQueLlega>();
+  /** Angie is on the hill and the morning came: now its title comes in. */
   readonly llego = output<void>();
   /**
    * Hay una partida para retomar: el toque es solo el gesto que deja sonar, sin prueba ni colina
@@ -124,6 +135,7 @@ export class AvisoAuricularesComponent {
   /** El lado que está sonando en la prueba: enciende esa copa. */
   protected readonly suena = signal<Lado | null>(null);
   protected readonly estrellas = estrellasDelAlba(11, 70);
+  protected readonly radioDeLaLuz = RADIO_DE_LA_LUZ;
   /** Las más grandes, lejos de la franja de arriba: en un celular una cruz caía sobre el sonido. */
   protected readonly destellos = this.estrellas.filter((e) => e.r >= 3 && e.y >= 110);
   protected readonly llamado = LLAMADO;
@@ -133,35 +145,35 @@ export class AvisoAuricularesComponent {
   protected readonly lenteIzquierdo = LENTE_IZQUIERDO;
   protected readonly lenteDerecho = LENTE_DERECHO;
 
+  /** Angie's little planet, with a seed: the same one on every visit. */
+  protected readonly planeta = dibujoDelPlaneta(7);
+  protected readonly radioDelPlaneta = RADIO_DEL_PLANETA;
+  protected readonly lomaDelPlaneta = LOMA_DEL_PLANETA;
+  protected readonly cajaDeLaPiedra = CAJA_DE_LA_PIEDRA;
+  protected readonly piedra = PIEDRA_DE_LA_COLINA;
+  protected readonly sombraDeLaPiedra = SOMBRA_DE_LA_PIEDRA;
+  protected readonly rayosDelSol = Array.from({ length: 12 }, (_, i) => i * 30);
+  protected readonly nubesDelPaso = NUBES_DEL_PASO;
+  protected readonly bollosDeNube = BOLLOS_DE_NUBE;
+  protected readonly colaDeLaLuz = Array.from({ length: LARGO_DE_LA_COLA }, (_, i) => i);
+
   private readonly seguir = viewChild.required<ElementRef<HTMLButtonElement>>('seguir');
   private readonly angie = viewChild.required(MascotaVivaComponent);
   private readonly host: HTMLElement = inject(ElementRef<HTMLElement>).nativeElement;
   private readonly temporizadores = new Set<ReturnType<typeof setTimeout>>();
   private cuadro = 0;
-  /** La colina y la capa que la contiene, mientras llevan puesta la cámara. */
-  private conCamara: HTMLElement[] = [];
-  /** Los loops que van quietos hasta llegar, con su efecto aparte para devolvérselo. */
-  private quietos: { animacion: Animation; efecto: KeyframeEffect; fijas: string[] }[] = [];
-  /** Los pseudo-elementos con su pulso apagado hasta llegar. */
-  private apagados: { blanco: Element; marca: string }[] = [];
-  private tapados: (HTMLElement | SVGElement)[] = [];
   /**
    * La colina de atrás, mientras el aviso la tapa. Es un diálogo modal: Tab salía de la invitación a
    * la lamparita, a las fichas y a "Entrar" de la colina, que no se veían.
    */
   private inertes: HTMLElement[] = [];
-  /** La página lleva el negro del ojo de fondo, mientras la cámara está adentro. */
-  private conFondoNegro = false;
-  /** Lo que el aviso tapa entero mientras espera y mientras se cierra: no se dibuja. */
+  /** Lo que el aviso tapa entero mientras espera y mientras Angie cae: no se dibuja. */
   private bajoElAviso: (HTMLElement | SVGElement)[] = [];
 
   constructor() {
     inject(DestroyRef).onDestroy(() => {
       this.temporizadores.forEach(clearTimeout);
       cancelAnimationFrame(this.cuadro);
-      this.sacarLaCamara();
-      this.despertarLoops();
-      this.destapar();
       this.soltarLaColina();
     });
     // El foco va a la invitación, así Enter alcanza; no si la landing arranca tapada (un deep-link).
@@ -266,7 +278,7 @@ export class AvisoAuricularesComponent {
     const salida = sonido().salida();
     if (salida) tocarPrueba(salida, plan);
     if (sinMovimiento()) {
-      this.alejarse(true);
+      this.caer(true);
       return;
     }
     // La prueba le saca su música: ahora escucha de qué lado suena.
@@ -283,310 +295,138 @@ export class AvisoAuricularesComponent {
         vuelca[lado]();
       });
     }
-    this.luego(cuandoSeAbre(plan) * 1000, () => this.alejarse(true));
+    this.luego(cuandoSeAbre(plan) * 1000, () => this.caer(true));
   }
 
   private sinSonido(): void {
     sonido().alternar(false);
-    this.alejarse(false);
+    this.caer(false);
   }
 
   /**
-   * La cámara se aleja desde el ojo de Angie en la colina, como en Powers of Ten: la noche del aviso
-   * era lo que ella miraba. Primero el aviso se cierra en un círculo y se va hasta desaparecer en el
-   * negro de su ojo, que ocupa toda la pantalla; después la cámara se aleja a la cara, a Angie en la
-   * piedra y a la colina entera. Va cuadro a cuadro desde acá y no con una animación del navegador:
-   * animada por el compositor, la colina agrandada se pintaba una sola vez y, al alejarse, aparecía
-   * cortada en rectángulos. La colina se dibuja por escalones y la capa que la contiene pone el resto
-   * (ver «La colina dibujada por escalones» en `aviso-auriculares.ts`).
+   * Angie turns into light and falls onto the hill (see «The fall» in `aviso-auriculares.ts`). It
+   * goes frame by frame from here, with a clock that does not skip a hitch: after a heavy frame the
+   * fall goes on where it was instead of showing up already advanced. The hill waits under the
+   * notice, is drawn again under the clouds at its real size and at night (`anochece`), and gets Angie
+   * back when the light touches the stone (`aterriza`).
    */
-  private alejarse(conSonido: boolean): void {
+  private caer(conSonido: boolean): void {
     this.elegido.emit(conSonido);
-    const escena = this.host.parentElement;
-    const capa = escena && capaDeLaCamara(escena);
-    if (sinMovimiento() || !escena || !capa) {
+    const escenario = sinMovimiento() ? null : this.escenarioDeLaCaida();
+    if (!escenario) {
       this.llegar();
       return;
     }
-    const r = this.host.getBoundingClientRect();
-    const deLaCapa = capa.getBoundingClientRect();
-    /** La capa, en las coordenadas de la colina: es lo que la colina dibujada tiene que tapar. */
-    const caja = {
-      x: deLaCapa.left - r.left,
-      y: deLaCapa.top - r.top,
-      ancho: deLaCapa.width,
-      alto: deLaCapa.height,
-    };
-    this.viaje.emit(true);
-    // Los ojos de frente: los del perfil también existen, apagados, y miden cero.
-    const elOjo = [...escena.querySelectorAll<SVGGraphicsElement>('.ini__angie .mv__parpado')].find(
-      (o) => o.getBoundingClientRect().width > 0,
-    );
-    const enPantalla = (): { x: number; y: number } | null => {
-      const m = elOjo?.getScreenCTM();
-      if (!m) return null;
-      const p = new DOMPoint(MANCHA.x, MANCHA.y).matrixTransform(m);
-      return { x: p.x - r.left, y: p.y - r.top };
-    };
-    let ojo = enPantalla() ?? { x: r.width / 2, y: r.height * 0.6 };
-    // El círculo se cierra en el medio de la pantalla y no donde está Angie: en un monitor ancho ella
-    // queda a un costado y el aviso se iba achicando hacia allá, corrido.
-    const medio = { x: r.width / 2, y: r.height / 2 };
-    const esquinas = [
-      [0, 0],
-      [r.width, 0],
-      [0, r.height],
-      [r.width, r.height],
-    ].map(([x, y]) => [x - medio.x, y - medio.y] as const);
-    const matriz = elOjo?.getScreenCTM();
-    const profundidad = matriz
-      ? profundidadDesdeElOjo(
-          { ancho: 2 * MANCHA.radio, alto: 2 * MANCHA.radio },
-          matriz.inverse(),
-          esquinas,
-        )
-      : profundidadDelViaje({ ancho: 10, alto: 10 }, r.width, r.height);
-    const cubre = aireQueCubre(medio.x, medio.y, r.width, r.height);
-    const cabe = aireQueCabe(medio.x, medio.y, r.width, r.height);
-    this.host.style.transformOrigin = `${medio.x}px ${medio.y}px`;
-    this.host.style.setProperty('--aa-x', `${medio.x}px`);
-    this.host.style.setProperty('--aa-y', `${medio.y}px`);
-    let corrida = { x: 0, y: 0 };
-
-    /**
-     * La cámara sigue al ojo: la cara de Angie se mueve sola, y a cientos de aumentos dos píxeles de
-     * su vaivén dejaban el negro corrido y asomaba la cara. Con el ojo como punto fijo de la escala,
-     * queda donde estaría sin acercar, y lo que se mueve es apenas lo que se mueve ella.
-     */
-    const seguirElOjo = (escala: number, colina: number): void => {
-      const medido = enPantalla();
-      if (medido) {
-        // Lo medido viene con la escala y la corrida del cuadro anterior: se deshacen.
-        ojo = {
-          x: ojo.x + (medido.x - corrida.x - ojo.x) / escala,
-          y: ojo.y + (medido.y - corrida.y - ojo.y) / escala,
-        };
-      }
-      corrida = laCorrida(colina, ojo);
-    };
-    /**
-     * La cámara lleva el ojo al medio y lo devuelve a su lugar a medida que se aleja, parejo en
-     * escala como el viaje: a la mitad del camino en escala, a la mitad del camino en pantalla.
-     */
-    const laCorrida = (
-      colina: number,
-      desde: { x: number; y: number },
-    ): { x: number; y: number } => {
-      const k = corridaDeLaCamara(colina, profundidad);
-      return { x: (medio.x - desde.x) * k, y: (medio.y - desde.y) * k };
-    };
-
-    /**
-     * Un escalón: la colina queda dibujada a la escala del final del tramo que empieza, y hasta
-     * entonces solo la mueve la capa. Con el ojo muy cerca de un borde la capa agrandada no llegaría
-     * a tapar el otro: se prueba con menos holgura hasta que tape.
-     */
-    const dibujar = (colina: number, llego: boolean): Dibujada => {
-      // Los loops que hayan arrancado desde el escalón anterior también van quietos.
-      this.aquietarLoops(escena);
-      // Ya asoma la cara: la página deja de tener el negro del ojo de fondo.
-      if (colina < profundidad) this.sacarElFondoNegro();
-      let dibujada: Dibujada = { escala: 1, ojo, corrida: { x: 0, y: 0 } };
-      for (let holgura = HOLGURA_DE_DIBUJO; !llego; holgura = Math.sqrt(holgura)) {
-        const escalon = holgura < 1.01 ? colina : escalaDeDibujo(colina, holgura);
-        dibujada = { escala: escalon, ojo, corrida: laCorrida(escalon, ojo) };
-        const vista = camaraSobreLoDibujado(dibujada, colina, ojo, corrida);
-        if (escalon === colina || laCapaTapaSuLugar(vista.escala, vista.corrida, ojo, caja)) break;
-      }
-      escena.style.transformOrigin = `${ojo.x}px ${ojo.y}px`;
-      escena.style.scale = `${dibujada.escala}`;
-      escena.style.translate = `${dibujada.corrida.x}px ${dibujada.corrida.y}px`;
-      capa.style.transformOrigin = `${ojo.x - caja.x}px ${ojo.y - caja.y}px`;
-      return dibujada;
-    };
-
-    /**
-     * Mientras la gema de Angie tapa la pantalla, lo que está detrás de ella (cielo, lomas, sol,
-     * piedra) no se pinta. Estaba igual en capas propias a cientos de aumentos: unos 250 MB de memoria
-     * de video sin que se viera nada, y con poca la cara aparecía cortada a rayas por donde asomaba la
-     * colina.
-     */
-    const piezas = [
-      ...escena.querySelectorAll<SVGGeometryElement>(
-        // De perfil, la silueta de la gema; de frente, las piezas del escudo y la placa de la cara.
-        '.ini__angie .mv__perfil > [data-pieza]:first-child > path, ' +
-          '.ini__angie .mv__frente > path[data-pieza], .ini__angie .mv__frente[data-pieza] > g > path',
-      ),
-    ].filter((p) => p.getBoundingClientRect().width > 0);
-    let deAngie: Element | null = escena.querySelector('.ini__angie');
-    while (deAngie && deAngie.parentElement !== escena) deAngie = deAngie.parentElement;
-    const detras: (HTMLElement | SVGElement)[] = [];
-    for (let h = deAngie?.previousElementSibling; h; h = h.previousElementSibling) {
-      if (h instanceof HTMLElement || h instanceof SVGElement) detras.push(h);
-    }
-
-    /**
-     * El color del ojo de Angie, que llena la pantalla mientras la cámara está adentro. Mientras el
-     * aviso se cierra, la colina no se dibuja: detrás hay solo ese negro, liso, que no pide memoria
-     * de video. Los dos juntos desde el arranque eran más de 100 MB a 3440 px, y con poca memoria
-     * al aviso le faltaban pedazos. La colina aparece un momento antes de que arranque la cámara, con
-     * el aviso ya chico. Sin ojo que medir no hay negro que valga: la colina sale enseguida.
-     */
-    const negro = elOjo ? getComputedStyle(elOjo.firstElementChild ?? elOjo).fill : null;
-    let aLaVista = false;
-
-    let escala = 1;
-    let dibujada: Dibujada | null = null;
+    const piezas = this.piezasDeLaCaida();
+    this.aquietarElAviso();
+    this.momento.set('cayendo');
     let reloj = 0;
-    let anterior = 0;
+    let anterior = performance.now();
+    let colinaALaVista = false;
+    let c0 = 0;
     const pintar = (ahora: number): void => {
-      // Un tirón no se salta: el viaje sigue donde iba. Con el reloj de pared, después de armar la
-      // capa de la colina (un cuarto de segundo a 3440 px) lo que seguía aparecía ya empezado.
       reloj += Math.max(0, Math.min(ahora - anterior, TIRON_MS));
       anterior = ahora;
-      const llego = reloj >= VIAJE_MS;
-      const c = cuadroDelViaje(Math.min(reloj, VIAJE_MS), profundidad, cubre, cabe);
-      if (!aLaVista) {
-        if (negro && reloj < LA_COLINA_APARECE_MS) {
-          // Sin la colina debajo, el aviso lleva la escala que tiene en pantalla.
-          this.host.style.scale = `${c.aviso * c.colina}`;
-          this.host.style.setProperty('--aa-aire', `${c.aire}px`);
-          this.cuadro = requestAnimationFrame(pintar);
-          return;
-        }
-        aLaVista = true;
+      if (!colinaALaVista && reloj >= LA_COLINA_APARECE_MS) {
+        colinaALaVista = true;
+        this.anochece.emit();
         this.mostrarLaColina();
-        escena.style.removeProperty('background-color');
-        // La capa nace ya agrandada: el navegador la dibuja a esa escala y después solo la achica.
-        capa.style.willChange = 'transform';
       }
-      seguirElOjo(escala, c.colina);
-      if (laGemaTapaLaPantalla(piezas, r)) this.tapar(detras);
-      else this.destapar();
-      escala = c.colina;
-      // La capa es la que se mueve en cada cuadro; la colina solo cambia en los escalones. Los loops
-      // van quietos todo el viaje (`aquietarLoops`, desde el primer escalón, con la colina recién
-      // aparecida). Al llegar, el último escalón deja la colina a escala 1 y la capa sin nada que
-      // agregar.
-      let vista = dibujada && camaraSobreLoDibujado(dibujada, escala, ojo, corrida);
-      if (
-        !dibujada ||
-        !vista ||
-        llego ||
-        tocaRedibujar(escala, dibujada.escala) ||
-        !laCapaTapaSuLugar(vista.escala, vista.corrida, dibujada.ojo, caja)
-      ) {
-        dibujada = dibujar(escala, llego);
-        vista = camaraSobreLoDibujado(dibujada, escala, ojo, corrida);
+      // Leaving the waiting moment restarts some of Angie's loops after they were stilled: still
+      // them again while she can be seen, or she keeps a layer that splits the rest in three.
+      if (c0 < CUADROS_QUE_SE_AQUIETA) {
+        c0++;
+        this.aquietarElAviso();
       }
-      capa.style.scale = `${vista.escala}`;
-      capa.style.translate = `${vista.corrida.x}px ${vista.corrida.y}px`;
-      if (escala < profundidad) {
-        // Cuando la cámara arranca, el aviso ya es una mota de pocos píxeles y deja de dibujarse, un
-        // instante antes de llegar a cero. Con los dos a la vez, el navegador redibujaba la colina
-        // entera cada tres cuadros, y la memoria de video del aviso todavía no había vuelto cuando
-        // llegaba el primer escalón: con poca, la pantalla salía en blanco un cuadro. Sin dibujarse
-        // tampoco recalcula el estilo de todo lo suyo en cada cuadro del viaje.
-        this.host.style.visibility = 'hidden';
-      } else {
-        // El aviso, adentro de la colina agrandada, se achica alrededor de su medio puesto sobre el
-        // ojo.
-        this.host.style.translate = `${ojo.x - medio.x}px ${ojo.y - medio.y}px`;
-        this.host.style.scale = `${c.aviso}`;
-        this.host.style.setProperty('--aa-aire', `${c.aire}px`);
+      if (reloj >= CHOQUE_MS) {
+        // The star touched the stone: from here the hill draws the light and Angie (`aterrizar`).
+        // The notice stops being drawn in this same frame: over the hill's night, which
+        // multiplies, it is a full-screen layer of its own, and keeping it while the sun came up
+        // was more than a loaded PC's video memory.
+        const caja = this.host.getBoundingClientRect();
+        const { x, y, escala } = cuadroDeLaCaida(CHOQUE_MS, escenario).estrella;
+        this.host.style.display = 'none';
+        this.aterriza.emit({ x: caja.left + x, y: caja.top + y, r: RADIO_DE_LA_LUZ * escala });
+        this.luego(EL_TITULO_ENTRA_MS - reloj, () => this.llegar());
+        return;
       }
-      this.cuadro = requestAnimationFrame(llego ? terminar : pintar);
+      pintarLaCaida(piezas, cuadroDeLaCaida(reloj, escenario), reloj, escenario.alto);
+      this.cuadro = requestAnimationFrame(pintar);
     };
-    /**
-     * Un cuadro después del último escalón, ya a escala 1 y sin corrida, sacar la cámara no mueve
-     * nada. Los loops despiertan unos cuadros más tarde: cada uno vuelve a su capa, y juntas con la
-     * de la cámara, que todavía no devolvió su memoria de video, pedían de más y a la colina le
-     * faltaba una franja un cuadro.
-     */
-    const terminar = (): void => {
-      this.sacarLaCamara();
-      this.destapar();
-      this.enCuadros(CUADROS_DE_ESPERA, () => {
-        this.despertarLoops();
-        // El aviso sigue sin dibujarse hasta que lo oculta `listo`: devuelto, volvía entero un cuadro.
-        this.viaje.emit(false);
-        this.llegar();
-      });
-    };
-    this.conCamara = [escena, capa];
-    this.alivianarElAviso();
-    // La máscara entra con el aviso entero: sin aire, el aviso desaparecía un cuadro.
-    this.host.style.setProperty('--aa-aire', `${cubre}px`);
-    this.momento.set('alejandose');
-    if (negro) {
-      // Mientras la colina no se dibuja, detrás del aviso hay solo el negro del ojo.
-      escena.style.backgroundColor = negro;
-      // Y también es el fondo de la página hasta el primer escalón: si al navegador le falta memoria
-      // de video para un cuadro, muestra lo que falta con el color de la página, y adentro del ojo
-      // tiene que ser negro. En blanco, al aparecer la colina quedaba una franja clara un cuadro.
-      document.documentElement.style.backgroundColor = negro;
-      this.conFondoNegro = true;
-    }
-    anterior = performance.now();
     pintar(anterior);
   }
 
-  /** Corre `fn` dentro de `cuadros` cuadros de pantalla; se cancela con la vista. */
-  private enCuadros(cuadros: number, fn: () => void): void {
-    this.cuadro = requestAnimationFrame(() => {
-      if (cuadros <= 1) fn();
-      else this.enCuadros(cuadros - 1, fn);
-    });
+  /**
+   * Where the notice's Angie and the hill's stone are, in px of the notice. The hill is hidden but
+   * laid out, so it can be measured.
+   */
+  private escenarioDeLaCaida(): EscenarioDeLaCaida | null {
+    const piedra = this.host.parentElement?.querySelector<HTMLElement>('.ini__piedra');
+    const angie = this.host.querySelector('.aa__angie');
+    const r = this.host.getBoundingClientRect();
+    if (!piedra || !angie || !r.width || !r.height || !piedra.offsetWidth) return null;
+    const a = angie.getBoundingClientRect();
+    const s = piedra.getBoundingClientRect();
+    // The stone's drawing is a square. It leans a little with the hill: its middle barely moves.
+    const lado = piedra.offsetWidth;
+    return {
+      ancho: r.width,
+      alto: r.height,
+      angie: { x: a.left + a.width / 2 - r.left, y: a.top + a.height / 2 - r.top },
+      piedra: {
+        x: s.left + s.width / 2 - r.left,
+        y: s.top + s.height / 2 - r.top + (BASE_DE_LA_PIEDRA - 0.5) * lado,
+        ancho: lado,
+      },
+    };
+  }
+
+  private piezasDeLaCaida(): PiezasDeLaCaida {
+    const una = <T extends Element>(selector: string): T => {
+      const el = this.host.querySelector<T>(selector);
+      // Fail fast: a missing layer would leave the fall half drawn without a word.
+      if (!el) throw new Error(`aviso-auriculares: falta ${selector}`);
+      return el;
+    };
+    const todas = <T extends Element>(selector: string): T[] => [
+      ...this.host.querySelectorAll<T>(selector),
+    ];
+    return {
+      textos: [una<HTMLElement>('.aa__titulo'), una<HTMLElement>('.aa__pie')],
+      escena: una('.aa__escena'),
+      noche: una('.aa__cielo'),
+      lejos: una('.aa__lejos'),
+      espacio: una('.aa__espacio'),
+      lienzo: una('.aa__lienzo-del-planeta'),
+      planeta: una('.aa__planeta'),
+      sombra: una('.aa__noche-del-planeta'),
+      sol: una('.aa__sol-lejano'),
+      atmosfera: una('.aa__atmosfera'),
+      nubesDelPaso: una('.aa__nubes-del-paso'),
+      nubes: todas('.aa__nubes-del-paso > g'),
+      cola: todas('.aa__luz > circle:not([class])'),
+      luz: una('.aa__luz-que-cae'),
+      brillo: una('.aa__brillo-de-la-luz'),
+      estallido: una('.aa__estallido'),
+    };
   }
 
   /**
-   * Mientras se cierra, el aviso es una sola capa que el navegador dibuja una vez y solo achica. Con
-   * sus loops andando eran tres a pantalla entera (el cielo, el velo y lo de adelante, partidos por
-   * las setenta estrellas que titilan en el medio): 57 MB de memoria de video a 3440 px que, con poca,
-   * no dejaban lugar para el primer escalón de la colina, y le faltaban pedazos un cuadro. Quietos en
-   * su pose no se nota: el aviso se va en un segundo y medio. No vuelven a moverse, que el aviso no
-   * vuelve.
+   * The notice's loops stand still in their pose while Angie falls: the stars that twinkle in the
+   * night that slides away gave every layer above them a layer of its own, the size of the screen.
+   * The notice does not come back, so they never move again.
    */
-  private alivianarElAviso(): void {
-    for (const animacion of this.host.getAnimations({ subtree: true }).filter(esLoopQueCorre)) {
+  private aquietarElAviso(): void {
+    for (const animacion of this.host.getAnimations({ subtree: true })) {
+      if (animacion.effect?.getComputedTiming().iterations !== Infinity) continue;
       animacion.playbackRate = 0;
       try {
         animacion.commitStyles();
         animacion.effect = null;
       } catch {
-        // Un pseudo-elemento, o algo que no se dibuja: queda quieto con su animación puesta.
+        // A pseudo-element, or something not drawn: it stays still with its animation on.
       }
     }
-    this.host.style.willChange = 'transform';
-    // Angie sigue moviéndose con sus muelles (el salto del acorde, las cejas caídas): con capa propia
-    // se redibuja ella sola. En la del aviso, cada cuadro suyo redibujaba franjas del ancho de la
-    // pantalla, 14 MB por cuadro a 3440 px que el navegador tardaba en devolver.
-    this.host
-      .querySelector<HTMLElement>('.aa__angie')
-      ?.style.setProperty('will-change', 'transform');
-  }
-
-  private sacarElFondoNegro(): void {
-    if (!this.conFondoNegro) return;
-    document.documentElement.style.removeProperty('background-color');
-    this.conFondoNegro = false;
-  }
-
-  private sacarLaCamara(): void {
-    this.sacarElFondoNegro();
-    for (const el of this.conCamara) {
-      for (const p of [
-        'scale',
-        'transform-origin',
-        'translate',
-        'will-change',
-        'background-color',
-      ]) {
-        el.style.removeProperty(p);
-      }
-    }
-    this.host.style.removeProperty('will-change');
-    this.conCamara = [];
   }
 
   /** La colina queda a la vista: vuelve a ser tocable y a estar en el orden de foco. */
@@ -608,67 +448,6 @@ export class AvisoAuricularesComponent {
     this.bajoElAviso = [];
   }
 
-  private tapar(detras: (HTMLElement | SVGElement)[]): void {
-    if (this.tapados.length) return;
-    this.tapados = detras;
-    for (const h of detras) h.style.visibility = 'hidden';
-  }
-
-  private destapar(): void {
-    for (const h of this.tapados) h.style.removeProperty('visibility');
-    this.tapados = [];
-  }
-
-  /**
-   * Los loops quedan quietos en la pose de este cuadro y sin animación enganchada: así no tienen capa
-   * propia y la colina entera es una sola, que solo se redibuja en cada escalón. Animando, cada
-   * pieza de Angie era una capa que a ×100–×500 cubría la pantalla: con poca memoria de video no
-   * entraban al redibujar y la colina salía un cuadro en blanco. Con velocidad 0 y no con pause(),
-   * que le saca al CSS el control de `animation-play-state` (ver `pausa-del-fondo.ts`).
-   */
-  private aquietarLoops(escena: HTMLElement): void {
-    for (const animacion of loopsQueSeRedibujan(
-      escena.getAnimations({ subtree: true }),
-      this.host,
-    )) {
-      const efecto = animacion.effect as KeyframeEffect;
-      const marca = efecto.target ? marcaDelPseudo(efecto.pseudoElement) : null;
-      if (efecto.target && marca) {
-        // `commitStyles` no escribe en un pseudo-elemento, y una animación que sostiene su pose
-        // también le pide capa: se apaga entero (`data-quieto` en `intro-tusi.css`).
-        alternarMarca(efecto.target, marca, true);
-        this.apagados.push({ blanco: efecto.target, marca });
-        continue;
-      }
-      animacion.playbackRate = 0;
-      try {
-        animacion.commitStyles();
-      } catch {
-        // Sin dibujar no se puede fijar la pose: sigue como estaba.
-        animacion.playbackRate = 1;
-        continue;
-      }
-      animacion.effect = null;
-      this.quietos.push({ animacion, efecto, fijas: propiedadesAnimadas(efecto.getKeyframes()) });
-    }
-  }
-
-  /**
-   * Vuelven a moverse desde la pose en que quedaron: sin salto. Los pseudo-elementos arrancan su
-   * pulso de cero, que es la pose en que estuvieron apagados.
-   */
-  private despertarLoops(): void {
-    for (const { animacion, efecto, fijas } of this.quietos) {
-      animacion.effect = efecto;
-      const blanco = efecto.target as HTMLElement | SVGElement | null;
-      for (const p of fijas) blanco?.style.removeProperty(p);
-      animacion.playbackRate = 1;
-    }
-    this.quietos = [];
-    for (const { blanco, marca } of this.apagados) alternarMarca(blanco, marca, false);
-    this.apagados = [];
-  }
-
   private luego(ms: number, fn: () => void): void {
     const id = setTimeout(() => {
       this.temporizadores.delete(id);
@@ -678,27 +457,107 @@ export class AvisoAuricularesComponent {
   }
 }
 
-/**
- * La capa que lleva la cámara: el contenedor de más afuera que recorta su contenido. Recortada, la
- * capa mide lo que la pantalla y no lo que la colina agrandada. Y tiene que ser el de más afuera:
- * con otro recorte por encima, el navegador pasa ese recorte al dibujo de la capa, que cambia con
- * cada cuadro de la cámara, y la capa entera se volvía a dibujar en casi todos (620 mosaicos en un
- * segundo y medio a 3440 px, contra 232 con la capa afuera, que son los de los escalones).
- */
-function capaDeLaCamara(escena: HTMLElement): HTMLElement | null {
-  let capa: HTMLElement | null = null;
-  for (let el = escena.parentElement; el && el !== document.body; el = el.parentElement) {
-    if (el === document.documentElement) break;
-    if (getComputedStyle(el).overflowX !== 'visible') capa = el;
-  }
-  return capa ?? escena.parentElement;
+/** The fall's layers, found once when it starts. */
+interface PiezasDeLaCaida {
+  readonly textos: readonly HTMLElement[];
+  /** Angie with her halo and her floor of light. */
+  readonly escena: HTMLElement;
+  readonly noche: HTMLElement;
+  readonly lejos: HTMLElement;
+  readonly espacio: HTMLElement;
+  readonly lienzo: SVGSVGElement;
+  readonly planeta: SVGGElement;
+  readonly sombra: SVGElement;
+  readonly sol: SVGGElement;
+  readonly atmosfera: HTMLElement;
+  readonly nubesDelPaso: SVGSVGElement;
+  readonly nubes: readonly SVGGElement[];
+  readonly cola: readonly SVGCircleElement[];
+  readonly luz: SVGGElement;
+  readonly brillo: SVGElement;
+  readonly estallido: SVGCircleElement;
 }
 
-/** Prende o apaga una marca de `data-quieto` sin tocar las otras del mismo elemento. */
-function alternarMarca(blanco: Element, marca: string, prendida: boolean): void {
-  const marcas = new Set((blanco.getAttribute('data-quieto') ?? '').split(' ').filter(Boolean));
-  if (prendida) marcas.add(marca);
-  else marcas.delete(marca);
-  if (marcas.size) blanco.setAttribute('data-quieto', [...marcas].join(' '));
-  else blanco.removeAttribute('data-quieto');
+const px = (v: number): string => v.toFixed(1);
+const k = (v: number): string => v.toFixed(4);
+
+/**
+ * What is not seen is not drawn: a layer at opacity 0 still costs its video memory, and the night,
+ * space and the clouds are each the size of the screen.
+ */
+function verSi(el: HTMLElement | SVGElement, si: boolean): void {
+  el.style.visibility = si ? '' : 'hidden';
+}
+
+function circulo(
+  el: SVGCircleElement,
+  c: { x: number; y: number; r: number; opacidad: number },
+): void {
+  el.setAttribute('cx', px(c.x));
+  el.setAttribute('cy', px(c.y));
+  el.setAttribute('r', px(c.r));
+  el.setAttribute('opacity', k(c.opacidad));
+}
+
+function pintarLaCaida(p: PiezasDeLaCaida, c: CuadroDeLaCaida, t: number, alto: number): void {
+  for (const el of p.textos) {
+    el.style.opacity = k(c.texto.opacidad);
+    el.style.translate = `0 ${px(c.texto.dy)}px`;
+  }
+
+  p.escena.style.opacity = k(c.angie.opacidad);
+  p.escena.style.translate = `0 ${px(c.angie.dy)}px`;
+  p.escena.style.scale = `${k(c.angie.sx)} ${k(c.angie.sy)}`;
+  p.escena.style.filter = `brightness(${k(c.angie.brillo)})`;
+  verSi(p.escena, c.angie.opacidad > 0);
+
+  p.noche.style.opacity = k(c.noche.opacidad);
+  p.noche.style.translate = `0 ${px(c.noche.dy)}px`;
+  // Its top edge fades into space: a hard edge read as a curtain being pulled. The fade grows with
+  // what the night went down: a fixed one made the top of the screen go see-through at once.
+  const borde = Math.min(c.noche.dy, 0.39 * alto);
+  p.noche.style.maskImage = borde > 0 ? `linear-gradient(transparent, #000 ${px(borde)}px)` : '';
+  verSi(p.noche, c.noche.opacidad > 0);
+
+  p.lejos.style.opacity = k(c.lejos);
+  verSi(p.lejos, c.lejos > 0);
+  p.espacio.style.opacity = k(c.espacio);
+  p.lienzo.style.opacity = k(c.planeta.opacidad);
+  verSi(p.lienzo, c.planeta.opacidad > 0);
+  p.planeta.setAttribute(
+    'transform',
+    `translate(${px(c.planeta.x)} ${px(c.planeta.y)}) scale(${k(c.planeta.k)})`,
+  );
+  p.sombra.setAttribute('transform', `rotate(${px(c.planeta.sombra)})`);
+  p.sol.setAttribute(
+    'transform',
+    `translate(${px(c.solLejano.x)} ${px(c.solLejano.y)}) scale(${k(c.solLejano.escala)})`,
+  );
+  p.sol.setAttribute('opacity', k(c.solLejano.opacidad));
+  p.atmosfera.style.opacity = k(c.atmosfera);
+
+  c.nubes.forEach((n, i) => {
+    const g = p.nubes[i];
+    if (!g) return;
+    g.setAttribute('transform', `translate(${px(n.x)} ${px(n.y)}) scale(${k(n.escala)})`);
+    g.setAttribute('opacity', k(n.opacidad));
+  });
+  verSi(
+    p.nubesDelPaso,
+    c.nubes.some((n) => n.opacidad > 0),
+  );
+
+  c.cola.forEach((punto, i) => {
+    const el = p.cola[i];
+    if (el) circulo(el, punto);
+  });
+  const e = c.estrella;
+  p.luz.setAttribute('transform', `translate(${px(e.x)} ${px(e.y)}) scale(${k(e.escala)})`);
+  p.luz.setAttribute('opacity', k(e.opacidad));
+  // The sparkle turns and breathes: a still star read as a sticker.
+  p.brillo.setAttribute(
+    'transform',
+    `rotate(${px(e.giro)}) scale(${k(1 + 0.18 * Math.sin(t * 0.03))})`,
+  );
+  circulo(p.estallido, c.destello);
 }

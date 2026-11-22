@@ -17,6 +17,90 @@ import { VOCES_GRABADAS, type VozGrabada } from './voces-grabadas';
 import { planDeLaRadio, sonidoDeOnda, tocarOnda, tocarRadio } from './ruido-de-radio';
 import { queHaceElToque } from './toque-de-dialogo';
 
+/** A loop stilled while the hill waits at night: what to give back to it when the morning comes. */
+interface LoopQuieto {
+  readonly animacion: Animation;
+  readonly efecto: KeyframeEffect;
+  readonly blanco: HTMLElement | SVGElement;
+  /** The inline value each property had before `commitStyles` wrote the pose over it. */
+  readonly antes: readonly (readonly [string, string])[];
+}
+
+/** The properties an animation moves, written as in CSS. */
+export function propiedadesAnimadas(cuadros: readonly object[]): string[] {
+  const internas = new Set(['offset', 'computedOffset', 'easing', 'composite']);
+  const nombres = new Set(cuadros.flatMap((c) => Object.keys(c)).filter((k) => !internas.has(k)));
+  return [...nombres].map((k) => k.replace(/[A-Z]/g, (m) => '-' + m.toLowerCase()));
+}
+
+/** How long the light of the landing lasts on the stone. */
+export const LUZ_DEL_CHOQUE_MS = 520;
+
+/** Where the falling star touched the stone, in px of the window, and how big its light was. */
+export interface LuzQueLlega {
+  readonly x: number;
+  readonly y: number;
+  readonly r: number;
+}
+
+/**
+ * The light that opens where the star touched the stone, `ms` after the touch, on a screen of
+ * `ancho` × `alto` px: its radius and how bright it is. It starts as the star's own light, at its
+ * size `desde` and fully bright, so the notice's last frame hands over to it without a jump.
+ */
+export function luzDelChoque(
+  ms: number,
+  desde: number,
+  ancho: number,
+  alto: number,
+): { readonly r: number; readonly opacidad: number } {
+  const hasta = Math.max(desde, 480 * Math.sqrt((ancho * alto) / (1920 * 1080)));
+  const v = Math.min(1, Math.max(0, ms / LUZ_DEL_CHOQUE_MS));
+  return { r: desde + (hasta - desde) * (1 - (1 - v) ** 3), opacidad: 1 - v };
+}
+
+/**
+ * Stills the endless loops still running under `raiz` and adds them to `quietos`: frozen in this
+ * frame's pose and without their effect, so they hold no layer of their own. `ini--de-noche` turns
+ * off the hill's own loops by CSS, but not the ones inside other components (Angie's mascot), and
+ * each of those took a layer and gave a full-screen one to everything drawn above it.
+ */
+function aquietarLoops(raiz: HTMLElement, quietos: LoopQuieto[]): void {
+  for (const animacion of raiz.getAnimations({ subtree: true })) {
+    const efecto = animacion.effect;
+    if (!(efecto instanceof KeyframeEffect) || animacion.playbackRate === 0) continue;
+    if (efecto.getComputedTiming().iterations !== Infinity) continue;
+    const blanco = efecto.target;
+    if (!(blanco instanceof HTMLElement || blanco instanceof SVGElement) || efecto.pseudoElement) {
+      continue; // a pseudo-element cannot keep a committed pose: it goes on as it was
+    }
+    const antes = propiedadesAnimadas(efecto.getKeyframes()).map(
+      (p) => [p, blanco.style.getPropertyValue(p)] as const,
+    );
+    animacion.playbackRate = 0; // not pause(): that takes `animation-play-state` away from CSS
+    try {
+      animacion.commitStyles();
+    } catch {
+      animacion.playbackRate = 1;
+      continue;
+    }
+    animacion.effect = null;
+    quietos.push({ animacion, efecto, blanco, antes });
+  }
+}
+
+function despertarLoops(quietos: LoopQuieto[]): void {
+  for (const { animacion, efecto, blanco, antes } of quietos) {
+    animacion.effect = efecto;
+    for (const [p, v] of antes) {
+      if (v) blanco.style.setProperty(p, v);
+      else blanco.style.removeProperty(p);
+    }
+    animacion.playbackRate = 1;
+  }
+  quietos.length = 0;
+}
+
 /**
  * Pantalla de inicio: una mañana en la colina. Angie está sentada en la piedra del centro, mirando
  * a lo lejos, y espera ahí. Al entrar se desarma en sus
@@ -369,12 +453,30 @@ const INCLINA_SENTADA = 0.45;
 /** Angie's lights on the hill. The prologue's fusion takes the first two: what collides is them. */
 export const COLORES_DE_LUZ = ['#ff5fa8', '#ffc65c', '#ffffff', '#ff8ac9'];
 
+/**
+ * How long the morning takes to come after Angie lands on the stone: the night lifts and the sun
+ * rises. Long enough to be watched, short enough not to wait for it.
+ */
+export const ALBA_MS = 2200;
+/** Angie comes back out of the light: she grows past her size and settles. */
+const VUELVE_MS = 650;
+
 export interface InicioAngie {
   /**
    * La colina aparece (el aviso se fue): entra el título de a poco y suena su música, que sigue
    * hasta que se toca para entrar.
    */
   revelar(): void;
+  /**
+   * Angie is falling as light: the hill waits for her at night, with stars, without the sun and
+   * without her on the stone. Called just before it is drawn again under the notice's clouds.
+   */
+  anochecer(): void;
+  /**
+   * The light touched the stone and the notice is gone: the light opens on the stone, Angie comes
+   * back out of it and the sun rises (`ALBA_MS`).
+   */
+  aterrizar(luz: LuzQueLlega): void;
   /** Angie se desarma en luz y el cielo se hace noche. Resuelve cuando se puede pasar al prólogo. */
   despedir(): Promise<void>;
   dispose(): void;
@@ -920,7 +1022,133 @@ export function initInicioAngie(host: HTMLElement, cuerpo?: AngieDeLaColina): In
     );
   }
 
+  /** The dawn's frame loop, while it runs, and the loops it holds still until the morning. */
+  let alba = 0;
+  const quietos: LoopQuieto[] = [];
+  /** The light of the landing, while it is on the stone. */
+  let luzDeLaLlegada: HTMLElement | null = null;
+
+  function anochecer(): void {
+    if (cerrado || yendose || sinMovimiento()) return;
+    escena.classList.add('ini--de-noche');
+    // Night at once, not after the penumbra's slow fade: it is about to be seen.
+    escena.querySelector<HTMLElement>('.ini__penumbra')?.style.setProperty('transition', 'none');
+    aquietarLoops(escena, quietos);
+  }
+
+  /** The light of the landing, at its biggest, at `x`, `y` of the scene. */
+  function luzEn(x: number, y: number, r: number): HTMLElement {
+    const el = document.createElement('span');
+    el.setAttribute('aria-hidden', 'true');
+    el.style.cssText =
+      `position:absolute;left:${x}px;top:${y}px;` +
+      `width:${2 * r}px;height:${2 * r}px;margin:${-r}px 0 0 ${-r}px;border-radius:50%;` +
+      'pointer-events:none;z-index:30;background:radial-gradient(closest-side,#fff6fb,' +
+      'rgba(255,138,201,.85) 25%,rgba(255,63,166,0))';
+    escena.appendChild(el);
+    return el;
+  }
+
+  /**
+   * Angie comes back out of the light, sitting on the stone, and the morning comes. Frame by frame
+   * and not with transitions: each one took a layer of its own, and with the night multiplying a
+   * loaded PC ran out of video memory and the hill went missing a frame. The light of the landing
+   * is drawn here too, in the hill's one layer: the notice that drew it is gone from this frame.
+   */
+  function aterrizar(llega: LuzQueLlega): void {
+    if (cerrado || alba || !escena.classList.contains('ini--de-noche')) return;
+    const penumbra = escena.querySelector<HTMLElement>('.ini__penumbra');
+    const estrellas = escena.querySelector<HTMLElement>('.ini__cielo-noche');
+    const sol = escena.querySelector<HTMLElement>('.ini__sol');
+    const conEstilo = [penumbra, estrellas, sol, angie].filter((el) => el !== null);
+    const tramo = (v: number, a: number, b: number): number =>
+      Math.min(1, Math.max(0, (v - a) / (b - a)));
+    const suave = (v: number): number => 0.5 - 0.5 * Math.cos(Math.PI * v);
+    const frena = (v: number): number => 1 - (1 - v) ** 3;
+    const o = escena.getBoundingClientRect();
+    const { width: ancho, height: alto } = o;
+    const radioFinal = luzDelChoque(LUZ_DEL_CHOQUE_MS, llega.r, ancho, alto).r;
+    luzDeLaLlegada = luzEn(llega.x - o.left, llega.y - o.top, radioFinal);
+    let reloj = 0;
+    let cielo = 0;
+    // The sky waits three frames: the notice's layer takes a couple of frames to give its memory
+    // back, and the night redrawn every frame asks for it.
+    let esperaDelCielo = 3;
+    let anterior = performance.now();
+    let cuadros = 0;
+    const pintar = (ahora: number): void => {
+      // Angie's loops start again when she changes state on the way in: still them again while
+      // the dawn begins, or each one brings its layers back.
+      if (cuadros++ < 12) aquietarLoops(escena, quietos);
+      // A hitch is not skipped: the dawn goes on where it was.
+      const paso = Math.max(0, Math.min(ahora - anterior, 50));
+      anterior = ahora;
+      reloj += paso;
+      if (esperaDelCielo-- <= 0) cielo += paso;
+      if (luzDeLaLlegada) {
+        const luz = luzDelChoque(reloj, llega.r, ancho, alto);
+        luzDeLaLlegada.style.opacity = luz.opacidad.toFixed(3);
+        luzDeLaLlegada.style.scale = (luz.r / radioFinal).toFixed(4);
+        if (reloj >= LUZ_DEL_CHOQUE_MS) {
+          luzDeLaLlegada.remove();
+          luzDeLaLlegada = null;
+        }
+      }
+      // She grows past her size and settles.
+      const v = Math.min(1, reloj / VUELVE_MS);
+      const escala =
+        v < 0.45 ? 0.25 + 0.87 * frena(v / 0.45) : 1.12 - 0.12 * suave((v - 0.45) / 0.55);
+      angie?.style.setProperty('opacity', Math.min(1, v * 4).toFixed(3));
+      angie?.style.setProperty('scale', escala.toFixed(4));
+      const p = Math.min(1, cielo / ALBA_MS);
+      if (p > 0) {
+        penumbra?.style.setProperty('opacity', (1 - suave(p)).toFixed(3));
+        estrellas?.style.setProperty('opacity', (1 - tramo(p, 0, 0.6)).toFixed(3));
+        const sube = frena(tramo(p, 0.2, 1));
+        sol?.style.setProperty('opacity', sube.toFixed(3));
+        sol?.style.setProperty('translate', `0 ${(45 * (1 - sube)).toFixed(2)}%`);
+      }
+      if (p < 1) {
+        alba = requestAnimationFrame(pintar);
+        return;
+      }
+      escena.classList.remove('ini--de-noche');
+      // The loops wake three frames after the night stops multiplying: the memory it frees takes
+      // a couple of frames to come back, and asking for both at once is what left holes.
+      let espera = 3;
+      const despertar = (): void => {
+        if (--espera > 0) {
+          alba = requestAnimationFrame(despertar);
+          return;
+        }
+        alba = 0;
+        despertarLoops(quietos);
+      };
+      alba = requestAnimationFrame(despertar);
+      for (const el of conEstilo) {
+        for (const prop of ['opacity', 'translate', 'scale', 'transition']) {
+          // Angie keeps her place on the stone: her `translate` is set by `ubicar`.
+          if (el !== angie || prop !== 'translate') el.style.removeProperty(prop);
+        }
+      }
+    };
+    pintar(anterior);
+    if (piedra) {
+      const o = escena.getBoundingClientRect();
+      const r = piedra.getBoundingClientRect();
+      const x = r.left + r.width / 2 - o.left;
+      const y = r.top + r.height * 0.8 - o.top;
+      onda(escena, x, y, 'rgba(255, 138, 201, 0.6)', r.width * 1.4);
+      chispas(escena, x, y, '#ff8ac9', 10);
+      chispas(escena, x, y, '#ffffff', 6);
+      // The landing shakes the hill's grass like a touch does, only harder.
+      emitirImpacto(escena, { x: r.left + r.width / 2, y: r.top + r.height * 0.8, fuerza: 0.9 });
+    }
+  }
+
   return {
+    anochecer,
+    aterrizar,
     revelar(): void {
       if (cerrado || yendose || colina) return;
       escena.classList.add('ini--revelada');
@@ -931,6 +1159,9 @@ export function initInicioAngie(host: HTMLElement, cuerpo?: AngieDeLaColina): In
     despedir,
     dispose(): void {
       cerrado = true;
+      cancelAnimationFrame(alba);
+      despertarLoops(quietos);
+      luzDeLaLlegada?.remove();
       colina?.apagar();
       musica?.apagar();
       fase?.apagar();

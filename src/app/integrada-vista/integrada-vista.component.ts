@@ -50,6 +50,7 @@ import {
   TECLA_MS,
   rayosDelSol,
   type InicioAngie,
+  type LuzQueLlega,
 } from './inicio-angie';
 import { LO_QUE_DICE_EL_SOL, LO_QUE_RESPONDE_ANGIE } from './intercambio-del-sol';
 import { LO_QUE_DECIDE, LO_QUE_PRESIENTE } from './pensamientos-de-la-colina';
@@ -88,6 +89,7 @@ import { CinematicaComponent } from './cinematicas/cinematica.component';
 import { PUNTOS_DEL_PROLOGO } from './puntos-del-prologo';
 import { despuesDelAviso, entradaDeLaHistoria } from './retomar';
 import { AvisoAuricularesComponent } from './aviso-auriculares/aviso-auriculares.component';
+import { PIEDRA_DE_LA_COLINA, SOMBRA_DE_LA_PIEDRA } from './piedra-de-la-colina';
 import {
   CAPITULO_FINAL,
   CAPITULO_REVELACION,
@@ -183,19 +185,24 @@ export class IntegradaVistaComponent {
   /** La de la colina: la escena la lleva hasta el borde, y el paso y la pose los pone ella. */
   private readonly angieInicio = viewChild('angieInicio', { read: MascotaVivaComponent });
 
-  /** La cámara viaja desde su ojo: mientras dura, Angie no parpadea. */
-  protected angieMiraFijo(fijo: boolean): void {
-    this.angieInicio()?.sinParpadear(fijo);
-  }
-
   /** La escena de la colina, para que el aviso le avise cuando se va. */
   private inicio: InicioAngie | null = null;
   /** La pantalla de inicio, para entrar sin la colina cuando hay dónde retomar. */
   private landing: IntroTusiHandle | null = null;
 
+  /** The hill shows again under the notice's clouds: at night, still without Angie. */
+  protected anochecerLaColina(): void {
+    this.inicio?.anochecer();
+  }
+
+  /** The light touched the stone: Angie comes back out of it and the sun rises. */
+  protected aterrizarEnLaColina(luz: LuzQueLlega): void {
+    this.inicio?.aterrizar(luz);
+  }
+
   /**
-   * La cámara llegó desde el ojo de Angie a la colina: entra el título y empieza su música. Aunque hayan elegido
-   * sin sonido: la música espera callada, y si lo prenden en la colina, suena ahí.
+   * Angie is on the hill and the day came: the title comes in and its music starts. Even if they
+   * chose no sound: the music waits silent, and if they turn it on on the hill, it plays there.
    */
   protected alLlegarALaColina(): void {
     this.inicio?.revelar();
@@ -245,6 +252,8 @@ export class IntegradaVistaComponent {
     juncosIzq: juncos(31, 9, -1),
     juncosDer: juncos(47, 9, 1),
     estrellas: estrellas(59, 70),
+    piedra: PIEDRA_DE_LA_COLINA,
+    sombraDeLaPiedra: SOMBRA_DE_LA_PIEDRA,
   };
 
   /** Las pantallas de cada concepto (del árbol de conceptos): son las páginas de su etapa. */
@@ -817,8 +826,8 @@ export class IntegradaVistaComponent {
     // verdad: si corriera detrás durante esos minutos, llegaría terminada y se comería su propio
     // premio, que es ver aparecer el círculo.
     //
-    // Angie ya está sentada en la piedra desde el principio, detrás del aviso de auriculares: al
-    // alejarse el aviso, la escena aparece con ella ahí.
+    // Angie is seated on the stone from the start, behind the headphones notice: when she falls
+    // there as light, the hill hides her until the light touches the stone (`aterrizar`).
     const inicio = initInicioAngie(this.host, {
       sentarse: (deUna) => this.angieInicio()?.sentarse(deUna),
       sonreir: () => this.angieInicio()?.sonreir(),
