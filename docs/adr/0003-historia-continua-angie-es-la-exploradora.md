@@ -43,6 +43,8 @@ El canon, el recorrido por etapas y lo que falta cerrar están en
 - **Las reglas del guion**: ocho palabras por línea, sin raya, y el reloj derivado del texto.
 - **La colina y el aviso de auriculares**, que ya tienen la estética nueva.
 - **Las poses de Angie que no son de frente salen de su modelo 3D**; no se dibujan a mano.
+  (Desde [0029](./0029-angie-tiene-un-modelo-3d-propio.md), ese modelo es el propio,
+  `libs/angie-3d.ts`, ajustado al oficial.)
 - **No se bloquea el avance** (0002), salvo lo que se decida sobre el desafío final.
 
 ## Consecuencias

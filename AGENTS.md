@@ -91,6 +91,9 @@ Esto es lo que funciona:
 - **Historia:** el canon (quién es quién y el bucle de Angie), el recorrido por
   etapas y lo que falta cerrar están en [`docs/historia/`](./docs/historia/README.md).
   Leelo antes de tocar guiones, cinemáticas o el orden de los conceptos.
+- **Poses de Angie:** las que no son de frente salen de su modelo 3D propio,
+  `src/app/libs/angie-3d.ts` (`proyectar({ yaw, pitch })`), nunca a mano. Si cambiás su forma,
+  medila contra el oficial con [`scripts/angie-3d/`](./scripts/angie-3d/README.md).
 
 ## Cómo se saca el guion
 
